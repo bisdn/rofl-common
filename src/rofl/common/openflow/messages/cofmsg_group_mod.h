@@ -9,7 +9,6 @@
 #define COFMSG_GROUP_MOD_H_ 1
 
 #include "rofl/common/openflow/messages/cofmsg.h"
-#include "rofl/common/openflow/cofbuckets.h"
 #include "rofl/common/openflow/cofgroupmod.h"
 
 namespace rofl {
@@ -18,167 +17,91 @@ namespace openflow {
 /**
  *
  */
-class cofmsg_group_mod :
-	public cofmsg
-{
-private:
-
-	rofl::openflow::cofbuckets			buckets;
-
-	union {
-		uint8_t*					ofhu_group_mod;
-		struct openflow12::ofp_group_mod*		ofhu12_group_mod;
-		struct openflow13::ofp_group_mod*		ofhu13_group_mod;
-	} ofhu;
-
-#define ofh_group_mod   ofhu.ofhu_group_mod
-#define ofh12_group_mod ofhu.ofhu12_group_mod
-#define ofh13_group_mod ofhu.ofhu13_group_mod
-
+class cofmsg_group_mod : public cofmsg {
 public:
 
+	/**
+	 *
+	 */
+	virtual
+	~cofmsg_group_mod()
+	{};
 
 	/**
 	 *
 	 */
 	cofmsg_group_mod(
-			uint8_t of_version,
-			uint32_t xid,
-			rofl::openflow::cofgroupmod const& ge);
-
-
-	/** constructor
-	 *
-	 */
-	cofmsg_group_mod(
-			uint8_t of_version = 0,
+			uint8_t version = rofl::openflow::OFP_VERSION_UNKNOWN,
 			uint32_t xid = 0,
-			uint16_t command = 0,
-			uint8_t  group_type = 0,
-			uint32_t group_id = 0,
-			rofl::openflow::cofbuckets const& buckets = rofl::openflow::cofbuckets());
-
+			const rofl::openflow::cofgroupmod& groupmod = rofl::openflow::cofgroupmod()) :
+				cofmsg(version, rofl::openflow12::OFPT_GROUP_MOD, 0, xid),
+				groupmod(groupmod)
+	{};
 
 	/**
 	 *
 	 */
 	cofmsg_group_mod(
-			cofmsg_group_mod const& group_mod);
-
+			const cofmsg_group_mod& msg)
+	{ *this = msg; };
 
 	/**
 	 *
 	 */
 	cofmsg_group_mod&
 	operator= (
-			cofmsg_group_mod const& group_mod);
-
-
-	/** destructor
-	 *
-	 */
-	virtual
-	~cofmsg_group_mod();
-
+			const cofmsg_group_mod& msg) {
+		if (this == &msg)
+			return *this;
+		cofmsg::operator= (msg);
+		groupmod = msg.groupmod;
+		return *this;
+	};
 
 	/**
 	 *
 	 */
-	cofmsg_group_mod(cmemory *memarea);
+	void
+	check_prerequisites() const
+	{ groupmod.check_prerequisites(); };
 
-
-	/** reset packet content
-	 *
-	 */
-	virtual void
-	reset();
-
+public:
 
 	/**
-	 *
-	 */
-	virtual uint8_t*
-	resize(size_t len);
-
-
-	/** returns length of packet in packed state
 	 *
 	 */
 	virtual size_t
 	length() const;
 
+	/**
+	 *
+	 */
+	virtual void
+	pack(
+			uint8_t *buf = (uint8_t*)0, size_t buflen = 0);
 
 	/**
 	 *
 	 */
 	virtual void
-	pack(uint8_t *buf = (uint8_t*)0, size_t buflen = 0);
-
-
-	/**
-	 *
-	 */
-	virtual void
-	unpack(uint8_t *buf, size_t buflen);
-
-
-	/** parse packet and validate it
-	 */
-	virtual void
-	validate();
-
-
-	/**
-	 *
-	 */
-	void
-	check_prerequisites() const;
-
+	unpack(
+			uint8_t *buf, size_t buflen);
 
 public:
 
+	/**
+	 *
+	 */
+	const rofl::openflow::cofgroupmod&
+	get_groupmod() const
+	{ return groupmod; };
 
 	/**
 	 *
 	 */
-	uint16_t
-	get_command() const;
-
-	/**
-	 *
-	 */
-	void
-	set_command(uint16_t command);
-
-	/**
-	 *
-	 */
-	uint8_t
-	get_group_type() const;
-
-	/**
-	 *
-	 */
-	void
-	set_group_type(uint8_t group_type);
-
-	/**
-	 *
-	 */
-	uint32_t
-	get_group_id() const;
-
-	/**
-	 *
-	 */
-	void
-	set_group_id(uint32_t group_id);
-
-	/**
-	 *
-	 */
-	rofl::openflow::cofbuckets&
-	get_buckets() { return buckets; };
+	rofl::openflow::cofgroupmod&
+	set_groupmod()
+	{ return groupmod; };
 
 public:
 
@@ -186,26 +109,22 @@ public:
 	operator<< (std::ostream& os, cofmsg_group_mod const& msg) {
 		os << rofl::indent(0) << "<cofmsg_group_mod >" << std::endl;
 		{ rofl::indent i(2); os << dynamic_cast<const cofmsg&>( msg ); };
-		switch (msg.get_command()) {
-			case rofl::openflow12::OFPGC_ADD: {
-				os << indent(4) << "<command: -ADD- >" << std::endl;
-			} break;
-			case rofl::openflow12::OFPGC_MODIFY: {
-				os << indent(4) << "<command: -MODIFY- >" << std::endl;
-			} break;
-			case rofl::openflow12::OFPGC_DELETE: {
-				os << indent(4) << "<command: -DELETE- >" << std::endl;
-			} break;
-			default: {
-				os << indent(4) << "<command: -UNKNOWN- >" << std::endl;
-			};
-			}
-		os << indent(4) << "<group-type:" 	<< (int)msg.get_group_type() 	<< " >" << std::endl;
-		os << indent(4) << "<group-id:" 	<< (int)msg.get_group_id() 		<< " >" << std::endl;
 		rofl::indent i(4);
-		os << msg.buckets;
+		os << msg.groupmod;
 		return os;
 	};
+
+	std::string
+	str() const {
+		std::stringstream ss;
+		ss << cofmsg::str() << "-Group-Mod- " << " ";
+		ss << "groupmod: " << groupmod.str() << " ";
+		return ss.str();
+	};
+
+private:
+
+	rofl::openflow::cofgroupmod groupmod;
 };
 
 } // end of namespace openflow

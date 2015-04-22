@@ -18,217 +18,274 @@ namespace openflow {
 /**
  *
  */
-class cofmsg_packet_in :
-	public cofmsg
-{
-private:
-
-	cofmatch			match;
-	cpacket				packet;
-
-	union {
-		uint8_t*						ofhu_packet_in;
-		struct openflow10::ofp_packet_in*			ofhu10_packet_in;
-		struct openflow12::ofp_packet_in*			ofhu12_packet_in;
-		struct openflow13::ofp_packet_in*			ofhu13_packet_in;
-	} ofhu;
-
-#define ofh_packet_in   ofhu.ofhu_packet_in
-#define ofh10_packet_in ofhu.ofhu10_packet_in
-#define ofh12_packet_in ofhu.ofhu12_packet_in
-#define ofh13_packet_in ofhu.ofhu13_packet_in
-
-#define OFP10_PACKET_IN_STATIC_HDR_LEN				(sizeof(struct openflow10::ofp_packet_in) - 2)
-#define OFP12_PACKET_IN_STATIC_HDR_LEN				(sizeof(struct openflow12::ofp_packet_in) - sizeof(struct openflow12::ofp_match))	// length without struct openflow12::ofp_match
-#define OFP13_PACKET_IN_STATIC_HDR_LEN				(sizeof(struct openflow13::ofp_packet_in) - sizeof(struct openflow13::ofp_match))	// length without struct openflow13::ofp_match
-
+class cofmsg_packet_in : public cofmsg {
 public:
 
-
-	/** constructor
+	/**
 	 *
 	 */
-	cofmsg_packet_in(
-			uint8_t of_version = 0,
-			uint32_t xid = 0,
-			uint32_t buffer_id = 0,
-			uint16_t total_len = 0,
-			uint8_t  reason = 0,
-			uint8_t  table_id = 0,
-			uint64_t of13_cookie = 0,	/*OF1.3*/
-			uint16_t of10_in_port = 0, 	/*OF1.0*/
-			cofmatch const& match = cofmatch(),
-			uint8_t *data = (uint8_t*)0,
-			size_t datalen = 0);
-
+	virtual
+	~cofmsg_packet_in()
+	{};
 
 	/**
 	 *
 	 */
 	cofmsg_packet_in(
-			cofmsg_packet_in const& packet_in);
+			uint8_t version = 0,
+			uint32_t xid = 0,
+			uint32_t buffer_id = 0,
+			uint16_t total_len = 0,
+			uint8_t  reason = 0,
+			uint8_t  table_id = 0,
+			uint64_t cookie = 0,
+			uint16_t in_port = 0,
+			const rofl::openflow::cofmatch& match = rofl::openflow::cofmatch(),
+			uint8_t *data = (uint8_t*)0,
+			size_t datalen = 0) :
+				cofmsg(version, rofl::openflow::OFPT_PACKET_IN, 0/* see below */, xid),
+				buffer_id(buffer_id),
+				total_len(total_len),
+				in_port(in_port),
+				reason(reason),
+				table_id(table_id),
+				cookie(cookie),
+				match(match),
+				packet(data, datalen)
+	{
+		switch (get_version()) {
+		case rofl::openflow10::OFP_VERSION: {
+			set_length(OFP10_PACKET_IN_STATIC_HDR_LEN
+					+ packet.length());
+		} break;
+		case rofl::openflow12::OFP_VERSION: {
+			set_length(OFP12_PACKET_IN_STATIC_HDR_LEN + match.length() + 2/* bytes padding */
+					+ packet.length());
+		} break;
+		default: {
+			set_length(OFP13_PACKET_IN_STATIC_HDR_LEN + match.length() + 2/* bytes padding */
+					+ packet.length());
+		};
+		}
+	};
 
+	/**
+	 *
+	 */
+	cofmsg_packet_in(
+			const cofmsg_packet_in& msg)
+	{ *this = msg; };
 
 	/**
 	 *
 	 */
 	cofmsg_packet_in&
 	operator= (
-			cofmsg_packet_in const& packet_in);
+			const cofmsg_packet_in& msg) {
+		if (this == &msg)
+			return *this;
+		cofmsg::operator= (msg);
+		buffer_id = msg.buffer_id;
+		total_len = msg.total_len;
+		in_port   = msg.in_port;
+		reason    = msg.reason;
+		table_id  = msg.table_id;
+		cookie    = msg.cookie;
+		match     = msg.match;
+		packet    = msg.packet;
+		return *this;
+	};
 
-
-	/** destructor
-	 *
-	 */
-	virtual
-	~cofmsg_packet_in();
-
-
-	/**
-	 *
-	 */
-	cofmsg_packet_in(cmemory *memarea);
-
-
-	/** reset packet content
-	 *
-	 */
-	virtual void
-	reset();
-
+public:
 
 	/**
-	 *
-	 */
-	virtual uint8_t*
-	resize(size_t len);
-
-
-	/** returns length of packet in packed state
 	 *
 	 */
 	virtual size_t
 	length() const;
 
+	/**
+	 *
+	 */
+	virtual void
+	pack(
+			uint8_t *buf = (uint8_t*)0, size_t buflen = 0);
 
 	/**
 	 *
 	 */
 	virtual void
-	pack(uint8_t *buf = (uint8_t*)0, size_t buflen = 0);
-
-
-	/**
-	 *
-	 */
-	virtual void
-	unpack(uint8_t *buf, size_t buflen);
-
-
-	/** parse packet and validate it
-	 */
-	virtual void
-	validate();
-
+	unpack(
+			uint8_t *buf, size_t buflen);
 
 public:
-
 
 	/**
 	 *
 	 */
 	uint32_t
-	get_buffer_id() const;
+	get_buffer_id() const
+	{ return buffer_id; };
 
 	/**
 	 *
 	 */
 	void
-	set_buffer_id(uint32_t buffer_id);
+	set_buffer_id(
+			uint32_t buffer_id)
+	{ this->buffer_id = buffer_id; };
 
 	/**
 	 *
 	 */
 	uint16_t
-	get_total_len() const;
+	get_total_len() const
+	{ return total_len; };
 
 	/**
 	 *
 	 */
 	void
-	set_total_len(uint16_t total_len);
+	set_total_len(
+			uint16_t total_len)
+	{ this->total_len = total_len; };
 
 	/**
-	 *
-	 */
-	uint8_t
-	get_reason() const;
-
-	/**
-	 *
-	 */
-	void
-	set_reason(uint8_t reason);
-
-	/**
-	 *
-	 */
-	uint8_t
-	get_table_id() const;
-
-	/**
-	 *
-	 */
-	void
-	set_table_id(uint8_t table_id);
-
-	/** OF1.0
 	 *
 	 */
 	uint16_t
-	get_in_port() const;
+	get_in_port() const
+	{ return in_port; };
 
-	/** OF1.0
+	/**
 	 *
 	 */
 	void
-	set_in_port(uint16_t port_no);
+	set_in_port(
+			uint16_t in_port)
+	{ this->in_port = in_port; };
 
-	/** OF1.3
+	/**
+	 *
+	 */
+	uint8_t
+	get_reason() const
+	{ return reason; };
+
+	/**
+	 *
+	 */
+	void
+	set_reason(
+			uint8_t reason)
+	{ this->reason = reason; };
+
+	/**
+	 *
+	 */
+	uint8_t
+	get_table_id() const
+	{ return table_id; };
+
+	/**
+	 *
+	 */
+	void
+	set_table_id(
+			uint8_t table_id)
+	{ this->table_id = table_id; };
+
+	/**
 	 *
 	 */
 	uint64_t
-	get_cookie() const;
+	get_cookie() const
+	{ return cookie; };
 
-	/** OF1.3
+	/**
 	 *
 	 */
 	void
-	set_cookie(uint64_t cookie);
+	set_cookie(
+			uint64_t cookie)
+	{ this->cookie = cookie; };
 
 	/**
 	 *
 	 */
-	cofmatch&
-	set_match() { return match; };
+	const rofl::openflow::cofmatch&
+	get_match() const
+	{ return match; };
 
 	/**
 	 *
 	 */
-	cofmatch const&
-	get_match() const { return match; };
+	rofl::openflow::cofmatch&
+	set_match()
+	{ return match; };
 
 	/**
 	 *
 	 */
-	cpacket&
-	set_packet() { return packet; };
+	const rofl::cpacket&
+	get_packet() const
+	{ return packet; };
 
 	/**
 	 *
 	 */
-	cpacket const&
-	get_packet() const { return packet; };
+	rofl::cpacket&
+	set_packet()
+	{ return packet; };
+
+private:
+
+	/**
+	 *
+	 */
+	std::string
+	s_reason() const {
+		std::string ss;
+		switch (get_version()) {
+		case rofl::openflow10::OFP_VERSION: {
+			if (rofl::openflow10::OFPR_NO_MATCH == get_reason())
+				ss.append("no match ");
+			if (rofl::openflow10::OFPR_ACTION == get_reason())
+				ss.append("action ");
+		} break;
+		case rofl::openflow12::OFP_VERSION: {
+			if (rofl::openflow12::OFPR_NO_MATCH == get_reason())
+				ss.append("no match ");
+			if (rofl::openflow12::OFPR_ACTION == get_reason())
+				ss.append("action ");
+			if (rofl::openflow12::OFPR_INVALID_TTL == get_reason())
+				ss.append("invalid ttl ");
+		} break;
+		case rofl::openflow13::OFP_VERSION: {
+			if (rofl::openflow13::OFPR_NO_MATCH == get_reason())
+				ss.append("no match ");
+			if (rofl::openflow13::OFPR_ACTION == get_reason())
+				ss.append("action ");
+			if (rofl::openflow13::OFPR_INVALID_TTL == get_reason())
+				ss.append("invalid ttl ");
+		} break;
+		default: {
+			if (rofl::openflow14::OFPR_TABLE_MISS == get_reason())
+				ss.append("table miss ");
+			if (rofl::openflow14::OFPR_APPLY_ACTION == get_reason())
+				ss.append("apply action ");
+			if (rofl::openflow14::OFPR_INVALID_TTL == get_reason())
+				ss.append("invalid ttl ");
+			if (rofl::openflow14::OFPR_ACTION_SET == get_reason())
+				ss.append("action set ");
+			if (rofl::openflow14::OFPR_GROUP == get_reason())
+				ss.append("group ");
+			if (rofl::openflow14::OFPR_PACKET_OUT == get_reason())
+				ss.append("packet out ");
+		};
+		}
+		return ss;
+	};
 
 public:
 
@@ -238,61 +295,24 @@ public:
 		os << indent(2) << "<cofmsg_packet_in >" << std::endl;
 		switch (msg.get_version()) {
 		case openflow10::OFP_VERSION: {
-			os << indent(4) << "<in-port:" 		<< (int)msg.get_in_port() 	<< " >" << std::endl;
 			os << indent(4) << "<buffer-id:" 	<< (int)msg.get_buffer_id() << " >" << std::endl;
 			os << indent(4) << "<total-len:" 	<< (int)msg.get_total_len() << " >" << std::endl;
-			switch (msg.get_reason()) {
-			case rofl::openflow10::OFPR_NO_MATCH: {
-				os << indent(4) << "<reason: NO-MATCH >" << std::endl;
-			} break;
-			case rofl::openflow10::OFPR_ACTION: {
-				os << indent(4) << "<reason: ACTION >" << std::endl;
-			} break;
-			default: {
-				os << indent(4) << "<reason:" 		<< (int)msg.get_reason() 	<< " >" << std::endl;
-			};
-			}
-
+			os << indent(4) << "<reason:" 		<< msg.s_reason() 	<< " >" << std::endl;
+			os << indent(4) << "<in-port:" 		<< (int)msg.get_in_port() 	<< " >" << std::endl;
 		} break;
 		case openflow12::OFP_VERSION: {
 			os << indent(4) << "<buffer-id:"	<< (int)msg.get_buffer_id() << " >" << std::endl;
 			os << indent(4) << "<total-len:" 	<< (int)msg.get_total_len() << " >" << std::endl;
-			switch (msg.get_reason()) {
-			case rofl::openflow12::OFPR_NO_MATCH: {
-				os << indent(4) << "<reason: NO-MATCH >" << std::endl;
-			} break;
-			case rofl::openflow12::OFPR_ACTION: {
-				os << indent(4) << "<reason: ACTION >" << std::endl;
-			} break;
-			case rofl::openflow12::OFPR_INVALID_TTL: {
-				os << indent(4) << "<reason: INVALID-TTL >" << std::endl;
-			} break;
-			default: {
-				os << indent(4) << "<reason:" 		<< (int)msg.get_reason() 	<< " >" << std::endl;
-			};
-			}
+			os << indent(4) << "<reason:" 		<< msg.s_reason() 	<< " >" << std::endl;
 			os << indent(4) << "<table-id:" 	<< (int)msg.get_table_id() 	<< " >" << std::endl;
 
 		} break;
 		case openflow13::OFP_VERSION: {
 			os << indent(4) << "<buffer-id:" 	<< (int)msg.get_buffer_id() << " >" << std::endl;
 			os << indent(4) << "<total-len:" 	<< (int)msg.get_total_len() << " >" << std::endl;
-			switch (msg.get_reason()) {
-			case rofl::openflow13::OFPR_NO_MATCH: {
-				os << indent(4) << "<reason: NO-MATCH >" << std::endl;
-			} break;
-			case rofl::openflow13::OFPR_ACTION: {
-				os << indent(4) << "<reason: ACTION >" << std::endl;
-			} break;
-			case rofl::openflow13::OFPR_INVALID_TTL: {
-				os << indent(4) << "<reason: INVALID-TTL >" << std::endl;
-			} break;
-			default: {
-				os << indent(4) << "<reason:" 		<< (int)msg.get_reason() 	<< " >" << std::endl;
-			};
-			}
+			os << indent(4) << "<reason:" 		<< msg.s_reason() 	<< " >" << std::endl;
 			os << indent(4) << "<table-id: " 	<< (int)msg.get_table_id() 	<< " >" << std::endl;
-			os << indent(4) << "<cookie: 0x" 		<< std::hex << (unsigned long long)msg.get_cookie() << std::dec << " >" << std::endl;
+			os << indent(4) << "<cookie: 0x" 	<< std::hex << (unsigned long long)msg.get_cookie() << std::dec << " >" << std::endl;
 
 		} break;
 		default: {
@@ -303,6 +323,36 @@ public:
 		os << indent(2) << msg.packet;
 		return os;
 	};
+
+	std::string
+	str() const {
+		std::stringstream ss;
+		ss << cofmsg::str() << "-Packet-In- " << " ";
+		ss << "buffer_id: " << (unsigned int)buffer_id << ", ";
+		ss << "total_len: " << (unsigned int)total_len << ", ";
+		ss << "reason: " << s_reason() << ", ";
+		if (get_version() == rofl::openflow10::OFP_VERSION) {
+			ss << "in_port: " << (unsigned int)in_port << ", ";
+		}
+		ss << "table_id: " << (unsigned int)table_id << ", ";
+		ss << "cookie: " << (unsigned long long)cookie << ", ";
+		return ss.str();
+	};
+
+private:
+
+	uint32_t                    buffer_id;
+	uint16_t                    total_len;
+	uint16_t                    in_port;   // OFP 1.0 only
+	uint8_t                     reason;
+	uint8_t						table_id;  // since OFP 1.2
+	uint64_t					cookie;    // since OFP 1.3
+	rofl::openflow::cofmatch    match;
+	rofl::cpacket               packet;
+
+    static const size_t         OFP10_PACKET_IN_STATIC_HDR_LEN;
+    static const size_t         OFP12_PACKET_IN_STATIC_HDR_LEN;
+    static const size_t         OFP13_PACKET_IN_STATIC_HDR_LEN;
 };
 
 } // end of namespace openflow

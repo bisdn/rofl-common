@@ -11,6 +11,7 @@
 #include "rofl/common/openflow/messages/cofmsg.h"
 #include "rofl/common/openflow/openflow_common.h"
 #include "rofl/common/openflow/openflow.h"
+#include "rofl/common/cmemory.h"
 
 namespace rofl {
 namespace openflow {
@@ -18,81 +19,55 @@ namespace openflow {
 /**
  *
  */
-class cofmsg_error :
-	public cofmsg
-{
-private:
-
-	cmemory body;
-
-	union {
-		uint8_t									*emu_error_msg;
-		struct openflow10::ofp_error_msg		*emu10_error_msg;
-		struct openflow12::ofp_error_msg		*emu12_error_msg;
-		struct openflow13::ofp_error_msg		*emu13_error_msg;
-	} emu;
-
-#define err_msg		emu.emu_error_msg
-#define err10_msg 	emu.emu10_error_msg
-#define err12_msg 	emu.emu12_error_msg
-#define err13_msg 	emu.emu13_error_msg
-
+class cofmsg_error : public cofmsg {
 public:
 
-
-	/** constructor
+	/**
 	 *
 	 */
-	cofmsg_error(
-			uint8_t of_version,
-			uint32_t xid,
-			uint16_t err_type = 0,
-			uint16_t err_code = 0,
-			uint8_t* data = 0,
-			size_t datalen = 0);
-
+	virtual
+	~cofmsg_error()
+	{};
 
 	/**
 	 *
 	 */
 	cofmsg_error(
-			cofmsg_error const& error);
+			uint8_t version = 0,
+			uint32_t xid = 0,
+			uint16_t err_type = 0,
+			uint16_t err_code = 0,
+			uint8_t* data = 0,
+			size_t datalen = 0) :
+				cofmsg(version, rofl::openflow::OFPT_ERROR, datalen, xid),
+				err_type(err_type),
+				err_code(err_code),
+				body(data, datalen)
+	{};
 
+	/**
+	 *
+	 */
+	cofmsg_error(
+			const cofmsg_error& msg)
+	{ *this = msg; };
 
 	/**
 	 *
 	 */
 	cofmsg_error&
 	operator= (
-			cofmsg_error const& error);
+			const cofmsg_error& msg) {
+		if (this == &msg)
+			return *this;
+		cofmsg::operator= (msg);
+		err_type = msg.err_type;
+		err_code = msg.err_code;
+		body     = msg.body;
+		return *this;
+	};
 
-
-	/** destructor
-	 *
-	 */
-	virtual
-	~cofmsg_error();
-
-
-	/**
-	 *
-	 */
-	cofmsg_error(cmemory *memarea);
-
-
-	/** reset packet content
-	 *
-	 */
-	virtual void
-	reset();
-
-
-	/**
-	 *
-	 */
-	virtual uint8_t*
-	resize(size_t len);
-
+public:
 
 	/** returns length of packet in packed state
 	 *
@@ -100,13 +75,11 @@ public:
 	virtual size_t
 	length() const;
 
-
 	/**
 	 *
 	 */
 	virtual void
 	pack(uint8_t *buf = (uint8_t*)0, size_t buflen = 0);
-
 
 	/**
 	 *
@@ -114,43 +87,51 @@ public:
 	virtual void
 	unpack(uint8_t *buf, size_t buflen);
 
-
-	/** parse packet and validate it
-	 */
-	virtual void
-	validate();
-
 public:
 
 	/**
 	 *
 	 */
 	uint16_t
-	get_err_type() const;
+	get_err_type() const
+	{ return err_type; };
 
 	/**
 	 *
 	 */
 	void
-	set_err_type(uint16_t type);
+	set_err_type(
+			uint16_t err_type)
+	{ this->err_type = err_type; };
 
 	/**
 	 *
 	 */
 	uint16_t
-	get_err_code() const;
+	get_err_code() const
+	{ return err_code; };
 
 	/**
 	 *
 	 */
 	void
-	set_err_code(uint16_t code);
+	set_err_code(
+			uint16_t err_code)
+	{ this->err_code = err_code; };
 
 	/**
 	 *
 	 */
-	cmemory&
-	get_body();
+	const rofl::cmemory&
+	get_body() const
+	{ return body; };
+
+	/**
+	 *
+	 */
+	rofl::cmemory&
+	set_body()
+	{ return body; };
 
 public:
 
@@ -508,6 +489,12 @@ public:
 		os << msg.body;
 		return os;
 	};
+
+private:
+
+	uint16_t 		err_type;
+	uint16_t 		err_code;
+	rofl::cmemory 	body;
 };
 
 

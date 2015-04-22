@@ -126,7 +126,8 @@ public:
 	 *
 	 */
 	void
-	clear() { buckets.clear(); };
+	clear()
+	{ buckets.clear(); };
 
 	/**
 	 *

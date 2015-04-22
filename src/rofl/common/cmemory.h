@@ -355,8 +355,8 @@ public:
 	virtual void
 	unpack(
 			uint8_t *buf,
-			size_t buflen);
-
+			size_t buflen)
+	{ assign(buf, buflen); };
 
 	/**
 	 * @brief	map onto std::string instance

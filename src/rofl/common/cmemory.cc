@@ -300,16 +300,6 @@ cmemory::pack(
 
 
 
-void
-cmemory::unpack(
-		uint8_t *buf,
-		size_t buflen)
-{
-	assign(buf, buflen);
-}
-
-
-
 std::string
 cmemory::toString() const
 {

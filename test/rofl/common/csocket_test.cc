@@ -12,8 +12,6 @@
 
 #include "csocket_test.h"
 
-#undef ROFL_HAVE_OPENSSL
-
 
 CPPUNIT_TEST_SUITE_REGISTRATION( csocket_test );
 
@@ -146,7 +144,7 @@ csocket_test::testSocketOpenSSL()
 #ifdef DEBUG
 		std::cerr << "testSocketOpenSSL: init" << std::endl;
 #endif
-		rofl::cioloop::get_loop().run();
+		rofl::cioloop::run();
 #ifdef DEBUG
 		std::cerr << "testSocketOpenSSL: shutdown" << std::endl;
 #endif

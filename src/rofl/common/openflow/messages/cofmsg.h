@@ -5,272 +5,167 @@
 #ifndef COFMSG_H
 #define COFMSG_H 1
 
-#include <set>
-#include <map>
-#include <string>
-#include <vector>
-#include <strings.h>
-#include <arpa/inet.h>
-#include <endian.h>
-#ifndef htobe16
-	#include "../../endian_conversion.h"
-#endif
+#include <sstream>
 
+#include "rofl/common/logging.h"
 #include "rofl/common/croflexception.h"
 #include "rofl/common/openflow/openflow_rofl_exceptions.h"
-#include "rofl/common/fframe.h"
-#include "rofl/common/cpacket.h"
-
 #include "rofl/common/openflow/openflow.h"
-#if 0
-#include "rofl/common/openflow/cofmatch.h"
-#include "rofl/common/openflow/cofinstructions.h"
-#include "rofl/common/openflow/cofactions.h"
-#include "rofl/common/openflow/cofbuckets.h"
-#include "rofl/common/openflow/cofports.h"
-#include "rofl/common/openflow/cofport.h"
-#include "rofl/common/openflow/cofdescstats.h"
-#include "rofl/common/openflow/cofflowstats.h"
-#include "rofl/common/openflow/cofaggrstats.h"
-#include "rofl/common/openflow/coftablestats.h"
-#include "rofl/common/openflow/cofportstats.h"
-#include "rofl/common/openflow/cofqueuestats.h"
-#include "rofl/common/openflow/cofgroupstats.h"
-#include "rofl/common/openflow/cofgroupdescstats.h"
-#endif
-
-// forward declarations
-class cofbase;
 
 namespace rofl {
 namespace openflow {
 
-class eOFpacketBase 		: public RoflException {};
-class eOFpacketInval 		: public eOFpacketBase {};
-class eOFpacketNoData 		: public eOFpacketBase {};
-class eOFpacketHeaderInval 	: public eOFpacketBase {}; // invalid header
+class eMsgBase 			: public RoflException {
+public:
+	eMsgBase(const std::string& __arg) : RoflException(__arg) {};
+};
+class eMsgInval 		: public eMsgBase {
+public:
+	eMsgInval(const std::string& __arg) : eMsgBase(__arg) {};
+};
 
-
-/** cofpacket
- * - contains a packet from OpenFlow protocol
- * - provides container for validating an OpenFlow packet
- * - stores during validation actions, matches, instructions, buckets, ofports
- *   in appropriate containers
- * - stores pointer to cofbase entity the packet was received from
- *   (either cfwdelem or cofrpc)
+/**
+ *
  */
-class cofmsg
-{
-public: // static
-
-	static std::set<cofmsg*> cofpacket_list; //< list of allocated cofpacket instances
-
-private: // static
-
-	static std::string pinfo; //< information string for cofpacket::cofpacket_list
-
-public:
-
-	/** return information string about allocated cofpacket instances
-	 */
-	static
-	const char*
-	packet_info(uint8_t ofp_version);
-
-    /** return description for ofp_type
-     */
-    static const char*
-    type2desc(uint8_t ofp_version, uint8_t type);
-
-	typedef struct {
-		uint8_t type;
-		char desc[64];
-	} typedesc_t;
-
-
-protected: // data structures
-
-	cmemory 					*memarea;			// OpenFlow packet received from socket
-
-	union {
-		uint8_t*							ofhu_generic;
-		struct rofl::openflow::ofp_header*	ofhu_header;
-	} ofh_ofhu;
-
-#define ofh_generic ofh_ofhu.ofhu_generic
-#define ofh_header 	ofh_ofhu.ofhu_header
-
+class cofmsg {
 public:
 
 	/**
-	 *
-	 */
-	cofmsg(
-			uint8_t ofp_version, uint32_t xid, uint8_t type);
-
-	/** constructor
-	 *
-	 */
-	cofmsg(
-			size_t size = sizeof(struct openflow::ofp_header));
-
-
-	/**
-	 *
-	 */
-	cofmsg(
-			cmemory *memarea);
-
-
-	/** copy constructor
-	 *
-	 */
-	cofmsg(
-			cofmsg const& p);
-
-
-	/** destructor
 	 *
 	 */
 	virtual
-	~cofmsg();
+	~cofmsg()
+	{};
 
+	/**
+	 *
+	 */
+	cofmsg() :
+		version(0),
+		type(0),
+		len(sizeof(struct rofl::openflow::ofp_header)),
+		xid(0)
+	{};
 
-	/** assignment operator
+	/**
+	 *
+	 */
+	cofmsg(
+			uint8_t version,
+			uint8_t type,
+			uint16_t len,
+			uint32_t xid) :
+				version(version),
+				type(type),
+				len(sizeof(struct rofl::openflow::ofp_header) + len),
+				xid(xid)
+	{};
+
+	/**
+	 *
+	 */
+	cofmsg(
+			const cofmsg& msg)
+	{ *this = msg; };
+
+	/**
 	 *
 	 */
 	cofmsg&
 	operator=(
-			cofmsg const& p);
+			const cofmsg& msg) {
+		if (this == &msg)
+			return *this;
+		version = msg.version;
+		type    = msg.type;
+		len     = msg.len;
+		xid     = msg.xid;
+		return *this;
+	};
 
+public:
 
-	/** reset packet content
-	 *
-	 */
-	virtual void
-	reset();
-
-
-	/** returns length of packet in packed state
+	/**
 	 *
 	 */
 	virtual size_t
 	length() const;
 
-
-	/** pack OFpacket content to specified buffer
+	/**
 	 *
 	 */
 	virtual void
-	pack(uint8_t *buf = (uint8_t*)0, size_t buflen = 0);
-
-
-	/** unpack OFpacket content from specified buffer
-	 *
-	 */
-	virtual void
-	unpack(uint8_t *buf, size_t buflen);
-
-
-	/** parse packet and validate it
-	 */
-	virtual void
-	validate();
-
+	pack(
+			uint8_t *buf = (uint8_t*)0, size_t buflen = 0);
 
 	/**
-	 */
-	virtual uint8_t*
-	resize(size_t len);
-
-
-	/** start of frame
 	 *
 	 */
-	uint8_t*
-	soframe() const { return memarea->somem(); };
-
-
-	/** frame length
-	 *
-	 */
-	size_t
-	framelen() const { return memarea->memlen(); };
-
-
-	/** start of frame
-	 *
-	 */
-	uint8_t*
-	sobody() const { return (soframe() + sizeof(struct openflow::ofp_header)); };
-
-
-	/** frame length
-	 *
-	 */
-	size_t
-	bodylen() const { return (framelen() - sizeof(struct openflow::ofp_header)); };
-
+	virtual void
+	unpack(
+			uint8_t *buf, size_t buflen);
 
 public:
-
-
-
 
 	/**
 	 *
 	 */
 	uint8_t
-	get_version() const;
-
+	get_version() const
+	{ return version; };
 
 	/**
 	 *
 	 */
 	virtual void
-	set_version(uint8_t ofp_version);
-
+	set_version(
+			uint8_t ofp_version)
+	{ this->version = ofp_version; };
 
 	/**
 	 *
 	 */
 	uint16_t
-	get_length() const;
-
+	get_length() const
+	{ return len; };
 
 	/**
 	 *
 	 */
 	void
-	set_length(uint16_t len);
-
+	set_length(
+			uint16_t len)
+	{ this->len = len; };
 
 	/**
 	 *
 	 */
 	uint8_t
-	get_type() const;
-
+	get_type() const
+	{ return type; };
 
 	/**
 	 *
 	 */
 	void
-	set_type(uint8_t type);
+	set_type(
+			uint8_t type)
+	{ this->type = type; };
 
-
-	/** returns xid field in host byte order from header
+	/**
 	 *
 	 */
 	uint32_t
-	get_xid() const;
+	get_xid() const
+	{ return xid; };
 
-
-	/** sets xid field in header
+	/**
 	 *
 	 */
 	void
-	set_xid(uint32_t xid);
+	set_xid(
+			uint32_t xid)
+	{ this->xid = xid; };
 
 public:
 
@@ -309,6 +204,13 @@ public:
 		ss << "} ";
 		return ss.str();
 	};
+
+private:
+
+	uint8_t		version;
+	uint8_t		type;
+	uint16_t	len;
+	uint32_t	xid;
 };
 
 }; // end of namespace openflow
