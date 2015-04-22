@@ -4,6 +4,9 @@
 
 #include "fipv6frame.h"
 
+//large types support
+#include "../large_types.h"
+
 using namespace rofl;
 
 fipv6frame::fipv6frame(

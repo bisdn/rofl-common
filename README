@@ -2,7 +2,7 @@
 What it is
 ==========
 
-The Revised OpenFlow Library (ROFL) helps you adding OpenFlow support to your software to build control applications, controller frameworks and/or datapath elements.
+The Revised OpenFlow Library (ROFL) - common helps you adding OpenFlow support to your software to build control applications, controller frameworks and/or datapath elements.
 
 Requirements
 ============
@@ -54,8 +54,6 @@ You can have a look on:
 
 * https://bisdn.github.io/rofl-core/rofl-common/index.html
 * https://bisdn.github.io/rofl-core/rofl-common/modules.html
-* https://bisdn.github.io/rofl-core/rofl-pipeline/index.html
-* https://bisdn.github.io/rofl-core/rofl-hal/index.html
 * http://www.roflibs.org/
 * http://www.roflibs.org/doc/
 

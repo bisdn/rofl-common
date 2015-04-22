@@ -8,7 +8,6 @@
 #ifndef CUDPRECV_H_
 #define CUDPRECV_H_
 
-#include <rofl.h>
 #include <sys/time.h>
 #include <sys/types.h>
 #include <unistd.h>

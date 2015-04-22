@@ -44,11 +44,4 @@
 /* Have OPENSSL */
 @ROFL_HAVE_OPENSSL@
 
-/* byteswap.h */
-@BYTESWAP_HEADER_DETECTED@
-
-/* endianness */
-@BIG_ENDIAN_DETECTED@
-@LITTLE_ENDIAN_DETECTED@
-
 #endif //__ROFL_COMMON_CONFIG_H__

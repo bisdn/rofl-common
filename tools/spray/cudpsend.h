@@ -8,7 +8,6 @@
 #ifndef CUDPSEND_H_
 #define CUDPSEND_H_
 
-#include <rofl.h>
 #include <pthread.h>
 #include <map>
 #include <exception>

@@ -10,7 +10,6 @@ install:
 env:
   - FLAGS=--enable-debug
   - FLAGS=
-  - FLAGS=--with-pipeline-lockless --with-pipeline-platform-funcs-inlined
 script:
   - mkdir -p build
   - cd build

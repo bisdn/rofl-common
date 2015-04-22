@@ -5,7 +5,6 @@
 #include <signal.h>
 #include <map>
 
-#include <rofl.h>
 #include <rofl/common/caddress.h>
 #include <rofl/common/crofbase.h>
 #include <rofl/common/crofdpt.h>
