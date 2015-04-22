@@ -4,7 +4,7 @@ What it is
 
 The Revised OpenFlow Library (ROFL) helps you adding OpenFlow support to your software to build control applications, controller frameworks and/or datapath elements.
 
-ROFL-common is a C++ to write OpenFlow endpoint (OF agents), for both controllers, proxy controllers and datapaths.
+ROFL-common is a C++ library that helps on writing OpenFlow endpoints (OF agents), for controllers, proxy controllers and datapaths.
 
 Requirements
 ============
@@ -69,9 +69,9 @@ Authorship
 (c) Copyright BISDN GmbH 2013
 
 Andreas Koepsel<andreas.koepsel (at) bisdn.de>  
+Tobias Jungel<tobias.jungel (at) bisdn.de>  
 Marc Sune<marc.sune (at) bisdn.de>  
 Victor Alvarez<victor.alvarez (at) bisdn.de>  
-Tobias Jungel<tobias.jungel (at) bisdn.de>
 
 And others.
 
