@@ -1,7 +1,5 @@
 MAINTAINERCLEANFILES = Makefile.in
 
-if !ONLY_C_CODE
-
 SUBDIRS = 
 
 sbin_PROGRAMS = ethswctld
@@ -19,9 +17,8 @@ ethswctld_SOURCES = \
 	cflowentry.h \
 	cflowentry.cc
 
-ethswctld_LDADD = ../../src/rofl/librofl.la 
+ethswctld_LDADD = ../../src/rofl/librofl_common.la 
 	-lpthread \
 	-lrt 
 
 AM_LDFLAGS = -static
-endif

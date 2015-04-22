@@ -3,9 +3,9 @@ exec_prefix=@exec_prefix@
 libdir=@libdir@
 includedir=@includedir@
 
-Name: rofl
+Name: rofl-common
 Description: Revised OpenFlow Library (common part)
 Version: @ROFL_VERSION_NORMALIZED@
-Libs: -L${libdir} -lrofl
+Libs: -L${libdir} -lrofl_common
 Cflags: -I${includedir}
 

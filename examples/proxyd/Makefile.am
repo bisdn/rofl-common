@@ -1,7 +1,5 @@
 MAINTAINERCLEANFILES = Makefile.in
 
-if !ONLY_C_CODE
-
 SUBDIRS = 
 
 sbin_PROGRAMS = proxyd
@@ -11,9 +9,8 @@ proxyd_SOURCES = \
 	ccontrol.hpp \
 	ccontrol.cpp
 	
-proxyd_LDADD = ../../src/rofl/librofl.la 
+proxyd_LDADD = ../../src/rofl/librofl_common.la 
 	-lpthread \
 	-lrt 
 
 AM_LDFLAGS = -static
-endif

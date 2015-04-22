@@ -5,7 +5,7 @@ MAINTAINERCLEANFILES = \
 
 export INCLUDES += -I$(abs_srcdir)/src/ -I$(abs_builddir)/src/
 SUBDIRS = src test examples tools doc 
-export LIBROFL=$(PWD)/src/rofl/librofl.la
+export LIBROFL=$(PWD)/src/rofl/librofl_common.la
 
 #Could be improved.. 
 .PHONY: doc

@@ -1,4 +1,4 @@
-AC_INIT(ROFL, m4_esyscmd_s(cat VERSION), rofl-devel@roflibs.org, rofl, http://www.roflibs.org)
+AC_INIT(ROFL-COMMON, m4_esyscmd_s(cat VERSION), rofl-devel@roflibs.org, rofl-common, http://www.roflibs.org)
 
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([m4])
@@ -43,21 +43,6 @@ m4_include([config/profiling.m4])
 # Experimental
 m4_include([config/experimental.m4])
 
-# Flush
-m4_include([config/flush.m4])
-
-# No C++ (cross compilation in C enviornments)
-m4_include([config/no_cpp.m4])
-
-# Pipeline support
-m4_include([config/pipeline.m4])
-
-# Pipeline optimizations
-m4_include([config/pipeline_opts.m4])
-
-# Checking libs
-#m4_include([config/libs.m4])
-
 # Checking libs
 m4_include([config/versioning.m4])
 
@@ -82,12 +67,9 @@ AC_CONFIG_FILES([
 	src/rofl/platform/Makefile
 	src/rofl/platform/unix/Makefile
 	
-	src/rofl/Makefile src/rofl/rofl.pc
+	src/rofl/Makefile
+	src/rofl/rofl_common.pc
 
-	src/rofl/datapath/hal/Makefile
-	src/rofl/datapath/hal/openflow/openflow1x/Makefile
-	src/rofl/datapath/hal/extensions/Makefile
-	
 	examples/Makefile
 	examples/ethswctld/Makefile
 	examples/testomat/Makefile
@@ -104,12 +86,7 @@ AC_CONFIG_FILES([
 	test/rofl/common/openflow/messages/Makefile
 	test/rofl/common/protocols/Makefile
 	
-	src/rofl_config.h])
-#	test/unit/cmemory/Makefile
-#	test/unit/cpacket/Makefile
-#	test/unit/croflexp/Makefile
-#	test/unit/frames/Makefile
-#	test/unit/test1/Makefile	
+	src/rofl_common_conf.h])
 
 # Doxygen (here to be the last Makefile) 
 m4_include([config/doxygen.m4])

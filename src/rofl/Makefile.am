@@ -2,30 +2,21 @@ MAINTAINERCLEANFILES = Makefile.in
 
 export INCLUDES += -I$(abs_srcdir)/../ #-I$(abs_builddir)
 
-if PIPELINE_SUPPORT
-PIPELINE_DIRS=datapath/pipeline
-endif
+SUBDIRS = common platform
 
-if ONLY_C_CODE
-SUBDIRS = datapath/hal $(PIPELINE_DIRS)
-else
-SUBDIRS = common datapath/hal $(PIPELINE_DIRS) platform
-LIBS_ROFL=common/librofl_common.la platform/libplatform.la
-endif
-
-#library_includedir=$(includedir)/rofl 
-#include_HEADERS=rofl.h
-
-lib_LTLIBRARIES = librofl.la
-librofl_la_SOURCES = ../rofl.c
-librofl_la_LIBADD = $(LIBS_ROFL) -lpthread
+lib_LTLIBRARIES = librofl_common.la
+librofl_common_la_SOURCES = ../rofl_common.c
+librofl_common_la_LIBADD = 			\
+			common/librofl_common_base.la 	\
+			platform/librofl_platform.la	\
+			-lpthread
 
 ROFL_LIBRARY_VERSION = 1:1:1
 
-librofl_la_LDFLAGS = -version-info $(ROFL_LIBRARY_VERSION)
+librofl_common_la_LDFLAGS = -version-info $(ROFL_LIBRARY_VERSION)
 
 pkgconfigdir = $(libdir)/pkgconfig
-pkgconfig_DATA = rofl.pc
+pkgconfig_DATA = rofl_common.pc
 
 #AM_LDFLAGS= -static
 AM_CPPFLAGS= -fPIC

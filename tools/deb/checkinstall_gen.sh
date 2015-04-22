@@ -1,14 +1,14 @@
 #!/bin/bash
 
-PKG_NAME="rofl"
-PKG_NAME_DBG="rofl-dbg"
+PKG_NAME="rofl-common"
+PKG_NAME_DBG="rofl-common-dbg"
 VERSION=""
 RELEASE=""
 DEFAULT_REQUIRES="libssl1.0.0, libcrypto++9"
 LICENSE="Mozilla Public License, Version 2.0"
 GROUP="net"
 MAINTAINER="rofl-devel@roflibs.org"
-DESCRIPTION="Revised OpenFlow Libraries"
+DESCRIPTION="Revised OpenFlow Libraries - common part"
 IS_DEBUG=""
 
 check_root(){

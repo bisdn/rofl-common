@@ -7,7 +7,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <rofl.h>
+#include <rofl_common.h>
 
 /**
 * @file c_logger.h
@@ -91,7 +91,9 @@ extern int (*rofl_debug_print)(FILE *stream, const char *format, ...);
 #endif //ROFL_NO_LOGGING
 
 //C++ extern C
-ROFL_BEGIN_DECLS
+#ifdef __cplusplus
+	extern "C"{
+#endif
 
 //API to capture logging events of the logger 
 void rofl_set_logging_function(int (*logging_func)(FILE *stream, const char *format, ...));
@@ -101,6 +103,8 @@ void rofl_set_logging_level(/*cn,*/ enum rofl_debug_levels level);
 
 
 //C++ extern C
-ROFL_END_DECLS
+#ifdef __cplusplus
+	}
+#endif
 
 #endif /* ROFL_LOG_H_ */

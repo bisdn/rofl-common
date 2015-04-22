@@ -21,7 +21,7 @@ unittest_SOURCES= \
 #coxmlisttest.h \
 #crofconntest.h crofconntest.cc
 
-unittest_LDADD=$(top_builddir)/src/rofl/librofl.la -lcppunit
+unittest_LDADD=$(top_builddir)/src/rofl/librofl_common.la -lcppunit
 
 check_PROGRAMS=unittest #$(TEST_PROG)
 

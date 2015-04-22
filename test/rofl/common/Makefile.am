@@ -29,7 +29,7 @@ unittest_SOURCES= \
 	cpacket_test.cc \
 	cpacket_test.h
 
-unittest_LDADD=$(top_builddir)/src/rofl/librofl.la -lcppunit -lpthread
+unittest_LDADD=$(top_builddir)/src/rofl/librofl_common.la -lcppunit -lpthread
 
 check_PROGRAMS=unittest 
 

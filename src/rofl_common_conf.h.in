@@ -1,0 +1,54 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+ 
+#ifndef __ROFL_COMMON_CONF_H__
+#define __ROFL_COMMON_CONF_H__
+
+/* Name of package */
+#define ROFL_COMMON_PACKAGE "@PACKAGE@"
+
+/* Define to the address where bug reports for this package should be sent. */
+#define ROFL_COMMON_PACKAGE_BUGREPORT "@PACKAGE_BUGREPORT@"
+
+/* Define to the full name of this package. */
+#define ROFL_COMMON_PACKAGE_NAME "@PACKAGE_NAME@"
+
+/* Define to the full name and version of this package. */
+#define ROFL_COMMON_PACKAGE_STRING "@PACKAGE_STRING@"
+
+/* Define to the one symbol short name of this package. */
+#define ROFL_COMMON_PACKAGE_TARNAME "@PACKAGE_TARNAME@"
+
+/* Define to the home page for this package. */
+#define ROFL_COMMON_PACKAGE_URL "@PACKAGE_URL@"
+
+/* Define to the version of this package. */
+#define ROFL_COMMON_PACKAGE_VERSION "@PACKAGE_VERSION@"
+
+/* Compiled in branch(local) */
+#define ROFL_COMMON_BRANCH "@ROFL_BRANCH@"
+
+/* Build (git hash) */
+#define ROFL_COMMON_BUILD "@ROFL_BUILD@"
+
+/* Git describe */
+#define ROFL_COMMON_DESCRIBE "@ROFL_DESCRIBE@"
+
+/* ROFL version */
+#define ROFL_COMMON_VERSION_ "@ROFL_VERSION@"
+
+/* Experimental */
+@ROFL_EXPERIMENTAL@
+
+/* Have OPENSSL */
+@ROFL_HAVE_OPENSSL@
+
+/* byteswap.h */
+@BYTESWAP_HEADER_DETECTED@
+
+/* endianness */
+@BIG_ENDIAN_DETECTED@
+@LITTLE_ENDIAN_DETECTED@
+
+#endif //__ROFL_COMMON_CONFIG_H__

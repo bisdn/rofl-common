@@ -11,7 +11,7 @@ pushpopd_SOURCES = \
 	ccontrol.hpp \
 	ccontrol.cpp
 	
-pushpopd_LDADD = ../../src/rofl/librofl.la 
+pushpopd_LDADD = ../../src/rofl/librofl_common.la 
 	-lpthread \
 	-lrt 
 

@@ -2,9 +2,9 @@ MAINTAINERCLEANFILES = Makefile.in
 
 SUBDIRS = openflow protocols utils 
 
-noinst_LTLIBRARIES = librofl_common.la
+noinst_LTLIBRARIES = librofl_common_base.la
 
-librofl_common_la_SOURCES = \
+librofl_common_base_la_SOURCES = \
 		endian_conversion.h \
 		rofcommon.h \
 		croflexception.h \
@@ -80,12 +80,12 @@ librofl_common_la_SOURCES = \
 		crofqueue.h
 		
 if ROFL_HAVE_OPENSSL
-librofl_common_la_SOURCES += \
+librofl_common_base_la_SOURCES += \
 		csocket_openssl.h \
 		csocket_openssl.cc
 endif
 
-librofl_common_la_LIBADD=openflow/libopenflow.la protocols/libprotocols.la utils/librofl_common_utils.la -lrt
+librofl_common_base_la_LIBADD=openflow/libopenflow.la protocols/libprotocols.la utils/librofl_common_utils.la -lrt
 
 library_includedir=$(includedir)/rofl/common
 library_include_HEADERS= \

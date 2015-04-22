@@ -17,7 +17,7 @@ unittest_SOURCES= \
 	cofmsgflowmod_test.cc \
 	cofmsgflowmod_test.h
 
-unittest_LDADD=$(top_builddir)/src/rofl/librofl.la -lcppunit
+unittest_LDADD=$(top_builddir)/src/rofl/librofl_common.la -lcppunit
 
 check_PROGRAMS=unittest 
 

@@ -8,7 +8,6 @@
 #ifndef COXMATCH_OUTPUT_H_
 #define COXMATCH_OUTPUT_H_
 
-#include "rofl.h"
 #include "rofl/common/openflow/coxmatch.h"
 
 #ifdef ROFL_EXPERIMENTAL
