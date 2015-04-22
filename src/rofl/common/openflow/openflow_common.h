@@ -37,12 +37,21 @@ namespace rofl {
 #define OFP_MAX_TABLE_NAME_LEN 32
 #define OFP_MAX_PORT_NAME_LEN  16
 
-#define OFP_TCP_PORT  6633
-#define OFP_SSL_PORT  6633
+#define OFP_TCP_PORT  6653
+#define OFP_SSL_PORT  6653
 
 //#define OFP_VERSION_UNKNOWN 0
 
 #define OFP_ETH_ALEN 6          /* Bytes in an Ethernet address. */
+
+#define OFP_DEFAULT_MISS_SEND_LEN   128
+
+
+#define DESC_STR_LEN   256
+#define SERIAL_NUM_LEN 32
+
+
+
 
 namespace openflow {
 
@@ -1091,6 +1100,17 @@ namespace openflow {
 		* struct ofp_experimenter_multipart_header.
 		* The request and reply bodies are otherwise experimenter-defined. */
 		OFPMP_EXPERIMENTER = 0xffff
+	};
+
+	enum ofp_queue_id_t {
+		/* All ones is used to indicate all queues in a port (for stats retrieval). */
+		OFPQ_ALL = 0xffffffff,
+	};
+
+	enum ofp_queue_rate_value_t {
+		/* Min rate > 1000 means not configured. */
+		OFPQ_MIN_RATE_UNCFG = 0xffff,
+		OFPQ_MAX_RATE_UNCFG = 0xffff,
 	};
 
 
