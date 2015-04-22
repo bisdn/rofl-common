@@ -29,7 +29,7 @@ namespace ethswctld {
  * A simple controller application capable of switching Ethernet
  * frames in a flow-based manner.
  */
-class cetherswitch : public rofl::crofbase {
+class cetherswitch : public rofl::crofbase, public rofl::ciosrv {
 public:
 
 	/**

@@ -36,16 +36,6 @@ class ctransactions :
 		public std::list<ctransaction>,
 		public rofl::ciosrv
 {
-	ctransactions_env			*env;
-	uint32_t					nxid;			// next xid
-	unsigned int				work_interval; 	// time interval for checking work-queue
-	PthreadRwLock				queuelock;		// rwlock for work-queue
-	ctimerid					ta_queue_timer_id;
-
-	enum ctransactions_timer_t {
-		TIMER_WORK_ON_TA_QUEUE 	= 1,	// lookup all expired TAs in list
-	};
-
 public:
 
 	/**
@@ -60,6 +50,30 @@ public:
 	 */
 	virtual
 	~ctransactions();
+
+	/**
+	 *
+	 */
+	ctransactions(
+			const ctransactions& tas) :
+				env(0), nxid(0), work_interval(0)
+	{};
+
+	/**
+	 *
+	 */
+	ctransactions&
+	operator= (
+			const ctransactions& tas) {
+		if (this == &tas)
+			return *this;
+		std::list<ctransaction>::operator= (tas);
+		work_interval = tas.work_interval;
+		nxid = tas.nxid;
+		if (not empty())
+			ta_queue_timer_id = register_timer(TIMER_WORK_ON_TA_QUEUE, ctimespec(work_interval));
+		return *this;
+	};
 
 public:
 
@@ -87,20 +101,8 @@ public:
 	 *
 	 */
 	uint32_t
-	get_async_xid() { return ++nxid; };
-
-private:
-
-	/**
-	 *
-	 */
-	ctransactions(
-			ctransactions const& tas) : env(0), nxid(0), work_interval(0) {};
-
-	/**
-	 *
-	 */
-	ctransactions& operator= (ctransactions const& tas) { return *this; };
+	get_async_xid()
+	{ return ++nxid; };
 
 private:
 
@@ -126,7 +128,7 @@ private:
 public:
 
 	friend std::ostream&
-	operator<< (std::ostream& os, ctransactions const& tas) {
+	operator<< (std::ostream& os, const ctransactions& tas) {
 		os << indent(0) << "<transactions #ta:" << tas.size() << " >" << std::endl;
 		indent i(2);
 		for (std::list<ctransaction>::const_iterator
@@ -134,6 +136,18 @@ public:
 			os << (*it);
 		}
 		return os;
+	};
+
+private:
+
+	ctransactions_env			*env;
+	uint32_t					nxid;			// next xid
+	unsigned int				work_interval; 	// time interval for checking work-queue
+	PthreadRwLock				queuelock;		// rwlock for work-queue
+	ctimerid					ta_queue_timer_id;
+
+	enum ctransactions_timer_t {
+		TIMER_WORK_ON_TA_QUEUE 	= 1,	// lookup all expired TAs in list
 	};
 };
 

@@ -2,286 +2,330 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-
-
 #include "crofbase.h"
+#include "crofcore.h"
 
 using namespace rofl;
 
-/* static */ std::set<crofbase*> crofbase::rofbases;
-
 crofbase::crofbase(
-		const rofl::openflow::cofhello_elem_versionbitmap& versionbitmap,
-		pthread_t tid) :
-				rofl::ciosrv(tid),
-				versionbitmap(versionbitmap),
-				transactions(this, tid),
-				generation_is_defined(false),
-				cached_generation_id((uint64_t)((int64_t)-1))
+		const rofl::openflow::cofhello_elem_versionbitmap& versionbitmap)
 {
-	crofbase::rofbases.insert(this);
-}
+	rofl::crofcore::register_rofbase(this);
+	rofl::crofcore::set_rofcore(this).set_versionbitmap() = versionbitmap;
+};
 
 
 
 crofbase::~crofbase()
 {
-	crofbase::rofbases.erase(this);
-
-	try {
-		// close the listening sockets
-		close_dpt_listening();
-		close_ctl_listening();
-
-		// detach from higher layer entities
-		while (not rofctls.empty()) {
-			drop_ctl(rofctls.begin()->first);
-		}
-
-		while (not rofdpts.empty()) {
-			drop_dpt(rofdpts.begin()->first);
-		}
-
-	} catch (RoflException& e) {}
-}
+	rofl::crofcore::deregister_rofbase(this);
+};
 
 
 
 void
-crofbase::handle_connect_refused(
-		crofconn& conn)
+crofbase::set_num_of_workers(
+		unsigned int n)
 {
-	rofl::logging::info << "[rofl-common][crofbase] connection refused: " << conn.str() << std::endl;
-}
+	rofl::crofcore::set_num_of_workers(n);
+};
 
 
 
-void
-crofbase::handle_connect_failed(
-		crofconn& conn)
+rofl::openflow::cofhello_elem_versionbitmap&
+crofbase::set_versionbitmap()
 {
-	rofl::logging::info << "[rofl-common][crofbase] connection failed: " << conn.str() << std::endl;
-}
+	return rofl::crofcore::set_rofcore(this).set_versionbitmap();
+};
 
 
 
-void
-crofbase::handle_connected(
-		crofconn& conn,
-		uint8_t ofp_version)
+const rofl::openflow::cofhello_elem_versionbitmap&
+crofbase::get_versionbitmap() const
 {
-	/*
-	 * situation:
-	 * 1. csocket accepted new connection
-	 * 2. crofconn was created and socket descriptor handed over
-	 * 3. crofconn conducts HELLO exchange and FEATURES.request/reply => learn dpid and aux-id
-	 * 4. this method is called
-	 *
-	 * next step: check for existing crofdpt instance for dpid seen by crofconn
-	 * if none exists, create new one, otherwise, add connection to existing crofdpt
-	 */
-
-	switch (conn.get_flavour()) {
-	case rofl::crofconn::FLAVOUR_CTL: {
-		rofl::logging::info << "[rofl-common][crofbase] "
-				<< "creating new crofctl instance for ctl peer" << std::endl;
-		add_ctl(get_idle_ctlid(), conn.get_versionbitmap(), /*remove_upon_channel_termination=*/true).add_connection(&conn);
-	} break;
-	case rofl::crofconn::FLAVOUR_DPT: try {
-		crofdpt::get_dpt(conn.get_dpid()).add_connection(&conn);
-	} catch (eRofDptNotFound& e) {
-		rofl::logging::info << "[rofl-common][crofbase] "
-				<< "creating new crofdpt instance for dpt peer, dpid:" << conn.get_dpid() << std::endl;
-		add_dpt(get_idle_dptid(), conn.get_versionbitmap(), /*remove_upon_channel_termination=*/true).add_connection(&conn);
-	} break;
-	default: {
-
-	};
-	}
-}
-
-
-
-void
-crofbase::handle_listen(
-		csocket& socket, int newsd)
-{
-	if (is_ctl_listening(socket)) {
-		rofl::logging::debug << "[rofl-common][crofbase] "
-				<< "accept => creating new crofconn for ctl peer on sd: " << newsd << std::endl;
-		(new rofl::crofconn(this, versionbitmap))->accept(
-				socket.get_socket_type(), socket.get_socket_params(), newsd, rofl::crofconn::FLAVOUR_CTL);
-	}
-	if (is_dpt_listening(socket)) {
-		rofl::logging::debug << "[rofl-common][crofbase] "
-						<< "accept => creating new crofconn for dpt peer on sd: " << newsd << std::endl;
-		(new rofl::crofconn(this, versionbitmap))->accept(
-				socket.get_socket_type(), socket.get_socket_params(), newsd, rofl::crofconn::FLAVOUR_DPT);
-	}
-}
-
-
-
-void
-crofbase::handle_closed(
-		csocket& socket)
-{
-	if (is_ctl_listening(socket)) {
-		drop_ctl_listening(socket);
-	} else
-	if (is_dpt_listening(socket)) {
-		drop_dpt_listening(socket);
-	}
-}
-
-
-
-void
-crofbase::role_request_rcvd(
-		crofctl& ctl,
-		uint32_t role,
-		uint64_t rcvd_generation_id)
-{
-	if (generation_is_defined &&
-			(rofl::openflow::cofrole::distance((int64_t)rcvd_generation_id, (int64_t)cached_generation_id) < 0)) {
-		if ((rofl::openflow13::OFPCR_ROLE_MASTER == role) || (rofl::openflow13::OFPCR_ROLE_SLAVE == role)) {
-			throw eRoleRequestStale();
-		}
-	} else {
-		cached_generation_id = rcvd_generation_id;
-		generation_is_defined = true;
-	}
-
-	// in either case: send current generation_id value back to controller
-	ctl.set_role().set_generation_id(cached_generation_id);
-
-	switch (role) {
-	case rofl::openflow13::OFPCR_ROLE_MASTER: {
-
-		// iterate over all attached controllers and check for an existing master
-		for (std::map<cctlid, crofctl*>::iterator
-				it = rofctls.begin(); it != rofctls.end(); ++it) {
-
-			// ignore ctl who called this method
-			if (it->second->get_ctlid() == ctl.get_ctlid())
-				continue;
-
-			// find any other controller and set them back to role SLAVE
-			if (rofl::openflow13::OFPCR_ROLE_MASTER == it->second->get_role().get_role()) {
-				it->second->set_role().set_role(rofl::openflow13::OFPCR_ROLE_SLAVE);
-			}
-		}
-
-		// set new master async-config to template retrieved from of-config (or default one)
-		ctl.set_async_config() = ctl.get_async_config_role_default_template();
-
-		ctl.set_role().set_role(rofl::openflow13::OFPCR_ROLE_MASTER);
-
-	} break;
-	case rofl::openflow13::OFPCR_ROLE_SLAVE: {
-
-		ctl.set_async_config() = ctl.get_async_config_role_default_template();
-		ctl.set_role().set_role(rofl::openflow13::OFPCR_ROLE_SLAVE);
-
-	} break;
-	case rofl::openflow13::OFPCR_ROLE_EQUAL: {
-
-		ctl.set_async_config() = ctl.get_async_config_role_default_template();
-		ctl.set_role().set_role(rofl::openflow13::OFPCR_ROLE_EQUAL);
-
-	} break;
-	case rofl::openflow13::OFPCR_ROLE_NOCHANGE:
-	default: {
-		// let crofctl_impl send a role-reply with the controller's unaltered current role
-	}
-	}
-}
-
-
-
-uint32_t
-crofbase::get_ofp_no_buffer(uint8_t ofp_version)
-{
-	switch (ofp_version) {
-	case openflow10::OFP_VERSION: return openflow10::OFP_NO_BUFFER;
-	case openflow12::OFP_VERSION: return openflow12::OFP_NO_BUFFER;
-	case openflow13::OFP_VERSION: return openflow13::OFP_NO_BUFFER;
-	default:
-		throw eBadVersion();
-	}
-}
-
-
-
-uint32_t
-crofbase::get_ofp_controller_port(uint8_t ofp_version)
-{
-	switch (ofp_version) {
-	case openflow10::OFP_VERSION: return openflow10::OFPP_CONTROLLER;
-	case openflow12::OFP_VERSION: return openflow12::OFPP_CONTROLLER;
-	case openflow13::OFP_VERSION: return openflow13::OFPP_CONTROLLER;
-	default:
-		throw eBadVersion();
-	}
-}
-
-
-
-uint32_t
-crofbase::get_ofp_flood_port(uint8_t ofp_version)
-{
-	switch (ofp_version) {
-	case openflow10::OFP_VERSION: return openflow10::OFPP_FLOOD;
-	case openflow12::OFP_VERSION: return openflow12::OFPP_FLOOD;
-	case openflow13::OFP_VERSION: return openflow13::OFPP_FLOOD;
-	default:
-		throw eBadVersion();
-	}
-}
+	return rofl::crofcore::set_rofcore(this).set_versionbitmap();
+};
 
 
 
 uint8_t
-crofbase::get_ofp_command(uint8_t ofp_version, enum openflow::ofp_flow_mod_command const& cmd)
+crofbase::get_highest_supported_ofp_version() const
 {
-	switch (ofp_version) {
-	case openflow10::OFP_VERSION: {
-		switch (cmd) {
-		case openflow::OFPFC_ADD: 			return openflow10::OFPFC_ADD;
-		case openflow::OFPFC_MODIFY: 		return openflow10::OFPFC_MODIFY;
-		case openflow::OFPFC_MODIFY_STRICT: return openflow10::OFPFC_MODIFY_STRICT;
-		case openflow::OFPFC_DELETE: 		return openflow10::OFPFC_DELETE;
-		case openflow::OFPFC_DELETE_STRICT: return openflow10::OFPFC_DELETE_STRICT;
-		default:
-			throw eBadVersion();
-		}
-	} break;
-	case openflow12::OFP_VERSION: {
-		switch (cmd) {
-		case openflow::OFPFC_ADD: 			return openflow12::OFPFC_ADD;
-		case openflow::OFPFC_MODIFY: 		return openflow12::OFPFC_MODIFY;
-		case openflow::OFPFC_MODIFY_STRICT: return openflow12::OFPFC_MODIFY_STRICT;
-		case openflow::OFPFC_DELETE: 		return openflow12::OFPFC_DELETE;
-		case openflow::OFPFC_DELETE_STRICT: return openflow12::OFPFC_DELETE_STRICT;
-		default:
-			throw eBadVersion();
-		}
-	} break;
-	case openflow13::OFP_VERSION: {
-		switch (cmd) {
-		case openflow::OFPFC_ADD: 			return openflow13::OFPFC_ADD;
-		case openflow::OFPFC_MODIFY: 		return openflow13::OFPFC_MODIFY;
-		case openflow::OFPFC_MODIFY_STRICT: return openflow13::OFPFC_MODIFY_STRICT;
-		case openflow::OFPFC_DELETE: 		return openflow13::OFPFC_DELETE;
-		case openflow::OFPFC_DELETE_STRICT: return openflow13::OFPFC_DELETE_STRICT;
-		default:
-			throw eBadVersion();
-		}
-	} break;
-	default:
-		throw eBadVersion();
-	}
-}
+	return rofl::crofcore::set_rofcore(this).get_highest_supported_ofp_version();
+};
+
+
+
+bool
+crofbase::is_ofp_version_supported(
+		uint8_t ofp_version) const
+{
+	return rofl::crofcore::set_rofcore(this).is_ofp_version_supported(ofp_version);
+};
+
+
+
+void
+crofbase::close_dpt_listening()
+{
+	rofl::crofcore::set_rofcore(this).close_dpt_listening();
+};
+
+
+
+rofl::csocket&
+crofbase::add_dpt_listening(
+		unsigned int sockid,
+		enum rofl::csocket::socket_type_t socket_type,
+		const rofl::cparams& params)
+{
+	return rofl::crofcore::set_rofcore(this).add_dpt_listening(sockid, socket_type, params);
+};
+
+
+
+rofl::csocket&
+crofbase::set_dpt_listening(
+		unsigned int sockid,
+		enum rofl::csocket::socket_type_t socket_type,
+		const rofl::cparams& params)
+{
+	return rofl::crofcore::set_rofcore(this).set_dpt_listening(sockid, socket_type, params);
+};
+
+
+
+const rofl::csocket&
+crofbase::get_dpt_listening(
+		unsigned int sockid) const
+{
+	return rofl::crofcore::set_rofcore(this).get_dpt_listening(sockid);
+};
+
+
+
+void
+crofbase::drop_dpt_listening(
+		unsigned int sockid)
+{
+	rofl::crofcore::set_rofcore(this).drop_dpt_listening(sockid);
+};
+
+
+
+bool
+crofbase::has_dpt_listening(
+		unsigned int sockid)
+{
+	return rofl::crofcore::set_rofcore(this).has_dpt_listening(sockid);
+};
+
+
+
+void
+crofbase::close_ctl_listening()
+{
+	rofl::crofcore::set_rofcore(this).close_ctl_listening();
+};
+
+
+
+rofl::csocket&
+crofbase::add_ctl_listening(
+		unsigned int sockid,
+		enum rofl::csocket::socket_type_t socket_type,
+		const rofl::cparams& params)
+{
+	return rofl::crofcore::set_rofcore(this).add_ctl_listening(sockid, socket_type, params);
+};
+
+
+
+rofl::csocket&
+crofbase::set_ctl_listening(
+		unsigned int sockid,
+		enum rofl::csocket::socket_type_t socket_type,
+		const rofl::cparams& params)
+{
+	return rofl::crofcore::set_rofcore(this).set_ctl_listening(sockid, socket_type, params);
+};
+
+
+
+const rofl::csocket&
+crofbase::get_ctl_listening(
+		unsigned int sockid) const
+{
+	return rofl::crofcore::set_rofcore(this).get_ctl_listening(sockid);
+};
+
+
+
+void
+crofbase::drop_ctl_listening(
+		unsigned int sockid)
+{
+	rofl::crofcore::set_rofcore(this).drop_ctl_listening(sockid);
+};
+
+
+
+bool
+crofbase::has_ctl_listening(
+		unsigned int sockid)
+{
+	return rofl::crofcore::set_rofcore(this).has_ctl_listening(sockid);
+};
+
+
+
+rofl::cdptid
+crofbase::get_idle_dptid() const
+{
+	return rofl::crofcore::set_rofcore(this).get_idle_dptid();
+};
+
+
+
+void
+crofbase::drop_dpts()
+{
+	rofl::crofcore::set_rofcore(this).drop_dpts();
+};
+
+
+
+rofl::crofdpt&
+crofbase::add_dpt(
+	const rofl::cdptid& dptid,
+	const rofl::openflow::cofhello_elem_versionbitmap& versionbitmap,
+	bool remove_on_channel_close,
+	const rofl::cdpid& dpid)
+{
+	return rofl::crofcore::set_rofcore(this).add_dpt(dptid, versionbitmap, remove_on_channel_close, dpid);
+};
+
+
+
+rofl::crofdpt&
+crofbase::set_dpt(
+	const rofl::cdptid& dptid,
+	const rofl::openflow::cofhello_elem_versionbitmap& versionbitmap,
+	bool remove_on_channel_close,
+	const rofl::cdpid& dpid)
+{
+	return rofl::crofcore::set_rofcore(this).set_dpt(dptid, versionbitmap, remove_on_channel_close, dpid);
+};
+
+
+
+rofl::crofdpt&
+crofbase::set_dpt(
+		const rofl::cdptid& dptid)
+{
+	return rofl::crofcore::set_rofcore(this).set_dpt(dptid);
+};
+
+
+
+const rofl::crofdpt&
+crofbase::get_dpt(
+		const rofl::cdptid& dptid) const
+{
+	return rofl::crofcore::set_rofcore(this).get_dpt(dptid);
+};
+
+
+
+void
+crofbase::drop_dpt(
+	rofl::cdptid dptid)
+{
+	rofl::crofcore::set_rofcore(this).drop_dpt(dptid);
+};
+
+
+
+bool
+crofbase::has_dpt(
+	const rofl::cdptid& dptid) const
+{
+	return rofl::crofcore::set_rofcore(this).has_dpt(dptid);
+};
+
+
+
+rofl::cctlid
+crofbase::get_idle_ctlid() const
+{
+	return rofl::crofcore::set_rofcore(this).get_idle_ctlid();
+};
+
+
+
+void
+crofbase::drop_ctls()
+{
+	rofl::crofcore::set_rofcore(this).drop_ctls();
+};
+
+
+
+rofl::crofctl&
+crofbase::add_ctl(
+	const rofl::cctlid& ctlid,
+	const rofl::openflow::cofhello_elem_versionbitmap& versionbitmap,
+	bool remove_on_channel_close)
+{
+	return rofl::crofcore::set_rofcore(this).add_ctl(ctlid, versionbitmap, remove_on_channel_close);
+};
+
+
+
+rofl::crofctl&
+crofbase::set_ctl(
+	const rofl::cctlid& ctlid,
+	const rofl::openflow::cofhello_elem_versionbitmap& versionbitmap,
+	bool remove_on_channel_close)
+{
+	return rofl::crofcore::set_rofcore(this).set_ctl(ctlid, versionbitmap, remove_on_channel_close);
+};
+
+
+
+rofl::crofctl&
+crofbase::set_ctl(
+		const rofl::cctlid& ctlid)
+{
+	return rofl::crofcore::set_rofcore(this).set_ctl(ctlid);
+};
+
+
+
+const rofl::crofctl&
+crofbase::get_ctl(
+		const rofl::cctlid& ctlid) const
+{
+	return rofl::crofcore::set_rofcore(this).get_ctl(ctlid);
+};
+
+
+
+void
+crofbase::drop_ctl(
+	rofl::cctlid ctlid)
+{
+	rofl::crofcore::set_rofcore(this).drop_ctl(ctlid);
+};
+
+
+
+bool
+crofbase::has_ctl(
+	const rofl::cctlid& ctlid) const
+{
+	return rofl::crofcore::set_rofcore(this).has_ctl(ctlid);
+};
 
 
 
@@ -298,35 +342,17 @@ crofbase::send_packet_in_message(
 		uint8_t *data,
 		size_t datalen)
 {
-	bool sent_out = false;
-
-	for (std::map<cctlid, crofctl*>::iterator
-			it = rofctls.begin(); it != rofctls.end(); ++it) {
-
-		crofctl& ctl = *(it->second);
-
-		if (not ctl.is_established()) {
-			continue;
-		}
-
-		ctl.send_packet_in_message(
-				auxid,
-				buffer_id,
-				total_len,
-				reason,
-				table_id,
-				cookie,
-				in_port, // for OF1.0
-				match,
-				data,
-				datalen);
-
-		sent_out = true;
-	}
-
-	if (not sent_out) {
-		throw eRofBaseNotConnected();
-	}
+	rofl::crofcore::set_rofcore(this).send_packet_in_message(
+			auxid,
+			buffer_id,
+			total_len,
+			reason,
+			table_id,
+			cookie,
+			in_port,
+			match,
+			data,
+			datalen);
 }
 
 
@@ -346,37 +372,19 @@ crofbase::send_flow_removed_message(
 		uint64_t packet_count,
 		uint64_t byte_count)
 {
-	bool sent_out = false;
-
-	for (std::map<cctlid, crofctl*>::iterator
-			it = rofctls.begin(); it != rofctls.end(); ++it) {
-
-		crofctl& ctl = *(it->second);
-
-		if (not ctl.is_established()) {
-			continue;
-		}
-
-		ctl.send_flow_removed_message(
-				auxid,
-				match,
-				cookie,
-				priority,
-				reason,
-				table_id,
-				duration_sec,
-				duration_nsec,
-				idle_timeout,
-				hard_timeout,
-				packet_count,
-				byte_count);
-
-		sent_out = true;
-	}
-
-	if (not sent_out) {
-		throw eRofBaseNotConnected();
-	}
+	rofl::crofcore::set_rofcore(this).send_flow_removed_message(
+			auxid,
+			match,
+			cookie,
+			priority,
+			reason,
+			table_id,
+			duration_sec,
+			duration_nsec,
+			idle_timeout,
+			hard_timeout,
+			packet_count,
+			byte_count);
 }
 
 
@@ -387,30 +395,10 @@ crofbase::send_port_status_message(
 		uint8_t reason,
 		const rofl::openflow::cofport& port)
 {
-	bool sent_out = false;
-
-	for (std::map<cctlid, crofctl*>::iterator
-			it = rofctls.begin(); it != rofctls.end(); ++it) {
-
-		crofctl& ctl = *(it->second);
-
-		if (not ctl.is_established()) {
-			continue;
-		}
-
-		ctl.send_port_status_message(
-				auxid,
-				reason,
-				port);
-
-		sent_out = true;
-	}
-
-	if (not sent_out) {
-		throw eRofBaseNotConnected();
-	}
+	rofl::crofcore::set_rofcore(this).send_port_status_message(
+			auxid,
+			reason,
+			port);
 }
-
-
 
 

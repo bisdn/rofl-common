@@ -204,8 +204,12 @@ public:
 	 */
 	void
 	close() {
+#if 0
 		RwLock rwlock(rofsock_lock, RwLock::RWLOCK_WRITE);
 		run_engine(EVENT_LOCAL_DISCONNECT);
+#endif
+		__close();
+		if (socket) socket->close();
 	};
 
 	/**

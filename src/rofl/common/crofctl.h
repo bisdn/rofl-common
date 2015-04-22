@@ -785,6 +785,8 @@ public:
 		rofl::logging::debug << "[rofl-common][crofctl] "
 				<< "instance destroyed, ctlid: " << ctlid.str() << std::endl;
 		crofctl::rofctls.erase(ctlid);
+		events.clear();
+		transactions.clear();
 	};
 
 	/**
@@ -795,6 +797,13 @@ public:
 	const rofl::cctlid&
 	get_ctlid() const
 	{ return ctlid; };
+
+	/**
+	 * @brief	Shutdown crofchan instance
+	 */
+	void
+	shutdown()
+	{ rofchan.close(); };
 
 public:
 
@@ -1787,29 +1796,25 @@ private:
 	static std::map<rofl::cctlid, rofl::crofctl*> rofctls;
 
 	// environment
-	rofl::crofctl_env*      env;
+	rofl::crofctl_env*               env;
 	// handle for this crofctl instance
-	rofl::cctlid            ctlid;
+	rofl::cctlid                     ctlid;
 	// OFP control channel
-	rofl::crofchan          rofchan;
+	rofl::crofchan                   rofchan;
 	// pending OFP transactions
-	rofl::ctransactions     transactions;
-
-	bool                    remove_on_channel_close;
-	rofl::openflow::cofasync_config async_config_role_default_template;
-	rofl::openflow::cofasync_config async_config;
-	rofl::openflow::cofrole role;
-
+	rofl::ctransactions              transactions;
+	bool                             remove_on_channel_close;
+	rofl::openflow::cofasync_config  async_config_role_default_template;
+	rofl::openflow::cofasync_config  async_config;
+	rofl::openflow::cofrole          role;
 	std::deque<enum crofctl_event_t> events;
-
-	PthreadRwLock           conns_terminated_rwlock;
-	std::list<rofl::cauxid> conns_terminated;
-	PthreadRwLock           conns_refused_rwlock;
-	std::list<rofl::cauxid> conns_refused;
-	PthreadRwLock           conns_failed_rwlock;
-	std::list<rofl::cauxid> conns_failed;
-
-	std::bitset<32>         flags;
+	PthreadRwLock                    conns_terminated_rwlock;
+	std::list<rofl::cauxid>          conns_terminated;
+	PthreadRwLock                    conns_refused_rwlock;
+	std::list<rofl::cauxid>          conns_refused;
+	PthreadRwLock                    conns_failed_rwlock;
+	std::list<rofl::cauxid>          conns_failed;
+	std::bitset<32>                  flags;
 };
 
 }; // end of namespace

@@ -27,7 +27,9 @@ unittest_SOURCES= \
 	ctimespec_test.cc \
 	ctimespec_test.h \
 	cpacket_test.cc \
-	cpacket_test.h
+	cpacket_test.h \
+	cworkflow_test.cc \
+	cworkflow_test.h
 
 unittest_LDADD=$(top_builddir)/src/rofl/librofl_common.la -lcppunit -lpthread
 
