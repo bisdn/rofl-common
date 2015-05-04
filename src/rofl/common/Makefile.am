@@ -131,7 +131,8 @@ library_include_HEADERS= \
 		caddrinfos.h \
 		cindex.h \
 		cdpid.h \
-		crofqueue.h
+		crofqueue.h \
+		ctspaddress.h
 
 if ROFL_HAVE_OPENSSL
 library_include_HEADERS += \
