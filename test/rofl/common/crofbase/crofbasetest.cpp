@@ -132,7 +132,6 @@ crofbasetest::handle_features_request(
 		const rofl::cauxid& auxid,
 		rofl::openflow::cofmsg_features_request& msg)
 {
-<<<<<<< HEAD
 	std::cerr << ">>> XXX -Features-Request- rcvd" << std::endl;
 
 	ctl.send_features_reply(
