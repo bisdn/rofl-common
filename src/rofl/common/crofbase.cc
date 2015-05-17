@@ -40,6 +40,15 @@ crofbase::set_versionbitmap()
 
 
 
+void
+crofbase::set_versionbitmap(
+		const rofl::openflow::cofhello_elem_versionbitmap& versionbitmap)
+{
+	rofl::crofcore::set_rofcore(this).set_versionbitmap() = versionbitmap;
+};
+
+
+
 const rofl::openflow::cofhello_elem_versionbitmap&
 crofbase::get_versionbitmap() const
 {
@@ -61,6 +70,15 @@ crofbase::is_ofp_version_supported(
 		uint8_t ofp_version) const
 {
 	return rofl::crofcore::set_rofcore(this).is_ofp_version_supported(ofp_version);
+};
+
+
+
+void
+crofbase::set_log_level(
+		unsigned int level)
+{
+	rofl::logging::set_debug_level(level);
 };
 
 

@@ -1,6 +1,6 @@
 MAINTAINERCLEANFILES = Makefile.in
 
-SUBDIRS = openflow protocols
+SUBDIRS = crofbase openflow protocols
 
 export INCLUDES += -I$(abs_srcdir)/../src/
 
