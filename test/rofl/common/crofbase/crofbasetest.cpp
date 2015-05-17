@@ -61,7 +61,7 @@ crofbasetest::test()
 	/*
 	 * set log level
 	 */
-	set_log_level(8);
+	set_log_level(0);
 
 	/*
 	 * set number of worker threads in rofl-common, here: 4
@@ -118,10 +118,12 @@ crofbasetest::test()
 	 */
 	while (run_test) {
 		struct timespec ts;
-		ts.tv_sec = 1;
-		ts.tv_nsec = 0;
+		ts.tv_sec = 0;
+		ts.tv_nsec = 5000000;
 		pselect(0, NULL, NULL, NULL, &ts, NULL);
 	}
+
+	//sleep(1);
 }
 
 
@@ -207,7 +209,7 @@ void
 crofbasetest::handle_dpt_open(
 		rofl::crofdpt& dpt)
 {
-	std::cerr << ">>> XXX dpt connected: " << std::endl << dpt;
+	std::cerr << ">>> XXX dpt connected: " << std::endl;
 
 	run_test = false;
 }

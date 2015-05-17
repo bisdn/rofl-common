@@ -522,6 +522,8 @@ private:
 	 */
 	void
 	__close() {
+		if (STATE_CLOSED == state)
+			return;
 		state = STATE_CLOSED;
 		if (fragment) {
 			delete fragment; fragment = NULL;
