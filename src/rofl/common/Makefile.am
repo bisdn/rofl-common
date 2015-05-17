@@ -40,6 +40,8 @@ librofl_common_base_la_SOURCES = \
 		ctransaction.cc \
 		ctransactions.h \
 		ctransactions.cc \
+		crofcore.h \
+		crofcore.cc \
 		crofbase.h \
 		crofbase.cc \
 		crofctl.h \
@@ -95,6 +97,7 @@ library_include_HEADERS= \
 		cpipe.h \
 		endian_conversion.h \
 		rofcommon.h \
+		crofcore.h \
 		crofbase.h \
 		crofctl.h \
 		crofdpt.h \
@@ -131,7 +134,8 @@ library_include_HEADERS= \
 		caddrinfos.h \
 		cindex.h \
 		cdpid.h \
-		crofqueue.h
+		crofqueue.h \
+		ctspaddress.h
 
 if ROFL_HAVE_OPENSSL
 library_include_HEADERS += \

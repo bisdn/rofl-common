@@ -86,10 +86,10 @@ cetherswitch::run(
 
 cetherswitch::cetherswitch(
 		const rofl::openflow::cofhello_elem_versionbitmap& versionbitmap) :
-		crofbase(versionbitmap),
 		dump_fib_interval(DUMP_FIB_DEFAULT_INTERVAL),
 		get_flow_stats_interval(GET_FLOW_STATS_DEFAULT_INTERVAL)
 {
+	set_versionbitmap() = versionbitmap;
 }
 
 
@@ -289,7 +289,11 @@ cetherswitch::handle_packet_in(
 		//Flood multicast and yet unknown frames (DST)
 		if (eth_dst.is_multicast() || (not fib.has_fib_entry(eth_dst))) {
 			rofl::openflow::cofactions actions(dpt.get_version_negotiated());
-			actions.add_action_output(rofl::cindex(0)).set_port_no(rofl::crofbase::get_ofp_flood_port(dpt.get_version_negotiated()));
+			if (rofl::openflow10::OFP_VERSION == dpt.get_version_negotiated()) {
+				actions.add_action_output(rofl::cindex(0)).set_port_no(rofl::openflow10::OFPP_FLOOD);
+			} else {
+				actions.add_action_output(rofl::cindex(0)).set_port_no(rofl::openflow12::OFPP_FLOOD);
+			}
 			dpt.send_packet_out_message(auxid, msg.get_buffer_id(), in_port, actions);
 			return;
 		}

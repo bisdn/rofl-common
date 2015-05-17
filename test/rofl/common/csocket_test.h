@@ -20,26 +20,33 @@
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 
-class csocket_test : public CppUnit::TestFixture, public rofl::ciosrv, public rofl::csocket_env {
 
-	CPPUNIT_TEST_SUITE( csocket_test );
-	CPPUNIT_TEST( testSocketImpl );
-#ifdef ROFL_HAVE_OPENSSL
-	CPPUNIT_TEST( testSocketOpenSSL );
-#endif
-	CPPUNIT_TEST_SUITE_END();
-
-private:
-
-
+class testSocket : public rofl::ciosrv, public rofl::csocket_env {
 public:
-	void setUp();
-	void tearDown();
 
-	void testSocketImpl();
-#ifdef ROFL_HAVE_OPENSSL
-	void testSocketOpenSSL();
-#endif
+	testSocket() :
+		rofl::ciosrv(rofl::cioloop::add_thread()),
+		socket_type(rofl::csocket::SOCKET_TYPE_PLAIN),
+		send_counter(0),
+		keep_on_running(true),
+		value(0),
+		client(NULL),
+		server(NULL),
+		worker(NULL)
+	{ initialize(); };
+
+	virtual
+	~testSocket()
+	{ terminate(); };
+
+	void
+	initialize();
+
+	void
+	run();
+
+	void
+	terminate();
 
 private:
 
@@ -52,13 +59,15 @@ private:
 	enum rofl::csocket::socket_type_t 	socket_type;
 	unsigned long 						send_counter;
 	rofl::ctimerid 						send_timer_id;
+	bool 								keep_on_running;
 
 	enum socket_test_timer_t {
 		TIMER_SEND_DATA = 1,
 	};
 
 	virtual void
-	handle_timeout(int opaque, void* data = NULL);
+	handle_timeout(
+			int opaque, void* data = NULL);
 
 	uint8_t			value;
 
@@ -111,5 +120,31 @@ private:
 	handle_closed(
 			rofl::csocket& socket);
 };
+
+class csocket_test : public CppUnit::TestFixture {
+
+	CPPUNIT_TEST_SUITE( csocket_test );
+	CPPUNIT_TEST( testSocketImpl );
+#ifdef ROFL_HAVE_OPENSSL
+	CPPUNIT_TEST( testSocketOpenSSL );
+#endif
+	CPPUNIT_TEST_SUITE_END();
+
+private:
+
+	testSocket* tester;
+
+public:
+	void setUp();
+	void tearDown();
+
+	void testSocketImpl();
+#ifdef ROFL_HAVE_OPENSSL
+	void testSocketOpenSSL();
+#endif
+
+};
+
+
 
 #endif /* CSOCKET_TEST_H_ */

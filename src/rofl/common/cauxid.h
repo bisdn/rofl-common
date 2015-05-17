@@ -10,6 +10,7 @@
 
 #include <inttypes.h>
 #include <iostream>
+#include <sstream>
 
 #include "rofl/common/logging.h"
 #include "rofl/common/croflexception.h"

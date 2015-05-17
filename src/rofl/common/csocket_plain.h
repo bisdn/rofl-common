@@ -115,20 +115,17 @@ private:
 		TIMER_RECONNECT 	= 1,
 	};
 
-	enum csocket_plain_event_t {
-		EVENT_CONN_RESET	= 1,
-		EVENT_DISCONNECTED	= 2,
-	};
-
-	static const unsigned int DEFAULT_MAX_TXQUEUE_SIZE;
+	static const unsigned int 	DEFAULT_MAX_TXQUEUE_SIZE;
 	unsigned int 				max_txqueue_size;		// limit for pout_squeue
 
 	ctimerid					reconnect_timerid;
-	int							reconnect_start_timeout;
+	static const unsigned int	DEFAULT_RECONNECT_START_TIMEOUT;
+	unsigned int				reconnect_start_timeout;
+
 	int 						reconnect_in_seconds; 	// reconnect in x seconds
 	int 						reconnect_counter;
 
-#define RECONNECT_START_TIMEOUT 1						// start reconnect timeout (default 1s)
+
 
 public:
 

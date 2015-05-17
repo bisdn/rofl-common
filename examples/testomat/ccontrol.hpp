@@ -22,8 +22,8 @@ public:
 	/**
 	 *
 	 */
-	ccontrol(const rofl::openflow::cofhello_elem_versionbitmap& versionbitmap) :
-		rofl::crofbase(versionbitmap) {};
+	ccontrol(const rofl::openflow::cofhello_elem_versionbitmap& versionbitmap)
+	{ set_versionbitmap() = versionbitmap; };
 
 	/**
 	 *
