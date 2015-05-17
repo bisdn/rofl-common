@@ -82,6 +82,7 @@ AC_CONFIG_FILES([
 	test/unit/Makefile
 	test/rofl/Makefile
 	test/rofl/common/Makefile
+	test/rofl/common/crofbase/Makefile
 	test/rofl/common/openflow/Makefile
 	test/rofl/common/openflow/messages/Makefile
 	test/rofl/common/protocols/Makefile

@@ -160,6 +160,13 @@ public:
 	set_versionbitmap();
 
 	/**
+	 * @brief	Set OpenFlow version bitmap used for incoming connections
+	 */
+	void
+	set_versionbitmap(
+			const rofl::openflow::cofhello_elem_versionbitmap& versionbitmap);
+
+	/**
 	 * @brief 	Returns const reference to OpenFlow version bitmap used for incoming connections.
 	 */
 	const rofl::openflow::cofhello_elem_versionbitmap&
@@ -177,6 +184,13 @@ public:
 	bool
 	is_ofp_version_supported(
 			uint8_t ofp_version) const;
+
+	/**
+	 * @brief	Set log level of rofl-common
+	 */
+	void
+	set_log_level(
+			unsigned int level);
 
 	/**@}*/
 
