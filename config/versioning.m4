@@ -27,12 +27,16 @@ if test $ff_git = no
 then
 	AC_MSG_RESULT([git not found!])
 else
+	if test -e $srcdir/.git ; then
+		old_pwd=$PWD
+		cd $srcdir
 
-	if test -d $srcdir/.git ; then
 		#Try to retrieve the build number
 		_ROFL_GIT_BUILD=`git log -1 --pretty=%H`
 		_ROFL_GIT_BRANCH=`git rev-parse --abbrev-ref HEAD`
 		_ROFL_GIT_DESCRIBE=`git describe --abbrev=40`
+
+		cd $old_pwd
 
 		AC_SUBST([ROFL_BUILD], ["$_ROFL_GIT_BUILD"])
 		AC_SUBST([ROFL_BRANCH], ["$_ROFL_GIT_BRANCH"])

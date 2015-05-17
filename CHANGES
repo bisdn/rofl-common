@@ -8,6 +8,11 @@ Legend:
 Change log
 ==========
 
+v0.6.1
+
+[B] Distributing missing ctspaddress.h
+[B] Fix versioning.m4 for subpackage and out-of-repository builds
+
 v0.6.0
 
 [K] Prevent compilation with buggy GCC versions (-O3 opt.)
