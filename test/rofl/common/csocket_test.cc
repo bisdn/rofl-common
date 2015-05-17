@@ -25,8 +25,9 @@ void
 csocket_test::setUp()
 {
 #ifdef DEBUG
-	rofl::logging::set_debug_level(7);
+	rofl::logging::set_debug_level(10);
 #endif
+	tester = new testSocket();
 }
 
 
@@ -34,14 +35,24 @@ csocket_test::setUp()
 void
 csocket_test::tearDown()
 {
-	rofl::cioloop::get_loop().stop();
-	rofl::cioloop::get_loop().shutdown();
+	delete tester;
 }
 
 
 
 void
 csocket_test::testSocketImpl()
+{
+	tester->run();
+}
+
+
+
+
+
+
+void
+testSocket::initialize()
 {
 	try {
 		cmem.resize(64);
@@ -50,8 +61,8 @@ csocket_test::testSocketImpl()
 
 		socket_type = rofl::csocket::SOCKET_TYPE_PLAIN;
 
-		server = rofl::csocket::csocket_factory(socket_type, this);
-		client = rofl::csocket::csocket_factory(socket_type, this);
+		server = rofl::csocket::csocket_factory(socket_type, this, rofl::ciosrv::get_thread_id());
+		client = rofl::csocket::csocket_factory(socket_type, this, rofl::ciosrv::get_thread_id());
 
 		sparams = rofl::csocket::get_default_params(rofl::csocket::SOCKET_TYPE_PLAIN);
 		sparams.set_param(rofl::csocket::PARAM_KEY_LOCAL_HOSTNAME).set_string("127.0.0.1");
@@ -75,18 +86,6 @@ csocket_test::testSocketImpl()
 
 		send_counter = 0;
 
-#ifdef DEBUG
-		std::cerr << "testSocketImpl: init" << std::endl;
-#endif
-		rofl::cioloop::get_loop().run();
-#ifdef DEBUG
-		std::cerr << "testSocketImpl: shutdown" << std::endl;
-#endif
-		delete client;
-		delete server;
-		delete worker;
-
-		sleep (1);
 #ifdef ROFL_HAVE_OPENSSL
 	} catch (rofl::eOpenSSL& e) {
 		std::cerr << e;
@@ -101,6 +100,75 @@ csocket_test::testSocketImpl()
 }
 
 
+
+void
+testSocket::run()
+{
+	try {
+
+#ifdef DEBUG
+		std::cerr << "testSocketImpl: init" << std::endl;
+#endif
+
+
+		while (keep_on_running) {
+			struct timespec ts;
+			ts.tv_sec = 5;
+			ts.tv_nsec = 0;
+			pselect(0, NULL, NULL, NULL, &ts, NULL);
+		}
+		//rofl::cioloop::get_loop().run();
+
+#ifdef DEBUG
+		std::cerr << "testSocketImpl: shutdown" << std::endl;
+#endif
+
+#ifdef ROFL_HAVE_OPENSSL
+	} catch (rofl::eOpenSSL& e) {
+		std::cerr << e;
+#endif
+	} catch (rofl::eSocketBase& e) {
+		std::cerr << e;
+	} catch (rofl::eSysCall& e) {
+		std::cerr << e;
+	} catch (rofl::RoflException& e) {
+		std::cerr << e;
+	}
+}
+
+
+
+
+void
+testSocket::terminate()
+{
+	try {
+		rofl::cioloop::drop_thread(rofl::ciosrv::get_thread_id());
+
+		std::cerr << "XXXXX testSocket::terminate()" << std::endl;
+		rofl::cioloop::show_all_cioloops(std::cerr);
+
+		delete client;
+		delete server;
+		delete worker;
+
+		sleep (1);
+
+#ifdef ROFL_HAVE_OPENSSL
+	} catch (rofl::eOpenSSL& e) {
+		std::cerr << e;
+#endif
+	} catch (rofl::eSocketBase& e) {
+		std::cerr << e;
+	} catch (rofl::eSysCall& e) {
+		std::cerr << e;
+	} catch (rofl::RoflException& e) {
+		std::cerr << e;
+	}
+}
+
+
+
 #ifdef ROFL_HAVE_OPENSSL 
 
 void
@@ -113,8 +181,8 @@ csocket_test::testSocketOpenSSL()
 
 		socket_type = rofl::csocket::SOCKET_TYPE_OPENSSL;
 
-		server = rofl::csocket::csocket_factory(socket_type, this);
-		client = rofl::csocket::csocket_factory(socket_type, this);
+		server = rofl::csocket::csocket_factory(socket_type, this, single_tid);
+		client = rofl::csocket::csocket_factory(socket_type, this, single_tid);
 
 		sparams = rofl::csocket::get_default_params(rofl::csocket::SOCKET_TYPE_OPENSSL);
 		sparams.set_param(rofl::csocket::PARAM_KEY_LOCAL_HOSTNAME).set_string("127.0.0.1");
@@ -170,7 +238,7 @@ csocket_test::testSocketOpenSSL()
 
 
 void
-csocket_test::handle_timeout(int opaque, void* data)
+testSocket::handle_timeout(int opaque, void* data)
 {
 #ifdef DEBUG
 	std::cerr << "handle_timeout" << std::endl;
@@ -185,7 +253,9 @@ csocket_test::handle_timeout(int opaque, void* data)
 #ifdef DEBUG
 			std::cerr << "handle_closed stopping main loop" << std::endl;
 #endif
-			rofl::cioloop::get_loop().stop();
+			keep_on_running = false;
+
+			//rofl::cioloop::get_loop().stop();
 
 			dump_sockets();
 
@@ -227,7 +297,7 @@ csocket_test::handle_timeout(int opaque, void* data)
 
 
 void
-csocket_test::handle_listen(
+testSocket::handle_listen(
 		rofl::csocket& socket, int newsd)
 {
 #ifdef DEBUG
@@ -241,7 +311,7 @@ csocket_test::handle_listen(
 		switch (socket_type) {
 		case rofl::csocket::SOCKET_TYPE_PLAIN:
 		case rofl::csocket::SOCKET_TYPE_OPENSSL: {
-			worker = rofl::csocket::csocket_factory(socket_type, this);
+			worker = rofl::csocket::csocket_factory(socket_type, this, rofl::ciosrv::get_thread_id());
 		} break;
 		default: {
 			throw rofl::eInval();
@@ -277,7 +347,7 @@ csocket_test::handle_listen(
 
 
 void
-csocket_test::handle_accepted(
+testSocket::handle_accepted(
 		rofl::csocket& socket)
 {
 #ifdef DEBUG
@@ -298,7 +368,7 @@ csocket_test::handle_accepted(
 
 
 void
-csocket_test::handle_accept_refused(
+testSocket::handle_accept_refused(
 		rofl::csocket& socket)
 {
 #ifdef DEBUG
@@ -310,7 +380,7 @@ csocket_test::handle_accept_refused(
 
 
 void
-csocket_test::handle_connected(
+testSocket::handle_connected(
 		rofl::csocket& socket)
 {
 #ifdef DEBUG
@@ -332,7 +402,7 @@ csocket_test::handle_connected(
 
 
 void
-csocket_test::handle_connect_refused(
+testSocket::handle_connect_refused(
 		rofl::csocket& socket)
 {
 #ifdef DEBUG
@@ -344,7 +414,7 @@ csocket_test::handle_connect_refused(
 
 
 void
-csocket_test::handle_connect_failed(
+testSocket::handle_connect_failed(
 		rofl::csocket& socket)
 {
 #ifdef DEBUG
@@ -356,7 +426,7 @@ csocket_test::handle_connect_failed(
 
 
 void
-csocket_test::handle_read(
+testSocket::handle_read(
 		rofl::csocket& socket)
 {
 	if (&socket == client) {
@@ -391,7 +461,7 @@ csocket_test::handle_read(
 
 
 void
-csocket_test::handle_write(
+testSocket::handle_write(
 		rofl::csocket& socket)
 {
 #ifdef DEBUG
@@ -402,7 +472,7 @@ csocket_test::handle_write(
 
 
 void
-csocket_test::handle_closed(
+testSocket::handle_closed(
 		rofl::csocket& socket)
 {
 #ifdef DEBUG
@@ -413,7 +483,7 @@ csocket_test::handle_closed(
 
 
 void
-csocket_test::dump_sockets()
+testSocket::dump_sockets()
 {
 #ifdef DEBUG
 	try {

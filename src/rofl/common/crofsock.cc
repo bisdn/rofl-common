@@ -45,6 +45,7 @@ crofsock::~crofsock()
 			<< ", target tid: " << std::hex << get_thread_id() << std::dec
 			<< ", running tid: " << std::hex << pthread_self() << std::dec
 			<< std::endl;
+	close();
 	if (fragment)
 		delete fragment;
 	if (socket)

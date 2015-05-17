@@ -327,11 +327,19 @@ public:
 	{ return dpid; };
 
 	/**
-	 * @brief	Return auxialiary_id
+	 * @brief	Return auxiliary_id
 	 */
 	cauxid const&
 	get_aux_id() const
 	{ return auxiliary_id; };
+
+	/**
+	 * @brief	Set auxiliary_id (Used only by crofchan)
+	 */
+	void
+	set_aux_id(
+			const cauxid& auxid)
+	{ this->auxiliary_id = auxid; };
 
 	/**
 	 * @brief

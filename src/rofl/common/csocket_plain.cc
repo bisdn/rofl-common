@@ -19,6 +19,7 @@ std::string const	csocket_plain::PARAM_DEFAULT_VALUE_TYPE(__PARAM_TYPE_VALUE_STR
 std::string const	csocket_plain::PARAM_DEFAULT_VALUE_PROTOCOL(__PARAM_PROTOCOL_VALUE_TCP);
 
 unsigned int const csocket_plain::DEFAULT_MAX_TXQUEUE_SIZE = 16;
+unsigned int const csocket_plain::DEFAULT_RECONNECT_START_TIMEOUT = 1;
 
 
 /*static*/cparams
@@ -47,8 +48,8 @@ csocket_plain::csocket_plain(
 				csocket(owner, rofl::csocket::SOCKET_TYPE_PLAIN, tid),
 				had_short_write(false),
 				max_txqueue_size(DEFAULT_MAX_TXQUEUE_SIZE),
-				reconnect_start_timeout(RECONNECT_START_TIMEOUT),
-				reconnect_in_seconds(RECONNECT_START_TIMEOUT),
+				reconnect_start_timeout(DEFAULT_RECONNECT_START_TIMEOUT),
+				reconnect_in_seconds(DEFAULT_RECONNECT_START_TIMEOUT),
 				reconnect_counter(0)
 {
 	pthread_rwlock_init(&pout_squeue_lock, 0);
@@ -103,28 +104,6 @@ void
 csocket_plain::handle_event(
 		cevent const& ev)
 {
-	switch (ev.cmd) {
-	case EVENT_CONN_RESET:
-	case EVENT_DISCONNECTED: {
-		close();
-
-		if (sockflags.test(FLAG_DO_RECONNECT)) {
-			sockflags.reset(FLAG_CONNECTED);
-			backoff_reconnect(true);
-		} else {
-			//rofl::logging::info << "[rofl-common][csocket][plain] closed socket." << std::endl << *this;
-			if (sockflags.test(FLAG_CLOSING)) {
-				//rofl::logging::info << "[rofl-common][csocket][plain] sending CLOSED NOTIFICATION." << std::endl;
-				sockflags.reset(FLAG_CLOSING);
-				cancel_all_events();
-				handle_closed();
-			}
-			return;
-		}
-	} break;
-	default:
-		;;
-	}
 }
 
 
@@ -948,6 +927,8 @@ csocket_plain::close()
 	if (sd == -1)
 		return;
 
+	cancel_all_events();
+	cancel_all_timers();
 	deregister_filedesc_r(sd);
 	deregister_filedesc_w(sd);
 	if (not sockflags.test(FLAG_RAW_SOCKET) and sockflags.test(FLAG_CONNECTED)) {
@@ -1016,7 +997,6 @@ csocket_plain::recv(void *buf, size_t count, int flags, rofl::csockaddr& from)
 				<< eSysCall("read") << " " << str() << std::endl;
 		close();
 
-		notify(cevent(EVENT_CONN_RESET));
 		throw eSysCall("read()");
 
 	} else if (rc < 0) {
@@ -1028,16 +1008,12 @@ csocket_plain::recv(void *buf, size_t count, int flags, rofl::csockaddr& from)
 			rofl::logging::error << "[rofl-common][csocket][plain] connection reset on socket: "
 					<< eSysCall("read") << ", closing endpoint. " << str() << std::endl;
 			close();
-
-			notify(cevent(EVENT_CONN_RESET));
 			throw eSysCall("read()");
 		} break;
 		default: {
 			rofl::logging::error << "[rofl-common][csocket][plain] error reading from socket: "
 					<< eSysCall("read") << ", closing endpoint. " << str() << std::endl;
 			close();
-
-			notify(cevent(EVENT_DISCONNECTED));
 			throw eSysCall("read()");
 		} break;
 		}

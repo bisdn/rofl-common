@@ -58,9 +58,6 @@ crofconn::~crofconn()
 	env = NULL;
 	rofl::logging::debug << "[rofl-common][crofconn] "
 			<< "connection destroyed, auxid: " << auxiliary_id.str() << std::endl;
-	if (STATE_DISCONNECTED != state) {
-		run_engine(EVENT_DISCONNECTED);
-	}
 
 	if (NULL != rofsock) {
 		delete rofsock; rofsock = NULL;
@@ -145,9 +142,32 @@ crofconn::connect(
 void
 crofconn::close()
 {
-
+#if 0
 	flags.set(FLAGS_LOCAL_DISCONNECT);
 	run_engine(EVENT_DISCONNECTED);
+#endif
+
+	flags.set(FLAGS_LOCAL_DISCONNECT);
+	while (not timer_ids.empty()) {
+		timer_stop(timer_ids.begin()->first);
+	}
+
+	// remove all pending packets from rxqueues
+	for (std::vector<crofqueue>::iterator
+			it = rxqueues.begin(); it != rxqueues.end(); ++it) {
+		(*it).clear();
+	}
+
+	// purge delay queue
+	dlqueue.clear();
+
+	rofsock->close();
+
+	// suppress any events received so far from crofsock instance
+	events.clear();
+
+	ciosrv::cancel_all_events();
+	ciosrv::cancel_all_timers();
 }
 
 
@@ -756,6 +776,7 @@ crofconn::recv_message(
 	} break;
 	default: {
 		rofl::logging::alert << "[rofl-common][rofsock] dropping message with unsupported OpenFlow version" << std::endl;
+#if 0
 		//throw eBadRequestBadVersion();
 		size_t len = (msg->framelen() > 64) ? 64 : msg->framelen();
 		rofl::openflow::cofmsg_error_bad_request_bad_version *error = 
@@ -765,6 +786,9 @@ crofconn::recv_message(
 					msg->soframe(),
 					len);
 		send_message(error);
+#endif
+		send_message(new rofl::openflow::cofmsg_error_bad_request_bad_version(
+						get_version(), msg->get_xid(), msg->soframe(), (msg->framelen() > 64) ? 64 : msg->framelen()));
 		delete msg; return;
 	};
 	}

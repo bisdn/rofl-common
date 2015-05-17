@@ -317,9 +317,9 @@ public:
 		switch (msg.get_version()) {
 		case openflow10::OFP_VERSION: {
 			os << "dpid:" 			<< msg.get_dpid() 				<< " ";
-			os << "#buffers:" 		<< (int)msg.get_n_buffers() 	<< " ";
+			os << "#buffers:" 		<< (unsigned int)msg.get_n_buffers() 	<< " ";
 			os << "#tables:" 		<< (int)msg.get_n_tables() 		<< " ";
-			os << "capabilities:" 	<< std::hex << (int)msg.get_capabilities() << std::dec << " ";
+			os << "capabilities:0x"	<< std::hex << (int)msg.get_capabilities() << std::dec << " ";
 			os << "actions:" 		<< (int)msg.get_actions_bitmap() << " ";
 			os << " >" << std::endl;
 			indent i(4);
@@ -327,18 +327,18 @@ public:
 		} break;
 		case openflow12::OFP_VERSION: {
 			os << "dpid:" 			<< msg.get_dpid() 				<< " ";
-			os << "#buffers:" 		<< (int)msg.get_n_buffers() 	<< " ";
+			os << "#buffers:" 		<< (unsigned int)msg.get_n_buffers() 	<< " ";
 			os << "#tables:" 		<< (int)msg.get_n_tables() 		<< " ";
-			os << "capabilities:" 	<< std::hex << (int)msg.get_capabilities() << std::dec << " ";
+			os << "capabilities:0x"	<< std::hex << (int)msg.get_capabilities() << std::dec << " ";
 			os << " >" << std::endl;
 			indent i(4);
 			os << msg.ports;
 		} break;
 		case openflow13::OFP_VERSION: {
 			os << "dpid:" 			<< msg.get_dpid() 				<< " ";
-			os << "#buffers:" 		<< (int)msg.get_n_buffers() 	<< " ";
+			os << "#buffers:" 		<< (unsigned int)msg.get_n_buffers() 	<< " ";
 			os << "#tables:" 		<< (int)msg.get_n_tables() 		<< " ";
-			os << "capabilities:" 	<< std::hex << (int)msg.get_capabilities() << std::dec << " ";
+			os << "capabilities:0x"	<< std::hex << (int)msg.get_capabilities() << std::dec << " ";
 			os << " >" << std::endl;
 		} break;
 		default: {
@@ -356,7 +356,7 @@ public:
 		if (get_version() >= rofl::openflow13::OFP_VERSION) {
 			ss << "auxid: " << cauxid(get_auxiliary_id()).str() << ", ";
 		}
-		ss << "#buffers: " << (int)get_n_buffers() << ", ";
+		ss << "#buffers: " << (unsigned int)get_n_buffers() << ", ";
 		ss << "#tables: " << (int)get_n_tables() << " ";
 		return ss.str();
 	};
