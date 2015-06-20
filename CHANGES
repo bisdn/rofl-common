@@ -12,6 +12,7 @@ v0.7.0
 
 [+] New internal threading model, running rofl's main ioloop by 
     application not necessary any more
+[O] Revised API of classes cofmsg_group_mod and cofgroupmod
 
 v0.6.1
 
