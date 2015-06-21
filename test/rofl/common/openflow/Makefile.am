@@ -73,7 +73,9 @@ unittest_SOURCES= \
 	cofactions_test.cc \
 	cofactions_test.h \
 	cofflowmod_test.cc \
-	cofflowmod_test.h
+	cofflowmod_test.h \
+	cofgroupmod_test.cc \
+	cofgroupmod_test.h
 
 unittest_LDADD=$(top_builddir)/src/rofl/librofl_common.la -lcppunit
 
