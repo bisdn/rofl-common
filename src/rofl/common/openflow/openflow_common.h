@@ -256,7 +256,11 @@ namespace openflow {
 		uint8_t  oxm_length;	/* oxm_length */
 	} __attribute__((packed));
 
-
+	struct ofp_oxm_experimenter_header {
+		struct ofp_oxm_hdr oxm_header;	/* oxm_class = OFPXMC_EXPERIMENTER */
+		uint32_t experimenter;			/* Experimenter ID which takes the same
+										   form as in struct ofp_experimenter_header. */
+	} __attribute__((packed));
 
 	// OXM_OF_VLAN_PCP 		/* 3 bits */
 	// OXM_OF_IP_DSCP 		/* 6 bits */

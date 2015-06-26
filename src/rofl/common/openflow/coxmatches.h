@@ -46,7 +46,7 @@ class eOxmListOutOfRange 	: public eOxmListBase {}; // out of range
  */
 class coxmatches
 {
-	std::map<uint32_t, coxmatch>	matches;
+	std::map<uint32_t, coxmatch*>	matches;
 
 public:
 
@@ -109,57 +109,51 @@ public:
 	/**
 	 *
 	 */
-	std::map<uint32_t, coxmatch>&
+	std::map<uint32_t, coxmatch*>&
 	set_matches() { return matches; }
 
 	/**
 	 *
 	 */
-	std::map<uint32_t, coxmatch> const&
+	std::map<uint32_t, coxmatch*> const&
 	get_matches() const { return matches; }
 
 	/**
 	 *
 	 */
-	coxmatch&
-	add_match(
-			coxmatch const& oxm);
+	coxmatch*
+	add_match(coxmatch *oxm);
 
 	/**
 	 *
 	 */
-	coxmatch&
-	add_match(
-			uint32_t oxm_id);
+	coxmatch*
+	add_match(uint32_t oxm_id);
 
 	/**
 	 *
 	 */
 	void
-	drop_match(
-			uint32_t oxm_id);
+	drop_match(uint32_t oxm_id);
 
 	/**
 	 *
 	 */
-	coxmatch&
-	set_match(
-			uint32_t oxm_id);
+	coxmatch*
+	set_match(uint32_t oxm_id);
 
 	/**
 	 *
 	 */
-	coxmatch const&
-	get_match(
-			uint32_t oxm_id) const;
+	coxmatch const*
+	get_match(uint32_t oxm_id) const;
 
 
 	/**
 	 *
 	 */
 	bool
-	has_match(
-			uint32_t oxm_id) const;
+	has_match(uint32_t oxm_id) const;
 
 public:
 
@@ -193,9 +187,9 @@ public:
 	operator<< (std::ostream& os, coxmatches const& oxl) {
 		os << rofl::indent(0) << "<coxmatches #matches:" << oxl.matches.size() << " >" << std::endl;
 		rofl::indent i(2);
-		for (std::map<uint32_t, coxmatch>::const_iterator
+		for (std::map<uint32_t, coxmatch*>::const_iterator
 				it = oxl.matches.begin(); it != oxl.matches.end(); ++it) {
-			os << coxmatch_output(it->second);
+			os << coxmatch_output(*it->second);
 		}
 		return os;
 	};

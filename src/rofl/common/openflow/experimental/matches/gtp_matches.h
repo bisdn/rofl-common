@@ -29,22 +29,22 @@ enum oxm_tlv_match_fields {
 /** OXM_OFX_GTP_TEID
  *
  */
-class coxmatch_ofx_gtp_teid : public coxmatch {
+class coxmatch_ofx_gtp_teid : public coxmatch_32 {
 public:
 	coxmatch_ofx_gtp_teid(
 			uint32_t teid) :
-				coxmatch(OXM_TLV_EXPR_GTP_TEID, teid, COXMATCH_32BIT) {};
+				coxmatch_32(OXM_TLV_EXPR_GTP_TEID, teid, COXMATCH_32BIT) {};
 	coxmatch_ofx_gtp_teid(
 			uint32_t teid, uint32_t mask) :
-				coxmatch(OXM_TLV_EXPR_GTP_TEID_MASK, teid, mask, COXMATCH_32BIT) {};
+				coxmatch_32(OXM_TLV_EXPR_GTP_TEID_MASK, teid, mask, COXMATCH_32BIT) {};
 	coxmatch_ofx_gtp_teid(
 			coxmatch const& oxm) :
-				coxmatch(oxm) {};
+				coxmatch_32(oxm) {};
 	virtual
 	~coxmatch_ofx_gtp_teid() {};
 	friend std::ostream&
 	operator<< (std::ostream& os, coxmatch_ofx_gtp_teid const& oxm) {
-		os << dynamic_cast<coxmatch const&>(oxm);
+		os << dynamic_cast<coxmatch_32 const&>(oxm);
 		os << indent(2) << "<gtp-teid: "
 						<< (int)oxm.get_u32value() << "/" << (int)oxm.get_u32mask()
 						<< " >" << std::endl;
@@ -56,17 +56,17 @@ public:
 /** OXM_OFX_GTP_MSG_TYPE
  *
  */
-class coxmatch_ofx_gtp_msg_type : public coxmatch {
+class coxmatch_ofx_gtp_msg_type : public coxmatch_8 {
 public:
 	coxmatch_ofx_gtp_msg_type(
 			uint8_t msg_type) :
-				coxmatch(OXM_TLV_EXPR_GTP_MSGTYPE, msg_type, COXMATCH_8BIT) {};
+				coxmatch_8(OXM_TLV_EXPR_GTP_MSGTYPE, msg_type, COXMATCH_8BIT) {};
 	coxmatch_ofx_gtp_msg_type(
 			uint8_t msg_type, uint8_t mask) :
-				coxmatch(OXM_TLV_EXPR_GTP_MSGTYPE_MASK, msg_type, mask, COXMATCH_8BIT) {};
+				coxmatch_8(OXM_TLV_EXPR_GTP_MSGTYPE_MASK, msg_type, mask, COXMATCH_8BIT) {};
 	coxmatch_ofx_gtp_msg_type(
 			coxmatch const& oxm) :
-				coxmatch(oxm) {};
+				coxmatch_8(oxm) {};
 	virtual
 	~coxmatch_ofx_gtp_msg_type() {};;
 	friend std::ostream&

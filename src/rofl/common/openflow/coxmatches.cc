@@ -43,9 +43,9 @@ coxmatches::operator= (
 
 	clear();
 
-	for (std::map<uint32_t, coxmatch>::const_iterator
+	for (std::map<uint32_t, coxmatch*>::const_iterator
 			jt = oxms.matches.begin(); jt != oxms.matches.end(); ++jt) {
-		add_match(jt->second);
+		add_match(new coxmatch(jt->second->somem(), jt->second->memlen()));
 	}
 
 	return *this;
@@ -57,6 +57,13 @@ coxmatches::operator= (
 void
 coxmatches::clear()
 {
+	std::cout << "clear count=" << matches.size() << std::endl;
+	for (std::map<uint32_t, coxmatch*>::iterator
+			it = matches.begin(); it != matches.end(); ++it) {
+		delete it->second;
+		it->second = NULL;
+		//matches.clear();
+	}
 	matches.clear();
 }
 
@@ -68,12 +75,12 @@ coxmatches::operator== (coxmatches const& oxms) const
 	if (matches.size() != oxms.matches.size()) {
 		return false;
 	}
-	for (std::map<uint32_t, coxmatch>::const_iterator
+	for (std::map<uint32_t, coxmatch*>::const_iterator
 			it = matches.begin(); it != matches.end(); ++it) {
 		if (oxms.matches.find(it->first) == oxms.matches.end()) {
 			return false;
 		}
-		if (it->second != oxms.matches.at(it->first)) {
+		if (*it->second != *oxms.matches.at(it->first)) {
 			return false;
 		}
 	}
@@ -107,7 +114,7 @@ coxmatches::unpack(
 		if (hdr->oxm_length > (sizeof(struct openflow::ofp_oxm_hdr) + buflen))
 			throw eBadMatchBadLen();
 
-		add_match(coxmatch(buf, sizeof(struct openflow::ofp_oxm_hdr) + hdr->oxm_length));
+		add_match(new coxmatch(buf, sizeof(struct openflow::ofp_oxm_hdr) + hdr->oxm_length));
 
 		buflen -= ((sizeof(struct openflow::ofp_oxm_hdr) + hdr->oxm_length));
 		buf += ((sizeof(struct openflow::ofp_oxm_hdr) + hdr->oxm_length));
@@ -123,52 +130,56 @@ coxmatches::pack(
 	if (buflen < length()) {
 		throw eBadMatchBadLen();
 	}
-	for (std::map<uint32_t, coxmatch>::iterator
+	for (std::map<uint32_t, coxmatch*>::iterator
 			jt = matches.begin(); jt != matches.end(); ++jt) {
 
-		coxmatch& match = (matches[jt->first]);
+		coxmatch *match = (matches[jt->first]);
 
-		match.pack(buf, match.length());
+		match->pack(buf, match->length());
 
-		buf += match.length();
+		buf += match->length();
 	}
 }
 
 
-coxmatch&
-coxmatches::add_match(coxmatch const& oxm)
+coxmatch*
+coxmatches::add_match(coxmatch *oxm)
 {
-	uint32_t oid = oxm.get_oxm_id() & 0xfffffe00; // keep class and field, hide mask and length
-	if (matches.find(oid) != matches.end()) {
-		matches.erase(oid);
+	uint32_t oid = oxm->get_oxm_id() & 0xfffffe00; // keep class and field, hide mask and length
+	std::map<uint32_t, coxmatch*>::iterator it = matches.find(oid);
+	if (it != matches.end()) {
+		delete it->second;
+		matches.erase(it);
 	}
 	return (matches[oid] = oxm);
 }
 
 
-coxmatch&
+coxmatch*
 coxmatches::add_match(uint32_t oxm_id)
 {
 	uint32_t oid = oxm_id & 0xfffffe00; // keep class and field, hide mask and length
-	if (matches.find(oid) != matches.end()) {
-		matches.erase(oid);
+	std::map<uint32_t, coxmatch*>::iterator it = matches.find(oid);
+	if (it != matches.end()) {
+		delete it->second;
+		matches.erase(it);
 	}
-	return (matches[oid] = coxmatch(oxm_id));
+	return (matches[oid] = new coxmatch(oxm_id));
 }
 
 
-coxmatch&
+coxmatch*
 coxmatches::set_match(uint32_t oxm_id)
 {
 	uint32_t oid = oxm_id & 0xfffffe00; // keep class and field, hide mask and length
 	if (matches.find(oid) == matches.end()) {
-		matches[oid] = coxmatch(oxm_id);
+		matches[oid] = new coxmatch(oxm_id);
 	}
 	return matches[oid];
 }
 
 
-coxmatch const&
+coxmatch const*
 coxmatches::get_match(uint32_t oxm_id) const
 {
 	uint32_t oid = oxm_id & 0xfffffe00; // keep class and field, hide mask and length
@@ -183,9 +194,11 @@ void
 coxmatches::drop_match(uint32_t oxm_id)
 {
 	uint32_t oid = oxm_id & 0xfffffe00; // keep class and field, hide mask and length
-	if (matches.find(oid) == matches.end()) {
+	std::map<uint32_t, coxmatch*>::iterator it = matches.find(oid);
+	if (it == matches.end()) {
 		return;
 	}
+	delete it->second;
 	matches.erase(oid);
 }
 
@@ -203,9 +216,9 @@ size_t
 coxmatches::length() const
 {
 	size_t len = 0;
-	for (std::map<uint32_t, coxmatch>::const_iterator
+	for (std::map<uint32_t, coxmatch*>::const_iterator
 			it = matches.begin(); it != matches.end(); ++it) {
-		len += it->second.length();
+		len += it->second->length();
 	}
 	return len;
 }
@@ -239,22 +252,22 @@ coxmatches::contains(
 	}
 
 	// strict: check all TLVs for specific class in oxl.matches => must exist and have same value
-	for (std::map<uint32_t, coxmatch>::iterator
+	for (std::map<uint32_t, coxmatch*>::iterator
 			jt = matches.begin(); jt != matches.end(); ++jt) {
 
-		coxmatch& lmatch = (jt->second);
+		coxmatch *lmatch = (jt->second);
 
 		// keep in mind: match.get_oxm_id() & 0xfffffe00 == jt->first
 
 		// strict: all OXM TLVs must also exist in oxl
-		if (oxms.matches.find(lmatch.get_oxm_id() & 0xfffffe00) == oxms.matches.end()) {
+		if (oxms.matches.find(lmatch->get_oxm_id() & 0xfffffe00) == oxms.matches.end()) {
 			return false;
 		}
 
-		coxmatch const& rmatch = (oxms.matches.find(jt->first)->second);
+		coxmatch const *rmatch = (oxms.matches.find(jt->first)->second);
 
 		// strict: both OXM TLVs must have identical values
-		if (lmatch != rmatch) {
+		if (*lmatch != *rmatch) {
 			return false;
 		}
 	}
@@ -274,18 +287,18 @@ coxmatches::is_part_of(
 {
 	bool result = true;
 
-	for (std::map<uint32_t, coxmatch>::const_iterator
+	for (std::map<uint32_t, coxmatch*>::const_iterator
 			jt = oxms.matches.begin(); jt != oxms.matches.end(); ++jt) {
 
-		coxmatch const& rmatch = (jt->second);
+		coxmatch const *rmatch = (jt->second);
 
 		// keep in mind: match.get_oxm_id() & 0xfffffe00 == jt->first
 
-		if (matches.find(rmatch.get_oxm_id() & 0xfffffe00) == matches.end()) {
+		if (matches.find(rmatch->get_oxm_id() & 0xfffffe00) == matches.end()) {
 			wildcard_hits++; continue;
 		}
 
-		if (matches[jt->first] != rmatch) {
+		if (*matches[jt->first] != *rmatch) {
 			missed++; result = false; continue;
 		}
 

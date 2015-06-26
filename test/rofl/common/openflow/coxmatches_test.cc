@@ -29,15 +29,20 @@ coxmatches_test::tearDown()
 void
 coxmatches_test::testPack()
 {
+	using rofl::openflow::coxmatch_8;
+	using rofl::openflow::coxmatch_16;
+	using rofl::openflow::coxmatch_48;
 	rofl::openflow::coxmatches matches;
 
-	matches.set_match(rofl::openflow::OXM_TLV_BASIC_ETH_DST).set_u48value(rofl::cmacaddr("b1:b2:b3:b4:b5:b6"));
-	matches.set_match(rofl::openflow::OXM_TLV_BASIC_ETH_SRC_MASK).set_u48value(rofl::cmacaddr("c1:c2:c3:c4:c5:c6"));
-	matches.set_match(rofl::openflow::OXM_TLV_BASIC_ETH_SRC_MASK).set_u48mask(rofl::cmacaddr("d1:d2:d3:d4:d5:d6"));
-	matches.set_match(rofl::openflow::OXM_TLV_BASIC_VLAN_VID_MASK).set_u16value(0x3132);
-	matches.set_match(rofl::openflow::OXM_TLV_BASIC_VLAN_VID_MASK).set_u16mask(0x4142);
-	matches.set_match(rofl::openflow::OXM_TLV_BASIC_IP_DSCP).set_u8value(0xa1);
-	matches.set_match(rofl::openflow::OXM_TLV_BASIC_UDP_SRC).set_u16value(0x1112);
+	static_cast<coxmatch_48*>(matches.set_match(rofl::openflow::OXM_TLV_BASIC_ETH_DST))->set_u48value(rofl::cmacaddr("b1:b2:b3:b4:b5:b6"));
+	static_cast<coxmatch_48*>(matches.set_match(rofl::openflow::OXM_TLV_BASIC_ETH_SRC_MASK))->set_u48value(rofl::cmacaddr("c1:c2:c3:c4:c5:c6"));
+	static_cast<coxmatch_48*>(matches.set_match(rofl::openflow::OXM_TLV_BASIC_ETH_SRC_MASK))->set_u48mask(rofl::cmacaddr("d1:d2:d3:d4:d5:d6"));
+	static_cast<coxmatch_16*>(matches.set_match(rofl::openflow::OXM_TLV_BASIC_VLAN_VID_MASK))->set_u16value(0x3132);
+	static_cast<coxmatch_16*>(matches.set_match(rofl::openflow::OXM_TLV_BASIC_VLAN_VID_MASK))->set_u16mask(0x4142);
+	static_cast<coxmatch_8*>(matches.set_match(rofl::openflow::OXM_TLV_BASIC_IP_DSCP))->set_u8value(0xa1);
+
+	//std::cout << "uiuiui" << matches.get_match(rofl::openflow::OXM_TLV_BASIC_IP_DSCP) << std::endl;
+	static_cast<coxmatch_16*>(matches.set_match(rofl::openflow::OXM_TLV_BASIC_UDP_SRC))->set_u16value(0x1112);
 	// MPLS
 
 	rofl::cmemory mem(matches.length());
@@ -176,22 +181,29 @@ coxmatches_test::testUnPack()
 void
 coxmatches_test::testAddMatch()
 {
+	using rofl::openflow::coxmatch_48;
 	rofl::openflow::coxmatches matches;
 
-	matches.add_match(rofl::openflow::OXM_TLV_BASIC_ETH_DST).set_u48value(rofl::cmacaddr("b1:b2:b3:b4:b5:b6"));
+	static_cast<coxmatch_48*>(matches.add_match(
+			rofl::openflow::OXM_TLV_BASIC_ETH_DST))->set_u48value(
+			rofl::cmacaddr("b1:b2:b3:b4:b5:b6"));
 
 	try {
-		CPPUNIT_ASSERT(matches.set_match(rofl::openflow::OXM_TLV_BASIC_ETH_DST) == rofl::openflow::coxmatch_ofb_eth_dst(rofl::cmacaddr("b1:b2:b3:b4:b5:b6")));
+		CPPUNIT_ASSERT(*matches.set_match(rofl::openflow::OXM_TLV_BASIC_ETH_DST) ==
+				rofl::openflow::coxmatch_ofb_eth_dst(rofl::cmacaddr("b1:b2:b3:b4:b5:b6")));
 	} catch (rofl::openflow::eOxmNotFound& e) {
 		CPPUNIT_ASSERT(false);
 	}
 
 	CPPUNIT_ASSERT(matches.get_matches().size() == 1);
-	CPPUNIT_ASSERT(matches.add_match(rofl::openflow::OXM_TLV_BASIC_ETH_DST) != rofl::openflow::coxmatch_ofb_eth_dst(rofl::cmacaddr("b1:b2:b3:b4:b5:b6")));
-	CPPUNIT_ASSERT(matches.add_match(rofl::openflow::OXM_TLV_BASIC_ETH_DST) == rofl::openflow::coxmatch(rofl::openflow::OXM_TLV_BASIC_ETH_DST));
-	CPPUNIT_ASSERT(matches.get_matches().find(rofl::openflow::OXM_TLV_BASIC_ETH_DST & 0xfffffe00) != matches.get_matches().end());
+	CPPUNIT_ASSERT(*matches.add_match(rofl::openflow::OXM_TLV_BASIC_ETH_DST) !=
+			rofl::openflow::coxmatch_ofb_eth_dst(rofl::cmacaddr("b1:b2:b3:b4:b5:b6")));
+	CPPUNIT_ASSERT(*matches.add_match(rofl::openflow::OXM_TLV_BASIC_ETH_DST) ==
+			rofl::openflow::coxmatch(rofl::openflow::OXM_TLV_BASIC_ETH_DST));
+	CPPUNIT_ASSERT(matches.get_matches().find(rofl::openflow::OXM_TLV_BASIC_ETH_DST & 0xfffffe00) !=
+			matches.get_matches().end());
 
-	matches.add_match(rofl::openflow::coxmatch_ofb_eth_dst(rofl::cmacaddr("c1:c2:c3:c4:c5:c6"), rofl::cmacaddr("d1:d2:d3:d4:d5:d6")));
+	matches.add_match(new rofl::openflow::coxmatch_ofb_eth_dst(rofl::cmacaddr("c1:c2:c3:c4:c5:c6"), rofl::cmacaddr("d1:d2:d3:d4:d5:d6")));
 
 	CPPUNIT_ASSERT(matches.get_matches().size() == 1);
 	CPPUNIT_ASSERT(matches.get_matches().find(rofl::openflow::OXM_TLV_BASIC_ETH_DST & 0xfffffe00) != matches.get_matches().end());
@@ -202,9 +214,10 @@ coxmatches_test::testAddMatch()
 void
 coxmatches_test::testDropMatch()
 {
+	using rofl::openflow::coxmatch_48;
 	rofl::openflow::coxmatches matches;
 
-	matches.add_match(rofl::openflow::OXM_TLV_BASIC_ETH_DST).set_u48value(rofl::cmacaddr("b1:b2:b3:b4:b5:b6"));
+	static_cast<coxmatch_48*>(matches.add_match(rofl::openflow::OXM_TLV_BASIC_ETH_DST))->set_u48value(rofl::cmacaddr("b1:b2:b3:b4:b5:b6"));
 
 	CPPUNIT_ASSERT(matches.get_matches().size() == 1);
 	CPPUNIT_ASSERT(matches.get_matches().find(rofl::openflow::OXM_TLV_BASIC_ETH_DST & 0xfffffe00) != matches.get_matches().end());
@@ -213,7 +226,7 @@ coxmatches_test::testDropMatch()
 
 	CPPUNIT_ASSERT(matches.get_matches().size() == 0);
 
-	matches.add_match(rofl::openflow::OXM_TLV_BASIC_ETH_DST).set_u48value(rofl::cmacaddr("b1:b2:b3:b4:b5:b6"));
+	static_cast<coxmatch_48*>(matches.add_match(rofl::openflow::OXM_TLV_BASIC_ETH_DST))->set_u48value(rofl::cmacaddr("b1:b2:b3:b4:b5:b6"));
 
 	CPPUNIT_ASSERT(matches.get_matches().size() == 1);
 	CPPUNIT_ASSERT(matches.get_matches().find(rofl::openflow::OXM_TLV_BASIC_ETH_DST & 0xfffffe00) != matches.get_matches().end());
@@ -228,10 +241,11 @@ coxmatches_test::testDropMatch()
 void
 coxmatches_test::testSetMatch()
 {
+	using rofl::openflow::coxmatch_48;
 	rofl::openflow::coxmatches matches;
 
-	matches.set_match(rofl::openflow::OXM_TLV_BASIC_ETH_DST_MASK).set_u48value(rofl::cmacaddr("b1:b2:b3:b4:b5:b6"));
-	matches.set_match(rofl::openflow::OXM_TLV_BASIC_ETH_DST_MASK).set_u48mask(rofl::cmacaddr("c1:c2:c3:c4:c5:c6"));
+	static_cast<coxmatch_48*>(matches.set_match(rofl::openflow::OXM_TLV_BASIC_ETH_DST_MASK))->set_u48value(rofl::cmacaddr("b1:b2:b3:b4:b5:b6"));
+	static_cast<coxmatch_48*>(matches.set_match(rofl::openflow::OXM_TLV_BASIC_ETH_DST_MASK))->set_u48mask(rofl::cmacaddr("c1:c2:c3:c4:c5:c6"));
 
 	rofl::cmemory test(16);
 	test[0] = 0x80;
@@ -362,72 +376,73 @@ coxmatches_test::testHasMatch()
 void
 coxmatches_test::testStrictMatching()
 {
+	using rofl::openflow::coxmatch_8;
 	// TODO
 	return;
-
-	uint16_t exact_hits = 0, wildcard_hits = 0, missed = 0;
-
-	rofl::openflow::coxmatches left;
-
-	left.set_match(rofl::openflow::OXM_TLV_BASIC_ETH_DST_MASK).set_u48value(rofl::cmacaddr("a1:a2:a3:a4:a5:a6"));
-	left.set_match(rofl::openflow::OXM_TLV_BASIC_ETH_DST_MASK).set_u48mask(rofl::cmacaddr("b1:b2:b3:b4:b5:b6"));
-	left.set_match(rofl::openflow::OXM_TLV_BASIC_ETH_SRC).set_u48value(rofl::cmacaddr("c1:c2:c3:c4:c5:c6"));
-	left.set_match(rofl::openflow::OXM_TLV_BASIC_VLAN_VID).set_u16value(0x3132);
-	left.set_match(rofl::openflow::OXM_TLV_BASIC_VLAN_PCP).set_u8value(0x3);
-	left.set_match(rofl::openflow::OXM_TLV_BASIC_ETH_TYPE).set_u16value(0x0800);
-	left.set_match(rofl::openflow::OXM_TLV_BASIC_IPV4_DST_MASK).set_u32value(rofl::caddress_in4("10.1.1.0"));
-	left.set_match(rofl::openflow::OXM_TLV_BASIC_IPV4_DST_MASK).set_u32mask(rofl::caddress_in4("255.255.255.0"));
-	left.set_match(rofl::openflow::OXM_TLV_BASIC_IP_PROTO).set_u8value(17);
-	left.set_match(rofl::openflow::OXM_TLV_BASIC_UDP_DST).set_u16value(80);
-
-	rofl::openflow::coxmatches right;
-
-	// right is all wildcard, left does not contain entire namespace
-	CPPUNIT_ASSERT(not left.contains(right, true));
-	// right is all wildcard, left is part of it, but strict checking means => right does not contain left
-	CPPUNIT_ASSERT(not right.contains(left, true));
-
-	right.set_match(rofl::openflow::OXM_TLV_BASIC_ETH_DST_MASK).set_u48value(rofl::cmacaddr("a1:a2:a3:a4:a5:a6"));
-	right.set_match(rofl::openflow::OXM_TLV_BASIC_ETH_DST_MASK).set_u48mask(rofl::cmacaddr("b1:b2:b3:b4:b5:b6"));
-	//std::cerr << "left:" << std::endl << left;
-	//std::cerr << "right:" << std::endl << right;
-	CPPUNIT_ASSERT(not left.contains(right, true));
-	CPPUNIT_ASSERT(left.is_part_of(right, exact_hits, wildcard_hits, missed));
-	//std::cerr << "exact: " << exact_hits << " wildcard: " << wildcard_hits << " missed: " << missed << std::endl;
-	CPPUNIT_ASSERT(not right.contains(left, true));
-	CPPUNIT_ASSERT(not right.is_part_of(left, exact_hits, wildcard_hits, missed));
-	//std::cerr << "exact: " << exact_hits << " wildcard: " << wildcard_hits << " missed: " << missed << std::endl;
-
-
-
-	right.set_match(rofl::openflow::OXM_TLV_BASIC_ETH_SRC).set_u48value(rofl::cmacaddr("c1:c2:c3:c4:c5:c6"));
-	CPPUNIT_ASSERT(not left.contains(right, true));
-	CPPUNIT_ASSERT(right.contains(left, true));
-
-	right.set_match(rofl::openflow::OXM_TLV_BASIC_VLAN_VID).set_u16value(0x3132);
-	CPPUNIT_ASSERT(not left.contains(right, true));
-	CPPUNIT_ASSERT(right.contains(left, true));
-
-	right.set_match(rofl::openflow::OXM_TLV_BASIC_VLAN_PCP).set_u8value(0x3);
-	CPPUNIT_ASSERT(not left.contains(right, true));
-	CPPUNIT_ASSERT(right.contains(left, true));
-
-	right.set_match(rofl::openflow::OXM_TLV_BASIC_ETH_TYPE).set_u16value(0x0800);
-	CPPUNIT_ASSERT(not left.contains(right, true));
-	CPPUNIT_ASSERT(right.contains(left, true));
-
-	right.set_match(rofl::openflow::OXM_TLV_BASIC_IPV4_DST_MASK).set_u32value(rofl::caddress_in4("10.1.1.0"));
-	right.set_match(rofl::openflow::OXM_TLV_BASIC_IPV4_DST_MASK).set_u32mask(rofl::caddress_in4("255.255.255.0"));
-	CPPUNIT_ASSERT(not left.contains(right, true));
-	CPPUNIT_ASSERT(right.contains(left, true));
-
-	right.set_match(rofl::openflow::OXM_TLV_BASIC_IP_PROTO).set_u8value(17);
-	CPPUNIT_ASSERT(not left.contains(right, true));
-	CPPUNIT_ASSERT(right.contains(left, true));
-
-	right.set_match(rofl::openflow::OXM_TLV_BASIC_UDP_DST).set_u16value(80);
-	CPPUNIT_ASSERT(not left.contains(right, true));
-	CPPUNIT_ASSERT(right.contains(left, true));
+//
+//	uint16_t exact_hits = 0, wildcard_hits = 0, missed = 0;
+//
+//	rofl::openflow::coxmatches left;
+//
+//	left.set_match(rofl::openflow::OXM_TLV_BASIC_ETH_DST_MASK).set_u48value(rofl::cmacaddr("a1:a2:a3:a4:a5:a6"));
+//	left.set_match(rofl::openflow::OXM_TLV_BASIC_ETH_DST_MASK).set_u48mask(rofl::cmacaddr("b1:b2:b3:b4:b5:b6"));
+//	left.set_match(rofl::openflow::OXM_TLV_BASIC_ETH_SRC).set_u48value(rofl::cmacaddr("c1:c2:c3:c4:c5:c6"));
+//	left.set_match(rofl::openflow::OXM_TLV_BASIC_VLAN_VID).set_u16value(0x3132);
+//	static_cast<coxmatch_8>(left.set_match(rofl::openflow::OXM_TLV_BASIC_VLAN_PCP)).set_u8value(0x3);
+//	left.set_match(rofl::openflow::OXM_TLV_BASIC_ETH_TYPE).set_u16value(0x0800);
+//	left.set_match(rofl::openflow::OXM_TLV_BASIC_IPV4_DST_MASK).set_u32value(rofl::caddress_in4("10.1.1.0"));
+//	left.set_match(rofl::openflow::OXM_TLV_BASIC_IPV4_DST_MASK).set_u32mask(rofl::caddress_in4("255.255.255.0"));
+//	static_cast<coxmatch_8>(left.set_match(rofl::openflow::OXM_TLV_BASIC_IP_PROTO)).set_u8value(17);
+//	left.set_match(rofl::openflow::OXM_TLV_BASIC_UDP_DST).set_u16value(80);
+//
+//	rofl::openflow::coxmatches right;
+//
+//	// right is all wildcard, left does not contain entire namespace
+//	CPPUNIT_ASSERT(not left.contains(right, true));
+//	// right is all wildcard, left is part of it, but strict checking means => right does not contain left
+//	CPPUNIT_ASSERT(not right.contains(left, true));
+//
+//	right.set_match(rofl::openflow::OXM_TLV_BASIC_ETH_DST_MASK).set_u48value(rofl::cmacaddr("a1:a2:a3:a4:a5:a6"));
+//	right.set_match(rofl::openflow::OXM_TLV_BASIC_ETH_DST_MASK).set_u48mask(rofl::cmacaddr("b1:b2:b3:b4:b5:b6"));
+//	//std::cerr << "left:" << std::endl << left;
+//	//std::cerr << "right:" << std::endl << right;
+//	CPPUNIT_ASSERT(not left.contains(right, true));
+//	CPPUNIT_ASSERT(left.is_part_of(right, exact_hits, wildcard_hits, missed));
+//	//std::cerr << "exact: " << exact_hits << " wildcard: " << wildcard_hits << " missed: " << missed << std::endl;
+//	CPPUNIT_ASSERT(not right.contains(left, true));
+//	CPPUNIT_ASSERT(not right.is_part_of(left, exact_hits, wildcard_hits, missed));
+//	//std::cerr << "exact: " << exact_hits << " wildcard: " << wildcard_hits << " missed: " << missed << std::endl;
+//
+//
+//
+//	right.set_match(rofl::openflow::OXM_TLV_BASIC_ETH_SRC).set_u48value(rofl::cmacaddr("c1:c2:c3:c4:c5:c6"));
+//	CPPUNIT_ASSERT(not left.contains(right, true));
+//	CPPUNIT_ASSERT(right.contains(left, true));
+//
+//	right.set_match(rofl::openflow::OXM_TLV_BASIC_VLAN_VID).set_u16value(0x3132);
+//	CPPUNIT_ASSERT(not left.contains(right, true));
+//	CPPUNIT_ASSERT(right.contains(left, true));
+//
+//	static_cast<coxmatch_8>(right.set_match(rofl::openflow::OXM_TLV_BASIC_VLAN_PCP)).set_u8value(0x3);
+//	CPPUNIT_ASSERT(not left.contains(right, true));
+//	CPPUNIT_ASSERT(right.contains(left, true));
+//
+//	right.set_match(rofl::openflow::OXM_TLV_BASIC_ETH_TYPE).set_u16value(0x0800);
+//	CPPUNIT_ASSERT(not left.contains(right, true));
+//	CPPUNIT_ASSERT(right.contains(left, true));
+//
+//	right.set_match(rofl::openflow::OXM_TLV_BASIC_IPV4_DST_MASK).set_u32value(rofl::caddress_in4("10.1.1.0"));
+//	right.set_match(rofl::openflow::OXM_TLV_BASIC_IPV4_DST_MASK).set_u32mask(rofl::caddress_in4("255.255.255.0"));
+//	CPPUNIT_ASSERT(not left.contains(right, true));
+//	CPPUNIT_ASSERT(right.contains(left, true));
+//
+//	static_cast<coxmatch_8>(right.set_match(rofl::openflow::OXM_TLV_BASIC_IP_PROTO)).set_u8value(17);
+//	CPPUNIT_ASSERT(not left.contains(right, true));
+//	CPPUNIT_ASSERT(right.contains(left, true));
+//
+//	right.set_match(rofl::openflow::OXM_TLV_BASIC_UDP_DST).set_u16value(80);
+//	CPPUNIT_ASSERT(not left.contains(right, true));
+//	CPPUNIT_ASSERT(right.contains(left, true));
 
 
 }

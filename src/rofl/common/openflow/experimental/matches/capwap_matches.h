@@ -32,17 +32,17 @@ enum oxm_tlv_match_fields {
 /** OXM_OFX_CAPWAP_WBID
  *
  */
-class coxmatch_ofx_capwap_wbid : public coxmatch {
+class coxmatch_ofx_capwap_wbid : public coxmatch_8 {
 public:
 	coxmatch_ofx_capwap_wbid(
 			uint8_t wbid) :
-				coxmatch(OXM_TLV_EXPR_CAPWAP_WBID, wbid, COXMATCH_8BIT) {};
+				coxmatch_8(OXM_TLV_EXPR_CAPWAP_WBID, wbid, COXMATCH_8BIT) {};
 	coxmatch_ofx_capwap_wbid(
 			uint8_t wbid, uint8_t mask) :
-				coxmatch(OXM_TLV_EXPR_CAPWAP_WBID_MASK, wbid, mask, COXMATCH_8BIT) {};
+				coxmatch_8(OXM_TLV_EXPR_CAPWAP_WBID_MASK, wbid, mask, COXMATCH_8BIT) {};
 	coxmatch_ofx_capwap_wbid(
 			coxmatch const& oxm) :
-				coxmatch(oxm) {};
+				coxmatch_8(oxm) {};
 	virtual
 	~coxmatch_ofx_capwap_wbid() {};
 	friend std::ostream&
@@ -60,17 +60,17 @@ public:
 /** OXM_OFX_CAPWAP_RID
  *
  */
-class coxmatch_ofx_capwap_rid : public coxmatch {
+class coxmatch_ofx_capwap_rid : public coxmatch_8 {
 public:
 	coxmatch_ofx_capwap_rid(
 			uint8_t rid) :
-				coxmatch(OXM_TLV_EXPR_CAPWAP_RID, rid, COXMATCH_8BIT) {};
+				coxmatch_8(OXM_TLV_EXPR_CAPWAP_RID, rid, COXMATCH_8BIT) {};
 	coxmatch_ofx_capwap_rid(
 			uint8_t rid, uint8_t mask) :
-				coxmatch(OXM_TLV_EXPR_CAPWAP_RID_MASK, rid, mask, COXMATCH_8BIT) {};
+				coxmatch_8(OXM_TLV_EXPR_CAPWAP_RID_MASK, rid, mask, COXMATCH_8BIT) {};
 	coxmatch_ofx_capwap_rid(
 			coxmatch const& oxm) :
-				coxmatch(oxm) {};
+				coxmatch_8(oxm) {};
 	virtual
 	~coxmatch_ofx_capwap_rid() {};
 	friend std::ostream&
@@ -88,22 +88,22 @@ public:
 /** OXM_OFX_CAPWAP_FLAGS
  *
  */
-class coxmatch_ofx_capwap_flags : public coxmatch {
+class coxmatch_ofx_capwap_flags : public coxmatch_16 {
 public:
 	coxmatch_ofx_capwap_flags(
 			uint16_t flags) :
-				coxmatch(OXM_TLV_EXPR_CAPWAP_FLAGS, flags, COXMATCH_16BIT) {};
+				coxmatch_16(OXM_TLV_EXPR_CAPWAP_FLAGS, flags, COXMATCH_16BIT) {};
 	coxmatch_ofx_capwap_flags(
 			uint16_t flags, uint16_t mask) :
-				coxmatch(OXM_TLV_EXPR_CAPWAP_FLAGS_MASK, flags, mask, COXMATCH_16BIT) {};
+				coxmatch_16(OXM_TLV_EXPR_CAPWAP_FLAGS_MASK, flags, mask, COXMATCH_16BIT) {};
 	coxmatch_ofx_capwap_flags(
 			coxmatch const& oxm) :
-				coxmatch(oxm) {};
+				coxmatch_16(oxm) {};
 	virtual
 	~coxmatch_ofx_capwap_flags() {};
 	friend std::ostream&
 	operator<< (std::ostream& os, coxmatch_ofx_capwap_flags const& oxm) {
-		os << dynamic_cast<coxmatch const&>(oxm);
+		os << dynamic_cast<coxmatch_16 const&>(oxm);
 		os << indent(2) << "<capwap-flags: 0x" << std::hex
 						<< (int)oxm.get_u16value() << "/0x" << (int)oxm.get_u16mask()
 						<< std::dec << " >" << std::endl;
