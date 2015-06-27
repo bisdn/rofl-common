@@ -46,7 +46,7 @@ class eOxmListOutOfRange 	: public eOxmListBase {}; // out of range
  */
 class coxmatches
 {
-	std::map<uint32_t, coxmatch*>	matches;
+	std::map<uint64_t, coxmatch*>	matches;
 
 public:
 
@@ -109,13 +109,13 @@ public:
 	/**
 	 *
 	 */
-	std::map<uint32_t, coxmatch*>&
+	std::map<uint64_t, coxmatch*>&
 	set_matches() { return matches; }
 
 	/**
 	 *
 	 */
-	std::map<uint32_t, coxmatch*> const&
+	std::map<uint64_t, coxmatch*> const&
 	get_matches() const { return matches; }
 
 	/**
@@ -134,7 +134,7 @@ public:
 	 *
 	 */
 	void
-	drop_match(uint32_t oxm_id);
+	drop_match(uint32_t oxm_id, uint32_t exp_id = 0);
 
 	/**
 	 *
@@ -187,7 +187,7 @@ public:
 	operator<< (std::ostream& os, coxmatches const& oxl) {
 		os << rofl::indent(0) << "<coxmatches #matches:" << oxl.matches.size() << " >" << std::endl;
 		rofl::indent i(2);
-		for (std::map<uint32_t, coxmatch*>::const_iterator
+		for (std::map<uint64_t, coxmatch*>::const_iterator
 				it = oxl.matches.begin(); it != oxl.matches.end(); ++it) {
 			os << coxmatch_output(*it->second);
 		}

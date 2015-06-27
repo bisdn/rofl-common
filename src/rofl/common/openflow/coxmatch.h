@@ -97,8 +97,7 @@ public:
 	/**
 	 *
 	 */
-	coxmatch(
-			uint32_t oxm_id);
+	coxmatch(uint32_t oxm_id, uint32_t exp_id = 0);
 
 	/**
 	 *
@@ -196,12 +195,29 @@ protected:
 	set_oxm_class(
 			uint16_t oxm_class);
 
+	void
+	set_oxm_exp_id(uint32_t exp_id);
+
 public:
 	/**
 	 *
 	 */
 	uint16_t
 	get_oxm_class() const;
+
+
+	uint32_t
+	get_oxm_exp_id() const;
+
+	bool
+	is_experimenter() const {
+		return (OFPAT_EXPERIMENTER == get_oxm_class());
+	}
+
+	static bool
+	is_experimenter(uint32_t exp_id) {
+		return (OFPAT_EXPERIMENTER == ((exp_id >> 16)&OFPAT_EXPERIMENTER));
+	}
 
 	/**
 	 *
@@ -602,6 +618,223 @@ public:
 	void
 	set_u128mask(
 			const rofl::caddress_in6& mask);
+};
+
+
+
+
+class coxmatch_8_exp : public coxmatch
+{
+public:
+	/**
+	 *
+	 */
+	coxmatch_8_exp(const coxmatch& oxm) :
+			coxmatch(oxm)
+	{
+	}
+
+	/**
+	 * @brief	coxmatch base class for single 8bit values
+	 */
+	coxmatch_8_exp(uint32_t oxm_id, uint32_t exp_id, uint8_t value, enum coxmatch_bit_t bits);
+
+	/**
+	 * @brief	coxmatch base class for masked 8bit values
+	 */
+	coxmatch_8_exp(uint32_t oxm_id, uint32_t exp_id, uint8_t value, uint8_t mask,
+			enum coxmatch_bit_t bits);
+
+	uint8_t
+	get_u8value() const;
+
+	uint8_t
+	get_u8mask() const;
+
+	uint8_t
+	get_u8masked_value() const;
+
+	void
+	set_u8value(uint8_t value);
+
+	void
+	set_u8mask(uint8_t mask);
+};
+
+class coxmatch_16_exp : public coxmatch
+{
+public:
+	/**
+	 *
+	 */
+	coxmatch_16_exp(const coxmatch& oxm) :
+			coxmatch(oxm)
+	{
+	}
+
+	coxmatch_16_exp(uint32_t oxm_id, uint32_t exp_id, uint16_t value, enum coxmatch_bit_t bits);
+
+	coxmatch_16_exp(uint32_t oxm_id, uint32_t exp_id, uint16_t value, uint16_t mask, enum coxmatch_bit_t bits);
+
+	uint16_t
+	get_u16value() const;
+
+	uint16_t
+	get_u16mask() const;
+
+	uint16_t
+	get_u16masked_value() const;
+
+	void
+	set_u16value(uint16_t value);
+
+	void
+	set_u16mask(uint16_t mask);
+};
+
+class coxmatch_24_exp : public coxmatch
+{
+public:
+	coxmatch_24_exp(const coxmatch& oxm) :
+			coxmatch(oxm)
+	{
+	}
+	/**
+	 * @brief	coxmatch base class for single 24bit values
+	 */
+	coxmatch_24_exp(uint32_t oxm_id, uint32_t exp_id, uint32_t value, enum coxmatch_bit_t bits);
+
+	/**
+	 * @brief	coxmatch base class for masked 24bit values
+	 */
+	coxmatch_24_exp(uint32_t oxm_id, uint32_t exp_id, uint32_t value, uint32_t mask, enum coxmatch_bit_t bits);
+
+	uint32_t
+	get_u24value() const;
+
+	uint32_t
+	get_u24mask() const;
+
+	uint32_t
+	get_u24masked_value() const;
+
+	void
+	set_u24value(uint32_t value);
+
+	void
+	set_u24mask(uint32_t mask);
+};
+
+class coxmatch_32_exp : public coxmatch
+{
+public:
+	coxmatch_32_exp(const coxmatch& oxm) :
+			coxmatch(oxm)
+	{
+	}
+
+	/**
+	 * @brief	coxmatch base class for single 32bit values
+	 */
+	coxmatch_32_exp(uint32_t oxm_id, uint32_t exp_id, uint32_t value, enum coxmatch_bit_t bits);
+
+	/**
+	 * @brief	coxmatch base class for masked 32bit values
+	 */
+	coxmatch_32_exp(
+			uint32_t oxm_id, uint32_t exp_id, uint32_t value, uint32_t mask, enum coxmatch_bit_t bits);
+
+	uint32_t
+	get_u32value() const;
+
+	uint32_t
+	get_u32mask() const;
+
+	uint32_t
+	get_u32masked_value() const;
+
+	void
+	set_u32value(
+			uint32_t value);
+
+	void
+	set_u32mask(
+			uint32_t mask);
+};
+
+class coxmatch_48_exp : public coxmatch
+{
+public:
+
+	coxmatch_48_exp(const coxmatch& oxm) :
+			coxmatch(oxm)
+	{
+	}
+	/**
+	 * @brief	coxmatch base class for single 48bit values
+	 */
+	coxmatch_48_exp(
+			uint32_t oxm_id, uint32_t exp_id, uint64_t value, enum coxmatch_bit_t bits);
+
+	/**
+	 * @brief	coxmatch base class for masked 48bit values
+	 */
+	coxmatch_48_exp(
+			uint32_t oxm_id, uint32_t exp_id, uint64_t value, uint64_t mask, enum coxmatch_bit_t bits);
+
+	uint64_t
+	get_u48value() const;
+
+	uint64_t
+	get_u48mask() const;
+
+	uint64_t
+	get_u48masked_value() const;
+
+	void
+	set_u48value(
+			uint64_t value);
+
+	void
+	set_u48mask(
+			uint64_t mask);
+};
+
+class coxmatch_64_exp : public coxmatch
+{
+public:
+	coxmatch_64_exp(const coxmatch& oxm) :
+			coxmatch(oxm)
+	{
+	}
+	/**
+	 * @brief	coxmatch base class for single 48bit and 64bit values
+	 */
+	coxmatch_64_exp(
+			uint32_t oxm_id, uint32_t exp_id, uint64_t value, enum coxmatch_bit_t bits);
+
+	/**
+	 * @brief	coxmatch base class for masked 48bit and 64bit values
+	 */
+	coxmatch_64_exp(
+			uint32_t oxm_id, uint32_t exp_id, uint64_t value, uint64_t mask, enum coxmatch_bit_t bits);
+
+
+	uint64_t
+	get_u64value() const;
+
+	uint64_t
+	get_u64mask() const;
+
+	uint64_t
+	get_u64masked_value() const;
+
+	void
+	set_u64value(uint64_t value);
+
+	void
+	set_u64mask(uint64_t mask);
+
 };
 
 

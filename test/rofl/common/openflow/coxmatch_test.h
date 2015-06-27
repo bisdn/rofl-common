@@ -17,6 +17,16 @@ class coxmatch_test : public CppUnit::TestFixture {
 	CPPUNIT_TEST( test4BytesHasMask );
 	CPPUNIT_TEST( test6BytesHasMask );
 	CPPUNIT_TEST( test8BytesHasMask );
+	CPPUNIT_TEST( test1ByteExp );
+	CPPUNIT_TEST( test2BytesExp );
+	CPPUNIT_TEST( test4BytesExp );
+	CPPUNIT_TEST( test6BytesExp );
+	CPPUNIT_TEST( test8BytesExp );
+	CPPUNIT_TEST( test1ByteHasMaskExp );
+	CPPUNIT_TEST( test2BytesHasMaskExp );
+	CPPUNIT_TEST( test4BytesHasMaskExp );
+	CPPUNIT_TEST( test6BytesHasMaskExp );
+	CPPUNIT_TEST( test8BytesHasMaskExp );
 	CPPUNIT_TEST( testOxmIPv4Src );
 	CPPUNIT_TEST( testOxmIPv4Dst );
 	CPPUNIT_TEST( testOxmIPv6Src );
@@ -24,11 +34,25 @@ class coxmatch_test : public CppUnit::TestFixture {
 	CPPUNIT_TEST_SUITE_END();
 
 private:
-
+	const uint32_t oxm_id_exp;
+	const uint32_t exp_id;
 
 public:
+	coxmatch_test();
+
 	void setUp();
 	void tearDown();
+
+	void test1ByteExp();
+	void test2BytesExp();
+	void test4BytesExp();
+	void test6BytesExp();
+	void test8BytesExp();
+	void test1ByteHasMaskExp();
+	void test2BytesHasMaskExp();
+	void test4BytesHasMaskExp();
+	void test6BytesHasMaskExp();
+	void test8BytesHasMaskExp();
 
 	void test1Byte();
 	void test2Bytes();

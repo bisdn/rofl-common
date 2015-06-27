@@ -43,7 +43,7 @@ coxmatches::operator= (
 
 	clear();
 
-	for (std::map<uint32_t, coxmatch*>::const_iterator
+	for (std::map<uint64_t, coxmatch*>::const_iterator
 			jt = oxms.matches.begin(); jt != oxms.matches.end(); ++jt) {
 		add_match(new coxmatch(jt->second->somem(), jt->second->memlen()));
 	}
@@ -57,8 +57,7 @@ coxmatches::operator= (
 void
 coxmatches::clear()
 {
-	std::cout << "clear count=" << matches.size() << std::endl;
-	for (std::map<uint32_t, coxmatch*>::iterator
+	for (std::map<uint64_t, coxmatch*>::iterator
 			it = matches.begin(); it != matches.end(); ++it) {
 		delete it->second;
 		it->second = NULL;
@@ -75,7 +74,7 @@ coxmatches::operator== (coxmatches const& oxms) const
 	if (matches.size() != oxms.matches.size()) {
 		return false;
 	}
-	for (std::map<uint32_t, coxmatch*>::const_iterator
+	for (std::map<uint64_t, coxmatch*>::const_iterator
 			it = matches.begin(); it != matches.end(); ++it) {
 		if (oxms.matches.find(it->first) == oxms.matches.end()) {
 			return false;
@@ -97,6 +96,8 @@ coxmatches::unpack(
 		size_t buflen)
 {
 	clear();
+
+	// xxx treat experimenter?
 
 	// sanity check: oxm_len must be of size at least of ofp_oxm_hdr
 	if (buflen < (int)sizeof(struct rofl::openflow::ofp_oxm_hdr)) {
@@ -130,7 +131,7 @@ coxmatches::pack(
 	if (buflen < length()) {
 		throw eBadMatchBadLen();
 	}
-	for (std::map<uint32_t, coxmatch*>::iterator
+	for (std::map<uint64_t, coxmatch*>::iterator
 			jt = matches.begin(); jt != matches.end(); ++jt) {
 
 		coxmatch *match = (matches[jt->first]);
@@ -145,33 +146,39 @@ coxmatches::pack(
 coxmatch*
 coxmatches::add_match(coxmatch *oxm)
 {
-	uint32_t oid = oxm->get_oxm_id() & 0xfffffe00; // keep class and field, hide mask and length
-	std::map<uint32_t, coxmatch*>::iterator it = matches.find(oid);
+	// keep class and field, hide mask and length
+	uint64_t id = (__UINT64_C(0xfffffe00) & oxm->get_oxm_id()) << 32 | (
+			oxm->is_experimenter() ? oxm->get_oxm_exp_id() : 0);
+
+	std::map<uint64_t, coxmatch*>::iterator it = matches.find(id);
 	if (it != matches.end()) {
 		delete it->second;
 		matches.erase(it);
 	}
-	return (matches[oid] = oxm);
+	return (matches[id] = oxm);
 }
 
 
 coxmatch*
 coxmatches::add_match(uint32_t oxm_id)
 {
-	uint32_t oid = oxm_id & 0xfffffe00; // keep class and field, hide mask and length
-	std::map<uint32_t, coxmatch*>::iterator it = matches.find(oid);
+	// todo experimenter currently not supported here
+
+	// keep class and field, hide mask and length
+	uint64_t id = (__UINT64_C(0xfffffe00) & oxm_id) << 32;
+	std::map<uint64_t, coxmatch*>::iterator it = matches.find(id);
 	if (it != matches.end()) {
 		delete it->second;
 		matches.erase(it);
 	}
-	return (matches[oid] = new coxmatch(oxm_id));
+	return (matches[id] = new coxmatch(oxm_id));
 }
 
 
 coxmatch*
 coxmatches::set_match(uint32_t oxm_id)
 {
-	uint32_t oid = oxm_id & 0xfffffe00; // keep class and field, hide mask and length
+	uint64_t oid = (__UINT64_C(0xfffffe00) & oxm_id) << 32; // keep class and field, hide mask and length
 	if (matches.find(oid) == matches.end()) {
 		matches[oid] = new coxmatch(oxm_id);
 	}
@@ -182,7 +189,7 @@ coxmatches::set_match(uint32_t oxm_id)
 coxmatch const*
 coxmatches::get_match(uint32_t oxm_id) const
 {
-	uint32_t oid = oxm_id & 0xfffffe00; // keep class and field, hide mask and length
+	uint64_t oid = (__UINT64_C(0xfffffe00) & oxm_id) << 32; // keep class and field, hide mask and length
 	if (matches.find(oid) == matches.end()) {
 		throw eOxmNotFound("coxmatches::get_match() oxm-id not found");
 	}
@@ -191,22 +198,24 @@ coxmatches::get_match(uint32_t oxm_id) const
 
 
 void
-coxmatches::drop_match(uint32_t oxm_id)
+coxmatches::drop_match(uint32_t oxm_id, uint32_t exp_id)
 {
-	uint32_t oid = oxm_id & 0xfffffe00; // keep class and field, hide mask and length
-	std::map<uint32_t, coxmatch*>::iterator it = matches.find(oid);
+	// keep class and field, hide mask and length
+	uint64_t id = (__UINT64_C(0xfffffe00) & oxm_id) << 32 |
+			(coxmatch::is_experimenter(oxm_id) ? exp_id : 0);
+	std::map<uint64_t, coxmatch*>::iterator it = matches.find(id);
 	if (it == matches.end()) {
 		return;
 	}
 	delete it->second;
-	matches.erase(oid);
+	matches.erase(id);
 }
 
 
 bool
 coxmatches::has_match(uint32_t oxm_id) const
 {
-	uint32_t oid = oxm_id & 0xfffffe00; // keep class and field, hide mask and length
+	uint64_t oid = (__UINT64_C(0xfffffe00) & oxm_id) << 32; // keep class and field, hide mask and length
 	return (not (matches.find(oid) == matches.end()));
 }
 
@@ -216,7 +225,7 @@ size_t
 coxmatches::length() const
 {
 	size_t len = 0;
-	for (std::map<uint32_t, coxmatch*>::const_iterator
+	for (std::map<uint64_t, coxmatch*>::const_iterator
 			it = matches.begin(); it != matches.end(); ++it) {
 		len += it->second->length();
 	}
@@ -252,7 +261,7 @@ coxmatches::contains(
 	}
 
 	// strict: check all TLVs for specific class in oxl.matches => must exist and have same value
-	for (std::map<uint32_t, coxmatch*>::iterator
+	for (std::map<uint64_t, coxmatch*>::iterator
 			jt = matches.begin(); jt != matches.end(); ++jt) {
 
 		coxmatch *lmatch = (jt->second);
@@ -260,7 +269,9 @@ coxmatches::contains(
 		// keep in mind: match.get_oxm_id() & 0xfffffe00 == jt->first
 
 		// strict: all OXM TLVs must also exist in oxl
-		if (oxms.matches.find(lmatch->get_oxm_id() & 0xfffffe00) == oxms.matches.end()) {
+		uint64_t id = (__UINT64_C(0xfffffe00) & lmatch->get_oxm_id()) << 32 |
+				(lmatch->is_experimenter() ? lmatch->get_oxm_exp_id() : 0);
+		if (oxms.matches.find(id) == oxms.matches.end()) {
 			return false;
 		}
 
@@ -287,14 +298,16 @@ coxmatches::is_part_of(
 {
 	bool result = true;
 
-	for (std::map<uint32_t, coxmatch*>::const_iterator
+	for (std::map<uint64_t, coxmatch*>::const_iterator
 			jt = oxms.matches.begin(); jt != oxms.matches.end(); ++jt) {
 
 		coxmatch const *rmatch = (jt->second);
 
 		// keep in mind: match.get_oxm_id() & 0xfffffe00 == jt->first
 
-		if (matches.find(rmatch->get_oxm_id() & 0xfffffe00) == matches.end()) {
+		uint64_t id = (__UINT64_C(0xfffffe00) & rmatch->get_oxm_id()) << 32 |
+				(rmatch->is_experimenter() ? rmatch->get_oxm_exp_id() : 0);
+		if (matches.find(id) == matches.end()) {
 			wildcard_hits++; continue;
 		}
 

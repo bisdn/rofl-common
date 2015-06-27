@@ -256,12 +256,6 @@ namespace openflow {
 		uint8_t  oxm_length;	/* oxm_length */
 	} __attribute__((packed));
 
-	struct ofp_oxm_experimenter_header {
-		struct ofp_oxm_hdr oxm_header;	/* oxm_class = OFPXMC_EXPERIMENTER */
-		uint32_t experimenter;			/* Experimenter ID which takes the same
-										   form as in struct ofp_experimenter_header. */
-	} __attribute__((packed));
-
 	// OXM_OF_VLAN_PCP 		/* 3 bits */
 	// OXM_OF_IP_DSCP 		/* 6 bits */
 	// OXM_OF_IP_ECN		/* 2 bits */
@@ -351,6 +345,48 @@ namespace openflow {
 		uint8_t mask[16];			/* only valid, when oxm_hasmask=1 */
 	} __attribute__((packed));
 
+	struct ofp_oxm_experimenter_header {
+		struct ofp_oxm_hdr oxm_header;	/* oxm_class = OFPXMC_EXPERIMENTER */
+		uint32_t experimenter;			/* Experimenter ID which takes the same
+										   form as in struct ofp_experimenter_header. */
+	} __attribute__((packed));
+
+	struct ofp_oxm_ofb_exp_uint8_t {
+		struct ofp_oxm_experimenter_header hdr;		/* oxm header */
+		uint8_t byte;
+		uint8_t mask;
+	} __attribute__((packed));
+
+	struct ofp_oxm_ofb_exp_uint16_t {
+		struct ofp_oxm_experimenter_header hdr;		/* oxm header */
+		uint16_t word;				/* network byte order */
+		uint16_t mask;
+	} __attribute__((packed));
+
+
+	struct ofp_oxm_ofb_exp_uint24_t {
+		struct ofp_oxm_experimenter_header hdr;		/* oxm header */
+		uint8_t word[3];			/* network byte order */
+		uint8_t mask[3];			/* only valid, when oxm_hasmask=1 */
+	} __attribute__((packed));
+
+	struct ofp_oxm_ofb_exp_uint32_t {
+		struct ofp_oxm_experimenter_header hdr;		/* oxm header */
+		uint32_t dword;				/* network byte order */
+		uint32_t mask;				/* only valid, when oxm_hasmask=1 */
+	} __attribute__((packed));
+
+	struct ofp_oxm_ofb_exp_uint48_t {
+		struct ofp_oxm_experimenter_header hdr;		/* oxm header */
+		uint8_t value[6];
+		uint8_t mask[6];			/* only valid, when oxm_hasmask=1 */
+	} __attribute__((packed));
+
+	struct ofp_oxm_ofb_exp_uint64_t {
+		struct ofp_oxm_experimenter_header hdr;		/* oxm header */
+		uint64_t word;
+		uint64_t mask;
+	} __attribute__((packed));
 
 	/* OXM Class IDs.
 	 * The high order bit differentiate reserved classes from member classes.

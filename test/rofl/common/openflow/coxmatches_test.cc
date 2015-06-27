@@ -40,8 +40,6 @@ coxmatches_test::testPack()
 	static_cast<coxmatch_16*>(matches.set_match(rofl::openflow::OXM_TLV_BASIC_VLAN_VID_MASK))->set_u16value(0x3132);
 	static_cast<coxmatch_16*>(matches.set_match(rofl::openflow::OXM_TLV_BASIC_VLAN_VID_MASK))->set_u16mask(0x4142);
 	static_cast<coxmatch_8*>(matches.set_match(rofl::openflow::OXM_TLV_BASIC_IP_DSCP))->set_u8value(0xa1);
-
-	//std::cout << "uiuiui" << matches.get_match(rofl::openflow::OXM_TLV_BASIC_IP_DSCP) << std::endl;
 	static_cast<coxmatch_16*>(matches.set_match(rofl::openflow::OXM_TLV_BASIC_UDP_SRC))->set_u16value(0x1112);
 	// MPLS
 
@@ -200,13 +198,18 @@ coxmatches_test::testAddMatch()
 			rofl::openflow::coxmatch_ofb_eth_dst(rofl::cmacaddr("b1:b2:b3:b4:b5:b6")));
 	CPPUNIT_ASSERT(*matches.add_match(rofl::openflow::OXM_TLV_BASIC_ETH_DST) ==
 			rofl::openflow::coxmatch(rofl::openflow::OXM_TLV_BASIC_ETH_DST));
-	CPPUNIT_ASSERT(matches.get_matches().find(rofl::openflow::OXM_TLV_BASIC_ETH_DST & 0xfffffe00) !=
-			matches.get_matches().end());
+
+	CPPUNIT_ASSERT(matches.get_matches().find(
+					static_cast<uint64_t>(rofl::openflow::OXM_TLV_BASIC_ETH_DST
+							& 0xfffffe00) << 32 | 0)
+					!= matches.get_matches().end());
 
 	matches.add_match(new rofl::openflow::coxmatch_ofb_eth_dst(rofl::cmacaddr("c1:c2:c3:c4:c5:c6"), rofl::cmacaddr("d1:d2:d3:d4:d5:d6")));
 
 	CPPUNIT_ASSERT(matches.get_matches().size() == 1);
-	CPPUNIT_ASSERT(matches.get_matches().find(rofl::openflow::OXM_TLV_BASIC_ETH_DST & 0xfffffe00) != matches.get_matches().end());
+	CPPUNIT_ASSERT(matches.get_matches().find(
+			static_cast<uint64_t>(rofl::openflow::OXM_TLV_BASIC_ETH_DST
+					& 0xfffffe00) << 32 | 0) != matches.get_matches().end());
 }
 
 
@@ -220,7 +223,8 @@ coxmatches_test::testDropMatch()
 	static_cast<coxmatch_48*>(matches.add_match(rofl::openflow::OXM_TLV_BASIC_ETH_DST))->set_u48value(rofl::cmacaddr("b1:b2:b3:b4:b5:b6"));
 
 	CPPUNIT_ASSERT(matches.get_matches().size() == 1);
-	CPPUNIT_ASSERT(matches.get_matches().find(rofl::openflow::OXM_TLV_BASIC_ETH_DST & 0xfffffe00) != matches.get_matches().end());
+	CPPUNIT_ASSERT(matches.get_matches().find(static_cast<uint64_t>(rofl::openflow::OXM_TLV_BASIC_ETH_DST
+			& 0xfffffe00) << 32 | 0) != matches.get_matches().end());
 
 	matches.drop_match(rofl::openflow::OXM_TLV_BASIC_ETH_DST);
 
@@ -229,7 +233,8 @@ coxmatches_test::testDropMatch()
 	static_cast<coxmatch_48*>(matches.add_match(rofl::openflow::OXM_TLV_BASIC_ETH_DST))->set_u48value(rofl::cmacaddr("b1:b2:b3:b4:b5:b6"));
 
 	CPPUNIT_ASSERT(matches.get_matches().size() == 1);
-	CPPUNIT_ASSERT(matches.get_matches().find(rofl::openflow::OXM_TLV_BASIC_ETH_DST & 0xfffffe00) != matches.get_matches().end());
+	CPPUNIT_ASSERT(matches.get_matches().find(static_cast<uint64_t>(rofl::openflow::OXM_TLV_BASIC_ETH_DST
+			& 0xfffffe00) << 32 | 0) != matches.get_matches().end());
 
 	matches.drop_match(rofl::openflow::OXM_TLV_BASIC_ETH_DST_MASK);
 
