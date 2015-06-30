@@ -4,7 +4,7 @@ using namespace rofl::openflow;
 
 cofmsg_group_mod::cofmsg_group_mod(
 		uint8_t ofp_version, uint32_t xid, const cofgroupmod& groupmod) :
-				cofmsg(ofp_version, xid, rofl::openflow::OFPT_FLOW_MOD),
+				cofmsg(ofp_version, xid, rofl::openflow::OFPT_GROUP_MOD),
 				groupmod(groupmod)
 {
 	this->groupmod.set_version(ofp_version);
