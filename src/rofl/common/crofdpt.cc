@@ -301,9 +301,13 @@ crofdpt::event_get_config_reply_rcvd()
 		} break;
 		case rofl::openflow13::OFP_VERSION:
 		default: {
-			rofl::logging::debug << "[rofl-common][crofdpt] entering state -wait-for-table-features-stats-" << std::endl;
-			state = STATE_WAIT_FOR_TABLE_FEATURES_STATS;
-			send_table_features_stats_request(rofl::cauxid(0), 0);
+			rofl::logging::debug << "[rofl-common][crofdpt] entering state -established-" << std::endl;
+			state = STATE_ESTABLISHED;
+			call_env().handle_chan_established(*this);
+			// send all postponed messages to higher layers
+			while (not dlqueue.empty()) {
+				recv_message(rofchan, rofl::cauxid(0), dlqueue.retrieve());
+			}
 		} break;
 		}
 	} break;
