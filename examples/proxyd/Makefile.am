@@ -2,7 +2,7 @@ MAINTAINERCLEANFILES = Makefile.in
 
 SUBDIRS = 
 
-sbin_PROGRAMS = proxyd
+noinst_PROGRAMS = proxyd
 
 proxyd_SOURCES = \
 	proxyd.cpp \

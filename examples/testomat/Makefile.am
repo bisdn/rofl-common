@@ -2,7 +2,7 @@ MAINTAINERCLEANFILES = Makefile.in
 
 SUBDIRS = 
 
-sbin_PROGRAMS = testomatd
+noinst_PROGRAMS = testomatd
 
 testomatd_SOURCES = \
 	testomatd.cpp \

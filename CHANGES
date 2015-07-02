@@ -8,6 +8,10 @@ Legend:
 Change log
 ==========
 
+v0.6.2
+
+[O] merged logging related pull request #1
+
 v0.6.1
 
 [B] Distributing missing ctspaddress.h

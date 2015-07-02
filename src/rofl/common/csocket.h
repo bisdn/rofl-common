@@ -227,7 +227,7 @@ public:
 				type(0),
 				protocol(0),
 				backlog(0) {
-		rofl::logging::debug2 << "[rofl-common][csocket][base] "
+		LOGGING_DEBUG2 << "[rofl-common][csocket][base] "
 				<< "constructor " << std::hex << this << std::dec
 				<< ", parameter tid: " << std::hex << tid << std::dec
 				<< ", target tid: " << std::hex << get_thread_id() << std::dec
@@ -240,7 +240,7 @@ public:
 	 */
 	virtual
 	~csocket() {
-		rofl::logging::debug2 << "[rofl-common][csocket][base] "
+		LOGGING_DEBUG2 << "[rofl-common][csocket][base] "
 				<< "destructor " << std::hex << this << std::dec
 				<< ", target tid: " << std::hex << get_thread_id() << std::dec
 				<< ", running tid: " << std::hex << pthread_self() << std::dec
