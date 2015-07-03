@@ -138,20 +138,21 @@ cofflowstatsarray_test::testOperatorPlus()
 	array[1].set_flow_stats(0).set_instructions().set_inst_apply_actions().
 			set_actions().add_action_output(index++).set_port_no(6);
 
-#ifdef DEBUG
+	std::cout << " XXXXXXXXXX   XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXXXX" << std::endl;
+//#ifdef DEBUG
 	std::cerr << "array[0]:" << std::endl << array[0];
 	std::cerr << "array[1]:" << std::endl << array[1];
-#endif
+//#endif
 
 	rofl::openflow::cofflowstatsarray merge(array[0]);
 	merge += array[1];
 
-#ifdef DEBUG
+//#ifdef DEBUG
 	std::cerr << "array[0]+array[1]:" << std::endl << merge;
 	std::cerr << "merge.set_flow_stats(0) == array[0].get_flow_stats(0): " << (merge.set_flow_stats(0) == array[0].get_flow_stats(0)) << std::endl;
 	std::cerr << "merge.set_flow_stats(1) == array[0].get_flow_stats(1): " << (merge.set_flow_stats(1) == array[0].get_flow_stats(1)) << std::endl;
 	std::cerr << "merge.set_flow_stats(2) == array[1].get_flow_stats(0): " << (merge.set_flow_stats(2) == array[1].get_flow_stats(0)) << std::endl;
-#endif
+//#endif
 
 	CPPUNIT_ASSERT(merge.set_flow_stats(0) == array[0].get_flow_stats(0));
 	CPPUNIT_ASSERT(merge.set_flow_stats(1) == array[0].get_flow_stats(1));
