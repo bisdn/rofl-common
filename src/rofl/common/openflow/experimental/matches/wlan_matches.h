@@ -72,21 +72,49 @@ public:
 /** OXM_OFX_WLAN_TYPE
  *
  */
-class coxmatch_ofx_wlan_type : public coxmatch_8 {
+class coxmatch_ofx_wlan_type : public coxmatch_8_exp {
 public:
 	coxmatch_ofx_wlan_type(
 			uint8_t type) :
-				coxmatch_8(OXM_TLV_EXPR_WLAN_TYPE, type, COXMATCH_8BIT) {};
+				coxmatch_8_exp(OXM_TLV_EXPR_WLAN_TYPE, /*exp_id=*/0, type)
+	{};
 	coxmatch_ofx_wlan_type(
-			uint8_t type, uint8_t mask) :
-				coxmatch_8(OXM_TLV_EXPR_WLAN_TYPE_MASK, type, mask, COXMATCH_8BIT) {};
-	coxmatch_ofx_wlan_type(
-			coxmatch const& oxm) :
-				coxmatch_8(oxm) {};
+			const coxmatch& oxm) :
+				coxmatch_8_exp(oxm)
+	{};
 	virtual
-	~coxmatch_ofx_wlan_type() {};
+	~coxmatch_ofx_wlan_type()
+	{};
 	friend std::ostream&
-	operator<< (std::ostream& os, coxmatch_ofx_wlan_type const& oxm) {
+	operator<< (std::ostream& os, const coxmatch_ofx_wlan_type& oxm) {
+		os << dynamic_cast<coxmatch const&>(oxm);
+		os << indent(2) << "<wlan-type: 0x" << std::hex
+						<< (int)oxm.get_u8value()
+						<< std::dec << " >" << std::endl;
+		return os;
+	};
+};
+
+
+
+/** OXM_OFX_WLAN_TYPE (masked)
+ *
+ */
+class coxmatch_ofx_wlan_type_masked : public coxmatch_8_exp_masked {
+public:
+	coxmatch_ofx_wlan_type_masked(
+			uint8_t type, uint8_t mask) :
+				coxmatch_8_exp_masked(OXM_TLV_EXPR_WLAN_TYPE_MASK, /*exp_id=*/0, type, mask)
+	{};
+	coxmatch_ofx_wlan_type_masked(
+			coxmatch const& oxm) :
+				coxmatch_8_exp_masked(oxm)
+	{};
+	virtual
+	~coxmatch_ofx_wlan_type_masked()
+	{};
+	friend std::ostream&
+	operator<< (std::ostream& os, const coxmatch_ofx_wlan_type_masked& oxm) {
 		os << dynamic_cast<coxmatch const&>(oxm);
 		os << indent(2) << "<wlan-type: 0x" << std::hex
 						<< (int)oxm.get_u8value() << "/0x" << (int)oxm.get_u8mask()

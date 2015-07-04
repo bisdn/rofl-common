@@ -89,62 +89,92 @@ public:
 		COXMATCH_64BIT	= (1 << 5),
 	};
 
-	/**
-	 *
-	 */
-	coxmatch();
-
-	/**
-	 *
-	 */
-	coxmatch(uint32_t oxm_id, uint32_t exp_id = 0);
-
-	/**
-	 *
-	 */
-	coxmatch(
-			uint8_t* oxm_hdr, size_t oxm_len);
-
-
-	/**
-	 *
-	 */
-	coxmatch(
-			const coxmatch& oxm);
+public:
 
 	/**
 	 *
 	 */
 	virtual
-	~coxmatch();
+	~coxmatch()
+	{};
+
+	/**
+	 *
+	 */
+	coxmatch()
+	{};
+
+	/**
+	 *
+	 */
+	coxmatch(
+			size_t oxm_len, uint32_t oxm_id) :
+				rofl::cmemory(oxm_len)
+	{ set_oxm_id(oxm_id); };
+
+	/**
+	 *
+	 */
+	coxmatch(
+			uint8_t* oxm_hdr, size_t oxm_len) :
+				rofl::cmemory(oxm_hdr, oxm_len)
+	{};
+
+	/**
+	 *
+	 */
+	coxmatch(
+			const coxmatch& oxm)
+	{ *this = oxm; };
 
 	/**
 	 *
 	 */
 	coxmatch&
 	operator= (
-			const coxmatch& oxm);
+			const coxmatch& oxm)
+	{
+		if (this == &oxm)
+			return *this;
+		cmemory::operator= (oxm);
+		return *this;
+	};
 
 	/**
 	 *
 	 */
 	bool
 	operator== (
-			const coxmatch& oxm) const;
+			const coxmatch& oxm) const
+	{ return cmemory::operator== (oxm); };
 
 	/**
 	 *
 	 */
 	bool
 	operator!= (
-			const coxmatch& oxm) const;
+			const coxmatch& oxm) const
+	{ return cmemory::operator!= (oxm); };
 
 	/**
 	 *
 	 */
 	bool
 	operator< (
-			const coxmatch& oxm);
+			const coxmatch& oxm)
+	{
+		if (get_oxm_id() != oxm.get_oxm_id()) {
+			return (get_oxm_id() < oxm.get_oxm_id());
+		}
+		size_t len = (memlen() < oxm.memlen()) ? memlen() : oxm.memlen();
+		int rc = memcmp(somem(), oxm.somem(), len);
+		if (rc < 0) {
+			return true;
+		} else if (rc > 0) {
+			return false;
+		}
+		return false;
+	};
 
 public:
 
@@ -152,7 +182,8 @@ public:
 	 *
 	 */
 	virtual void
-	clear() { rofl::cmemory::clear(); };
+	clear()
+	{ rofl::cmemory::clear(); };
 
 	/**
 	 *
@@ -195,19 +226,12 @@ protected:
 	set_oxm_class(
 			uint16_t oxm_class);
 
-	void
-	set_oxm_exp_id(uint32_t exp_id);
-
 public:
 	/**
 	 *
 	 */
 	uint16_t
 	get_oxm_class() const;
-
-
-	uint32_t
-	get_oxm_exp_id() const;
 
 	bool
 	is_experimenter() const {
@@ -309,42 +333,248 @@ public:
 };
 
 
-class coxmatch_8 : public coxmatch
+
+
+
+
+class coxmatch_exp :
+		public coxmatch
+{
+public:
+
+	/**
+	 *
+	 */
+	virtual
+	~coxmatch_exp()
+	{};
+
+	/**
+	 *
+	 */
+	coxmatch_exp()
+	{};
+
+	/**
+	 *
+	 */
+	coxmatch_exp(
+			size_t oxm_len, uint32_t oxm_id, uint32_t exp_id) :
+				coxmatch(oxm_len, oxm_id)
+	{ set_oxm_exp_id(exp_id); };
+
+	/**
+	 *
+	 */
+	coxmatch_exp(
+			uint8_t* oxm_hdr, size_t oxm_len);
+
+	/**
+	 *
+	 */
+	coxmatch_exp(
+			const coxmatch& oxm) :
+				coxmatch(oxm)
+	{ *this = oxm; };
+
+	/**
+	 *
+	 */
+	coxmatch_exp&
+	operator= (
+			const coxmatch_exp& oxm)
+	{
+		if (this == &oxm)
+			return *this;
+		coxmatch::operator= (oxm);
+		return *this;
+	};
+
+public:
+
+	/**
+	 *
+	 */
+	void
+	set_oxm_exp_id(
+			uint32_t exp_id)
+	{
+		struct ofp_oxm_experimenter_header* oxm =
+				(struct ofp_oxm_experimenter_header*)somem();
+		oxm->experimenter = htobe32(exp_id);
+	};
+
+	/**
+	 *
+	 */
+	uint32_t
+	get_oxm_exp_id() const
+	{
+		struct ofp_oxm_experimenter_header* oxm =
+				(struct ofp_oxm_experimenter_header*)somem();
+		return be32toh(oxm->experimenter);
+	};
+
+public:
+
+	/**
+	 *
+	 */
+	friend std::ostream&
+	operator<< (std::ostream& os, const coxmatch_exp& oxm) {
+		os << rofl::indent(0) << "<coxmatch_exp ";
+		os << "oxm_id: 0x" << std::hex << oxm.get_oxm_id() << std::dec << ", ";
+		os << "exp_id: 0x" << std::hex << oxm.get_oxm_exp_id() << std::dec << " ";
+		os << " >" << std::endl;
+		rofl::indent i(2);
+		os << dynamic_cast<const coxmatch&>( oxm );
+		return os;
+	};
+};
+
+
+
+
+
+
+
+class coxmatch_8 :
+		public coxmatch
 {
 public:
 	/**
 	 *
 	 */
-	coxmatch_8(const coxmatch& oxm) :
-			coxmatch(oxm)
-	{
-	}
+	coxmatch_8(
+			const coxmatch& oxm) :
+				coxmatch(oxm)
+	{};
 
 	/**
 	 * @brief	coxmatch base class for single 8bit values
 	 */
-	coxmatch_8(uint32_t oxm_id, uint8_t value, enum coxmatch_bit_t bits);
+	coxmatch_8(
+			uint32_t oxm_id, uint8_t value) :
+				coxmatch(sizeof(struct rofl::openflow::ofp_oxm_hdr) + 1*sizeof(uint8_t), oxm_id)
+	{ set_u8value(value); };
+
+public:
+
+	uint8_t
+	get_u8value() const {
+		if (memlen() < sizeof(struct rofl::openflow::ofp_oxm_hdr) + sizeof(uint8_t))
+			throw eOxmBadLen("coxmatch_8::get_u8value() invalid length");
+		struct rofl::openflow::ofp_oxm_ofb_uint8_t* oxm =
+				(struct rofl::openflow::ofp_oxm_ofb_uint8_t*)somem();
+		return oxm->byte;
+	};
+
+	void
+	set_u8value(
+			uint8_t value) {
+		if (memlen() < sizeof(struct rofl::openflow::ofp_oxm_hdr) + sizeof(uint8_t)) {
+			throw eOxmBadLen("coxmatch_8::set_u8value() invalid length");
+		}
+		struct rofl::openflow::ofp_oxm_ofb_uint8_t* oxm =
+				(struct rofl::openflow::ofp_oxm_ofb_uint8_t*)somem();
+		oxm->byte = value;
+	};
+};
+
+
+
+
+
+class coxmatch_8_masked :
+		public coxmatch
+{
+public:
+	/**
+	 *
+	 */
+	coxmatch_8_masked(
+			const coxmatch& oxm) :
+			coxmatch(oxm)
+	{};
 
 	/**
 	 * @brief	coxmatch base class for masked 8bit values
 	 */
-	coxmatch_8(uint32_t oxm_id, uint8_t value, uint8_t mask,
-			enum coxmatch_bit_t bits);
+	coxmatch_8_masked(
+			uint32_t oxm_id, uint8_t value, uint8_t mask) :
+			coxmatch(sizeof(struct rofl::openflow::ofp_oxm_hdr) + 2*sizeof(uint8_t), oxm_id)
+	{
+			set_u8value(value);
+			set_u8mask(mask);
+	};
 
+public:
+
+	/**
+	 *
+	 */
 	uint8_t
-	get_u8value() const;
+	get_u8value() const
+	{
+		if (memlen() < sizeof(struct rofl::openflow::ofp_oxm_hdr) + sizeof(uint8_t))
+			throw eOxmBadLen("coxmatch_8_masked::get_u8value() invalid length");
+		struct rofl::openflow::ofp_oxm_ofb_uint8_t* oxm =
+				(struct rofl::openflow::ofp_oxm_ofb_uint8_t*)somem();
+		return oxm->byte;
+	};
 
-	uint8_t
-	get_u8mask() const;
-
-	uint8_t
-	get_u8masked_value() const;
-
+	/**
+	 *
+	 */
 	void
-	set_u8value(uint8_t value);
+	set_u8value(uint8_t value)
+	{
+		if (memlen() < sizeof(struct rofl::openflow::ofp_oxm_hdr) + sizeof(uint8_t)) {
+			throw eOxmBadLen("coxmatch_8_masked::set_u8value() invalid length");
+		}
+		struct rofl::openflow::ofp_oxm_ofb_uint8_t* oxm =
+				(struct rofl::openflow::ofp_oxm_ofb_uint8_t*)somem();
+		oxm->byte = value;
+	};
 
+	/**
+	 *
+	 */
+	uint8_t
+	get_u8mask() const
+	{
+		if (memlen() < sizeof(struct rofl::openflow::ofp_oxm_hdr) + 2*sizeof(uint8_t))
+			return 0xff;
+		struct rofl::openflow::ofp_oxm_ofb_uint8_t* oxm =
+				(struct rofl::openflow::ofp_oxm_ofb_uint8_t*)somem();
+		return oxm->mask;
+	};
+
+	/**
+	 *
+	 */
 	void
-	set_u8mask(uint8_t mask);
+	set_u8mask(uint8_t mask)
+	{
+		if (memlen() < sizeof(struct rofl::openflow::ofp_oxm_hdr) + 2*sizeof(uint8_t))
+			throw eOxmBadLen("coxmatch_8_masked::set_u8mask() invalid length");
+		struct rofl::openflow::ofp_oxm_ofb_uint8_t* oxm =
+				(struct rofl::openflow::ofp_oxm_ofb_uint8_t*)somem();
+		oxm->mask = mask;
+	};
+
+	/**
+	 *
+	 */
+	uint8_t
+	get_u8masked_value() const
+	{
+		if (memlen() < sizeof(struct rofl::openflow::ofp_oxm_hdr) + 2*sizeof(uint8_t))
+			return get_u8value();
+		struct rofl::openflow::ofp_oxm_ofb_uint8_t* oxm =
+				(struct rofl::openflow::ofp_oxm_ofb_uint8_t*)somem();
+		return (oxm->byte & oxm->mask);
+	};
 };
 
 class coxmatch_16 : public coxmatch
@@ -623,43 +853,180 @@ public:
 
 
 
-class coxmatch_8_exp : public coxmatch
+
+
+class coxmatch_8_exp :
+		public coxmatch_exp
 {
 public:
 	/**
 	 *
 	 */
-	coxmatch_8_exp(const coxmatch& oxm) :
-			coxmatch(oxm)
-	{
-	}
+	coxmatch_8_exp(
+			const coxmatch& oxm) :
+				coxmatch_exp(oxm)
+	{};
 
 	/**
 	 * @brief	coxmatch base class for single 8bit values
 	 */
-	coxmatch_8_exp(uint32_t oxm_id, uint32_t exp_id, uint8_t value, enum coxmatch_bit_t bits);
+	coxmatch_8_exp(
+			uint32_t oxm_id, uint32_t exp_id, uint8_t value) :
+				coxmatch_exp(sizeof(struct ofp_oxm_experimenter_header) + 1*sizeof(uint8_t), oxm_id, exp_id)
+	{ set_u8value(value); };
+
+	/**
+	 *
+	 */
+	coxmatch_8_exp(
+			const coxmatch_8_exp& oxm)
+	{ *this = oxm; };
+
+	/**
+	 *
+	 */
+	coxmatch_8_exp&
+	operator= (
+			const coxmatch_8_exp& oxm)
+	{
+		if (this == &oxm)
+			return *this;
+		coxmatch_exp::operator= (oxm);
+		return *this;
+	};
+
+public:
+
+	/**
+	 *
+	 */
+	uint8_t
+	get_u8value() const
+	{
+		struct rofl::openflow::ofp_oxm_ofb_exp_uint8_t* oxm =
+				(struct rofl::openflow::ofp_oxm_ofb_exp_uint8_t*)somem();
+		return oxm->byte;
+	};
+
+	/**
+	 *
+	 */
+	void
+	set_u8value(uint8_t value)
+	{
+		struct rofl::openflow::ofp_oxm_ofb_exp_uint8_t* oxm =
+				(struct rofl::openflow::ofp_oxm_ofb_exp_uint8_t*)somem();
+		oxm->byte = value;
+	};
+};
+
+
+
+
+class coxmatch_8_exp_masked :
+		public coxmatch_exp
+{
+public:
+	/**
+	 *
+	 */
+	coxmatch_8_exp_masked(
+			const coxmatch& oxm) :
+				coxmatch_exp(oxm)
+	{};
 
 	/**
 	 * @brief	coxmatch base class for masked 8bit values
 	 */
-	coxmatch_8_exp(uint32_t oxm_id, uint32_t exp_id, uint8_t value, uint8_t mask,
-			enum coxmatch_bit_t bits);
+	coxmatch_8_exp_masked(
+			uint32_t oxm_id, uint32_t exp_id, uint8_t value, uint8_t mask) :
+				coxmatch_exp(sizeof(struct ofp_oxm_experimenter_header) + 2*sizeof(uint8_t), oxm_id, exp_id)
+	{
+		set_u8value(value);
+		set_u8mask(mask);
+	};
 
+	/**
+	 *
+	 */
+	coxmatch_8_exp_masked(
+			const coxmatch_8_exp_masked& oxm)
+	{ *this = oxm; };
+
+	/**
+	 *
+	 */
+	coxmatch_8_exp_masked&
+	operator= (
+			const coxmatch_8_exp_masked& oxm)
+	{
+		if (this == &oxm)
+			return *this;
+		coxmatch_exp::operator= (oxm);
+		return *this;
+	};
+
+public:
+
+	/**
+	 *
+	 */
 	uint8_t
-	get_u8value() const;
+	get_u8value() const
+	{
+		struct rofl::openflow::ofp_oxm_ofb_exp_uint8_t* oxm =
+				(struct rofl::openflow::ofp_oxm_ofb_exp_uint8_t*)somem();
+		return oxm->byte;
+	};
 
-	uint8_t
-	get_u8mask() const;
-
-	uint8_t
-	get_u8masked_value() const;
-
+	/**
+	 *
+	 */
 	void
-	set_u8value(uint8_t value);
+	set_u8value(uint8_t value)
+	{
+		struct rofl::openflow::ofp_oxm_ofb_exp_uint8_t* oxm =
+				(struct rofl::openflow::ofp_oxm_ofb_exp_uint8_t*)somem();
+		oxm->byte = value;
+	};
 
+	/**
+	 *
+	 */
+	uint8_t
+	get_u8mask() const
+	{
+		struct rofl::openflow::ofp_oxm_ofb_exp_uint8_t* oxm =
+				(struct rofl::openflow::ofp_oxm_ofb_exp_uint8_t*)somem();
+		return oxm->mask;
+	};
+
+	/**
+	 *
+	 */
 	void
-	set_u8mask(uint8_t mask);
+	set_u8mask(uint8_t mask)
+	{
+		struct rofl::openflow::ofp_oxm_ofb_exp_uint8_t* oxm =
+				(struct rofl::openflow::ofp_oxm_ofb_exp_uint8_t*)somem();
+		oxm->mask = mask;
+	};
+
+	/**
+	 *
+	 */
+	uint8_t
+	get_u8masked_value() const
+	{
+		struct rofl::openflow::ofp_oxm_ofb_exp_uint8_t* oxm =
+				(struct rofl::openflow::ofp_oxm_ofb_exp_uint8_t*)somem();
+		return (oxm->byte & oxm->mask);
+	};
 };
+
+
+
+
 
 class coxmatch_16_exp : public coxmatch
 {
@@ -1102,7 +1469,7 @@ class coxmatch_ofb_vlan_pcp : public coxmatch_8 {
 public:
 	coxmatch_ofb_vlan_pcp(
 			uint8_t pcp) :
-				coxmatch_8(rofl::openflow::OXM_TLV_BASIC_VLAN_PCP, pcp, COXMATCH_8BIT)
+				coxmatch_8(rofl::openflow::OXM_TLV_BASIC_VLAN_PCP, pcp)
 	{};
 	coxmatch_ofb_vlan_pcp(
 			const coxmatch& oxm) :
@@ -1128,7 +1495,7 @@ class coxmatch_ofb_ip_dscp : public coxmatch_8 {
 public:
 	coxmatch_ofb_ip_dscp(
 			uint8_t dscp) :
-				coxmatch_8(rofl::openflow::OXM_TLV_BASIC_IP_DSCP, dscp, COXMATCH_8BIT)
+				coxmatch_8(rofl::openflow::OXM_TLV_BASIC_IP_DSCP, dscp)
 	{};
 	coxmatch_ofb_ip_dscp(
 			const coxmatch& oxm) :
@@ -1154,7 +1521,7 @@ class coxmatch_ofb_ip_ecn : public coxmatch_8 {
 public:
 	coxmatch_ofb_ip_ecn(
 			uint8_t ecn) :
-				coxmatch_8(rofl::openflow::OXM_TLV_BASIC_IP_ECN, ecn, COXMATCH_8BIT)
+				coxmatch_8(rofl::openflow::OXM_TLV_BASIC_IP_ECN, ecn)
 	{};
 	coxmatch_ofb_ip_ecn(
 			const coxmatch& oxm) :
@@ -1180,7 +1547,7 @@ class coxmatch_ofb_ip_proto : public coxmatch_8 {
 public:
 	coxmatch_ofb_ip_proto(
 			uint8_t proto) :
-				coxmatch_8(rofl::openflow::OXM_TLV_BASIC_IP_PROTO, proto, COXMATCH_8BIT)
+				coxmatch_8(rofl::openflow::OXM_TLV_BASIC_IP_PROTO, proto)
 	{};
 	coxmatch_ofb_ip_proto(
 			const coxmatch& oxm) :
@@ -1528,7 +1895,7 @@ class coxmatch_ofb_icmpv4_type : public coxmatch_8 {
 public:
 	coxmatch_ofb_icmpv4_type(
 			uint8_t type) :
-				coxmatch_8(rofl::openflow::OXM_TLV_BASIC_ICMPV4_TYPE, type, COXMATCH_8BIT)
+				coxmatch_8(rofl::openflow::OXM_TLV_BASIC_ICMPV4_TYPE, type)
 	{};
 	coxmatch_ofb_icmpv4_type(
 			const coxmatch& oxm) :
@@ -1554,7 +1921,7 @@ class coxmatch_ofb_icmpv4_code : public coxmatch_8 {
 public:
 	coxmatch_ofb_icmpv4_code(
 			uint8_t code) :
-				coxmatch_8(rofl::openflow::OXM_TLV_BASIC_ICMPV4_CODE, code, COXMATCH_8BIT)
+				coxmatch_8(rofl::openflow::OXM_TLV_BASIC_ICMPV4_CODE, code)
 	{};
 	coxmatch_ofb_icmpv4_code(
 			const coxmatch& oxm) :
@@ -1802,7 +2169,7 @@ class coxmatch_ofb_icmpv6_type : public coxmatch_8 {
 public:
 	coxmatch_ofb_icmpv6_type(
 			uint8_t type) :
-				coxmatch_8(rofl::openflow::OXM_TLV_BASIC_ICMPV6_TYPE, type, COXMATCH_8BIT)
+				coxmatch_8(rofl::openflow::OXM_TLV_BASIC_ICMPV6_TYPE, type)
 	{};
 	coxmatch_ofb_icmpv6_type(
 			const coxmatch& oxm) :
@@ -1828,7 +2195,7 @@ class coxmatch_ofb_icmpv6_code : public coxmatch_8 {
 public:
 	coxmatch_ofb_icmpv6_code(
 			uint8_t code) :
-				coxmatch_8(rofl::openflow::OXM_TLV_BASIC_ICMPV6_CODE, code, COXMATCH_8BIT)
+				coxmatch_8(rofl::openflow::OXM_TLV_BASIC_ICMPV6_CODE, code)
 	{};
 	coxmatch_ofb_icmpv6_code(
 			const coxmatch& oxm) :
@@ -1945,7 +2312,7 @@ class coxmatch_ofb_mpls_tc : public coxmatch_8 {
 public:
 	coxmatch_ofb_mpls_tc(
 			uint8_t mpls_tc) :
-				coxmatch_8(rofl::openflow::OXM_TLV_BASIC_MPLS_TC, mpls_tc, COXMATCH_8BIT)
+				coxmatch_8(rofl::openflow::OXM_TLV_BASIC_MPLS_TC, mpls_tc)
 	{};
 	coxmatch_ofb_mpls_tc(
 			const coxmatch& oxm) :
@@ -1971,7 +2338,7 @@ class coxmatch_ofb_mpls_bos : public coxmatch_8 {
 public:
 	coxmatch_ofb_mpls_bos(
 			uint8_t mpls_bos) :
-				coxmatch_8(rofl::openflow::OXM_TLV_BASIC_MPLS_BOS, mpls_bos, COXMATCH_8BIT)
+				coxmatch_8(rofl::openflow::OXM_TLV_BASIC_MPLS_BOS, mpls_bos)
 	{};
 	coxmatch_ofb_mpls_bos(
 			const coxmatch& oxm) :
@@ -2100,7 +2467,7 @@ class coxmatch_ofx_nw_proto : public coxmatch_8 {
 public:
 	coxmatch_ofx_nw_proto(
 			uint8_t proto) :
-				coxmatch_8(rofl::openflow::experimental::OXM_TLV_EXPR_NW_PROTO, proto, COXMATCH_8BIT)
+				coxmatch_8(rofl::openflow::experimental::OXM_TLV_EXPR_NW_PROTO, proto)
 	{};
 	coxmatch_ofx_nw_proto(
 			const coxmatch& oxm) :
@@ -2126,7 +2493,7 @@ class coxmatch_ofx_nw_tos : public coxmatch_8 {
 public:
 	coxmatch_ofx_nw_tos(
 			uint8_t tos) :
-				coxmatch_8(rofl::openflow::experimental::OXM_TLV_EXPR_NW_TOS, tos, COXMATCH_8BIT)
+				coxmatch_8(rofl::openflow::experimental::OXM_TLV_EXPR_NW_TOS, tos)
 	{};
 	coxmatch_ofx_nw_tos(
 			const coxmatch& oxm) :
