@@ -456,6 +456,8 @@ namespace openflow {
 
 #define HAS_MASK_FLAG (1 << 8)
 
+#define OXM_TYPE(x) (x & 0xfffffe00)
+
 	/* OXM Flow match field types for OpenFlow basic class. */
 	enum oxm_tlv_match_fields {
 		OXM_TLV_BASIC_IN_PORT 		= (OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_IN_PORT << 9) 	|  4,	/* Switch input port. */				// required

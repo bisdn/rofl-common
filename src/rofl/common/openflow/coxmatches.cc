@@ -40,31 +40,11 @@ coxmatches::operator= (
 {
 	if (this == &oxms)
 		return *this;
-
 	clear();
-
-	for (std::map<uint64_t, coxmatch*>::const_iterator
-			jt = oxms.matches.begin(); jt != oxms.matches.end(); ++jt) {
-		add_match(new coxmatch(jt->second->somem(), jt->second->memlen()));
-	}
-
+	copy_matches(oxms);
 	return *this;
 }
 
-
-
-
-void
-coxmatches::clear()
-{
-	for (std::map<uint64_t, coxmatch*>::iterator
-			it = matches.begin(); it != matches.end(); ++it) {
-		delete it->second;
-		it->second = NULL;
-		//matches.clear();
-	}
-	matches.clear();
-}
 
 
 
@@ -115,7 +95,171 @@ coxmatches::unpack(
 		if (hdr->oxm_length > (sizeof(struct openflow::ofp_oxm_hdr) + buflen))
 			throw eBadMatchBadLen();
 
-		add_match(new coxmatch(buf, sizeof(struct openflow::ofp_oxm_hdr) + hdr->oxm_length));
+		struct rofl::openflow::ofp_oxm_tlv_hdr* oxm = (struct rofl::openflow::ofp_oxm_tlv_hdr*)buf;
+
+		switch (OXM_TYPE(oxm->oxm_id)) {
+		case rofl::openflow::OXM_TLV_BASIC_IN_PORT: {
+			add_ofb_in_port().unpack(buf, buflen);
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_IN_PHY_PORT: {
+			add_ofb_in_phy_port().unpack(buf, buflen);
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_METADATA:
+		case rofl::openflow::OXM_TLV_BASIC_METADATA_MASK: {
+			add_ofb_metadata().unpack(buf, buflen);
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_ETH_DST:
+		case rofl::openflow::OXM_TLV_BASIC_ETH_DST_MASK: {
+			add_ofb_eth_dst().unpack(buf, buflen);
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_ETH_SRC:
+		case rofl::openflow::OXM_TLV_BASIC_ETH_SRC_MASK: {
+			add_ofb_eth_src().unpack(buf, buflen);
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_ETH_TYPE: {
+			add_ofb_eth_type().unpack(buf, buflen);
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_VLAN_VID:
+		case rofl::openflow::OXM_TLV_BASIC_VLAN_VID_MASK: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_VLAN_PCP: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_IP_DSCP: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_IP_ECN: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_IP_PROTO: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_IPV4_SRC:
+		case rofl::openflow::OXM_TLV_BASIC_IPV4_SRC_MASK: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_IPV4_DST:
+		case rofl::openflow::OXM_TLV_BASIC_IPV4_DST_MASK: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_TCP_SRC: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_TCP_DST: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_UDP_SRC: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_UDP_DST: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_SCTP_SRC: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_SCTP_DST: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_ICMPV4_TYPE: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_ICMPV4_CODE: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_ARP_OP: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_ARP_SPA:
+		case rofl::openflow::OXM_TLV_BASIC_ARP_SPA_MASK: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_ARP_TPA:
+		case rofl::openflow::OXM_TLV_BASIC_ARP_TPA_MASK: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_ARP_SHA:
+		case rofl::openflow::OXM_TLV_BASIC_ARP_SHA_MASK: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_ARP_THA:
+		case rofl::openflow::OXM_TLV_BASIC_ARP_THA_MASK: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_IPV6_SRC:
+		case rofl::openflow::OXM_TLV_BASIC_IPV6_SRC_MASK: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_IPV6_DST:
+		case rofl::openflow::OXM_TLV_BASIC_IPV6_DST_MASK: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_IPV6_FLABEL:
+		case rofl::openflow::OXM_TLV_BASIC_IPV6_FLABEL_MASK: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_ICMPV6_TYPE: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_ICMPV6_CODE: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TARGET: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_IPV6_ND_SLL: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TLL: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_MPLS_LABEL: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_MPLS_TC: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_MPLS_BOS: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_PBB_ISID:
+		case rofl::openflow::OXM_TLV_BASIC_PBB_ISID_MASK: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_TUNNEL_ID:
+		case rofl::openflow::OXM_TLV_BASIC_TUNNEL_ID_MASK: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_IPV6_EXTHDR:
+		case rofl::openflow::OXM_TLV_BASIC_IPV6_EXTHDR_MASK: {
+
+		} break;
+		case rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC:
+		case rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC_MASK: {
+
+		} break;
+		case rofl::openflow::experimental::OXM_TLV_EXPR_NW_DST:
+		case rofl::openflow::experimental::OXM_TLV_EXPR_NW_DST_MASK: {
+
+		} break;
+		case rofl::openflow::experimental::OXM_TLV_EXPR_NW_PROTO: {
+
+		} break;
+		case rofl::openflow::experimental::OXM_TLV_EXPR_NW_TOS: {
+
+		} break;
+		case rofl::openflow::experimental::OXM_TLV_EXPR_TP_SRC: {
+
+		} break;
+		case rofl::openflow::experimental::OXM_TLV_EXPR_TP_DST: {
+
+		} break;
+		default: {
+
+		};
+		}
+
+		//add_match(new coxmatch(buf, sizeof(struct openflow::ofp_oxm_hdr) + hdr->oxm_length));
 
 		buflen -= ((sizeof(struct openflow::ofp_oxm_hdr) + hdr->oxm_length));
 		buf += ((sizeof(struct openflow::ofp_oxm_hdr) + hdr->oxm_length));
@@ -321,4 +465,177 @@ coxmatches::is_part_of(
 	return result;
 }
 
+
+
+void
+coxmatches::copy_matches(
+			const coxmatches& oxmatches)
+{
+	clear();
+	RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
+	for (std::map<uint32_t, coxmatch*>::iterator
+			it = oxmatches.matches.begin(); it != oxmatches.matches.end(); ++it) {
+		switch (OXM_TYPE(it->first)) {
+		case rofl::openflow::OXM_TLV_BASIC_IN_PORT: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_IN_PHY_PORT: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_METADATA:
+		case rofl::openflow::OXM_TLV_BASIC_METADATA_MASK: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_ETH_DST:
+		case rofl::openflow::OXM_TLV_BASIC_ETH_DST_MASK: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_ETH_SRC:
+		case rofl::openflow::OXM_TLV_BASIC_ETH_SRC_MASK: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_ETH_TYPE: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_VLAN_VID:
+		case rofl::openflow::OXM_TLV_BASIC_VLAN_VID_MASK: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_VLAN_PCP: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_IP_DSCP: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_IP_ECN: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_IP_PROTO: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_IPV4_SRC:
+		case rofl::openflow::OXM_TLV_BASIC_IPV4_SRC_MASK: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_IPV4_DST:
+		case rofl::openflow::OXM_TLV_BASIC_IPV4_DST_MASK: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_TCP_SRC: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_TCP_DST: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_UDP_SRC: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_UDP_DST: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_SCTP_SRC: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_SCTP_DST: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_ICMPV4_TYPE: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_ICMPV4_CODE: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_ARP_OP: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_ARP_SPA:
+		case rofl::openflow::OXM_TLV_BASIC_ARP_SPA_MASK: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_ARP_TPA:
+		case rofl::openflow::OXM_TLV_BASIC_ARP_TPA_MASK: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_ARP_SHA:
+		case rofl::openflow::OXM_TLV_BASIC_ARP_SHA_MASK: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_ARP_THA:
+		case rofl::openflow::OXM_TLV_BASIC_ARP_THA_MASK: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_IPV6_SRC:
+		case rofl::openflow::OXM_TLV_BASIC_IPV6_SRC_MASK: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_IPV6_DST:
+		case rofl::openflow::OXM_TLV_BASIC_IPV6_DST_MASK: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_IPV6_FLABEL:
+		case rofl::openflow::OXM_TLV_BASIC_IPV6_FLABEL_MASK: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_ICMPV6_TYPE: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_ICMPV6_CODE: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TARGET: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_IPV6_ND_SLL: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TLL: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_MPLS_LABEL: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_MPLS_TC: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_MPLS_BOS: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_PBB_ISID:
+		case rofl::openflow::OXM_TLV_BASIC_PBB_ISID_MASK: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_TUNNEL_ID:
+		case rofl::openflow::OXM_TLV_BASIC_TUNNEL_ID_MASK: {
+
+		} break;
+		case rofl::openflow::OXM_TLV_BASIC_IPV6_EXTHDR:
+		case rofl::openflow::OXM_TLV_BASIC_IPV6_EXTHDR_MASK: {
+
+		} break;
+		case rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC:
+		case rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC_MASK: {
+
+		} break;
+		case rofl::openflow::experimental::OXM_TLV_EXPR_NW_DST:
+		case rofl::openflow::experimental::OXM_TLV_EXPR_NW_DST_MASK: {
+
+		} break;
+		case rofl::openflow::experimental::OXM_TLV_EXPR_NW_PROTO: {
+
+		} break;
+		case rofl::openflow::experimental::OXM_TLV_EXPR_NW_TOS: {
+
+		} break;
+		case rofl::openflow::experimental::OXM_TLV_EXPR_TP_SRC: {
+
+		} break;
+		case rofl::openflow::experimental::OXM_TLV_EXPR_TP_DST: {
+
+		} break;
+		default: {
+
+		};
+		}
+	}
+}
 

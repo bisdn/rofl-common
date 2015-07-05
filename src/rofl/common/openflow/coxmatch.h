@@ -170,6 +170,7 @@ public:
 			throw eOxmBadLen("coxmatch::pack() buf too short");
 		}
 		struct rofl::openflow::ofp_oxm_tlv_hdr* oxm = (struct rofl::openflow::ofp_oxm_tlv_hdr*)buf;
+		set_oxm_length(length()); // use overwritten length() method of derived classes
 		oxm->oxm_id = htobe32(oxm_id);
 	};
 
@@ -500,19 +501,19 @@ public:
 	get_u8value() const
 	{ return value; };
 
-	void
+	coxmatch_8&
 	set_u8value(
 			uint8_t value)
-	{ this->value = value; };
+	{ this->value = value; return *this; };
 
 	uint8_t
 	get_u8mask() const
 	{ return mask; };
 
-	void
+	coxmatch_8&
 	set_u8mask(
 			uint8_t mask)
-	{ this->mask = mask; set_oxm_hasmask(true); };
+	{ this->mask = mask; set_oxm_hasmask(true); return *this; };
 
 public:
 
@@ -662,19 +663,19 @@ public:
 	get_u16value() const
 	{ return value; };
 
-	void
+	coxmatch_16&
 	set_u16value(
 			uint16_t value)
-	{ this->value = value; };
+	{ this->value = value; return *this; };
 
 	uint16_t
 	get_u16mask() const
 	{ return mask; };
 
-	void
+	coxmatch_16&
 	set_u16mask(
 			uint16_t mask)
-	{ this->mask = mask; set_oxm_hasmask(true); };
+	{ this->mask = mask; set_oxm_hasmask(true); return *this; };
 
 public:
 
@@ -824,19 +825,19 @@ public:
 	get_u24value() const
 	{ return value; };
 
-	void
+	coxmatch_24&
 	set_u24value(
 			uint32_t value)
-	{ this->value = value; };
+	{ this->value = value; return *this; };
 
 	uint32_t
 	get_u24mask() const
 	{ return mask; };
 
-	void
+	coxmatch_24&
 	set_u24mask(
 			uint32_t mask)
-	{ this->mask = mask; set_oxm_hasmask(true); };
+	{ this->mask = mask; set_oxm_hasmask(true); return *this; };
 
 public:
 
@@ -1014,19 +1015,19 @@ public:
 	get_u32value() const
 	{ return value; };
 
-	void
+	coxmatch_32&
 	set_u32value(
 			uint32_t value)
-	{ this->value = value; };
+	{ this->value = value; return *this; };
 
 	uint32_t
 	get_u32mask() const
 	{ return mask; };
 
-	void
+	coxmatch_32&
 	set_u32mask(
 			uint32_t mask)
-	{ this->mask = mask; set_oxm_hasmask(true); };
+	{ this->mask = mask; set_oxm_hasmask(true); return *this; };
 
 public:
 
@@ -1040,19 +1041,19 @@ public:
 	get_u32value_as_addr() const
 	{ caddress_in4 addr; addr.set_addr_hbo(value); return addr; };
 
-	void
+	coxmatch_32&
 	set_u32value(
 			const rofl::caddress_in4& addr)
-	{ value = addr.get_addr_hbo(); };
+	{ value = addr.get_addr_hbo(); return *this; };
 
 	rofl::caddress_in4
 	get_u32mask_as_addr() const
 	{ caddress_in4 addr; addr.set_addr_hbo(mask); return addr; };
 
-	void
+	coxmatch_32&
 	set_u32mask(
 			const rofl::caddress_in4& addr)
-	{ mask = addr.get_addr_hbo(); set_oxm_hasmask(true); };
+	{ mask = addr.get_addr_hbo(); set_oxm_hasmask(true); return *this; };
 
 public:
 
@@ -1222,19 +1223,19 @@ public:
 	get_u48value() const
 	{ return value; };
 
-	void
+	coxmatch_48&
 	set_u48value(
 			uint32_t value)
-	{ this->value = value; };
+	{ this->value = value; return *this; };
 
 	uint32_t
 	get_u48mask() const
 	{ return mask; };
 
-	void
+	coxmatch_48&
 	set_u48mask(
 			uint32_t mask)
-	{ this->mask = mask; set_oxm_hasmask(true); };
+	{ this->mask = mask; set_oxm_hasmask(true); return *this; };
 
 public:
 
@@ -1257,7 +1258,7 @@ public:
 		return lladdr;
 	};
 
-	void
+	coxmatch_48&
 	set_u48value(
 			const rofl::caddress_ll& lladdr)
 	{
@@ -1267,6 +1268,7 @@ public:
 				 ((uint64_t)lladdr[3] << 16) |
 				 ((uint64_t)lladdr[4] <<  8) |
 				 ((uint64_t)lladdr[5] <<  0));
+		return *this;
 	};
 
 	rofl::caddress_ll
@@ -1282,7 +1284,7 @@ public:
 		return lladdr;
 	};
 
-	void
+	coxmatch_48&
 	set_u48mask(
 			const rofl::caddress_ll& lladdr)
 	{
@@ -1293,6 +1295,7 @@ public:
 				((uint64_t)lladdr[4] <<  8) |
 				((uint64_t)lladdr[5] <<  0));
 		set_oxm_hasmask(true);
+		return *this;
 	};
 
 public:
@@ -1468,19 +1471,19 @@ public:
 	get_u64value() const
 	{ return value; };
 
-	void
+	coxmatch_64&
 	set_u64value(
 			uint64_t value)
-	{ this->value = value; };
+	{ this->value = value; return *this; };
 
 	uint64_t
 	get_u64mask() const
 	{ return mask; };
 
-	void
+	coxmatch_64&
 	set_u64mask(
 			uint64_t mask)
-	{ this->mask = mask; set_oxm_hasmask(true); };
+	{ this->mask = mask; set_oxm_hasmask(true); return *this; };
 
 public:
 
@@ -1629,19 +1632,19 @@ public:
 	get_u128value() const
 	{ return value; };
 
-	void
+	coxmatch_128&
 	set_u128value(
 			const rofl::caddress_in6& value)
-	{ this->value = value; };
+	{ this->value = value; return *this; };
 
 	const rofl::caddress_in6&
 	get_u128mask() const
 	{ return mask; };
 
-	void
+	coxmatch_128&
 	set_u128mask(
 			const rofl::caddress_in6& mask)
-	{ this->mask = mask; set_oxm_hasmask(true); };
+	{ this->mask = mask; set_oxm_hasmask(true); return *this; };
 
 public:
 
@@ -1825,19 +1828,19 @@ public:
 	get_u8value() const
 	{ return value; };
 
-	void
+	coxmatch_8_exp&
 	set_u8value(
 			uint8_t value)
-	{ this->value = value; };
+	{ this->value = value; return *this; };
 
 	uint8_t
 	get_u8mask() const
 	{ return mask; };
 
-	void
+	coxmatch_8_exp&
 	set_u8mask(
 			uint8_t mask)
-	{ this->mask = mask; set_oxm_hasmask(true); };
+	{ this->mask = mask; set_oxm_hasmask(true); return *this; };
 
 public:
 
@@ -1986,19 +1989,19 @@ public:
 	get_u16value() const
 	{ return value; };
 
-	void
+	coxmatch_16_exp&
 	set_u16value(
 			uint16_t value)
-	{ this->value = value; };
+	{ this->value = value; return *this; };
 
 	uint16_t
 	get_u16mask() const
 	{ return mask; };
 
-	void
+	coxmatch_16_exp&
 	set_u16mask(
 			uint16_t mask)
-	{ this->mask = mask; set_oxm_hasmask(true); };
+	{ this->mask = mask; set_oxm_hasmask(true); return *this; };
 
 public:
 
@@ -2147,19 +2150,19 @@ public:
 	get_u24value() const
 	{ return value; };
 
-	void
+	coxmatch_24_exp&
 	set_u24value(
 			uint32_t value)
-	{ this->value = value; };
+	{ this->value = value; return *this; };
 
 	uint32_t
 	get_u24mask() const
 	{ return mask; };
 
-	void
+	coxmatch_24_exp&
 	set_u24mask(
 			uint32_t mask)
-	{ this->mask = mask; set_oxm_hasmask(true); };
+	{ this->mask = mask; set_oxm_hasmask(true); return *this; };
 
 public:
 
@@ -2315,19 +2318,19 @@ public:
 	get_u32value() const
 	{ return value; };
 
-	void
+	coxmatch_32_exp&
 	set_u32value(
 			uint32_t value)
-	{ this->value = value; };
+	{ this->value = value; return *this; };
 
 	uint32_t
 	get_u32mask() const
 	{ return mask; };
 
-	void
+	coxmatch_32_exp&
 	set_u32mask(
 			uint32_t mask)
-	{ this->mask = mask; set_oxm_hasmask(true); };
+	{ this->mask = mask; set_oxm_hasmask(true); return *this; };
 
 public:
 
@@ -2497,19 +2500,19 @@ public:
 	get_u48value() const
 	{ return value; };
 
-	void
+	coxmatch_48_exp&
 	set_u48value(
 			uint32_t value)
-	{ this->value = value; };
+	{ this->value = value; return *this; };
 
 	uint32_t
 	get_u48mask() const
 	{ return mask; };
 
-	void
+	coxmatch_48_exp&
 	set_u48mask(
 			uint32_t mask)
-	{ this->mask = mask; set_oxm_hasmask(true); };
+	{ this->mask = mask; set_oxm_hasmask(true); return *this; };
 
 public:
 
@@ -2532,7 +2535,7 @@ public:
 		return lladdr;
 	};
 
-	void
+	coxmatch_48_exp&
 	set_u48value(
 			const rofl::caddress_ll& lladdr)
 	{
@@ -2542,6 +2545,7 @@ public:
 				 ((uint64_t)lladdr[3] << 16) |
 				 ((uint64_t)lladdr[4] <<  8) |
 				 ((uint64_t)lladdr[5] <<  0));
+		return *this;
 	};
 
 	rofl::caddress_ll
@@ -2557,7 +2561,7 @@ public:
 		return lladdr;
 	};
 
-	void
+	coxmatch_48_exp&
 	set_u48mask(
 			const rofl::caddress_ll& lladdr)
 	{
@@ -2568,6 +2572,7 @@ public:
 				((uint64_t)lladdr[4] <<  8) |
 				((uint64_t)lladdr[5] <<  0));
 		set_oxm_hasmask(true);
+		return *this;
 	};
 
 public:
@@ -2740,19 +2745,19 @@ public:
 	get_u64value() const
 	{ return value; };
 
-	void
+	coxmatch_64_exp&
 	set_u64value(
 			uint64_t value)
-	{ this->value = value; };
+	{ this->value = value; return *this; };
 
 	uint64_t
 	get_u64mask() const
 	{ return mask; };
 
-	void
+	coxmatch_64_exp&
 	set_u64mask(
 			uint64_t mask)
-	{ this->mask = mask; set_oxm_hasmask(true); };
+	{ this->mask = mask; set_oxm_hasmask(true); return *this; };
 
 public:
 
@@ -2851,6 +2856,9 @@ private:
  */
 class coxmatch_ofb_in_port : public coxmatch_32 {
 public:
+	coxmatch_ofb_in_port() :
+				coxmatch_32(rofl::openflow::OXM_TLV_BASIC_IN_PORT)
+	{};
 	coxmatch_ofb_in_port(
 			uint32_t port_no) :
 				coxmatch_32(rofl::openflow::OXM_TLV_BASIC_IN_PORT, port_no)
@@ -2877,6 +2885,9 @@ public:
  */
 class coxmatch_ofb_in_phy_port : public coxmatch_32 {
 public:
+	coxmatch_ofb_in_phy_port() :
+				coxmatch_32(rofl::openflow::OXM_TLV_BASIC_IN_PHY_PORT)
+	{};
 	coxmatch_ofb_in_phy_port(
 			uint32_t port_no) :
 				coxmatch_32(rofl::openflow::OXM_TLV_BASIC_IN_PHY_PORT, port_no)
@@ -2903,6 +2914,9 @@ public:
  */
 class coxmatch_ofb_metadata : public coxmatch_64 {
 public:
+	coxmatch_ofb_metadata() :
+				coxmatch_64(rofl::openflow::OXM_TLV_BASIC_METADATA)
+	{};
 	coxmatch_ofb_metadata(
 			uint64_t metadata) :
 				coxmatch_64(rofl::openflow::OXM_TLV_BASIC_METADATA, metadata)
@@ -2938,6 +2952,9 @@ public:
  */
 class coxmatch_ofb_eth_dst : public coxmatch_48 {
 public:
+	coxmatch_ofb_eth_dst() :
+				coxmatch_48(rofl::openflow::OXM_TLV_BASIC_ETH_DST)
+	{};
 	coxmatch_ofb_eth_dst(
 			const rofl::caddress_ll& maddr) :
 				coxmatch_48(rofl::openflow::OXM_TLV_BASIC_ETH_DST, maddr)
@@ -2972,6 +2989,9 @@ public:
  */
 class coxmatch_ofb_eth_src : public coxmatch_48 {
 public:
+	coxmatch_ofb_eth_src() :
+				coxmatch_48(rofl::openflow::OXM_TLV_BASIC_ETH_SRC)
+	{};
 	coxmatch_ofb_eth_src(
 			const rofl::caddress_ll& maddr) :
 				coxmatch_48(rofl::openflow::OXM_TLV_BASIC_ETH_SRC, maddr)
@@ -3006,6 +3026,9 @@ public:
  */
 class coxmatch_ofb_eth_type : public coxmatch_16 {
 public:
+	coxmatch_ofb_eth_type() :
+				coxmatch_16(rofl::openflow::OXM_TLV_BASIC_ETH_TYPE)
+	{};
 	coxmatch_ofb_eth_type(
 			uint16_t dl_type) :
 				coxmatch_16(rofl::openflow::OXM_TLV_BASIC_ETH_TYPE, dl_type)
@@ -3032,6 +3055,9 @@ public:
  */
 class coxmatch_ofb_vlan_vid : public coxmatch_16 {
 public:
+	coxmatch_ofb_vlan_vid() :
+				coxmatch_16(rofl::openflow::OXM_TLV_BASIC_VLAN_VID)
+	{};
 	coxmatch_ofb_vlan_vid(
 			uint16_t vid) :
 				coxmatch_16(rofl::openflow::OXM_TLV_BASIC_VLAN_VID, vid)
@@ -3119,6 +3145,9 @@ public:
  */
 class coxmatch_ofb_vlan_pcp : public coxmatch_8 {
 public:
+	coxmatch_ofb_vlan_pcp() :
+				coxmatch_8(rofl::openflow::OXM_TLV_BASIC_VLAN_PCP)
+	{};
 	coxmatch_ofb_vlan_pcp(
 			uint8_t pcp) :
 				coxmatch_8(rofl::openflow::OXM_TLV_BASIC_VLAN_PCP, pcp)
@@ -3145,6 +3174,9 @@ public:
  */
 class coxmatch_ofb_ip_dscp : public coxmatch_8 {
 public:
+	coxmatch_ofb_ip_dscp() :
+				coxmatch_8(rofl::openflow::OXM_TLV_BASIC_IP_DSCP)
+	{};
 	coxmatch_ofb_ip_dscp(
 			uint8_t dscp) :
 				coxmatch_8(rofl::openflow::OXM_TLV_BASIC_IP_DSCP, dscp)
@@ -3171,6 +3203,9 @@ public:
  */
 class coxmatch_ofb_ip_ecn : public coxmatch_8 {
 public:
+	coxmatch_ofb_ip_ecn() :
+				coxmatch_8(rofl::openflow::OXM_TLV_BASIC_IP_ECN)
+	{};
 	coxmatch_ofb_ip_ecn(
 			uint8_t ecn) :
 				coxmatch_8(rofl::openflow::OXM_TLV_BASIC_IP_ECN, ecn)
@@ -3197,6 +3232,9 @@ public:
  */
 class coxmatch_ofb_ip_proto : public coxmatch_8 {
 public:
+	coxmatch_ofb_ip_proto() :
+				coxmatch_8(rofl::openflow::OXM_TLV_BASIC_IP_PROTO)
+	{};
 	coxmatch_ofb_ip_proto(
 			uint8_t proto) :
 				coxmatch_8(rofl::openflow::OXM_TLV_BASIC_IP_PROTO, proto)
@@ -3223,6 +3261,9 @@ public:
  */
 class coxmatch_ofb_ipv4_src : public coxmatch_32 {
 public:
+	coxmatch_ofb_ipv4_src() :
+				coxmatch_32(rofl::openflow::OXM_TLV_BASIC_IPV4_SRC)
+	{};
 	coxmatch_ofb_ipv4_src(
 			uint32_t src) :
 				coxmatch_32(rofl::openflow::OXM_TLV_BASIC_IPV4_SRC, src)
@@ -3263,6 +3304,9 @@ public:
  */
 class coxmatch_ofb_ipv4_dst : public coxmatch_32 {
 public:
+	coxmatch_ofb_ipv4_dst() :
+				coxmatch_32(rofl::openflow::OXM_TLV_BASIC_IPV4_DST)
+	{};
 	coxmatch_ofb_ipv4_dst(
 			uint32_t dst) :
 				coxmatch_32(rofl::openflow::OXM_TLV_BASIC_IPV4_DST, dst)
@@ -3303,6 +3347,9 @@ public:
  */
 class coxmatch_ofb_ipv6_src : public coxmatch_128 {
 public:
+	coxmatch_ofb_ipv6_src() :
+				coxmatch_128(rofl::openflow::OXM_TLV_BASIC_IPV6_SRC)
+	{};
 	coxmatch_ofb_ipv6_src(
 			const rofl::caddress_in6& src) :
 				coxmatch_128(rofl::openflow::OXM_TLV_BASIC_IPV6_SRC, src)
@@ -3335,6 +3382,9 @@ public:
  */
 class coxmatch_ofb_ipv6_dst : public coxmatch_128 {
 public:
+	coxmatch_ofb_ipv6_dst() :
+				coxmatch_128(rofl::openflow::OXM_TLV_BASIC_IPV6_DST)
+	{};
 	coxmatch_ofb_ipv6_dst(
 			const rofl::caddress_in6& dst) :
 				coxmatch_128(rofl::openflow::OXM_TLV_BASIC_IPV6_DST, dst)
@@ -3367,6 +3417,9 @@ public:
  */
 class coxmatch_ofb_ipv6_nd_target : public coxmatch_128 {
 public:
+	coxmatch_ofb_ipv6_nd_target() :
+				coxmatch_128(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TARGET)
+	{};
 	coxmatch_ofb_ipv6_nd_target(
 			const rofl::caddress_in6& nd_target) :
 				coxmatch_128(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TARGET, nd_target)
@@ -3393,6 +3446,9 @@ public:
  */
 class coxmatch_ofb_tcp_src : public coxmatch_16 {
 public:
+	coxmatch_ofb_tcp_src() :
+				coxmatch_16(rofl::openflow::OXM_TLV_BASIC_TCP_SRC)
+	{};
 	coxmatch_ofb_tcp_src(
 			uint16_t src) :
 				coxmatch_16(rofl::openflow::OXM_TLV_BASIC_TCP_SRC, src)
@@ -3419,6 +3475,9 @@ public:
  */
 class coxmatch_ofb_tcp_dst : public coxmatch_16 {
 public:
+	coxmatch_ofb_tcp_dst() :
+				coxmatch_16(rofl::openflow::OXM_TLV_BASIC_TCP_DST)
+	{};
 	coxmatch_ofb_tcp_dst(
 			uint16_t dst) :
 				coxmatch_16(rofl::openflow::OXM_TLV_BASIC_TCP_DST, dst)
@@ -3445,6 +3504,9 @@ public:
  */
 class coxmatch_ofb_udp_src : public coxmatch_16 {
 public:
+	coxmatch_ofb_udp_src() :
+				coxmatch_16(rofl::openflow::OXM_TLV_BASIC_UDP_SRC)
+	{};
 	coxmatch_ofb_udp_src(
 			uint16_t src) :
 				coxmatch_16(rofl::openflow::OXM_TLV_BASIC_UDP_SRC, src)
@@ -3471,6 +3533,9 @@ public:
  */
 class coxmatch_ofb_udp_dst : public coxmatch_16 {
 public:
+	coxmatch_ofb_udp_dst() :
+				coxmatch_16(rofl::openflow::OXM_TLV_BASIC_UDP_DST)
+	{};
 	coxmatch_ofb_udp_dst(
 			uint16_t dst) :
 				coxmatch_16(rofl::openflow::OXM_TLV_BASIC_UDP_DST, dst)
@@ -3497,6 +3562,9 @@ public:
  */
 class coxmatch_ofb_sctp_src : public coxmatch_16 {
 public:
+	coxmatch_ofb_sctp_src() :
+				coxmatch_16(rofl::openflow::OXM_TLV_BASIC_SCTP_SRC)
+	{};
 	coxmatch_ofb_sctp_src(
 			uint16_t src) :
 				coxmatch_16(rofl::openflow::OXM_TLV_BASIC_SCTP_SRC, src)
@@ -3523,6 +3591,9 @@ public:
  */
 class coxmatch_ofb_sctp_dst : public coxmatch_16 {
 public:
+	coxmatch_ofb_sctp_dst() :
+				coxmatch_16(rofl::openflow::OXM_TLV_BASIC_SCTP_DST)
+	{};
 	coxmatch_ofb_sctp_dst(
 			uint16_t dst) :
 				coxmatch_16(rofl::openflow::OXM_TLV_BASIC_SCTP_DST, dst)
@@ -3549,6 +3620,9 @@ public:
  */
 class coxmatch_ofb_icmpv4_type : public coxmatch_8 {
 public:
+	coxmatch_ofb_icmpv4_type() :
+				coxmatch_8(rofl::openflow::OXM_TLV_BASIC_ICMPV4_TYPE)
+	{};
 	coxmatch_ofb_icmpv4_type(
 			uint8_t type) :
 				coxmatch_8(rofl::openflow::OXM_TLV_BASIC_ICMPV4_TYPE, type)
@@ -3575,6 +3649,9 @@ public:
  */
 class coxmatch_ofb_icmpv4_code : public coxmatch_8 {
 public:
+	coxmatch_ofb_icmpv4_code() :
+				coxmatch_8(rofl::openflow::OXM_TLV_BASIC_ICMPV4_CODE)
+	{};
 	coxmatch_ofb_icmpv4_code(
 			uint8_t code) :
 				coxmatch_8(rofl::openflow::OXM_TLV_BASIC_ICMPV4_CODE, code)
@@ -3600,6 +3677,9 @@ public:
  */
 class coxmatch_ofb_arp_opcode : public coxmatch_16 {
 public:
+	coxmatch_ofb_arp_opcode() :
+				coxmatch_16(rofl::openflow::OXM_TLV_BASIC_ARP_OP)
+	{};
 	coxmatch_ofb_arp_opcode(
 			uint16_t opcode) :
 				coxmatch_16(rofl::openflow::OXM_TLV_BASIC_ARP_OP, opcode)
@@ -3627,6 +3707,9 @@ public:
  */
 class coxmatch_ofb_arp_spa : public coxmatch_32 {
 public:
+	coxmatch_ofb_arp_spa() :
+				coxmatch_32(rofl::openflow::OXM_TLV_BASIC_ARP_SPA)
+	{};
 	coxmatch_ofb_arp_spa(
 			uint32_t spa) :
 				coxmatch_32(rofl::openflow::OXM_TLV_BASIC_ARP_SPA, spa)
@@ -3667,6 +3750,9 @@ public:
  */
 class coxmatch_ofb_arp_tpa : public coxmatch_32 {
 public:
+	coxmatch_ofb_arp_tpa() :
+				coxmatch_32(rofl::openflow::OXM_TLV_BASIC_ARP_TPA)
+	{};
 	coxmatch_ofb_arp_tpa(
 			uint32_t tpa) :
 				coxmatch_32(rofl::openflow::OXM_TLV_BASIC_ARP_TPA, tpa)
@@ -3707,6 +3793,9 @@ public:
  */
 class coxmatch_ofb_arp_sha : public coxmatch_48 {
 public:
+	coxmatch_ofb_arp_sha() :
+				coxmatch_48(rofl::openflow::OXM_TLV_BASIC_ARP_SHA)
+	{};
 	coxmatch_ofb_arp_sha(
 			uint64_t lladdr) :
 				coxmatch_48(rofl::openflow::OXM_TLV_BASIC_ARP_SHA, lladdr)
@@ -3750,6 +3839,9 @@ public:
  */
 class coxmatch_ofb_arp_tha : public coxmatch_48 {
 public:
+	coxmatch_ofb_arp_tha() :
+				coxmatch_48(rofl::openflow::OXM_TLV_BASIC_ARP_THA)
+	{};
 	coxmatch_ofb_arp_tha(
 			uint64_t lladdr) :
 				coxmatch_48(rofl::openflow::OXM_TLV_BASIC_ARP_THA, lladdr)
@@ -3791,8 +3883,9 @@ public:
  */
 class coxmatch_ofb_ipv6_flabel : public coxmatch_32 {
 public:
-	/** constructor
-	 */
+	coxmatch_ofb_ipv6_flabel() :
+				coxmatch_32(rofl::openflow::OXM_TLV_BASIC_IPV6_FLABEL)
+	{};
 	coxmatch_ofb_ipv6_flabel(
 			uint32_t flow_label) :
 				coxmatch_32(rofl::openflow::OXM_TLV_BASIC_IPV6_FLABEL, flow_label)
@@ -3826,6 +3919,9 @@ public:
  */
 class coxmatch_ofb_icmpv6_type : public coxmatch_8 {
 public:
+	coxmatch_ofb_icmpv6_type() :
+				coxmatch_8(rofl::openflow::OXM_TLV_BASIC_ICMPV6_TYPE)
+	{};
 	coxmatch_ofb_icmpv6_type(
 			uint8_t type) :
 				coxmatch_8(rofl::openflow::OXM_TLV_BASIC_ICMPV6_TYPE, type)
@@ -3852,6 +3948,9 @@ public:
  */
 class coxmatch_ofb_icmpv6_code : public coxmatch_8 {
 public:
+	coxmatch_ofb_icmpv6_code() :
+				coxmatch_8(rofl::openflow::OXM_TLV_BASIC_ICMPV6_CODE)
+	{};
 	coxmatch_ofb_icmpv6_code(
 			uint8_t code) :
 				coxmatch_8(rofl::openflow::OXM_TLV_BASIC_ICMPV6_CODE, code)
@@ -3879,6 +3978,9 @@ public:
  */
 class coxmatch_ofb_ipv6_nd_sll : public coxmatch_48 {
 public:
+	coxmatch_ofb_ipv6_nd_sll() :
+				coxmatch_48(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_SLL)
+	{};
 	coxmatch_ofb_ipv6_nd_sll(
 			uint64_t lladdr) :
 				coxmatch_48(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_SLL, lladdr)
@@ -3911,6 +4013,9 @@ public:
  */
 class coxmatch_ofb_ipv6_nd_tll : public coxmatch_48 {
 public:
+	coxmatch_ofb_ipv6_nd_tll() :
+				coxmatch_48(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TLL)
+	{};
 	coxmatch_ofb_ipv6_nd_tll(
 			uint64_t lladdr) :
 				coxmatch_48(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TLL, lladdr)
@@ -3943,6 +4048,9 @@ public:
  */
 class coxmatch_ofb_mpls_label : public coxmatch_32 {
 public:
+	coxmatch_ofb_mpls_label() :
+				coxmatch_32(rofl::openflow::OXM_TLV_BASIC_MPLS_LABEL)
+	{};
 	coxmatch_ofb_mpls_label(
 			uint32_t mpls_label) :
 				coxmatch_32(rofl::openflow::OXM_TLV_BASIC_MPLS_LABEL, mpls_label)
@@ -3969,6 +4077,9 @@ public:
  */
 class coxmatch_ofb_mpls_tc : public coxmatch_8 {
 public:
+	coxmatch_ofb_mpls_tc() :
+				coxmatch_8(rofl::openflow::OXM_TLV_BASIC_MPLS_TC)
+	{};
 	coxmatch_ofb_mpls_tc(
 			uint8_t mpls_tc) :
 				coxmatch_8(rofl::openflow::OXM_TLV_BASIC_MPLS_TC, mpls_tc)
@@ -3995,6 +4106,9 @@ public:
  */
 class coxmatch_ofb_mpls_bos : public coxmatch_8 {
 public:
+	coxmatch_ofb_mpls_bos() :
+				coxmatch_8(rofl::openflow::OXM_TLV_BASIC_MPLS_BOS)
+	{};
 	coxmatch_ofb_mpls_bos(
 			uint8_t mpls_bos) :
 				coxmatch_8(rofl::openflow::OXM_TLV_BASIC_MPLS_BOS, mpls_bos)
@@ -4022,6 +4136,9 @@ public:
  */
 class coxmatch_ofb_tunnel_id : public coxmatch_64 {
 public:
+	coxmatch_ofb_tunnel_id() :
+				coxmatch_64(rofl::openflow::OXM_TLV_BASIC_TUNNEL_ID)
+	{};
 	coxmatch_ofb_tunnel_id(
 			uint64_t tunnel_id) :
 				coxmatch_64(rofl::openflow::OXM_TLV_BASIC_TUNNEL_ID, tunnel_id)
@@ -4058,6 +4175,9 @@ public:
  */
 class coxmatch_ofb_pbb_isid : public coxmatch_24 {
 public:
+	coxmatch_ofb_pbb_isid() :
+				coxmatch_24(rofl::openflow::OXM_TLV_BASIC_PBB_ISID)
+	{};
 	coxmatch_ofb_pbb_isid(
 			uint32_t pbb_isid) :
 				coxmatch_24(rofl::openflow::OXM_TLV_BASIC_PBB_ISID, pbb_isid)
@@ -4093,6 +4213,9 @@ public:
  */
 class coxmatch_ofb_ipv6_exthdr : public coxmatch_16 {
 public:
+	coxmatch_ofb_ipv6_exthdr() :
+				coxmatch_16(rofl::openflow::OXM_TLV_BASIC_IPV6_EXTHDR)
+	{};
 	coxmatch_ofb_ipv6_exthdr(
 			uint16_t ipv6_exthdr) :
 				coxmatch_16(rofl::openflow::OXM_TLV_BASIC_IPV6_EXTHDR, ipv6_exthdr)
@@ -4128,6 +4251,9 @@ public:
  */
 class coxmatch_ofx_nw_proto : public coxmatch_8 {
 public:
+	coxmatch_ofx_nw_proto() :
+				coxmatch_8(rofl::openflow::experimental::OXM_TLV_EXPR_NW_PROTO)
+	{};
 	coxmatch_ofx_nw_proto(
 			uint8_t proto) :
 				coxmatch_8(rofl::openflow::experimental::OXM_TLV_EXPR_NW_PROTO, proto)
@@ -4154,6 +4280,9 @@ public:
  */
 class coxmatch_ofx_nw_tos : public coxmatch_8 {
 public:
+	coxmatch_ofx_nw_tos() :
+				coxmatch_8(rofl::openflow::experimental::OXM_TLV_EXPR_NW_TOS)
+	{};
 	coxmatch_ofx_nw_tos(
 			uint8_t tos) :
 				coxmatch_8(rofl::openflow::experimental::OXM_TLV_EXPR_NW_TOS, tos)
@@ -4181,6 +4310,9 @@ public:
  */
 class coxmatch_ofx_nw_src : public coxmatch_32 {
 public:
+	coxmatch_ofx_nw_src() :
+				coxmatch_32(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC)
+	{};
 	coxmatch_ofx_nw_src(
 			uint32_t src) :
 				coxmatch_32(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC, src)
@@ -4224,6 +4356,9 @@ public:
  */
 class coxmatch_ofx_nw_dst : public coxmatch_32 {
 public:
+	coxmatch_ofx_nw_dst() :
+				coxmatch_32(rofl::openflow::experimental::OXM_TLV_EXPR_NW_DST)
+	{};
 	coxmatch_ofx_nw_dst(
 			uint32_t dst) :
 				coxmatch_32(rofl::openflow::experimental::OXM_TLV_EXPR_NW_DST, dst)
@@ -4268,6 +4403,9 @@ public:
  */
 class coxmatch_ofx_tp_src : public coxmatch_16 {
 public:
+	coxmatch_ofx_tp_src() :
+				coxmatch_16(rofl::openflow::experimental::OXM_TLV_EXPR_TP_SRC)
+	{};
 	coxmatch_ofx_tp_src(
 			uint16_t src) :
 				coxmatch_16(rofl::openflow::experimental::OXM_TLV_EXPR_TP_SRC, src)
@@ -4294,6 +4432,9 @@ public:
  */
 class coxmatch_ofx_tp_dst : public coxmatch_16 {
 public:
+	coxmatch_ofx_tp_dst() :
+				coxmatch_16(rofl::openflow::experimental::OXM_TLV_EXPR_TP_DST)
+	{};
 	coxmatch_ofx_tp_dst(
 			uint16_t dst) :
 				coxmatch_16(rofl::openflow::experimental::OXM_TLV_EXPR_TP_DST, dst)
