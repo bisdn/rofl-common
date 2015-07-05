@@ -95,9 +95,18 @@ coxmatches::unpack(
 		if (hdr->oxm_length > (sizeof(struct openflow::ofp_oxm_hdr) + buflen))
 			throw eBadMatchBadLen();
 
+
+		uint64_t oxm_type = 0;
+		if (be16toh(hdr->oxm_class) == rofl::openflow::OFPXMC_EXPERIMENTER) {
+			struct rofl::openflow::ofp_oxm_experimenter_header* oxm = (struct rofl::openflow::ofp_oxm_experimenter_header*)buf;
+			oxm_type = ((uint64_t)be32toh(oxm->experimenter)) << 32;
+		}
+
 		struct rofl::openflow::ofp_oxm_tlv_hdr* oxm = (struct rofl::openflow::ofp_oxm_tlv_hdr*)buf;
 
-		switch (OXM_TYPE(oxm->oxm_id)) {
+		oxm_type |= OXM_TYPE(oxm->oxm_id);
+
+		switch (oxm_type) {
 		case rofl::openflow::OXM_TLV_BASIC_IN_PORT: {
 			add_ofb_in_port().unpack(buf, buflen);
 		} break;
@@ -121,118 +130,118 @@ coxmatches::unpack(
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_VLAN_VID:
 		case rofl::openflow::OXM_TLV_BASIC_VLAN_VID_MASK: {
-
+			add_ofb_vlan_vid().unpack(buf, buflen);
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_VLAN_PCP: {
-
+			add_ofb_vlan_pcp().unpack(buf, buflen);
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_IP_DSCP: {
-
+			add_ofb_ip_dscp().unpack(buf, buflen);
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_IP_ECN: {
-
+			add_ofb_ip_ecn().unpack(buf, buflen);
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_IP_PROTO: {
-
+			add_ofb_ip_proto().unpack(buf, buflen);
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_IPV4_SRC:
 		case rofl::openflow::OXM_TLV_BASIC_IPV4_SRC_MASK: {
-
+			add_ofb_ipv4_src().unpack(buf, buflen);
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_IPV4_DST:
 		case rofl::openflow::OXM_TLV_BASIC_IPV4_DST_MASK: {
-
+			add_ofb_ipv4_dst().unpack(buf, buflen);
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_TCP_SRC: {
-
+			add_ofb_tcp_src().unpack(buf, buflen);
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_TCP_DST: {
-
+			add_ofb_tcp_dst().unpack(buf, buflen);
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_UDP_SRC: {
-
+			add_ofb_udp_src().unpack(buf, buflen);
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_UDP_DST: {
-
+			add_ofb_udp_dst().unpack(buf, buflen);
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_SCTP_SRC: {
-
+			add_ofb_sctp_src().unpack(buf, buflen);
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_SCTP_DST: {
-
+			add_ofb_sctp_dst().unpack(buf, buflen);
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_ICMPV4_TYPE: {
-
+			add_ofb_icmpv4_type().unpack(buf, buflen);
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_ICMPV4_CODE: {
-
+			add_ofb_icmpv4_code().unpack(buf, buflen);
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_ARP_OP: {
-
+			add_ofb_arp_opcode().unpack(buf, buflen);
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_ARP_SPA:
 		case rofl::openflow::OXM_TLV_BASIC_ARP_SPA_MASK: {
-
+			add_ofb_arp_spa().unpack(buf, buflen);
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_ARP_TPA:
 		case rofl::openflow::OXM_TLV_BASIC_ARP_TPA_MASK: {
-
+			add_ofb_arp_tpa().unpack(buf, buflen);
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_ARP_SHA:
 		case rofl::openflow::OXM_TLV_BASIC_ARP_SHA_MASK: {
-
+			add_ofb_arp_sha().unpack(buf, buflen);
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_ARP_THA:
 		case rofl::openflow::OXM_TLV_BASIC_ARP_THA_MASK: {
-
+			add_ofb_arp_tha().unpack(buf, buflen);
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_IPV6_SRC:
 		case rofl::openflow::OXM_TLV_BASIC_IPV6_SRC_MASK: {
-
+			add_ofb_ipv6_src().unpack(buf, buflen);
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_IPV6_DST:
 		case rofl::openflow::OXM_TLV_BASIC_IPV6_DST_MASK: {
-
+			add_ofb_ipv6_dst().unpack(buf, buflen);
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_IPV6_FLABEL:
 		case rofl::openflow::OXM_TLV_BASIC_IPV6_FLABEL_MASK: {
-
+			add_ofb_ipv6_flabel().unpack(buf, buflen);
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_ICMPV6_TYPE: {
-
+			add_ofb_icmpv6_type().unpack(buf, buflen);
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_ICMPV6_CODE: {
-
+			add_ofb_icmpv6_code().unpack(buf, buflen);
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TARGET: {
-
+			add_ofb_ipv6_nd_target().unpack(buf, buflen);
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_IPV6_ND_SLL: {
-
+			add_ofb_ipv6_nd_sll().unpack(buf, buflen);
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TLL: {
-
+			add_ofb_ipv6_nd_tll().unpack(buf, buflen);
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_MPLS_LABEL: {
-
+			add_ofb_mpls_label().unpack(buf, buflen);
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_MPLS_TC: {
-
+			add_ofb_mpls_tc().unpack(buf, buflen);
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_MPLS_BOS: {
-
+			add_ofb_mpls_bos().unpack(buf, buflen);
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_PBB_ISID:
 		case rofl::openflow::OXM_TLV_BASIC_PBB_ISID_MASK: {
-
+			add_ofb_pbb_isid().unpack(buf, buflen);
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_TUNNEL_ID:
 		case rofl::openflow::OXM_TLV_BASIC_TUNNEL_ID_MASK: {
-
+			add_ofb_mpls_bos().unpack(buf, buflen);
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_IPV6_EXTHDR:
 		case rofl::openflow::OXM_TLV_BASIC_IPV6_EXTHDR_MASK: {
-
+			add_ofb_ipv6_exthdr().unpack(buf, buflen);
 		} break;
 		case rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC:
 		case rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC_MASK: {
@@ -258,6 +267,8 @@ coxmatches::unpack(
 
 		};
 		}
+
+
 
 		//add_match(new coxmatch(buf, sizeof(struct openflow::ofp_oxm_hdr) + hdr->oxm_length));
 
@@ -477,140 +488,140 @@ coxmatches::copy_matches(
 			it = oxmatches.matches.begin(); it != oxmatches.matches.end(); ++it) {
 		switch (OXM_TYPE(it->first)) {
 		case rofl::openflow::OXM_TLV_BASIC_IN_PORT: {
-
+			add_ofb_in_port() = oxmatches.get_ofb_in_port();
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_IN_PHY_PORT: {
-
+			add_ofb_in_phy_port() = oxmatches.get_ofb_in_phy_port();
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_METADATA:
 		case rofl::openflow::OXM_TLV_BASIC_METADATA_MASK: {
-
+			add_ofb_metadata() = oxmatches.get_ofb_metadata();
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_ETH_DST:
 		case rofl::openflow::OXM_TLV_BASIC_ETH_DST_MASK: {
-
+			add_ofb_eth_dst() = oxmatches.get_ofb_eth_dst();
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_ETH_SRC:
 		case rofl::openflow::OXM_TLV_BASIC_ETH_SRC_MASK: {
-
+			add_ofb_eth_src() = oxmatches.get_ofb_eth_src();
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_ETH_TYPE: {
-
+			add_ofb_eth_type() = oxmatches.get_ofb_eth_type();
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_VLAN_VID:
 		case rofl::openflow::OXM_TLV_BASIC_VLAN_VID_MASK: {
-
+			add_ofb_vlan_vid() = oxmatches.get_ofb_vlan_vid();
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_VLAN_PCP: {
-
+			add_ofb_vlan_pcp() = oxmatches.get_ofb_vlan_pcp();
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_IP_DSCP: {
-
+			add_ofb_ip_dscp() = oxmatches.get_ofb_ip_dscp();
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_IP_ECN: {
-
+			add_ofb_ip_ecn() = oxmatches.get_ofb_ip_ecn();
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_IP_PROTO: {
-
+			add_ofb_ip_proto() = oxmatches.get_ofb_ip_proto();
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_IPV4_SRC:
 		case rofl::openflow::OXM_TLV_BASIC_IPV4_SRC_MASK: {
-
+			add_ofb_ipv4_src() = oxmatches.get_ofb_ipv4_src();
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_IPV4_DST:
 		case rofl::openflow::OXM_TLV_BASIC_IPV4_DST_MASK: {
-
+			add_ofb_ipv4_dst() = oxmatches.get_ofb_ipv4_dst();
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_TCP_SRC: {
-
+			add_ofb_tcp_src() = oxmatches.get_ofb_tcp_src();
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_TCP_DST: {
-
+			add_ofb_tcp_dst() = oxmatches.get_ofb_tcp_dst();
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_UDP_SRC: {
-
+			add_ofb_udp_src() = oxmatches.get_ofb_udp_src();
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_UDP_DST: {
-
+			add_ofb_udp_dst() = oxmatches.get_ofb_udp_dst();
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_SCTP_SRC: {
-
+			add_ofb_sctp_src() = oxmatches.get_ofb_sctp_src();
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_SCTP_DST: {
-
+			add_ofb_sctp_dst() = oxmatches.get_ofb_sctp_dst();
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_ICMPV4_TYPE: {
-
+			add_ofb_icmpv4_type() = oxmatches.get_ofb_icmpv4_type();
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_ICMPV4_CODE: {
-
+			add_ofb_icmpv4_code() = oxmatches.get_ofb_icmpv4_code();
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_ARP_OP: {
-
+			add_ofb_arp_opcode() = oxmatches.get_ofb_arp_opcode();
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_ARP_SPA:
 		case rofl::openflow::OXM_TLV_BASIC_ARP_SPA_MASK: {
-
+			add_ofb_arp_spa() = oxmatches.get_ofb_arp_spa();
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_ARP_TPA:
 		case rofl::openflow::OXM_TLV_BASIC_ARP_TPA_MASK: {
-
+			add_ofb_arp_tpa() = oxmatches.get_ofb_arp_tpa();
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_ARP_SHA:
 		case rofl::openflow::OXM_TLV_BASIC_ARP_SHA_MASK: {
-
+			add_ofb_arp_sha() = oxmatches.get_ofb_arp_sha();
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_ARP_THA:
 		case rofl::openflow::OXM_TLV_BASIC_ARP_THA_MASK: {
-
+			add_ofb_arp_tha() = oxmatches.get_ofb_arp_tha();
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_IPV6_SRC:
 		case rofl::openflow::OXM_TLV_BASIC_IPV6_SRC_MASK: {
-
+			add_ofb_ipv6_src() = oxmatches.get_ofb_ipv6_src();
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_IPV6_DST:
 		case rofl::openflow::OXM_TLV_BASIC_IPV6_DST_MASK: {
-
+			add_ofb_ipv6_dst() = oxmatches.get_ofb_ipv6_dst();
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_IPV6_FLABEL:
 		case rofl::openflow::OXM_TLV_BASIC_IPV6_FLABEL_MASK: {
-
+			add_ofb_ipv6_flabel() = oxmatches.get_ofb_ipv6_flabel();
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_ICMPV6_TYPE: {
-
+			add_ofb_icmpv6_type() = oxmatches.get_ofb_icmpv6_type();
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_ICMPV6_CODE: {
-
+			add_ofb_icmpv6_code() = oxmatches.get_ofb_icmpv6_code();
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TARGET: {
-
+			add_ofb_ipv6_nd_target() = oxmatches.get_ofb_ipv6_nd_target();
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_IPV6_ND_SLL: {
-
+			add_ofb_ipv6_nd_sll() = oxmatches.get_ofb_ipv6_nd_sll();
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TLL: {
-
+			add_ofb_ipv6_nd_tll() = oxmatches.get_ofb_ipv6_nd_tll();
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_MPLS_LABEL: {
-
+			add_ofb_mpls_label() = oxmatches.get_ofb_mpls_label();
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_MPLS_TC: {
-
+			add_ofb_mpls_tc() = oxmatches.get_ofb_mpls_tc();
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_MPLS_BOS: {
-
+			add_ofb_mpls_bos() = oxmatches.get_ofb_mpls_bos();
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_PBB_ISID:
 		case rofl::openflow::OXM_TLV_BASIC_PBB_ISID_MASK: {
-
+			add_ofb_pbb_isid() = oxmatches.get_ofb_pbb_isid();
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_TUNNEL_ID:
 		case rofl::openflow::OXM_TLV_BASIC_TUNNEL_ID_MASK: {
-
+			add_ofb_tunnel_id() = oxmatches.get_ofb_tunnel_id();
 		} break;
 		case rofl::openflow::OXM_TLV_BASIC_IPV6_EXTHDR:
 		case rofl::openflow::OXM_TLV_BASIC_IPV6_EXTHDR_MASK: {
-
+			add_ofb_ipv6_exthdr() = oxmatches.get_ofb_ipv6_exthdr();
 		} break;
 		case rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC:
 		case rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC_MASK: {

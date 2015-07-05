@@ -2281,6 +2281,26 @@ public:
 	{};
 
 	/**
+	 * @brief	coxmatch base class for single 32bit values
+	 */
+	coxmatch_32_exp(
+			uint32_t oxm_id, uint32_t exp_id, const rofl::caddress_in4& value) :
+				coxmatch_exp(oxm_id, exp_id),
+				value(0),
+				mask(0xffffffff)
+	{ set_u32value(value); };
+
+	/**
+	 * @brief	coxmatch base class for masked 32bit values
+	 */
+	coxmatch_32_exp(
+			uint32_t oxm_id, uint32_t exp_id, const rofl::caddress_in4& value, const rofl::caddress_in4& mask) :
+				coxmatch_exp(oxm_id, exp_id),
+				value(0),
+				mask(0xffffffff)
+	{ set_u32value(value); set_u32mask(mask); };
+
+	/**
 	 * @brief	coxmatch base class for masked 32bit values
 	 */
 	coxmatch_32_exp(
@@ -2337,6 +2357,32 @@ public:
 	uint32_t
 	get_u32masked_value() const
 	{ return (value & mask); };
+
+public:
+
+	rofl::caddress_in4
+	get_u32value_as_addr() const
+	{ caddress_in4 addr; addr.set_addr_hbo(value); return addr; };
+
+	coxmatch_32&
+	set_u32value(
+			const rofl::caddress_in4& addr)
+	{ value = addr.get_addr_hbo(); return *this; };
+
+	rofl::caddress_in4
+	get_u32mask_as_addr() const
+	{ caddress_in4 addr; addr.set_addr_hbo(mask); return addr; };
+
+	coxmatch_32&
+	set_u32mask(
+			const rofl::caddress_in4& addr)
+	{ mask = addr.get_addr_hbo(); set_oxm_hasmask(true); return *this; };
+
+public:
+
+	rofl::caddress_in4
+	get_u32masked_value_as_addr() const
+	{ return (get_u32value_as_addr() & get_u32mask_as_addr()); };
 
 public:
 
@@ -4249,18 +4295,18 @@ public:
 /**
  * @brief	OXM_OF_NW_PROTO (pseudo OXM-TLV for OF1.0 backwards compatibility)
  */
-class coxmatch_ofx_nw_proto : public coxmatch_8 {
+class coxmatch_ofx_nw_proto : public coxmatch_8_exp {
 public:
 	coxmatch_ofx_nw_proto() :
-				coxmatch_8(rofl::openflow::experimental::OXM_TLV_EXPR_NW_PROTO)
+				coxmatch_8_exp(rofl::openflow::experimental::OXM_TLV_EXPR_NW_PROTO, ROFL_EXP_ID)
 	{};
 	coxmatch_ofx_nw_proto(
 			uint8_t proto) :
-				coxmatch_8(rofl::openflow::experimental::OXM_TLV_EXPR_NW_PROTO, proto)
+				coxmatch_8_exp(rofl::openflow::experimental::OXM_TLV_EXPR_NW_PROTO, ROFL_EXP_ID, proto)
 	{};
 	coxmatch_ofx_nw_proto(
-			const coxmatch_8& oxm) :
-				coxmatch_8(oxm)
+			const coxmatch_8_exp& oxm) :
+				coxmatch_8_exp(oxm)
 	{};
 	virtual
 	~coxmatch_ofx_nw_proto()
@@ -4278,18 +4324,18 @@ public:
 /**
  * @brief	OXM_OF_NW_TOS (pseudo OXM-TLV for OF1.0 backwards compatibility)
  */
-class coxmatch_ofx_nw_tos : public coxmatch_8 {
+class coxmatch_ofx_nw_tos : public coxmatch_8_exp {
 public:
 	coxmatch_ofx_nw_tos() :
-				coxmatch_8(rofl::openflow::experimental::OXM_TLV_EXPR_NW_TOS)
+				coxmatch_8_exp(rofl::openflow::experimental::OXM_TLV_EXPR_NW_TOS, ROFL_EXP_ID)
 	{};
 	coxmatch_ofx_nw_tos(
 			uint8_t tos) :
-				coxmatch_8(rofl::openflow::experimental::OXM_TLV_EXPR_NW_TOS, tos)
+				coxmatch_8_exp(rofl::openflow::experimental::OXM_TLV_EXPR_NW_TOS, ROFL_EXP_ID, tos)
 	{};
 	coxmatch_ofx_nw_tos(
-			const coxmatch_8& oxm) :
-				coxmatch_8(oxm)
+			const coxmatch_8_exp& oxm) :
+				coxmatch_8_exp(oxm)
 	{};
 	virtual
 	~coxmatch_ofx_nw_tos()
@@ -4308,30 +4354,30 @@ public:
 /**
  * @brief	OXM_OF_NW_SRC (pseudo OXM-TLV for OF1.0 backwards compatibility)
  */
-class coxmatch_ofx_nw_src : public coxmatch_32 {
+class coxmatch_ofx_nw_src : public coxmatch_32_exp {
 public:
 	coxmatch_ofx_nw_src() :
-				coxmatch_32(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC)
+				coxmatch_32_exp(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC, ROFL_EXP_ID)
 	{};
 	coxmatch_ofx_nw_src(
 			uint32_t src) :
-				coxmatch_32(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC, src)
+				coxmatch_32_exp(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC, ROFL_EXP_ID, src)
 	{};
 	coxmatch_ofx_nw_src(
 			uint32_t src, uint32_t mask) :
-				coxmatch_32(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC_MASK, src, mask)
+				coxmatch_32_exp(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC_MASK, ROFL_EXP_ID, src, mask)
 	{};
 	coxmatch_ofx_nw_src(
 			const caddress_in4& src) :
-				coxmatch_32(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC, src)
+				coxmatch_32_exp(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC, ROFL_EXP_ID, src)
 	{};
 	coxmatch_ofx_nw_src(
 			const caddress_in4& src, const caddress_in4& mask) :
-				coxmatch_32(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC_MASK, src, mask)
+				coxmatch_32_exp(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC_MASK, ROFL_EXP_ID, src, mask)
 	{};
 	coxmatch_ofx_nw_src(
-			const coxmatch_32& oxm) :
-				coxmatch_32(oxm)
+			const coxmatch_32_exp& oxm) :
+				coxmatch_32_exp(oxm)
 	{};
 	virtual
 	~coxmatch_ofx_nw_src()
