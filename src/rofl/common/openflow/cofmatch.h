@@ -235,22 +235,22 @@ public:
 	 return static_cast<const coxmatch_ofx_nw_tos*>(matches.get_match(rofl::openflow::experimental::OXM_TLV_EXPR_NW_TOS))->get_u8value();
 	};
 	caddress_in4 get_nw_src() const {
-	 return static_cast<const coxmatch_ofx_nw_src_masked*>(matches.get_match(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC_MASK))->get_u32masked_value_as_addr();
+	 return static_cast<const coxmatch_ofx_nw_src*>(matches.get_match(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC_MASK))->get_u32masked_value_as_addr();
 	};
 	caddress_in4 get_nw_src_value() const {
-	 return static_cast<const coxmatch_ofx_nw_src_masked*>(matches.get_match(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC_MASK))->get_u32value_as_addr();
+	 return static_cast<const coxmatch_ofx_nw_src*>(matches.get_match(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC_MASK))->get_u32value_as_addr();
 	};
 	caddress_in4 get_nw_src_mask() const {
-	 return static_cast<const coxmatch_ofx_nw_src_masked*>(matches.get_match(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC_MASK))->get_u32mask_as_addr();
+	 return static_cast<const coxmatch_ofx_nw_src*>(matches.get_match(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC_MASK))->get_u32mask_as_addr();
 	};
 	caddress_in4 get_nw_dst() const {
-	 return static_cast<const coxmatch_ofx_nw_dst_masked*>(matches.get_match(rofl::openflow::experimental::OXM_TLV_EXPR_NW_DST_MASK))->get_u32masked_value_as_addr();
+	 return static_cast<const coxmatch_ofx_nw_dst*>(matches.get_match(rofl::openflow::experimental::OXM_TLV_EXPR_NW_DST_MASK))->get_u32masked_value_as_addr();
 	};
 	caddress_in4 get_nw_dst_value() const {
-	 return static_cast<const coxmatch_ofx_nw_dst_masked*>(matches.get_match(rofl::openflow::experimental::OXM_TLV_EXPR_NW_DST_MASK))->get_u32value_as_addr();
+	 return static_cast<const coxmatch_ofx_nw_dst*>(matches.get_match(rofl::openflow::experimental::OXM_TLV_EXPR_NW_DST_MASK))->get_u32value_as_addr();
 	};
 	caddress_in4 get_nw_dst_mask() const {
-	 return static_cast<const coxmatch_ofx_nw_dst_masked*>(matches.get_match(rofl::openflow::experimental::OXM_TLV_EXPR_NW_DST_MASK))->get_u32mask_as_addr();
+	 return static_cast<const coxmatch_ofx_nw_dst*>(matches.get_match(rofl::openflow::experimental::OXM_TLV_EXPR_NW_DST_MASK))->get_u32mask_as_addr();
 	};
 	uint16_t get_tp_src() const {
 	 return static_cast<const coxmatch_ofx_tp_src*>(matches.get_match(rofl::openflow::experimental::OXM_TLV_EXPR_TP_SRC))->get_u16value();
@@ -267,43 +267,43 @@ public:
 	 return static_cast<const coxmatch_ofb_in_phy_port*>(matches.get_match(OXM_TLV_BASIC_IN_PHY_PORT))->get_u32value();
 	};
 	uint64_t get_metadata() const {
-	 return static_cast<const coxmatch_ofb_metadata_masked*>(matches.get_match(OXM_TLV_BASIC_METADATA))->get_u64masked_value();
+	 return static_cast<const coxmatch_ofb_metadata*>(matches.get_match(OXM_TLV_BASIC_METADATA))->get_u64masked_value();
 	};
 	uint64_t get_metadata_value() const {
 	 return static_cast<const coxmatch_64*>(matches.get_match(OXM_TLV_BASIC_METADATA))->get_u64value();
 	};
 	uint64_t get_metadata_mask() const {
-	 return static_cast<const coxmatch_64_masked*>(matches.get_match(OXM_TLV_BASIC_METADATA))->get_u64mask();
+	 return static_cast<const coxmatch_64*>(matches.get_match(OXM_TLV_BASIC_METADATA))->get_u64mask();
 	};
 	cmacaddr get_eth_dst() const {
-	 return static_cast<const coxmatch_48_masked*>(matches.get_match(OXM_TLV_BASIC_ETH_DST))->get_u48masked_value_as_lladdr();
+	 return static_cast<const coxmatch_48*>(matches.get_match(OXM_TLV_BASIC_ETH_DST))->get_u48masked_value_as_lladdr();
 	};
 	cmacaddr get_eth_dst_addr() const {
 	 return static_cast<const coxmatch_48*>(matches.get_match(OXM_TLV_BASIC_ETH_DST))->get_u48value_as_lladdr();
 	};
 	cmacaddr get_eth_dst_mask() const {
-	 return static_cast<const coxmatch_48_masked*>(matches.get_match(OXM_TLV_BASIC_ETH_DST))->get_u48mask_as_lladdr();
+	 return static_cast<const coxmatch_48*>(matches.get_match(OXM_TLV_BASIC_ETH_DST))->get_u48mask_as_lladdr();
 	};
 	cmacaddr get_eth_src() const {
-	 return static_cast<const coxmatch_48_masked*>(matches.get_match(OXM_TLV_BASIC_ETH_SRC))->get_u48masked_value_as_lladdr();
+	 return static_cast<const coxmatch_48*>(matches.get_match(OXM_TLV_BASIC_ETH_SRC))->get_u48masked_value_as_lladdr();
 	};
 	cmacaddr get_eth_src_addr() const {
 	 return static_cast<const coxmatch_48*>(matches.get_match(OXM_TLV_BASIC_ETH_SRC))->get_u48value_as_lladdr();
 	};
 	cmacaddr get_eth_src_mask() const {
-	 return static_cast<const coxmatch_48_masked*>(matches.get_match(OXM_TLV_BASIC_ETH_SRC))->get_u48mask_as_lladdr();
+	 return static_cast<const coxmatch_48*>(matches.get_match(OXM_TLV_BASIC_ETH_SRC))->get_u48mask_as_lladdr();
 	};
 	uint16_t get_eth_type() const {
 	 return static_cast<const coxmatch_16*>(matches.get_match(OXM_TLV_BASIC_ETH_TYPE))->get_u16value();
 	};
 	uint16_t get_vlan_vid() const {
-	 return static_cast<const coxmatch_16_masked*>(matches.get_match(OXM_TLV_BASIC_VLAN_VID))->get_u16masked_value();
+	 return static_cast<const coxmatch_16*>(matches.get_match(OXM_TLV_BASIC_VLAN_VID))->get_u16masked_value();
 	};
 	uint16_t get_vlan_vid_value() const {
 	 return static_cast<const coxmatch_16*>(matches.get_match(OXM_TLV_BASIC_VLAN_VID))->get_u16value();
 	};
 	uint16_t get_vlan_vid_mask() const {
-	 return static_cast<const coxmatch_16_masked*>(matches.get_match(OXM_TLV_BASIC_VLAN_VID))->get_u16mask();
+	 return static_cast<const coxmatch_16*>(matches.get_match(OXM_TLV_BASIC_VLAN_VID))->get_u16mask();
 	};
 	uint8_t  get_vlan_pcp() const {
 	 return static_cast<const coxmatch_8*>(matches.get_match(OXM_TLV_BASIC_VLAN_PCP))->get_u8value();
@@ -315,79 +315,79 @@ public:
 	 return static_cast<const coxmatch_8*>(matches.get_match(OXM_TLV_BASIC_MPLS_TC))->get_u8value();
 	};
 	caddress_in4 get_ipv4_src() const {
-	 return static_cast<const coxmatch_32_masked*>(matches.get_match(OXM_TLV_BASIC_IPV4_SRC))->get_u32masked_value_as_addr();
+	 return static_cast<const coxmatch_32*>(matches.get_match(OXM_TLV_BASIC_IPV4_SRC))->get_u32masked_value_as_addr();
 	};
 	caddress_in4 get_ipv4_src_value() const {
 	 return static_cast<const coxmatch_32*>(matches.get_match(OXM_TLV_BASIC_IPV4_SRC))->get_u32value_as_addr();
 	};
 	caddress_in4 get_ipv4_src_mask() const {
-	 return static_cast<const coxmatch_32_masked*>(matches.get_match(OXM_TLV_BASIC_IPV4_SRC))->get_u32mask_as_addr();
+	 return static_cast<const coxmatch_32*>(matches.get_match(OXM_TLV_BASIC_IPV4_SRC))->get_u32mask_as_addr();
 	};
 	caddress_in4 get_ipv4_dst() const {
-	 return static_cast<const coxmatch_32_masked*>(matches.get_match(OXM_TLV_BASIC_IPV4_DST))->get_u32masked_value_as_addr();
+	 return static_cast<const coxmatch_32*>(matches.get_match(OXM_TLV_BASIC_IPV4_DST))->get_u32masked_value_as_addr();
 	};
 	caddress_in4 get_ipv4_dst_value() const {
 	 return static_cast<const coxmatch_32*>(matches.get_match(OXM_TLV_BASIC_IPV4_DST))->get_u32value_as_addr();
 	};
 	caddress_in4 get_ipv4_dst_mask() const {
-	 return static_cast<const coxmatch_32_masked*>(matches.get_match(OXM_TLV_BASIC_IPV4_DST))->get_u32mask_as_addr();
+	 return static_cast<const coxmatch_32*>(matches.get_match(OXM_TLV_BASIC_IPV4_DST))->get_u32mask_as_addr();
 	};
 	uint16_t get_arp_opcode() const {
 	 return static_cast<const coxmatch_16*>(matches.get_match(OXM_TLV_BASIC_ARP_OP))->get_u16value();
 	};
 	cmacaddr get_arp_sha() const {
-	 return static_cast<const coxmatch_48_masked*>(matches.get_match(OXM_TLV_BASIC_ARP_SHA))->get_u48masked_value_as_lladdr();
+	 return static_cast<const coxmatch_48*>(matches.get_match(OXM_TLV_BASIC_ARP_SHA))->get_u48masked_value_as_lladdr();
 	};
 	cmacaddr get_arp_sha_addr() const {
 	 return static_cast<const coxmatch_48*>(matches.get_match(OXM_TLV_BASIC_ARP_SHA))->get_u48value_as_lladdr();
 	};
 	cmacaddr get_arp_sha_mask() const {
-	 return static_cast<const coxmatch_48_masked*>(matches.get_match(OXM_TLV_BASIC_ARP_SHA))->get_u48mask_as_lladdr();
+	 return static_cast<const coxmatch_48*>(matches.get_match(OXM_TLV_BASIC_ARP_SHA))->get_u48mask_as_lladdr();
 	};
 	cmacaddr get_arp_tha() const {
-	 return static_cast<const coxmatch_48_masked*>(matches.get_match(OXM_TLV_BASIC_ARP_THA))->get_u48masked_value_as_lladdr();
+	 return static_cast<const coxmatch_48*>(matches.get_match(OXM_TLV_BASIC_ARP_THA))->get_u48masked_value_as_lladdr();
 	};
 	cmacaddr get_arp_tha_addr() const {
 	 return static_cast<const coxmatch_48*>(matches.get_match(OXM_TLV_BASIC_ARP_THA))->get_u48value_as_lladdr();
 	};
 	cmacaddr get_arp_tha_mask() const {
-	 return static_cast<const coxmatch_48_masked*>(matches.get_match(OXM_TLV_BASIC_ARP_THA))->get_u48mask_as_lladdr();
+	 return static_cast<const coxmatch_48*>(matches.get_match(OXM_TLV_BASIC_ARP_THA))->get_u48mask_as_lladdr();
 	};
 	caddress_in4 get_arp_spa() const {
-	 return static_cast<const coxmatch_32_masked*>(matches.get_match(OXM_TLV_BASIC_ARP_SPA))->get_u32masked_value_as_addr();
+	 return static_cast<const coxmatch_32*>(matches.get_match(OXM_TLV_BASIC_ARP_SPA))->get_u32masked_value_as_addr();
 	};
 	caddress_in4 get_arp_spa_value() const {
 	 return static_cast<const coxmatch_32*>(matches.get_match(OXM_TLV_BASIC_ARP_SPA))->get_u32value_as_addr();
 	};
 	caddress_in4 get_arp_spa_mask() const {
-	 return static_cast<const coxmatch_32_masked*>(matches.get_match(OXM_TLV_BASIC_ARP_SPA))->get_u32mask_as_addr();
+	 return static_cast<const coxmatch_32*>(matches.get_match(OXM_TLV_BASIC_ARP_SPA))->get_u32mask_as_addr();
 	};
 	caddress_in4 get_arp_tpa() const {
-	 return static_cast<const coxmatch_32_masked*>(matches.get_match(OXM_TLV_BASIC_ARP_TPA))->get_u32masked_value_as_addr();
+	 return static_cast<const coxmatch_32*>(matches.get_match(OXM_TLV_BASIC_ARP_TPA))->get_u32masked_value_as_addr();
 	};
 	caddress_in4 get_arp_tpa_value() const {
-	 return static_cast<const coxmatch_32_masked*>(matches.get_match(OXM_TLV_BASIC_ARP_TPA))->get_u32value_as_addr();
+	 return static_cast<const coxmatch_32*>(matches.get_match(OXM_TLV_BASIC_ARP_TPA))->get_u32value_as_addr();
 	};
 	caddress_in4 get_arp_tpa_mask() const {
-	 return static_cast<const coxmatch_32_masked*>(matches.get_match(OXM_TLV_BASIC_ARP_TPA))->get_u32mask_as_addr();
+	 return static_cast<const coxmatch_32*>(matches.get_match(OXM_TLV_BASIC_ARP_TPA))->get_u32mask_as_addr();
 	};
 	caddress_in6 get_ipv6_src() const {
-	 return static_cast<const coxmatch_128_masked*>(matches.get_match(OXM_TLV_BASIC_IPV6_SRC))->get_u128masked_value();
+	 return static_cast<const coxmatch_128*>(matches.get_match(OXM_TLV_BASIC_IPV6_SRC))->get_u128masked_value();
 	};
 	caddress_in6 get_ipv6_src_value() const {
 	 return static_cast<const coxmatch_128*>(matches.get_match(OXM_TLV_BASIC_IPV6_SRC))->get_u128value();
 	};
 	caddress_in6 get_ipv6_src_mask() const {
-	 return static_cast<const coxmatch_128_masked*>(matches.get_match(OXM_TLV_BASIC_IPV6_SRC))->get_u128mask();
+	 return static_cast<const coxmatch_128*>(matches.get_match(OXM_TLV_BASIC_IPV6_SRC))->get_u128mask();
 	};
 	caddress_in6 get_ipv6_dst() const {
-	 return static_cast<const coxmatch_128_masked*>(matches.get_match(OXM_TLV_BASIC_IPV6_DST))->get_u128masked_value();
+	 return static_cast<const coxmatch_128*>(matches.get_match(OXM_TLV_BASIC_IPV6_DST))->get_u128masked_value();
 	};
 	caddress_in6 get_ipv6_dst_value() const {
 	 return static_cast<const coxmatch_128*>(matches.get_match(OXM_TLV_BASIC_IPV6_DST))->get_u128value();
 	};
 	caddress_in6 get_ipv6_dst_mask() const {
-	 return static_cast<const coxmatch_128_masked*>(matches.get_match(OXM_TLV_BASIC_IPV6_DST))->get_u128mask();
+	 return static_cast<const coxmatch_128*>(matches.get_match(OXM_TLV_BASIC_IPV6_DST))->get_u128mask();
 	};
 	uint8_t  get_ip_proto() const {
 	 return static_cast<const coxmatch_8*>(matches.get_match(OXM_TLV_BASIC_IP_PROTO))->get_u8value();
@@ -411,22 +411,22 @@ public:
 	 return static_cast<const coxmatch_8*>(matches.get_match(OXM_TLV_BASIC_ICMPV6_CODE))->get_u8value();
 	};
 	uint32_t get_ipv6_flabel() const {
-	 return static_cast<const coxmatch_32_masked*>(matches.get_match(OXM_TLV_BASIC_IPV6_FLABEL))->get_u32masked_value();
+	 return static_cast<const coxmatch_32*>(matches.get_match(OXM_TLV_BASIC_IPV6_FLABEL))->get_u32masked_value();
 	};
 	uint32_t get_ipv6_flabel_value() const {
 	 return static_cast<const coxmatch_32*>(matches.get_match(OXM_TLV_BASIC_IPV6_FLABEL))->get_u32value();
 	};
 	uint32_t get_ipv6_flabel_mask() const {
-	 return static_cast<const coxmatch_32_masked*>(matches.get_match(OXM_TLV_BASIC_IPV6_FLABEL))->get_u32mask();
+	 return static_cast<const coxmatch_32*>(matches.get_match(OXM_TLV_BASIC_IPV6_FLABEL))->get_u32mask();
 	};
 	cmacaddr get_ipv6_nd_sll() const {
-	 return static_cast<const coxmatch_48_masked*>(matches.get_match(OXM_TLV_BASIC_IPV6_ND_SLL))->get_u48masked_value_as_lladdr();
+	 return static_cast<const coxmatch_48*>(matches.get_match(OXM_TLV_BASIC_IPV6_ND_SLL))->get_u48masked_value_as_lladdr();
 	};
 	cmacaddr get_ipv6_nd_tll() const {
-	 return static_cast<const coxmatch_48_masked*>(matches.get_match(OXM_TLV_BASIC_IPV6_ND_TLL))->get_u48masked_value_as_lladdr();
+	 return static_cast<const coxmatch_48*>(matches.get_match(OXM_TLV_BASIC_IPV6_ND_TLL))->get_u48masked_value_as_lladdr();
 	};
 	caddress_in6 get_ipv6_nd_target() const {
-	 return static_cast<const coxmatch_128_masked*>(matches.get_match(OXM_TLV_BASIC_IPV6_ND_TARGET))->get_u128masked_value();
+	 return static_cast<const coxmatch_128*>(matches.get_match(OXM_TLV_BASIC_IPV6_ND_TARGET))->get_u128masked_value();
 	};
 	uint16_t get_udp_src() const {
 	 return static_cast<const coxmatch_16*>(matches.get_match(OXM_TLV_BASIC_UDP_SRC))->get_u16value();
@@ -452,31 +452,31 @@ public:
 	 return static_cast<const coxmatch_8*>(matches.get_match(OXM_TLV_BASIC_MPLS_BOS))->get_u8value();
 	};
 	uint64_t get_tunnel_id() const {
-	 return static_cast<const coxmatch_64_masked*>(matches.get_match(OXM_TLV_BASIC_TUNNEL_ID))->get_u64masked_value();
+	 return static_cast<const coxmatch_64*>(matches.get_match(OXM_TLV_BASIC_TUNNEL_ID))->get_u64masked_value();
 	};
 	uint64_t get_tunnel_id_value() const {
 	 return static_cast<const coxmatch_64*>(matches.get_match(OXM_TLV_BASIC_TUNNEL_ID))->get_u64value();
 	};
 	uint64_t get_tunnel_id_mask() const {
-	 return static_cast<const coxmatch_64_masked*>(matches.get_match(OXM_TLV_BASIC_TUNNEL_ID))->get_u64mask();
+	 return static_cast<const coxmatch_64*>(matches.get_match(OXM_TLV_BASIC_TUNNEL_ID))->get_u64mask();
 	};
 	uint32_t get_pbb_isid() const {
-	 return static_cast<const coxmatch_24_masked*>(matches.get_match(OXM_TLV_BASIC_PBB_ISID))->get_u24masked_value();
+	 return static_cast<const coxmatch_24*>(matches.get_match(OXM_TLV_BASIC_PBB_ISID))->get_u24masked_value();
 	};
 	uint32_t get_pbb_isid_value() const {
 	 return static_cast<const coxmatch_24*>(matches.get_match(OXM_TLV_BASIC_PBB_ISID))->get_u24value();
 	};
 	uint32_t get_pbb_isid_mask() const {
-	 return static_cast<const coxmatch_24_masked*>(matches.get_match(OXM_TLV_BASIC_PBB_ISID))->get_u24mask();
+	 return static_cast<const coxmatch_24*>(matches.get_match(OXM_TLV_BASIC_PBB_ISID))->get_u24mask();
 	};
 	uint16_t get_ipv6_exthdr() const {
-	 return static_cast<const coxmatch_16_masked*>(matches.get_match(OXM_TLV_BASIC_IPV6_EXTHDR))->get_u16masked_value();
+	 return static_cast<const coxmatch_16*>(matches.get_match(OXM_TLV_BASIC_IPV6_EXTHDR))->get_u16masked_value();
 	};
 	uint16_t get_ipv6_exthdr_value() const {
 	 return static_cast<const coxmatch_16*>(matches.get_match(OXM_TLV_BASIC_IPV6_EXTHDR))->get_u16value();
 	};
 	uint16_t get_ipv6_exthdr_mask() const {
-	 return static_cast<const coxmatch_16_masked*>(matches.get_match(OXM_TLV_BASIC_IPV6_EXTHDR))->get_u16mask();
+	 return static_cast<const coxmatch_16*>(matches.get_match(OXM_TLV_BASIC_IPV6_EXTHDR))->get_u16mask();
 	};
 
      // OF10
@@ -490,13 +490,13 @@ public:
 		matches.add_match(new coxmatch_ofx_nw_src(src));
 	};
 	void set_nw_src(const caddress_in4& src, const caddress_in4& mask) {
-		matches.add_match(new coxmatch_ofx_nw_src_masked(src, mask));
+		matches.add_match(new coxmatch_ofx_nw_src(src, mask));
 	};
 	void set_nw_dst(const caddress_in4& dst) {
 		matches.add_match(new coxmatch_ofx_nw_dst(dst));
 	};
 	void set_nw_dst(const caddress_in4& dst, const caddress_in4& mask) {
-		matches.add_match(new coxmatch_ofx_nw_dst_masked(dst, mask));
+		matches.add_match(new coxmatch_ofx_nw_dst(dst, mask));
 	};
 	void set_tp_src(uint16_t src_port) {
 		matches.add_match(new coxmatch_ofx_tp_src(src_port));
@@ -516,19 +516,19 @@ public:
 		matches.add_match(new coxmatch_ofb_metadata(metadata));
 	};
 	void set_metadata(uint64_t metadata, uint64_t mask) {
-		matches.add_match(new coxmatch_ofb_metadata_masked(metadata, mask));
+		matches.add_match(new coxmatch_ofb_metadata(metadata, mask));
 	};
 	void set_eth_dst(const cmacaddr& maddr) {
 		matches.add_match(new coxmatch_ofb_eth_dst(maddr));
 	};
 	void set_eth_dst(const cmacaddr& maddr, const cmacaddr& mmask) {
-		matches.add_match(new coxmatch_ofb_eth_dst_masked(maddr, mmask));
+		matches.add_match(new coxmatch_ofb_eth_dst(maddr, mmask));
 	};
 	void set_eth_src(const cmacaddr& maddr) {
 		matches.add_match(new coxmatch_ofb_eth_src(maddr));
 	};
 	void set_eth_src(const cmacaddr& maddr, const cmacaddr& mmask) {
-		matches.add_match(new coxmatch_ofb_eth_src_masked(maddr, mmask));
+		matches.add_match(new coxmatch_ofb_eth_src(maddr, mmask));
 	};
 	void set_eth_type( uint16_t dl_type) {
 		matches.add_match(new coxmatch_ofb_eth_type(dl_type));
@@ -537,7 +537,7 @@ public:
 		matches.add_match(new coxmatch_ofb_vlan_vid(vid));
 	};
 	void set_vlan_vid(uint16_t vid, uint16_t mask) {
-		matches.add_match(new coxmatch_ofb_vlan_vid_masked(vid, mask));
+		matches.add_match(new coxmatch_ofb_vlan_vid(vid, mask));
 	};
 	void set_vlan_present() {
 		matches.add_match(new coxmatch_ofb_vlan_present());
@@ -561,13 +561,13 @@ public:
 		matches.add_match(new coxmatch_ofb_ipv4_src(src));
 	};
 	void set_ipv4_src(const caddress_in4& src, const caddress_in4& mask) {
-		matches.add_match(new coxmatch_ofb_ipv4_src_masked(src, mask));
+		matches.add_match(new coxmatch_ofb_ipv4_src(src, mask));
 	};
 	void set_ipv4_dst(const caddress_in4& dst) {
 		matches.add_match(new coxmatch_ofb_ipv4_dst(dst));
 	};
 	void set_ipv4_dst(const caddress_in4& dst, const caddress_in4& mask) {
-		matches.add_match(new coxmatch_ofb_ipv4_dst_masked(dst, mask));
+		matches.add_match(new coxmatch_ofb_ipv4_dst(dst, mask));
 	};
 	void set_tcp_src(uint16_t src_port) {
 		matches.add_match(new coxmatch_ofb_tcp_src(src_port));
@@ -600,43 +600,43 @@ public:
 		matches.add_match(new coxmatch_ofb_arp_spa(spa));
 	};
 	void set_arp_spa(const caddress_in4& spa, const caddress_in4& mask) {
-		matches.add_match(new coxmatch_ofb_arp_spa_masked(spa, mask));
+		matches.add_match(new coxmatch_ofb_arp_spa(spa, mask));
 	};
 	void set_arp_tpa(const caddress_in4& tpa) {
 		matches.add_match(new coxmatch_ofb_arp_tpa(tpa));
 	};
 	void set_arp_tpa(const caddress_in4& tpa, const caddress_in4& mask) {
-		matches.add_match(new coxmatch_ofb_arp_tpa_masked(tpa, mask));
+		matches.add_match(new coxmatch_ofb_arp_tpa(tpa, mask));
 	};
 	void set_arp_sha(const cmacaddr& sha) {
 		matches.add_match(new coxmatch_ofb_arp_sha(sha));
 	};
 	void set_arp_sha(const cmacaddr& sha, const cmacaddr& mmask) {
-		matches.add_match(new coxmatch_ofb_arp_sha_masked(sha, mmask));
+		matches.add_match(new coxmatch_ofb_arp_sha(sha, mmask));
 	};
 	void set_arp_tha(const cmacaddr& tha) {
 		matches.add_match(new coxmatch_ofb_arp_tha(tha));
 	};
 	void set_arp_tha(const cmacaddr& tha, const cmacaddr& mmask) {
-		matches.add_match(new coxmatch_ofb_arp_tha_masked(tha, mmask));
+		matches.add_match(new coxmatch_ofb_arp_tha(tha, mmask));
 	};
 	void set_ipv6_src(const caddress_in6& addr) {
 		matches.add_match(new coxmatch_ofb_ipv6_src(addr));
 	};
 	void set_ipv6_src(const caddress_in6& addr, const caddress_in6& mask) {
-		matches.add_match(new coxmatch_ofb_ipv6_src_masked(addr, mask));
+		matches.add_match(new coxmatch_ofb_ipv6_src(addr, mask));
 	};
 	void set_ipv6_dst(const caddress_in6& addr) {
 		matches.add_match(new coxmatch_ofb_ipv6_dst(addr));
 	};
 	void set_ipv6_dst(const caddress_in6& addr, const caddress_in6& mask) {
-		matches.add_match(new coxmatch_ofb_ipv6_dst_masked(addr, mask));
+		matches.add_match(new coxmatch_ofb_ipv6_dst(addr, mask));
 	};
 	void set_ipv6_flabel(uint32_t flabel) {
 		matches.add_match(new coxmatch_ofb_ipv6_flabel(flabel));
 	};
 	void set_ipv6_flabel(uint32_t flabel, uint32_t mask) {
-		matches.add_match(new coxmatch_ofb_ipv6_flabel_masked(flabel, mask));
+		matches.add_match(new coxmatch_ofb_ipv6_flabel(flabel, mask));
 	};
 	void set_icmpv6_type(uint8_t type) {
 		matches.add_match(new coxmatch_ofb_icmpv6_type(type));
@@ -668,19 +668,19 @@ public:
 		matches.add_match(new coxmatch_ofb_tunnel_id(tunnel_id));
 	};
 	void set_tunnel_id(uint64_t tunnel_id, uint64_t mask) {
-		matches.add_match(new coxmatch_ofb_tunnel_id_masked(tunnel_id, mask));
+		matches.add_match(new coxmatch_ofb_tunnel_id(tunnel_id, mask));
 	};
 	void set_pbb_isid(uint32_t pbb_isid) {
 		matches.add_match(new coxmatch_ofb_pbb_isid(pbb_isid));
 	};
 	void set_pbb_isid(uint32_t pbb_isid, uint32_t mask) {
-		matches.add_match(new coxmatch_ofb_pbb_isid_masked(pbb_isid, mask));
+		matches.add_match(new coxmatch_ofb_pbb_isid(pbb_isid, mask));
 	};
 	void set_ipv6_exthdr(uint16_t ipv6_exthdr) {
 		matches.add_match(new coxmatch_ofb_ipv6_exthdr(ipv6_exthdr));
 	};
 	void set_ipv6_exthdr(uint16_t ipv6_exthdr, uint16_t mask) {
-		matches.add_match(new coxmatch_ofb_ipv6_exthdr_masked(ipv6_exthdr, mask));
+		matches.add_match(new coxmatch_ofb_ipv6_exthdr(ipv6_exthdr, mask));
 	};
 
 public:

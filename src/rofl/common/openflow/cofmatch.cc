@@ -178,7 +178,6 @@ cofmatch::pack_of10(uint8_t* buf, size_t buflen)
 		coxmatch_32 const *oxm = static_cast<const coxmatch_32*>(matches.get_match(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC));
 		m->nw_src = htobe32(oxm->get_u32value());
 		if (oxm->get_oxm_hasmask()) {
-			coxmatch_32_masked const *oxm = static_cast<const coxmatch_32_masked*>(matches.get_match(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC_MASK));
 			std::bitset<32> mask(oxm->get_u32mask());
 			wildcards |= ((32 - mask.count()) << rofl::openflow10::OFPFW_NW_SRC_SHIFT) & rofl::openflow10::OFPFW_NW_SRC_MASK;
 		}
@@ -192,7 +191,6 @@ cofmatch::pack_of10(uint8_t* buf, size_t buflen)
 		coxmatch_32 const *oxm =  static_cast<const coxmatch_32*>(matches.get_match(experimental::OXM_TLV_EXPR_NW_DST));
 		m->nw_dst = htobe32(oxm->get_u32value());
 		if (oxm->get_oxm_hasmask()) {
-			coxmatch_32_masked const *oxm =  static_cast<const coxmatch_32_masked*>(matches.get_match(experimental::OXM_TLV_EXPR_NW_DST_MASK));
 			std::bitset<32> mask(oxm->get_u32mask());
 			wildcards |= ((32 - mask.count()) << rofl::openflow10::OFPFW_NW_DST_SHIFT) & rofl::openflow10::OFPFW_NW_DST_MASK;
 		}
@@ -281,7 +279,7 @@ cofmatch::unpack_of10(uint8_t* buf, size_t buflen)
 				rofl::caddress_in4 addr; addr.set_addr_nbo(m->nw_src);
 				rofl::caddress_in4 mask; mask.set_addr_nbo(htobe32((uint32_t)u_mask));
 				if (num_of_bits <= 32) {
-					matches.add_match(new coxmatch_ofx_nw_src_masked(addr, mask));
+					matches.add_match(new coxmatch_ofx_nw_src(addr, mask));
 				}
 			}
 
@@ -294,7 +292,7 @@ cofmatch::unpack_of10(uint8_t* buf, size_t buflen)
 				rofl::caddress_in4 addr; addr.set_addr_nbo(m->nw_dst);
 				rofl::caddress_in4 mask; mask.set_addr_nbo(htobe32((uint32_t)u_mask));
 				if (num_of_bits <= 32) {
-					matches.add_match(new coxmatch_ofx_nw_dst_masked(addr, mask));
+					matches.add_match(new coxmatch_ofx_nw_dst(addr, mask));
 				}
 			}
 

@@ -38,7 +38,7 @@ public:
 				coxmatch_8_exp(OXM_TLV_EXPR_PPPOE_CODE, ROFL_EXP_ID, code)
 	{};
 	coxmatch_ofx_pppoe_code(
-			const coxmatch& oxm) :
+			const coxmatch_8_exp& oxm) :
 				coxmatch_8_exp(oxm)
 	{};
 	virtual
@@ -65,7 +65,7 @@ public:
 				coxmatch_8_exp(OXM_TLV_EXPR_PPPOE_TYPE, ROFL_EXP_ID, type)
 	{};
 	coxmatch_ofx_pppoe_type(
-			const coxmatch& oxm) :
+			const coxmatch_8_exp& oxm) :
 				coxmatch_8_exp(oxm)
 	{};
 	virtual
@@ -92,7 +92,7 @@ public:
 				coxmatch_16_exp(OXM_TLV_EXPR_PPPOE_SID, ROFL_EXP_ID,  sid)
 	{};
 	coxmatch_ofx_pppoe_sid(
-			const coxmatch& oxm) :
+			const coxmatch_16_exp& oxm) :
 				coxmatch_16_exp(oxm)
 	{};
 	virtual
@@ -119,7 +119,7 @@ public:
 				coxmatch_16_exp(OXM_TLV_EXPR_PPP_PROT, ROFL_EXP_ID, prot)
 	{};
 	coxmatch_ofx_ppp_prot(
-			const coxmatch& oxm) :
+			const coxmatch_16_exp& oxm) :
 				coxmatch_16_exp(oxm)
 	{};
 	virtual

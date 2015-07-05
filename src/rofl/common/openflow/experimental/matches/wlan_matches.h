@@ -51,7 +51,11 @@ public:
 				coxmatch_16_exp(OXM_TLV_EXPR_WLAN_FC, ROFL_EXP_ID, fc)
 	{};
 	coxmatch_ofx_wlan_fc(
-			const coxmatch& oxm) :
+			uint16_t fc, uint16_t mask) :
+				coxmatch_16_exp(OXM_TLV_EXPR_WLAN_FC_MASK, ROFL_EXP_ID, fc, mask)
+	{};
+	coxmatch_ofx_wlan_fc(
+			const coxmatch_16_exp& oxm) :
 				coxmatch_16_exp(oxm)
 	{};
 	virtual
@@ -59,41 +63,14 @@ public:
 	{};
 	friend std::ostream&
 	operator<< (std::ostream& os, const coxmatch_ofx_wlan_fc& oxm) {
-		os << dynamic_cast<coxmatch_16_exp const&>(oxm);
-		os << indent(2) << "<wlan-fc: 0x" << std::hex
-						<< (int)oxm.get_u16value()
-						<< std::dec << " >" << std::endl;
-		return os;
-	};
-};
-
-
-
-/** OXM_OFX_WLAN_FC
- *
- */
-class coxmatch_ofx_wlan_fc_masked : public coxmatch_16_exp_masked {
-public:
-	coxmatch_ofx_wlan_fc_masked(
-			uint16_t fc, uint16_t mask) :
-				coxmatch_16_exp_masked(OXM_TLV_EXPR_WLAN_FC_MASK, ROFL_EXP_ID, fc, mask)
-	{};
-	coxmatch_ofx_wlan_fc_masked(
-			const coxmatch& oxm) :
-				coxmatch_16_exp_masked(oxm)
-	{};
-	virtual
-	~coxmatch_ofx_wlan_fc_masked()
-	{};
-	friend std::ostream&
-	operator<< (std::ostream& os, const coxmatch_ofx_wlan_fc_masked& oxm) {
-		os << dynamic_cast<coxmatch_16_exp_masked const&>(oxm);
+		os << dynamic_cast<const coxmatch_16_exp&>(oxm);
 		os << indent(2) << "<wlan-fc: 0x" << std::hex
 						<< (int)oxm.get_u16value() << "/0x" << (int)oxm.get_u16mask()
 						<< std::dec << " >" << std::endl;
 		return os;
 	};
 };
+
 
 
 
@@ -107,7 +84,11 @@ public:
 				coxmatch_8_exp(OXM_TLV_EXPR_WLAN_TYPE, ROFL_EXP_ID, type)
 	{};
 	coxmatch_ofx_wlan_type(
-			const coxmatch& oxm) :
+			uint8_t type, uint8_t mask) :
+				coxmatch_8_exp(OXM_TLV_EXPR_WLAN_TYPE_MASK, ROFL_EXP_ID, type, mask)
+	{};
+	coxmatch_ofx_wlan_type(
+			const coxmatch_8_exp& oxm) :
 				coxmatch_8_exp(oxm)
 	{};
 	virtual
@@ -115,35 +96,7 @@ public:
 	{};
 	friend std::ostream&
 	operator<< (std::ostream& os, const coxmatch_ofx_wlan_type& oxm) {
-		os << dynamic_cast<coxmatch const&>(oxm);
-		os << indent(2) << "<wlan-type: 0x" << std::hex
-						<< (int)oxm.get_u8value()
-						<< std::dec << " >" << std::endl;
-		return os;
-	};
-};
-
-
-
-/** OXM_OFX_WLAN_TYPE (masked)
- *
- */
-class coxmatch_ofx_wlan_type_masked : public coxmatch_8_exp_masked {
-public:
-	coxmatch_ofx_wlan_type_masked(
-			uint8_t type, uint8_t mask) :
-				coxmatch_8_exp_masked(OXM_TLV_EXPR_WLAN_TYPE_MASK, ROFL_EXP_ID, type, mask)
-	{};
-	coxmatch_ofx_wlan_type_masked(
-			coxmatch const& oxm) :
-				coxmatch_8_exp_masked(oxm)
-	{};
-	virtual
-	~coxmatch_ofx_wlan_type_masked()
-	{};
-	friend std::ostream&
-	operator<< (std::ostream& os, const coxmatch_ofx_wlan_type_masked& oxm) {
-		os << dynamic_cast<coxmatch const&>(oxm);
+		os << dynamic_cast<const coxmatch_exp&>(oxm);
 		os << indent(2) << "<wlan-type: 0x" << std::hex
 						<< (int)oxm.get_u8value() << "/0x" << (int)oxm.get_u8mask()
 						<< std::dec << " >" << std::endl;
@@ -163,7 +116,11 @@ public:
 				coxmatch_8_exp(OXM_TLV_EXPR_WLAN_SUBTYPE, ROFL_EXP_ID, subtype)
 	{};
 	coxmatch_ofx_wlan_subtype(
-			const coxmatch& oxm) :
+			uint8_t subtype, uint8_t mask) :
+				coxmatch_8_exp(OXM_TLV_EXPR_WLAN_SUBTYPE_MASK, ROFL_EXP_ID, subtype, mask)
+	{};
+	coxmatch_ofx_wlan_subtype(
+			const coxmatch_8_exp& oxm) :
 				coxmatch_8_exp(oxm)
 	{};
 	virtual
@@ -172,34 +129,6 @@ public:
 	friend std::ostream&
 	operator<< (std::ostream& os, const coxmatch_ofx_wlan_subtype& oxm) {
 		os << dynamic_cast<const coxmatch_8_exp&>(oxm);
-		os << indent(2) << "<wlan-subtype: 0x" << std::hex
-						<< (int)oxm.get_u8value()
-						<< std::dec << " >" << std::endl;
-		return os;
-	};
-};
-
-
-
-/** OXM_OFX_WLAN_SUBTYPE
- *
- */
-class coxmatch_ofx_wlan_subtype_masked : public coxmatch_8_exp_masked {
-public:
-	coxmatch_ofx_wlan_subtype_masked(
-			uint8_t subtype, uint8_t mask) :
-				coxmatch_8_exp_masked(OXM_TLV_EXPR_WLAN_SUBTYPE_MASK, ROFL_EXP_ID, subtype, mask)
-	{};
-	coxmatch_ofx_wlan_subtype_masked(
-			const coxmatch& oxm) :
-				coxmatch_8_exp_masked(oxm)
-	{};
-	virtual
-	~coxmatch_ofx_wlan_subtype_masked()
-	{};
-	friend std::ostream&
-	operator<< (std::ostream& os, const coxmatch_ofx_wlan_subtype_masked& oxm) {
-		os << dynamic_cast<const coxmatch_8_exp_masked&>(oxm);
 		os << indent(2) << "<wlan-subtype: 0x" << std::hex
 						<< (int)oxm.get_u8value() << "/0x" << (int)oxm.get_u8mask()
 						<< std::dec << " >" << std::endl;
@@ -219,7 +148,11 @@ public:
 				coxmatch_8_exp(OXM_TLV_EXPR_WLAN_DIRECTION, ROFL_EXP_ID, direction)
 	{};
 	coxmatch_ofx_wlan_direction(
-			const coxmatch& oxm) :
+			uint8_t direction, uint8_t mask) :
+				coxmatch_8_exp(OXM_TLV_EXPR_WLAN_DIRECTION_MASK, ROFL_EXP_ID, direction, mask)
+	{};
+	coxmatch_ofx_wlan_direction(
+			const coxmatch_8_exp& oxm) :
 				coxmatch_8_exp(oxm)
 	{};
 	virtual
@@ -228,34 +161,6 @@ public:
 	friend std::ostream&
 	operator<< (std::ostream& os, const coxmatch_ofx_wlan_direction& oxm) {
 		os << dynamic_cast<const coxmatch_8_exp&>(oxm);
-		os << indent(2) << "<wlan-direction: 0x" << std::hex
-						<< (int)oxm.get_u8value()
-						<< std::dec << " >" << std::endl;
-		return os;
-	};
-};
-
-
-
-/** OXM_OFX_WLAN_DIRECTION
- *
- */
-class coxmatch_ofx_wlan_direction_masked : public coxmatch_8_exp_masked {
-public:
-	coxmatch_ofx_wlan_direction_masked(
-			uint8_t direction, uint8_t mask) :
-				coxmatch_8_exp_masked(OXM_TLV_EXPR_WLAN_DIRECTION_MASK, ROFL_EXP_ID, direction, mask)
-	{};
-	coxmatch_ofx_wlan_direction_masked(
-			const coxmatch& oxm) :
-				coxmatch_8_exp_masked(oxm)
-	{};
-	virtual
-	~coxmatch_ofx_wlan_direction_masked()
-	{};
-	friend std::ostream&
-	operator<< (std::ostream& os, const coxmatch_ofx_wlan_direction_masked& oxm) {
-		os << dynamic_cast<const coxmatch_8_exp_masked&>(oxm);
 		os << indent(2) << "<wlan-direction: 0x" << std::hex
 						<< (int)oxm.get_u8value() << "/0x" << (int)oxm.get_u8mask()
 						<< std::dec << " >" << std::endl;
@@ -275,7 +180,11 @@ public:
 				coxmatch_48_exp(OXM_TLV_EXPR_WLAN_ADDRESS_1, ROFL_EXP_ID, maddr)
 	{};
 	coxmatch_ofx_wlan_address_1(
-			const coxmatch& oxm) :
+			const rofl::caddress_ll& maddr, const rofl::caddress_ll& mask) :
+				coxmatch_48_exp(OXM_TLV_EXPR_WLAN_ADDRESS_1_MASK, ROFL_EXP_ID, maddr, mask)
+	{};
+	coxmatch_ofx_wlan_address_1(
+			const coxmatch_48_exp& oxm) :
 				coxmatch_48_exp(oxm)
 	{};
 	virtual
@@ -284,33 +193,6 @@ public:
 	friend std::ostream&
 	operator<< (std::ostream& os, const coxmatch_ofx_wlan_address_1& oxm) {
 		os << dynamic_cast<const coxmatch_48_exp&>(oxm);
-		os << indent(2) << "<wlan-address-1 value: >" << std::endl;
-		{ indent i(4); os << oxm.get_u48value();  }
-		return os;
-	};
-};
-
-
-
-/** OXM_OFX_WLAN_ADDRESS_1
- *
- */
-class coxmatch_ofx_wlan_address_1_masked : public coxmatch_48_exp_masked {
-public:
-	coxmatch_ofx_wlan_address_1_masked(
-			const rofl::caddress_ll& maddr, const rofl::caddress_ll& mask) :
-				coxmatch_48_exp_masked(OXM_TLV_EXPR_WLAN_ADDRESS_1_MASK, ROFL_EXP_ID, maddr, mask)
-	{};
-	coxmatch_ofx_wlan_address_1_masked(
-			const coxmatch& oxm) :
-				coxmatch_48_exp_masked(oxm)
-	{};
-	virtual
-	~coxmatch_ofx_wlan_address_1_masked()
-	{};
-	friend std::ostream&
-	operator<< (std::ostream& os, const coxmatch_ofx_wlan_address_1_masked& oxm) {
-		os << dynamic_cast<const coxmatch_48_exp_masked&>(oxm);
 		os << indent(2) << "<wlan-address-1 value: >" << std::endl;
 		{ indent i(4); os << oxm.get_u48value();  }
 		os << indent(2) << "<wlan-address-1 mask: >" << std::endl;
@@ -331,7 +213,11 @@ public:
 				coxmatch_48_exp(OXM_TLV_EXPR_WLAN_ADDRESS_2, ROFL_EXP_ID, maddr)
 	{};
 	coxmatch_ofx_wlan_address_2(
-			const coxmatch& oxm) :
+			const rofl::caddress_ll& maddr, const rofl::caddress_ll& mask) :
+				coxmatch_48_exp(OXM_TLV_EXPR_WLAN_ADDRESS_2_MASK, ROFL_EXP_ID, maddr, mask)
+	{};
+	coxmatch_ofx_wlan_address_2(
+			const coxmatch_48_exp& oxm) :
 				coxmatch_48_exp(oxm)
 	{};
 	virtual
@@ -340,33 +226,6 @@ public:
 	friend std::ostream&
 	operator<< (std::ostream& os, const coxmatch_ofx_wlan_address_2& oxm) {
 		os << dynamic_cast<const coxmatch_48_exp&>(oxm);
-		os << indent(2) << "<wlan-address-2 value: >" << std::endl;
-		{ indent i(4); os << oxm.get_u48value();  }
-		return os;
-	};
-};
-
-
-
-/** OXM_OFX_WLAN_ADDRESS_2
- *
- */
-class coxmatch_ofx_wlan_address_2_masked : public coxmatch_48_exp_masked {
-public:
-	coxmatch_ofx_wlan_address_2_masked(
-			const rofl::caddress_ll& maddr, const rofl::caddress_ll& mask) :
-				coxmatch_48_exp_masked(OXM_TLV_EXPR_WLAN_ADDRESS_2_MASK, ROFL_EXP_ID, maddr, mask)
-	{};
-	coxmatch_ofx_wlan_address_2_masked(
-			const coxmatch& oxm) :
-				coxmatch_48_exp_masked(oxm)
-	{};
-	virtual
-	~coxmatch_ofx_wlan_address_2_masked()
-	{};
-	friend std::ostream&
-	operator<< (std::ostream& os, const coxmatch_ofx_wlan_address_2_masked& oxm) {
-		os << dynamic_cast<const coxmatch_48_exp_masked&>(oxm);
 		os << indent(2) << "<wlan-address-2 value: >" << std::endl;
 		{ indent i(4); os << oxm.get_u48value();  }
 		os << indent(2) << "<wlan-address-2 mask: >" << std::endl;
@@ -387,7 +246,11 @@ public:
 				coxmatch_48_exp(OXM_TLV_EXPR_WLAN_ADDRESS_3, ROFL_EXP_ID, maddr)
 	{};
 	coxmatch_ofx_wlan_address_3(
-			const coxmatch& oxm) :
+			const rofl::caddress_ll& maddr, const rofl::caddress_ll& mask) :
+				coxmatch_48_exp(OXM_TLV_EXPR_WLAN_ADDRESS_3_MASK, ROFL_EXP_ID, maddr, mask)
+	{};
+	coxmatch_ofx_wlan_address_3(
+			const coxmatch_48_exp& oxm) :
 				coxmatch_48_exp(oxm)
 	{};
 	virtual
@@ -396,33 +259,6 @@ public:
 	friend std::ostream&
 	operator<< (std::ostream& os, const coxmatch_ofx_wlan_address_3& oxm) {
 		os << dynamic_cast<const coxmatch_48_exp&>(oxm);
-		os << indent(2) << "<wlan-address-3 value: >" << std::endl;
-		{ indent i(4); os << oxm.get_u48value();  }
-		return os;
-	};
-};
-
-
-
-/** OXM_OFX_WLAN_ADDRESS_3
- *
- */
-class coxmatch_ofx_wlan_address_3_masked : public coxmatch_48_exp_masked {
-public:
-	coxmatch_ofx_wlan_address_3_masked(
-			const rofl::caddress_ll& maddr, const rofl::caddress_ll& mask) :
-				coxmatch_48_exp_masked(OXM_TLV_EXPR_WLAN_ADDRESS_3_MASK, ROFL_EXP_ID, maddr, mask)
-	{};
-	coxmatch_ofx_wlan_address_3_masked(
-			const coxmatch& oxm) :
-				coxmatch_48_exp_masked(oxm)
-	{};
-	virtual
-	~coxmatch_ofx_wlan_address_3_masked()
-	{};
-	friend std::ostream&
-	operator<< (std::ostream& os, const coxmatch_ofx_wlan_address_3_masked& oxm) {
-		os << dynamic_cast<const coxmatch_48_exp_masked&>(oxm);
 		os << indent(2) << "<wlan-address-3 value: >" << std::endl;
 		{ indent i(4); os << oxm.get_u48value();  }
 		os << indent(2) << "<wlan-address-3 mask: >" << std::endl;

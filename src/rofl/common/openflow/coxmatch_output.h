@@ -28,6 +28,7 @@ public:
 
 	friend std::ostream&
 	operator<<(std::ostream& os, coxmatch_output const& oxm_output) {
+#if 0
 		coxmatch const& oxm = oxm_output.oxm;
 		switch (oxm.get_oxm_class()) {
 		case openflow::OFPXMC_OPENFLOW_BASIC: {
@@ -157,6 +158,7 @@ public:
 		default:
 			os << oxm; return os;
 		}
+#endif
 
 		return os;
 	};
