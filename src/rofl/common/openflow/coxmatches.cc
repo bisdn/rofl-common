@@ -243,25 +243,25 @@ coxmatches::unpack(
 		case rofl::openflow::OXM_TLV_BASIC_IPV6_EXTHDR_MASK: {
 			add_ofb_ipv6_exthdr().unpack(buf, buflen);
 		} break;
-		case rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC:
-		case rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC_MASK: {
-
+		case OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC):
+		case OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC_MASK): {
+			add_ofx_nw_src().unpack(buf, buflen);
 		} break;
-		case rofl::openflow::experimental::OXM_TLV_EXPR_NW_DST:
-		case rofl::openflow::experimental::OXM_TLV_EXPR_NW_DST_MASK: {
-
+		case OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_DST):
+		case OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_DST_MASK): {
+			add_ofx_nw_dst().unpack(buf, buflen);
 		} break;
-		case rofl::openflow::experimental::OXM_TLV_EXPR_NW_PROTO: {
-
+		case OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_PROTO): {
+			add_ofx_nw_proto().unpack(buf, buflen);
 		} break;
-		case rofl::openflow::experimental::OXM_TLV_EXPR_NW_TOS: {
-
+		case OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_TOS): {
+			add_ofx_nw_tos().unpack(buf, buflen);
 		} break;
-		case rofl::openflow::experimental::OXM_TLV_EXPR_TP_SRC: {
-
+		case OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_SRC): {
+			add_ofx_tp_src().unpack(buf, buflen);
 		} break;
-		case rofl::openflow::experimental::OXM_TLV_EXPR_TP_DST: {
-
+		case OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_DST): {
+			add_ofx_tp_dst().unpack(buf, buflen);
 		} break;
 		default: {
 
@@ -295,83 +295,6 @@ coxmatches::pack(
 
 		buf += match->length();
 	}
-}
-
-
-coxmatch*
-coxmatches::add_match(coxmatch *oxm)
-{
-	// keep class and field, hide mask and length
-	uint64_t id = (__UINT64_C(0xfffffe00) & oxm->get_oxm_id()) << 32 | (
-			oxm->is_experimenter() ? oxm->get_oxm_exp_id() : 0);
-
-	std::map<uint64_t, coxmatch*>::iterator it = matches.find(id);
-	if (it != matches.end()) {
-		delete it->second;
-		matches.erase(it);
-	}
-	return (matches[id] = oxm);
-}
-
-
-coxmatch*
-coxmatches::add_match(uint32_t oxm_id)
-{
-	// todo experimenter currently not supported here
-
-	// keep class and field, hide mask and length
-	uint64_t id = (__UINT64_C(0xfffffe00) & oxm_id) << 32;
-	std::map<uint64_t, coxmatch*>::iterator it = matches.find(id);
-	if (it != matches.end()) {
-		delete it->second;
-		matches.erase(it);
-	}
-	return (matches[id] = new coxmatch(oxm_id));
-}
-
-
-coxmatch*
-coxmatches::set_match(uint32_t oxm_id)
-{
-	uint64_t oid = (__UINT64_C(0xfffffe00) & oxm_id) << 32; // keep class and field, hide mask and length
-	if (matches.find(oid) == matches.end()) {
-		matches[oid] = new coxmatch(oxm_id);
-	}
-	return matches[oid];
-}
-
-
-coxmatch const*
-coxmatches::get_match(uint32_t oxm_id) const
-{
-	uint64_t oid = (__UINT64_C(0xfffffe00) & oxm_id) << 32; // keep class and field, hide mask and length
-	if (matches.find(oid) == matches.end()) {
-		throw eOxmNotFound("coxmatches::get_match() oxm-id not found");
-	}
-	return matches.at(oid);
-}
-
-
-void
-coxmatches::drop_match(uint32_t oxm_id, uint32_t exp_id)
-{
-	// keep class and field, hide mask and length
-	uint64_t id = (__UINT64_C(0xfffffe00) & oxm_id) << 32 |
-			(coxmatch::is_experimenter(oxm_id) ? exp_id : 0);
-	std::map<uint64_t, coxmatch*>::iterator it = matches.find(id);
-	if (it == matches.end()) {
-		return;
-	}
-	delete it->second;
-	matches.erase(id);
-}
-
-
-bool
-coxmatches::has_match(uint32_t oxm_id) const
-{
-	uint64_t oid = (__UINT64_C(0xfffffe00) & oxm_id) << 32; // keep class and field, hide mask and length
-	return (not (matches.find(oid) == matches.end()));
 }
 
 
@@ -425,7 +348,7 @@ coxmatches::contains(
 
 		// strict: all OXM TLVs must also exist in oxl
 		uint64_t id = (__UINT64_C(0xfffffe00) & lmatch->get_oxm_id()) << 32 |
-				(lmatch->is_experimenter() ? lmatch->get_oxm_exp_id() : 0);
+				0/*(lmatch->is_experimenter() ? lmatch->get_oxm_exp_id() : 0)*/;
 		if (oxms.matches.find(id) == oxms.matches.end()) {
 			return false;
 		}
@@ -461,7 +384,7 @@ coxmatches::is_part_of(
 		// keep in mind: match.get_oxm_id() & 0xfffffe00 == jt->first
 
 		uint64_t id = (__UINT64_C(0xfffffe00) & rmatch->get_oxm_id()) << 32 |
-				(rmatch->is_experimenter() ? rmatch->get_oxm_exp_id() : 0);
+				0/*(rmatch->is_experimenter() ? rmatch->get_oxm_exp_id() : 0)*/;
 		if (matches.find(id) == matches.end()) {
 			wildcard_hits++; continue;
 		}
@@ -625,23 +548,23 @@ coxmatches::copy_matches(
 		} break;
 		case rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC:
 		case rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC_MASK: {
-
+			add_ofx_nw_src() = oxmatches.get_ofx_nw_src();
 		} break;
 		case rofl::openflow::experimental::OXM_TLV_EXPR_NW_DST:
 		case rofl::openflow::experimental::OXM_TLV_EXPR_NW_DST_MASK: {
-
+			add_ofx_nw_dst() = oxmatches.get_ofx_nw_dst();
 		} break;
 		case rofl::openflow::experimental::OXM_TLV_EXPR_NW_PROTO: {
-
+			add_ofx_nw_proto() = oxmatches.get_ofx_nw_proto();
 		} break;
 		case rofl::openflow::experimental::OXM_TLV_EXPR_NW_TOS: {
-
+			add_ofx_nw_tos() = oxmatches.get_ofx_nw_tos();
 		} break;
 		case rofl::openflow::experimental::OXM_TLV_EXPR_TP_SRC: {
-
+			add_ofx_tp_src() = oxmatches.get_ofx_tp_src();
 		} break;
 		case rofl::openflow::experimental::OXM_TLV_EXPR_TP_DST: {
-
+			add_ofx_tp_dst() = oxmatches.get_ofx_tp_dst();
 		} break;
 		default: {
 

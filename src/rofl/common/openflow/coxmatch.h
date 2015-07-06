@@ -70,9 +70,7 @@ public:
 };
 
 
-enum rofl_exp_id_t {
-	ROFL_EXP_ID = 0, // TODO
-};
+
 
 
 
@@ -2364,7 +2362,7 @@ public:
 	get_u32value_as_addr() const
 	{ caddress_in4 addr; addr.set_addr_hbo(value); return addr; };
 
-	coxmatch_32&
+	coxmatch_32_exp&
 	set_u32value(
 			const rofl::caddress_in4& addr)
 	{ value = addr.get_addr_hbo(); return *this; };
@@ -2373,7 +2371,7 @@ public:
 	get_u32mask_as_addr() const
 	{ caddress_in4 addr; addr.set_addr_hbo(mask); return addr; };
 
-	coxmatch_32&
+	coxmatch_32_exp&
 	set_u32mask(
 			const rofl::caddress_in4& addr)
 	{ mask = addr.get_addr_hbo(); set_oxm_hasmask(true); return *this; };

@@ -229,7 +229,7 @@ public:
 
 	// OF10
 	uint8_t  get_nw_proto() const {
-	 return static_cast<const coxmatch_ofx_nw_proto*>(matches.get_match(rofl::openflow::experimental::OXM_TLV_EXPR_NW_PROTO))->get_u8value();
+		return matches.get_ofx_nw_proto().get_u8masked_value();
 	};
 	uint8_t  get_nw_tos() const {
 	 return static_cast<const coxmatch_ofx_nw_tos*>(matches.get_match(rofl::openflow::experimental::OXM_TLV_EXPR_NW_TOS))->get_u8value();
