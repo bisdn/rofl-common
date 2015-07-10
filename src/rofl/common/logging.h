@@ -9,6 +9,7 @@
 #include <fstream>
 #include <iomanip>
 #include <string>
+#include <map>
 
 namespace rofl
 {
@@ -93,34 +94,39 @@ public:
 
 class indent
 {
-	static unsigned int width;
-	unsigned int my_width;
+	static std::map<pthread_t, unsigned int> width;
+	std::map<pthread_t, unsigned int> my_width;
 public:
-	indent(unsigned int my_width = 0) :
-		my_width(my_width) {
-		indent::width += my_width;
+	indent(unsigned int my_width = 0) {
+		pthread_t tid = pthread_self();
+		this->my_width[tid] = my_width;
+		indent::width[tid] += my_width;
 	};
 	virtual ~indent() {
-		indent::width = (indent::width >= my_width) ? (indent::width - my_width) : 0;
+		pthread_t tid = pthread_self();
+		indent::width[tid] = (indent::width[tid] >= my_width[tid]) ? (indent::width[tid] - my_width[tid]) : 0;
 	};
 	static void inc(unsigned int width) {
-		indent::width += width;
+		pthread_t tid = pthread_self();
+		indent::width[tid] += width;
 	};
 	static void dec(unsigned int width) {
-		indent::width = (indent::width >= width) ? (indent::width - width) : 0;
+		pthread_t tid = pthread_self();
+		indent::width[tid] = (indent::width[tid] >= width) ? (indent::width[tid] - width) : 0;
 	};
 	static void null() {
-		indent::width = 0;
+		pthread_t tid = pthread_self();
+		indent::width[tid] = 0;
 	};
 	friend std::ostream&
 	operator<< (std::ostream& os, indent const& i) {
-		if (indent::width) {
-			os << std::setw(indent::width) << " " << std::setw(0);
+		pthread_t tid = pthread_self();
+		if (indent::width[tid]) {
+			os << std::setw(indent::width[tid]) << " " << std::setw(0);
 		}
 		return os;
 	};
 };
-
 
 }; // end of namespace
 

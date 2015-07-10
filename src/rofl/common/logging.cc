@@ -29,7 +29,7 @@ std::ostream logging::trace_  (&logging::devnull);
 
 unsigned int logging::curr_level(EMERG);
 std::streamsize logging::width(70);
-unsigned int indent::width(0);
+std::map<pthread_t, unsigned int> indent::width;
 
 
 void

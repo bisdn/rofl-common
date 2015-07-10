@@ -12,6 +12,7 @@ v0.6.2
 
 [O] merged logging related pull request #1
 [B] fixed stalling situation in crofsock under higher load
+[B] making class indent thread aware
 
 v0.6.1
 
