@@ -242,7 +242,6 @@ private:
 		state(STATE_INIT),
 		fragment(NULL),
 		msg_bytes_read(0),
-		max_pkts_rcvd_per_round(DEFAULT_MAX_PKTS_RVCD_PER_ROUND),
 		socket_type(rofl::csocket::SOCKET_TYPE_UNKNOWN),
 		sd(-1)
 	{};
@@ -638,10 +637,6 @@ private:
 	cmemory*					fragment;
 	// number of bytes already received for current message fragment
 	unsigned int				msg_bytes_read;
-	// read not more than this number of packets per round before rescheduling
-	unsigned int				max_pkts_rcvd_per_round;
-	// default value for max_pkts_rcvd_per_round
-	static unsigned int const	DEFAULT_MAX_PKTS_RVCD_PER_ROUND = 16;
 
 	/*
 	 * scheduler and txqueues
