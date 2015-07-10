@@ -11,6 +11,7 @@ Change log
 v0.6.2
 
 [O] merged logging related pull request #1
+[B] fixed stalling situation in crofsock under higher load
 
 v0.6.1
 
