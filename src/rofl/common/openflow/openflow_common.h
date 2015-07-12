@@ -458,10 +458,11 @@ namespace openflow {
 #define HAS_MASK_FLAG (1 << 8)
 
 enum rofl_exp_id_t {
-	ROFL_EXP_ID = 0, // TODO
+	ROFL_EXP_ID = 0xa1a2a3a4, // TODO
 };
 
 #define OXM_TYPE(x) (x & 0xfffffe00)
+#define OXM_ROFL_OFB_TYPE(x) (((uint64_t)          0 << 32) | (OXM_TYPE(x)))
 #define OXM_ROFL_EXP_TYPE(x) (((uint64_t)ROFL_EXP_ID << 32) | (OXM_TYPE(x)))
 
 	/* OXM Flow match field types for OpenFlow basic class. */
