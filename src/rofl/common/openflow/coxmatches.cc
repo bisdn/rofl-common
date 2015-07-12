@@ -227,22 +227,22 @@ coxmatches::unpack(
 		case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_EXTHDR): {
 			add_ofb_ipv6_exthdr().unpack(buf, buflen);
 		} break;
-		case OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC): {
+		case OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC): {
 			add_ofx_nw_src().unpack(buf, buflen);
 		} break;
-		case OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_DST): {
+		case OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_DST): {
 			add_ofx_nw_dst().unpack(buf, buflen);
 		} break;
-		case OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_PROTO): {
+		case OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_PROTO): {
 			add_ofx_nw_proto().unpack(buf, buflen);
 		} break;
-		case OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_TOS): {
+		case OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_TOS): {
 			add_ofx_nw_tos().unpack(buf, buflen);
 		} break;
-		case OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_SRC): {
+		case OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_SRC): {
 			add_ofx_tp_src().unpack(buf, buflen);
 		} break;
-		case OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_DST): {
+		case OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_DST): {
 			add_ofx_tp_dst().unpack(buf, buflen);
 		} break;
 		default: {
@@ -512,22 +512,22 @@ coxmatches::copy_matches(
 		case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_EXTHDR): {
 			add_ofb_ipv6_exthdr() = oxmatches.get_ofb_ipv6_exthdr();
 		} break;
-		case OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC): {
+		case OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC): {
 			add_ofx_nw_src() = oxmatches.get_ofx_nw_src();
 		} break;
-		case OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_DST): {
+		case OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_DST): {
 			add_ofx_nw_dst() = oxmatches.get_ofx_nw_dst();
 		} break;
-		case OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_PROTO): {
+		case OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_PROTO): {
 			add_ofx_nw_proto() = oxmatches.get_ofx_nw_proto();
 		} break;
-		case OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_TOS): {
+		case OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_TOS): {
 			add_ofx_nw_tos() = oxmatches.get_ofx_nw_tos();
 		} break;
-		case OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_SRC): {
+		case OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_SRC): {
 			add_ofx_tp_src() = oxmatches.get_ofx_tp_src();
 		} break;
-		case OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_DST): {
+		case OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_DST): {
 			add_ofx_tp_dst() = oxmatches.get_ofx_tp_dst();
 		} break;
 		default: {

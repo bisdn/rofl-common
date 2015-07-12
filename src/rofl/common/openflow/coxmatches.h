@@ -168,11 +168,11 @@ public:
 	add_ofb_in_port(
 			uint32_t in_port = 0) {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IN_PORT)) != matches.end()) {
-			delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IN_PORT)];
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IN_PORT)) != matches.end()) {
+			delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IN_PORT)];
 		}
-		matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IN_PORT)] = new coxmatch_ofb_in_port(in_port);
-		return dynamic_cast<coxmatch_ofb_in_port&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IN_PORT)]);
+		matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IN_PORT)] = new coxmatch_ofb_in_port(in_port);
+		return dynamic_cast<coxmatch_ofb_in_port&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IN_PORT)]);
 	};
 
 	/**
@@ -181,10 +181,10 @@ public:
 	coxmatch_ofb_in_port&
 	set_ofb_in_port() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IN_PORT)) == matches.end()) {
-			matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IN_PORT)] = new coxmatch_ofb_in_port();
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IN_PORT)) == matches.end()) {
+			matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IN_PORT)] = new coxmatch_ofb_in_port();
 		}
-		return dynamic_cast<coxmatch_ofb_in_port&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IN_PORT)]);
+		return dynamic_cast<coxmatch_ofb_in_port&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IN_PORT)]);
 	};
 
 	/**
@@ -193,10 +193,10 @@ public:
 	const coxmatch_ofb_in_port&
 	get_ofb_in_port() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IN_PORT)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IN_PORT)) == matches.end()) {
 			throw eOxmInval("coxmatches::get_ofb_in_port() not found");
 		}
-		return dynamic_cast<const coxmatch_ofb_in_port&>(*matches.at(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IN_PORT)));
+		return dynamic_cast<const coxmatch_ofb_in_port&>(*matches.at(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IN_PORT)));
 	};
 
 	/**
@@ -205,11 +205,11 @@ public:
 	bool
 	drop_ofb_in_port() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IN_PORT)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IN_PORT)) == matches.end()) {
 			return false;
 		}
-		delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IN_PORT)];
-		matches.erase(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IN_PORT));
+		delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IN_PORT)];
+		matches.erase(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IN_PORT));
 		return true;
 	};
 
@@ -219,7 +219,7 @@ public:
 	bool
 	has_ofb_in_port() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		return (not (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IN_PORT)) == matches.end()));
+		return (not (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IN_PORT)) == matches.end()));
 	};
 
 public:
@@ -231,11 +231,11 @@ public:
 	add_ofb_in_phy_port(
 			uint32_t in_phy_port = 0) {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IN_PHY_PORT)) != matches.end()) {
-			delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IN_PHY_PORT)];
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IN_PHY_PORT)) != matches.end()) {
+			delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IN_PHY_PORT)];
 		}
-		matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IN_PHY_PORT)] = new coxmatch_ofb_in_phy_port(in_phy_port);
-		return dynamic_cast<coxmatch_ofb_in_phy_port&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IN_PHY_PORT)]);
+		matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IN_PHY_PORT)] = new coxmatch_ofb_in_phy_port(in_phy_port);
+		return dynamic_cast<coxmatch_ofb_in_phy_port&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IN_PHY_PORT)]);
 	};
 
 	/**
@@ -244,10 +244,10 @@ public:
 	coxmatch_ofb_in_phy_port&
 	set_ofb_in_phy_port() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IN_PHY_PORT)) == matches.end()) {
-			matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IN_PHY_PORT)] = new coxmatch_ofb_in_phy_port();
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IN_PHY_PORT)) == matches.end()) {
+			matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IN_PHY_PORT)] = new coxmatch_ofb_in_phy_port();
 		}
-		return dynamic_cast<coxmatch_ofb_in_phy_port&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IN_PHY_PORT)]);
+		return dynamic_cast<coxmatch_ofb_in_phy_port&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IN_PHY_PORT)]);
 	};
 
 	/**
@@ -256,10 +256,10 @@ public:
 	const coxmatch_ofb_in_phy_port&
 	get_ofb_in_phy_port() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IN_PHY_PORT)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IN_PHY_PORT)) == matches.end()) {
 			throw eOxmInval("coxmatches::get_ofb_in_phy_port() not found");
 		}
-		return dynamic_cast<const coxmatch_ofb_in_phy_port&>(*matches.at(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IN_PHY_PORT)));
+		return dynamic_cast<const coxmatch_ofb_in_phy_port&>(*matches.at(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IN_PHY_PORT)));
 	};
 
 	/**
@@ -268,11 +268,11 @@ public:
 	bool
 	drop_ofb_in_phy_port() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IN_PHY_PORT)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IN_PHY_PORT)) == matches.end()) {
 			return false;
 		}
-		delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IN_PHY_PORT)];
-		matches.erase(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IN_PHY_PORT));
+		delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IN_PHY_PORT)];
+		matches.erase(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IN_PHY_PORT));
 		return true;
 	};
 
@@ -282,7 +282,7 @@ public:
 	bool
 	has_ofb_in_phy_port() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		return (not (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IN_PHY_PORT)) == matches.end()));
+		return (not (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IN_PHY_PORT)) == matches.end()));
 	};
 
 public:
@@ -294,11 +294,11 @@ public:
 	add_ofb_metadata(
 			uint64_t metadata = 0, uint64_t mask = 0) {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_METADATA)) != matches.end()) {
-			delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_METADATA)];
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_METADATA)) != matches.end()) {
+			delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_METADATA)];
 		}
-		matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_METADATA)] = new coxmatch_ofb_metadata(metadata, mask);
-		return dynamic_cast<coxmatch_ofb_metadata&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_METADATA)]);
+		matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_METADATA)] = new coxmatch_ofb_metadata(metadata, mask);
+		return dynamic_cast<coxmatch_ofb_metadata&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_METADATA)]);
 	};
 
 	/**
@@ -307,10 +307,10 @@ public:
 	coxmatch_ofb_metadata&
 	set_ofb_metadata() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_METADATA)) == matches.end()) {
-			matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_METADATA)] = new coxmatch_ofb_metadata();
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_METADATA)) == matches.end()) {
+			matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_METADATA)] = new coxmatch_ofb_metadata();
 		}
-		return dynamic_cast<coxmatch_ofb_metadata&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_METADATA)]);
+		return dynamic_cast<coxmatch_ofb_metadata&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_METADATA)]);
 	};
 
 	/**
@@ -319,10 +319,10 @@ public:
 	const coxmatch_ofb_metadata&
 	get_ofb_metadata() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_METADATA)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_METADATA)) == matches.end()) {
 			throw eOxmInval("coxmatches::get_ofb_metadata() not found");
 		}
-		return dynamic_cast<const coxmatch_ofb_metadata&>(*matches.at(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_METADATA)));
+		return dynamic_cast<const coxmatch_ofb_metadata&>(*matches.at(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_METADATA)));
 	};
 
 	/**
@@ -331,11 +331,11 @@ public:
 	bool
 	drop_ofb_metadata() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_METADATA)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_METADATA)) == matches.end()) {
 			return false;
 		}
-		delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_METADATA)];
-		matches.erase(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_METADATA));
+		delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_METADATA)];
+		matches.erase(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_METADATA));
 		return true;
 	};
 
@@ -345,7 +345,7 @@ public:
 	bool
 	has_ofb_metadata() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		return (not (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_METADATA)) == matches.end()));
+		return (not (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_METADATA)) == matches.end()));
 	};
 
 public:
@@ -357,11 +357,11 @@ public:
 	add_ofb_eth_dst(
 			const rofl::caddress_ll& eth_dst = 0, const rofl::caddress_ll& mask = 0) {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_DST)) != matches.end()) {
-			delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_DST)];
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_DST)) != matches.end()) {
+			delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_DST)];
 		}
-		matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_DST)] = new coxmatch_ofb_eth_dst(eth_dst, mask);
-		return dynamic_cast<coxmatch_ofb_eth_dst&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_DST)]);
+		matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_DST)] = new coxmatch_ofb_eth_dst(eth_dst, mask);
+		return dynamic_cast<coxmatch_ofb_eth_dst&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_DST)]);
 	};
 
 	/**
@@ -370,10 +370,10 @@ public:
 	coxmatch_ofb_eth_dst&
 	set_ofb_eth_dst() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_DST)) == matches.end()) {
-			matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_DST)] = new coxmatch_ofb_eth_dst();
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_DST)) == matches.end()) {
+			matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_DST)] = new coxmatch_ofb_eth_dst();
 		}
-		return dynamic_cast<coxmatch_ofb_eth_dst&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_DST)]);
+		return dynamic_cast<coxmatch_ofb_eth_dst&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_DST)]);
 	};
 
 	/**
@@ -382,10 +382,10 @@ public:
 	const coxmatch_ofb_eth_dst&
 	get_ofb_eth_dst() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_DST)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_DST)) == matches.end()) {
 			throw eOxmInval("coxmatches::get_ofb_eth_dst() not found");
 		}
-		return dynamic_cast<const coxmatch_ofb_eth_dst&>(*matches.at(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_DST)));
+		return dynamic_cast<const coxmatch_ofb_eth_dst&>(*matches.at(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_DST)));
 	};
 
 	/**
@@ -394,11 +394,11 @@ public:
 	bool
 	drop_ofb_eth_dst() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_DST)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_DST)) == matches.end()) {
 			return false;
 		}
-		delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_DST)];
-		matches.erase(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_DST));
+		delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_DST)];
+		matches.erase(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_DST));
 		return true;
 	};
 
@@ -408,7 +408,7 @@ public:
 	bool
 	has_ofb_eth_dst() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		return (not (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_DST)) == matches.end()));
+		return (not (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_DST)) == matches.end()));
 	};
 
 public:
@@ -420,11 +420,11 @@ public:
 	add_ofb_eth_src(
 			const rofl::caddress_ll& eth_src = 0, const rofl::caddress_ll& mask = 0) {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_SRC)) != matches.end()) {
-			delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_SRC)];
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_SRC)) != matches.end()) {
+			delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_SRC)];
 		}
-		matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_SRC)] = new coxmatch_ofb_eth_src(eth_src, mask);
-		return dynamic_cast<coxmatch_ofb_eth_src&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_SRC)]);
+		matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_SRC)] = new coxmatch_ofb_eth_src(eth_src, mask);
+		return dynamic_cast<coxmatch_ofb_eth_src&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_SRC)]);
 	};
 
 	/**
@@ -433,10 +433,10 @@ public:
 	coxmatch_ofb_eth_src&
 	set_ofb_eth_src() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_SRC)) == matches.end()) {
-			matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_SRC)] = new coxmatch_ofb_eth_src();
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_SRC)) == matches.end()) {
+			matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_SRC)] = new coxmatch_ofb_eth_src();
 		}
-		return dynamic_cast<coxmatch_ofb_eth_src&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_SRC)]);
+		return dynamic_cast<coxmatch_ofb_eth_src&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_SRC)]);
 	};
 
 	/**
@@ -445,10 +445,10 @@ public:
 	const coxmatch_ofb_eth_src&
 	get_ofb_eth_src() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_SRC)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_SRC)) == matches.end()) {
 			throw eOxmInval("coxmatches::get_ofb_eth_src() not found");
 		}
-		return dynamic_cast<const coxmatch_ofb_eth_src&>(*matches.at(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_SRC)));
+		return dynamic_cast<const coxmatch_ofb_eth_src&>(*matches.at(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_SRC)));
 	};
 
 	/**
@@ -457,11 +457,11 @@ public:
 	bool
 	drop_ofb_eth_src() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_SRC)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_SRC)) == matches.end()) {
 			return false;
 		}
-		delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_SRC)];
-		matches.erase(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_SRC));
+		delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_SRC)];
+		matches.erase(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_SRC));
 		return true;
 	};
 
@@ -471,7 +471,7 @@ public:
 	bool
 	has_ofb_eth_src() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		return (not (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_SRC)) == matches.end()));
+		return (not (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_SRC)) == matches.end()));
 	};
 
 public:
@@ -483,11 +483,11 @@ public:
 	add_ofb_eth_type(
 			uint16_t eth_type = 0) {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_TYPE)) != matches.end()) {
-			delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_TYPE)];
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_TYPE)) != matches.end()) {
+			delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_TYPE)];
 		}
-		matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_TYPE)] = new coxmatch_ofb_eth_type(eth_type);
-		return dynamic_cast<coxmatch_ofb_eth_type&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_TYPE)]);
+		matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_TYPE)] = new coxmatch_ofb_eth_type(eth_type);
+		return dynamic_cast<coxmatch_ofb_eth_type&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_TYPE)]);
 	};
 
 	/**
@@ -496,10 +496,10 @@ public:
 	coxmatch_ofb_eth_type&
 	set_ofb_eth_type() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_TYPE)) == matches.end()) {
-			matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_TYPE)] = new coxmatch_ofb_eth_type();
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_TYPE)) == matches.end()) {
+			matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_TYPE)] = new coxmatch_ofb_eth_type();
 		}
-		return dynamic_cast<coxmatch_ofb_eth_type&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_TYPE)]);
+		return dynamic_cast<coxmatch_ofb_eth_type&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_TYPE)]);
 	};
 
 	/**
@@ -508,10 +508,10 @@ public:
 	const coxmatch_ofb_eth_type&
 	get_ofb_eth_type() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_TYPE)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_TYPE)) == matches.end()) {
 			throw eOxmInval("coxmatches::get_ofb_eth_type() not found");
 		}
-		return dynamic_cast<const coxmatch_ofb_eth_type&>(*matches.at(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_TYPE)));
+		return dynamic_cast<const coxmatch_ofb_eth_type&>(*matches.at(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_TYPE)));
 	};
 
 	/**
@@ -520,11 +520,11 @@ public:
 	bool
 	drop_ofb_eth_type() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_TYPE)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_TYPE)) == matches.end()) {
 			return false;
 		}
-		delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_TYPE)];
-		matches.erase(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_TYPE));
+		delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_TYPE)];
+		matches.erase(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_TYPE));
 		return true;
 	};
 
@@ -534,7 +534,7 @@ public:
 	bool
 	has_ofb_eth_type() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		return (not (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_TYPE)) == matches.end()));
+		return (not (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_TYPE)) == matches.end()));
 	};
 
 public:
@@ -546,11 +546,11 @@ public:
 	add_ofb_vlan_vid(
 			uint16_t vlan_vid = 0, uint16_t mask = 0) {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_VLAN_VID)) != matches.end()) {
-			delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_VLAN_VID)];
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_VLAN_VID)) != matches.end()) {
+			delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_VLAN_VID)];
 		}
-		matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_VLAN_VID)] = new coxmatch_ofb_vlan_vid(vlan_vid, mask);
-		return dynamic_cast<coxmatch_ofb_vlan_vid&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_VLAN_VID)]);
+		matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_VLAN_VID)] = new coxmatch_ofb_vlan_vid(vlan_vid, mask);
+		return dynamic_cast<coxmatch_ofb_vlan_vid&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_VLAN_VID)]);
 	};
 
 	/**
@@ -559,10 +559,10 @@ public:
 	coxmatch_ofb_vlan_vid&
 	set_ofb_vlan_vid() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_VLAN_VID)) == matches.end()) {
-			matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_VLAN_VID)] = new coxmatch_ofb_vlan_vid();
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_VLAN_VID)) == matches.end()) {
+			matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_VLAN_VID)] = new coxmatch_ofb_vlan_vid();
 		}
-		return dynamic_cast<coxmatch_ofb_vlan_vid&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_VLAN_VID)]);
+		return dynamic_cast<coxmatch_ofb_vlan_vid&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_VLAN_VID)]);
 	};
 
 	/**
@@ -571,10 +571,10 @@ public:
 	const coxmatch_ofb_vlan_vid&
 	get_ofb_vlan_vid() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_VLAN_VID)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_VLAN_VID)) == matches.end()) {
 			throw eOxmInval("coxmatches::get_ofb_vlan_vid() not found");
 		}
-		return dynamic_cast<const coxmatch_ofb_vlan_vid&>(*matches.at(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_VLAN_VID)));
+		return dynamic_cast<const coxmatch_ofb_vlan_vid&>(*matches.at(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_VLAN_VID)));
 	};
 
 	/**
@@ -583,11 +583,11 @@ public:
 	bool
 	drop_ofb_vlan_vid() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_VLAN_VID)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_VLAN_VID)) == matches.end()) {
 			return false;
 		}
-		delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_VLAN_VID)];
-		matches.erase(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_VLAN_VID));
+		delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_VLAN_VID)];
+		matches.erase(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_VLAN_VID));
 		return true;
 	};
 
@@ -597,7 +597,7 @@ public:
 	bool
 	has_ofb_vlan_vid() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		return (not (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_VLAN_VID)) == matches.end()));
+		return (not (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_VLAN_VID)) == matches.end()));
 	};
 
 public:
@@ -609,11 +609,11 @@ public:
 	add_ofb_vlan_pcp(
 			uint8_t vlan_pcp = 0) {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_VLAN_PCP)) != matches.end()) {
-			delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_VLAN_PCP)];
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_VLAN_PCP)) != matches.end()) {
+			delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_VLAN_PCP)];
 		}
-		matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_VLAN_PCP)] = new coxmatch_ofb_vlan_pcp(vlan_pcp);
-		return dynamic_cast<coxmatch_ofb_vlan_pcp&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_VLAN_PCP)]);
+		matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_VLAN_PCP)] = new coxmatch_ofb_vlan_pcp(vlan_pcp);
+		return dynamic_cast<coxmatch_ofb_vlan_pcp&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_VLAN_PCP)]);
 	};
 
 	/**
@@ -622,10 +622,10 @@ public:
 	coxmatch_ofb_vlan_pcp&
 	set_ofb_vlan_pcp() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_VLAN_PCP)) == matches.end()) {
-			matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_VLAN_PCP)] = new coxmatch_ofb_vlan_pcp();
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_VLAN_PCP)) == matches.end()) {
+			matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_VLAN_PCP)] = new coxmatch_ofb_vlan_pcp();
 		}
-		return dynamic_cast<coxmatch_ofb_vlan_pcp&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_VLAN_PCP)]);
+		return dynamic_cast<coxmatch_ofb_vlan_pcp&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_VLAN_PCP)]);
 	};
 
 	/**
@@ -634,10 +634,10 @@ public:
 	const coxmatch_ofb_vlan_pcp&
 	get_ofb_vlan_pcp() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_VLAN_PCP)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_VLAN_PCP)) == matches.end()) {
 			throw eOxmInval("coxmatches::get_ofb_vlan_pcp() not found");
 		}
-		return dynamic_cast<const coxmatch_ofb_vlan_pcp&>(*matches.at(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_VLAN_PCP)));
+		return dynamic_cast<const coxmatch_ofb_vlan_pcp&>(*matches.at(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_VLAN_PCP)));
 	};
 
 	/**
@@ -646,11 +646,11 @@ public:
 	bool
 	drop_ofb_vlan_pcp() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_VLAN_PCP)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_VLAN_PCP)) == matches.end()) {
 			return false;
 		}
-		delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_VLAN_PCP)];
-		matches.erase(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_VLAN_PCP));
+		delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_VLAN_PCP)];
+		matches.erase(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_VLAN_PCP));
 		return true;
 	};
 
@@ -660,7 +660,7 @@ public:
 	bool
 	has_ofb_vlan_pcp() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		return (not (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_VLAN_PCP)) == matches.end()));
+		return (not (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_VLAN_PCP)) == matches.end()));
 	};
 
 public:
@@ -672,11 +672,11 @@ public:
 	add_ofb_ip_dscp(
 			uint8_t ip_dscp = 0) {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_DSCP)) != matches.end()) {
-			delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_DSCP)];
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_DSCP)) != matches.end()) {
+			delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_DSCP)];
 		}
-		matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_DSCP)] = new coxmatch_ofb_ip_dscp(ip_dscp);
-		return dynamic_cast<coxmatch_ofb_ip_dscp&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_DSCP)]);
+		matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_DSCP)] = new coxmatch_ofb_ip_dscp(ip_dscp);
+		return dynamic_cast<coxmatch_ofb_ip_dscp&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_DSCP)]);
 	};
 
 	/**
@@ -685,10 +685,10 @@ public:
 	coxmatch_ofb_ip_dscp&
 	set_ofb_ip_dscp() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_DSCP)) == matches.end()) {
-			matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_DSCP)] = new coxmatch_ofb_ip_dscp();
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_DSCP)) == matches.end()) {
+			matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_DSCP)] = new coxmatch_ofb_ip_dscp();
 		}
-		return dynamic_cast<coxmatch_ofb_ip_dscp&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_DSCP)]);
+		return dynamic_cast<coxmatch_ofb_ip_dscp&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_DSCP)]);
 	};
 
 	/**
@@ -697,10 +697,10 @@ public:
 	const coxmatch_ofb_ip_dscp&
 	get_ofb_ip_dscp() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_DSCP)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_DSCP)) == matches.end()) {
 			throw eOxmInval("coxmatches::get_ofb_ip_dscp() not found");
 		}
-		return dynamic_cast<const coxmatch_ofb_ip_dscp&>(*matches.at(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_DSCP)));
+		return dynamic_cast<const coxmatch_ofb_ip_dscp&>(*matches.at(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_DSCP)));
 	};
 
 	/**
@@ -709,11 +709,11 @@ public:
 	bool
 	drop_ofb_ip_dscp() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_DSCP)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_DSCP)) == matches.end()) {
 			return false;
 		}
-		delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_DSCP)];
-		matches.erase(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_DSCP));
+		delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_DSCP)];
+		matches.erase(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_DSCP));
 		return true;
 	};
 
@@ -723,7 +723,7 @@ public:
 	bool
 	has_ofb_ip_dscp() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		return (not (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_DSCP)) == matches.end()));
+		return (not (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_DSCP)) == matches.end()));
 	};
 
 public:
@@ -735,11 +735,11 @@ public:
 	add_ofb_ip_ecn(
 			uint8_t ip_ecn = 0) {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_ECN)) != matches.end()) {
-			delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_ECN)];
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_ECN)) != matches.end()) {
+			delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_ECN)];
 		}
-		matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_ECN)] = new coxmatch_ofb_ip_ecn(ip_ecn);
-		return dynamic_cast<coxmatch_ofb_ip_ecn&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_ECN)]);
+		matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_ECN)] = new coxmatch_ofb_ip_ecn(ip_ecn);
+		return dynamic_cast<coxmatch_ofb_ip_ecn&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_ECN)]);
 	};
 
 	/**
@@ -748,10 +748,10 @@ public:
 	coxmatch_ofb_ip_ecn&
 	set_ofb_ip_ecn() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_ECN)) == matches.end()) {
-			matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_ECN)] = new coxmatch_ofb_ip_ecn();
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_ECN)) == matches.end()) {
+			matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_ECN)] = new coxmatch_ofb_ip_ecn();
 		}
-		return dynamic_cast<coxmatch_ofb_ip_ecn&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_ECN)]);
+		return dynamic_cast<coxmatch_ofb_ip_ecn&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_ECN)]);
 	};
 
 	/**
@@ -760,10 +760,10 @@ public:
 	const coxmatch_ofb_ip_ecn&
 	get_ofb_ip_ecn() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_ECN)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_ECN)) == matches.end()) {
 			throw eOxmInval("coxmatches::get_ofb_ip_ecn() not found");
 		}
-		return dynamic_cast<const coxmatch_ofb_ip_ecn&>(*matches.at(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_ECN)));
+		return dynamic_cast<const coxmatch_ofb_ip_ecn&>(*matches.at(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_ECN)));
 	};
 
 	/**
@@ -772,11 +772,11 @@ public:
 	bool
 	drop_ofb_ip_ecn() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_ECN)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_ECN)) == matches.end()) {
 			return false;
 		}
-		delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_ECN)];
-		matches.erase(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_ECN));
+		delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_ECN)];
+		matches.erase(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_ECN));
 		return true;
 	};
 
@@ -786,7 +786,7 @@ public:
 	bool
 	has_ofb_ip_ecn() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		return (not (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_ECN)) == matches.end()));
+		return (not (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_ECN)) == matches.end()));
 	};
 
 public:
@@ -798,11 +798,11 @@ public:
 	add_ofb_ip_proto(
 			uint8_t ip_proto = 0) {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_PROTO)) != matches.end()) {
-			delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_PROTO)];
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_PROTO)) != matches.end()) {
+			delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_PROTO)];
 		}
-		matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_PROTO)] = new coxmatch_ofb_ip_proto(ip_proto);
-		return dynamic_cast<coxmatch_ofb_ip_proto&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_PROTO)]);
+		matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_PROTO)] = new coxmatch_ofb_ip_proto(ip_proto);
+		return dynamic_cast<coxmatch_ofb_ip_proto&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_PROTO)]);
 	};
 
 	/**
@@ -811,10 +811,10 @@ public:
 	coxmatch_ofb_ip_proto&
 	set_ofb_ip_proto() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_PROTO)) == matches.end()) {
-			matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_PROTO)] = new coxmatch_ofb_ip_proto();
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_PROTO)) == matches.end()) {
+			matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_PROTO)] = new coxmatch_ofb_ip_proto();
 		}
-		return dynamic_cast<coxmatch_ofb_ip_proto&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_PROTO)]);
+		return dynamic_cast<coxmatch_ofb_ip_proto&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_PROTO)]);
 	};
 
 	/**
@@ -823,10 +823,10 @@ public:
 	const coxmatch_ofb_ip_proto&
 	get_ofb_ip_proto() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_PROTO)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_PROTO)) == matches.end()) {
 			throw eOxmInval("coxmatches::get_ofb_ip_proto() not found");
 		}
-		return dynamic_cast<const coxmatch_ofb_ip_proto&>(*matches.at(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_PROTO)));
+		return dynamic_cast<const coxmatch_ofb_ip_proto&>(*matches.at(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_PROTO)));
 	};
 
 	/**
@@ -835,11 +835,11 @@ public:
 	bool
 	drop_ofb_ip_proto() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_PROTO)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_PROTO)) == matches.end()) {
 			return false;
 		}
-		delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_PROTO)];
-		matches.erase(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_PROTO));
+		delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_PROTO)];
+		matches.erase(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_PROTO));
 		return true;
 	};
 
@@ -849,7 +849,7 @@ public:
 	bool
 	has_ofb_ip_proto() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		return (not (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_PROTO)) == matches.end()));
+		return (not (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_PROTO)) == matches.end()));
 	};
 
 public:
@@ -862,11 +862,11 @@ public:
 			const rofl::caddress_in4& addr = rofl::caddress_in4(),
 			const rofl::caddress_in4& mask = rofl::caddress_in4()) {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV4_SRC)) != matches.end()) {
-			delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV4_SRC)];
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV4_SRC)) != matches.end()) {
+			delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV4_SRC)];
 		}
-		matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV4_SRC)] = new coxmatch_ofb_ipv4_src(addr, mask);
-		return dynamic_cast<coxmatch_ofb_ipv4_src&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV4_SRC)]);
+		matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV4_SRC)] = new coxmatch_ofb_ipv4_src(addr, mask);
+		return dynamic_cast<coxmatch_ofb_ipv4_src&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV4_SRC)]);
 	};
 
 	/**
@@ -875,10 +875,10 @@ public:
 	coxmatch_ofb_ipv4_src&
 	set_ofb_ipv4_src() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV4_SRC)) == matches.end()) {
-			matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV4_SRC)] = new coxmatch_ofb_ipv4_src();
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV4_SRC)) == matches.end()) {
+			matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV4_SRC)] = new coxmatch_ofb_ipv4_src();
 		}
-		return dynamic_cast<coxmatch_ofb_ipv4_src&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV4_SRC)]);
+		return dynamic_cast<coxmatch_ofb_ipv4_src&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV4_SRC)]);
 	};
 
 	/**
@@ -887,10 +887,10 @@ public:
 	const coxmatch_ofb_ipv4_src&
 	get_ofb_ipv4_src() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV4_SRC)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV4_SRC)) == matches.end()) {
 			throw eOxmInval("coxmatches::get_ofb_ipv4_src() not found");
 		}
-		return dynamic_cast<const coxmatch_ofb_ipv4_src&>(*matches.at(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV4_SRC)));
+		return dynamic_cast<const coxmatch_ofb_ipv4_src&>(*matches.at(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV4_SRC)));
 	};
 
 	/**
@@ -899,11 +899,11 @@ public:
 	bool
 	drop_ofb_ipv4_src() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV4_SRC)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV4_SRC)) == matches.end()) {
 			return false;
 		}
-		delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV4_SRC)];
-		matches.erase(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV4_SRC));
+		delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV4_SRC)];
+		matches.erase(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV4_SRC));
 		return true;
 	};
 
@@ -913,7 +913,7 @@ public:
 	bool
 	has_ofb_ipv4_src() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		return (not (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV4_SRC)) == matches.end()));
+		return (not (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV4_SRC)) == matches.end()));
 	};
 
 public:
@@ -926,11 +926,11 @@ public:
 			const rofl::caddress_in4& addr = rofl::caddress_in4(),
 			const rofl::caddress_in4& mask = rofl::caddress_in4()) {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV4_DST)) != matches.end()) {
-			delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV4_DST)];
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV4_DST)) != matches.end()) {
+			delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV4_DST)];
 		}
-		matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV4_DST)] = new coxmatch_ofb_ipv4_dst(addr, mask);
-		return dynamic_cast<coxmatch_ofb_ipv4_dst&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV4_DST)]);
+		matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV4_DST)] = new coxmatch_ofb_ipv4_dst(addr, mask);
+		return dynamic_cast<coxmatch_ofb_ipv4_dst&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV4_DST)]);
 	};
 
 	/**
@@ -939,10 +939,10 @@ public:
 	coxmatch_ofb_ipv4_dst&
 	set_ofb_ipv4_dst() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV4_DST)) == matches.end()) {
-			matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV4_DST)] = new coxmatch_ofb_ipv4_dst();
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV4_DST)) == matches.end()) {
+			matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV4_DST)] = new coxmatch_ofb_ipv4_dst();
 		}
-		return dynamic_cast<coxmatch_ofb_ipv4_dst&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV4_DST)]);
+		return dynamic_cast<coxmatch_ofb_ipv4_dst&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV4_DST)]);
 	};
 
 	/**
@@ -951,10 +951,10 @@ public:
 	const coxmatch_ofb_ipv4_dst&
 	get_ofb_ipv4_dst() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV4_DST)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV4_DST)) == matches.end()) {
 			throw eOxmInval("coxmatches::get_ofb_ipv4_dst() not found");
 		}
-		return dynamic_cast<const coxmatch_ofb_ipv4_dst&>(*matches.at(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV4_DST)));
+		return dynamic_cast<const coxmatch_ofb_ipv4_dst&>(*matches.at(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV4_DST)));
 	};
 
 	/**
@@ -963,11 +963,11 @@ public:
 	bool
 	drop_ofb_ipv4_dst() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV4_DST)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV4_DST)) == matches.end()) {
 			return false;
 		}
-		delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV4_DST)];
-		matches.erase(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV4_DST));
+		delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV4_DST)];
+		matches.erase(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV4_DST));
 		return true;
 	};
 
@@ -977,7 +977,7 @@ public:
 	bool
 	has_ofb_ipv4_dst() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		return (not (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV4_DST)) == matches.end()));
+		return (not (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV4_DST)) == matches.end()));
 	};
 
 public:
@@ -990,11 +990,11 @@ public:
 			const rofl::caddress_in6& addr = rofl::caddress_in6(),
 			const rofl::caddress_in6& mask = rofl::caddress_in6()) {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_SRC)) != matches.end()) {
-			delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_SRC)];
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_SRC)) != matches.end()) {
+			delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_SRC)];
 		}
-		matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_SRC)] = new coxmatch_ofb_ipv6_src(addr, mask);
-		return dynamic_cast<coxmatch_ofb_ipv6_src&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_SRC)]);
+		matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_SRC)] = new coxmatch_ofb_ipv6_src(addr, mask);
+		return dynamic_cast<coxmatch_ofb_ipv6_src&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_SRC)]);
 	};
 
 	/**
@@ -1003,10 +1003,10 @@ public:
 	coxmatch_ofb_ipv6_src&
 	set_ofb_ipv6_src() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_SRC)) == matches.end()) {
-			matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_SRC)] = new coxmatch_ofb_ipv6_src();
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_SRC)) == matches.end()) {
+			matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_SRC)] = new coxmatch_ofb_ipv6_src();
 		}
-		return dynamic_cast<coxmatch_ofb_ipv6_src&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_SRC)]);
+		return dynamic_cast<coxmatch_ofb_ipv6_src&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_SRC)]);
 	};
 
 	/**
@@ -1015,10 +1015,10 @@ public:
 	const coxmatch_ofb_ipv6_src&
 	get_ofb_ipv6_src() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_SRC)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_SRC)) == matches.end()) {
 			throw eOxmInval("coxmatches::get_ofb_ipv6_src() not found");
 		}
-		return dynamic_cast<const coxmatch_ofb_ipv6_src&>(*matches.at(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_SRC)));
+		return dynamic_cast<const coxmatch_ofb_ipv6_src&>(*matches.at(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_SRC)));
 	};
 
 	/**
@@ -1027,11 +1027,11 @@ public:
 	bool
 	drop_ofb_ipv6_src() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_SRC)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_SRC)) == matches.end()) {
 			return false;
 		}
-		delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_SRC)];
-		matches.erase(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_SRC));
+		delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_SRC)];
+		matches.erase(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_SRC));
 		return true;
 	};
 
@@ -1041,7 +1041,7 @@ public:
 	bool
 	has_ofb_ipv6_src() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		return (not (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_SRC)) == matches.end()));
+		return (not (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_SRC)) == matches.end()));
 	};
 
 public:
@@ -1054,11 +1054,11 @@ public:
 			const rofl::caddress_in6& addr = rofl::caddress_in6(),
 			const rofl::caddress_in6& mask = rofl::caddress_in6()) {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_DST)) != matches.end()) {
-			delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_DST)];
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_DST)) != matches.end()) {
+			delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_DST)];
 		}
-		matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_DST)] = new coxmatch_ofb_ipv6_dst(addr, mask);
-		return dynamic_cast<coxmatch_ofb_ipv6_dst&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_DST)]);
+		matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_DST)] = new coxmatch_ofb_ipv6_dst(addr, mask);
+		return dynamic_cast<coxmatch_ofb_ipv6_dst&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_DST)]);
 	};
 
 	/**
@@ -1067,10 +1067,10 @@ public:
 	coxmatch_ofb_ipv6_dst&
 	set_ofb_ipv6_dst() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_DST)) == matches.end()) {
-			matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_DST)] = new coxmatch_ofb_ipv6_dst();
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_DST)) == matches.end()) {
+			matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_DST)] = new coxmatch_ofb_ipv6_dst();
 		}
-		return dynamic_cast<coxmatch_ofb_ipv6_dst&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_DST)]);
+		return dynamic_cast<coxmatch_ofb_ipv6_dst&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_DST)]);
 	};
 
 	/**
@@ -1079,10 +1079,10 @@ public:
 	const coxmatch_ofb_ipv6_dst&
 	get_ofb_ipv6_dst() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_DST)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_DST)) == matches.end()) {
 			throw eOxmInval("coxmatches::get_ofb_ipv6_dst() not found");
 		}
-		return dynamic_cast<const coxmatch_ofb_ipv6_dst&>(*matches.at(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_DST)));
+		return dynamic_cast<const coxmatch_ofb_ipv6_dst&>(*matches.at(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_DST)));
 	};
 
 	/**
@@ -1091,11 +1091,11 @@ public:
 	bool
 	drop_ofb_ipv6_dst() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_DST)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_DST)) == matches.end()) {
 			return false;
 		}
-		delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_DST)];
-		matches.erase(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_DST));
+		delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_DST)];
+		matches.erase(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_DST));
 		return true;
 	};
 
@@ -1105,7 +1105,7 @@ public:
 	bool
 	has_ofb_ipv6_dst() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		return (not (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_DST)) == matches.end()));
+		return (not (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_DST)) == matches.end()));
 	};
 
 public:
@@ -1117,11 +1117,11 @@ public:
 	add_ofb_tcp_src(
 			uint16_t tcp_src = 0) {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_TCP_SRC)) != matches.end()) {
-			delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_TCP_SRC)];
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_TCP_SRC)) != matches.end()) {
+			delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_TCP_SRC)];
 		}
-		matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_TCP_SRC)] = new coxmatch_ofb_tcp_src(tcp_src);
-		return dynamic_cast<coxmatch_ofb_tcp_src&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_TCP_SRC)]);
+		matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_TCP_SRC)] = new coxmatch_ofb_tcp_src(tcp_src);
+		return dynamic_cast<coxmatch_ofb_tcp_src&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_TCP_SRC)]);
 	};
 
 	/**
@@ -1130,10 +1130,10 @@ public:
 	coxmatch_ofb_tcp_src&
 	set_ofb_tcp_src() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_TCP_SRC)) == matches.end()) {
-			matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_TCP_SRC)] = new coxmatch_ofb_tcp_src();
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_TCP_SRC)) == matches.end()) {
+			matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_TCP_SRC)] = new coxmatch_ofb_tcp_src();
 		}
-		return dynamic_cast<coxmatch_ofb_tcp_src&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_TCP_SRC)]);
+		return dynamic_cast<coxmatch_ofb_tcp_src&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_TCP_SRC)]);
 	};
 
 	/**
@@ -1142,10 +1142,10 @@ public:
 	const coxmatch_ofb_tcp_src&
 	get_ofb_tcp_src() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_TCP_SRC)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_TCP_SRC)) == matches.end()) {
 			throw eOxmInval("coxmatches::get_ofb_tcp_src() not found");
 		}
-		return dynamic_cast<const coxmatch_ofb_tcp_src&>(*matches.at(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_TCP_SRC)));
+		return dynamic_cast<const coxmatch_ofb_tcp_src&>(*matches.at(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_TCP_SRC)));
 	};
 
 	/**
@@ -1154,11 +1154,11 @@ public:
 	bool
 	drop_ofb_tcp_src() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_TCP_SRC)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_TCP_SRC)) == matches.end()) {
 			return false;
 		}
-		delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_TCP_SRC)];
-		matches.erase(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_TCP_SRC));
+		delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_TCP_SRC)];
+		matches.erase(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_TCP_SRC));
 		return true;
 	};
 
@@ -1168,7 +1168,7 @@ public:
 	bool
 	has_ofb_tcp_src() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		return (not (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_TCP_SRC)) == matches.end()));
+		return (not (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_TCP_SRC)) == matches.end()));
 	};
 
 public:
@@ -1180,11 +1180,11 @@ public:
 	add_ofb_tcp_dst(
 			uint16_t tcp_dst = 0) {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_TCP_DST)) != matches.end()) {
-			delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_TCP_DST)];
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_TCP_DST)) != matches.end()) {
+			delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_TCP_DST)];
 		}
-		matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_TCP_DST)] = new coxmatch_ofb_tcp_dst(tcp_dst);
-		return dynamic_cast<coxmatch_ofb_tcp_dst&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_TCP_DST)]);
+		matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_TCP_DST)] = new coxmatch_ofb_tcp_dst(tcp_dst);
+		return dynamic_cast<coxmatch_ofb_tcp_dst&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_TCP_DST)]);
 	};
 
 	/**
@@ -1193,10 +1193,10 @@ public:
 	coxmatch_ofb_tcp_dst&
 	set_ofb_tcp_dst() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_TCP_DST)) == matches.end()) {
-			matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_TCP_DST)] = new coxmatch_ofb_tcp_dst();
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_TCP_DST)) == matches.end()) {
+			matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_TCP_DST)] = new coxmatch_ofb_tcp_dst();
 		}
-		return dynamic_cast<coxmatch_ofb_tcp_dst&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_TCP_DST)]);
+		return dynamic_cast<coxmatch_ofb_tcp_dst&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_TCP_DST)]);
 	};
 
 	/**
@@ -1205,10 +1205,10 @@ public:
 	const coxmatch_ofb_tcp_dst&
 	get_ofb_tcp_dst() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_TCP_DST)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_TCP_DST)) == matches.end()) {
 			throw eOxmInval("coxmatches::get_ofb_tcp_dst() not found");
 		}
-		return dynamic_cast<const coxmatch_ofb_tcp_dst&>(*matches.at(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_TCP_DST)));
+		return dynamic_cast<const coxmatch_ofb_tcp_dst&>(*matches.at(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_TCP_DST)));
 	};
 
 	/**
@@ -1217,11 +1217,11 @@ public:
 	bool
 	drop_ofb_tcp_dst() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_TCP_DST)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_TCP_DST)) == matches.end()) {
 			return false;
 		}
-		delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_TCP_DST)];
-		matches.erase(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_TCP_DST));
+		delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_TCP_DST)];
+		matches.erase(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_TCP_DST));
 		return true;
 	};
 
@@ -1231,7 +1231,7 @@ public:
 	bool
 	has_ofb_tcp_dst() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		return (not (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_TCP_DST)) == matches.end()));
+		return (not (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_TCP_DST)) == matches.end()));
 	};
 
 public:
@@ -1243,11 +1243,11 @@ public:
 	add_ofb_udp_src(
 			uint16_t udp_src = 0) {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_UDP_SRC)) != matches.end()) {
-			delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_UDP_SRC)];
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_UDP_SRC)) != matches.end()) {
+			delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_UDP_SRC)];
 		}
-		matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_UDP_SRC)] = new coxmatch_ofb_udp_src(udp_src);
-		return dynamic_cast<coxmatch_ofb_udp_src&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_UDP_SRC)]);
+		matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_UDP_SRC)] = new coxmatch_ofb_udp_src(udp_src);
+		return dynamic_cast<coxmatch_ofb_udp_src&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_UDP_SRC)]);
 	};
 
 	/**
@@ -1256,10 +1256,10 @@ public:
 	coxmatch_ofb_udp_src&
 	set_ofb_udp_src() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_UDP_SRC)) == matches.end()) {
-			matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_UDP_SRC)] = new coxmatch_ofb_udp_src();
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_UDP_SRC)) == matches.end()) {
+			matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_UDP_SRC)] = new coxmatch_ofb_udp_src();
 		}
-		return dynamic_cast<coxmatch_ofb_udp_src&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_UDP_SRC)]);
+		return dynamic_cast<coxmatch_ofb_udp_src&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_UDP_SRC)]);
 	};
 
 	/**
@@ -1268,10 +1268,10 @@ public:
 	const coxmatch_ofb_udp_src&
 	get_ofb_udp_src() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_UDP_SRC)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_UDP_SRC)) == matches.end()) {
 			throw eOxmInval("coxmatches::get_ofb_udp_src() not found");
 		}
-		return dynamic_cast<const coxmatch_ofb_udp_src&>(*matches.at(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_UDP_SRC)));
+		return dynamic_cast<const coxmatch_ofb_udp_src&>(*matches.at(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_UDP_SRC)));
 	};
 
 	/**
@@ -1280,11 +1280,11 @@ public:
 	bool
 	drop_ofb_udp_src() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_UDP_SRC)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_UDP_SRC)) == matches.end()) {
 			return false;
 		}
-		delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_UDP_SRC)];
-		matches.erase(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_UDP_SRC));
+		delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_UDP_SRC)];
+		matches.erase(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_UDP_SRC));
 		return true;
 	};
 
@@ -1294,7 +1294,7 @@ public:
 	bool
 	has_ofb_udp_src() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		return (not (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_UDP_SRC)) == matches.end()));
+		return (not (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_UDP_SRC)) == matches.end()));
 	};
 
 public:
@@ -1306,11 +1306,11 @@ public:
 	add_ofb_udp_dst(
 			uint16_t udp_dst = 0) {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_UDP_DST)) != matches.end()) {
-			delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_UDP_DST)];
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_UDP_DST)) != matches.end()) {
+			delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_UDP_DST)];
 		}
-		matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_UDP_DST)] = new coxmatch_ofb_udp_dst(udp_dst);
-		return dynamic_cast<coxmatch_ofb_udp_dst&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_UDP_DST)]);
+		matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_UDP_DST)] = new coxmatch_ofb_udp_dst(udp_dst);
+		return dynamic_cast<coxmatch_ofb_udp_dst&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_UDP_DST)]);
 	};
 
 	/**
@@ -1319,10 +1319,10 @@ public:
 	coxmatch_ofb_udp_dst&
 	set_ofb_udp_dst() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_UDP_DST)) == matches.end()) {
-			matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_UDP_DST)] = new coxmatch_ofb_udp_dst();
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_UDP_DST)) == matches.end()) {
+			matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_UDP_DST)] = new coxmatch_ofb_udp_dst();
 		}
-		return dynamic_cast<coxmatch_ofb_udp_dst&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_UDP_DST)]);
+		return dynamic_cast<coxmatch_ofb_udp_dst&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_UDP_DST)]);
 	};
 
 	/**
@@ -1331,10 +1331,10 @@ public:
 	const coxmatch_ofb_udp_dst&
 	get_ofb_udp_dst() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_UDP_DST)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_UDP_DST)) == matches.end()) {
 			throw eOxmInval("coxmatches::get_ofb_udp_dst() not found");
 		}
-		return dynamic_cast<const coxmatch_ofb_udp_dst&>(*matches.at(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_UDP_DST)));
+		return dynamic_cast<const coxmatch_ofb_udp_dst&>(*matches.at(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_UDP_DST)));
 	};
 
 	/**
@@ -1343,11 +1343,11 @@ public:
 	bool
 	drop_ofb_udp_dst() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_UDP_DST)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_UDP_DST)) == matches.end()) {
 			return false;
 		}
-		delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_UDP_DST)];
-		matches.erase(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_UDP_DST));
+		delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_UDP_DST)];
+		matches.erase(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_UDP_DST));
 		return true;
 	};
 
@@ -1357,7 +1357,7 @@ public:
 	bool
 	has_ofb_udp_dst() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		return (not (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_UDP_DST)) == matches.end()));
+		return (not (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_UDP_DST)) == matches.end()));
 	};
 
 public:
@@ -1369,11 +1369,11 @@ public:
 	add_ofb_sctp_src(
 			uint16_t sctp_src = 0) {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_SCTP_SRC)) != matches.end()) {
-			delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_SCTP_SRC)];
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_SCTP_SRC)) != matches.end()) {
+			delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_SCTP_SRC)];
 		}
-		matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_SCTP_SRC)] = new coxmatch_ofb_sctp_src(sctp_src);
-		return dynamic_cast<coxmatch_ofb_sctp_src&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_SCTP_SRC)]);
+		matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_SCTP_SRC)] = new coxmatch_ofb_sctp_src(sctp_src);
+		return dynamic_cast<coxmatch_ofb_sctp_src&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_SCTP_SRC)]);
 	};
 
 	/**
@@ -1382,10 +1382,10 @@ public:
 	coxmatch_ofb_sctp_src&
 	set_ofb_sctp_src() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_SCTP_SRC)) == matches.end()) {
-			matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_SCTP_SRC)] = new coxmatch_ofb_sctp_src();
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_SCTP_SRC)) == matches.end()) {
+			matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_SCTP_SRC)] = new coxmatch_ofb_sctp_src();
 		}
-		return dynamic_cast<coxmatch_ofb_sctp_src&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_SCTP_SRC)]);
+		return dynamic_cast<coxmatch_ofb_sctp_src&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_SCTP_SRC)]);
 	};
 
 	/**
@@ -1394,10 +1394,10 @@ public:
 	const coxmatch_ofb_sctp_src&
 	get_ofb_sctp_src() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_SCTP_SRC)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_SCTP_SRC)) == matches.end()) {
 			throw eOxmInval("coxmatches::get_ofb_sctp_src() not found");
 		}
-		return dynamic_cast<const coxmatch_ofb_sctp_src&>(*matches.at(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_SCTP_SRC)));
+		return dynamic_cast<const coxmatch_ofb_sctp_src&>(*matches.at(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_SCTP_SRC)));
 	};
 
 	/**
@@ -1406,11 +1406,11 @@ public:
 	bool
 	drop_ofb_sctp_src() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_SCTP_SRC)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_SCTP_SRC)) == matches.end()) {
 			return false;
 		}
-		delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_SCTP_SRC)];
-		matches.erase(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_SCTP_SRC));
+		delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_SCTP_SRC)];
+		matches.erase(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_SCTP_SRC));
 		return true;
 	};
 
@@ -1420,7 +1420,7 @@ public:
 	bool
 	has_ofb_sctp_src() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		return (not (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_SCTP_SRC)) == matches.end()));
+		return (not (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_SCTP_SRC)) == matches.end()));
 	};
 
 public:
@@ -1432,11 +1432,11 @@ public:
 	add_ofb_sctp_dst(
 			uint16_t sctp_dst = 0) {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_SCTP_DST)) != matches.end()) {
-			delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_SCTP_DST)];
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_SCTP_DST)) != matches.end()) {
+			delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_SCTP_DST)];
 		}
-		matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_SCTP_DST)] = new coxmatch_ofb_sctp_dst(sctp_dst);
-		return dynamic_cast<coxmatch_ofb_sctp_dst&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_SCTP_DST)]);
+		matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_SCTP_DST)] = new coxmatch_ofb_sctp_dst(sctp_dst);
+		return dynamic_cast<coxmatch_ofb_sctp_dst&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_SCTP_DST)]);
 	};
 
 	/**
@@ -1445,10 +1445,10 @@ public:
 	coxmatch_ofb_sctp_dst&
 	set_ofb_sctp_dst() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_SCTP_DST)) == matches.end()) {
-			matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_SCTP_DST)] = new coxmatch_ofb_sctp_dst();
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_SCTP_DST)) == matches.end()) {
+			matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_SCTP_DST)] = new coxmatch_ofb_sctp_dst();
 		}
-		return dynamic_cast<coxmatch_ofb_sctp_dst&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_SCTP_DST)]);
+		return dynamic_cast<coxmatch_ofb_sctp_dst&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_SCTP_DST)]);
 	};
 
 	/**
@@ -1457,10 +1457,10 @@ public:
 	const coxmatch_ofb_sctp_dst&
 	get_ofb_sctp_dst() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_SCTP_DST)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_SCTP_DST)) == matches.end()) {
 			throw eOxmInval("coxmatches::get_ofb_sctp_dst() not found");
 		}
-		return dynamic_cast<const coxmatch_ofb_sctp_dst&>(*matches.at(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_SCTP_DST)));
+		return dynamic_cast<const coxmatch_ofb_sctp_dst&>(*matches.at(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_SCTP_DST)));
 	};
 
 	/**
@@ -1469,11 +1469,11 @@ public:
 	bool
 	drop_ofb_sctp_dst() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_SCTP_DST)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_SCTP_DST)) == matches.end()) {
 			return false;
 		}
-		delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_SCTP_DST)];
-		matches.erase(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_SCTP_DST));
+		delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_SCTP_DST)];
+		matches.erase(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_SCTP_DST));
 		return true;
 	};
 
@@ -1483,7 +1483,7 @@ public:
 	bool
 	has_ofb_sctp_dst() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		return (not (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_SCTP_DST)) == matches.end()));
+		return (not (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_SCTP_DST)) == matches.end()));
 	};
 
 public:
@@ -1495,11 +1495,11 @@ public:
 	add_ofb_icmpv4_type(
 			uint8_t icmpv4_type = 0) {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV4_TYPE)) != matches.end()) {
-			delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV4_TYPE)];
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV4_TYPE)) != matches.end()) {
+			delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV4_TYPE)];
 		}
-		matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV4_TYPE)] = new coxmatch_ofb_icmpv4_type(icmpv4_type);
-		return dynamic_cast<coxmatch_ofb_icmpv4_type&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV4_TYPE)]);
+		matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV4_TYPE)] = new coxmatch_ofb_icmpv4_type(icmpv4_type);
+		return dynamic_cast<coxmatch_ofb_icmpv4_type&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV4_TYPE)]);
 	};
 
 	/**
@@ -1508,10 +1508,10 @@ public:
 	coxmatch_ofb_icmpv4_type&
 	set_ofb_icmpv4_type() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV4_TYPE)) == matches.end()) {
-			matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV4_TYPE)] = new coxmatch_ofb_icmpv4_type();
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV4_TYPE)) == matches.end()) {
+			matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV4_TYPE)] = new coxmatch_ofb_icmpv4_type();
 		}
-		return dynamic_cast<coxmatch_ofb_icmpv4_type&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV4_TYPE)]);
+		return dynamic_cast<coxmatch_ofb_icmpv4_type&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV4_TYPE)]);
 	};
 
 	/**
@@ -1520,10 +1520,10 @@ public:
 	const coxmatch_ofb_icmpv4_type&
 	get_ofb_icmpv4_type() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV4_TYPE)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV4_TYPE)) == matches.end()) {
 			throw eOxmInval("coxmatches::get_ofb_icmpv4_type() not found");
 		}
-		return dynamic_cast<const coxmatch_ofb_icmpv4_type&>(*matches.at(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV4_TYPE)));
+		return dynamic_cast<const coxmatch_ofb_icmpv4_type&>(*matches.at(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV4_TYPE)));
 	};
 
 	/**
@@ -1532,11 +1532,11 @@ public:
 	bool
 	drop_ofb_icmpv4_type() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV4_TYPE)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV4_TYPE)) == matches.end()) {
 			return false;
 		}
-		delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV4_TYPE)];
-		matches.erase(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV4_TYPE));
+		delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV4_TYPE)];
+		matches.erase(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV4_TYPE));
 		return true;
 	};
 
@@ -1546,7 +1546,7 @@ public:
 	bool
 	has_ofb_icmpv4_type() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		return (not (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV4_TYPE)) == matches.end()));
+		return (not (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV4_TYPE)) == matches.end()));
 	};
 
 public:
@@ -1558,11 +1558,11 @@ public:
 	add_ofb_icmpv4_code(
 			uint8_t icmpv4_code = 0) {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV4_CODE)) != matches.end()) {
-			delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV4_CODE)];
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV4_CODE)) != matches.end()) {
+			delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV4_CODE)];
 		}
-		matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV4_CODE)] = new coxmatch_ofb_icmpv4_code(icmpv4_code);
-		return dynamic_cast<coxmatch_ofb_icmpv4_code&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV4_CODE)]);
+		matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV4_CODE)] = new coxmatch_ofb_icmpv4_code(icmpv4_code);
+		return dynamic_cast<coxmatch_ofb_icmpv4_code&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV4_CODE)]);
 	};
 
 	/**
@@ -1571,10 +1571,10 @@ public:
 	coxmatch_ofb_icmpv4_code&
 	set_ofb_icmpv4_code() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV4_CODE)) == matches.end()) {
-			matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV4_CODE)] = new coxmatch_ofb_icmpv4_code();
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV4_CODE)) == matches.end()) {
+			matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV4_CODE)] = new coxmatch_ofb_icmpv4_code();
 		}
-		return dynamic_cast<coxmatch_ofb_icmpv4_code&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV4_CODE)]);
+		return dynamic_cast<coxmatch_ofb_icmpv4_code&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV4_CODE)]);
 	};
 
 	/**
@@ -1583,10 +1583,10 @@ public:
 	const coxmatch_ofb_icmpv4_code&
 	get_ofb_icmpv4_code() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV4_CODE)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV4_CODE)) == matches.end()) {
 			throw eOxmInval("coxmatches::get_ofb_icmpv4_code() not found");
 		}
-		return dynamic_cast<const coxmatch_ofb_icmpv4_code&>(*matches.at(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV4_CODE)));
+		return dynamic_cast<const coxmatch_ofb_icmpv4_code&>(*matches.at(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV4_CODE)));
 	};
 
 	/**
@@ -1595,11 +1595,11 @@ public:
 	bool
 	drop_ofb_icmpv4_code() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV4_CODE)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV4_CODE)) == matches.end()) {
 			return false;
 		}
-		delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV4_CODE)];
-		matches.erase(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV4_CODE));
+		delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV4_CODE)];
+		matches.erase(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV4_CODE));
 		return true;
 	};
 
@@ -1609,7 +1609,7 @@ public:
 	bool
 	has_ofb_icmpv4_code() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		return (not (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV4_CODE)) == matches.end()));
+		return (not (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV4_CODE)) == matches.end()));
 	};
 
 public:
@@ -1621,11 +1621,11 @@ public:
 	add_ofb_arp_opcode(
 			uint16_t arp_opcode = 0) {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_OP)) != matches.end()) {
-			delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_OP)];
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_OP)) != matches.end()) {
+			delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_OP)];
 		}
-		matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_OP)] = new coxmatch_ofb_arp_opcode(arp_opcode);
-		return dynamic_cast<coxmatch_ofb_arp_opcode&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_OP)]);
+		matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_OP)] = new coxmatch_ofb_arp_opcode(arp_opcode);
+		return dynamic_cast<coxmatch_ofb_arp_opcode&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_OP)]);
 	};
 
 	/**
@@ -1634,10 +1634,10 @@ public:
 	coxmatch_ofb_arp_opcode&
 	set_ofb_arp_opcode() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_OP)) == matches.end()) {
-			matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_OP)] = new coxmatch_ofb_arp_opcode();
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_OP)) == matches.end()) {
+			matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_OP)] = new coxmatch_ofb_arp_opcode();
 		}
-		return dynamic_cast<coxmatch_ofb_arp_opcode&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_OP)]);
+		return dynamic_cast<coxmatch_ofb_arp_opcode&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_OP)]);
 	};
 
 	/**
@@ -1646,10 +1646,10 @@ public:
 	const coxmatch_ofb_arp_opcode&
 	get_ofb_arp_opcode() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_OP)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_OP)) == matches.end()) {
 			throw eOxmInval("coxmatches::get_ofb_arp_opcode() not found");
 		}
-		return dynamic_cast<const coxmatch_ofb_arp_opcode&>(*matches.at(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_OP)));
+		return dynamic_cast<const coxmatch_ofb_arp_opcode&>(*matches.at(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_OP)));
 	};
 
 	/**
@@ -1658,11 +1658,11 @@ public:
 	bool
 	drop_ofb_arp_opcode() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_OP)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_OP)) == matches.end()) {
 			return false;
 		}
-		delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_OP)];
-		matches.erase(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_OP));
+		delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_OP)];
+		matches.erase(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_OP));
 		return true;
 	};
 
@@ -1672,7 +1672,7 @@ public:
 	bool
 	has_ofb_arp_opcode() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		return (not (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_OP)) == matches.end()));
+		return (not (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_OP)) == matches.end()));
 	};
 
 public:
@@ -1684,11 +1684,11 @@ public:
 	add_ofb_arp_spa(
 			uint32_t arp_spa = 0, uint32_t mask = 0) {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_SPA)) != matches.end()) {
-			delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_SPA)];
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_SPA)) != matches.end()) {
+			delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_SPA)];
 		}
-		matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_SPA)] = new coxmatch_ofb_arp_spa(arp_spa, mask);
-		return dynamic_cast<coxmatch_ofb_arp_spa&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_SPA)]);
+		matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_SPA)] = new coxmatch_ofb_arp_spa(arp_spa, mask);
+		return dynamic_cast<coxmatch_ofb_arp_spa&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_SPA)]);
 	};
 
 	/**
@@ -1697,10 +1697,10 @@ public:
 	coxmatch_ofb_arp_spa&
 	set_ofb_arp_spa() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_SPA)) == matches.end()) {
-			matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_SPA)] = new coxmatch_ofb_arp_spa();
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_SPA)) == matches.end()) {
+			matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_SPA)] = new coxmatch_ofb_arp_spa();
 		}
-		return dynamic_cast<coxmatch_ofb_arp_spa&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_SPA)]);
+		return dynamic_cast<coxmatch_ofb_arp_spa&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_SPA)]);
 	};
 
 	/**
@@ -1709,10 +1709,10 @@ public:
 	const coxmatch_ofb_arp_spa&
 	get_ofb_arp_spa() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_SPA)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_SPA)) == matches.end()) {
 			throw eOxmInval("coxmatches::get_ofb_arp_spa() not found");
 		}
-		return dynamic_cast<const coxmatch_ofb_arp_spa&>(*matches.at(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_SPA)));
+		return dynamic_cast<const coxmatch_ofb_arp_spa&>(*matches.at(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_SPA)));
 	};
 
 	/**
@@ -1721,11 +1721,11 @@ public:
 	bool
 	drop_ofb_arp_spa() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_SPA)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_SPA)) == matches.end()) {
 			return false;
 		}
-		delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_SPA)];
-		matches.erase(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_SPA));
+		delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_SPA)];
+		matches.erase(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_SPA));
 		return true;
 	};
 
@@ -1735,7 +1735,7 @@ public:
 	bool
 	has_ofb_arp_spa() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		return (not (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_SPA)) == matches.end()));
+		return (not (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_SPA)) == matches.end()));
 	};
 
 public:
@@ -1747,11 +1747,11 @@ public:
 	add_ofb_arp_tpa(
 			uint32_t arp_tpa = 0, uint32_t mask = 0) {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_TPA)) != matches.end()) {
-			delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_TPA)];
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_TPA)) != matches.end()) {
+			delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_TPA)];
 		}
-		matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_TPA)] = new coxmatch_ofb_arp_tpa(arp_tpa, mask);
-		return dynamic_cast<coxmatch_ofb_arp_tpa&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_TPA)]);
+		matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_TPA)] = new coxmatch_ofb_arp_tpa(arp_tpa, mask);
+		return dynamic_cast<coxmatch_ofb_arp_tpa&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_TPA)]);
 	};
 
 	/**
@@ -1760,10 +1760,10 @@ public:
 	coxmatch_ofb_arp_tpa&
 	set_ofb_arp_tpa() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_TPA)) == matches.end()) {
-			matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_TPA)] = new coxmatch_ofb_arp_tpa();
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_TPA)) == matches.end()) {
+			matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_TPA)] = new coxmatch_ofb_arp_tpa();
 		}
-		return dynamic_cast<coxmatch_ofb_arp_tpa&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_TPA)]);
+		return dynamic_cast<coxmatch_ofb_arp_tpa&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_TPA)]);
 	};
 
 	/**
@@ -1772,10 +1772,10 @@ public:
 	const coxmatch_ofb_arp_tpa&
 	get_ofb_arp_tpa() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_TPA)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_TPA)) == matches.end()) {
 			throw eOxmInval("coxmatches::get_ofb_arp_tpa() not found");
 		}
-		return dynamic_cast<const coxmatch_ofb_arp_tpa&>(*matches.at(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_TPA)));
+		return dynamic_cast<const coxmatch_ofb_arp_tpa&>(*matches.at(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_TPA)));
 	};
 
 	/**
@@ -1784,11 +1784,11 @@ public:
 	bool
 	drop_ofb_arp_tpa() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_TPA)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_TPA)) == matches.end()) {
 			return false;
 		}
-		delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_TPA)];
-		matches.erase(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_TPA));
+		delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_TPA)];
+		matches.erase(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_TPA));
 		return true;
 	};
 
@@ -1798,7 +1798,7 @@ public:
 	bool
 	has_ofb_arp_tpa() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		return (not (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_TPA)) == matches.end()));
+		return (not (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_TPA)) == matches.end()));
 	};
 
 public:
@@ -1810,11 +1810,11 @@ public:
 	add_ofb_arp_sha(
 			const rofl::caddress_ll& arp_sha = 0, const rofl::caddress_ll& mask = 0) {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_SHA)) != matches.end()) {
-			delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_SHA)];
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_SHA)) != matches.end()) {
+			delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_SHA)];
 		}
-		matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_SHA)] = new coxmatch_ofb_arp_sha(arp_sha, mask);
-		return dynamic_cast<coxmatch_ofb_arp_sha&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_SHA)]);
+		matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_SHA)] = new coxmatch_ofb_arp_sha(arp_sha, mask);
+		return dynamic_cast<coxmatch_ofb_arp_sha&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_SHA)]);
 	};
 
 	/**
@@ -1823,10 +1823,10 @@ public:
 	coxmatch_ofb_arp_sha&
 	set_ofb_arp_sha() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_SHA)) == matches.end()) {
-			matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_SHA)] = new coxmatch_ofb_arp_sha();
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_SHA)) == matches.end()) {
+			matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_SHA)] = new coxmatch_ofb_arp_sha();
 		}
-		return dynamic_cast<coxmatch_ofb_arp_sha&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_SHA)]);
+		return dynamic_cast<coxmatch_ofb_arp_sha&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_SHA)]);
 	};
 
 	/**
@@ -1835,10 +1835,10 @@ public:
 	const coxmatch_ofb_arp_sha&
 	get_ofb_arp_sha() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_SHA)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_SHA)) == matches.end()) {
 			throw eOxmInval("coxmatches::get_ofb_arp_sha() not found");
 		}
-		return dynamic_cast<const coxmatch_ofb_arp_sha&>(*matches.at(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_SHA)));
+		return dynamic_cast<const coxmatch_ofb_arp_sha&>(*matches.at(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_SHA)));
 	};
 
 	/**
@@ -1847,11 +1847,11 @@ public:
 	bool
 	drop_ofb_arp_sha() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_SHA)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_SHA)) == matches.end()) {
 			return false;
 		}
-		delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_SHA)];
-		matches.erase(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_SHA));
+		delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_SHA)];
+		matches.erase(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_SHA));
 		return true;
 	};
 
@@ -1861,7 +1861,7 @@ public:
 	bool
 	has_ofb_arp_sha() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		return (not (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_SHA)) == matches.end()));
+		return (not (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_SHA)) == matches.end()));
 	};
 
 public:
@@ -1873,11 +1873,11 @@ public:
 	add_ofb_arp_tha(
 			const rofl::caddress_ll& arp_tha = 0, const rofl::caddress_ll& mask = 0) {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_THA)) != matches.end()) {
-			delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_THA)];
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_THA)) != matches.end()) {
+			delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_THA)];
 		}
-		matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_THA)] = new coxmatch_ofb_arp_tha(arp_tha, mask);
-		return dynamic_cast<coxmatch_ofb_arp_tha&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_THA)]);
+		matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_THA)] = new coxmatch_ofb_arp_tha(arp_tha, mask);
+		return dynamic_cast<coxmatch_ofb_arp_tha&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_THA)]);
 	};
 
 	/**
@@ -1886,10 +1886,10 @@ public:
 	coxmatch_ofb_arp_tha&
 	set_ofb_arp_tha() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_THA)) == matches.end()) {
-			matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_THA)] = new coxmatch_ofb_arp_tha();
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_THA)) == matches.end()) {
+			matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_THA)] = new coxmatch_ofb_arp_tha();
 		}
-		return dynamic_cast<coxmatch_ofb_arp_tha&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_THA)]);
+		return dynamic_cast<coxmatch_ofb_arp_tha&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_THA)]);
 	};
 
 	/**
@@ -1898,10 +1898,10 @@ public:
 	const coxmatch_ofb_arp_tha&
 	get_ofb_arp_tha() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_THA)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_THA)) == matches.end()) {
 			throw eOxmInval("coxmatches::get_ofb_arp_tha() not found");
 		}
-		return dynamic_cast<const coxmatch_ofb_arp_tha&>(*matches.at(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_THA)));
+		return dynamic_cast<const coxmatch_ofb_arp_tha&>(*matches.at(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_THA)));
 	};
 
 	/**
@@ -1910,11 +1910,11 @@ public:
 	bool
 	drop_ofb_arp_tha() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_THA)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_THA)) == matches.end()) {
 			return false;
 		}
-		delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_THA)];
-		matches.erase(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_THA));
+		delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_THA)];
+		matches.erase(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_THA));
 		return true;
 	};
 
@@ -1924,7 +1924,7 @@ public:
 	bool
 	has_ofb_arp_tha() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		return (not (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_THA)) == matches.end()));
+		return (not (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_THA)) == matches.end()));
 	};
 
 public:
@@ -1936,11 +1936,11 @@ public:
 	add_ofb_ipv6_flabel(
 			uint32_t ipv6_flabel = 0, uint32_t mask = 0) {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_FLABEL)) != matches.end()) {
-			delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_FLABEL)];
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_FLABEL)) != matches.end()) {
+			delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_FLABEL)];
 		}
-		matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_FLABEL)] = new coxmatch_ofb_ipv6_flabel(ipv6_flabel, mask);
-		return dynamic_cast<coxmatch_ofb_ipv6_flabel&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_FLABEL)]);
+		matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_FLABEL)] = new coxmatch_ofb_ipv6_flabel(ipv6_flabel, mask);
+		return dynamic_cast<coxmatch_ofb_ipv6_flabel&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_FLABEL)]);
 	};
 
 	/**
@@ -1949,10 +1949,10 @@ public:
 	coxmatch_ofb_ipv6_flabel&
 	set_ofb_ipv6_flabel() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_FLABEL)) == matches.end()) {
-			matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_FLABEL)] = new coxmatch_ofb_ipv6_flabel();
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_FLABEL)) == matches.end()) {
+			matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_FLABEL)] = new coxmatch_ofb_ipv6_flabel();
 		}
-		return dynamic_cast<coxmatch_ofb_ipv6_flabel&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_FLABEL)]);
+		return dynamic_cast<coxmatch_ofb_ipv6_flabel&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_FLABEL)]);
 	};
 
 	/**
@@ -1961,10 +1961,10 @@ public:
 	const coxmatch_ofb_ipv6_flabel&
 	get_ofb_ipv6_flabel() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_FLABEL)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_FLABEL)) == matches.end()) {
 			throw eOxmInval("coxmatches::get_ofb_ipv6_flabel() not found");
 		}
-		return dynamic_cast<const coxmatch_ofb_ipv6_flabel&>(*matches.at(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_FLABEL)));
+		return dynamic_cast<const coxmatch_ofb_ipv6_flabel&>(*matches.at(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_FLABEL)));
 	};
 
 	/**
@@ -1973,11 +1973,11 @@ public:
 	bool
 	drop_ofb_ipv6_flabel() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_FLABEL)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_FLABEL)) == matches.end()) {
 			return false;
 		}
-		delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_FLABEL)];
-		matches.erase(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_FLABEL));
+		delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_FLABEL)];
+		matches.erase(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_FLABEL));
 		return true;
 	};
 
@@ -1987,7 +1987,7 @@ public:
 	bool
 	has_ofb_ipv6_flabel() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		return (not (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_FLABEL)) == matches.end()));
+		return (not (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_FLABEL)) == matches.end()));
 	};
 
 public:
@@ -1999,11 +1999,11 @@ public:
 	add_ofb_icmpv6_type(
 			uint8_t icmpv6_type = 0) {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV6_TYPE)) != matches.end()) {
-			delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV6_TYPE)];
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV6_TYPE)) != matches.end()) {
+			delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV6_TYPE)];
 		}
-		matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV6_TYPE)] = new coxmatch_ofb_icmpv6_type(icmpv6_type);
-		return dynamic_cast<coxmatch_ofb_icmpv6_type&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV6_TYPE)]);
+		matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV6_TYPE)] = new coxmatch_ofb_icmpv6_type(icmpv6_type);
+		return dynamic_cast<coxmatch_ofb_icmpv6_type&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV6_TYPE)]);
 	};
 
 	/**
@@ -2012,10 +2012,10 @@ public:
 	coxmatch_ofb_icmpv6_type&
 	set_ofb_icmpv6_type() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV6_TYPE)) == matches.end()) {
-			matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV6_TYPE)] = new coxmatch_ofb_icmpv6_type();
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV6_TYPE)) == matches.end()) {
+			matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV6_TYPE)] = new coxmatch_ofb_icmpv6_type();
 		}
-		return dynamic_cast<coxmatch_ofb_icmpv6_type&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV6_TYPE)]);
+		return dynamic_cast<coxmatch_ofb_icmpv6_type&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV6_TYPE)]);
 	};
 
 	/**
@@ -2024,10 +2024,10 @@ public:
 	const coxmatch_ofb_icmpv6_type&
 	get_ofb_icmpv6_type() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV6_TYPE)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV6_TYPE)) == matches.end()) {
 			throw eOxmInval("coxmatches::get_ofb_icmpv6_type() not found");
 		}
-		return dynamic_cast<const coxmatch_ofb_icmpv6_type&>(*matches.at(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV6_TYPE)));
+		return dynamic_cast<const coxmatch_ofb_icmpv6_type&>(*matches.at(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV6_TYPE)));
 	};
 
 	/**
@@ -2036,11 +2036,11 @@ public:
 	bool
 	drop_ofb_icmpv6_type() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV6_TYPE)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV6_TYPE)) == matches.end()) {
 			return false;
 		}
-		delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV6_TYPE)];
-		matches.erase(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV6_TYPE));
+		delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV6_TYPE)];
+		matches.erase(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV6_TYPE));
 		return true;
 	};
 
@@ -2050,7 +2050,7 @@ public:
 	bool
 	has_ofb_icmpv6_type() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		return (not (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV6_TYPE)) == matches.end()));
+		return (not (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV6_TYPE)) == matches.end()));
 	};
 
 public:
@@ -2062,11 +2062,11 @@ public:
 	add_ofb_icmpv6_code(
 			uint8_t icmpv6_code = 0) {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV6_CODE)) != matches.end()) {
-			delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV6_CODE)];
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV6_CODE)) != matches.end()) {
+			delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV6_CODE)];
 		}
-		matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV6_CODE)] = new coxmatch_ofb_icmpv6_code(icmpv6_code);
-		return dynamic_cast<coxmatch_ofb_icmpv6_code&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV6_CODE)]);
+		matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV6_CODE)] = new coxmatch_ofb_icmpv6_code(icmpv6_code);
+		return dynamic_cast<coxmatch_ofb_icmpv6_code&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV6_CODE)]);
 	};
 
 	/**
@@ -2075,10 +2075,10 @@ public:
 	coxmatch_ofb_icmpv6_code&
 	set_ofb_icmpv6_code() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV6_CODE)) == matches.end()) {
-			matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV6_CODE)] = new coxmatch_ofb_icmpv6_code();
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV6_CODE)) == matches.end()) {
+			matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV6_CODE)] = new coxmatch_ofb_icmpv6_code();
 		}
-		return dynamic_cast<coxmatch_ofb_icmpv6_code&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV6_CODE)]);
+		return dynamic_cast<coxmatch_ofb_icmpv6_code&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV6_CODE)]);
 	};
 
 	/**
@@ -2087,10 +2087,10 @@ public:
 	const coxmatch_ofb_icmpv6_code&
 	get_ofb_icmpv6_code() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV6_CODE)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV6_CODE)) == matches.end()) {
 			throw eOxmInval("coxmatches::get_ofb_icmpv6_code() not found");
 		}
-		return dynamic_cast<const coxmatch_ofb_icmpv6_code&>(*matches.at(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV6_CODE)));
+		return dynamic_cast<const coxmatch_ofb_icmpv6_code&>(*matches.at(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV6_CODE)));
 	};
 
 	/**
@@ -2099,11 +2099,11 @@ public:
 	bool
 	drop_ofb_icmpv6_code() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV6_CODE)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV6_CODE)) == matches.end()) {
 			return false;
 		}
-		delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV6_CODE)];
-		matches.erase(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV6_CODE));
+		delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV6_CODE)];
+		matches.erase(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV6_CODE));
 		return true;
 	};
 
@@ -2113,7 +2113,7 @@ public:
 	bool
 	has_ofb_icmpv6_code() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		return (not (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV6_CODE)) == matches.end()));
+		return (not (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV6_CODE)) == matches.end()));
 	};
 
 public:
@@ -2125,11 +2125,11 @@ public:
 	add_ofb_ipv6_nd_target(
 			const rofl::caddress_in6& ipv6_nd_target = rofl::caddress_in6()) {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TARGET)) != matches.end()) {
-			delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TARGET)];
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TARGET)) != matches.end()) {
+			delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TARGET)];
 		}
-		matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TARGET)] = new coxmatch_ofb_ipv6_nd_target(ipv6_nd_target);
-		return dynamic_cast<coxmatch_ofb_ipv6_nd_target&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TARGET)]);
+		matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TARGET)] = new coxmatch_ofb_ipv6_nd_target(ipv6_nd_target);
+		return dynamic_cast<coxmatch_ofb_ipv6_nd_target&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TARGET)]);
 	};
 
 	/**
@@ -2138,10 +2138,10 @@ public:
 	coxmatch_ofb_ipv6_nd_target&
 	set_ofb_ipv6_nd_target() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TARGET)) == matches.end()) {
-			matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TARGET)] = new coxmatch_ofb_ipv6_nd_target();
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TARGET)) == matches.end()) {
+			matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TARGET)] = new coxmatch_ofb_ipv6_nd_target();
 		}
-		return dynamic_cast<coxmatch_ofb_ipv6_nd_target&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TARGET)]);
+		return dynamic_cast<coxmatch_ofb_ipv6_nd_target&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TARGET)]);
 	};
 
 	/**
@@ -2150,10 +2150,10 @@ public:
 	const coxmatch_ofb_ipv6_nd_target&
 	get_ofb_ipv6_nd_target() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TARGET)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TARGET)) == matches.end()) {
 			throw eOxmInval("coxmatches::get_ofb_ipv6_nd_target() not found");
 		}
-		return dynamic_cast<const coxmatch_ofb_ipv6_nd_target&>(*matches.at(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TARGET)));
+		return dynamic_cast<const coxmatch_ofb_ipv6_nd_target&>(*matches.at(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TARGET)));
 	};
 
 	/**
@@ -2162,11 +2162,11 @@ public:
 	bool
 	drop_ofb_ipv6_nd_target() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TARGET)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TARGET)) == matches.end()) {
 			return false;
 		}
-		delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TARGET)];
-		matches.erase(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TARGET));
+		delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TARGET)];
+		matches.erase(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TARGET));
 		return true;
 	};
 
@@ -2176,7 +2176,7 @@ public:
 	bool
 	has_ofb_ipv6_nd_target() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		return (not (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TARGET)) == matches.end()));
+		return (not (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TARGET)) == matches.end()));
 	};
 
 public:
@@ -2188,11 +2188,11 @@ public:
 	add_ofb_ipv6_nd_sll(
 			const rofl::caddress_ll& ipv6_nd_sll = 0) {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_SLL)) != matches.end()) {
-			delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_SLL)];
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_SLL)) != matches.end()) {
+			delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_SLL)];
 		}
-		matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_SLL)] = new coxmatch_ofb_ipv6_nd_sll(ipv6_nd_sll);
-		return dynamic_cast<coxmatch_ofb_ipv6_nd_sll&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_SLL)]);
+		matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_SLL)] = new coxmatch_ofb_ipv6_nd_sll(ipv6_nd_sll);
+		return dynamic_cast<coxmatch_ofb_ipv6_nd_sll&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_SLL)]);
 	};
 
 	/**
@@ -2201,10 +2201,10 @@ public:
 	coxmatch_ofb_ipv6_nd_sll&
 	set_ofb_ipv6_nd_sll() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_SLL)) == matches.end()) {
-			matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_SLL)] = new coxmatch_ofb_ipv6_nd_sll();
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_SLL)) == matches.end()) {
+			matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_SLL)] = new coxmatch_ofb_ipv6_nd_sll();
 		}
-		return dynamic_cast<coxmatch_ofb_ipv6_nd_sll&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_SLL)]);
+		return dynamic_cast<coxmatch_ofb_ipv6_nd_sll&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_SLL)]);
 	};
 
 	/**
@@ -2213,10 +2213,10 @@ public:
 	const coxmatch_ofb_ipv6_nd_sll&
 	get_ofb_ipv6_nd_sll() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_SLL)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_SLL)) == matches.end()) {
 			throw eOxmInval("coxmatches::get_ofb_ipv6_nd_sll() not found");
 		}
-		return dynamic_cast<const coxmatch_ofb_ipv6_nd_sll&>(*matches.at(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_SLL)));
+		return dynamic_cast<const coxmatch_ofb_ipv6_nd_sll&>(*matches.at(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_SLL)));
 	};
 
 	/**
@@ -2225,11 +2225,11 @@ public:
 	bool
 	drop_ofb_ipv6_nd_sll() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_SLL)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_SLL)) == matches.end()) {
 			return false;
 		}
-		delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_SLL)];
-		matches.erase(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_SLL));
+		delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_SLL)];
+		matches.erase(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_SLL));
 		return true;
 	};
 
@@ -2239,7 +2239,7 @@ public:
 	bool
 	has_ofb_ipv6_nd_sll() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		return (not (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_SLL)) == matches.end()));
+		return (not (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_SLL)) == matches.end()));
 	};
 
 public:
@@ -2251,11 +2251,11 @@ public:
 	add_ofb_ipv6_nd_tll(
 			const rofl::caddress_ll& ipv6_nd_tll = 0) {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TLL)) != matches.end()) {
-			delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TLL)];
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TLL)) != matches.end()) {
+			delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TLL)];
 		}
-		matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TLL)] = new coxmatch_ofb_ipv6_nd_tll(ipv6_nd_tll);
-		return dynamic_cast<coxmatch_ofb_ipv6_nd_tll&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TLL)]);
+		matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TLL)] = new coxmatch_ofb_ipv6_nd_tll(ipv6_nd_tll);
+		return dynamic_cast<coxmatch_ofb_ipv6_nd_tll&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TLL)]);
 	};
 
 	/**
@@ -2264,10 +2264,10 @@ public:
 	coxmatch_ofb_ipv6_nd_tll&
 	set_ofb_ipv6_nd_tll() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TLL)) == matches.end()) {
-			matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TLL)] = new coxmatch_ofb_ipv6_nd_tll();
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TLL)) == matches.end()) {
+			matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TLL)] = new coxmatch_ofb_ipv6_nd_tll();
 		}
-		return dynamic_cast<coxmatch_ofb_ipv6_nd_tll&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TLL)]);
+		return dynamic_cast<coxmatch_ofb_ipv6_nd_tll&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TLL)]);
 	};
 
 	/**
@@ -2276,10 +2276,10 @@ public:
 	const coxmatch_ofb_ipv6_nd_tll&
 	get_ofb_ipv6_nd_tll() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TLL)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TLL)) == matches.end()) {
 			throw eOxmInval("coxmatches::get_ofb_ipv6_nd_tll() not found");
 		}
-		return dynamic_cast<const coxmatch_ofb_ipv6_nd_tll&>(*matches.at(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TLL)));
+		return dynamic_cast<const coxmatch_ofb_ipv6_nd_tll&>(*matches.at(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TLL)));
 	};
 
 	/**
@@ -2288,11 +2288,11 @@ public:
 	bool
 	drop_ofb_ipv6_nd_tll() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TLL)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TLL)) == matches.end()) {
 			return false;
 		}
-		delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TLL)];
-		matches.erase(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TLL));
+		delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TLL)];
+		matches.erase(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TLL));
 		return true;
 	};
 
@@ -2302,7 +2302,7 @@ public:
 	bool
 	has_ofb_ipv6_nd_tll() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		return (not (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TLL)) == matches.end()));
+		return (not (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TLL)) == matches.end()));
 	};
 
 public:
@@ -2314,11 +2314,11 @@ public:
 	add_ofb_mpls_label(
 			uint32_t mpls_label = 0) {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_LABEL)) != matches.end()) {
-			delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_LABEL)];
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_LABEL)) != matches.end()) {
+			delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_LABEL)];
 		}
-		matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_LABEL)] = new coxmatch_ofb_mpls_label(mpls_label);
-		return dynamic_cast<coxmatch_ofb_mpls_label&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_LABEL)]);
+		matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_LABEL)] = new coxmatch_ofb_mpls_label(mpls_label);
+		return dynamic_cast<coxmatch_ofb_mpls_label&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_LABEL)]);
 	};
 
 	/**
@@ -2327,10 +2327,10 @@ public:
 	coxmatch_ofb_mpls_label&
 	set_ofb_mpls_label() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_LABEL)) == matches.end()) {
-			matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_LABEL)] = new coxmatch_ofb_mpls_label();
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_LABEL)) == matches.end()) {
+			matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_LABEL)] = new coxmatch_ofb_mpls_label();
 		}
-		return dynamic_cast<coxmatch_ofb_mpls_label&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_LABEL)]);
+		return dynamic_cast<coxmatch_ofb_mpls_label&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_LABEL)]);
 	};
 
 	/**
@@ -2339,10 +2339,10 @@ public:
 	const coxmatch_ofb_mpls_label&
 	get_ofb_mpls_label() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_LABEL)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_LABEL)) == matches.end()) {
 			throw eOxmInval("coxmatches::get_ofb_mpls_label() not found");
 		}
-		return dynamic_cast<const coxmatch_ofb_mpls_label&>(*matches.at(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_LABEL)));
+		return dynamic_cast<const coxmatch_ofb_mpls_label&>(*matches.at(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_LABEL)));
 	};
 
 	/**
@@ -2351,11 +2351,11 @@ public:
 	bool
 	drop_ofb_mpls_label() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_LABEL)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_LABEL)) == matches.end()) {
 			return false;
 		}
-		delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_LABEL)];
-		matches.erase(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_LABEL));
+		delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_LABEL)];
+		matches.erase(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_LABEL));
 		return true;
 	};
 
@@ -2365,7 +2365,7 @@ public:
 	bool
 	has_ofb_mpls_label() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		return (not (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_LABEL)) == matches.end()));
+		return (not (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_LABEL)) == matches.end()));
 	};
 
 public:
@@ -2377,11 +2377,11 @@ public:
 	add_ofb_mpls_tc(
 			uint8_t mpls_tc = 0) {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_TC)) != matches.end()) {
-			delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_TC)];
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_TC)) != matches.end()) {
+			delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_TC)];
 		}
-		matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_TC)] = new coxmatch_ofb_mpls_tc(mpls_tc);
-		return dynamic_cast<coxmatch_ofb_mpls_tc&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_TC)]);
+		matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_TC)] = new coxmatch_ofb_mpls_tc(mpls_tc);
+		return dynamic_cast<coxmatch_ofb_mpls_tc&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_TC)]);
 	};
 
 	/**
@@ -2390,10 +2390,10 @@ public:
 	coxmatch_ofb_mpls_tc&
 	set_ofb_mpls_tc() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_TC)) == matches.end()) {
-			matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_TC)] = new coxmatch_ofb_mpls_tc();
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_TC)) == matches.end()) {
+			matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_TC)] = new coxmatch_ofb_mpls_tc();
 		}
-		return dynamic_cast<coxmatch_ofb_mpls_tc&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_TC)]);
+		return dynamic_cast<coxmatch_ofb_mpls_tc&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_TC)]);
 	};
 
 	/**
@@ -2402,10 +2402,10 @@ public:
 	const coxmatch_ofb_mpls_tc&
 	get_ofb_mpls_tc() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_TC)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_TC)) == matches.end()) {
 			throw eOxmInval("coxmatches::get_ofb_mpls_tc() not found");
 		}
-		return dynamic_cast<const coxmatch_ofb_mpls_tc&>(*matches.at(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_TC)));
+		return dynamic_cast<const coxmatch_ofb_mpls_tc&>(*matches.at(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_TC)));
 	};
 
 	/**
@@ -2414,11 +2414,11 @@ public:
 	bool
 	drop_ofb_mpls_tc() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_TC)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_TC)) == matches.end()) {
 			return false;
 		}
-		delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_TC)];
-		matches.erase(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_TC));
+		delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_TC)];
+		matches.erase(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_TC));
 		return true;
 	};
 
@@ -2428,7 +2428,7 @@ public:
 	bool
 	has_ofb_mpls_tc() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		return (not (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_TC)) == matches.end()));
+		return (not (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_TC)) == matches.end()));
 	};
 
 public:
@@ -2440,11 +2440,11 @@ public:
 	add_ofb_mpls_bos(
 			uint8_t mpls_bos = 0) {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_BOS)) != matches.end()) {
-			delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_BOS)];
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_BOS)) != matches.end()) {
+			delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_BOS)];
 		}
-		matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_BOS)] = new coxmatch_ofb_mpls_bos(mpls_bos);
-		return dynamic_cast<coxmatch_ofb_mpls_bos&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_BOS)]);
+		matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_BOS)] = new coxmatch_ofb_mpls_bos(mpls_bos);
+		return dynamic_cast<coxmatch_ofb_mpls_bos&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_BOS)]);
 	};
 
 	/**
@@ -2453,10 +2453,10 @@ public:
 	coxmatch_ofb_mpls_bos&
 	set_ofb_mpls_bos() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_BOS)) == matches.end()) {
-			matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_BOS)] = new coxmatch_ofb_mpls_bos();
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_BOS)) == matches.end()) {
+			matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_BOS)] = new coxmatch_ofb_mpls_bos();
 		}
-		return dynamic_cast<coxmatch_ofb_mpls_bos&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_BOS)]);
+		return dynamic_cast<coxmatch_ofb_mpls_bos&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_BOS)]);
 	};
 
 	/**
@@ -2465,10 +2465,10 @@ public:
 	const coxmatch_ofb_mpls_bos&
 	get_ofb_mpls_bos() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_BOS)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_BOS)) == matches.end()) {
 			throw eOxmInval("coxmatches::get_ofb_mpls_bos() not found");
 		}
-		return dynamic_cast<const coxmatch_ofb_mpls_bos&>(*matches.at(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_BOS)));
+		return dynamic_cast<const coxmatch_ofb_mpls_bos&>(*matches.at(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_BOS)));
 	};
 
 	/**
@@ -2477,11 +2477,11 @@ public:
 	bool
 	drop_ofb_mpls_bos() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_BOS)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_BOS)) == matches.end()) {
 			return false;
 		}
-		delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_BOS)];
-		matches.erase(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_BOS));
+		delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_BOS)];
+		matches.erase(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_BOS));
 		return true;
 	};
 
@@ -2491,7 +2491,7 @@ public:
 	bool
 	has_ofb_mpls_bos() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		return (not (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_BOS)) == matches.end()));
+		return (not (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_BOS)) == matches.end()));
 	};
 
 public:
@@ -2503,11 +2503,11 @@ public:
 	add_ofb_tunnel_id(
 			uint64_t tunnel_id = 0, uint64_t mask = 0) {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_TUNNEL_ID)) != matches.end()) {
-			delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_TUNNEL_ID)];
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_TUNNEL_ID)) != matches.end()) {
+			delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_TUNNEL_ID)];
 		}
-		matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_TUNNEL_ID)] = new coxmatch_ofb_tunnel_id(tunnel_id, mask);
-		return dynamic_cast<coxmatch_ofb_tunnel_id&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_TUNNEL_ID)]);
+		matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_TUNNEL_ID)] = new coxmatch_ofb_tunnel_id(tunnel_id, mask);
+		return dynamic_cast<coxmatch_ofb_tunnel_id&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_TUNNEL_ID)]);
 	};
 
 	/**
@@ -2516,10 +2516,10 @@ public:
 	coxmatch_ofb_tunnel_id&
 	set_ofb_tunnel_id() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_TUNNEL_ID)) == matches.end()) {
-			matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_TUNNEL_ID)] = new coxmatch_ofb_tunnel_id();
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_TUNNEL_ID)) == matches.end()) {
+			matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_TUNNEL_ID)] = new coxmatch_ofb_tunnel_id();
 		}
-		return dynamic_cast<coxmatch_ofb_tunnel_id&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_TUNNEL_ID)]);
+		return dynamic_cast<coxmatch_ofb_tunnel_id&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_TUNNEL_ID)]);
 	};
 
 	/**
@@ -2528,10 +2528,10 @@ public:
 	const coxmatch_ofb_tunnel_id&
 	get_ofb_tunnel_id() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_TUNNEL_ID)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_TUNNEL_ID)) == matches.end()) {
 			throw eOxmInval("coxmatches::get_ofb_tunnel_id() not found");
 		}
-		return dynamic_cast<const coxmatch_ofb_tunnel_id&>(*matches.at(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_TUNNEL_ID)));
+		return dynamic_cast<const coxmatch_ofb_tunnel_id&>(*matches.at(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_TUNNEL_ID)));
 	};
 
 	/**
@@ -2540,11 +2540,11 @@ public:
 	bool
 	drop_ofb_tunnel_id() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_TUNNEL_ID)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_TUNNEL_ID)) == matches.end()) {
 			return false;
 		}
-		delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_TUNNEL_ID)];
-		matches.erase(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_TUNNEL_ID));
+		delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_TUNNEL_ID)];
+		matches.erase(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_TUNNEL_ID));
 		return true;
 	};
 
@@ -2554,7 +2554,7 @@ public:
 	bool
 	has_ofb_tunnel_id() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		return (not (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_TUNNEL_ID)) == matches.end()));
+		return (not (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_TUNNEL_ID)) == matches.end()));
 	};
 
 public:
@@ -2566,11 +2566,11 @@ public:
 	add_ofb_pbb_isid(
 			uint32_t pbb_isid = 0, uint32_t mask = 0) {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_PBB_ISID)) != matches.end()) {
-			delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_PBB_ISID)];
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_PBB_ISID)) != matches.end()) {
+			delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_PBB_ISID)];
 		}
-		matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_PBB_ISID)] = new coxmatch_ofb_pbb_isid(pbb_isid, mask);
-		return dynamic_cast<coxmatch_ofb_pbb_isid&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_PBB_ISID)]);
+		matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_PBB_ISID)] = new coxmatch_ofb_pbb_isid(pbb_isid, mask);
+		return dynamic_cast<coxmatch_ofb_pbb_isid&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_PBB_ISID)]);
 	};
 
 	/**
@@ -2579,10 +2579,10 @@ public:
 	coxmatch_ofb_pbb_isid&
 	set_ofb_pbb_isid() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_PBB_ISID)) == matches.end()) {
-			matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_PBB_ISID)] = new coxmatch_ofb_pbb_isid();
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_PBB_ISID)) == matches.end()) {
+			matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_PBB_ISID)] = new coxmatch_ofb_pbb_isid();
 		}
-		return dynamic_cast<coxmatch_ofb_pbb_isid&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_PBB_ISID)]);
+		return dynamic_cast<coxmatch_ofb_pbb_isid&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_PBB_ISID)]);
 	};
 
 	/**
@@ -2591,10 +2591,10 @@ public:
 	const coxmatch_ofb_pbb_isid&
 	get_ofb_pbb_isid() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_PBB_ISID)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_PBB_ISID)) == matches.end()) {
 			throw eOxmInval("coxmatches::get_ofb_pbb_isid() not found");
 		}
-		return dynamic_cast<const coxmatch_ofb_pbb_isid&>(*matches.at(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_PBB_ISID)));
+		return dynamic_cast<const coxmatch_ofb_pbb_isid&>(*matches.at(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_PBB_ISID)));
 	};
 
 	/**
@@ -2603,11 +2603,11 @@ public:
 	bool
 	drop_ofb_pbb_isid() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_PBB_ISID)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_PBB_ISID)) == matches.end()) {
 			return false;
 		}
-		delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_PBB_ISID)];
-		matches.erase(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_PBB_ISID));
+		delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_PBB_ISID)];
+		matches.erase(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_PBB_ISID));
 		return true;
 	};
 
@@ -2617,7 +2617,7 @@ public:
 	bool
 	has_ofb_pbb_isid() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		return (not (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_PBB_ISID)) == matches.end()));
+		return (not (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_PBB_ISID)) == matches.end()));
 	};
 
 public:
@@ -2629,11 +2629,11 @@ public:
 	add_ofb_ipv6_exthdr(
 			uint16_t ipv6_exthdr = 0, uint16_t mask = 0) {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_EXTHDR)) != matches.end()) {
-			delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_EXTHDR)];
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_EXTHDR)) != matches.end()) {
+			delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_EXTHDR)];
 		}
-		matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_EXTHDR)] = new coxmatch_ofb_ipv6_exthdr(ipv6_exthdr, mask);
-		return dynamic_cast<coxmatch_ofb_ipv6_exthdr&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_EXTHDR)]);
+		matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_EXTHDR)] = new coxmatch_ofb_ipv6_exthdr(ipv6_exthdr, mask);
+		return dynamic_cast<coxmatch_ofb_ipv6_exthdr&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_EXTHDR)]);
 	};
 
 	/**
@@ -2642,10 +2642,10 @@ public:
 	coxmatch_ofb_ipv6_exthdr&
 	set_ofb_ipv6_exthdr() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_EXTHDR)) == matches.end()) {
-			matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_EXTHDR)] = new coxmatch_ofb_ipv6_exthdr();
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_EXTHDR)) == matches.end()) {
+			matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_EXTHDR)] = new coxmatch_ofb_ipv6_exthdr();
 		}
-		return dynamic_cast<coxmatch_ofb_ipv6_exthdr&>(*matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_EXTHDR)]);
+		return dynamic_cast<coxmatch_ofb_ipv6_exthdr&>(*matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_EXTHDR)]);
 	};
 
 	/**
@@ -2654,10 +2654,10 @@ public:
 	const coxmatch_ofb_ipv6_exthdr&
 	get_ofb_ipv6_exthdr() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_EXTHDR)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_EXTHDR)) == matches.end()) {
 			throw eOxmInval("coxmatches::get_ofb_ipv6_exthdr() not found");
 		}
-		return dynamic_cast<const coxmatch_ofb_ipv6_exthdr&>(*matches.at(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_EXTHDR)));
+		return dynamic_cast<const coxmatch_ofb_ipv6_exthdr&>(*matches.at(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_EXTHDR)));
 	};
 
 	/**
@@ -2666,11 +2666,11 @@ public:
 	bool
 	drop_ofb_ipv6_exthdr() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_EXTHDR)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_EXTHDR)) == matches.end()) {
 			return false;
 		}
-		delete matches[OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_EXTHDR)];
-		matches.erase(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_EXTHDR));
+		delete matches[OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_EXTHDR)];
+		matches.erase(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_EXTHDR));
 		return true;
 	};
 
@@ -2680,7 +2680,7 @@ public:
 	bool
 	has_ofb_ipv6_exthdr() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		return (not (matches.find(OXM_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_EXTHDR)) == matches.end()));
+		return (not (matches.find(OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_EXTHDR)) == matches.end()));
 	};
 
 public:
@@ -2692,11 +2692,11 @@ public:
 	add_ofx_nw_proto(
 			uint8_t nw_proto = 0) {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_PROTO)) != matches.end()) {
-			delete matches[OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_PROTO)];
+		if (matches.find(OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_PROTO)) != matches.end()) {
+			delete matches[OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_PROTO)];
 		}
-		matches[OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_PROTO)] = new coxmatch_ofx_nw_proto(nw_proto);
-		return dynamic_cast<coxmatch_ofx_nw_proto&>(*matches[OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_PROTO)]);
+		matches[OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_PROTO)] = new coxmatch_ofx_nw_proto(nw_proto);
+		return dynamic_cast<coxmatch_ofx_nw_proto&>(*matches[OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_PROTO)]);
 	};
 
 	/**
@@ -2705,10 +2705,10 @@ public:
 	coxmatch_ofx_nw_proto&
 	set_ofx_nw_proto() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_PROTO)) == matches.end()) {
-			matches[OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_PROTO)] = new coxmatch_ofx_nw_proto();
+		if (matches.find(OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_PROTO)) == matches.end()) {
+			matches[OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_PROTO)] = new coxmatch_ofx_nw_proto();
 		}
-		return dynamic_cast<coxmatch_ofx_nw_proto&>(*matches[OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_PROTO)]);
+		return dynamic_cast<coxmatch_ofx_nw_proto&>(*matches[OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_PROTO)]);
 	};
 
 	/**
@@ -2717,10 +2717,10 @@ public:
 	const coxmatch_ofx_nw_proto&
 	get_ofx_nw_proto() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		if (matches.find(OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_PROTO)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_PROTO)) == matches.end()) {
 			throw eOxmInval("coxmatches::get_ofx_nw_proto() not found");
 		}
-		return dynamic_cast<const coxmatch_ofx_nw_proto&>(*matches.at(OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_PROTO)));
+		return dynamic_cast<const coxmatch_ofx_nw_proto&>(*matches.at(OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_PROTO)));
 	};
 
 	/**
@@ -2729,11 +2729,11 @@ public:
 	bool
 	drop_ofx_nw_proto() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_PROTO)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_PROTO)) == matches.end()) {
 			return false;
 		}
-		delete matches[OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_PROTO)];
-		matches.erase(OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_PROTO));
+		delete matches[OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_PROTO)];
+		matches.erase(OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_PROTO));
 		return true;
 	};
 
@@ -2743,7 +2743,7 @@ public:
 	bool
 	has_ofx_nw_proto() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		return (not (matches.find(OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_PROTO)) == matches.end()));
+		return (not (matches.find(OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_PROTO)) == matches.end()));
 	};
 
 public:
@@ -2756,11 +2756,11 @@ public:
 			const rofl::caddress_in4& nw_src = rofl::caddress_in4(),
 			const rofl::caddress_in4& mask = rofl::caddress_in4()) {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC)) != matches.end()) {
-			delete matches[OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC)];
+		if (matches.find(OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC)) != matches.end()) {
+			delete matches[OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC)];
 		}
-		matches[OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC)] = new coxmatch_ofx_nw_src(nw_src, mask);
-		return dynamic_cast<coxmatch_ofx_nw_src&>(*matches[OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC)]);
+		matches[OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC)] = new coxmatch_ofx_nw_src(nw_src, mask);
+		return dynamic_cast<coxmatch_ofx_nw_src&>(*matches[OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC)]);
 	};
 
 	/**
@@ -2769,10 +2769,10 @@ public:
 	coxmatch_ofx_nw_src&
 	set_ofx_nw_src() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC)) == matches.end()) {
-			matches[OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC)] = new coxmatch_ofx_nw_src();
+		if (matches.find(OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC)) == matches.end()) {
+			matches[OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC)] = new coxmatch_ofx_nw_src();
 		}
-		return dynamic_cast<coxmatch_ofx_nw_src&>(*matches[OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC)]);
+		return dynamic_cast<coxmatch_ofx_nw_src&>(*matches[OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC)]);
 	};
 
 	/**
@@ -2781,10 +2781,10 @@ public:
 	const coxmatch_ofx_nw_src&
 	get_ofx_nw_src() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		if (matches.find(OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC)) == matches.end()) {
 			throw eOxmInval("coxmatches::get_ofx_nw_src() not found");
 		}
-		return dynamic_cast<const coxmatch_ofx_nw_src&>(*matches.at(OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC)));
+		return dynamic_cast<const coxmatch_ofx_nw_src&>(*matches.at(OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC)));
 	};
 
 	/**
@@ -2793,11 +2793,11 @@ public:
 	bool
 	drop_ofx_nw_src() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC)) == matches.end()) {
 			return false;
 		}
-		delete matches[OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC)];
-		matches.erase(OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC));
+		delete matches[OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC)];
+		matches.erase(OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC));
 		return true;
 	};
 
@@ -2807,7 +2807,7 @@ public:
 	bool
 	has_ofx_nw_src() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		return (not (matches.find(OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC)) == matches.end()));
+		return (not (matches.find(OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC)) == matches.end()));
 	};
 
 public:
@@ -2820,11 +2820,11 @@ public:
 			const rofl::caddress_in4& nw_dst = rofl::caddress_in4(),
 			const rofl::caddress_in4& mask = rofl::caddress_in4()) {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_DST)) != matches.end()) {
-			delete matches[OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_DST)];
+		if (matches.find(OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_DST)) != matches.end()) {
+			delete matches[OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_DST)];
 		}
-		matches[OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_DST)] = new coxmatch_ofx_nw_dst(nw_dst, mask);
-		return dynamic_cast<coxmatch_ofx_nw_dst&>(*matches[OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_DST)]);
+		matches[OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_DST)] = new coxmatch_ofx_nw_dst(nw_dst, mask);
+		return dynamic_cast<coxmatch_ofx_nw_dst&>(*matches[OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_DST)]);
 	};
 
 	/**
@@ -2833,10 +2833,10 @@ public:
 	coxmatch_ofx_nw_dst&
 	set_ofx_nw_dst() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_DST)) == matches.end()) {
-			matches[OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_DST)] = new coxmatch_ofx_nw_dst();
+		if (matches.find(OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_DST)) == matches.end()) {
+			matches[OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_DST)] = new coxmatch_ofx_nw_dst();
 		}
-		return dynamic_cast<coxmatch_ofx_nw_dst&>(*matches[OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_DST)]);
+		return dynamic_cast<coxmatch_ofx_nw_dst&>(*matches[OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_DST)]);
 	};
 
 	/**
@@ -2845,10 +2845,10 @@ public:
 	const coxmatch_ofx_nw_dst&
 	get_ofx_nw_dst() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		if (matches.find(OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_DST)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_DST)) == matches.end()) {
 			throw eOxmInval("coxmatches::get_ofx_nw_dst() not found");
 		}
-		return dynamic_cast<const coxmatch_ofx_nw_dst&>(*matches.at(OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_DST)));
+		return dynamic_cast<const coxmatch_ofx_nw_dst&>(*matches.at(OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_DST)));
 	};
 
 	/**
@@ -2857,11 +2857,11 @@ public:
 	bool
 	drop_ofx_nw_dst() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_DST)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_DST)) == matches.end()) {
 			return false;
 		}
-		delete matches[OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_DST)];
-		matches.erase(OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_DST));
+		delete matches[OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_DST)];
+		matches.erase(OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_DST));
 		return true;
 	};
 
@@ -2871,7 +2871,7 @@ public:
 	bool
 	has_ofx_nw_dst() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		return (not (matches.find(OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_DST)) == matches.end()));
+		return (not (matches.find(OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_DST)) == matches.end()));
 	};
 
 public:
@@ -2883,11 +2883,11 @@ public:
 	add_ofx_nw_tos(
 			uint8_t nw_tos = 0) {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_TOS)) != matches.end()) {
-			delete matches[OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_TOS)];
+		if (matches.find(OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_TOS)) != matches.end()) {
+			delete matches[OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_TOS)];
 		}
-		matches[OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_TOS)] = new coxmatch_ofx_nw_tos(nw_tos);
-		return dynamic_cast<coxmatch_ofx_nw_tos&>(*matches[OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_TOS)]);
+		matches[OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_TOS)] = new coxmatch_ofx_nw_tos(nw_tos);
+		return dynamic_cast<coxmatch_ofx_nw_tos&>(*matches[OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_TOS)]);
 	};
 
 	/**
@@ -2896,10 +2896,10 @@ public:
 	coxmatch_ofx_nw_tos&
 	set_ofx_nw_tos() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_TOS)) == matches.end()) {
-			matches[OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_TOS)] = new coxmatch_ofx_nw_tos();
+		if (matches.find(OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_TOS)) == matches.end()) {
+			matches[OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_TOS)] = new coxmatch_ofx_nw_tos();
 		}
-		return dynamic_cast<coxmatch_ofx_nw_tos&>(*matches[OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_TOS)]);
+		return dynamic_cast<coxmatch_ofx_nw_tos&>(*matches[OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_TOS)]);
 	};
 
 	/**
@@ -2908,10 +2908,10 @@ public:
 	const coxmatch_ofx_nw_tos&
 	get_ofx_nw_tos() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		if (matches.find(OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_TOS)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_TOS)) == matches.end()) {
 			throw eOxmInval("coxmatches::get_ofx_nw_tos() not found");
 		}
-		return dynamic_cast<const coxmatch_ofx_nw_tos&>(*matches.at(OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_TOS)));
+		return dynamic_cast<const coxmatch_ofx_nw_tos&>(*matches.at(OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_TOS)));
 	};
 
 	/**
@@ -2920,11 +2920,11 @@ public:
 	bool
 	drop_ofx_nw_tos() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_TOS)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_TOS)) == matches.end()) {
 			return false;
 		}
-		delete matches[OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_TOS)];
-		matches.erase(OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_TOS));
+		delete matches[OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_TOS)];
+		matches.erase(OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_TOS));
 		return true;
 	};
 
@@ -2934,7 +2934,7 @@ public:
 	bool
 	has_ofx_nw_tos() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		return (not (matches.find(OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_TOS)) == matches.end()));
+		return (not (matches.find(OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_TOS)) == matches.end()));
 	};
 
 public:
@@ -2946,11 +2946,11 @@ public:
 	add_ofx_tp_src(
 			uint8_t tp_src = 0) {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_SRC)) != matches.end()) {
-			delete matches[OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_SRC)];
+		if (matches.find(OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_SRC)) != matches.end()) {
+			delete matches[OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_SRC)];
 		}
-		matches[OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_SRC)] = new coxmatch_ofx_tp_src(tp_src);
-		return dynamic_cast<coxmatch_ofx_tp_src&>(*matches[OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_SRC)]);
+		matches[OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_SRC)] = new coxmatch_ofx_tp_src(tp_src);
+		return dynamic_cast<coxmatch_ofx_tp_src&>(*matches[OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_SRC)]);
 	};
 
 	/**
@@ -2959,10 +2959,10 @@ public:
 	coxmatch_ofx_tp_src&
 	set_ofx_tp_src() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_SRC)) == matches.end()) {
-			matches[OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_SRC)] = new coxmatch_ofx_tp_src();
+		if (matches.find(OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_SRC)) == matches.end()) {
+			matches[OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_SRC)] = new coxmatch_ofx_tp_src();
 		}
-		return dynamic_cast<coxmatch_ofx_tp_src&>(*matches[OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_SRC)]);
+		return dynamic_cast<coxmatch_ofx_tp_src&>(*matches[OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_SRC)]);
 	};
 
 	/**
@@ -2971,10 +2971,10 @@ public:
 	const coxmatch_ofx_tp_src&
 	get_ofx_tp_src() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		if (matches.find(OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_SRC)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_SRC)) == matches.end()) {
 			throw eOxmInval("coxmatches::get_ofx_tp_src() not found");
 		}
-		return dynamic_cast<const coxmatch_ofx_tp_src&>(*matches.at(OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_SRC)));
+		return dynamic_cast<const coxmatch_ofx_tp_src&>(*matches.at(OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_SRC)));
 	};
 
 	/**
@@ -2983,11 +2983,11 @@ public:
 	bool
 	drop_ofx_tp_src() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_SRC)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_SRC)) == matches.end()) {
 			return false;
 		}
-		delete matches[OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_SRC)];
-		matches.erase(OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_SRC));
+		delete matches[OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_SRC)];
+		matches.erase(OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_SRC));
 		return true;
 	};
 
@@ -2997,7 +2997,7 @@ public:
 	bool
 	has_ofx_tp_src() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		return (not (matches.find(OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_SRC)) == matches.end()));
+		return (not (matches.find(OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_SRC)) == matches.end()));
 	};
 
 public:
@@ -3009,11 +3009,11 @@ public:
 	add_ofx_tp_dst(
 			uint8_t tp_dst = 0) {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_DST)) != matches.end()) {
-			delete matches[OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_DST)];
+		if (matches.find(OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_DST)) != matches.end()) {
+			delete matches[OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_DST)];
 		}
-		matches[OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_DST)] = new coxmatch_ofx_tp_dst(tp_dst);
-		return dynamic_cast<coxmatch_ofx_tp_dst&>(*matches[OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_DST)]);
+		matches[OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_DST)] = new coxmatch_ofx_tp_dst(tp_dst);
+		return dynamic_cast<coxmatch_ofx_tp_dst&>(*matches[OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_DST)]);
 	};
 
 	/**
@@ -3022,10 +3022,10 @@ public:
 	coxmatch_ofx_tp_dst&
 	set_ofx_tp_dst() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_DST)) == matches.end()) {
-			matches[OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_DST)] = new coxmatch_ofx_tp_dst();
+		if (matches.find(OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_DST)) == matches.end()) {
+			matches[OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_DST)] = new coxmatch_ofx_tp_dst();
 		}
-		return dynamic_cast<coxmatch_ofx_tp_dst&>(*matches[OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_DST)]);
+		return dynamic_cast<coxmatch_ofx_tp_dst&>(*matches[OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_DST)]);
 	};
 
 	/**
@@ -3034,10 +3034,10 @@ public:
 	const coxmatch_ofx_tp_dst&
 	get_ofx_tp_dst() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		if (matches.find(OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_DST)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_DST)) == matches.end()) {
 			throw eOxmInval("coxmatches::get_ofx_tp_dst() not found");
 		}
-		return dynamic_cast<const coxmatch_ofx_tp_dst&>(*matches.at(OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_DST)));
+		return dynamic_cast<const coxmatch_ofx_tp_dst&>(*matches.at(OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_DST)));
 	};
 
 	/**
@@ -3046,11 +3046,11 @@ public:
 	bool
 	drop_ofx_tp_dst() {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-		if (matches.find(OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_DST)) == matches.end()) {
+		if (matches.find(OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_DST)) == matches.end()) {
 			return false;
 		}
-		delete matches[OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_DST)];
-		matches.erase(OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_DST));
+		delete matches[OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_DST)];
+		matches.erase(OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_DST));
 		return true;
 	};
 
@@ -3060,7 +3060,7 @@ public:
 	bool
 	has_ofx_tp_dst() const {
 		RwLock lock(rwlock, RwLock::RWLOCK_READ);
-		return (not (matches.find(OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_DST)) == matches.end()));
+		return (not (matches.find(OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_DST)) == matches.end()));
 	};
 
 public:
