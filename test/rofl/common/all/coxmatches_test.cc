@@ -34,13 +34,12 @@ coxmatches_test::testPack()
 	using rofl::openflow::coxmatch_48;
 	rofl::openflow::coxmatches matches;
 
-	static_cast<coxmatch_48*>(matches.set_match(rofl::openflow::OXM_TLV_BASIC_ETH_DST))->set_u48value(rofl::cmacaddr("b1:b2:b3:b4:b5:b6"));
-	static_cast<coxmatch_48*>(matches.set_match(rofl::openflow::OXM_TLV_BASIC_ETH_SRC_MASK))->set_u48value(rofl::cmacaddr("c1:c2:c3:c4:c5:c6"));
-	static_cast<coxmatch_48*>(matches.set_match(rofl::openflow::OXM_TLV_BASIC_ETH_SRC_MASK))->set_u48mask(rofl::cmacaddr("d1:d2:d3:d4:d5:d6"));
-	static_cast<coxmatch_16*>(matches.set_match(rofl::openflow::OXM_TLV_BASIC_VLAN_VID_MASK))->set_u16value(0x3132);
-	static_cast<coxmatch_16*>(matches.set_match(rofl::openflow::OXM_TLV_BASIC_VLAN_VID_MASK))->set_u16mask(0x4142);
-	static_cast<coxmatch_8*>(matches.set_match(rofl::openflow::OXM_TLV_BASIC_IP_DSCP))->set_u8value(0xa1);
-	static_cast<coxmatch_16*>(matches.set_match(rofl::openflow::OXM_TLV_BASIC_UDP_SRC))->set_u16value(0x1112);
+	matches.add_ofb_eth_dst(rofl::cmacaddr("b1:b2:b3:b4:b5:b6"));
+	matches.add_ofb_eth_src(rofl::cmacaddr("c1:c2:c3:c4:c5:c6"), rofl::cmacaddr("d1:d2:d3:d4:d5:d6"));
+	matches.add_ofb_vlan_vid(0x3132, 0x4142);
+	matches.add_ofb_ip_dscp(0xa1);
+	matches.add_ofb_udp_src(0x1112);
+
 	// MPLS
 
 	rofl::cmemory mem(matches.length());
@@ -182,34 +181,16 @@ coxmatches_test::testAddMatch()
 	using rofl::openflow::coxmatch_48;
 	rofl::openflow::coxmatches matches;
 
-	static_cast<coxmatch_48*>(matches.add_match(
-			rofl::openflow::OXM_TLV_BASIC_ETH_DST))->set_u48value(
-			rofl::cmacaddr("b1:b2:b3:b4:b5:b6"));
+	matches.add_ofb_eth_dst(rofl::cmacaddr("b1:b2:b3:b4:b5:b6"));
 
 	try {
-		CPPUNIT_ASSERT(*matches.set_match(rofl::openflow::OXM_TLV_BASIC_ETH_DST) ==
-				rofl::openflow::coxmatch_ofb_eth_dst(rofl::cmacaddr("b1:b2:b3:b4:b5:b6")));
+		CPPUNIT_ASSERT(matches.get_ofb_eth_dst().get_u48value_as_lladdr() == rofl::cmacaddr("b1:b2:b3:b4:b5:b6"));
 	} catch (rofl::openflow::eOxmNotFound& e) {
 		CPPUNIT_ASSERT(false);
 	}
 
 	CPPUNIT_ASSERT(matches.get_matches().size() == 1);
-	CPPUNIT_ASSERT(*matches.add_match(rofl::openflow::OXM_TLV_BASIC_ETH_DST) !=
-			rofl::openflow::coxmatch_ofb_eth_dst(rofl::cmacaddr("b1:b2:b3:b4:b5:b6")));
-	CPPUNIT_ASSERT(*matches.add_match(rofl::openflow::OXM_TLV_BASIC_ETH_DST) ==
-			rofl::openflow::coxmatch(rofl::openflow::OXM_TLV_BASIC_ETH_DST));
-
-	CPPUNIT_ASSERT(matches.get_matches().find(
-					static_cast<uint64_t>(rofl::openflow::OXM_TLV_BASIC_ETH_DST
-							& 0xfffffe00) << 32 | 0)
-					!= matches.get_matches().end());
-
-	matches.add_match(new rofl::openflow::coxmatch_ofb_eth_dst(rofl::cmacaddr("c1:c2:c3:c4:c5:c6"), rofl::cmacaddr("d1:d2:d3:d4:d5:d6")));
-
-	CPPUNIT_ASSERT(matches.get_matches().size() == 1);
-	CPPUNIT_ASSERT(matches.get_matches().find(
-			static_cast<uint64_t>(rofl::openflow::OXM_TLV_BASIC_ETH_DST
-					& 0xfffffe00) << 32 | 0) != matches.get_matches().end());
+	CPPUNIT_ASSERT(matches.add_ofb_eth_dst().get_u48value_as_lladdr() != rofl::cmacaddr("b1:b2:b3:b4:b5:b6"));
 }
 
 
@@ -219,24 +200,6 @@ coxmatches_test::testDropMatch()
 {
 	using rofl::openflow::coxmatch_48;
 	rofl::openflow::coxmatches matches;
-
-	static_cast<coxmatch_48*>(matches.add_match(rofl::openflow::OXM_TLV_BASIC_ETH_DST))->set_u48value(rofl::cmacaddr("b1:b2:b3:b4:b5:b6"));
-
-	CPPUNIT_ASSERT(matches.get_matches().size() == 1);
-	CPPUNIT_ASSERT(matches.get_matches().find(static_cast<uint64_t>(rofl::openflow::OXM_TLV_BASIC_ETH_DST
-			& 0xfffffe00) << 32 | 0) != matches.get_matches().end());
-
-	matches.drop_match(rofl::openflow::OXM_TLV_BASIC_ETH_DST);
-
-	CPPUNIT_ASSERT(matches.get_matches().size() == 0);
-
-	static_cast<coxmatch_48*>(matches.add_match(rofl::openflow::OXM_TLV_BASIC_ETH_DST))->set_u48value(rofl::cmacaddr("b1:b2:b3:b4:b5:b6"));
-
-	CPPUNIT_ASSERT(matches.get_matches().size() == 1);
-	CPPUNIT_ASSERT(matches.get_matches().find(static_cast<uint64_t>(rofl::openflow::OXM_TLV_BASIC_ETH_DST
-			& 0xfffffe00) << 32 | 0) != matches.get_matches().end());
-
-	matches.drop_match(rofl::openflow::OXM_TLV_BASIC_ETH_DST_MASK);
 
 	CPPUNIT_ASSERT(matches.get_matches().size() == 0);
 }
@@ -249,8 +212,6 @@ coxmatches_test::testSetMatch()
 	using rofl::openflow::coxmatch_48;
 	rofl::openflow::coxmatches matches;
 
-	static_cast<coxmatch_48*>(matches.set_match(rofl::openflow::OXM_TLV_BASIC_ETH_DST_MASK))->set_u48value(rofl::cmacaddr("b1:b2:b3:b4:b5:b6"));
-	static_cast<coxmatch_48*>(matches.set_match(rofl::openflow::OXM_TLV_BASIC_ETH_DST_MASK))->set_u48mask(rofl::cmacaddr("c1:c2:c3:c4:c5:c6"));
 
 	rofl::cmemory test(16);
 	test[0] = 0x80;
@@ -280,7 +241,7 @@ coxmatches_test::testSetMatch()
 	CPPUNIT_ASSERT(matches.get_matches().size() == 1);
 
 	try {
-		matches.get_match(rofl::openflow::OXM_TLV_BASIC_ETH_DST);
+
 	} catch (rofl::openflow::eOxmNotFound& e) {
 		CPPUNIT_ASSERT(false);
 	}
@@ -293,44 +254,6 @@ coxmatches_test::testGetMatch()
 {
 	rofl::openflow::coxmatches matches;
 
-	try {
-		matches.get_match(rofl::openflow::OXM_TLV_BASIC_ETH_DST);
-		CPPUNIT_ASSERT(false);
-	} catch (rofl::openflow::eOxmNotFound& e) {}
-
-	try {
-		matches.get_match(rofl::openflow::OXM_TLV_BASIC_ETH_DST_MASK);
-		CPPUNIT_ASSERT(false);
-	} catch (rofl::openflow::eOxmNotFound& e) {}
-
-	matches.set_match(rofl::openflow::OXM_TLV_BASIC_ETH_DST);
-
-	try {
-		matches.get_match(rofl::openflow::OXM_TLV_BASIC_ETH_DST);
-	} catch (rofl::openflow::eOxmNotFound& e) {
-		CPPUNIT_ASSERT(false);
-	}
-
-	try {
-		matches.get_match(rofl::openflow::OXM_TLV_BASIC_ETH_DST_MASK);
-	} catch (rofl::openflow::eOxmNotFound& e) {
-		CPPUNIT_ASSERT(false);
-	}
-
-	CPPUNIT_ASSERT(matches.get_matches().size() == 1);
-
-	matches.drop_match(rofl::openflow::OXM_TLV_BASIC_ETH_DST);
-
-	try {
-		matches.get_match(rofl::openflow::OXM_TLV_BASIC_ETH_DST);
-		CPPUNIT_ASSERT(false);
-	} catch (rofl::openflow::eOxmNotFound& e) {}
-
-	try {
-		matches.get_match(rofl::openflow::OXM_TLV_BASIC_ETH_DST_MASK);
-		CPPUNIT_ASSERT(false);
-	} catch (rofl::openflow::eOxmNotFound& e) {}
-
 	CPPUNIT_ASSERT(matches.get_matches().size() == 0);
 }
 
@@ -341,37 +264,6 @@ coxmatches_test::testHasMatch()
 {
 	rofl::openflow::coxmatches matches;
 
-
-	if (matches.has_match(rofl::openflow::OXM_TLV_BASIC_ETH_DST)) {
-		CPPUNIT_ASSERT(false);
-	}
-
-	if (matches.has_match(rofl::openflow::OXM_TLV_BASIC_ETH_DST_MASK)) {
-		CPPUNIT_ASSERT(false);
-	}
-
-	matches.set_match(rofl::openflow::OXM_TLV_BASIC_ETH_DST);
-
-	if (not matches.has_match(rofl::openflow::OXM_TLV_BASIC_ETH_DST)) {
-		CPPUNIT_ASSERT(false);
-	}
-
-	if (not matches.has_match(rofl::openflow::OXM_TLV_BASIC_ETH_DST_MASK)) {;
-		CPPUNIT_ASSERT(false);
-	}
-
-	CPPUNIT_ASSERT(matches.get_matches().size() == 1);
-
-	matches.drop_match(rofl::openflow::OXM_TLV_BASIC_ETH_DST);
-
-
-	if (matches.has_match(rofl::openflow::OXM_TLV_BASIC_ETH_DST)) {
-		CPPUNIT_ASSERT(false);
-	}
-
-	if (matches.has_match(rofl::openflow::OXM_TLV_BASIC_ETH_DST_MASK)) {
-		CPPUNIT_ASSERT(false);
-	}
 
 	CPPUNIT_ASSERT(matches.get_matches().size() == 0);
 }

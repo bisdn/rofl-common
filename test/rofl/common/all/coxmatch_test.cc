@@ -39,7 +39,7 @@ coxmatch_test::test1Byte()
 {
 	uint32_t oxm_id = 0xa1a2a3a4 & ~HAS_MASK_FLAG;
 
-	rofl::openflow::coxmatch_8 oxm(oxm_id, (uint8_t)0xb1, rofl::openflow::coxmatch::COXMATCH_8BIT);
+	rofl::openflow::coxmatch_8 oxm(oxm_id, (uint8_t)0xb1);
 
 	CPPUNIT_ASSERT(oxm.length() == 5);
 	CPPUNIT_ASSERT(oxm.get_oxm_class() == 0xa1a2);
@@ -74,7 +74,7 @@ coxmatch_test::test1ByteHasMask()
 {
 	uint32_t oxm_id = 0xa1a2a3a4 | HAS_MASK_FLAG;
 
-	rofl::openflow::coxmatch_8 oxm(oxm_id, (uint8_t)0xb1, (uint8_t)0xc1, rofl::openflow::coxmatch::COXMATCH_8BIT);
+	rofl::openflow::coxmatch_8 oxm(oxm_id, (uint8_t)0xb1, (uint8_t)0xc1);
 
 	CPPUNIT_ASSERT(oxm.length() == 6);
 	CPPUNIT_ASSERT(oxm.get_oxm_class() == 0xa1a2);
@@ -112,7 +112,7 @@ coxmatch_test::test2Bytes()
 {
 	uint32_t oxm_id = 0xa1a2a3a4 & ~HAS_MASK_FLAG;
 
-	rofl::openflow::coxmatch_16 oxm(oxm_id, (uint16_t)0xb1b2, rofl::openflow::coxmatch::COXMATCH_16BIT);
+	rofl::openflow::coxmatch_16 oxm(oxm_id, (uint16_t)0xb1b2);
 
 	CPPUNIT_ASSERT(oxm.length() == 6);
 	CPPUNIT_ASSERT(oxm.get_oxm_class() == 0xa1a2);
@@ -147,7 +147,7 @@ coxmatch_test::test2BytesHasMask()
 {
 	uint32_t oxm_id = 0xa1a2a3a4 | HAS_MASK_FLAG;
 
-	rofl::openflow::coxmatch_16 oxm(oxm_id, (uint16_t)0xb1b2, (uint16_t)0xc1c2, rofl::openflow::coxmatch::COXMATCH_16BIT);
+	rofl::openflow::coxmatch_16 oxm(oxm_id, (uint16_t)0xb1b2, (uint16_t)0xc1c2);
 
 	CPPUNIT_ASSERT(oxm.length() == 8);
 	CPPUNIT_ASSERT(oxm.get_oxm_class() == 0xa1a2);
@@ -187,7 +187,7 @@ coxmatch_test::test4Bytes()
 {
 	uint32_t oxm_id = 0xa1a2a3a4 & ~HAS_MASK_FLAG;
 
-	rofl::openflow::coxmatch_32 oxm(oxm_id, (uint32_t)0xb1b2b3b4, rofl::openflow::coxmatch::COXMATCH_32BIT);
+	rofl::openflow::coxmatch_32 oxm(oxm_id, (uint32_t)0xb1b2b3b4);
 
 	CPPUNIT_ASSERT(oxm.length() == 8);
 	CPPUNIT_ASSERT(oxm.get_oxm_class() == 0xa1a2);
@@ -224,7 +224,7 @@ coxmatch_test::test4BytesHasMask()
 {
 	uint32_t oxm_id = 0xa1a2a3a4 | HAS_MASK_FLAG;
 
-	rofl::openflow::coxmatch_32 oxm(oxm_id, (uint32_t)0xb1b2b3b4, (uint32_t)0xc1c2c3c4, rofl::openflow::coxmatch::COXMATCH_32BIT);
+	rofl::openflow::coxmatch_32 oxm(oxm_id, (uint32_t)0xb1b2b3b4, (uint32_t)0xc1c2c3c4);
 
 	CPPUNIT_ASSERT(oxm.length() == 12);
 	CPPUNIT_ASSERT(oxm.get_oxm_class() == 0xa1a2);
@@ -355,7 +355,7 @@ coxmatch_test::test8Bytes()
 {
 	uint32_t oxm_id = 0xa1a2a3a4 & ~HAS_MASK_FLAG;
 
-	rofl::openflow::coxmatch_64 oxm(oxm_id, (uint64_t)0xb1b2b3b4b5b6b7b8, rofl::openflow::coxmatch::COXMATCH_64BIT);
+	rofl::openflow::coxmatch_64 oxm(oxm_id, (uint64_t)0xb1b2b3b4b5b6b7b8);
 
 	CPPUNIT_ASSERT(oxm.length() == 12);
 	CPPUNIT_ASSERT(oxm.get_oxm_class() == 0xa1a2);
@@ -396,7 +396,7 @@ coxmatch_test::test8BytesHasMask()
 {
 	uint32_t oxm_id = 0xa1a2a3a4 | HAS_MASK_FLAG;
 
-	rofl::openflow::coxmatch_64 oxm(oxm_id, (uint64_t)0xb1b2b3b4b5b6b7b8, (uint64_t)0xc1c2c3c4c5c6c7c8, rofl::openflow::coxmatch::COXMATCH_64BIT);
+	rofl::openflow::coxmatch_64 oxm(oxm_id, (uint64_t)0xb1b2b3b4b5b6b7b8, (uint64_t)0xc1c2c3c4c5c6c7c8);
 
 	CPPUNIT_ASSERT(oxm.length() == 20);
 	CPPUNIT_ASSERT(oxm.get_oxm_class() == 0xa1a2);
@@ -450,7 +450,7 @@ coxmatch_test::test1ByteExp()
 	const uint8_t *_oxm_id = (uint8_t *)&oxm_id;
 	const uint8_t *_exp_id = (uint8_t *)&exp_id;
 
-	rofl::openflow::coxmatch_8_exp oxm(oxm_id, exp_id, (uint8_t)0xb1, rofl::openflow::coxmatch::COXMATCH_8BIT);
+	rofl::openflow::coxmatch_exp oxm(oxm_id, exp_id, (uint8_t)0xb1);
 
 	CPPUNIT_ASSERT(oxm.length() == 9);
 	CPPUNIT_ASSERT(oxm.get_oxm_class() == rofl::openflow::OFPXMC_EXPERIMENTER);
@@ -490,7 +490,7 @@ coxmatch_test::test1ByteHasMaskExp()
 	const uint8_t *_oxm_id = (uint8_t *)&oxm_id;
 	const uint8_t *_exp_id = (uint8_t *)&exp_id;
 
-	rofl::openflow::coxmatch_8_exp oxm(oxm_id, exp_id, (uint8_t)0xb1, (uint8_t)0xc1, rofl::openflow::coxmatch::COXMATCH_8BIT);
+	rofl::openflow::coxmatch_exp oxm(oxm_id, exp_id, (uint8_t)0xb1, (uint8_t)0xc1);
 
 	CPPUNIT_ASSERT(oxm.length() == 10);
 	CPPUNIT_ASSERT(oxm.get_oxm_class() == rofl::openflow::OFPXMC_EXPERIMENTER);
@@ -534,7 +534,7 @@ coxmatch_test::test2BytesExp()
 	const uint8_t *_oxm_id = (uint8_t *)&oxm_id;
 	const uint8_t *_exp_id = (uint8_t *)&exp_id;
 
-	rofl::openflow::coxmatch_16_exp oxm(oxm_id, exp_id, (uint16_t)0xb1b2, rofl::openflow::coxmatch::COXMATCH_16BIT);
+	rofl::openflow::coxmatch_exp oxm(oxm_id, exp_id, (uint16_t)0xb1b2);
 
 	CPPUNIT_ASSERT(oxm.length() == 10);
 	CPPUNIT_ASSERT(oxm.get_oxm_class() == rofl::openflow::OFPXMC_EXPERIMENTER);
@@ -575,7 +575,7 @@ coxmatch_test::test2BytesHasMaskExp()
 	const uint8_t *_oxm_id = (uint8_t *)&oxm_id;
 	const uint8_t *_exp_id = (uint8_t *)&exp_id;
 
-	rofl::openflow::coxmatch_16_exp oxm(oxm_id, exp_id, (uint16_t)0xb1b2, (uint16_t)0xc1c2, rofl::openflow::coxmatch::COXMATCH_16BIT);
+	rofl::openflow::coxmatch_exp oxm(oxm_id, exp_id, (uint16_t)0xb1b2, (uint16_t)0xc1c2);
 
 	CPPUNIT_ASSERT(oxm.length() == 12);
 	CPPUNIT_ASSERT(oxm.get_oxm_class() == rofl::openflow::OFPXMC_EXPERIMENTER);
@@ -621,7 +621,7 @@ coxmatch_test::test4BytesExp()
 	const uint8_t *_oxm_id = (uint8_t *)&oxm_id;
 	const uint8_t *_exp_id = (uint8_t *)&exp_id;
 
-	rofl::openflow::coxmatch_32_exp oxm(oxm_id, exp_id, (uint32_t)0xb1b2b3b4, rofl::openflow::coxmatch::COXMATCH_32BIT);
+	rofl::openflow::coxmatch_exp oxm(oxm_id, exp_id, (uint32_t)0xb1b2b3b4);
 
 	CPPUNIT_ASSERT(oxm.length() == 12);
 	CPPUNIT_ASSERT(oxm.get_oxm_class() == rofl::openflow::OFPXMC_EXPERIMENTER);
@@ -664,7 +664,7 @@ coxmatch_test::test4BytesHasMaskExp()
 	const uint8_t *_oxm_id = (uint8_t *)&oxm_id;
 	const uint8_t *_exp_id = (uint8_t *)&exp_id;
 
-	rofl::openflow::coxmatch_32_exp oxm(oxm_id, exp_id, (uint32_t)0xb1b2b3b4, (uint32_t)0xc1c2c3c4, rofl::openflow::coxmatch::COXMATCH_32BIT);
+	rofl::openflow::coxmatch_exp oxm(oxm_id, exp_id, (uint32_t)0xb1b2b3b4, (uint32_t)0xc1c2c3c4);
 
 	CPPUNIT_ASSERT(oxm.length() == 16);
 	CPPUNIT_ASSERT(oxm.get_oxm_class() == rofl::openflow::OFPXMC_EXPERIMENTER);
@@ -714,9 +714,8 @@ coxmatch_test::test6BytesExp()
 	const uint8_t *_oxm_id = (uint8_t *)&oxm_id;
 	const uint8_t *_exp_id = (uint8_t *)&exp_id;
 
-	rofl::openflow::coxmatch_48_exp oxm(oxm_id, exp_id,
-			rofl::cmacaddr("b1:b2:b3:b4:b5:b6").get_mac(),
-			rofl::openflow::coxmatch::COXMATCH_48BIT);
+	rofl::openflow::coxmatch_exp oxm(oxm_id, exp_id,
+			rofl::cmacaddr("b1:b2:b3:b4:b5:b6").get_mac());
 
 	CPPUNIT_ASSERT(oxm.length() == 14);
 	CPPUNIT_ASSERT(oxm.get_oxm_class() == rofl::openflow::OFPXMC_EXPERIMENTER);
@@ -761,10 +760,9 @@ coxmatch_test::test6BytesHasMaskExp()
 	const uint8_t *_oxm_id = (uint8_t *)&oxm_id;
 	const uint8_t *_exp_id = (uint8_t *)&exp_id;
 
-	rofl::openflow::coxmatch_48_exp oxm(oxm_id, exp_id,
+	rofl::openflow::coxmatch_exp oxm(oxm_id, exp_id,
 			rofl::cmacaddr("b1:b2:b3:b4:b5:b6").get_mac(),
-			rofl::cmacaddr("c1:c2:c3:c4:c5:c6").get_mac(),
-			rofl::openflow::coxmatch::COXMATCH_48BIT);
+			rofl::cmacaddr("c1:c2:c3:c4:c5:c6").get_mac());
 
 	CPPUNIT_ASSERT(oxm.length() == 20);
 	CPPUNIT_ASSERT(oxm.get_oxm_class() == rofl::openflow::OFPXMC_EXPERIMENTER);
@@ -820,7 +818,7 @@ coxmatch_test::test8BytesExp()
 	const uint8_t *_oxm_id = (uint8_t *)&oxm_id;
 	const uint8_t *_exp_id = (uint8_t *)&exp_id;
 
-	rofl::openflow::coxmatch_64_exp oxm(oxm_id, exp_id, (uint64_t)0xb1b2b3b4b5b6b7b8, rofl::openflow::coxmatch::COXMATCH_64BIT);
+	rofl::openflow::coxmatch_exp oxm(oxm_id, exp_id, (uint64_t)0xb1b2b3b4b5b6b7b8);
 
 	CPPUNIT_ASSERT(oxm.length() == 16);
 	CPPUNIT_ASSERT(oxm.get_oxm_class() == rofl::openflow::OFPXMC_EXPERIMENTER);
@@ -867,9 +865,8 @@ coxmatch_test::test8BytesHasMaskExp()
 	const uint8_t *_oxm_id = (uint8_t *)&oxm_id;
 	const uint8_t *_exp_id = (uint8_t *)&exp_id;
 
-	rofl::openflow::coxmatch_64_exp oxm(oxm_id, exp_id,
-			(uint64_t) 0xb1b2b3b4b5b6b7b8, (uint64_t) 0xc1c2c3c4c5c6c7c8,
-			rofl::openflow::coxmatch::COXMATCH_64BIT);
+	rofl::openflow::coxmatch_exp oxm(oxm_id, exp_id,
+			(uint64_t) 0xb1b2b3b4b5b6b7b8, (uint64_t) 0xc1c2c3c4c5c6c7c8);
 
 	CPPUNIT_ASSERT(oxm.length() == 24);
 	CPPUNIT_ASSERT(oxm.get_oxm_class() == rofl::openflow::OFPXMC_EXPERIMENTER);

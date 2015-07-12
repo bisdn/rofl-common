@@ -388,10 +388,12 @@ coxmatches::copy_matches(
 			const coxmatches& oxmatches)
 {
 	clear();
-	RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
-	for (std::map<uint64_t, coxmatch*>::const_iterator
-			it = oxmatches.matches.begin(); it != oxmatches.matches.end(); ++it) {
-		switch (OXM_TYPE(it->first)) {
+	std::vector<uint64_t> ids = oxmatches.get_ids();
+	std::cerr << "Punkt 1.0" << std::endl;
+	for (std::vector<uint64_t>::const_iterator
+			it = ids.begin(); it != ids.end(); ++it) {
+		std::cerr << "Punkt 2.0 " << std::hex << *it << std::dec << std::endl;
+		switch (*it) {
 		case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IN_PORT): {
 			add_ofb_in_port() = oxmatches.get_ofb_in_port();
 		} break;
@@ -534,6 +536,8 @@ coxmatches::copy_matches(
 
 		};
 		}
+		std::cerr << "Punkt 2.1" << std::endl;
 	}
+	std::cerr << "Punkt 3.0" << std::endl;
 }
 

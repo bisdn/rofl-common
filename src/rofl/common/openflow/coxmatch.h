@@ -168,7 +168,6 @@ public:
 			throw eOxmBadLen("coxmatch::pack() buf too short");
 		}
 		struct rofl::openflow::ofp_oxm_tlv_hdr* oxm = (struct rofl::openflow::ofp_oxm_tlv_hdr*)buf;
-		set_oxm_length(length()); // use overwritten length() method of derived classes
 		oxm->oxm_id = htobe32(oxm_id);
 	};
 
@@ -208,7 +207,7 @@ public:
 	/**
 	 * @brief	Returns type (=class+field) without (hasmask+length), no shift
 	 */
-	uint16_t
+	uint32_t
 	get_oxm_type() const
 	{ return (oxm_id & 0xfffffe00); };
 
@@ -289,9 +288,13 @@ public:
 	 */
 	friend std::ostream&
 	operator<< (std::ostream& os, const coxmatch& oxm) {
-		os << rofl::indent(0) << "<coxmatch oxm-id: 0x" << std::hex << oxm.get_oxm_id() << std::dec << " >" << std::endl;
-		rofl::indent i(2);
-		os << dynamic_cast<rofl::cmemory const&>( oxm );
+		os << rofl::indent(0) << "<coxmatch ";
+		os << "oxm_id: 0x" << std::hex << (unsigned int)oxm.get_oxm_id() << std::dec << " ";
+		os << "class: 0x" << std::hex << (int)oxm.get_oxm_class() << std::dec << " ";
+		os << "field: 0x" << std::hex << (int)oxm.get_oxm_field() << std::dec << " ";
+		os << "hasmask: " << oxm.get_oxm_hasmask() << " ";
+		os << "length: " << (int)oxm.get_oxm_length() << " ";
+		os << ">" << std::endl;
 		return os;
 	};
 
@@ -491,10 +494,10 @@ public:
 		value.clear();
 		mask.clear();
 
+		coxmatch::unpack(buf, buflen);
 		if (buflen < length()) {
 			throw eOxmBadLen("coxmatch_exp::unpack() buf too short");
 		}
-		coxmatch::unpack(buf, buflen);
 		struct rofl::openflow::ofp_oxm_experimenter_header* oxm = (struct rofl::openflow::ofp_oxm_experimenter_header*)buf;
 		exp_id = be32toh(oxm->experimenter);
 		size_t bodylen = buflen - sizeof(struct rofl::openflow::ofp_oxm_experimenter_header);
@@ -936,10 +939,10 @@ public:
 	unpack(
 			uint8_t* buf, size_t buflen)
 	 {
+		coxmatch::unpack(buf, buflen);
 		if (buflen < length()) {
 			throw eOxmBadLen("coxmatch_8::unpack() buf too short");
 		}
-		coxmatch::unpack(buf, buflen);
 		struct rofl::openflow::ofp_oxm_ofb_uint8_t* oxm = (struct rofl::openflow::ofp_oxm_ofb_uint8_t*)buf;
 		value = oxm->byte;
 		mask = (get_oxm_hasmask() ? oxm->mask : 0xff);
@@ -1098,10 +1101,10 @@ public:
 	unpack(
 			uint8_t* buf, size_t buflen)
 	 {
+		coxmatch::unpack(buf, buflen);
 		if (buflen < length()) {
 			throw eOxmBadLen("coxmatch_16::unpack() buf too short");
 		}
-		coxmatch::unpack(buf, buflen);
 		struct rofl::openflow::ofp_oxm_ofb_uint16_t* oxm = (struct rofl::openflow::ofp_oxm_ofb_uint16_t*)buf;
 		value = be16toh(oxm->word);
 		mask = (get_oxm_hasmask() ? be16toh(oxm->mask) : 0xffff);
@@ -1265,10 +1268,10 @@ public:
 	unpack(
 			uint8_t* buf, size_t buflen)
 	 {
+		coxmatch::unpack(buf, buflen);
 		if (buflen < length()) {
 			throw eOxmBadLen("coxmatch_24::unpack() buf too short");
 		}
-		coxmatch::unpack(buf, buflen);
 		struct rofl::openflow::ofp_oxm_ofb_uint24_t* oxm = (struct rofl::openflow::ofp_oxm_ofb_uint24_t*)buf;
 		value = (((uint32_t)oxm->word[0] << 16) | ((uint32_t)oxm->word[1] << 8) | ((uint32_t)oxm->word[2] << 0));
 		if (get_oxm_hasmask())
@@ -1476,10 +1479,10 @@ public:
 	unpack(
 			uint8_t* buf, size_t buflen)
 	 {
+		coxmatch::unpack(buf, buflen);
 		if (buflen < length()) {
 			throw eOxmBadLen("coxmatch_32::unpack() buf too short");
 		}
-		coxmatch::unpack(buf, buflen);
 		struct rofl::openflow::ofp_oxm_ofb_uint32_t* oxm = (struct rofl::openflow::ofp_oxm_ofb_uint32_t*)buf;
 		value = be32toh(oxm->dword);
 		mask = (get_oxm_hasmask() ? be32toh(oxm->mask) : 0xffffffff);
@@ -1598,7 +1601,7 @@ public:
 
 public:
 
-	uint32_t
+	uint64_t
 	get_u48value() const
 	{ return value; };
 
@@ -1607,7 +1610,7 @@ public:
 			uint32_t value)
 	{ this->value = value; return *this; };
 
-	uint32_t
+	uint64_t
 	get_u48mask() const
 	{ return mask; };
 
@@ -1730,10 +1733,10 @@ public:
 	unpack(
 			uint8_t* buf, size_t buflen)
 	 {
+		coxmatch::unpack(buf, buflen);
 		if (buflen < length()) {
 			throw eOxmBadLen("coxmatch_48::unpack() buf too short");
 		}
-		coxmatch::unpack(buf, buflen);
 		struct rofl::openflow::ofp_oxm_ofb_uint48_t* oxm = (struct rofl::openflow::ofp_oxm_ofb_uint48_t*)buf;
 		value = (((uint64_t)oxm->value[0] << 40) |
 				 ((uint64_t)oxm->value[1] << 32) |
@@ -1906,10 +1909,10 @@ public:
 	unpack(
 			uint8_t* buf, size_t buflen)
 	 {
+		coxmatch::unpack(buf, buflen);
 		if (buflen < length()) {
 			throw eOxmBadLen("coxmatch_64::unpack() buf too short");
 		}
-		coxmatch::unpack(buf, buflen);
 		struct rofl::openflow::ofp_oxm_ofb_uint64_t* oxm = (struct rofl::openflow::ofp_oxm_ofb_uint64_t*)buf;
 		value = be64toh(oxm->word);
 		mask = (get_oxm_hasmask() ? be64toh(oxm->mask) : 0xffffffffffffffff);
@@ -2068,10 +2071,10 @@ public:
 	unpack(
 			uint8_t* buf, size_t buflen)
 	 {
+		coxmatch::unpack(buf, buflen);
 		if (buflen < length()) {
 			throw eOxmBadLen("coxmatch_128::unpack() buf too short");
 		}
-		coxmatch::unpack(buf, buflen);
 		struct rofl::openflow::ofp_oxm_ofb_ipv6_addr* oxm = (struct rofl::openflow::ofp_oxm_ofb_ipv6_addr*)buf;
 		memcpy(value.somem(), oxm->addr, 16);
 		if (get_oxm_hasmask()) {

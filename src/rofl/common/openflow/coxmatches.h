@@ -13,6 +13,7 @@
 #define COXMATCHES_H_
 
 #include <ostream>
+#include <vector>
 #include <string>
 #include <deque>
 #include <map>
@@ -145,6 +146,17 @@ public:
 			uint16_t& missed);
 
 public:
+
+	std::vector<uint64_t>
+	get_ids() const {
+		std::vector<uint64_t> ids;
+		RwLock lock(rwlock, RwLock::RWLOCK_READ);
+		for (std::map<uint64_t, coxmatch*>::const_iterator
+				it = matches.begin(); it != matches.end(); ++it) {
+			ids.push_back(it->first);
+		}
+		return ids;
+	};
 
 	/**
 	 *
@@ -3071,7 +3083,7 @@ public:
 		rofl::indent i(2);
 		for (std::map<uint64_t, coxmatch*>::const_iterator
 				it = oxl.matches.begin(); it != oxl.matches.end(); ++it) {
-			os << coxmatch_output(*it->second);
+			//os << coxmatch_output(*it->second);
 		}
 		return os;
 	};
