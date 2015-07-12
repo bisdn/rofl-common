@@ -333,6 +333,96 @@ public:
 	 *
 	 */
 	coxmatch_exp(
+			uint32_t oxm_id, uint32_t exp_id, uint8_t value) :
+				coxmatch(oxm_id),
+				exp_id(exp_id)
+	{ set_u8value(value); };
+
+	/**
+	 *
+	 */
+	coxmatch_exp(
+			uint32_t oxm_id, uint32_t exp_id, uint8_t value, uint8_t mask) :
+				coxmatch(oxm_id),
+				exp_id(exp_id)
+	{ set_u8value(value); set_u8mask(mask); };
+
+	/**
+	 *
+	 */
+	coxmatch_exp(
+			uint32_t oxm_id, uint32_t exp_id, uint16_t value) :
+				coxmatch(oxm_id),
+				exp_id(exp_id)
+	{ set_u16value(value); };
+
+	/**
+	 *
+	 */
+	coxmatch_exp(
+			uint32_t oxm_id, uint32_t exp_id, uint16_t value, uint16_t mask) :
+				coxmatch(oxm_id),
+				exp_id(exp_id)
+	{ set_u16value(value); set_u16mask(mask); };
+
+	/**
+	 *
+	 */
+	coxmatch_exp(
+			uint32_t oxm_id, uint32_t exp_id, uint32_t value) :
+				coxmatch(oxm_id),
+				exp_id(exp_id)
+	{ set_u32value(value); };
+
+	/**
+	 *
+	 */
+	coxmatch_exp(
+			uint32_t oxm_id, uint32_t exp_id, uint32_t value, uint32_t mask) :
+				coxmatch(oxm_id),
+				exp_id(exp_id)
+	{ set_u32value(value); set_u32mask(mask); };
+
+	/**
+	 *
+	 */
+	coxmatch_exp(
+			uint32_t oxm_id, uint32_t exp_id, const rofl::caddress_ll& value) :
+				coxmatch(oxm_id),
+				exp_id(exp_id)
+	{ set_u48value(value); };
+
+	/**
+	 *
+	 */
+	coxmatch_exp(
+			uint32_t oxm_id, uint32_t exp_id, const rofl::caddress_ll& value, const rofl::caddress_ll& mask) :
+				coxmatch(oxm_id),
+				exp_id(exp_id)
+	{ set_u48value(value); set_u48mask(mask); };
+
+	/**
+	 *
+	 */
+	coxmatch_exp(
+			uint32_t oxm_id, uint32_t exp_id, uint64_t value) :
+				coxmatch(oxm_id),
+				exp_id(exp_id)
+	{ set_u64value(value); };
+
+	/**
+	 *
+	 */
+	coxmatch_exp(
+			uint32_t oxm_id, uint32_t exp_id, uint64_t value, uint64_t mask) :
+				coxmatch(oxm_id),
+				exp_id(exp_id)
+	{ set_u64value(value); set_u64mask(mask); };
+
+	/**
+	 *
+	 */
+	coxmatch_exp(
 			const coxmatch_exp& oxm)
 	{ *this = oxm; };
 
@@ -347,6 +437,8 @@ public:
 			return *this;
 		coxmatch::operator= (oxm);
 		exp_id = oxm.exp_id;
+		value = oxm.value;
+		mask = oxm.mask;
 		return *this;
 	};
 
@@ -357,7 +449,12 @@ public:
 	 */
 	virtual size_t
 	length() const
-	{ return sizeof(struct rofl::openflow::ofp_oxm_experimenter_header); };
+	{
+		if (get_oxm_hasmask() && ((value.length() != mask.length()))) {
+			throw eOxmInval("coxmatch_exp::length() value and mask differ in size");
+		}
+		return (sizeof(struct rofl::openflow::ofp_oxm_experimenter_header) + value.length() + mask.length());
+	};
 
 	/**
 	 *
@@ -366,12 +463,22 @@ public:
 	pack(
 			uint8_t* buf, size_t buflen)
 	{
+		if (get_oxm_hasmask() && ((value.length() != mask.length()))) {
+			throw eOxmInval("coxmatch_exp::pack() value and mask differ in size");
+		}
+
 		if (buflen < length()) {
 			throw eOxmBadLen("coxmatch_exp::pack() buf too short");
 		}
 		coxmatch::pack(buf, buflen);
 		struct rofl::openflow::ofp_oxm_experimenter_header* oxm = (struct rofl::openflow::ofp_oxm_experimenter_header*)buf;
 		oxm->experimenter = htobe32(exp_id);
+		if (not value.empty()) {
+			memcpy(oxm->data, value.somem(), value.length());
+		}
+		if (get_oxm_hasmask() && (not mask.empty())) {
+			memcpy(oxm->data + value.length(), mask.somem(), mask.length());
+		}
 	};
 
 	/**
@@ -381,12 +488,38 @@ public:
 	unpack(
 			uint8_t* buf, size_t buflen)
 	 {
+		value.clear();
+		mask.clear();
+
 		if (buflen < length()) {
-			throw eOxmBadLen("coxmatch::unpack() buf too short");
+			throw eOxmBadLen("coxmatch_exp::unpack() buf too short");
 		}
 		coxmatch::unpack(buf, buflen);
 		struct rofl::openflow::ofp_oxm_experimenter_header* oxm = (struct rofl::openflow::ofp_oxm_experimenter_header*)buf;
 		exp_id = be32toh(oxm->experimenter);
+		size_t bodylen = buflen - sizeof(struct rofl::openflow::ofp_oxm_experimenter_header);
+
+		/* mask flag is false => single value, no mask */
+		if (not get_oxm_hasmask()) {
+			value.assign(oxm->data, bodylen);
+			/* set mask to 0xffffff..., same length as value */
+			mask.resize(bodylen);
+			for (unsigned int i = 0; i < mask.length(); ++i) {
+				mask[i] = 0xff;
+			}
+
+		/* mask flag is true => value and mask */
+		} else {
+
+			/* sanity check: length must be an even value */
+			if (bodylen % 2) {
+				throw eOxmBadLen("coxmatch_exp::unpack() has_mask is true, but data langth cannot be divided by 2");
+			}
+
+			size_t len = bodylen / 2;
+			value.assign(oxm->data, len);
+			mask.assign(oxm->data + len, len);
+		}
 	};
 
 public:
@@ -408,6 +541,249 @@ public:
 
 public:
 
+	const rofl::cmemory&
+	get_value() const
+	{ return value; };
+
+	rofl::cmemory&
+	set_value()
+	{ return value; };
+
+	coxmatch_exp&
+	set_value(
+			const rofl::cmemory& value)
+	{ this->value = value; return *this; };
+
+	const rofl::cmemory&
+	get_mask() const
+	{ return mask; };
+
+	rofl::cmemory&
+	set_mask()
+	{ return mask; };
+
+	coxmatch_exp&
+	set_mask(
+			const rofl::cmemory& mask)
+	{ this->mask = mask; set_oxm_hasmask(true); return *this; };
+
+public:
+
+	uint8_t
+	get_u8masked_value() const
+	{ return (get_u8value() & get_u8mask()); };
+
+	uint16_t
+	get_u16masked_value() const
+	{ return (get_u16value() & get_u16mask()); };
+
+	uint32_t
+	get_u32masked_value() const
+	{ return (get_u32value() & get_u32mask()); };
+
+	rofl::caddress_ll
+	get_u48masked_value() const
+	{ return (get_u48value() & get_u48mask()); };
+
+	uint64_t
+	get_u64masked_value() const
+	{ return (get_u64value() & get_u64mask()); };
+
+public:
+
+	uint8_t
+	get_u8value() const
+	{
+		if (value.length() < sizeof(uint8_t))
+			throw eOxmInval("coxmatch_exp::get_u8value() body too short");
+		return *((uint8_t*)(value.somem()));
+	};
+
+	coxmatch_exp&
+	set_u8value(
+			uint8_t u8value)
+	{
+		value.resize(sizeof(uint8_t));
+		uint8_t tmp = u8value;
+		memcpy(value.somem(), (uint8_t*)&tmp, sizeof(tmp));
+		return *this;
+	};
+
+	uint8_t
+	get_u8mask() const
+	{
+		if (mask.length() < sizeof(uint8_t))
+			return 0xff;
+		return *((uint8_t*)(mask.somem()));
+	};
+
+	coxmatch_exp&
+	set_u8mask(
+			uint8_t u8mask)
+	{
+		mask.resize(sizeof(uint8_t));
+		uint8_t tmp = u8mask;
+		memcpy(mask.somem(), (uint8_t*)&tmp, sizeof(tmp));
+		set_oxm_hasmask(true);
+		return *this;
+	};
+
+public:
+
+	uint16_t
+	get_u16value() const
+	{
+		if (value.length() < sizeof(uint16_t))
+			throw eOxmInval("coxmatch_exp::get_u16value() body too short");
+		return be16toh(*((uint16_t*)(value.somem())));
+	};
+
+	coxmatch_exp&
+	set_u16value(
+			uint16_t u16value)
+	{
+		value.resize(sizeof(uint16_t));
+		uint16_t tmp = htobe16(u16value);
+		memcpy(value.somem(), (uint8_t*)&tmp, sizeof(tmp));
+		return *this;
+	};
+
+	uint16_t
+	get_u16mask() const
+	{
+		if (mask.length() < sizeof(uint16_t))
+			return 0xffff;
+		return be16toh(*((uint16_t*)(mask.somem())));
+	};
+
+	coxmatch_exp&
+	set_u16mask(
+			uint16_t u16mask)
+	{
+		mask.resize(sizeof(uint16_t));
+		uint16_t tmp = htobe16(u16mask);
+		memcpy(mask.somem(), (uint8_t*)&tmp, sizeof(tmp));
+		set_oxm_hasmask(true);
+		return *this;
+	};
+
+public:
+
+	uint32_t
+	get_u32value() const
+	{
+		if (value.length() < sizeof(uint32_t))
+			throw eOxmInval("coxmatch_exp::get_u32value() body too short");
+		return be32toh(*((uint32_t*)(value.somem())));
+	};
+
+	coxmatch_exp&
+	set_u32value(
+			uint32_t u32value)
+	{
+		value.resize(sizeof(uint32_t));
+		uint32_t tmp = htobe32(u32value);
+		memcpy(value.somem(), (uint8_t*)&tmp, sizeof(tmp));
+		return *this;
+	};
+
+	uint32_t
+	get_u32mask() const
+	{
+		if (mask.length() < sizeof(uint32_t))
+			return 0xffffffff;
+		return be32toh(*((uint32_t*)(mask.somem())));
+	};
+
+	coxmatch_exp&
+	set_u32mask(
+			uint32_t u32mask)
+	{
+		mask.resize(sizeof(uint32_t));
+		uint32_t tmp = htobe32(u32mask);
+		memcpy(mask.somem(), (uint8_t*)&tmp, sizeof(tmp));
+		set_oxm_hasmask(true);
+		return *this;
+	};
+
+public:
+
+	rofl::caddress_ll
+	get_u48value() const
+	{
+		if (value.length() < OFP_ETH_ALEN)
+			throw eOxmInval("coxmatch_exp::get_u48value() body too short");
+		return rofl::caddress_ll(value.somem(), OFP_ETH_ALEN);
+	};
+
+	coxmatch_exp&
+	set_u48value(
+			const rofl::caddress_ll& lladdr)
+	{
+		value.resize(OFP_ETH_ALEN);
+		value.assign(lladdr.somem(), lladdr.length());
+		return *this;
+	};
+
+	rofl::caddress_ll
+	get_u48mask() const
+	{
+		if (mask.length() < OFP_ETH_ALEN)
+			return rofl::caddress_ll("ff:ff:ff:ff:ff:ff");
+		return rofl::caddress_ll(mask.somem(), OFP_ETH_ALEN);
+	};
+
+	coxmatch_exp&
+	set_u48mask(
+			const rofl::caddress_ll& lladdr)
+	{
+		mask.resize(OFP_ETH_ALEN);
+		mask.assign(lladdr.somem(), lladdr.length());
+		set_oxm_hasmask(true);
+		return *this;
+	};
+
+public:
+
+	uint64_t
+	get_u64value() const
+	{
+		if (value.length() < sizeof(uint64_t))
+			throw eOxmInval("coxmatch_exp::get_u64value() body too short");
+		return be64toh(*((uint64_t*)(value.somem())));
+	};
+
+	coxmatch_exp&
+	set_u64value(
+			uint64_t u64value)
+	{
+		value.resize(sizeof(uint64_t));
+		uint64_t tmp = htobe64(u64value);
+		memcpy(value.somem(), (uint8_t*)&tmp, sizeof(tmp));
+		return *this;
+	};
+
+	uint64_t
+	get_u64mask() const
+	{
+		if (mask.length() < sizeof(uint64_t))
+			return 0xffffffffffffffff;
+		return be64toh(*((uint64_t*)(mask.somem())));
+	};
+
+	coxmatch_exp&
+	set_u64mask(
+			uint64_t u64mask)
+	{
+		mask.resize(sizeof(uint64_t));
+		uint64_t tmp = htobe64(u64mask);
+		memcpy(mask.somem(), (uint8_t*)&tmp, sizeof(tmp));
+		set_oxm_hasmask(true);
+		return *this;
+	};
+
+public:
+
 	/**
 	 *
 	 */
@@ -417,6 +793,9 @@ public:
 		os << "exp_id: 0x" << std::hex << oxm.get_oxm_exp_id() << std::dec << " ";
 		os << " >" << std::endl;
 		rofl::indent i(2);
+		os << "<value >" << oxm.get_value() << std::endl;
+		os << "<mask >" << oxm.get_mask() << std::endl;
+		rofl::indent j(4);
 		os << dynamic_cast<const coxmatch&>( oxm );
 		return os;
 	};
@@ -424,6 +803,8 @@ public:
 private:
 
 	uint32_t		exp_id;
+	rofl::cmemory   value;
+	rofl::cmemory   mask;
 };
 
 
@@ -1724,1159 +2105,6 @@ private:
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-class coxmatch_8_exp :
-		public coxmatch_exp
-{
-public:
-
-	/**
-	 *
-	 */
-	virtual
-	~coxmatch_8_exp()
-	{};
-
-	/**
-	 *
-	 */
-	coxmatch_8_exp(
-			uint32_t oxm_id, uint32_t exp_id) :
-				coxmatch_exp(oxm_id, exp_id),
-				value(0),
-				mask(0xff)
-	{};
-
-	/**
-	 * @brief	coxmatch base class for single 8bit values
-	 */
-	coxmatch_8_exp(
-			uint32_t oxm_id, uint32_t exp_id, uint8_t value) :
-				coxmatch_exp(oxm_id, exp_id),
-				value(value),
-				mask(0xff)
-	{};
-
-	/**
-	 * @brief	coxmatch base class for masked 8bit values
-	 */
-	coxmatch_8_exp(
-			uint32_t oxm_id, uint32_t exp_id, uint8_t value, uint8_t mask) :
-				coxmatch_exp(oxm_id, exp_id),
-				value(value),
-				mask(mask)
-	{ set_oxm_hasmask(true); };
-
-	/**
-	 *
-	 */
-	coxmatch_8_exp(
-			const coxmatch_8_exp& oxm)
-	{ *this = oxm; };
-
-	/**
-	 *
-	 */
-	coxmatch_8_exp&
-	operator= (
-			const coxmatch_8_exp& oxm)
-	{
-		if (this == &oxm)
-			return *this;
-		coxmatch_exp::operator= (oxm);
-		value = oxm.value;
-		mask = oxm.mask;
-		return *this;
-	};
-
-public:
-
-	uint8_t
-	get_u8value() const
-	{ return value; };
-
-	coxmatch_8_exp&
-	set_u8value(
-			uint8_t value)
-	{ this->value = value; return *this; };
-
-	uint8_t
-	get_u8mask() const
-	{ return mask; };
-
-	coxmatch_8_exp&
-	set_u8mask(
-			uint8_t mask)
-	{ this->mask = mask; set_oxm_hasmask(true); return *this; };
-
-public:
-
-	uint8_t
-	get_u8masked_value() const
-	{ return (value & mask); };
-
-public:
-
-	/**
-	 *
-	 */
-	virtual size_t
-	length() const
-	{
-		return sizeof(struct rofl::openflow::ofp_oxm_experimenter_header) +
-			(get_oxm_hasmask() ? 2*sizeof(uint8_t) : 1*sizeof(uint8_t));
-	};
-
-	/**
-	 *
-	 */
-	virtual void
-	pack(
-			uint8_t* buf, size_t buflen)
-	{
-		if (buflen < length()) {
-			throw eOxmBadLen("coxmatch_8::pack() buf too short");
-		}
-		coxmatch_exp::pack(buf, buflen);
-		struct rofl::openflow::ofp_oxm_ofb_exp_uint8_t* oxm = (struct rofl::openflow::ofp_oxm_ofb_exp_uint8_t*)buf;
-		oxm->byte = value;
-		if (get_oxm_hasmask())
-			oxm->mask = mask;
-	};
-
-	/**
-	 *
-	 */
-	virtual void
-	unpack(
-			uint8_t* buf, size_t buflen)
-	 {
-		if (buflen < length()) {
-			throw eOxmBadLen("coxmatch_8::unpack() buf too short");
-		}
-		coxmatch_exp::unpack(buf, buflen);
-		struct rofl::openflow::ofp_oxm_ofb_exp_uint8_t* oxm = (struct rofl::openflow::ofp_oxm_ofb_exp_uint8_t*)buf;
-		value = oxm->byte;
-		mask = (get_oxm_hasmask() ? oxm->mask : 0xff);
-	};
-
-public:
-
-	/**
-	 *
-	 */
-	friend std::ostream&
-	operator<< (std::ostream& os, const coxmatch_8_exp& oxm) {
-		os << rofl::indent(0) << "<coxmatch_8_exp ";
-		os << "value: 0x" << std::hex << oxm.get_u8value() << std::dec << " ";
-		if (oxm.get_oxm_hasmask()) {
-			os << "/ mask: 0x" << std::hex << oxm.get_u8mask() << std::dec << " ";
-		}
-		os << " >" << std::endl;
-		rofl::indent i(2);
-		os << dynamic_cast<const coxmatch_exp&>( oxm );
-		return os;
-	};
-
-private:
-
-	uint8_t value;
-	uint8_t mask;
-};
-
-
-
-class coxmatch_16_exp :
-		public coxmatch_exp
-{
-public:
-
-	/**
-	 *
-	 */
-	virtual
-	~coxmatch_16_exp()
-	{};
-
-	/**
-	 *
-	 */
-	coxmatch_16_exp(
-			uint32_t oxm_id, uint32_t exp_id) :
-				coxmatch_exp(oxm_id, exp_id),
-				value(0),
-				mask(0xffff)
-	{};
-
-	/**
-	 * @brief	coxmatch base class for single 16bit values
-	 */
-	coxmatch_16_exp(
-			uint32_t oxm_id, uint32_t exp_id, uint16_t value) :
-				coxmatch_exp(oxm_id, exp_id),
-				value(value),
-				mask(0xffff)
-	{};
-
-	/**
-	 * @brief	coxmatch base class for masked 16bit values
-	 */
-	coxmatch_16_exp(
-			uint32_t oxm_id, uint32_t exp_id, uint16_t value, uint16_t mask) :
-				coxmatch_exp(oxm_id, exp_id),
-				value(value),
-				mask(mask)
-	{ set_oxm_hasmask(true); };
-
-	/**
-	 *
-	 */
-	coxmatch_16_exp(
-			const coxmatch_16_exp& oxm)
-	{ *this = oxm; };
-
-	/**
-	 *
-	 */
-	coxmatch_16_exp&
-	operator= (
-			const coxmatch_16_exp& oxm)
-	{
-		if (this == &oxm)
-			return *this;
-		coxmatch_exp::operator= (oxm);
-		value = oxm.value;
-		mask = oxm.mask;
-		return *this;
-	};
-
-public:
-
-	uint16_t
-	get_u16value() const
-	{ return value; };
-
-	coxmatch_16_exp&
-	set_u16value(
-			uint16_t value)
-	{ this->value = value; return *this; };
-
-	uint16_t
-	get_u16mask() const
-	{ return mask; };
-
-	coxmatch_16_exp&
-	set_u16mask(
-			uint16_t mask)
-	{ this->mask = mask; set_oxm_hasmask(true); return *this; };
-
-public:
-
-	uint16_t
-	get_u16masked_value() const
-	{ return (value & mask); };
-
-public:
-
-	/**
-	 *
-	 */
-	virtual size_t
-	length() const
-	{
-		return sizeof(struct rofl::openflow::ofp_oxm_experimenter_header) +
-			(get_oxm_hasmask() ? 2*sizeof(uint16_t) : 1*sizeof(uint16_t));
-	};
-
-	/**
-	 *
-	 */
-	virtual void
-	pack(
-			uint8_t* buf, size_t buflen)
-	{
-		if (buflen < length()) {
-			throw eOxmBadLen("coxmatch_16::pack() buf too short");
-		}
-		coxmatch_exp::pack(buf, buflen);
-		struct rofl::openflow::ofp_oxm_ofb_exp_uint16_t* oxm = (struct rofl::openflow::ofp_oxm_ofb_exp_uint16_t*)buf;
-		oxm->word = htobe16(value);
-		if (get_oxm_hasmask())
-			oxm->mask = htobe16(mask);
-	};
-
-	/**
-	 *
-	 */
-	virtual void
-	unpack(
-			uint8_t* buf, size_t buflen)
-	 {
-		if (buflen < length()) {
-			throw eOxmBadLen("coxmatch_16::unpack() buf too short");
-		}
-		coxmatch_exp::unpack(buf, buflen);
-		struct rofl::openflow::ofp_oxm_ofb_exp_uint16_t* oxm = (struct rofl::openflow::ofp_oxm_ofb_exp_uint16_t*)buf;
-		value = be16toh(oxm->word);
-		mask = (get_oxm_hasmask() ? be16toh(oxm->mask) : 0xffff);
-	};
-
-public:
-
-	/**
-	 *
-	 */
-	friend std::ostream&
-	operator<< (std::ostream& os, const coxmatch_16_exp& oxm) {
-		os << rofl::indent(0) << "<coxmatch_16_exp ";
-		os << "value: 0x" << std::hex << oxm.get_u16value() << std::dec << " ";
-		if (oxm.get_oxm_hasmask()) {
-			os << "/ mask: 0x" << std::hex << oxm.get_u16mask() << std::dec << " ";
-		}
-		os << " >" << std::endl;
-		rofl::indent i(2);
-		os << dynamic_cast<const coxmatch_exp&>( oxm );
-		return os;
-	};
-
-private:
-
-	uint16_t value;
-	uint16_t mask;
-};
-
-
-
-class coxmatch_24_exp :
-		public coxmatch_exp
-{
-public:
-
-	/**
-	 *
-	 */
-	virtual
-	~coxmatch_24_exp()
-	{};
-
-	/**
-	 *
-	 */
-	coxmatch_24_exp(
-			uint32_t oxm_id, uint32_t exp_id) :
-				coxmatch_exp(oxm_id, exp_id),
-				value(0),
-				mask(0xffffff)
-	{};
-
-	/**
-	 * @brief	coxmatch base class for single 24bit values
-	 */
-	coxmatch_24_exp(
-			uint32_t oxm_id, uint32_t exp_id, uint32_t value) :
-				coxmatch_exp(oxm_id, exp_id),
-				value(value),
-				mask(0xffffff)
-	{};
-
-	/**
-	 * @brief	coxmatch base class for masked 24bit values
-	 */
-	coxmatch_24_exp(
-			uint32_t oxm_id, uint32_t exp_id, uint32_t value, uint32_t mask) :
-				coxmatch_exp(oxm_id, exp_id),
-				value(value),
-				mask(mask)
-	{ set_oxm_hasmask(true); };
-
-	/**
-	 *
-	 */
-	coxmatch_24_exp(
-			const coxmatch_24_exp& oxm)
-	{ *this = oxm; };
-
-	/**
-	 *
-	 */
-	coxmatch_24_exp&
-	operator= (
-			const coxmatch_24_exp& oxm)
-	{
-		if (this == &oxm)
-			return *this;
-		coxmatch_exp::operator= (oxm);
-		value = oxm.value;
-		mask = oxm.mask;
-		return *this;
-	};
-
-public:
-
-	uint32_t
-	get_u24value() const
-	{ return value; };
-
-	coxmatch_24_exp&
-	set_u24value(
-			uint32_t value)
-	{ this->value = value; return *this; };
-
-	uint32_t
-	get_u24mask() const
-	{ return mask; };
-
-	coxmatch_24_exp&
-	set_u24mask(
-			uint32_t mask)
-	{ this->mask = mask; set_oxm_hasmask(true); return *this; };
-
-public:
-
-	uint32_t
-	get_u24masked_value() const
-	{ return (value & mask); };
-
-public:
-
-	/**
-	 *
-	 */
-	virtual size_t
-	length() const
-	{
-		return sizeof(struct rofl::openflow::ofp_oxm_experimenter_header) +
-			(get_oxm_hasmask() ? 2*3*sizeof(uint8_t) : 1*3*sizeof(uint8_t));
-	};
-
-	/**
-	 *
-	 */
-	virtual void
-	pack(
-			uint8_t* buf, size_t buflen)
-	{
-		if (buflen < length()) {
-			throw eOxmBadLen("coxmatch_24::pack() buf too short");
-		}
-		coxmatch_exp::pack(buf, buflen);
-		struct rofl::openflow::ofp_oxm_ofb_exp_uint24_t* oxm = (struct rofl::openflow::ofp_oxm_ofb_exp_uint24_t*)buf;
-		oxm->word[2] = (uint8_t)((value >>  0) & 0x000000ff);
-		oxm->word[1] = (uint8_t)((value >>  8) & 0x000000ff);
-		oxm->word[0] = (uint8_t)((value >> 16) & 0x000000ff);
-		if (get_oxm_hasmask()) {
-			oxm->mask[2] = (uint8_t)((mask >>  0) & 0x000000ff);
-			oxm->mask[1] = (uint8_t)((mask >>  8) & 0x000000ff);
-			oxm->mask[0] = (uint8_t)((mask >> 16) & 0x000000ff);
-		}
-	};
-
-	/**
-	 *
-	 */
-	virtual void
-	unpack(
-			uint8_t* buf, size_t buflen)
-	 {
-		if (buflen < length()) {
-			throw eOxmBadLen("coxmatch_24::unpack() buf too short");
-		}
-		coxmatch_exp::unpack(buf, buflen);
-		struct rofl::openflow::ofp_oxm_ofb_exp_uint24_t* oxm = (struct rofl::openflow::ofp_oxm_ofb_exp_uint24_t*)buf;
-		value = (((uint32_t)oxm->word[0] << 16) | ((uint32_t)oxm->word[1] << 8) | ((uint32_t)oxm->word[2] << 0));
-		if (get_oxm_hasmask()) {
-			mask = (((uint32_t)oxm->mask[0] << 16) | ((uint32_t)oxm->mask[1] << 8) | ((uint32_t)oxm->mask[2] << 0));
-		}
-	};
-
-public:
-
-	/**
-	 *
-	 */
-	friend std::ostream&
-	operator<< (std::ostream& os, const coxmatch_24_exp& oxm) {
-		os << rofl::indent(0) << "<coxmatch_24_exp ";
-		os << "value: 0x" << std::hex << oxm.get_u24value() << std::dec << " ";
-		if (oxm.get_oxm_hasmask()) {
-			os << "/ mask: 0x" << std::hex << oxm.get_u24mask() << std::dec << " ";
-		}
-		os << " >" << std::endl;
-		rofl::indent i(2);
-		os << dynamic_cast<const coxmatch_exp&>( oxm );
-		return os;
-	};
-
-private:
-
-	uint32_t value;
-	uint32_t mask;
-};
-
-
-
-class coxmatch_32_exp :
-		public coxmatch_exp
-{
-public:
-
-	/**
-	 *
-	 */
-	virtual
-	~coxmatch_32_exp()
-	{};
-
-	/**
-	 *
-	 */
-	coxmatch_32_exp(
-			uint32_t oxm_id, uint32_t exp_id) :
-				coxmatch_exp(oxm_id, exp_id),
-				value(0),
-				mask(0xffffffff)
-	{};
-
-	/**
-	 * @brief	coxmatch base class for single 32bit values
-	 */
-	coxmatch_32_exp(
-			uint32_t oxm_id, uint32_t exp_id, uint32_t value) :
-				coxmatch_exp(oxm_id, exp_id),
-				value(value),
-				mask(0xffffffff)
-	{};
-
-	/**
-	 * @brief	coxmatch base class for single 32bit values
-	 */
-	coxmatch_32_exp(
-			uint32_t oxm_id, uint32_t exp_id, const rofl::caddress_in4& value) :
-				coxmatch_exp(oxm_id, exp_id),
-				value(0),
-				mask(0xffffffff)
-	{ set_u32value(value); };
-
-	/**
-	 * @brief	coxmatch base class for masked 32bit values
-	 */
-	coxmatch_32_exp(
-			uint32_t oxm_id, uint32_t exp_id, const rofl::caddress_in4& value, const rofl::caddress_in4& mask) :
-				coxmatch_exp(oxm_id, exp_id),
-				value(0),
-				mask(0xffffffff)
-	{ set_u32value(value); set_u32mask(mask); };
-
-	/**
-	 * @brief	coxmatch base class for masked 32bit values
-	 */
-	coxmatch_32_exp(
-			uint32_t oxm_id, uint32_t exp_id, uint32_t value, uint32_t mask) :
-				coxmatch_exp(oxm_id, exp_id),
-				value(value),
-				mask(mask)
-	{ set_oxm_hasmask(true); };
-
-	/**
-	 *
-	 */
-	coxmatch_32_exp(
-			const coxmatch_32_exp& oxm)
-	{ *this = oxm; };
-
-	/**
-	 *
-	 */
-	coxmatch_32_exp&
-	operator= (
-			const coxmatch_32_exp& oxm)
-	{
-		if (this == &oxm)
-			return *this;
-		coxmatch_exp::operator= (oxm);
-		value = oxm.value;
-		mask = oxm.mask;
-		return *this;
-	};
-
-public:
-
-	uint32_t
-	get_u32value() const
-	{ return value; };
-
-	coxmatch_32_exp&
-	set_u32value(
-			uint32_t value)
-	{ this->value = value; return *this; };
-
-	uint32_t
-	get_u32mask() const
-	{ return mask; };
-
-	coxmatch_32_exp&
-	set_u32mask(
-			uint32_t mask)
-	{ this->mask = mask; set_oxm_hasmask(true); return *this; };
-
-public:
-
-	uint32_t
-	get_u32masked_value() const
-	{ return (value & mask); };
-
-public:
-
-	rofl::caddress_in4
-	get_u32value_as_addr() const
-	{ caddress_in4 addr; addr.set_addr_hbo(value); return addr; };
-
-	coxmatch_32_exp&
-	set_u32value(
-			const rofl::caddress_in4& addr)
-	{ value = addr.get_addr_hbo(); return *this; };
-
-	rofl::caddress_in4
-	get_u32mask_as_addr() const
-	{ caddress_in4 addr; addr.set_addr_hbo(mask); return addr; };
-
-	coxmatch_32_exp&
-	set_u32mask(
-			const rofl::caddress_in4& addr)
-	{ mask = addr.get_addr_hbo(); set_oxm_hasmask(true); return *this; };
-
-public:
-
-	rofl::caddress_in4
-	get_u32masked_value_as_addr() const
-	{ return (get_u32value_as_addr() & get_u32mask_as_addr()); };
-
-public:
-
-	/**
-	 *
-	 */
-	virtual size_t
-	length() const
-	{
-		return sizeof(struct rofl::openflow::ofp_oxm_experimenter_header) +
-			(get_oxm_hasmask() ? 2*sizeof(uint32_t) : 1*sizeof(uint32_t));
-	};
-
-	/**
-	 *
-	 */
-	virtual void
-	pack(
-			uint8_t* buf, size_t buflen)
-	{
-		if (buflen < length()) {
-			throw eOxmBadLen("coxmatch_32::pack() buf too short");
-		}
-		coxmatch_exp::pack(buf, buflen);
-		struct rofl::openflow::ofp_oxm_ofb_exp_uint32_t* oxm = (struct rofl::openflow::ofp_oxm_ofb_exp_uint32_t*)buf;
-		oxm->dword = htobe32(value);
-		if (get_oxm_hasmask())
-			oxm->mask = htobe32(mask);
-	};
-
-	/**
-	 *
-	 */
-	virtual void
-	unpack(
-			uint8_t* buf, size_t buflen)
-	 {
-		if (buflen < length()) {
-			throw eOxmBadLen("coxmatch_32::unpack() buf too short");
-		}
-		coxmatch_exp::unpack(buf, buflen);
-		struct rofl::openflow::ofp_oxm_ofb_exp_uint32_t* oxm = (struct rofl::openflow::ofp_oxm_ofb_exp_uint32_t*)buf;
-		value = be32toh(oxm->dword);
-		mask = (get_oxm_hasmask() ? be32toh(oxm->mask) : 0xffffffff);
-	};
-
-public:
-
-	/**
-	 *
-	 */
-	friend std::ostream&
-	operator<< (std::ostream& os, const coxmatch_32_exp& oxm) {
-		os << rofl::indent(0) << "<coxmatch_32_exp ";
-		os << "value: 0x" << std::hex << oxm.get_u32value() << std::dec << " ";
-		if (oxm.get_oxm_hasmask()) {
-			os << "/ mask: 0x" << std::hex << oxm.get_u32mask() << std::dec << " ";
-		}
-		os << " >" << std::endl;
-		rofl::indent i(2);
-		os << dynamic_cast<const coxmatch_exp&>( oxm );
-		return os;
-	};
-
-private:
-
-	uint32_t value;
-	uint32_t mask;
-};
-
-
-
-class coxmatch_48_exp :
-		public coxmatch_exp
-{
-public:
-
-	/**
-	 *
-	 */
-	virtual
-	~coxmatch_48_exp()
-	{};
-
-	/**
-	 *
-	 */
-	coxmatch_48_exp(
-			uint32_t oxm_id, uint32_t exp_id) :
-				coxmatch_exp(oxm_id, exp_id),
-				value(0),
-				mask(0xffffffffffff)
-	{};
-
-	/**
-	 * @brief	coxmatch base class for single 48bit values
-	 */
-	coxmatch_48_exp(
-			uint32_t oxm_id, uint32_t exp_id, uint32_t value) :
-				coxmatch_exp(oxm_id, exp_id),
-				value(value),
-				mask(0xffffffffffff)
-	{};
-
-	/**
-	 * @brief	coxmatch base class for masked 48bit values
-	 */
-	coxmatch_48_exp(
-			uint32_t oxm_id, uint32_t exp_id, uint32_t value, uint32_t mask) :
-				coxmatch_exp(oxm_id, exp_id),
-				value(value),
-				mask(mask)
-	{ set_oxm_hasmask(true); };
-
-
-	/**
-	 * @brief	coxmatch base class for single 48bit values
-	 */
-	coxmatch_48_exp(
-			uint32_t oxm_id, uint32_t exp_id, const rofl::caddress_ll& value) :
-				coxmatch_exp(oxm_id, exp_id),
-				value(0),
-				mask(0xffffffffffff)
-	{ set_u48value(value); };
-
-	/**
-	 * @brief	coxmatch base class for masked 48bit values
-	 */
-	coxmatch_48_exp(
-			uint32_t oxm_id, uint32_t exp_id, const rofl::caddress_ll& value, const rofl::caddress_ll& mask) :
-				coxmatch_exp(oxm_id, exp_id),
-				value(0),
-				mask(0xffffffffffff)
-	{ set_u48value(value); set_u48mask(mask); };
-
-	/**
-	 *
-	 */
-	coxmatch_48_exp(
-			const coxmatch_48_exp& oxm)
-	{ *this = oxm; };
-
-	/**
-	 *
-	 */
-	coxmatch_48_exp&
-	operator= (
-			const coxmatch_48_exp& oxm)
-	{
-		if (this == &oxm)
-			return *this;
-		coxmatch_exp::operator= (oxm);
-		value = oxm.value;
-		mask = oxm.mask;
-		return *this;
-	};
-
-public:
-
-	uint32_t
-	get_u48value() const
-	{ return value; };
-
-	coxmatch_48_exp&
-	set_u48value(
-			uint32_t value)
-	{ this->value = value; return *this; };
-
-	uint32_t
-	get_u48mask() const
-	{ return mask; };
-
-	coxmatch_48_exp&
-	set_u48mask(
-			uint32_t mask)
-	{ this->mask = mask; set_oxm_hasmask(true); return *this; };
-
-public:
-
-	uint32_t
-	get_u48masked_value() const
-	{ return (value & mask); };
-
-public:
-
-	rofl::caddress_ll
-	get_u48value_as_lladdr() const
-	{
-		rofl::caddress_ll lladdr;
-		lladdr[5] = (uint8_t)((value >>  0) & 0x00000000000000ff);
-		lladdr[4] = (uint8_t)((value >>  8) & 0x00000000000000ff);
-		lladdr[3] = (uint8_t)((value >> 16) & 0x00000000000000ff);
-		lladdr[2] = (uint8_t)((value >> 24) & 0x00000000000000ff);
-		lladdr[1] = (uint8_t)((value >> 32) & 0x00000000000000ff);
-		lladdr[0] = (uint8_t)((value >> 40) & 0x00000000000000ff);
-		return lladdr;
-	};
-
-	coxmatch_48_exp&
-	set_u48value(
-			const rofl::caddress_ll& lladdr)
-	{
-		value = (((uint64_t)lladdr[0] << 40) |
-				 ((uint64_t)lladdr[1] << 32) |
-				 ((uint64_t)lladdr[2] << 24) |
-				 ((uint64_t)lladdr[3] << 16) |
-				 ((uint64_t)lladdr[4] <<  8) |
-				 ((uint64_t)lladdr[5] <<  0));
-		return *this;
-	};
-
-	rofl::caddress_ll
-	get_u48mask_as_lladdr() const
-	{
-		rofl::caddress_ll lladdr;
-		lladdr[5] = (uint8_t)((mask >>  0) & 0x00000000000000ff);
-		lladdr[4] = (uint8_t)((mask >>  8) & 0x00000000000000ff);
-		lladdr[3] = (uint8_t)((mask >> 16) & 0x00000000000000ff);
-		lladdr[2] = (uint8_t)((mask >> 24) & 0x00000000000000ff);
-		lladdr[1] = (uint8_t)((mask >> 32) & 0x00000000000000ff);
-		lladdr[0] = (uint8_t)((mask >> 40) & 0x00000000000000ff);
-		return lladdr;
-	};
-
-	coxmatch_48_exp&
-	set_u48mask(
-			const rofl::caddress_ll& lladdr)
-	{
-		mask = (((uint64_t)lladdr[0] << 40) |
-				((uint64_t)lladdr[1] << 32) |
-				((uint64_t)lladdr[2] << 24) |
-				((uint64_t)lladdr[3] << 16) |
-				((uint64_t)lladdr[4] <<  8) |
-				((uint64_t)lladdr[5] <<  0));
-		set_oxm_hasmask(true);
-		return *this;
-	};
-
-public:
-
-	rofl::caddress_ll
-	get_u48masked_value_as_lladdr() const
-	{ return (get_u48value_as_lladdr() & get_u48mask_as_lladdr()); };
-
-public:
-
-	/**
-	 *
-	 */
-	virtual size_t
-	length() const
-	{
-		return sizeof(struct rofl::openflow::ofp_oxm_experimenter_header) +
-			(get_oxm_hasmask() ? 2*6*sizeof(uint8_t) : 1*6*sizeof(uint8_t));
-	};
-
-	/**
-	 *
-	 */
-	virtual void
-	pack(
-			uint8_t* buf, size_t buflen)
-	{
-		if (buflen < length()) {
-			throw eOxmBadLen("coxmatch_48::pack() buf too short");
-		}
-		coxmatch_exp::pack(buf, buflen);
-		struct rofl::openflow::ofp_oxm_ofb_exp_uint48_t* oxm = (struct rofl::openflow::ofp_oxm_ofb_exp_uint48_t*)buf;
-		oxm->value[5] = (uint8_t)((value >>  0) & 0x00000000000000ff);
-		oxm->value[4] = (uint8_t)((value >>  8) & 0x00000000000000ff);
-		oxm->value[3] = (uint8_t)((value >> 16) & 0x00000000000000ff);
-		oxm->value[2] = (uint8_t)((value >> 24) & 0x00000000000000ff);
-		oxm->value[1] = (uint8_t)((value >> 32) & 0x00000000000000ff);
-		oxm->value[0] = (uint8_t)((value >> 40) & 0x00000000000000ff);
-		if (get_oxm_hasmask()) {
-			oxm->mask[5] = (uint8_t)((mask >>  0) & 0x00000000000000ff);
-			oxm->mask[4] = (uint8_t)((mask >>  8) & 0x00000000000000ff);
-			oxm->mask[3] = (uint8_t)((mask >> 16) & 0x00000000000000ff);
-			oxm->mask[2] = (uint8_t)((mask >> 24) & 0x00000000000000ff);
-			oxm->mask[1] = (uint8_t)((mask >> 32) & 0x00000000000000ff);
-			oxm->mask[0] = (uint8_t)((mask >> 40) & 0x00000000000000ff);
-		}
-	};
-
-	/**
-	 *
-	 */
-	virtual void
-	unpack(
-			uint8_t* buf, size_t buflen)
-	 {
-		if (buflen < length()) {
-			throw eOxmBadLen("coxmatch_48::unpack() buf too short");
-		}
-		coxmatch_exp::unpack(buf, buflen);
-		struct rofl::openflow::ofp_oxm_ofb_exp_uint48_t* oxm = (struct rofl::openflow::ofp_oxm_ofb_exp_uint48_t*)buf;
-		value = (((uint64_t)oxm->value[0] << 40) |
-				 ((uint64_t)oxm->value[1] << 32) |
-				 ((uint64_t)oxm->value[2] << 24) |
-				 ((uint64_t)oxm->value[3] << 16) |
-				 ((uint64_t)oxm->value[4] <<  8) |
-				 ((uint64_t)oxm->value[5] <<  0));
-		if (get_oxm_hasmask()) {
-			mask = (((uint64_t)oxm->mask[0] << 40) |
-					((uint64_t)oxm->mask[1] << 32) |
-					((uint64_t)oxm->mask[2] << 24) |
-					((uint64_t)oxm->mask[3] << 16) |
-					((uint64_t)oxm->mask[4] <<  8) |
-					((uint64_t)oxm->mask[5] <<  0));
-		}
-	};
-
-public:
-
-	/**
-	 *
-	 */
-	friend std::ostream&
-	operator<< (std::ostream& os, const coxmatch_48_exp& oxm) {
-		os << rofl::indent(0) << "<coxmatch_48_exp ";
-		os << "value: 0x" << std::hex << oxm.get_u48value() << std::dec << " ";
-		if (oxm.get_oxm_hasmask()) {
-			os << "/ mask: 0x" << std::hex << oxm.get_u48mask() << std::dec << " ";
-		}
-		os << " >" << std::endl;
-		rofl::indent i(2);
-		os << dynamic_cast<const coxmatch_exp&>( oxm );
-		return os;
-	};
-
-private:
-
-	uint64_t value;
-	uint64_t mask;
-};
-
-
-
-class coxmatch_64_exp :
-		public coxmatch_exp
-{
-public:
-
-	/**
-	 *
-	 */
-	virtual
-	~coxmatch_64_exp()
-	{};
-
-	/**
-	 *
-	 */
-	coxmatch_64_exp(
-			uint64_t oxm_id, uint64_t exp_id) :
-				coxmatch_exp(oxm_id, exp_id),
-				value(0),
-				mask(0xffffffffffffffff)
-	{};
-
-	/**
-	 * @brief	coxmatch base class for single 64bit values
-	 */
-	coxmatch_64_exp(
-			uint64_t oxm_id, uint64_t exp_id, uint64_t value) :
-				coxmatch_exp(oxm_id, exp_id),
-				value(value),
-				mask(0xffffffffffffffff)
-	{};
-
-	/**
-	 * @brief	coxmatch base class for masked 64bit values
-	 */
-	coxmatch_64_exp(
-			uint64_t oxm_id, uint64_t exp_id, uint64_t value, uint64_t mask) :
-				coxmatch_exp(oxm_id, exp_id),
-				value(value),
-				mask(mask)
-	{ set_oxm_hasmask(true); };
-
-	/**
-	 *
-	 */
-	coxmatch_64_exp(
-			const coxmatch_64_exp& oxm)
-	{ *this = oxm; };
-
-	/**
-	 *
-	 */
-	coxmatch_64_exp&
-	operator= (
-			const coxmatch_64_exp& oxm)
-	{
-		if (this == &oxm)
-			return *this;
-		coxmatch_exp::operator= (oxm);
-		value = oxm.value;
-		mask = oxm.mask;
-		return *this;
-	};
-
-public:
-
-	uint64_t
-	get_u64value() const
-	{ return value; };
-
-	coxmatch_64_exp&
-	set_u64value(
-			uint64_t value)
-	{ this->value = value; return *this; };
-
-	uint64_t
-	get_u64mask() const
-	{ return mask; };
-
-	coxmatch_64_exp&
-	set_u64mask(
-			uint64_t mask)
-	{ this->mask = mask; set_oxm_hasmask(true); return *this; };
-
-public:
-
-	uint64_t
-	get_u64masked_value() const
-	{ return (value & mask); };
-
-public:
-
-	/**
-	 *
-	 */
-	virtual size_t
-	length() const
-	{
-		return sizeof(struct rofl::openflow::ofp_oxm_experimenter_header) +
-			(get_oxm_hasmask() ? 2*sizeof(uint64_t) : 1*sizeof(uint64_t));
-	};
-
-	/**
-	 *
-	 */
-	virtual void
-	pack(
-			uint8_t* buf, size_t buflen)
-	{
-		if (buflen < length()) {
-			throw eOxmBadLen("coxmatch_64::pack() buf too short");
-		}
-		coxmatch_exp::pack(buf, buflen);
-		struct rofl::openflow::ofp_oxm_ofb_exp_uint64_t* oxm = (struct rofl::openflow::ofp_oxm_ofb_exp_uint64_t*)buf;
-		oxm->word = htobe64(value);
-		if (get_oxm_hasmask())
-			oxm->mask = htobe64(mask);
-	};
-
-	/**
-	 *
-	 */
-	virtual void
-	unpack(
-			uint8_t* buf, size_t buflen)
-	 {
-		if (buflen < length()) {
-			throw eOxmBadLen("coxmatch_64::unpack() buf too short");
-		}
-		coxmatch_exp::unpack(buf, buflen);
-		struct rofl::openflow::ofp_oxm_ofb_exp_uint64_t* oxm = (struct rofl::openflow::ofp_oxm_ofb_exp_uint64_t*)buf;
-		value = be64toh(oxm->word);
-		mask = (get_oxm_hasmask() ? be64toh(oxm->mask) : 0xffffffffffffffff);
-	};
-
-public:
-
-	/**
-	 *
-	 */
-	friend std::ostream&
-	operator<< (std::ostream& os, const coxmatch_64_exp& oxm) {
-		os << rofl::indent(0) << "<coxmatch_64_exp ";
-		os << "value: 0x" << std::hex << oxm.get_u64value() << std::dec << " ";
-		if (oxm.get_oxm_hasmask()) {
-			os << "/ mask: 0x" << std::hex << oxm.get_u64mask() << std::dec << " ";
-		}
-		os << " >" << std::endl;
-		rofl::indent i(2);
-		os << dynamic_cast<const coxmatch_exp&>( oxm );
-		return os;
-	};
-
-private:
-
-	uint64_t value;
-	uint64_t mask;
-};
 
 
 
@@ -4293,18 +3521,18 @@ public:
 /**
  * @brief	OXM_OF_NW_PROTO (pseudo OXM-TLV for OF1.0 backwards compatibility)
  */
-class coxmatch_ofx_nw_proto : public coxmatch_8_exp {
+class coxmatch_ofx_nw_proto : public coxmatch_exp {
 public:
 	coxmatch_ofx_nw_proto() :
-				coxmatch_8_exp(rofl::openflow::experimental::OXM_TLV_EXPR_NW_PROTO, ROFL_EXP_ID)
+				coxmatch_exp(rofl::openflow::experimental::OXM_TLV_EXPR_NW_PROTO, ROFL_EXP_ID)
 	{};
 	coxmatch_ofx_nw_proto(
 			uint8_t proto) :
-				coxmatch_8_exp(rofl::openflow::experimental::OXM_TLV_EXPR_NW_PROTO, ROFL_EXP_ID, proto)
-	{};
+				coxmatch_exp(rofl::openflow::experimental::OXM_TLV_EXPR_NW_PROTO, ROFL_EXP_ID)
+	{ set_u8value(proto); };
 	coxmatch_ofx_nw_proto(
-			const coxmatch_8_exp& oxm) :
-				coxmatch_8_exp(oxm)
+			const coxmatch_exp& oxm) :
+				coxmatch_exp(oxm)
 	{};
 	virtual
 	~coxmatch_ofx_nw_proto()
@@ -4312,7 +3540,7 @@ public:
 public:
 	friend std::ostream&
 	operator<< (std::ostream& os, const coxmatch_ofx_nw_proto& oxm) {
-		os << dynamic_cast<const coxmatch&>(oxm);
+		os << dynamic_cast<const coxmatch_exp&>(oxm);
 		os << indent(2) << "<nw-proto: " << (int)oxm.get_u8value() << " >" << std::endl;
 		return os;
 	};
@@ -4322,18 +3550,18 @@ public:
 /**
  * @brief	OXM_OF_NW_TOS (pseudo OXM-TLV for OF1.0 backwards compatibility)
  */
-class coxmatch_ofx_nw_tos : public coxmatch_8_exp {
+class coxmatch_ofx_nw_tos : public coxmatch_exp {
 public:
 	coxmatch_ofx_nw_tos() :
-				coxmatch_8_exp(rofl::openflow::experimental::OXM_TLV_EXPR_NW_TOS, ROFL_EXP_ID)
+				coxmatch_exp(rofl::openflow::experimental::OXM_TLV_EXPR_NW_TOS, ROFL_EXP_ID)
 	{};
 	coxmatch_ofx_nw_tos(
 			uint8_t tos) :
-				coxmatch_8_exp(rofl::openflow::experimental::OXM_TLV_EXPR_NW_TOS, ROFL_EXP_ID, tos)
-	{};
+				coxmatch_exp(rofl::openflow::experimental::OXM_TLV_EXPR_NW_TOS, ROFL_EXP_ID)
+	{ set_u8value(tos); };
 	coxmatch_ofx_nw_tos(
-			const coxmatch_8_exp& oxm) :
-				coxmatch_8_exp(oxm)
+			const coxmatch_exp& oxm) :
+				coxmatch_exp(oxm)
 	{};
 	virtual
 	~coxmatch_ofx_nw_tos()
@@ -4341,7 +3569,7 @@ public:
 public:
 	friend std::ostream&
 	operator<< (std::ostream& os, const coxmatch_ofx_nw_tos& oxm) {
-		os << dynamic_cast<const coxmatch&>(oxm);
+		os << dynamic_cast<const coxmatch_exp&>(oxm);
 		os << indent(2) << "<nw-tos: " << (int)oxm.get_u8value() << " >" << std::endl;
 		return os;
 	};
@@ -4352,30 +3580,30 @@ public:
 /**
  * @brief	OXM_OF_NW_SRC (pseudo OXM-TLV for OF1.0 backwards compatibility)
  */
-class coxmatch_ofx_nw_src : public coxmatch_32_exp {
+class coxmatch_ofx_nw_src : public coxmatch_exp {
 public:
 	coxmatch_ofx_nw_src() :
-				coxmatch_32_exp(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC, ROFL_EXP_ID)
+				coxmatch_exp(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC, ROFL_EXP_ID)
 	{};
 	coxmatch_ofx_nw_src(
 			uint32_t src) :
-				coxmatch_32_exp(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC, ROFL_EXP_ID, src)
-	{};
+				coxmatch_exp(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC, ROFL_EXP_ID)
+	{ set_u32value(src); };
 	coxmatch_ofx_nw_src(
 			uint32_t src, uint32_t mask) :
-				coxmatch_32_exp(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC_MASK, ROFL_EXP_ID, src, mask)
-	{};
+				coxmatch_exp(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC_MASK, ROFL_EXP_ID)
+	{ set_u32value(src); set_u32mask(mask); };
 	coxmatch_ofx_nw_src(
 			const caddress_in4& src) :
-				coxmatch_32_exp(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC, ROFL_EXP_ID, src)
-	{};
+				coxmatch_exp(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC, ROFL_EXP_ID)
+	{ set_u32value(src.get_addr_hbo()); };
 	coxmatch_ofx_nw_src(
 			const caddress_in4& src, const caddress_in4& mask) :
-				coxmatch_32_exp(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC_MASK, ROFL_EXP_ID, src, mask)
-	{};
+				coxmatch_exp(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC_MASK, ROFL_EXP_ID)
+	{ set_u32value(src.get_addr_hbo()); set_u32mask(mask.get_addr_hbo()); };
 	coxmatch_ofx_nw_src(
-			const coxmatch_32_exp& oxm) :
-				coxmatch_32_exp(oxm)
+			const coxmatch_exp& oxm) :
+				coxmatch_exp(oxm)
 	{};
 	virtual
 	~coxmatch_ofx_nw_src()
@@ -4383,10 +3611,10 @@ public:
 public:
 	friend std::ostream&
 	operator<< (std::ostream& os, const coxmatch_ofx_nw_src& oxm) {
-		os << dynamic_cast<const coxmatch_32&>(oxm);
+		os << dynamic_cast<const coxmatch_exp&>(oxm);
 		os << indent(2) << "<nw-src: "
-				<< oxm.get_u32value_as_addr().str() << "/"
-				<< oxm.get_u32mask_as_addr().str() << " >" << std::endl;
+				<< (unsigned int)oxm.get_u32value() << "/"
+				<< (unsigned int)oxm.get_u32mask() << " >" << std::endl;
 		return os;
 	};
 };
@@ -4398,30 +3626,30 @@ public:
 /**
  * @brief	OXM_OF_NW_DST (pseudo OXM-TLV for OF1.0 backwards compatibility)
  */
-class coxmatch_ofx_nw_dst : public coxmatch_32 {
+class coxmatch_ofx_nw_dst : public coxmatch_exp {
 public:
 	coxmatch_ofx_nw_dst() :
-				coxmatch_32(rofl::openflow::experimental::OXM_TLV_EXPR_NW_DST)
+				coxmatch_exp(rofl::openflow::experimental::OXM_TLV_EXPR_NW_DST, ROFL_EXP_ID)
 	{};
 	coxmatch_ofx_nw_dst(
 			uint32_t dst) :
-				coxmatch_32(rofl::openflow::experimental::OXM_TLV_EXPR_NW_DST, dst)
-	{};
+				coxmatch_exp(rofl::openflow::experimental::OXM_TLV_EXPR_NW_DST, ROFL_EXP_ID)
+	{ set_u32value(dst); };
 	coxmatch_ofx_nw_dst(
 			uint32_t dst, uint32_t mask) :
-				coxmatch_32(rofl::openflow::experimental::OXM_TLV_EXPR_NW_DST_MASK, dst, mask)
-	{};
+				coxmatch_exp(rofl::openflow::experimental::OXM_TLV_EXPR_NW_DST_MASK, ROFL_EXP_ID)
+	{ set_u32value(dst); set_u32mask(mask); };
 	coxmatch_ofx_nw_dst(
 			const caddress_in4& dst) :
-				coxmatch_32(rofl::openflow::experimental::OXM_TLV_EXPR_NW_DST, dst)
-	{};
+				coxmatch_exp(rofl::openflow::experimental::OXM_TLV_EXPR_NW_DST, ROFL_EXP_ID)
+	{ set_u32value(dst.get_addr_hbo()); };
 	coxmatch_ofx_nw_dst(
 			const caddress_in4& dst, const caddress_in4& mask) :
-				coxmatch_32(rofl::openflow::experimental::OXM_TLV_EXPR_NW_DST_MASK, dst, mask)
-	{};
+				coxmatch_exp(rofl::openflow::experimental::OXM_TLV_EXPR_NW_DST_MASK, ROFL_EXP_ID)
+	{ set_u32value(dst.get_addr_hbo()); set_u32mask(mask.get_addr_hbo()); };
 	coxmatch_ofx_nw_dst(
-			const coxmatch_32& oxm) :
-				coxmatch_32(oxm)
+			const coxmatch_exp& oxm) :
+				coxmatch_exp(oxm)
 	{};
 	virtual
 	~coxmatch_ofx_nw_dst()
@@ -4429,10 +3657,10 @@ public:
 public:
 	friend std::ostream&
 	operator<< (std::ostream& os, const coxmatch_ofx_nw_dst& oxm) {
-		os << dynamic_cast<const coxmatch_32&>(oxm);
+		os << dynamic_cast<const coxmatch_exp&>(oxm);
 		os << indent(2) << "<nw-dst: "
-				<< oxm.get_u32value_as_addr().str() << "/"
-				<< oxm.get_u32mask_as_addr().str() << " >" << std::endl;
+				<< (unsigned int)oxm.get_u32value() << "/"
+				<< (unsigned int)oxm.get_u32mask() << " >" << std::endl;
 		return os;
 	};
 };
@@ -4445,18 +3673,18 @@ public:
 /**
  * @brief	OXM_OF_TP_SRC (pseudo OXM-TLV for OF1.0 backwards compatibility)
  */
-class coxmatch_ofx_tp_src : public coxmatch_16 {
+class coxmatch_ofx_tp_src : public coxmatch_exp {
 public:
 	coxmatch_ofx_tp_src() :
-				coxmatch_16(rofl::openflow::experimental::OXM_TLV_EXPR_TP_SRC)
+				coxmatch_exp(rofl::openflow::experimental::OXM_TLV_EXPR_TP_SRC, ROFL_EXP_ID)
 	{};
 	coxmatch_ofx_tp_src(
 			uint16_t src) :
-				coxmatch_16(rofl::openflow::experimental::OXM_TLV_EXPR_TP_SRC, src)
-	{};
+				coxmatch_exp(rofl::openflow::experimental::OXM_TLV_EXPR_TP_SRC, ROFL_EXP_ID)
+	{ set_u16value(src); };
 	coxmatch_ofx_tp_src(
-			const coxmatch_16& oxm) :
-				coxmatch_16(oxm)
+			const coxmatch_exp& oxm) :
+				coxmatch_exp(oxm)
 	{};
 	virtual
 	~coxmatch_ofx_tp_src()
@@ -4464,7 +3692,7 @@ public:
 public:
 	friend std::ostream&
 	operator<< (std::ostream& os, const coxmatch_ofx_tp_src& oxm) {
-		os << dynamic_cast<const coxmatch_16&>(oxm);
+		os << dynamic_cast<const coxmatch_exp&>(oxm);
 		os << indent(2) << "<tp-src: " << (int)oxm.get_u16value() << " >" << std::endl;
 		return os;
 	};
@@ -4474,18 +3702,18 @@ public:
 /**
  * @brief	OXM_OF_TP_DST (pseudo OXM-TLV for OF1.0 backwards compatibility)
  */
-class coxmatch_ofx_tp_dst : public coxmatch_16 {
+class coxmatch_ofx_tp_dst : public coxmatch_exp {
 public:
 	coxmatch_ofx_tp_dst() :
-				coxmatch_16(rofl::openflow::experimental::OXM_TLV_EXPR_TP_DST)
+				coxmatch_exp(rofl::openflow::experimental::OXM_TLV_EXPR_TP_DST, ROFL_EXP_ID)
 	{};
 	coxmatch_ofx_tp_dst(
 			uint16_t dst) :
-				coxmatch_16(rofl::openflow::experimental::OXM_TLV_EXPR_TP_DST, dst)
-	{};
+				coxmatch_exp(rofl::openflow::experimental::OXM_TLV_EXPR_TP_DST, ROFL_EXP_ID)
+	{ set_u16value(dst); };
 	coxmatch_ofx_tp_dst(
-			const coxmatch_16& oxm) :
-				coxmatch_16(oxm)
+			const coxmatch_exp& oxm) :
+				coxmatch_exp(oxm)
 	{};
 	virtual
 	~coxmatch_ofx_tp_dst()
@@ -4493,7 +3721,7 @@ public:
 public:
 	friend std::ostream&
 	operator<< (std::ostream& os, const coxmatch_ofx_tp_dst& oxm) {
-		os << dynamic_cast<const coxmatch_16&>(oxm);
+		os << dynamic_cast<const coxmatch_exp&>(oxm);
 		os << indent(2) << "<tp-dst: " << (int)oxm.get_u16value() << " >" << std::endl;
 		return os;
 	};

@@ -39,26 +39,26 @@ enum oxm_tlv_match_fields {
 /** OXM_OFX_GRE_VERSION
  *
  */
-class coxmatch_ofx_gre_version : public coxmatch_16_exp {
+class coxmatch_ofx_gre_version : public coxmatch_exp {
 public:
 	coxmatch_ofx_gre_version(
 			uint16_t version) :
-				coxmatch_16_exp(OXM_TLV_EXPR_GRE_VERSION, ROFL_EXP_ID, version)
+				coxmatch_exp(OXM_TLV_EXPR_GRE_VERSION, ROFL_EXP_ID, version)
 	{};
 	coxmatch_ofx_gre_version(
 			uint16_t version, uint16_t mask) :
-				coxmatch_16_exp(OXM_TLV_EXPR_GRE_VERSION_MASK, ROFL_EXP_ID, version, mask)
+				coxmatch_exp(OXM_TLV_EXPR_GRE_VERSION_MASK, ROFL_EXP_ID, version, mask)
 	{};
 	coxmatch_ofx_gre_version(
-			const coxmatch_16_exp& oxm) :
-				coxmatch_16_exp(oxm)
+			const coxmatch_exp& oxm) :
+				coxmatch_exp(oxm)
 	{};
 	virtual
 	~coxmatch_ofx_gre_version()
 	{};
 	friend std::ostream&
 	operator<< (std::ostream& os, const coxmatch_ofx_gre_version& oxm) {
-		os << dynamic_cast<const coxmatch_16_exp&>(oxm);
+		os << dynamic_cast<const coxmatch_exp&>(oxm);
 		os << indent(2) << "<gre-version: "
 						<< (int)oxm.get_u16value() << "/" << (int)oxm.get_u16mask()
 						<< " >" << std::endl;
@@ -72,26 +72,26 @@ public:
 /** OXM_OFX_GRE_PROT_TYPE
  *
  */
-class coxmatch_ofx_gre_prot_type : public coxmatch_16_exp {
+class coxmatch_ofx_gre_prot_type : public coxmatch_exp {
 public:
 	coxmatch_ofx_gre_prot_type(
 			uint16_t prot_type) :
-				coxmatch_16_exp(OXM_TLV_EXPR_GRE_PROT_TYPE, ROFL_EXP_ID, prot_type)
+				coxmatch_exp(OXM_TLV_EXPR_GRE_PROT_TYPE, ROFL_EXP_ID, prot_type)
 	{};
 	coxmatch_ofx_gre_prot_type(
 			uint16_t prot_type, uint16_t mask) :
-				coxmatch_16_exp(OXM_TLV_EXPR_GRE_PROT_TYPE_MASK, ROFL_EXP_ID, prot_type, mask)
+				coxmatch_exp(OXM_TLV_EXPR_GRE_PROT_TYPE_MASK, ROFL_EXP_ID, prot_type, mask)
 	{};
 	coxmatch_ofx_gre_prot_type(
-			const coxmatch_16_exp& oxm) :
-				coxmatch_16_exp(oxm)
+			const coxmatch_exp& oxm) :
+				coxmatch_exp(oxm)
 	{};
 	virtual
 	~coxmatch_ofx_gre_prot_type()
 	{};
 	friend std::ostream&
 	operator<< (std::ostream& os, const coxmatch_ofx_gre_prot_type& oxm) {
-		os << dynamic_cast<const coxmatch_16_exp&>(oxm);
+		os << dynamic_cast<const coxmatch_exp&>(oxm);
 		os << indent(2) << "<gre-prot-type: "
 						<< (int)oxm.get_u16value() << "/" << (int)oxm.get_u16mask()
 						<< " >" << std::endl;
@@ -105,25 +105,25 @@ public:
 /** OXM_OFX_GRE_KEY
  *
  */
-class coxmatch_ofx_gre_key : public coxmatch_32_exp {
+class coxmatch_ofx_gre_key : public coxmatch_exp {
 public:
 	coxmatch_ofx_gre_key(
 			uint32_t key) :
-				coxmatch_32_exp(OXM_TLV_EXPR_GRE_KEY, ROFL_EXP_ID, key)
+				coxmatch_exp(OXM_TLV_EXPR_GRE_KEY, ROFL_EXP_ID, key)
 	{};
 	coxmatch_ofx_gre_key(
 			uint32_t key, uint32_t mask) :
-				coxmatch_32_exp(OXM_TLV_EXPR_GRE_KEY_MASK, ROFL_EXP_ID, key, mask)
+				coxmatch_exp(OXM_TLV_EXPR_GRE_KEY_MASK, ROFL_EXP_ID, key, mask)
 	{};
 	coxmatch_ofx_gre_key(
-			const coxmatch_32_exp& oxm) :
-				coxmatch_32_exp(oxm)
+			const coxmatch_exp& oxm) :
+				coxmatch_exp(oxm)
 	{};
 	virtual
 	~coxmatch_ofx_gre_key() {};
 	friend std::ostream&
 	operator<< (std::ostream& os, const coxmatch_ofx_gre_key& oxm) {
-		os << dynamic_cast<const coxmatch_32_exp&>(oxm);
+		os << dynamic_cast<const coxmatch_exp&>(oxm);
 		os << indent(2) << "<gre-key: "
 						<< (int)oxm.get_u32value() << "/" << (int)oxm.get_u32mask()
 						<< " >" << std::endl;

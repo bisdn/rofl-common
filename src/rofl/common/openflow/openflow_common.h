@@ -349,6 +349,7 @@ namespace openflow {
 		struct ofp_oxm_hdr oxm_header;	/* oxm_class = OFPXMC_EXPERIMENTER */
 		uint32_t experimenter;			/* Experimenter ID which takes the same
 										   form as in struct ofp_experimenter_header. */
+		uint8_t data[0];
 	} __attribute__((packed));
 
 	struct ofp_oxm_ofb_exp_uint8_t {

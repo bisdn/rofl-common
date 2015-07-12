@@ -2753,12 +2753,13 @@ public:
 	 */
 	coxmatch_ofx_nw_src&
 	add_ofx_nw_src(
-			const rofl::caddress_in4& nw_src = rofl::caddress_in4()) {
+			const rofl::caddress_in4& nw_src = rofl::caddress_in4(),
+			const rofl::caddress_in4& mask = rofl::caddress_in4()) {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
 		if (matches.find(OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC)) != matches.end()) {
 			delete matches[OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC)];
 		}
-		matches[OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC)] = new coxmatch_ofx_nw_src(nw_src);
+		matches[OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC)] = new coxmatch_ofx_nw_src(nw_src, mask);
 		return dynamic_cast<coxmatch_ofx_nw_src&>(*matches[OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC)]);
 	};
 
@@ -2816,12 +2817,13 @@ public:
 	 */
 	coxmatch_ofx_nw_dst&
 	add_ofx_nw_dst(
-			const rofl::caddress_in4& nw_dst = rofl::caddress_in4()) {
+			const rofl::caddress_in4& nw_dst = rofl::caddress_in4(),
+			const rofl::caddress_in4& mask = rofl::caddress_in4()) {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
 		if (matches.find(OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_DST)) != matches.end()) {
 			delete matches[OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_DST)];
 		}
-		matches[OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_DST)] = new coxmatch_ofx_nw_dst(nw_dst);
+		matches[OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_DST)] = new coxmatch_ofx_nw_dst(nw_dst, mask);
 		return dynamic_cast<coxmatch_ofx_nw_dst&>(*matches[OXM_ROFL_EXP_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_DST)]);
 	};
 

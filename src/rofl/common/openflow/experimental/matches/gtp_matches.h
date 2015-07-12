@@ -29,26 +29,26 @@ enum oxm_tlv_match_fields {
 /** OXM_OFX_GTP_TEID
  *
  */
-class coxmatch_ofx_gtp_teid : public coxmatch_32_exp {
+class coxmatch_ofx_gtp_teid : public coxmatch_exp {
 public:
 	coxmatch_ofx_gtp_teid(
 			uint32_t teid) :
-				coxmatch_32_exp(OXM_TLV_EXPR_GTP_TEID, ROFL_EXP_ID, teid)
-	{};
+				coxmatch_exp(OXM_TLV_EXPR_GTP_TEID, ROFL_EXP_ID)
+	{ set_u32value(teid); };
 	coxmatch_ofx_gtp_teid(
 			uint32_t teid, uint32_t mask) :
-				coxmatch_32_exp(OXM_TLV_EXPR_GTP_TEID_MASK, ROFL_EXP_ID, teid, mask)
-	{};
+				coxmatch_exp(OXM_TLV_EXPR_GTP_TEID_MASK, ROFL_EXP_ID)
+	{ set_u32value(teid); set_u32mask(mask); };
 	coxmatch_ofx_gtp_teid(
-			const coxmatch_32_exp& oxm) :
-				coxmatch_32_exp(oxm)
+			const coxmatch_exp& oxm) :
+				coxmatch_exp(oxm)
 	{};
 	virtual
 	~coxmatch_ofx_gtp_teid()
 	{};
 	friend std::ostream&
 	operator<< (std::ostream& os, const coxmatch_ofx_gtp_teid& oxm) {
-		os << dynamic_cast<const coxmatch_32_exp&>(oxm);
+		os << dynamic_cast<const coxmatch_exp&>(oxm);
 		os << indent(2) << "<gtp-teid: "
 						<< (int)oxm.get_u32value() << "/" << (int)oxm.get_u32mask()
 						<< " >" << std::endl;
@@ -62,26 +62,26 @@ public:
 /** OXM_OFX_GTP_MSG_TYPE
  *
  */
-class coxmatch_ofx_gtp_msg_type : public coxmatch_8_exp {
+class coxmatch_ofx_gtp_msg_type : public coxmatch_exp {
 public:
 	coxmatch_ofx_gtp_msg_type(
 			uint8_t msg_type) :
-				coxmatch_8_exp(OXM_TLV_EXPR_GTP_MSGTYPE, ROFL_EXP_ID, msg_type)
+				coxmatch_exp(OXM_TLV_EXPR_GTP_MSGTYPE, ROFL_EXP_ID, msg_type)
 	{};
 	coxmatch_ofx_gtp_msg_type(
 			uint8_t msg_type, uint8_t mask) :
-				coxmatch_8_exp(OXM_TLV_EXPR_GTP_MSGTYPE_MASK, ROFL_EXP_ID, msg_type, mask)
+				coxmatch_exp(OXM_TLV_EXPR_GTP_MSGTYPE_MASK, ROFL_EXP_ID, msg_type, mask)
 	{};
 	coxmatch_ofx_gtp_msg_type(
-			const coxmatch_8_exp& oxm) :
-				coxmatch_8_exp(oxm)
+			const coxmatch_exp& oxm) :
+				coxmatch_exp(oxm)
 	{};
 	virtual
 	~coxmatch_ofx_gtp_msg_type()
 	{};
 	friend std::ostream&
 	operator<< (std::ostream& os, const coxmatch_ofx_gtp_msg_type& oxm) {
-		os << dynamic_cast<const coxmatch_8_exp&>(oxm);
+		os << dynamic_cast<const coxmatch_exp&>(oxm);
 		os << indent(2) << "<gtp-msg-type: "
 						<< (int)oxm.get_u8value()
 						<< " >" << std::endl;

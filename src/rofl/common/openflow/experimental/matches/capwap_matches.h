@@ -33,26 +33,26 @@ enum oxm_tlv_match_fields {
 /** OXM_OFX_CAPWAP_WBID
  *
  */
-class coxmatch_ofx_capwap_wbid : public coxmatch_8_exp {
+class coxmatch_ofx_capwap_wbid : public coxmatch_exp {
 public:
 	coxmatch_ofx_capwap_wbid(
 			uint8_t wbid) :
-				coxmatch_8_exp(OXM_TLV_EXPR_CAPWAP_WBID, ROFL_EXP_ID, wbid)
+				coxmatch_exp(OXM_TLV_EXPR_CAPWAP_WBID, ROFL_EXP_ID, wbid)
 	{};
 	coxmatch_ofx_capwap_wbid(
 			uint8_t wbid, uint8_t mask) :
-				coxmatch_8_exp(OXM_TLV_EXPR_CAPWAP_WBID_MASK, ROFL_EXP_ID, wbid, mask)
+				coxmatch_exp(OXM_TLV_EXPR_CAPWAP_WBID_MASK, ROFL_EXP_ID, wbid, mask)
 	{};
 	coxmatch_ofx_capwap_wbid(
-			const coxmatch_8_exp& oxm) :
-				coxmatch_8_exp(oxm)
+			const coxmatch_exp& oxm) :
+				coxmatch_exp(oxm)
 	{};
 	virtual
 	~coxmatch_ofx_capwap_wbid()
 	{};
 	friend std::ostream&
 	operator<< (std::ostream& os, const coxmatch_ofx_capwap_wbid& oxm) {
-		os << dynamic_cast<const coxmatch_8_exp&>(oxm);
+		os << dynamic_cast<const coxmatch_exp&>(oxm);
 		os << indent(2) << "<capwap-wbid: 0x" << std::hex
 						<< (int)oxm.get_u8value() << "/0x" << (int)oxm.get_u8mask()
 						<< std::dec << " >" << std::endl;
@@ -65,26 +65,26 @@ public:
 /** OXM_OFX_CAPWAP_RID
  *
  */
-class coxmatch_ofx_capwap_rid : public coxmatch_8_exp {
+class coxmatch_ofx_capwap_rid : public coxmatch_exp {
 public:
 	coxmatch_ofx_capwap_rid(
 			uint8_t rid) :
-				coxmatch_8_exp(OXM_TLV_EXPR_CAPWAP_RID, ROFL_EXP_ID, rid)
+				coxmatch_exp(OXM_TLV_EXPR_CAPWAP_RID, ROFL_EXP_ID, rid)
 	{};
 	coxmatch_ofx_capwap_rid(
 			uint8_t rid, uint8_t mask) :
-				coxmatch_8_exp(OXM_TLV_EXPR_CAPWAP_RID_MASK, ROFL_EXP_ID, rid, mask)
+				coxmatch_exp(OXM_TLV_EXPR_CAPWAP_RID_MASK, ROFL_EXP_ID, rid, mask)
 	{};
 	coxmatch_ofx_capwap_rid(
-			const coxmatch_8_exp& oxm) :
-				coxmatch_8_exp(oxm)
+			const coxmatch_exp& oxm) :
+				coxmatch_exp(oxm)
 	{};
 	virtual
 	~coxmatch_ofx_capwap_rid()
 	{};
 	friend std::ostream&
 	operator<< (std::ostream& os, const coxmatch_ofx_capwap_rid& oxm) {
-		os << dynamic_cast<const coxmatch_8_exp&>(oxm);
+		os << dynamic_cast<const coxmatch_exp&>(oxm);
 		os << indent(2) << "<capwap-rid: 0x" << std::hex
 						<< (int)oxm.get_u8value() << "/0x" << (int)oxm.get_u8mask()
 						<< std::dec << " >" << std::endl;
@@ -97,26 +97,26 @@ public:
 /** OXM_OFX_CAPWAP_FLAGS
  *
  */
-class coxmatch_ofx_capwap_flags : public coxmatch_16_exp {
+class coxmatch_ofx_capwap_flags : public coxmatch_exp {
 public:
 	coxmatch_ofx_capwap_flags(
 			uint16_t flags) :
-				coxmatch_16_exp(OXM_TLV_EXPR_CAPWAP_FLAGS, ROFL_EXP_ID, flags)
+				coxmatch_exp(OXM_TLV_EXPR_CAPWAP_FLAGS, ROFL_EXP_ID, flags)
 	{};
 	coxmatch_ofx_capwap_flags(
 			uint16_t flags, uint16_t mask) :
-				coxmatch_16_exp(OXM_TLV_EXPR_CAPWAP_FLAGS_MASK, ROFL_EXP_ID, flags, mask)
+				coxmatch_exp(OXM_TLV_EXPR_CAPWAP_FLAGS_MASK, ROFL_EXP_ID, flags, mask)
 	{};
 	coxmatch_ofx_capwap_flags(
-			const coxmatch_16_exp& oxm) :
-				coxmatch_16_exp(oxm)
+			const coxmatch_exp& oxm) :
+				coxmatch_exp(oxm)
 	{};
 	virtual
 	~coxmatch_ofx_capwap_flags()
 	{};
 	friend std::ostream&
 	operator<< (std::ostream& os, const coxmatch_ofx_capwap_flags& oxm) {
-		os << dynamic_cast<const coxmatch_16_exp&>(oxm);
+		os << dynamic_cast<const coxmatch_exp&>(oxm);
 		os << indent(2) << "<capwap-flags: 0x" << std::hex
 						<< (int)oxm.get_u16value() << "/0x" << (int)oxm.get_u16mask()
 						<< std::dec << " >" << std::endl;
