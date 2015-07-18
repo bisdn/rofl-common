@@ -461,9 +461,12 @@ enum rofl_exp_id_t {
 	ROFL_EXP_ID = 0xa1a2a3a4, // TODO
 };
 
-#define OXM_TYPE(x) (x & 0xfffffe00)
-#define OXM_ROFL_OFB_TYPE(x) (((uint64_t)          0 << 32) | (OXM_TYPE(x)))
-#define OXM_ROFL_OFX_TYPE(x) (((uint64_t)ROFL_EXP_ID << 32) | (OXM_TYPE(x)))
+#define OXM_TYPE(x)  (x & 0xfffffe00)
+#define OXM_CLASS(x) (x & 0xffff0000)
+#define OXM_FIELD(x) (x & 0x0000fe00)
+#define OXM_ROFL_OFB_TYPE(x)    (((uint64_t)          0 << 32) | (OXM_TYPE(x)))
+#define OXM_ROFL_OFX_TYPE(x)    (((uint64_t)ROFL_EXP_ID << 32) | (OXM_TYPE(x)))
+#define OXM_EXPR_OFX_TYPE(w, x) (((uint64_t)          w << 32) | (OXM_TYPE(x)))
 
 	/* OXM Flow match field types for OpenFlow basic class. */
 	enum oxm_tlv_match_fields {

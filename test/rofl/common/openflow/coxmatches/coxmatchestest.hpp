@@ -1,12 +1,23 @@
-#include "rofl/common/openflow/coxmatches.h"
-#include "rofl/common/cmemory.h"
-#include "rofl/common/caddress.h"
+/*
+ * coxmatch_test.hpp
+ *
+ *  Created on: Apr 26, 2015
+ *      Author: andi
+ */
+
+#ifndef TEST_SRC_ROFL_COMMON_OPENFLOW_COXMATCH_TEST_HPP_
+#define TEST_SRC_ROFL_COMMON_OPENFLOW_COXMATCH_TEST_HPP_
+
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 
-class coxmatches_test : public CppUnit::TestFixture {
+#include "rofl/common/openflow/coxmatches.h"
+#include "rofl/common/cmemory.h"
 
-	CPPUNIT_TEST_SUITE( coxmatches_test );
+class coxmatchestest :
+		public CppUnit::TestFixture
+{
+	CPPUNIT_TEST_SUITE( coxmatchestest );
 	CPPUNIT_TEST( testPack );
 	CPPUNIT_TEST( testUnPack );
 	CPPUNIT_TEST( testAddMatch );
@@ -19,13 +30,11 @@ class coxmatches_test : public CppUnit::TestFixture {
 	CPPUNIT_TEST( testOxmVlanVidUnpack );
 	CPPUNIT_TEST_SUITE_END();
 
-private:
-
-
 public:
 	void setUp();
 	void tearDown();
 
+public:
 	void testPack();
 	void testUnPack();
 	void testAddMatch();
@@ -39,3 +48,4 @@ public:
 	void testOxmVlanVidUnpack();
 };
 
+#endif /* TEST_SRC_ROFL_COMMON_OPENFLOW_COXMATCH_TEST_HPP_ */

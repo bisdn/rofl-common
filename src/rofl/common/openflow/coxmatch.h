@@ -178,7 +178,7 @@ public:
 	unpack(
 			uint8_t* buf, size_t buflen)
 	 {
-		if (buflen < length()) {
+		if (buflen < coxmatch::length()) {
 			throw eOxmBadLen("coxmatch::unpack() buf too short");
 		}
 		struct rofl::openflow::ofp_oxm_tlv_hdr* oxm = (struct rofl::openflow::ofp_oxm_tlv_hdr*)buf;
@@ -956,9 +956,9 @@ public:
 	friend std::ostream&
 	operator<< (std::ostream& os, const coxmatch_8& oxm) {
 		os << rofl::indent(0) << "<coxmatch_8 ";
-		os << "value: 0x" << std::hex << oxm.get_u8value() << std::dec << " ";
+		os << "value: 0x" << std::hex << (int)oxm.get_u8value() << std::dec << " ";
 		if (oxm.get_oxm_hasmask()) {
-			os << "/ mask: 0x" << std::hex << oxm.get_u8mask() << std::dec << " ";
+			os << "/ mask: 0x" << std::hex << (int)oxm.get_u8mask() << std::dec << " ";
 		}
 		os << " >" << std::endl;
 		rofl::indent i(2);
@@ -2437,7 +2437,7 @@ public:
 public:
 	friend std::ostream&
 	operator<< (std::ostream& os, const coxmatch_ofb_vlan_pcp& oxm) {
-		os << dynamic_cast<const coxmatch&>(oxm);
+		os << dynamic_cast<const coxmatch_8&>(oxm);
 		os << indent(2) << "<vlan-pcp: " << (int)oxm.get_u8value() << " >" << std::endl;
 		return os;
 	};
@@ -2466,7 +2466,7 @@ public:
 public:
 	friend std::ostream&
 	operator<< (std::ostream& os, const coxmatch_ofb_ip_dscp& oxm) {
-		os << dynamic_cast<const coxmatch&>(oxm);
+		os << dynamic_cast<const coxmatch_8&>(oxm);
 		os << indent(2) << "<ip-dscp: " << (int)oxm.get_u8value() << " >" << std::endl;
 		return os;
 	};
@@ -2495,7 +2495,7 @@ public:
 public:
 	friend std::ostream&
 	operator<< (std::ostream& os, const coxmatch_ofb_ip_ecn& oxm) {
-		os << dynamic_cast<const coxmatch&>(oxm);
+		os << dynamic_cast<const coxmatch_8&>(oxm);
 		os << indent(2) << "<ip-ecn: " << (int)oxm.get_u8value() << " >" << std::endl;
 		return os;
 	};
@@ -2524,7 +2524,7 @@ public:
 public:
 	friend std::ostream&
 	operator<< (std::ostream& os, const coxmatch_ofb_ip_proto& oxm) {
-		os << dynamic_cast<const coxmatch&>(oxm);
+		os << dynamic_cast<const coxmatch_8&>(oxm);
 		os << indent(2) << "<ip-proto: " << (int)oxm.get_u8value() << " >" << std::endl;
 		return os;
 	};
@@ -2912,7 +2912,7 @@ public:
 public:
 	friend std::ostream&
 	operator<< (std::ostream& os, const coxmatch_ofb_icmpv4_type& oxm) {
-		os << dynamic_cast<const coxmatch&>(oxm);
+		os << dynamic_cast<const coxmatch_8&>(oxm);
 		os << indent(2) << "<icmpv4-type: "	<< (int)oxm.get_u8value() << " >" << std::endl;
 		return os;
 	};
@@ -2940,7 +2940,7 @@ public:
 	{};
 	friend std::ostream&
 	operator<< (std::ostream& os, const coxmatch_ofb_icmpv4_code& oxm) {
-		os << dynamic_cast<const coxmatch&>(oxm);
+		os << dynamic_cast<const coxmatch_8&>(oxm);
 		os << indent(2) << "<icmpv4-code: "	<< (int)oxm.get_u8value() << " >" << std::endl;
 		return os;
 	};
@@ -3211,7 +3211,7 @@ public:
 public:
 	friend std::ostream&
 	operator<< (std::ostream& os, const coxmatch_ofb_icmpv6_type& oxm) {
-		os << dynamic_cast<const coxmatch&>(oxm);
+		os << dynamic_cast<const coxmatch_8&>(oxm);
 		os << indent(2) << "<icmpv6-type: "	<< (int)oxm.get_u8value() << " >" << std::endl;
 		return os;
 	};
@@ -3240,7 +3240,7 @@ public:
 public:
 	friend std::ostream&
 	operator<< (std::ostream& os, const coxmatch_ofb_icmpv6_code& oxm) {
-		os << dynamic_cast<const coxmatch&>(oxm);
+		os << dynamic_cast<const coxmatch_8&>(oxm);
 		os << indent(2) << "<icmpv6-code: "	<< (int)oxm.get_u8value() << " >" << std::endl;
 		return os;
 	};
@@ -3369,7 +3369,7 @@ public:
 public:
 	friend std::ostream&
 	operator<< (std::ostream& os, const coxmatch_ofb_mpls_tc& oxm) {
-		os << dynamic_cast<const coxmatch&>(oxm);
+		os << dynamic_cast<const coxmatch_8&>(oxm);
 		os << indent(2) << "<mpls-tc: "	<< (int)oxm.get_u8value() << " >" << std::endl;
 		return os;
 	};
@@ -3398,7 +3398,7 @@ public:
 public:
 	friend std::ostream&
 	operator<< (std::ostream& os, const coxmatch_ofb_mpls_bos& oxm) {
-		os << dynamic_cast<const coxmatch&>(oxm);
+		os << dynamic_cast<const coxmatch_8&>(oxm);
 		os << indent(2) << "<mpls-bos: " << (int)oxm.get_u8value() << " >" << std::endl;
 		return os;
 	};

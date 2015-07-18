@@ -1,40 +1,44 @@
+/*
+ * coxmatchtest.cpp
+ *
+ *  Created on: Apr 26, 2015
+ *      Author: andi
+ */
+
 #include <stdlib.h>
 
 #include <cppunit/extensions/TestFactoryRegistry.h>
 #include <cppunit/ui/text/TestRunner.h>
 
-#include "coxmatches_test.h"
+#include "coxmatchestest.hpp"
 
+using namespace rofl::openflow;
 
-CPPUNIT_TEST_SUITE_REGISTRATION( coxmatches_test );
-
-#if defined DEBUG
-#undef DEBUG
-#endif
+CPPUNIT_TEST_SUITE_REGISTRATION( coxmatchestest );
 
 void
-coxmatches_test::setUp()
+coxmatchestest::setUp()
 {
 }
 
 
 
 void
-coxmatches_test::tearDown()
+coxmatchestest::tearDown()
 {
 }
 
 
 
 void
-coxmatches_test::testPack()
+coxmatchestest::testPack()
 {
 	using rofl::openflow::coxmatch_8;
 	using rofl::openflow::coxmatch_16;
 	using rofl::openflow::coxmatch_48;
 	rofl::openflow::coxmatches matches;
 
-	matches.add_ofb_eth_dst(rofl::cmacaddr("b1:b2:b3:b4:b5:b6"));
+	matches.add_ofb_eth_dst(rofl::cmacaddr("b1:b2:b3:b4:b5:b6"), rofl::cmacaddr("ff:ff:ff:ff:ff:ff"));
 	matches.add_ofb_eth_src(rofl::cmacaddr("c1:c2:c3:c4:c5:c6"), rofl::cmacaddr("d1:d2:d3:d4:d5:d6"));
 	matches.add_ofb_vlan_vid(0x3132, 0x4142);
 	matches.add_ofb_ip_dscp(0xa1);
@@ -45,70 +49,78 @@ coxmatches_test::testPack()
 	rofl::cmemory mem(matches.length());
 	matches.pack(mem.somem(), mem.memlen());
 
-	rofl::cmemory test(45);
+	rofl::cmemory test(51);
 	// ETH_DST
 	test[0] = 0x80;
 	test[1] = 0x00;
-	test[2] = 0x06; // (ETH_DST == 3) << 1, has-mask == 0
-	test[3] = 0x06;
+	test[2] = 0x07; // (ETH_DST == 3) << 1, has-mask == 1
+	test[3] = 0x0c;
 	test[4] = 0xb1;
 	test[5] = 0xb2;
 	test[6] = 0xb3;
 	test[7] = 0xb4;
 	test[8] = 0xb5;
 	test[9] = 0xb6;
-	// ETH_SRC_MASK
-	test[10] = 0x80;
-	test[11] = 0x00;
-	test[12] = 0x09; // (ETH_SRC == 4) << 1, has-mask == 1
-	test[13] = 0x0c;
-	test[14] = 0xc1;
-	test[15] = 0xc2;
-	test[16] = 0xc3;
-	test[17] = 0xc4;
-	test[18] = 0xc5;
-	test[19] = 0xc6;
-	test[20] = 0xd1;
-	test[21] = 0xd2;
-	test[22] = 0xd3;
-	test[23] = 0xd4;
-	test[24] = 0xd5;
-	test[25] = 0xd6;
-	// VLAN_VID
-	test[26] = 0x80;
-	test[27] = 0x00;
-	test[28] = 0x0d; // (VLAN_VID == 6) << 1, has-mask == 1
-	test[29] = 0x04;
-	test[30] = 0x31;
-	test[31] = 0x32;
-	test[32] = 0x41;
-	test[33] = 0x42;
-	// IP_DSCP
-	test[34] = 0x80;
-	test[35] = 0x00;
-	test[36] = 0x10; // (IP_DSCP == 8) << 1, has-mask == 0
-	test[37] = 0x01;
-	test[38] = 0xa1;
-	// UDP_SRC
-	test[39] = 0x80;
-	test[40] = 0x00;
-	test[41] = 0x1e; // (UDP_SRC == 15) << 1, has-mask == 0
-	test[42] = 0x02;
-	test[43] = 0x11;
-	test[44] = 0x12;
+	test[10] = 0xff;
+	test[11] = 0xff;
+	test[12] = 0xff;
+	test[13] = 0xff;
+	test[14] = 0xff;
+	test[15] = 0xff;
 
-	//std::cerr << "mem:" << std::endl << mem;
-	//std::cerr << "test:" << std::endl << test;
+	// ETH_SRC_MASK
+	test[16] = 0x80;
+	test[17] = 0x00;
+	test[18] = 0x09; // (ETH_SRC == 4) << 1, has-mask == 1
+	test[19] = 0x0c;
+	test[20] = 0xc1;
+	test[21] = 0xc2;
+	test[22] = 0xc3;
+	test[23] = 0xc4;
+	test[24] = 0xc5;
+	test[25] = 0xc6;
+	test[26] = 0xd1;
+	test[27] = 0xd2;
+	test[28] = 0xd3;
+	test[29] = 0xd4;
+	test[30] = 0xd5;
+	test[31] = 0xd6;
+	// VLAN_VID
+	test[32] = 0x80;
+	test[33] = 0x00;
+	test[34] = 0x0d; // (VLAN_VID == 6) << 1, has-mask == 1
+	test[35] = 0x04;
+	test[36] = 0x31;
+	test[37] = 0x32;
+	test[38] = 0x41;
+	test[39] = 0x42;
+	// IP_DSCP
+	test[40] = 0x80;
+	test[41] = 0x00;
+	test[42] = 0x10; // (IP_DSCP == 8) << 1, has-mask == 0
+	test[43] = 0x01;
+	test[44] = 0xa1;
+	// UDP_SRC
+	test[45] = 0x80;
+	test[46] = 0x00;
+	test[47] = 0x1e; // (UDP_SRC == 15) << 1, has-mask == 0
+	test[48] = 0x02;
+	test[49] = 0x11;
+	test[50] = 0x12;
+
+	std::cerr << "matches:" << std::endl << matches;
+	std::cerr << "mem:" << std::endl << mem;
+	std::cerr << "test:" << std::endl << test;
 
 	CPPUNIT_ASSERT(matches.get_matches().size() == 5);
-	CPPUNIT_ASSERT(matches.length() == 45);
+	CPPUNIT_ASSERT(matches.length() == 51);
 	CPPUNIT_ASSERT(mem == test);
 }
 
 
 
 void
-coxmatches_test::testUnPack()
+coxmatchestest::testUnPack()
 {
 	rofl::openflow::coxmatches matches;
 
@@ -166,17 +178,22 @@ coxmatches_test::testUnPack()
 
 	matches.unpack(test.somem(), test.memlen());
 
-	//std::cerr << "test:" << std::endl << test;
-	//std::cerr << "matches:" << std::endl << matches;
+	std::cerr << "test:" << std::endl << test;
+	std::cerr << "matches:" << std::endl << matches;
 
 	CPPUNIT_ASSERT(matches.get_matches().size() == 5);
+	CPPUNIT_ASSERT(matches.has_ofb_eth_dst());
+	CPPUNIT_ASSERT(matches.has_ofb_eth_src());
+	CPPUNIT_ASSERT(matches.has_ofb_vlan_vid());
+	CPPUNIT_ASSERT(matches.has_ofb_ip_dscp());
+	CPPUNIT_ASSERT(matches.has_ofb_udp_src());
 	CPPUNIT_ASSERT(matches.length() == 45);
 }
 
 
 
 void
-coxmatches_test::testAddMatch()
+coxmatchestest::testAddMatch()
 {
 	using rofl::openflow::coxmatch_48;
 	rofl::openflow::coxmatches matches;
@@ -196,7 +213,7 @@ coxmatches_test::testAddMatch()
 
 
 void
-coxmatches_test::testDropMatch()
+coxmatchestest::testDropMatch()
 {
 	using rofl::openflow::coxmatch_48;
 	rofl::openflow::coxmatches matches;
@@ -207,7 +224,7 @@ coxmatches_test::testDropMatch()
 
 
 void
-coxmatches_test::testSetMatch()
+coxmatchestest::testSetMatch()
 {
 	using rofl::openflow::coxmatch_48;
 	rofl::openflow::coxmatches matches;
@@ -231,6 +248,10 @@ coxmatches_test::testSetMatch()
 	test[14] = 0xc5;
 	test[15] = 0xc6;
 
+	matches.unpack(test.somem(), test.memlen());
+
+	std::cerr << "matches: " << std::endl << matches;
+
 	CPPUNIT_ASSERT(matches.length() == 16);
 
 	rofl::cmemory mem(matches.length());
@@ -250,7 +271,7 @@ coxmatches_test::testSetMatch()
 
 
 void
-coxmatches_test::testGetMatch()
+coxmatchestest::testGetMatch()
 {
 	rofl::openflow::coxmatches matches;
 
@@ -260,7 +281,7 @@ coxmatches_test::testGetMatch()
 
 
 void
-coxmatches_test::testHasMatch()
+coxmatchestest::testHasMatch()
 {
 	rofl::openflow::coxmatches matches;
 
@@ -271,7 +292,7 @@ coxmatches_test::testHasMatch()
 
 
 void
-coxmatches_test::testStrictMatching()
+coxmatchestest::testStrictMatching()
 {
 	using rofl::openflow::coxmatch_8;
 	// TODO
@@ -347,7 +368,7 @@ coxmatches_test::testStrictMatching()
 
 
 void
-coxmatches_test::testNonStrictMatching()
+coxmatchestest::testNonStrictMatching()
 {
 	// TODO
 }
@@ -355,7 +376,7 @@ coxmatches_test::testNonStrictMatching()
 
 
 void
-coxmatches_test::testOxmVlanVidUnpack()
+coxmatchestest::testOxmVlanVidUnpack()
 {
 	rofl::openflow::coxmatches matches;
 

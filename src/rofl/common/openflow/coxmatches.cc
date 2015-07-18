@@ -77,14 +77,6 @@ coxmatches::unpack(
 {
 	clear();
 
-	// xxx treat experimenter?
-
-	// sanity check: oxm_len must be of size at least of ofp_oxm_hdr
-	if (buflen < (int)sizeof(struct rofl::openflow::ofp_oxm_hdr)) {
-		throw eBadMatchBadLen();
-	}
-
-
 	while (buflen > 0) {
 		struct openflow::ofp_oxm_hdr *hdr = (struct openflow::ofp_oxm_hdr*)buf;
 
@@ -92,170 +84,189 @@ coxmatches::unpack(
 			return; // not enough bytes to parse an entire ofp_oxm_hdr, possibly padding bytes found
 		}
 
-		if (hdr->oxm_length > (sizeof(struct openflow::ofp_oxm_hdr) + buflen))
-			throw eBadMatchBadLen();
-
-
-		uint64_t oxm_type = 0;
-		if (be16toh(hdr->oxm_class) == rofl::openflow::OFPXMC_EXPERIMENTER) {
-			struct rofl::openflow::ofp_oxm_experimenter_header* oxm = (struct rofl::openflow::ofp_oxm_experimenter_header*)buf;
-			oxm_type = ((uint64_t)be32toh(oxm->experimenter)) << 32;
+		if (hdr->oxm_length > ((sizeof(struct openflow::ofp_oxm_hdr) + buflen))) {
+			throw eOxmBadLen("coxmatches::unpack() buflen too short");
 		}
 
-		struct rofl::openflow::ofp_oxm_tlv_hdr* oxm = (struct rofl::openflow::ofp_oxm_tlv_hdr*)buf;
+		switch (be16toh(hdr->oxm_class)) {
+		case rofl::openflow::OFPXMC_OPENFLOW_BASIC: {
 
-		oxm_type |= OXM_TYPE(oxm->oxm_id);
+			struct rofl::openflow::ofp_oxm_tlv_hdr* oxm = (struct rofl::openflow::ofp_oxm_tlv_hdr*)buf;
 
-		switch (oxm_type) {
-		case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IN_PORT): {
-			add_ofb_in_port().unpack(buf, buflen);
-		} break;
-		case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IN_PHY_PORT): {
-			add_ofb_in_phy_port().unpack(buf, buflen);
-		} break;
-		case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_METADATA): {
-			add_ofb_metadata().unpack(buf, buflen);
-		} break;
-		case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_DST): {
-			add_ofb_eth_dst().unpack(buf, buflen);
-		} break;
-		case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_SRC): {
-			add_ofb_eth_src().unpack(buf, buflen);
-		} break;
-		case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_TYPE): {
-			add_ofb_eth_type().unpack(buf, buflen);
-		} break;
-		case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_VLAN_VID): {
-			add_ofb_vlan_vid().unpack(buf, buflen);
-		} break;
-		case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_VLAN_PCP): {
-			add_ofb_vlan_pcp().unpack(buf, buflen);
-		} break;
-		case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_DSCP): {
-			add_ofb_ip_dscp().unpack(buf, buflen);
-		} break;
-		case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_ECN): {
-			add_ofb_ip_ecn().unpack(buf, buflen);
-		} break;
-		case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_PROTO): {
-			add_ofb_ip_proto().unpack(buf, buflen);
-		} break;
-		case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV4_SRC): {
-			add_ofb_ipv4_src().unpack(buf, buflen);
-		} break;
-		case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV4_DST): {
-			add_ofb_ipv4_dst().unpack(buf, buflen);
-		} break;
-		case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_TCP_SRC): {
-			add_ofb_tcp_src().unpack(buf, buflen);
-		} break;
-		case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_TCP_DST): {
-			add_ofb_tcp_dst().unpack(buf, buflen);
-		} break;
-		case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_UDP_SRC): {
-			add_ofb_udp_src().unpack(buf, buflen);
-		} break;
-		case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_UDP_DST): {
-			add_ofb_udp_dst().unpack(buf, buflen);
-		} break;
-		case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_SCTP_SRC): {
-			add_ofb_sctp_src().unpack(buf, buflen);
-		} break;
-		case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_SCTP_DST): {
-			add_ofb_sctp_dst().unpack(buf, buflen);
-		} break;
-		case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV4_TYPE): {
-			add_ofb_icmpv4_type().unpack(buf, buflen);
-		} break;
-		case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV4_CODE): {
-			add_ofb_icmpv4_code().unpack(buf, buflen);
-		} break;
-		case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_OP): {
-			add_ofb_arp_opcode().unpack(buf, buflen);
-		} break;
-		case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_SPA): {
-			add_ofb_arp_spa().unpack(buf, buflen);
-		} break;
-		case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_TPA): {
-			add_ofb_arp_tpa().unpack(buf, buflen);
-		} break;
-		case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_SHA): {
-			add_ofb_arp_sha().unpack(buf, buflen);
-		} break;
-		case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_THA): {
-			add_ofb_arp_tha().unpack(buf, buflen);
-		} break;
-		case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_SRC): {
-			add_ofb_ipv6_src().unpack(buf, buflen);
-		} break;
-		case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_DST): {
-			add_ofb_ipv6_dst().unpack(buf, buflen);
-		} break;
-		case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_FLABEL): {
-			add_ofb_ipv6_flabel().unpack(buf, buflen);
-		} break;
-		case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV6_TYPE): {
-			add_ofb_icmpv6_type().unpack(buf, buflen);
-		} break;
-		case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV6_CODE): {
-			add_ofb_icmpv6_code().unpack(buf, buflen);
-		} break;
-		case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TARGET): {
-			add_ofb_ipv6_nd_target().unpack(buf, buflen);
-		} break;
-		case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_SLL): {
-			add_ofb_ipv6_nd_sll().unpack(buf, buflen);
-		} break;
-		case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TLL): {
-			add_ofb_ipv6_nd_tll().unpack(buf, buflen);
-		} break;
-		case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_LABEL): {
-			add_ofb_mpls_label().unpack(buf, buflen);
-		} break;
-		case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_TC): {
-			add_ofb_mpls_tc().unpack(buf, buflen);
-		} break;
-		case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_BOS): {
-			add_ofb_mpls_bos().unpack(buf, buflen);
-		} break;
-		case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_PBB_ISID): {
-			add_ofb_pbb_isid().unpack(buf, buflen);
-		} break;
-		case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_TUNNEL_ID): {
-			add_ofb_mpls_bos().unpack(buf, buflen);
-		} break;
-		case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_EXTHDR): {
-			add_ofb_ipv6_exthdr().unpack(buf, buflen);
-		} break;
-		case OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC): {
-			add_ofx_nw_src().unpack(buf, buflen);
-		} break;
-		case OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_DST): {
-			add_ofx_nw_dst().unpack(buf, buflen);
-		} break;
-		case OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_PROTO): {
-			add_ofx_nw_proto().unpack(buf, buflen);
-		} break;
-		case OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_TOS): {
-			add_ofx_nw_tos().unpack(buf, buflen);
-		} break;
-		case OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_SRC): {
-			add_ofx_tp_src().unpack(buf, buflen);
-		} break;
-		case OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_DST): {
-			add_ofx_tp_dst().unpack(buf, buflen);
-		} break;
-		default: {
+			uint64_t oxm_type = OXM_TYPE(be32toh(oxm->oxm_id));
 
-		};
+			switch (oxm_type) {
+			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IN_PORT): {
+				add_ofb_in_port().unpack(buf, buflen);
+			} break;
+			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IN_PHY_PORT): {
+				add_ofb_in_phy_port().unpack(buf, buflen);
+			} break;
+			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_METADATA): {
+				add_ofb_metadata().unpack(buf, buflen);
+			} break;
+			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_DST): {
+				add_ofb_eth_dst().unpack(buf, buflen);
+			} break;
+			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_SRC): {
+				add_ofb_eth_src().unpack(buf, buflen);
+			} break;
+			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_TYPE): {
+				add_ofb_eth_type().unpack(buf, buflen);
+			} break;
+			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_VLAN_VID): {
+				add_ofb_vlan_vid().unpack(buf, buflen);
+			} break;
+			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_VLAN_PCP): {
+				add_ofb_vlan_pcp().unpack(buf, buflen);
+			} break;
+			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_DSCP): {
+				add_ofb_ip_dscp().unpack(buf, buflen);
+			} break;
+			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_ECN): {
+				add_ofb_ip_ecn().unpack(buf, buflen);
+			} break;
+			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_PROTO): {
+				add_ofb_ip_proto().unpack(buf, buflen);
+			} break;
+			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV4_SRC): {
+				add_ofb_ipv4_src().unpack(buf, buflen);
+			} break;
+			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV4_DST): {
+				add_ofb_ipv4_dst().unpack(buf, buflen);
+			} break;
+			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_TCP_SRC): {
+				add_ofb_tcp_src().unpack(buf, buflen);
+			} break;
+			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_TCP_DST): {
+				add_ofb_tcp_dst().unpack(buf, buflen);
+			} break;
+			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_UDP_SRC): {
+				add_ofb_udp_src().unpack(buf, buflen);
+			} break;
+			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_UDP_DST): {
+				add_ofb_udp_dst().unpack(buf, buflen);
+			} break;
+			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_SCTP_SRC): {
+				add_ofb_sctp_src().unpack(buf, buflen);
+			} break;
+			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_SCTP_DST): {
+				add_ofb_sctp_dst().unpack(buf, buflen);
+			} break;
+			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV4_TYPE): {
+				add_ofb_icmpv4_type().unpack(buf, buflen);
+			} break;
+			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV4_CODE): {
+				add_ofb_icmpv4_code().unpack(buf, buflen);
+			} break;
+			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_OP): {
+				add_ofb_arp_opcode().unpack(buf, buflen);
+			} break;
+			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_SPA): {
+				add_ofb_arp_spa().unpack(buf, buflen);
+			} break;
+			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_TPA): {
+				add_ofb_arp_tpa().unpack(buf, buflen);
+			} break;
+			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_SHA): {
+				add_ofb_arp_sha().unpack(buf, buflen);
+			} break;
+			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_THA): {
+				add_ofb_arp_tha().unpack(buf, buflen);
+			} break;
+			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_SRC): {
+				add_ofb_ipv6_src().unpack(buf, buflen);
+			} break;
+			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_DST): {
+				add_ofb_ipv6_dst().unpack(buf, buflen);
+			} break;
+			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_FLABEL): {
+				add_ofb_ipv6_flabel().unpack(buf, buflen);
+			} break;
+			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV6_TYPE): {
+				add_ofb_icmpv6_type().unpack(buf, buflen);
+			} break;
+			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV6_CODE): {
+				add_ofb_icmpv6_code().unpack(buf, buflen);
+			} break;
+			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TARGET): {
+				add_ofb_ipv6_nd_target().unpack(buf, buflen);
+			} break;
+			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_SLL): {
+				add_ofb_ipv6_nd_sll().unpack(buf, buflen);
+			} break;
+			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TLL): {
+				add_ofb_ipv6_nd_tll().unpack(buf, buflen);
+			} break;
+			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_LABEL): {
+				add_ofb_mpls_label().unpack(buf, buflen);
+			} break;
+			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_TC): {
+				add_ofb_mpls_tc().unpack(buf, buflen);
+			} break;
+			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_BOS): {
+				add_ofb_mpls_bos().unpack(buf, buflen);
+			} break;
+			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_PBB_ISID): {
+				add_ofb_pbb_isid().unpack(buf, buflen);
+			} break;
+			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_TUNNEL_ID): {
+				add_ofb_mpls_bos().unpack(buf, buflen);
+			} break;
+			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_EXTHDR): {
+				add_ofb_ipv6_exthdr().unpack(buf, buflen);
+			} break;
+			default: {
+
+			};
+			}
+
+			buflen -= ((sizeof(struct openflow::ofp_oxm_hdr) + hdr->oxm_length));
+			buf += ((sizeof(struct openflow::ofp_oxm_hdr) + hdr->oxm_length));
+
+		} break;
+		case rofl::openflow::OFPXMC_EXPERIMENTER: {
+
+			struct rofl::openflow::ofp_oxm_experimenter_header* oxm =
+					(struct rofl::openflow::ofp_oxm_experimenter_header*)buf;
+			uint64_t oxm_type = ((uint64_t)be32toh(oxm->experimenter)) << 32;
+
+			struct rofl::openflow::ofp_oxm_tlv_hdr* hdr =
+					(struct rofl::openflow::ofp_oxm_tlv_hdr*)buf;
+			oxm_type |= OXM_TYPE(be32toh(hdr->oxm_id));
+
+			uint32_t exp_id = be32toh(oxm->experimenter);
+			uint32_t oxm_id = be32toh(hdr->oxm_id);
+
+			switch (oxm_type) {
+			case OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC): {
+				add_ofx_nw_src().unpack(buf, buflen);
+			} break;
+			case OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_DST): {
+				add_ofx_nw_dst().unpack(buf, buflen);
+			} break;
+			case OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_PROTO): {
+				add_ofx_nw_proto().unpack(buf, buflen);
+			} break;
+			case OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_TOS): {
+				add_ofx_nw_tos().unpack(buf, buflen);
+			} break;
+			case OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_SRC): {
+				add_ofx_tp_src().unpack(buf, buflen);
+			} break;
+			case OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_DST): {
+				add_ofx_tp_dst().unpack(buf, buflen);
+			} break;
+			default: {
+				add_exp_match(exp_id, oxm_id).unpack(buf, buflen);
+			};
+			}
+
+			buflen -= ((sizeof(struct openflow::ofp_oxm_experimenter_header) + ((struct ofp_oxm_hdr*)oxm)->oxm_length));
+			buf += ((sizeof(struct openflow::ofp_oxm_experimenter_header) + ((struct ofp_oxm_hdr*)oxm)->oxm_length));
+
+		} break;
 		}
-
-
-
-		//add_match(new coxmatch(buf, sizeof(struct openflow::ofp_oxm_hdr) + hdr->oxm_length));
-
-		buflen -= ((sizeof(struct openflow::ofp_oxm_hdr) + hdr->oxm_length));
-		buf += ((sizeof(struct openflow::ofp_oxm_hdr) + hdr->oxm_length));
 	}
 }
 

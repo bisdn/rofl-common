@@ -2436,19 +2436,22 @@ public:
 			uint8_t ofp_version = rofl::openflow::OFP_VERSION_UNKNOWN,
 			const rofl::openflow::coxmatch& oxm = rofl::openflow::coxmatch()) :
 				cofaction(ofp_version, rofl::openflow::OFPAT_SET_FIELD),
-				oxm(oxm) {};
+				oxm(oxm)
+	{};
 
 	/**
 	 *
 	 */
 	virtual
-	~cofaction_set_field() {};
+	~cofaction_set_field()
+	{};
 
 	/**
 	 *
 	 */
 	cofaction_set_field(
-			const cofaction_set_field& action) { *this = action; };
+			const cofaction_set_field& action)
+	{ *this = action; };
 
 	/**
 	 *
@@ -2512,8 +2515,7 @@ public:
 		os << rofl::indent(0) << "<cofaction_set_field >" << std::endl;
 		rofl::indent i(2);
 		os << dynamic_cast<cofaction const&>( action );
-		rofl::indent j(2);
-		os << coxmatch_output(action.get_oxm());
+		os << action.get_oxm();
 		return os;
 	};
 
