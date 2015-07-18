@@ -52,7 +52,7 @@ coxmatchtest::test()
 	CPPUNIT_ASSERT(oxm.get_oxm_class() == rofl::openflow::OFPXMC_OPENFLOW_BASIC);
 	CPPUNIT_ASSERT(oxm.get_oxm_field() == rofl::openflow::OFPXMT_OFB_ETH_TYPE);
 	CPPUNIT_ASSERT(oxm.get_oxm_hasmask() == false);
-	CPPUNIT_ASSERT(oxm.get_oxm_type() == ((rofl::openflow::OFPXMC_OPENFLOW_BASIC << 16) | (rofl::openflow::OFPXMT_OFB_ETH_TYPE << 9)));
+	CPPUNIT_ASSERT(oxm.get_oxm_type() == (uint32_t)((rofl::openflow::OFPXMC_OPENFLOW_BASIC << 16) | (rofl::openflow::OFPXMT_OFB_ETH_TYPE << 9)));
 }
 
 
@@ -76,7 +76,7 @@ coxmatchtest::test_eth_dst()
 	CPPUNIT_ASSERT(oxm.get_oxm_class() == rofl::openflow::OFPXMC_OPENFLOW_BASIC);
 	CPPUNIT_ASSERT(oxm.get_oxm_field() == rofl::openflow::OFPXMT_OFB_ETH_DST);
 	CPPUNIT_ASSERT(oxm.get_oxm_hasmask() == false);
-	CPPUNIT_ASSERT(oxm.get_oxm_type() == ((rofl::openflow::OFPXMC_OPENFLOW_BASIC << 16) | (rofl::openflow::OFPXMT_OFB_ETH_DST << 9)));
+	CPPUNIT_ASSERT(oxm.get_oxm_type() == (uint32_t)((rofl::openflow::OFPXMC_OPENFLOW_BASIC << 16) | (rofl::openflow::OFPXMT_OFB_ETH_DST << 9)));
 	CPPUNIT_ASSERT(oxm.get_u48value_as_lladdr() == lladdr);
 	CPPUNIT_ASSERT(oxm.get_u48masked_value_as_lladdr() == lladdr);
 }
@@ -103,7 +103,7 @@ coxmatchtest::test_eth_dst_mask()
 	CPPUNIT_ASSERT(oxm.get_oxm_class() == rofl::openflow::OFPXMC_OPENFLOW_BASIC);
 	CPPUNIT_ASSERT(oxm.get_oxm_field() == rofl::openflow::OFPXMT_OFB_ETH_DST);
 	CPPUNIT_ASSERT(oxm.get_oxm_hasmask() == true);
-	CPPUNIT_ASSERT(oxm.get_oxm_type() == ((rofl::openflow::OFPXMC_OPENFLOW_BASIC << 16) | (rofl::openflow::OFPXMT_OFB_ETH_DST << 9)));
+	CPPUNIT_ASSERT(oxm.get_oxm_type() == (uint32_t)((rofl::openflow::OFPXMC_OPENFLOW_BASIC << 16) | (rofl::openflow::OFPXMT_OFB_ETH_DST << 9)));
 	CPPUNIT_ASSERT(oxm.get_u48value_as_lladdr() == lladdr);
 	CPPUNIT_ASSERT(oxm.get_u48mask_as_lladdr() == mask);
 	CPPUNIT_ASSERT(oxm.get_u48masked_value_as_lladdr() == (lladdr & mask));
