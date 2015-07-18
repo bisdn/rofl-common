@@ -69,13 +69,21 @@ cofactionset::actionset_clear(const cofinstruction_actions& inst)
 	for (std::map<cindex, unsigned int>::const_iterator
 			it = inst.get_actions().get_actions_index().begin();
 					it != inst.get_actions().get_actions_index().end(); ++it) {
+#if 0
+		// FIXME
 		const cindex& index 		= it->first;
+#endif
 		const unsigned int& type	= it->second;
 
 		switch (type) {
 		case rofl::openflow13::OFPAT_SET_FIELD: {
+#if 0
+			// FIXME
 			const coxmatch& oxm = inst.get_actions().get_action_set_field(index).get_oxm();
 			acfields[oxm.get_oxm_class()].erase(oxm.get_oxm_field());
+#else
+			throw eNotImplemented("cofactionset::actionset_clear()");
+#endif
 		} break;
 		default:
 			continue;
