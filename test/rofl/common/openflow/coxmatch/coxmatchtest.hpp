@@ -31,20 +31,15 @@ class coxmatchtest :
 	CPPUNIT_TEST( test4BytesHasMask );
 	CPPUNIT_TEST( test6BytesHasMask );
 	CPPUNIT_TEST( test8BytesHasMask );
-	CPPUNIT_TEST( test1ByteExp );
-	CPPUNIT_TEST( test2BytesExp );
-	CPPUNIT_TEST( test4BytesExp );
-	CPPUNIT_TEST( test6BytesExp );
-	CPPUNIT_TEST( test8BytesExp );
-	CPPUNIT_TEST( test1ByteHasMaskExp );
-	CPPUNIT_TEST( test2BytesHasMaskExp );
-	CPPUNIT_TEST( test4BytesHasMaskExp );
-	CPPUNIT_TEST( test6BytesHasMaskExp );
-	CPPUNIT_TEST( test8BytesHasMaskExp );
 	CPPUNIT_TEST( testOxmIPv4Src );
 	CPPUNIT_TEST( testOxmIPv4Dst );
 	CPPUNIT_TEST( testOxmIPv6Src );
 	CPPUNIT_TEST( testOxmIPv6Dst );
+	CPPUNIT_TEST( testExp8 );
+	CPPUNIT_TEST( testExp16 );
+	CPPUNIT_TEST( testExp32 );
+	CPPUNIT_TEST( testExp48 );
+	CPPUNIT_TEST( testExp64 );
 	CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -55,17 +50,6 @@ public:
 	void test();
 	void test_eth_dst();
 	void test_eth_dst_mask();
-
-	void test1ByteExp();
-	void test2BytesExp();
-	void test4BytesExp();
-	void test6BytesExp();
-	void test8BytesExp();
-	void test1ByteHasMaskExp();
-	void test2BytesHasMaskExp();
-	void test4BytesHasMaskExp();
-	void test6BytesHasMaskExp();
-	void test8BytesHasMaskExp();
 
 	void test1Byte();
 	void test2Bytes();
@@ -82,6 +66,12 @@ public:
 	void testOxmIPv4Dst();
 	void testOxmIPv6Src();
 	void testOxmIPv6Dst();
+
+	void testExp8();
+	void testExp16();
+	void testExp32();
+	void testExp48();
+	void testExp64();
 
 private:
 	uint32_t oxm_id_exp;

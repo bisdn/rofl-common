@@ -521,487 +521,6 @@ coxmatchtest::test8BytesHasMask()
 
 
 void
-coxmatchtest::test1ByteExp()
-{
-	uint32_t oxm_id = oxm_id_exp & ~HAS_MASK_FLAG;
-	const uint8_t *_oxm_id = (uint8_t *)&oxm_id;
-	const uint8_t *_exp_id = (uint8_t *)&exp_id;
-
-	rofl::openflow::coxmatch_exp oxm(oxm_id, exp_id, (uint8_t)0xb1);
-
-	CPPUNIT_ASSERT(oxm.length() == 9);
-	CPPUNIT_ASSERT(oxm.get_oxm_class() == rofl::openflow::OFPXMC_EXPERIMENTER);
-	CPPUNIT_ASSERT(oxm.get_oxm_field() == ((0xa3 & ~0x01) >> 1));
-	CPPUNIT_ASSERT(oxm.get_oxm_length() == 0xa4);
-
-	rofl::cmemory mem(oxm.length());
-	oxm.pack(mem.somem(), mem.memlen());
-
-	rofl::cmemory test(9);
-	test[0] = _oxm_id[3];
-	test[1] = _oxm_id[2];
-	test[2] = _oxm_id[1];
-	test[3] = _oxm_id[0];
-	test[4] = _exp_id[3];
-	test[5] = _exp_id[2];
-	test[6] = _exp_id[1];
-	test[7] = _exp_id[0];
-	test[8] = 0xb1;
-
-	CPPUNIT_ASSERT(mem == test);
-	CPPUNIT_ASSERT(oxm.get_u8value() == 0xb1);
-	CPPUNIT_ASSERT(oxm.get_u8mask() == 0xff); // questionable
-	CPPUNIT_ASSERT(oxm.get_u8masked_value() == 0xb1);
-
-	oxm.set_u8value(0xd1);
-
-	CPPUNIT_ASSERT(oxm.get_u8value() == 0xd1);
-}
-
-
-
-void
-coxmatchtest::test1ByteHasMaskExp()
-{
-	uint32_t oxm_id = oxm_id_exp | HAS_MASK_FLAG;
-	const uint8_t *_oxm_id = (uint8_t *)&oxm_id;
-	const uint8_t *_exp_id = (uint8_t *)&exp_id;
-
-	rofl::openflow::coxmatch_exp oxm(oxm_id, exp_id, (uint8_t)0xb1, (uint8_t)0xc1);
-
-	CPPUNIT_ASSERT(oxm.length() == 10);
-	CPPUNIT_ASSERT(oxm.get_oxm_class() == rofl::openflow::OFPXMC_EXPERIMENTER);
-	CPPUNIT_ASSERT(oxm.get_oxm_field() == ((0xa3 | 0x01) >> 1));
-	CPPUNIT_ASSERT(oxm.get_oxm_length() == 0xa4);
-
-	rofl::cmemory mem(oxm.length());
-	oxm.pack(mem.somem(), mem.memlen());
-
-	rofl::cmemory test(10);
-	test[0] = _oxm_id[3];
-	test[1] = _oxm_id[2];
-	test[2] = _oxm_id[1];
-	test[3] = _oxm_id[0];
-	test[4] = _exp_id[3];
-	test[5] = _exp_id[2];
-	test[6] = _exp_id[1];
-	test[7] = _exp_id[0];
-	test[8] = 0xb1;
-	test[9] = 0xc1;
-
-	CPPUNIT_ASSERT(mem == test);
-	CPPUNIT_ASSERT(oxm.get_u8value() == 0xb1);
-	CPPUNIT_ASSERT(oxm.get_u8mask() == 0xc1);
-	CPPUNIT_ASSERT(oxm.get_u8masked_value() == (0xb1 & 0xc1));
-
-	oxm.set_u8value(0xd1);
-	oxm.set_u8mask(0xe1);
-
-	CPPUNIT_ASSERT(oxm.get_u8value() == 0xd1);
-	CPPUNIT_ASSERT(oxm.get_u8mask() == 0xe1);
-	CPPUNIT_ASSERT(oxm.get_u8masked_value() == (0xd1 & 0xe1));
-}
-
-
-
-void
-coxmatchtest::test2BytesExp()
-{
-	uint32_t oxm_id = oxm_id_exp & ~HAS_MASK_FLAG;
-	const uint8_t *_oxm_id = (uint8_t *)&oxm_id;
-	const uint8_t *_exp_id = (uint8_t *)&exp_id;
-
-	rofl::openflow::coxmatch_exp oxm(oxm_id, exp_id, (uint16_t)0xb1b2);
-
-	CPPUNIT_ASSERT(oxm.length() == 10);
-	CPPUNIT_ASSERT(oxm.get_oxm_class() == rofl::openflow::OFPXMC_EXPERIMENTER);
-	CPPUNIT_ASSERT(oxm.get_oxm_field() == ((0xa3 & ~0x01) >> 1));
-	CPPUNIT_ASSERT(oxm.get_oxm_length() == 0xa4);
-
-	rofl::cmemory mem(oxm.length());
-	oxm.pack(mem.somem(), mem.memlen());
-
-	rofl::cmemory test(10);
-	test[0] = _oxm_id[3];
-	test[1] = _oxm_id[2];
-	test[2] = _oxm_id[1];
-	test[3] = _oxm_id[0];
-	test[4] = _exp_id[3];
-	test[5] = _exp_id[2];
-	test[6] = _exp_id[1];
-	test[7] = _exp_id[0];
-	test[8] = 0xb1;
-	test[9] = 0xb2;
-
-	CPPUNIT_ASSERT(mem == test);
-	CPPUNIT_ASSERT(oxm.get_u16value() == 0xb1b2);
-	CPPUNIT_ASSERT(oxm.get_u16mask() == 0xffff);
-	CPPUNIT_ASSERT(oxm.get_u16masked_value() == 0xb1b2);
-
-	oxm.set_u16value(0xd1d2);
-
-	CPPUNIT_ASSERT(oxm.get_u16value() == 0xd1d2);
-}
-
-
-
-void
-coxmatchtest::test2BytesHasMaskExp()
-{
-	uint32_t oxm_id = oxm_id_exp | HAS_MASK_FLAG;
-	const uint8_t *_oxm_id = (uint8_t *)&oxm_id;
-	const uint8_t *_exp_id = (uint8_t *)&exp_id;
-
-	rofl::openflow::coxmatch_exp oxm(oxm_id, exp_id, (uint16_t)0xb1b2, (uint16_t)0xc1c2);
-
-	CPPUNIT_ASSERT(oxm.length() == 12);
-	CPPUNIT_ASSERT(oxm.get_oxm_class() == rofl::openflow::OFPXMC_EXPERIMENTER);
-	CPPUNIT_ASSERT(oxm.get_oxm_field() == ((0xa3 | 0x01) >> 1));
-	CPPUNIT_ASSERT(oxm.get_oxm_length() == 0xa4);
-
-	rofl::cmemory mem(oxm.length());
-	oxm.pack(mem.somem(), mem.memlen());
-
-	rofl::cmemory test(12);
-	test[0] = _oxm_id[3];
-	test[1] = _oxm_id[2];
-	test[2] = _oxm_id[1];
-	test[3] = _oxm_id[0];
-	test[4] = _exp_id[3];
-	test[5] = _exp_id[2];
-	test[6] = _exp_id[1];
-	test[7] = _exp_id[0];
-	test[8] = 0xb1;
-	test[9] = 0xb2;
-	test[10] = 0xc1;
-	test[11] = 0xc2;
-
-	CPPUNIT_ASSERT(mem == test);
-	CPPUNIT_ASSERT(oxm.get_u16value() == 0xb1b2);
-	CPPUNIT_ASSERT(oxm.get_u16mask() == 0xc1c2);
-	CPPUNIT_ASSERT(oxm.get_u16masked_value() == (0xb1b2 & 0xc1c2));
-
-	oxm.set_u16value(0xd1d2);
-	oxm.set_u16mask(0xe1e2);
-
-	CPPUNIT_ASSERT(oxm.get_u16value() == 0xd1d2);
-	CPPUNIT_ASSERT(oxm.get_u16mask() == 0xe1e2);
-	CPPUNIT_ASSERT(oxm.get_u16masked_value() == (0xd1d2 & 0xe1e2));
-}
-
-
-
-void
-coxmatchtest::test4BytesExp()
-{
-	uint32_t oxm_id = oxm_id_exp & ~HAS_MASK_FLAG;
-	const uint8_t *_oxm_id = (uint8_t *)&oxm_id;
-	const uint8_t *_exp_id = (uint8_t *)&exp_id;
-
-	rofl::openflow::coxmatch_exp oxm(oxm_id, exp_id, (uint32_t)0xb1b2b3b4);
-
-	CPPUNIT_ASSERT(oxm.length() == 12);
-	CPPUNIT_ASSERT(oxm.get_oxm_class() == rofl::openflow::OFPXMC_EXPERIMENTER);
-	CPPUNIT_ASSERT(oxm.get_oxm_field() == ((0xa3 & ~0x01) >> 1));
-	CPPUNIT_ASSERT(oxm.get_oxm_length() == 0xa4);
-
-	rofl::cmemory mem(oxm.length());
-	oxm.pack(mem.somem(), mem.memlen());
-
-	rofl::cmemory test(12);
-	test[0] = _oxm_id[3];
-	test[1] = _oxm_id[2];
-	test[2] = _oxm_id[1];
-	test[3] = _oxm_id[0];
-	test[4] = _exp_id[3];
-	test[5] = _exp_id[2];
-	test[6] = _exp_id[1];
-	test[7] = _exp_id[0];
-	test[8] = 0xb1;
-	test[9] = 0xb2;
-	test[10] = 0xb3;
-	test[11] = 0xb4;
-
-	CPPUNIT_ASSERT(mem == test);
-	CPPUNIT_ASSERT(oxm.get_u32value() == 0xb1b2b3b4);
-	CPPUNIT_ASSERT(oxm.get_u32mask() == 0xffffffff);
-	CPPUNIT_ASSERT(oxm.get_u32masked_value() == 0xb1b2b3b4);
-
-	oxm.set_u32value(0xd1d2d3d4);
-
-	CPPUNIT_ASSERT(oxm.get_u32value() == 0xd1d2d3d4);
-}
-
-
-
-void
-coxmatchtest::test4BytesHasMaskExp()
-{
-	uint32_t oxm_id = oxm_id_exp | HAS_MASK_FLAG;
-	const uint8_t *_oxm_id = (uint8_t *)&oxm_id;
-	const uint8_t *_exp_id = (uint8_t *)&exp_id;
-
-	rofl::openflow::coxmatch_exp oxm(oxm_id, exp_id, (uint32_t)0xb1b2b3b4, (uint32_t)0xc1c2c3c4);
-
-	CPPUNIT_ASSERT(oxm.length() == 16);
-	CPPUNIT_ASSERT(oxm.get_oxm_class() == rofl::openflow::OFPXMC_EXPERIMENTER);
-	CPPUNIT_ASSERT(oxm.get_oxm_field() == ((0xa3 | 0x01) >> 1));
-	CPPUNIT_ASSERT(oxm.get_oxm_length() == 0xa4);
-
-	rofl::cmemory mem(oxm.length());
-	oxm.pack(mem.somem(), mem.memlen());
-
-	rofl::cmemory test(16);
-	test[0] = _oxm_id[3];
-	test[1] = _oxm_id[2];
-	test[2] = _oxm_id[1];
-	test[3] = _oxm_id[0];
-	test[4] = _exp_id[3];
-	test[5] = _exp_id[2];
-	test[6] = _exp_id[1];
-	test[7] = _exp_id[0];
-	test[8] = 0xb1;
-	test[9] = 0xb2;
-	test[10] = 0xb3;
-	test[11] = 0xb4;
-	test[12] = 0xc1;
-	test[13] = 0xc2;
-	test[14] = 0xc3;
-	test[15] = 0xc4;
-
-	CPPUNIT_ASSERT(mem == test);
-	CPPUNIT_ASSERT(oxm.get_u32value() == 0xb1b2b3b4);
-	CPPUNIT_ASSERT(oxm.get_u32mask() == 0xc1c2c3c4);
-	CPPUNIT_ASSERT(oxm.get_u32masked_value() == (0xb1b2b3b4 & 0xc1c2c3c4));
-
-	oxm.set_u32value(0xd1d2d3d4);
-	oxm.set_u32mask(0xe1e2e3e4);
-
-	CPPUNIT_ASSERT(oxm.get_u32value() == 0xd1d2d3d4);
-	CPPUNIT_ASSERT(oxm.get_u32mask() == 0xe1e2e3e4);
-	CPPUNIT_ASSERT(oxm.get_u32masked_value() == (0xd1d2d3d4 & 0xe1e2e3e4));
-}
-
-
-
-void
-coxmatchtest::test6BytesExp()
-{
-	try {
-	uint32_t oxm_id = oxm_id_exp & ~HAS_MASK_FLAG;
-	const uint8_t *_oxm_id = (uint8_t *)&oxm_id;
-	const uint8_t *_exp_id = (uint8_t *)&exp_id;
-
-	rofl::openflow::coxmatch_exp oxm(oxm_id, exp_id,
-			rofl::cmacaddr("b1:b2:b3:b4:b5:b6"));
-
-	CPPUNIT_ASSERT(oxm.length() == 14);
-	CPPUNIT_ASSERT(oxm.get_oxm_class() == rofl::openflow::OFPXMC_EXPERIMENTER);
-	CPPUNIT_ASSERT(oxm.get_oxm_field() == ((0xa3 & ~0x01) >> 1));
-	CPPUNIT_ASSERT(oxm.get_oxm_length() == 0xa4);
-
-	rofl::cmemory mem(oxm.length());
-	oxm.pack(mem.somem(), mem.memlen());
-
-	rofl::cmemory test(14);
-	test[0] = _oxm_id[3];
-	test[1] = _oxm_id[2];
-	test[2] = _oxm_id[1];
-	test[3] = _oxm_id[0];
-	test[4] = _exp_id[3];
-	test[5] = _exp_id[2];
-	test[6] = _exp_id[1];
-	test[7] = _exp_id[0];
-	test[8] = 0xb1;
-	test[9] = 0xb2;
-	test[10] = 0xb3;
-	test[11] = 0xb4;
-	test[12] = 0xb5;
-	test[13] = 0xb6;
-
-	CPPUNIT_ASSERT(mem == test);
-	CPPUNIT_ASSERT(oxm.get_u48value() == rofl::cmacaddr("b1:b2:b3:b4:b5:b6"));
-	CPPUNIT_ASSERT(oxm.get_u48mask() == rofl::cmacaddr("ff:ff:ff:ff:ff:ff"));
-	CPPUNIT_ASSERT(oxm.get_u48masked_value() == rofl::cmacaddr("b1:b2:b3:b4:b5:b6"));
-
-	oxm.set_u48value(rofl::cmacaddr("d1:d2:d3:d4:d5:d6"));
-
-	CPPUNIT_ASSERT(oxm.get_u48value() == rofl::cmacaddr("d1:d2:d3:d4:d5:d6"));
-	} catch (...) {
-		CPPUNIT_ASSERT(false);
-	}
-}
-
-
-
-void
-coxmatchtest::test6BytesHasMaskExp()
-{
-	try {
-	uint32_t oxm_id = oxm_id_exp | HAS_MASK_FLAG;
-	const uint8_t *_oxm_id = (uint8_t *)&oxm_id;
-	const uint8_t *_exp_id = (uint8_t *)&exp_id;
-
-	rofl::openflow::coxmatch_exp oxm(oxm_id, exp_id,
-			rofl::cmacaddr("b1:b2:b3:b4:b5:b6"),
-			rofl::cmacaddr("c1:c2:c3:c4:c5:c6"));
-
-	CPPUNIT_ASSERT(oxm.length() == 20);
-	CPPUNIT_ASSERT(oxm.get_oxm_class() == rofl::openflow::OFPXMC_EXPERIMENTER);
-	CPPUNIT_ASSERT(oxm.get_oxm_field() == ((0xa3 & ~0x01) >> 1));
-	CPPUNIT_ASSERT(oxm.get_oxm_length() == 0xa4);
-
-	rofl::cmemory mem(oxm.length());
-	oxm.pack(mem.somem(), mem.memlen());
-
-	rofl::cmemory test(20);
-	test[0] = _oxm_id[3];
-	test[1] = _oxm_id[2];
-	test[2] = _oxm_id[1];
-	test[3] = _oxm_id[0];
-	test[4] = _exp_id[3];
-	test[5] = _exp_id[2];
-	test[6] = _exp_id[1];
-	test[7] = _exp_id[0];
-	test[8] = 0xb1;
-	test[9] = 0xb2;
-	test[10] = 0xb3;
-	test[11] = 0xb4;
-	test[12] = 0xb5;
-	test[13] = 0xb6;
-	test[14] = 0xc1;
-	test[15] = 0xc2;
-	test[16] = 0xc3;
-	test[17] = 0xc4;
-	test[18] = 0xc5;
-	test[19] = 0xc6;
-
-	CPPUNIT_ASSERT(mem == test);
-	CPPUNIT_ASSERT(oxm.get_u48value() == rofl::cmacaddr("b1:b2:b3:b4:b5:b6"));
-	CPPUNIT_ASSERT(oxm.get_u48mask() == rofl::cmacaddr("c1:c2:c3:c4:c5:c6"));
-	CPPUNIT_ASSERT(oxm.get_u48masked_value() ==
-			(rofl::cmacaddr("b1:b2:b3:b4:b5:b6") & rofl::cmacaddr("c1:c2:c3:c4:c5:c6")));
-
-	oxm.set_u48value(rofl::cmacaddr("d1:d2:d3:d4:d5:d6"));
-	oxm.set_u48mask(rofl::cmacaddr("e1:e2:e3:e4:e5:e6"));
-
-	CPPUNIT_ASSERT(oxm.get_u48value() == rofl::cmacaddr("d1:d2:d3:d4:d5:d6"));
-	CPPUNIT_ASSERT(oxm.get_u48mask() == rofl::cmacaddr("e1:e2:e3:e4:e5:e6"));
-	CPPUNIT_ASSERT(oxm.get_u48masked_value() ==
-			(rofl::cmacaddr("d1:d2:d3:d4:d5:d6") & rofl::cmacaddr("e1:e2:e3:e4:e5:e6")));
-	} catch (...) {
-		CPPUNIT_ASSERT(false);
-	}
-}
-
-
-
-void
-coxmatchtest::test8BytesExp()
-{
-	uint32_t oxm_id = oxm_id_exp & ~HAS_MASK_FLAG;
-	const uint8_t *_oxm_id = (uint8_t *)&oxm_id;
-	const uint8_t *_exp_id = (uint8_t *)&exp_id;
-
-	rofl::openflow::coxmatch_exp oxm(oxm_id, exp_id, (uint64_t)0xb1b2b3b4b5b6b7b8);
-
-	CPPUNIT_ASSERT(oxm.length() == 16);
-	CPPUNIT_ASSERT(oxm.get_oxm_class() == rofl::openflow::OFPXMC_EXPERIMENTER);
-	CPPUNIT_ASSERT(oxm.get_oxm_field() == ((0xa3 & ~0x01) >> 1));
-	CPPUNIT_ASSERT(oxm.get_oxm_length() == 0xa4);
-
-	rofl::cmemory mem(oxm.length());
-	oxm.pack(mem.somem(), mem.memlen());
-
-	rofl::cmemory test(16);
-	test[0] = _oxm_id[3];
-	test[1] = _oxm_id[2];
-	test[2] = _oxm_id[1];
-	test[3] = _oxm_id[0];
-	test[4] = _exp_id[3];
-	test[5] = _exp_id[2];
-	test[6] = _exp_id[1];
-	test[7] = _exp_id[0];
-	test[8] = 0xb1;
-	test[9] = 0xb2;
-	test[10] = 0xb3;
-	test[11] = 0xb4;
-	test[12] = 0xb5;
-	test[13] = 0xb6;
-	test[14] = 0xb7;
-	test[15] = 0xb8;
-
-	CPPUNIT_ASSERT(mem == test);
-	CPPUNIT_ASSERT(oxm.get_u64value() == 0xb1b2b3b4b5b6b7b8);
-	CPPUNIT_ASSERT(oxm.get_u64mask() == 0xffffffffffffffff);
-	CPPUNIT_ASSERT(oxm.get_u64masked_value() == 0xb1b2b3b4b5b6b7b8);
-
-	oxm.set_u64value(0xd1d2d3d4d5d6d7d8);
-
-	CPPUNIT_ASSERT(oxm.get_u64value() == 0xd1d2d3d4d5d6d7d8);
-}
-
-
-
-void
-coxmatchtest::test8BytesHasMaskExp()
-{
-	uint32_t oxm_id = oxm_id_exp | HAS_MASK_FLAG;
-	const uint8_t *_oxm_id = (uint8_t *)&oxm_id;
-	const uint8_t *_exp_id = (uint8_t *)&exp_id;
-
-	rofl::openflow::coxmatch_exp oxm(oxm_id, exp_id,
-			(uint64_t) 0xb1b2b3b4b5b6b7b8, (uint64_t) 0xc1c2c3c4c5c6c7c8);
-
-	CPPUNIT_ASSERT(oxm.length() == 24);
-	CPPUNIT_ASSERT(oxm.get_oxm_class() == rofl::openflow::OFPXMC_EXPERIMENTER);
-	CPPUNIT_ASSERT(oxm.get_oxm_field() == ((0xa3 | 0x01) >> 1));
-	CPPUNIT_ASSERT(oxm.get_oxm_length() == 0xa4);
-
-	rofl::cmemory mem(oxm.length());
-	oxm.pack(mem.somem(), mem.memlen());
-
-	rofl::cmemory test(24);
-	test[0] = _oxm_id[3];
-	test[1] = _oxm_id[2];
-	test[2] = _oxm_id[1];
-	test[3] = _oxm_id[0];
-	test[4] = _exp_id[3];
-	test[5] = _exp_id[2];
-	test[6] = _exp_id[1];
-	test[7] = _exp_id[0];
-	test[8] = 0xb1;
-	test[9] = 0xb2;
-	test[10] = 0xb3;
-	test[11] = 0xb4;
-	test[12] = 0xb5;
-	test[13] = 0xb6;
-	test[14] = 0xb7;
-	test[15] = 0xb8;
-	test[16] = 0xc1;
-	test[17] = 0xc2;
-	test[18] = 0xc3;
-	test[19] = 0xc4;
-	test[20] = 0xc5;
-	test[21] = 0xc6;
-	test[22] = 0xc7;
-	test[23] = 0xc8;
-
-	CPPUNIT_ASSERT(mem == test);
-	CPPUNIT_ASSERT(oxm.get_u64value() == 0xb1b2b3b4b5b6b7b8);
-	CPPUNIT_ASSERT(oxm.get_u64mask() == 0xc1c2c3c4c5c6c7c8);
-	CPPUNIT_ASSERT(oxm.get_u64masked_value() == (0xb1b2b3b4b5b6b7b8 & 0xc1c2c3c4c5c6c7c8));
-
-	oxm.set_u64value(0xd1d2d3d4d5d6d7d8);
-	oxm.set_u64mask(0xe1e2e3e4e5e6e7e8);
-
-	CPPUNIT_ASSERT(oxm.get_u64value() == 0xd1d2d3d4d5d6d7d8);
-	CPPUNIT_ASSERT(oxm.get_u64mask() == 0xe1e2e3e4e5e6e7e8);
-	CPPUNIT_ASSERT(oxm.get_u64masked_value() == (0xd1d2d3d4d5d6d7d8 & 0xe1e2e3e4e5e6e7e8));
-}
-
-
-void
 coxmatchtest::testOxmIPv4Src()
 {
 	rofl::caddress_in4 addr("192.168.1.2");
@@ -1048,6 +567,331 @@ coxmatchtest::testOxmIPv6Dst()
 {
 	// TODO
 	//exit(0);
+}
+
+
+
+void
+coxmatchtest::testExp8()
+{
+	uint16_t oxm_class = 0xffff;
+	uint8_t  oxm_field = 0x74; // must be < 128 (0x80)
+	uint32_t exp_id = 0xe1e2e3e4;
+	uint32_t oxm_id = (((uint32_t)oxm_class) << 16) | (((uint16_t)oxm_field) << 9);
+	uint8_t value = 0xa1;
+	uint8_t mask  = 0xb2;
+
+	rofl::openflow::coxmatch_exp oxm(oxm_id, exp_id);
+	rofl::openflow::coxmatch_exp clone;
+	rofl::cmemory mem;
+
+	oxm.set_u8value(value);
+
+	mem.resize(oxm.length());
+	oxm.pack(mem.somem(), mem.memlen());
+	clone.unpack(mem.somem(), mem.memlen());
+
+	std::cerr << ">>>oxm<<< " << std::endl << oxm;
+	std::cerr << ">>>mem<<< " << std::endl << mem;
+	std::cerr << ">>>clone<<< " << std::endl << clone;
+
+	std::cerr << "oxm_id: 0x" << std::hex << (unsigned int)oxm_id << std::endl;
+	std::cerr << "clone.get_oxm_type(): 0x" << std::hex << (unsigned int)clone.get_oxm_type() << std::endl;
+	std::cerr << "clone.get_oxm_id(): 0x" << std::hex << (unsigned int)clone.get_oxm_id() << std::endl;
+
+	CPPUNIT_ASSERT(clone.get_u8value() == value);
+	CPPUNIT_ASSERT(clone.get_u8mask() == 0xff);
+	CPPUNIT_ASSERT(clone.get_oxm_class() == oxm_class);
+	CPPUNIT_ASSERT(clone.get_oxm_field() == oxm_field);
+	CPPUNIT_ASSERT(clone.get_oxm_hasmask() == false);
+	CPPUNIT_ASSERT(OXM_TYPE(clone.get_oxm_id()) == oxm_id);
+	CPPUNIT_ASSERT(clone.get_oxm_type() == oxm_id);
+	CPPUNIT_ASSERT(clone.length() == oxm.length());
+	CPPUNIT_ASSERT(clone.get_oxm_length() == sizeof(uint32_t) + sizeof(uint8_t));
+
+	oxm.set_u8mask(mask);
+
+	mem.resize(oxm.length());
+	oxm.pack(mem.somem(), mem.memlen());
+	clone.unpack(mem.somem(), mem.memlen());
+
+	std::cerr << ">>>oxm<<< " << std::endl << oxm;
+	std::cerr << ">>>mem<<< " << std::endl << mem;
+	std::cerr << ">>>clone<<< " << std::endl << clone;
+
+	std::cerr << "oxm_id: 0x" << std::hex << (unsigned int)oxm_id << std::endl;
+	std::cerr << "clone.get_oxm_type(): 0x" << std::hex << (unsigned int)clone.get_oxm_type() << std::endl;
+	std::cerr << "clone.get_oxm_id(): 0x" << std::hex << (unsigned int)clone.get_oxm_id() << std::endl;
+
+	CPPUNIT_ASSERT(clone.get_u8value() == value);
+	CPPUNIT_ASSERT(clone.get_u8mask() == mask);
+	CPPUNIT_ASSERT(clone.get_oxm_class() == oxm_class);
+	CPPUNIT_ASSERT(clone.get_oxm_field() == oxm_field);
+	CPPUNIT_ASSERT(clone.get_oxm_hasmask() == true);
+	CPPUNIT_ASSERT(OXM_TYPE(clone.get_oxm_id()) == oxm_id);
+	CPPUNIT_ASSERT(clone.get_oxm_type() == oxm_id);
+	CPPUNIT_ASSERT(clone.length() == oxm.length());
+	CPPUNIT_ASSERT(clone.get_oxm_length() == sizeof(uint32_t) + 2*sizeof(uint8_t));
+}
+
+
+
+void
+coxmatchtest::testExp16()
+{
+	uint16_t oxm_class = 0xffff;
+	uint8_t  oxm_field = 0x74; // must be < 128 (0x80)
+	uint32_t exp_id = 0xe1e2e3e4;
+	uint32_t oxm_id = (((uint32_t)oxm_class) << 16) | (((uint16_t)oxm_field) << 9);
+	uint16_t value = 0xa1a2;
+	uint16_t mask  = 0xb2b3;
+
+	rofl::openflow::coxmatch_exp oxm(oxm_id, exp_id);
+	rofl::openflow::coxmatch_exp clone;
+	rofl::cmemory mem;
+
+	oxm.set_u16value(value);
+
+	mem.resize(oxm.length());
+	oxm.pack(mem.somem(), mem.memlen());
+	clone.unpack(mem.somem(), mem.memlen());
+
+	std::cerr << ">>>oxm<<< " << std::endl << oxm;
+	std::cerr << ">>>mem<<< " << std::endl << mem;
+	std::cerr << ">>>clone<<< " << std::endl << clone;
+
+	std::cerr << "oxm_id: 0x" << std::hex << (unsigned int)oxm_id << std::endl;
+	std::cerr << "clone.get_oxm_type(): 0x" << std::hex << (unsigned int)clone.get_oxm_type() << std::endl;
+	std::cerr << "clone.get_oxm_id(): 0x" << std::hex << (unsigned int)clone.get_oxm_id() << std::endl;
+
+	CPPUNIT_ASSERT(clone.get_u16value() == value);
+	CPPUNIT_ASSERT(clone.get_u16mask() == 0xffff);
+	CPPUNIT_ASSERT(clone.get_oxm_class() == oxm_class);
+	CPPUNIT_ASSERT(clone.get_oxm_field() == oxm_field);
+	CPPUNIT_ASSERT(clone.get_oxm_hasmask() == false);
+	CPPUNIT_ASSERT(OXM_TYPE(clone.get_oxm_id()) == oxm_id);
+	CPPUNIT_ASSERT(clone.get_oxm_type() == oxm_id);
+	CPPUNIT_ASSERT(clone.length() == oxm.length());
+	CPPUNIT_ASSERT(clone.get_oxm_length() == sizeof(uint32_t) + sizeof(uint16_t));
+
+	oxm.set_u16mask(mask);
+
+	mem.resize(oxm.length());
+	oxm.pack(mem.somem(), mem.memlen());
+	clone.unpack(mem.somem(), mem.memlen());
+
+	std::cerr << ">>>oxm<<< " << std::endl << oxm;
+	std::cerr << ">>>mem<<< " << std::endl << mem;
+	std::cerr << ">>>clone<<< " << std::endl << clone;
+
+	std::cerr << "oxm_id: 0x" << std::hex << (unsigned int)oxm_id << std::endl;
+	std::cerr << "clone.get_oxm_type(): 0x" << std::hex << (unsigned int)clone.get_oxm_type() << std::endl;
+	std::cerr << "clone.get_oxm_id(): 0x" << std::hex << (unsigned int)clone.get_oxm_id() << std::endl;
+
+	CPPUNIT_ASSERT(clone.get_u16value() == value);
+	CPPUNIT_ASSERT(clone.get_u16mask() == mask);
+	CPPUNIT_ASSERT(clone.get_oxm_class() == oxm_class);
+	CPPUNIT_ASSERT(clone.get_oxm_field() == oxm_field);
+	CPPUNIT_ASSERT(clone.get_oxm_hasmask() == true);
+	CPPUNIT_ASSERT(OXM_TYPE(clone.get_oxm_id()) == oxm_id);
+	CPPUNIT_ASSERT(clone.get_oxm_type() == oxm_id);
+	CPPUNIT_ASSERT(clone.length() == oxm.length());
+	CPPUNIT_ASSERT(clone.get_oxm_length() == sizeof(uint32_t) + 2*sizeof(uint16_t));
+}
+
+
+
+void
+coxmatchtest::testExp32()
+{
+	uint16_t oxm_class = 0xffff;
+	uint8_t  oxm_field = 0x74; // must be < 128 (0x80)
+	uint32_t exp_id = 0xe1e2e3e4;
+	uint32_t oxm_id = (((uint32_t)oxm_class) << 16) | (((uint16_t)oxm_field) << 9);
+	uint32_t value = 0xa1a2a3a4;
+	uint32_t mask  = 0xb2b3b4b5;
+
+	rofl::openflow::coxmatch_exp oxm(oxm_id, exp_id);
+	rofl::openflow::coxmatch_exp clone;
+	rofl::cmemory mem;
+
+	oxm.set_u32value(value);
+
+	mem.resize(oxm.length());
+	oxm.pack(mem.somem(), mem.memlen());
+	clone.unpack(mem.somem(), mem.memlen());
+
+	std::cerr << ">>>oxm<<< " << std::endl << oxm;
+	std::cerr << ">>>mem<<< " << std::endl << mem;
+	std::cerr << ">>>clone<<< " << std::endl << clone;
+
+	std::cerr << "oxm_id: 0x" << std::hex << (unsigned int)oxm_id << std::endl;
+	std::cerr << "clone.get_oxm_type(): 0x" << std::hex << (unsigned int)clone.get_oxm_type() << std::endl;
+	std::cerr << "clone.get_oxm_id(): 0x" << std::hex << (unsigned int)clone.get_oxm_id() << std::endl;
+
+	CPPUNIT_ASSERT(clone.get_u32value() == value);
+	CPPUNIT_ASSERT(clone.get_u32mask() == 0xffffffff);
+	CPPUNIT_ASSERT(clone.get_oxm_class() == oxm_class);
+	CPPUNIT_ASSERT(clone.get_oxm_field() == oxm_field);
+	CPPUNIT_ASSERT(clone.get_oxm_hasmask() == false);
+	CPPUNIT_ASSERT(OXM_TYPE(clone.get_oxm_id()) == oxm_id);
+	CPPUNIT_ASSERT(clone.get_oxm_type() == oxm_id);
+	CPPUNIT_ASSERT(clone.length() == oxm.length());
+	CPPUNIT_ASSERT(clone.get_oxm_length() == sizeof(uint32_t) + sizeof(uint32_t));
+
+	oxm.set_u32mask(mask);
+
+	mem.resize(oxm.length());
+	oxm.pack(mem.somem(), mem.memlen());
+	clone.unpack(mem.somem(), mem.memlen());
+
+	std::cerr << ">>>oxm<<< " << std::endl << oxm;
+	std::cerr << ">>>mem<<< " << std::endl << mem;
+	std::cerr << ">>>clone<<< " << std::endl << clone;
+
+	std::cerr << "oxm_id: 0x" << std::hex << (unsigned int)oxm_id << std::endl;
+	std::cerr << "clone.get_oxm_type(): 0x" << std::hex << (unsigned int)clone.get_oxm_type() << std::endl;
+	std::cerr << "clone.get_oxm_id(): 0x" << std::hex << (unsigned int)clone.get_oxm_id() << std::endl;
+
+	CPPUNIT_ASSERT(clone.get_u32value() == value);
+	CPPUNIT_ASSERT(clone.get_u32mask() == mask);
+	CPPUNIT_ASSERT(clone.get_oxm_class() == oxm_class);
+	CPPUNIT_ASSERT(clone.get_oxm_field() == oxm_field);
+	CPPUNIT_ASSERT(clone.get_oxm_hasmask() == true);
+	CPPUNIT_ASSERT(OXM_TYPE(clone.get_oxm_id()) == oxm_id);
+	CPPUNIT_ASSERT(clone.get_oxm_type() == oxm_id);
+	CPPUNIT_ASSERT(clone.length() == oxm.length());
+	CPPUNIT_ASSERT(clone.get_oxm_length() == sizeof(uint32_t) + 2*sizeof(uint32_t));
+}
+
+
+
+void
+coxmatchtest::testExp48()
+{
+	uint16_t oxm_class = 0xffff;
+	uint8_t  oxm_field = 0x74; // must be < 128 (0x80)
+	uint32_t exp_id = 0xe1e2e3e4;
+	uint32_t oxm_id = (((uint32_t)oxm_class) << 16) | (((uint16_t)oxm_field) << 9);
+	rofl::caddress_ll value("a1:a2:a3:a4:a5:a6");
+	rofl::caddress_ll mask ("b2:b3:b4:b5:b6:b7");
+
+	rofl::openflow::coxmatch_exp oxm(oxm_id, exp_id);
+	rofl::openflow::coxmatch_exp clone;
+	rofl::cmemory mem;
+
+	oxm.set_u48value(value);
+
+	mem.resize(oxm.length());
+	oxm.pack(mem.somem(), mem.memlen());
+	clone.unpack(mem.somem(), mem.memlen());
+
+	std::cerr << ">>>oxm<<< " << std::endl << oxm;
+	std::cerr << ">>>mem<<< " << std::endl << mem;
+	std::cerr << ">>>clone<<< " << std::endl << clone;
+
+	std::cerr << "oxm_id: 0x" << std::hex << (unsigned int)oxm_id << std::endl;
+	std::cerr << "clone.get_oxm_type(): 0x" << std::hex << (unsigned int)clone.get_oxm_type() << std::endl;
+	std::cerr << "clone.get_oxm_id(): 0x" << std::hex << (unsigned int)clone.get_oxm_id() << std::endl;
+
+	CPPUNIT_ASSERT(clone.get_u48value() == value);
+	CPPUNIT_ASSERT(clone.get_u48mask() == rofl::caddress_ll("ff:ff:ff:ff:ff:ff"));
+	CPPUNIT_ASSERT(clone.get_oxm_class() == oxm_class);
+	CPPUNIT_ASSERT(clone.get_oxm_field() == oxm_field);
+	CPPUNIT_ASSERT(clone.get_oxm_hasmask() == false);
+	CPPUNIT_ASSERT(OXM_TYPE(clone.get_oxm_id()) == oxm_id);
+	CPPUNIT_ASSERT(clone.get_oxm_type() == oxm_id);
+	CPPUNIT_ASSERT(clone.length() == oxm.length());
+	CPPUNIT_ASSERT(clone.get_oxm_length() == sizeof(uint32_t) + 6*sizeof(uint8_t));
+
+	oxm.set_u48mask(mask);
+
+	mem.resize(oxm.length());
+	oxm.pack(mem.somem(), mem.memlen());
+	clone.unpack(mem.somem(), mem.memlen());
+
+	std::cerr << ">>>oxm<<< " << std::endl << oxm;
+	std::cerr << ">>>mem<<< " << std::endl << mem;
+	std::cerr << ">>>clone<<< " << std::endl << clone;
+
+	std::cerr << "oxm_id: 0x" << std::hex << (unsigned int)oxm_id << std::endl;
+	std::cerr << "clone.get_oxm_type(): 0x" << std::hex << (unsigned int)clone.get_oxm_type() << std::endl;
+	std::cerr << "clone.get_oxm_id(): 0x" << std::hex << (unsigned int)clone.get_oxm_id() << std::endl;
+
+	CPPUNIT_ASSERT(clone.get_u48value() == value);
+	CPPUNIT_ASSERT(clone.get_u48mask() == mask);
+	CPPUNIT_ASSERT(clone.get_oxm_class() == oxm_class);
+	CPPUNIT_ASSERT(clone.get_oxm_field() == oxm_field);
+	CPPUNIT_ASSERT(clone.get_oxm_hasmask() == true);
+	CPPUNIT_ASSERT(OXM_TYPE(clone.get_oxm_id()) == oxm_id);
+	CPPUNIT_ASSERT(clone.get_oxm_type() == oxm_id);
+	CPPUNIT_ASSERT(clone.length() == oxm.length());
+	CPPUNIT_ASSERT(clone.get_oxm_length() == sizeof(uint32_t) + 2*6*sizeof(uint8_t));
+}
+
+
+
+void
+coxmatchtest::testExp64()
+{
+	uint16_t oxm_class = 0xffff;
+	uint8_t  oxm_field = 0x74; // must be < 128 (0x80)
+	uint32_t exp_id = 0xe1e2e3e4;
+	uint32_t oxm_id = (((uint32_t)oxm_class) << 16) | (((uint16_t)oxm_field) << 9);
+	uint64_t value = 0xa1a2a3a4a5a6a7a8;
+	uint64_t mask  = 0xb2b3b4b5b6b7b8b9;
+
+	rofl::openflow::coxmatch_exp oxm(oxm_id, exp_id);
+	rofl::openflow::coxmatch_exp clone;
+	rofl::cmemory mem;
+
+	oxm.set_u64value(value);
+
+	mem.resize(oxm.length());
+	oxm.pack(mem.somem(), mem.memlen());
+	clone.unpack(mem.somem(), mem.memlen());
+
+	std::cerr << ">>>oxm<<< " << std::endl << oxm;
+	std::cerr << ">>>mem<<< " << std::endl << mem;
+	std::cerr << ">>>clone<<< " << std::endl << clone;
+
+	std::cerr << "oxm_id: 0x" << std::hex << (unsigned int)oxm_id << std::endl;
+	std::cerr << "clone.get_oxm_type(): 0x" << std::hex << (unsigned int)clone.get_oxm_type() << std::endl;
+	std::cerr << "clone.get_oxm_id(): 0x" << std::hex << (unsigned int)clone.get_oxm_id() << std::endl;
+
+	CPPUNIT_ASSERT(clone.get_u64value() == value);
+	CPPUNIT_ASSERT(clone.get_u64mask() == 0xffffffffffffffff);
+	CPPUNIT_ASSERT(clone.get_oxm_class() == oxm_class);
+	CPPUNIT_ASSERT(clone.get_oxm_field() == oxm_field);
+	CPPUNIT_ASSERT(clone.get_oxm_hasmask() == false);
+	CPPUNIT_ASSERT(OXM_TYPE(clone.get_oxm_id()) == oxm_id);
+	CPPUNIT_ASSERT(clone.get_oxm_type() == oxm_id);
+	CPPUNIT_ASSERT(clone.length() == oxm.length());
+	CPPUNIT_ASSERT(clone.get_oxm_length() == sizeof(uint32_t) + sizeof(uint64_t));
+
+	oxm.set_u64mask(mask);
+
+	mem.resize(oxm.length());
+	oxm.pack(mem.somem(), mem.memlen());
+	clone.unpack(mem.somem(), mem.memlen());
+
+	std::cerr << ">>>oxm<<< " << std::endl << oxm;
+	std::cerr << ">>>mem<<< " << std::endl << mem;
+	std::cerr << ">>>clone<<< " << std::endl << clone;
+
+	std::cerr << "oxm_id: 0x" << std::hex << (unsigned int)oxm_id << std::endl;
+	std::cerr << "clone.get_oxm_type(): 0x" << std::hex << (unsigned int)clone.get_oxm_type() << std::endl;
+	std::cerr << "clone.get_oxm_id(): 0x" << std::hex << (unsigned int)clone.get_oxm_id() << std::endl;
+
+	CPPUNIT_ASSERT(clone.get_u64value() == value);
+	CPPUNIT_ASSERT(clone.get_u64mask() == mask);
+	CPPUNIT_ASSERT(clone.get_oxm_class() == oxm_class);
+	CPPUNIT_ASSERT(clone.get_oxm_field() == oxm_field);
+	CPPUNIT_ASSERT(clone.get_oxm_hasmask() == true);
+	CPPUNIT_ASSERT(OXM_TYPE(clone.get_oxm_id()) == oxm_id);
+	CPPUNIT_ASSERT(clone.get_oxm_type() == oxm_id);
+	CPPUNIT_ASSERT(clone.length() == oxm.length());
+	CPPUNIT_ASSERT(clone.get_oxm_length() == sizeof(uint32_t) + 2*sizeof(uint64_t));
 }
 
 

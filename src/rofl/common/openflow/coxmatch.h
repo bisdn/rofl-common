@@ -32,41 +32,68 @@ namespace rofl {
 namespace openflow {
 
 /* error classes */
-class eOxmBase 				: public RoflException {
+class eOxmBase : public RoflException {
 public:
-	eOxmBase(const std::string& __arg) : RoflException(__arg) {};
+	eOxmBase(
+			const std::string& __arg) :
+				RoflException(__arg)
+	{};
 };
-class eOxmInval 			: public eOxmBase {
+class eOxmInval : public eOxmBase {
 public:
-	eOxmInval(const std::string& __arg) : eOxmBase(__arg) {};
+	eOxmInval(
+			const std::string& __arg) :
+				eOxmBase(__arg)
+	{};
 };
-class eOxmNotFound 			: public eOxmBase {
+class eOxmNotFound : public eOxmBase {
 public:
-	eOxmNotFound(const std::string& __arg) : eOxmBase(__arg) {};
+	eOxmNotFound(
+			const std::string& __arg) :
+				eOxmBase(__arg)
+	{};
 };
-class eOxmBadLen 			: public eOxmBase {
+class eOxmBadLen : public eOxmBase {
 public:
-	eOxmBadLen(const std::string& __arg) : eOxmBase(__arg) {};
+	eOxmBadLen(
+			const std::string& __arg) :
+				eOxmBase(__arg)
+	{};
 };
-class eOxmInvalType 		: public eOxmBase {
+class eOxmInvalType	: public eOxmBase {
 public:
-	eOxmInvalType(const std::string& __arg) : eOxmBase(__arg) {};
+	eOxmInvalType(
+			const std::string& __arg) :
+				eOxmBase(__arg)
+	{};
 };
-class eOxmInvalClass 		: public eOxmBase {
+class eOxmInvalClass : public eOxmBase {
 public:
-	eOxmInvalClass(const std::string& __arg) : eOxmBase(__arg) {};
+	eOxmInvalClass(
+			const std::string& __arg) :
+				eOxmBase(__arg)
+	{};
 };
-class eOxmHeaderInval 		: public eOxmBase {
+class eOxmHeaderInval : public eOxmBase {
 public:
-	eOxmHeaderInval(const std::string& __arg) : eOxmBase(__arg) {};
+	eOxmHeaderInval(
+			const std::string& __arg) :
+				eOxmBase(__arg)
+	{};
 };
-class eOxmActionNotFound 	: public eOxmBase {
+class eOxmActionNotFound : public eOxmBase {
 public:
-	eOxmActionNotFound(const std::string& __arg) : eOxmBase(__arg) {};
+	eOxmActionNotFound(
+			const std::string& __arg) :
+				eOxmBase(__arg)
+	{};
 };
-class eOxmBadExperimenter 	: public eOxmBase {
+class eOxmBadExperimenter : public eOxmBase {
 public:
-	eOxmBadExperimenter(const std::string& __arg) : eOxmBase(__arg) {};
+	eOxmBadExperimenter(
+			const std::string& __arg) :
+				eOxmBase(__arg)
+	{};
 };
 
 
@@ -495,7 +522,7 @@ public:
 		mask.clear();
 
 		coxmatch::unpack(buf, buflen);
-		if (buflen < length()) {
+		if (buflen < sizeof(struct rofl::openflow::ofp_oxm_experimenter_header)) {
 			throw eOxmBadLen("coxmatch_exp::unpack() buf too short");
 		}
 		struct rofl::openflow::ofp_oxm_experimenter_header* oxm = (struct rofl::openflow::ofp_oxm_experimenter_header*)buf;
@@ -505,11 +532,6 @@ public:
 		/* mask flag is false => single value, no mask */
 		if (not get_oxm_hasmask()) {
 			value.assign(oxm->data, bodylen);
-			/* set mask to 0xffffff..., same length as value */
-			mask.resize(bodylen);
-			for (unsigned int i = 0; i < mask.length(); ++i) {
-				mask[i] = 0xff;
-			}
 
 		/* mask flag is true => value and mask */
 		} else {
@@ -548,27 +570,19 @@ public:
 	get_value() const
 	{ return value; };
 
-	rofl::cmemory&
-	set_value()
-	{ return value; };
-
 	coxmatch_exp&
 	set_value(
 			const rofl::cmemory& value)
-	{ this->value = value; return *this; };
+	{ this->value = value; adjust_oxm_length(); return *this; };
 
 	const rofl::cmemory&
 	get_mask() const
 	{ return mask; };
 
-	rofl::cmemory&
-	set_mask()
-	{ return mask; };
-
 	coxmatch_exp&
 	set_mask(
 			const rofl::cmemory& mask)
-	{ this->mask = mask; set_oxm_hasmask(true); return *this; };
+	{ this->mask = mask; set_oxm_hasmask(true); adjust_oxm_length(); return *this; };
 
 public:
 
@@ -609,6 +623,7 @@ public:
 		value.resize(sizeof(uint8_t));
 		uint8_t tmp = u8value;
 		memcpy(value.somem(), (uint8_t*)&tmp, sizeof(tmp));
+		adjust_oxm_length();
 		return *this;
 	};
 
@@ -628,6 +643,7 @@ public:
 		uint8_t tmp = u8mask;
 		memcpy(mask.somem(), (uint8_t*)&tmp, sizeof(tmp));
 		set_oxm_hasmask(true);
+		adjust_oxm_length();
 		return *this;
 	};
 
@@ -648,6 +664,7 @@ public:
 		value.resize(sizeof(uint16_t));
 		uint16_t tmp = htobe16(u16value);
 		memcpy(value.somem(), (uint8_t*)&tmp, sizeof(tmp));
+		adjust_oxm_length();
 		return *this;
 	};
 
@@ -667,6 +684,7 @@ public:
 		uint16_t tmp = htobe16(u16mask);
 		memcpy(mask.somem(), (uint8_t*)&tmp, sizeof(tmp));
 		set_oxm_hasmask(true);
+		adjust_oxm_length();
 		return *this;
 	};
 
@@ -687,6 +705,7 @@ public:
 		value.resize(sizeof(uint32_t));
 		uint32_t tmp = htobe32(u32value);
 		memcpy(value.somem(), (uint8_t*)&tmp, sizeof(tmp));
+		adjust_oxm_length();
 		return *this;
 	};
 
@@ -706,6 +725,7 @@ public:
 		uint32_t tmp = htobe32(u32mask);
 		memcpy(mask.somem(), (uint8_t*)&tmp, sizeof(tmp));
 		set_oxm_hasmask(true);
+		adjust_oxm_length();
 		return *this;
 	};
 
@@ -723,8 +743,8 @@ public:
 	set_u48value(
 			const rofl::caddress_ll& lladdr)
 	{
-		value.resize(OFP_ETH_ALEN);
 		value.assign(lladdr.somem(), lladdr.length());
+		adjust_oxm_length();
 		return *this;
 	};
 
@@ -740,9 +760,9 @@ public:
 	set_u48mask(
 			const rofl::caddress_ll& lladdr)
 	{
-		mask.resize(OFP_ETH_ALEN);
 		mask.assign(lladdr.somem(), lladdr.length());
 		set_oxm_hasmask(true);
+		adjust_oxm_length();
 		return *this;
 	};
 
@@ -763,6 +783,7 @@ public:
 		value.resize(sizeof(uint64_t));
 		uint64_t tmp = htobe64(u64value);
 		memcpy(value.somem(), (uint8_t*)&tmp, sizeof(tmp));
+		adjust_oxm_length();
 		return *this;
 	};
 
@@ -782,6 +803,7 @@ public:
 		uint64_t tmp = htobe64(u64mask);
 		memcpy(mask.somem(), (uint8_t*)&tmp, sizeof(tmp));
 		set_oxm_hasmask(true);
+		adjust_oxm_length();
 		return *this;
 	};
 
@@ -801,6 +823,22 @@ public:
 		rofl::indent j(4);
 		os << dynamic_cast<const coxmatch&>( oxm );
 		return os;
+	};
+
+private:
+
+	/**
+	 *
+	 */
+	void
+	adjust_oxm_length() {
+		if (coxmatch::get_oxm_hasmask()) {
+			coxmatch::set_oxm_length(
+					sizeof(uint32_t) + value.length() + mask.length());
+		} else {
+			coxmatch::set_oxm_length(
+					sizeof(uint32_t) + value.length());
+		}
 	};
 
 private:
