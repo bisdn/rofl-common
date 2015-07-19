@@ -130,8 +130,12 @@ coxmatchtest::test1Byte()
 	test[0] = 0xa1;
 	test[1] = 0xa2;
 	test[2] = 0xa3 & ~0x01;
-	test[3] = 0xa4;
+	test[3] = 0x01;
 	test[4] = 0xb1;
+
+	std::cerr << ">>>oxm<<< " << std::endl << oxm;
+	std::cerr << ">>>mem<<< " << std::endl << mem;
+	std::cerr << ">>>test<<< " << std::endl << test;
 
 	CPPUNIT_ASSERT(mem == test);
 	CPPUNIT_ASSERT(oxm.get_u8value() == 0xb1);
@@ -165,7 +169,7 @@ coxmatchtest::test1ByteHasMask()
 	test[0] = 0xa1;
 	test[1] = 0xa2;
 	test[2] = 0xa3 | 0x01;
-	test[3] = 0xa4;
+	test[3] = 0x02;
 	test[4] = 0xb1;
 	test[5] = 0xc1;
 
@@ -203,7 +207,7 @@ coxmatchtest::test2Bytes()
 	test[0] = 0xa1;
 	test[1] = 0xa2;
 	test[2] = 0xa3 & ~0x01;
-	test[3] = 0xa4;
+	test[3] = 0x02;
 	test[4] = 0xb1;
 	test[5] = 0xb2;
 
@@ -238,7 +242,7 @@ coxmatchtest::test2BytesHasMask()
 	test[0] = 0xa1;
 	test[1] = 0xa2;
 	test[2] = 0xa3 | 0x01;
-	test[3] = 0xa4;
+	test[3] = 0x04;
 	test[4] = 0xb1;
 	test[5] = 0xb2;
 	test[6] = 0xc1;
@@ -278,7 +282,7 @@ coxmatchtest::test4Bytes()
 	test[0] = 0xa1;
 	test[1] = 0xa2;
 	test[2] = 0xa3 & ~0x01;
-	test[3] = 0xa4;
+	test[3] = 0x04;
 	test[4] = 0xb1;
 	test[5] = 0xb2;
 	test[6] = 0xb3;
@@ -315,7 +319,7 @@ coxmatchtest::test4BytesHasMask()
 	test[0] = 0xa1;
 	test[1] = 0xa2;
 	test[2] = 0xa3 | 0x01;
-	test[3] = 0xa4;
+	test[3] = 0x08;
 	test[4] = 0xb1;
 	test[5] = 0xb2;
 	test[6] = 0xb3;
@@ -359,7 +363,7 @@ coxmatchtest::test6Bytes()
 	test[0] = 0xa1;
 	test[1] = 0xa2;
 	test[2] = 0xa3 & ~0x01;
-	test[3] = 0xa4;
+	test[3] = 0x06;
 	test[4] = 0xb1;
 	test[5] = 0xb2;
 	test[6] = 0xb3;
@@ -398,7 +402,7 @@ coxmatchtest::test6BytesHasMask()
 	test[0] = 0xa1;
 	test[1] = 0xa2;
 	test[2] = 0xa3 | 0x01;
-	test[3] = 0xa4;
+	test[3] = 0x0c;
 	test[4] = 0xb1;
 	test[5] = 0xb2;
 	test[6] = 0xb3;
@@ -446,7 +450,7 @@ coxmatchtest::test8Bytes()
 	test[0] = 0xa1;
 	test[1] = 0xa2;
 	test[2] = 0xa3 & ~0x01;
-	test[3] = 0xa4;
+	test[3] = 0x08;
 	test[4] = 0xb1;
 	test[5] = 0xb2;
 	test[6] = 0xb3;
@@ -487,7 +491,7 @@ coxmatchtest::test8BytesHasMask()
 	test[0] = 0xa1;
 	test[1] = 0xa2;
 	test[2] = 0xa3 | 0x01;
-	test[3] = 0xa4;
+	test[3] = 0x10;
 	test[4] = 0xb1;
 	test[5] = 0xb2;
 	test[6] = 0xb3;
