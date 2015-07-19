@@ -2448,7 +2448,7 @@ public:
 	cofaction_set_field(
 			uint8_t ofp_version = rofl::openflow::OFP_VERSION_UNKNOWN) :
 				cofaction(ofp_version, rofl::openflow::OFPAT_SET_FIELD),
-				oxm_type(OXM_TYPE_UNKNOWN),
+				oxm_set_field_type(OXM_TYPE_UNKNOWN),
 				oxm_8(0),
 				oxm_16(0),
 				oxm_24(0),
@@ -2470,7 +2470,7 @@ public:
 	 */
 	cofaction_set_field(
 			const cofaction_set_field& action) :
-				oxm_type(OXM_TYPE_UNKNOWN),
+				oxm_set_field_type(OXM_TYPE_UNKNOWN),
 				oxm_8(0),
 				oxm_16(0),
 				oxm_24(0),
@@ -2489,7 +2489,7 @@ public:
 		if (this == &action)
 			return *this;
 		cofaction::operator= (action);
-		oxm_type = action.oxm_type;
+		oxm_set_field_type = action.oxm_set_field_type;
 		oxm_8    = action.oxm_8;
 		oxm_16   = action.oxm_16;
 		oxm_24   = action.oxm_24;
@@ -2507,8 +2507,172 @@ public:
 	 *
 	 */
 	enum oxm_set_field_type_t
+	get_oxm_set_field_type() const
+	{ return oxm_set_field_type; }
+
+	/**
+	 *
+	 */
+	uint16_t
+	get_oxm_class() const
+	{
+		switch (oxm_set_field_type) {
+		case OXM_TYPE_8: {
+			return oxm_8.get_oxm_class();
+		} break;
+		case OXM_TYPE_16: {
+			return oxm_16.get_oxm_class();
+		} break;
+		case OXM_TYPE_24: {
+			return oxm_24.get_oxm_class();
+		} break;
+		case OXM_TYPE_32: {
+			return oxm_32.get_oxm_class();
+		} break;
+		case OXM_TYPE_48: {
+			return oxm_48.get_oxm_class();
+		} break;
+		case OXM_TYPE_64: {
+			return oxm_64.get_oxm_class();
+		} break;
+		case OXM_TYPE_128: {
+			return oxm_128.get_oxm_class();
+		} break;
+		case OXM_TYPE_EXP: {
+			return oxm_exp.get_oxm_class();
+		} break;
+		default: {
+			throw eActionInval();
+		};
+		}
+	};
+
+	/**
+	 *
+	 */
+	uint8_t
+	get_oxm_field() const
+	{
+		switch (oxm_set_field_type) {
+		case OXM_TYPE_8: {
+			return oxm_8.get_oxm_field();
+		} break;
+		case OXM_TYPE_16: {
+			return oxm_16.get_oxm_field();
+		} break;
+		case OXM_TYPE_24: {
+			return oxm_24.get_oxm_field();
+		} break;
+		case OXM_TYPE_32: {
+			return oxm_32.get_oxm_field();
+		} break;
+		case OXM_TYPE_48: {
+			return oxm_48.get_oxm_field();
+		} break;
+		case OXM_TYPE_64: {
+			return oxm_64.get_oxm_field();
+		} break;
+		case OXM_TYPE_128: {
+			return oxm_128.get_oxm_field();
+		} break;
+		case OXM_TYPE_EXP: {
+			return oxm_exp.get_oxm_field();
+		} break;
+		default: {
+			throw eActionInval();
+		};
+		}
+	};
+
+	/**
+	 *
+	 */
+	uint32_t
 	get_oxm_type() const
-	{ return oxm_type; }
+	{
+		switch (oxm_set_field_type) {
+		case OXM_TYPE_8: {
+			return oxm_8.get_oxm_type();
+		} break;
+		case OXM_TYPE_16: {
+			return oxm_16.get_oxm_type();
+		} break;
+		case OXM_TYPE_24: {
+			return oxm_24.get_oxm_type();
+		} break;
+		case OXM_TYPE_32: {
+			return oxm_32.get_oxm_type();
+		} break;
+		case OXM_TYPE_48: {
+			return oxm_48.get_oxm_type();
+		} break;
+		case OXM_TYPE_64: {
+			return oxm_64.get_oxm_type();
+		} break;
+		case OXM_TYPE_128: {
+			return oxm_128.get_oxm_type();
+		} break;
+		case OXM_TYPE_EXP: {
+			return oxm_exp.get_oxm_type();
+		} break;
+		default: {
+			throw eActionInval();
+		};
+		}
+	};
+
+	/**
+	 *
+	 */
+	uint32_t
+	get_oxm_id() const
+	{
+		switch (oxm_set_field_type) {
+		case OXM_TYPE_8: {
+			return oxm_8.get_oxm_id();
+		} break;
+		case OXM_TYPE_16: {
+			return oxm_16.get_oxm_id();
+		} break;
+		case OXM_TYPE_24: {
+			return oxm_24.get_oxm_id();
+		} break;
+		case OXM_TYPE_32: {
+			return oxm_32.get_oxm_id();
+		} break;
+		case OXM_TYPE_48: {
+			return oxm_48.get_oxm_id();
+		} break;
+		case OXM_TYPE_64: {
+			return oxm_64.get_oxm_id();
+		} break;
+		case OXM_TYPE_128: {
+			return oxm_128.get_oxm_id();
+		} break;
+		case OXM_TYPE_EXP: {
+			return oxm_exp.get_oxm_id();
+		} break;
+		default: {
+			throw eActionInval();
+		};
+		}
+	};
+
+	/**
+	 *
+	 */
+	uint32_t
+	get_oxm_exp_id() const
+	{
+		switch (oxm_set_field_type) {
+		case OXM_TYPE_EXP: {
+			return oxm_exp.get_oxm_exp_id();
+		} break;
+		default: {
+			return 0;
+		};
+		}
+	};
 
 public:
 
@@ -2524,7 +2688,7 @@ public:
 	 */
 	rofl::openflow::coxmatch_8&
 	set_oxm_8()
-	{ oxm_type = OXM_TYPE_8; return oxm_8; };
+	{ oxm_set_field_type = OXM_TYPE_8; return oxm_8; };
 
 	/**
 	 *
@@ -2532,7 +2696,7 @@ public:
 	cofaction_set_field&
 	set_oxm(
 			const rofl::openflow::coxmatch_8& oxm_8)
-	{ oxm_type = OXM_TYPE_8; this->oxm_8 = oxm_8; return *this; };
+	{ oxm_set_field_type = OXM_TYPE_8; this->oxm_8 = oxm_8; return *this; };
 
 public:
 
@@ -2548,7 +2712,7 @@ public:
 	 */
 	rofl::openflow::coxmatch_16&
 	set_oxm_16()
-	{ oxm_type = OXM_TYPE_16; return oxm_16; };
+	{ oxm_set_field_type = OXM_TYPE_16; return oxm_16; };
 
 	/**
 	 *
@@ -2556,7 +2720,7 @@ public:
 	cofaction_set_field&
 	set_oxm(
 			const rofl::openflow::coxmatch_16& oxm_16)
-	{ oxm_type = OXM_TYPE_16; this->oxm_16 = oxm_16; return *this; };
+	{ oxm_set_field_type = OXM_TYPE_16; this->oxm_16 = oxm_16; return *this; };
 
 public:
 
@@ -2572,7 +2736,7 @@ public:
 	 */
 	rofl::openflow::coxmatch_24&
 	set_oxm_24()
-	{ oxm_type = OXM_TYPE_24; return oxm_24; };
+	{ oxm_set_field_type = OXM_TYPE_24; return oxm_24; };
 
 	/**
 	 *
@@ -2580,7 +2744,7 @@ public:
 	cofaction_set_field&
 	set_oxm(
 			const rofl::openflow::coxmatch_24& oxm_24)
-	{ oxm_type = OXM_TYPE_24; this->oxm_24 = oxm_24; return *this; };
+	{ oxm_set_field_type = OXM_TYPE_24; this->oxm_24 = oxm_24; return *this; };
 
 public:
 
@@ -2596,7 +2760,7 @@ public:
 	 */
 	rofl::openflow::coxmatch_32&
 	set_oxm_32()
-	{ oxm_type = OXM_TYPE_32; return oxm_32; };
+	{ oxm_set_field_type = OXM_TYPE_32; return oxm_32; };
 
 	/**
 	 *
@@ -2604,7 +2768,7 @@ public:
 	cofaction_set_field&
 	set_oxm(
 			const rofl::openflow::coxmatch_32& oxm_32)
-	{ oxm_type = OXM_TYPE_32; this->oxm_32 = oxm_32; return *this; };
+	{ oxm_set_field_type = OXM_TYPE_32; this->oxm_32 = oxm_32; return *this; };
 
 public:
 
@@ -2620,7 +2784,7 @@ public:
 	 */
 	rofl::openflow::coxmatch_48&
 	set_oxm_48()
-	{ oxm_type = OXM_TYPE_48; return oxm_48; };
+	{ oxm_set_field_type = OXM_TYPE_48; return oxm_48; };
 
 	/**
 	 *
@@ -2628,7 +2792,7 @@ public:
 	cofaction_set_field&
 	set_oxm(
 			const rofl::openflow::coxmatch_48& oxm_48)
-	{ oxm_type = OXM_TYPE_48; this->oxm_48 = oxm_48; return *this; };
+	{ oxm_set_field_type = OXM_TYPE_48; this->oxm_48 = oxm_48; return *this; };
 
 public:
 
@@ -2644,7 +2808,7 @@ public:
 	 */
 	rofl::openflow::coxmatch_64&
 	set_oxm_64()
-	{ oxm_type = OXM_TYPE_64; return oxm_64; };
+	{ oxm_set_field_type = OXM_TYPE_64; return oxm_64; };
 
 	/**
 	 *
@@ -2652,7 +2816,7 @@ public:
 	cofaction_set_field&
 	set_oxm(
 			const rofl::openflow::coxmatch_64& oxm_64)
-	{ oxm_type = OXM_TYPE_64; this->oxm_64 = oxm_64; return *this; };
+	{ oxm_set_field_type = OXM_TYPE_64; this->oxm_64 = oxm_64; return *this; };
 
 public:
 
@@ -2668,7 +2832,7 @@ public:
 	 */
 	rofl::openflow::coxmatch_128&
 	set_oxm_128()
-	{ oxm_type = OXM_TYPE_128; return oxm_128; };
+	{ oxm_set_field_type = OXM_TYPE_128; return oxm_128; };
 
 	/**
 	 *
@@ -2676,7 +2840,7 @@ public:
 	cofaction_set_field&
 	set_oxm(
 			const rofl::openflow::coxmatch_128& oxm_128)
-	{ oxm_type = OXM_TYPE_128; this->oxm_128 = oxm_128; return *this; };
+	{ oxm_set_field_type = OXM_TYPE_128; this->oxm_128 = oxm_128; return *this; };
 
 public:
 
@@ -2692,7 +2856,7 @@ public:
 	 */
 	rofl::openflow::coxmatch_exp&
 	set_oxm_exp()
-	{ oxm_type = OXM_TYPE_EXP; return oxm_exp; };
+	{ oxm_set_field_type = OXM_TYPE_EXP; return oxm_exp; };
 
 	/**
 	 *
@@ -2700,7 +2864,7 @@ public:
 	cofaction_set_field&
 	set_oxm(
 			const rofl::openflow::coxmatch_exp& oxm_exp)
-	{ oxm_type = OXM_TYPE_EXP; this->oxm_exp = oxm_exp; return *this; };
+	{ oxm_set_field_type = OXM_TYPE_EXP; this->oxm_exp = oxm_exp; return *this; };
 
 public:
 
@@ -2731,7 +2895,7 @@ public:
 		os << rofl::indent(0) << "<cofaction_set_field >" << std::endl;
 		rofl::indent i(2);
 		os << dynamic_cast<const cofaction&>( action );
-		switch (action.get_oxm_type()) {
+		switch (action.get_oxm_set_field_type()) {
 		case OXM_TYPE_8: {
 			os << action.get_oxm_8();
 		} break;
@@ -2765,7 +2929,7 @@ public:
 
 private:
 
-	enum oxm_set_field_type_t    oxm_type;
+	enum oxm_set_field_type_t    oxm_set_field_type;
 
 	rofl::openflow::coxmatch_8   oxm_8;
 	rofl::openflow::coxmatch_16  oxm_16;

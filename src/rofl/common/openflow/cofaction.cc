@@ -1923,7 +1923,7 @@ cofaction_set_field::length() const
 		size_t total_length =
 				sizeof(struct rofl::openflow::ofp_action_header) - 4*sizeof(uint8_t);
 
-		switch (oxm_type) {
+		switch (oxm_set_field_type) {
 		case OXM_TYPE_8: {
 			total_length += oxm_8.length();
 		} break;
@@ -1986,7 +1986,7 @@ cofaction_set_field::pack(
 
 		struct rofl::openflow13::ofp_action_set_field* hdr = (struct rofl::openflow13::ofp_action_set_field*)buf;
 
-		switch (oxm_type) {
+		switch (oxm_set_field_type) {
 		case OXM_TYPE_8: {
 			oxm_8.pack(hdr->field, oxm_8.length());
 		} break;
