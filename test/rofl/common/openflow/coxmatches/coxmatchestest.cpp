@@ -397,3 +397,50 @@ coxmatchestest::testOxmVlanVidUnpack()
 
 
 
+void
+coxmatchestest::testExp()
+{
+	uint8_t  u8value   = 0xa1;
+	uint8_t  u8mask    = 0xa8;
+	uint16_t u16value  = 0xb1b2;
+	uint16_t u16mask   = 0xb8b9;
+	uint32_t u32value  = 0xc1c2c3c4;
+	uint32_t u32mask   = 0xc8c9cacb;
+	rofl::caddress_ll u48value("d1:d2:d3:d4:d5:d6");
+	rofl::caddress_ll u48mask ("d8:d9:da:db:dc:dd");
+	uint64_t u64value  = 0xe0e1e2e3e4e5e6e7;
+	uint64_t u64mask   = 0xe8e9eaebecedeeef;
+
+	uint32_t exp_id    = 0x40414243;
+	uint16_t oxm_class = 0xffff;
+	uint8_t  oxm_field = 0x52;
+	uint32_t oxm_id    = (((uint32_t)oxm_class) << 16) | (((uint32_t)oxm_field) << 9);
+
+	rofl::openflow::coxmatches oxms;
+	rofl::openflow::coxmatches clone;
+	rofl::cmemory mem;
+
+	oxms.add_ofb_mpls_tc(u8value);
+	oxms.set_ofb_eth_type().set_u16value(u16value);
+	oxms.add_ofb_ipv4_src().set_u32value(u32value).set_u32mask(u32mask);
+	oxms.add_ofb_eth_src(u48value, u48mask);
+	oxms.add_ofb_eth_dst().set_u48value(u48value).set_u48mask(u48mask);
+	oxms.add_ofb_metadata(u64value).set_u64mask(u64mask);
+	oxms.add_ofb_tcp_src(u16value);
+	oxms.add_exp_match(exp_id, oxm_id).set_u64value(u64value);
+
+	mem.resize(oxms.length());
+	oxms.pack(mem.somem(), mem.memlen());
+	clone.unpack(mem.somem(), mem.memlen());
+
+	std::cerr << ">>>oxms<<< " << std::endl << oxms;
+	std::cerr << ">>>mem<<< " << std::endl << mem;
+	std::cerr << ">>>clone<<< " << std::endl << clone;
+
+	(void)u8mask;
+	(void)u16mask;
+	(void)u32mask;
+	(void)u64mask;
+}
+
+

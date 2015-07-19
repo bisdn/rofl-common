@@ -28,6 +28,7 @@ class coxmatchestest :
 	CPPUNIT_TEST( testStrictMatching );
 	CPPUNIT_TEST( testNonStrictMatching );
 	CPPUNIT_TEST( testOxmVlanVidUnpack );
+	CPPUNIT_TEST( testExp );
 	CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -46,6 +47,8 @@ public:
 	void testNonStrictMatching();
 
 	void testOxmVlanVidUnpack();
+
+	void testExp();
 };
 
 #endif /* TEST_SRC_ROFL_COMMON_OPENFLOW_COXMATCH_TEST_HPP_ */

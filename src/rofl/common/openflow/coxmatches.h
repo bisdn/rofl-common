@@ -3380,150 +3380,151 @@ public:
 		std::vector<uint64_t> ids = oxmatches.get_ids();
 		for (std::vector<uint64_t>::const_iterator
 				it = ids.begin(); it != ids.end(); ++it) {
+			os << "<id: 0x" << std::hex << (unsigned long long)*it << std::dec << " >" << std::endl;
 			switch (*it) {
 			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IN_PORT): {
-				os << oxmatches.get_ofb_in_port() << std::endl;
+				os << oxmatches.get_ofb_in_port();
 			} break;
 			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IN_PHY_PORT): {
-				os << oxmatches.get_ofb_in_phy_port() << std::endl;
+				os << oxmatches.get_ofb_in_phy_port();
 			} break;
 			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_METADATA): {
-				os << oxmatches.get_ofb_metadata() << std::endl;
+				os << oxmatches.get_ofb_metadata();
 			} break;
 			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_DST): {
-				os << oxmatches.get_ofb_eth_dst() << std::endl;
+				os << oxmatches.get_ofb_eth_dst();
 			} break;
 			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_SRC): {
-				os << oxmatches.get_ofb_eth_src() << std::endl;
+				os << oxmatches.get_ofb_eth_src();
 			} break;
 			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ETH_TYPE): {
-				os << oxmatches.get_ofb_eth_type() << std::endl;
+				os << oxmatches.get_ofb_eth_type();
 			} break;
 			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_VLAN_VID): {
-				os << oxmatches.get_ofb_vlan_vid() << std::endl;
+				os << oxmatches.get_ofb_vlan_vid();
 			} break;
 			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_VLAN_PCP): {
-				os << oxmatches.get_ofb_vlan_pcp() << std::endl;
+				os << oxmatches.get_ofb_vlan_pcp();
 			} break;
 			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_DSCP): {
-				os << oxmatches.get_ofb_ip_dscp() << std::endl;
+				os << oxmatches.get_ofb_ip_dscp();
 			} break;
 			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_ECN): {
-				os << oxmatches.get_ofb_ip_ecn() << std::endl;
+				os << oxmatches.get_ofb_ip_ecn();
 			} break;
 			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IP_PROTO): {
-				os << oxmatches.get_ofb_ip_proto() << std::endl;
+				os << oxmatches.get_ofb_ip_proto();
 			} break;
 			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV4_SRC): {
-				os << oxmatches.get_ofb_ipv4_src() << std::endl;
+				os << oxmatches.get_ofb_ipv4_src();
 			} break;
 			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV4_DST): {
-				os << oxmatches.get_ofb_ipv4_dst() << std::endl;
+				os << oxmatches.get_ofb_ipv4_dst();
 			} break;
 			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_TCP_SRC): {
-				os << oxmatches.get_ofb_tcp_src() << std::endl;
+				os << oxmatches.get_ofb_tcp_src();
 			} break;
 			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_TCP_DST): {
-				os << oxmatches.get_ofb_tcp_dst() << std::endl;
+				os << oxmatches.get_ofb_tcp_dst();
 			} break;
 			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_UDP_SRC): {
-				os << oxmatches.get_ofb_udp_src() << std::endl;
+				os << oxmatches.get_ofb_udp_src();
 			} break;
 			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_UDP_DST): {
-				os << oxmatches.get_ofb_udp_dst() << std::endl;
+				os << oxmatches.get_ofb_udp_dst();
 			} break;
 			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_SCTP_SRC): {
-				os << oxmatches.get_ofb_sctp_src() << std::endl;
+				os << oxmatches.get_ofb_sctp_src();
 			} break;
 			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_SCTP_DST): {
-				os << oxmatches.get_ofb_sctp_dst() << std::endl;
+				os << oxmatches.get_ofb_sctp_dst();
 			} break;
 			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV4_TYPE): {
-				os << oxmatches.get_ofb_icmpv4_type() << std::endl;
+				os << oxmatches.get_ofb_icmpv4_type();
 			} break;
 			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV4_CODE): {
-				os << oxmatches.get_ofb_icmpv4_code() << std::endl;
+				os << oxmatches.get_ofb_icmpv4_code();
 			} break;
 			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_OP): {
-				os << oxmatches.get_ofb_arp_opcode() << std::endl;
+				os << oxmatches.get_ofb_arp_opcode();
 			} break;
 			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_SPA): {
-				os << oxmatches.get_ofb_arp_spa() << std::endl;
+				os << oxmatches.get_ofb_arp_spa();
 			} break;
 			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_TPA): {
-				os << oxmatches.get_ofb_arp_tpa() << std::endl;
+				os << oxmatches.get_ofb_arp_tpa();
 			} break;
 			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_SHA): {
-				os << oxmatches.get_ofb_arp_sha() << std::endl;
+				os << oxmatches.get_ofb_arp_sha();
 			} break;
 			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ARP_THA): {
-				os << oxmatches.get_ofb_arp_tha() << std::endl;
+				os << oxmatches.get_ofb_arp_tha();
 			} break;
 			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_SRC): {
-				os << oxmatches.get_ofb_ipv6_src() << std::endl;
+				os << oxmatches.get_ofb_ipv6_src();
 			} break;
 			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_DST): {
-				os << oxmatches.get_ofb_ipv6_dst() << std::endl;
+				os << oxmatches.get_ofb_ipv6_dst();
 			} break;
 			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_FLABEL): {
-				os << oxmatches.get_ofb_ipv6_flabel() << std::endl;
+				os << oxmatches.get_ofb_ipv6_flabel();
 			} break;
 			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV6_TYPE): {
-				os << oxmatches.get_ofb_icmpv6_type() << std::endl;
+				os << oxmatches.get_ofb_icmpv6_type();
 			} break;
 			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_ICMPV6_CODE): {
-				os << oxmatches.get_ofb_icmpv6_code() << std::endl;
+				os << oxmatches.get_ofb_icmpv6_code();
 			} break;
 			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TARGET): {
-				os << oxmatches.get_ofb_ipv6_nd_target() << std::endl;
+				os << oxmatches.get_ofb_ipv6_nd_target();
 			} break;
 			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_SLL): {
-				os << oxmatches.get_ofb_ipv6_nd_sll() << std::endl;
+				os << oxmatches.get_ofb_ipv6_nd_sll();
 			} break;
 			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_ND_TLL): {
-				os << oxmatches.get_ofb_ipv6_nd_tll() << std::endl;
+				os << oxmatches.get_ofb_ipv6_nd_tll();
 			} break;
 			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_LABEL): {
-				os << oxmatches.get_ofb_mpls_label() << std::endl;
+				os << oxmatches.get_ofb_mpls_label();
 			} break;
 			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_TC): {
-				os << oxmatches.get_ofb_mpls_tc() << std::endl;
+				os << oxmatches.get_ofb_mpls_tc();
 			} break;
 			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_MPLS_BOS): {
-				os << oxmatches.get_ofb_mpls_bos() << std::endl;
+				os << oxmatches.get_ofb_mpls_bos();
 			} break;
 			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_PBB_ISID): {
-				os << oxmatches.get_ofb_pbb_isid() << std::endl;
+				os << oxmatches.get_ofb_pbb_isid();
 			} break;
 			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_TUNNEL_ID): {
-				os << oxmatches.get_ofb_tunnel_id() << std::endl;
+				os << oxmatches.get_ofb_tunnel_id();
 			} break;
 			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_EXTHDR): {
-				os << oxmatches.get_ofb_ipv6_exthdr() << std::endl;
+				os << oxmatches.get_ofb_ipv6_exthdr();
 			} break;
 			case OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC): {
-				os << oxmatches.get_ofx_nw_src() << std::endl;
+				os << oxmatches.get_ofx_nw_src();
 			} break;
 			case OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_DST): {
-				os << oxmatches.get_ofx_nw_dst() << std::endl;
+				os << oxmatches.get_ofx_nw_dst();
 			} break;
 			case OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_PROTO): {
-				os << oxmatches.get_ofx_nw_proto() << std::endl;
+				os << oxmatches.get_ofx_nw_proto();
 			} break;
 			case OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_NW_TOS): {
-				os << oxmatches.get_ofx_nw_tos() << std::endl;
+				os << oxmatches.get_ofx_nw_tos();
 			} break;
 			case OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_SRC): {
-				os << oxmatches.get_ofx_tp_src() << std::endl;
+				os << oxmatches.get_ofx_tp_src();
 			} break;
 			case OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_DST): {
-				os << oxmatches.get_ofx_tp_dst() << std::endl;
+				os << oxmatches.get_ofx_tp_dst();
 			} break;
 			default: {
 				if (OXM_CLASS(*it) == 0xffff0000) {
 					os << oxmatches.get_exp_match(
 							(*it & 0xffffffff00000000) >> 32,
-							(*it & 0x00000000fffffe00) >>  0) << std::endl;
+							(*it & 0x00000000fffffe00) >>  0);
 				}
 			};
 			}

@@ -818,10 +818,10 @@ public:
 		os << "exp_id: 0x" << std::hex << oxm.get_oxm_exp_id() << std::dec << " ";
 		os << " >" << std::endl;
 		rofl::indent i(2);
-		os << "<value >" << oxm.get_value() << std::endl;
-		os << "<mask >" << oxm.get_mask() << std::endl;
-		rofl::indent j(4);
 		os << dynamic_cast<const coxmatch&>( oxm );
+		rofl::indent j(2);
+		os << rofl::indent() << "<value: >" << std::endl << oxm.get_value();
+		os << rofl::indent() << "<mask: >" << std::endl << oxm.get_mask();
 		return os;
 	};
 
@@ -960,6 +960,7 @@ public:
 	pack(
 			uint8_t* buf, size_t buflen)
 	{
+		adjust_oxm_length();
 		if (buflen < length()) {
 			throw eOxmBadLen("coxmatch_8::pack() buf too short");
 		}
@@ -1002,6 +1003,20 @@ public:
 		rofl::indent i(2);
 		os << dynamic_cast<const coxmatch&>( oxm );
 		return os;
+	};
+
+private:
+
+	/**
+	 *
+	 */
+	void
+	adjust_oxm_length() {
+		if (coxmatch::get_oxm_hasmask()) {
+			coxmatch::set_oxm_length(2*sizeof(uint8_t));
+		} else {
+			coxmatch::set_oxm_length(1*sizeof(uint8_t));
+		}
 	};
 
 private:
@@ -1122,6 +1137,7 @@ public:
 	pack(
 			uint8_t* buf, size_t buflen)
 	{
+		adjust_oxm_length();
 		if (buflen < length()) {
 			throw eOxmBadLen("coxmatch_16::pack() buf too short");
 		}
@@ -1164,6 +1180,20 @@ public:
 		rofl::indent i(2);
 		os << dynamic_cast<const coxmatch&>( oxm );
 		return os;
+	};
+
+private:
+
+	/**
+	 *
+	 */
+	void
+	adjust_oxm_length() {
+		if (coxmatch::get_oxm_hasmask()) {
+			coxmatch::set_oxm_length(2*sizeof(uint16_t));
+		} else {
+			coxmatch::set_oxm_length(1*sizeof(uint16_t));
+		}
 	};
 
 private:
@@ -1284,6 +1314,7 @@ public:
 	pack(
 			uint8_t* buf, size_t buflen)
 	{
+		adjust_oxm_length();
 		if (buflen < length()) {
 			throw eOxmBadLen("coxmatch_24::pack() buf too short");
 		}
@@ -1334,6 +1365,20 @@ public:
 		rofl::indent i(2);
 		os << dynamic_cast<const coxmatch&>( oxm );
 		return os;
+	};
+
+private:
+
+	/**
+	 *
+	 */
+	void
+	adjust_oxm_length() {
+		if (coxmatch::get_oxm_hasmask()) {
+			coxmatch::set_oxm_length(2*3*sizeof(uint8_t));
+		} else {
+			coxmatch::set_oxm_length(1*3*sizeof(uint8_t));
+		}
 	};
 
 private:
@@ -1500,6 +1545,7 @@ public:
 	pack(
 			uint8_t* buf, size_t buflen)
 	{
+		adjust_oxm_length();
 		if (buflen < length()) {
 			throw eOxmBadLen("coxmatch_32::pack() buf too short");
 		}
@@ -1542,6 +1588,20 @@ public:
 		rofl::indent i(2);
 		os << dynamic_cast<const coxmatch&>( oxm );
 		return os;
+	};
+
+private:
+
+	/**
+	 *
+	 */
+	void
+	adjust_oxm_length() {
+		if (coxmatch::get_oxm_hasmask()) {
+			coxmatch::set_oxm_length(2*sizeof(uint32_t));
+		} else {
+			coxmatch::set_oxm_length(1*sizeof(uint32_t));
+		}
 	};
 
 private:
@@ -1743,6 +1803,7 @@ public:
 	pack(
 			uint8_t* buf, size_t buflen)
 	{
+		adjust_oxm_length();
 		if (buflen < length()) {
 			throw eOxmBadLen("coxmatch_48::pack() buf too short");
 		}
@@ -1810,6 +1871,20 @@ public:
 		rofl::indent i(2);
 		os << dynamic_cast<const coxmatch&>( oxm );
 		return os;
+	};
+
+private:
+
+	/**
+	 *
+	 */
+	void
+	adjust_oxm_length() {
+		if (coxmatch::get_oxm_hasmask()) {
+			coxmatch::set_oxm_length(2*6*sizeof(uint8_t));
+		} else {
+			coxmatch::set_oxm_length(1*6*sizeof(uint8_t));
+		}
 	};
 
 private:
@@ -1930,6 +2005,7 @@ public:
 	pack(
 			uint8_t* buf, size_t buflen)
 	{
+		adjust_oxm_length();
 		if (buflen < length()) {
 			throw eOxmBadLen("coxmatch_64::pack() buf too short");
 		}
@@ -1972,6 +2048,20 @@ public:
 		rofl::indent i(2);
 		os << dynamic_cast<const coxmatch&>( oxm );
 		return os;
+	};
+
+private:
+
+	/**
+	 *
+	 */
+	void
+	adjust_oxm_length() {
+		if (coxmatch::get_oxm_hasmask()) {
+			coxmatch::set_oxm_length(2*sizeof(uint64_t));
+		} else {
+			coxmatch::set_oxm_length(1*sizeof(uint64_t));
+		}
 	};
 
 private:
@@ -2091,6 +2181,7 @@ public:
 	pack(
 			uint8_t* buf, size_t buflen)
 	{
+		adjust_oxm_length();
 		if (buflen < length()) {
 			throw eOxmBadLen("coxmatch_128::pack() buf too short");
 		}
@@ -2136,6 +2227,20 @@ public:
 		rofl::indent i(2);
 		os << dynamic_cast<const coxmatch&>( oxm );
 		return os;
+	};
+
+private:
+
+	/**
+	 *
+	 */
+	void
+	adjust_oxm_length() {
+		if (coxmatch::get_oxm_hasmask()) {
+			coxmatch::set_oxm_length(2*16*sizeof(uint8_t));
+		} else {
+			coxmatch::set_oxm_length(1*16*sizeof(uint8_t));
+		}
 	};
 
 private:

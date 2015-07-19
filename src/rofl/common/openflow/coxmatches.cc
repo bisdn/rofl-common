@@ -77,19 +77,20 @@ coxmatches::unpack(
 {
 	clear();
 
-	while (buflen > 0) {
-		struct openflow::ofp_oxm_hdr *hdr = (struct openflow::ofp_oxm_hdr*)buf;
+	while (true) {
 
-		if ((buflen < sizeof(struct openflow::ofp_oxm_hdr)) || (0 == hdr->oxm_length)) {
+		if (buflen < sizeof(struct openflow::ofp_oxm_hdr)) {
 			return; // not enough bytes to parse an entire ofp_oxm_hdr, possibly padding bytes found
 		}
 
-		if (hdr->oxm_length > ((sizeof(struct openflow::ofp_oxm_hdr) + buflen))) {
-			throw eOxmBadLen("coxmatches::unpack() buflen too short");
-		}
+		struct openflow::ofp_oxm_hdr *hdr = (struct openflow::ofp_oxm_hdr*)buf;
 
 		switch (be16toh(hdr->oxm_class)) {
 		case rofl::openflow::OFPXMC_OPENFLOW_BASIC: {
+
+			if (buflen < sizeof(struct openflow::ofp_oxm_hdr)) {
+				throw eOxmBadLen("coxmatches::unpack() buflen too short");
+			}
 
 			struct rofl::openflow::ofp_oxm_tlv_hdr* oxm = (struct rofl::openflow::ofp_oxm_tlv_hdr*)buf;
 
@@ -221,14 +222,17 @@ coxmatches::unpack(
 			};
 			}
 
-			buflen -= ((sizeof(struct openflow::ofp_oxm_hdr) + hdr->oxm_length));
-			buf += ((sizeof(struct openflow::ofp_oxm_hdr) + hdr->oxm_length));
 
 		} break;
 		case rofl::openflow::OFPXMC_EXPERIMENTER: {
 
+			if (buflen < sizeof(struct openflow::ofp_oxm_experimenter_header)) {
+				throw eOxmBadLen("coxmatches::unpack() buflen too short");
+			}
+
 			struct rofl::openflow::ofp_oxm_experimenter_header* oxm =
 					(struct rofl::openflow::ofp_oxm_experimenter_header*)buf;
+
 			uint64_t oxm_type = ((uint64_t)be32toh(oxm->experimenter)) << 32;
 
 			struct rofl::openflow::ofp_oxm_tlv_hdr* hdr =
@@ -262,10 +266,14 @@ coxmatches::unpack(
 			};
 			}
 
-			buflen -= ((sizeof(struct openflow::ofp_oxm_experimenter_header) + ((struct ofp_oxm_hdr*)oxm)->oxm_length));
-			buf += ((sizeof(struct openflow::ofp_oxm_experimenter_header) + ((struct ofp_oxm_hdr*)oxm)->oxm_length));
-
 		} break;
+		}
+
+		if (buflen >= (sizeof(struct openflow::ofp_oxm_hdr) + hdr->oxm_length)) {
+			buflen -= ((sizeof(struct openflow::ofp_oxm_hdr) + hdr->oxm_length));
+			buf += ((sizeof(struct openflow::ofp_oxm_hdr) + hdr->oxm_length));
+		} else {
+			return;
 		}
 	}
 }
