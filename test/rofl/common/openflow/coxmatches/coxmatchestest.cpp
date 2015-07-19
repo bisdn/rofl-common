@@ -413,10 +413,10 @@ coxmatchestest::testExp()
 	rofl::cmemory u17value(19);
 	rofl::cmemory u17mask(19);
 
-	for (int i = 0; i < u17value.length(); i++) {
+	for (unsigned int i = 0; i < u17value.length(); i++) {
 		u17value[i] = 0xa0 + i;
 	}
-	for (int i = 0; i < u17mask.length(); i++) {
+	for (unsigned int i = 0; i < u17mask.length(); i++) {
 		u17mask[i] = 0xee;
 	}
 
