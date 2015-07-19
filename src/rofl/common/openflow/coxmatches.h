@@ -3180,7 +3180,7 @@ public:
 	 */
 	coxmatch_ofx_tp_src&
 	add_ofx_tp_src(
-			uint8_t tp_src = 0) {
+			uint16_t tp_src = 0) {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
 		if (matches.find(OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_SRC)) != matches.end()) {
 			delete matches[OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_SRC)];
@@ -3243,7 +3243,7 @@ public:
 	 */
 	coxmatch_ofx_tp_dst&
 	add_ofx_tp_dst(
-			uint8_t tp_dst = 0) {
+			uint16_t tp_dst = 0) {
 		RwLock lock(rwlock, RwLock::RWLOCK_WRITE);
 		if (matches.find(OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_DST)) != matches.end()) {
 			delete matches[OXM_ROFL_OFX_TYPE(rofl::openflow::experimental::OXM_TLV_EXPR_TP_DST)];

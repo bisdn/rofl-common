@@ -410,11 +410,22 @@ coxmatchestest::testExp()
 	rofl::caddress_ll u48mask ("d8:d9:da:db:dc:dd");
 	uint64_t u64value  = 0xe0e1e2e3e4e5e6e7;
 	uint64_t u64mask   = 0xe8e9eaebecedeeef;
+	rofl::cmemory u17value(19);
+	rofl::cmemory u17mask(19);
 
-	uint32_t exp_id    = 0x40414243;
-	uint16_t oxm_class = 0xffff;
-	uint8_t  oxm_field = 0x52;
-	uint32_t oxm_id    = (((uint32_t)oxm_class) << 16) | (((uint32_t)oxm_field) << 9);
+	for (int i = 0; i < u17value.length(); i++) {
+		u17value[i] = 0xa0 + i;
+	}
+	for (int i = 0; i < u17mask.length(); i++) {
+		u17mask[i] = 0xee;
+	}
+
+	uint32_t exp_id     = 0x40414243;
+	uint16_t oxm_class  = 0xffff;
+	uint8_t  oxm_field1 = 0x52;
+	uint32_t oxm_id1    = (((uint32_t)oxm_class) << 16) | (((uint32_t)oxm_field1) << 9);
+	uint8_t  oxm_field2 = 0x38;
+	uint32_t oxm_id2    = (((uint32_t)oxm_class) << 16) | (((uint32_t)oxm_field2) << 9);
 
 	rofl::openflow::coxmatches oxms;
 	rofl::openflow::coxmatches clone;
@@ -427,20 +438,41 @@ coxmatchestest::testExp()
 	oxms.add_ofb_eth_dst().set_u48value(u48value).set_u48mask(u48mask);
 	oxms.add_ofb_metadata(u64value).set_u64mask(u64mask);
 	oxms.add_ofb_tcp_src(u16value);
-	oxms.add_exp_match(exp_id, oxm_id).set_u64value(u64value);
+	oxms.add_exp_match(exp_id, oxm_id1).set_u64value(u64value);
+	oxms.add_ofx_nw_proto(u8value);
+	oxms.add_ofx_tp_dst(u16value);
+	oxms.add_exp_match(exp_id, oxm_id2).set_value(u17value).set_mask(u17mask);
 
 	mem.resize(oxms.length());
 	oxms.pack(mem.somem(), mem.memlen());
-	clone.unpack(mem.somem(), mem.memlen());
 
 	std::cerr << ">>>oxms<<< " << std::endl << oxms;
 	std::cerr << ">>>mem<<< " << std::endl << mem;
+	clone.unpack(mem.somem(), mem.memlen());
+
 	std::cerr << ">>>clone<<< " << std::endl << clone;
 
 	(void)u8mask;
 	(void)u16mask;
 	(void)u32mask;
 	(void)u64mask;
+
+	CPPUNIT_ASSERT(clone.get_ofb_mpls_tc().get_u8value()   == u8value);
+	CPPUNIT_ASSERT(clone.get_ofb_eth_type().get_u16value() == u16value);
+	CPPUNIT_ASSERT(clone.get_ofb_ipv4_src().get_u32value() == u32value);
+	CPPUNIT_ASSERT(clone.get_ofb_ipv4_src().get_u32mask()  == u32mask);
+	CPPUNIT_ASSERT(clone.get_ofb_eth_src().get_u48value_as_lladdr()  == u48value);
+	CPPUNIT_ASSERT(clone.get_ofb_eth_src().get_u48mask_as_lladdr()   == u48mask);
+	CPPUNIT_ASSERT(clone.get_ofb_eth_dst().get_u48value_as_lladdr()  == u48value);
+	CPPUNIT_ASSERT(clone.get_ofb_eth_dst().get_u48mask_as_lladdr()   == u48mask);
+	CPPUNIT_ASSERT(clone.get_ofb_metadata().get_u64value() == u64value);
+	CPPUNIT_ASSERT(clone.get_ofb_metadata().get_u64mask()  == u64mask);
+	CPPUNIT_ASSERT(clone.get_ofb_tcp_src().get_u16value()  == u16value);
+	CPPUNIT_ASSERT(clone.get_exp_match(exp_id, oxm_id1).get_u64value() == u64value);
+	CPPUNIT_ASSERT(clone.get_ofx_nw_proto().get_u8value()  == u8value);
+	CPPUNIT_ASSERT(clone.get_ofx_tp_dst().get_u16value()   == u16value);
+	CPPUNIT_ASSERT(clone.get_exp_match(exp_id, oxm_id2).get_value() == u17value);
+	CPPUNIT_ASSERT(clone.get_exp_match(exp_id, oxm_id2).get_mask() == u17mask);
 }
 
 

@@ -527,7 +527,10 @@ public:
 		}
 		struct rofl::openflow::ofp_oxm_experimenter_header* oxm = (struct rofl::openflow::ofp_oxm_experimenter_header*)buf;
 		exp_id = be32toh(oxm->experimenter);
-		size_t bodylen = buflen - sizeof(struct rofl::openflow::ofp_oxm_experimenter_header);
+		if (buflen < (sizeof(struct rofl::openflow::ofp_oxm_hdr) + oxm->oxm_header.oxm_length)) {
+			throw eOxmBadLen("coxmatch_exp::unpack() invalid oxm_length field");
+		}
+		size_t bodylen = oxm->oxm_header.oxm_length - /*sizeof(exp_id)=*/sizeof(uint32_t);
 
 		/* mask flag is false => single value, no mask */
 		if (not get_oxm_hasmask()) {
@@ -538,7 +541,7 @@ public:
 
 			/* sanity check: length must be an even value */
 			if (bodylen % 2) {
-				throw eOxmBadLen("coxmatch_exp::unpack() has_mask is true, but data langth cannot be divided by 2");
+				throw eOxmBadLen("coxmatch_exp::unpack() has_mask is true, but data length cannot be divided by 2");
 			}
 
 			size_t len = bodylen / 2;
