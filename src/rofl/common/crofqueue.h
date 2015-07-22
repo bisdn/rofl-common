@@ -47,6 +47,15 @@ public:
 	/**
 	 *
 	 */
+	size_t
+	size() const {
+		RwLock rwlock(queuelock, RwLock::RWLOCK_READ);
+		return queue.size();
+	};
+
+	/**
+	 *
+	 */
 	void
 	clear() {
 		RwLock rwlock(queuelock, RwLock::RWLOCK_WRITE);

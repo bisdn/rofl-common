@@ -129,9 +129,10 @@ class crofsock :
 		EVENT_ACCEPT			= 5,
 		EVENT_ACCEPT_REFUSED	= 6,
 		EVENT_ACCEPTED			= 7,
-		EVENT_PEER_DISCONNECTED		= 8,
-		EVENT_LOCAL_DISCONNECT		= 9,
+		EVENT_PEER_DISCONNECTED	= 8,
+		EVENT_LOCAL_DISCONNECT	= 9,
 		EVENT_CONGESTION_SOLVED	= 10,
+		EVENT_RX_QUEUE          = 11,
 	};
 
 	enum crofsock_flag_t {
@@ -229,6 +230,23 @@ public:
 	is_established() const
 	{ return socket->is_established(); };
 
+	/**
+	 * @brief	Instructs crofsock to disable reception of messages on the socket.
+	 */
+	void
+	rx_disable()
+	{ rx_disabled = true; };
+
+	/**
+	 * @brief	Instructs crofsock to re-enable reception of messages on the socket.
+	 */
+	void
+	rx_enable()
+	{
+		rofl::ciosrv::notify(rofl::cevent(EVENT_RX_QUEUE));
+		rx_disabled = false;
+	};
+
 private:
 
 
@@ -242,6 +260,8 @@ private:
 		state(STATE_INIT),
 		fragment(NULL),
 		msg_bytes_read(0),
+		max_pkts_rcvd_per_round(DEFAULT_MAX_PKTS_RVCD_PER_ROUND),
+		rx_disabled(false),
 		socket_type(rofl::csocket::SOCKET_TYPE_UNKNOWN),
 		sd(-1)
 	{};
@@ -637,6 +657,12 @@ private:
 	cmemory*					fragment;
 	// number of bytes already received for current message fragment
 	unsigned int				msg_bytes_read;
+    // read not more than this number of packets per round before rescheduling
+    unsigned int                max_pkts_rcvd_per_round;
+    // default value for max_pkts_rcvd_per_round
+    static unsigned int const   DEFAULT_MAX_PKTS_RVCD_PER_ROUND = 16;
+    // flag for RX reception on socket
+    bool                        rx_disabled;
 
 	/*
 	 * scheduler and txqueues
