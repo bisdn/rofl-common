@@ -36,6 +36,7 @@ crofconn::crofconn(
 				state(STATE_INIT),
 				rxqueues(QUEUE_MAX, crofqueue()),
 				rx_pending_messages(false),
+				rx_max_queue_size(DEFAULT_RX_MAX_QUEUE_SIZE),
 				rx_need_lifecheck(false),
 				rxweights(QUEUE_MAX, 1),
 				hello_timeout(DEFAULT_HELLO_TIMEOUT),
@@ -683,6 +684,12 @@ crofconn::recv_message(
 		case rofl::openflow10::OFPT_PACKET_OUT: {
 			rxqueues[QUEUE_PKT].store(msg);
 			LOGGING_DEBUG2 << "[rofl-common][crofconn][recv_message] rxqueues[QUEUE_PKT]:" << std::endl << rxqueues[QUEUE_PKT];
+
+			/* throttle reception of further messages */
+			if (rxqueues[QUEUE_PKT].size() >= rx_max_queue_size) {
+				rofsock.rx_disable();
+			}
+
 		} break;
 		case rofl::openflow10::OFPT_FLOW_MOD:
 		case rofl::openflow10::OFPT_FLOW_REMOVED:
@@ -692,6 +699,12 @@ crofconn::recv_message(
 		case rofl::openflow10::OFPT_BARRIER_REPLY: {
 			rxqueues[QUEUE_FLOW].store(msg);
 			LOGGING_DEBUG2 << "[rofl-common][crofconn][recv_message] rxqueues[QUEUE_FLOW]:" << std::endl << rxqueues[QUEUE_FLOW];
+
+			/* throttle reception of further messages */
+			if (rxqueues[QUEUE_FLOW].size() >= rx_max_queue_size) {
+				rofsock.rx_disable();
+			}
+
 		} break;
 		case rofl::openflow10::OFPT_HELLO:
 		case rofl::openflow10::OFPT_ECHO_REQUEST:
@@ -711,6 +724,12 @@ crofconn::recv_message(
 		case rofl::openflow12::OFPT_PACKET_OUT: {
 			rxqueues[QUEUE_PKT].store(msg);
 			LOGGING_DEBUG2 << "[rofl-common][crofconn][recv_message] rxqueues[QUEUE_PKT]:" << std::endl << rxqueues[QUEUE_PKT];
+
+			/* throttle reception of further messages */
+			if (rxqueues[QUEUE_PKT].size() >= rx_max_queue_size) {
+				rofsock.rx_disable();
+			}
+
 		} break;
 		case rofl::openflow12::OFPT_FLOW_MOD:
 		case rofl::openflow12::OFPT_FLOW_REMOVED:
@@ -723,6 +742,12 @@ crofconn::recv_message(
 		case rofl::openflow12::OFPT_BARRIER_REPLY: {
 			rxqueues[QUEUE_FLOW].store(msg);
 			LOGGING_DEBUG2 << "[rofl-common][crofconn][recv_message] rxqueues[QUEUE_FLOW]:" << std::endl << rxqueues[QUEUE_FLOW];
+
+			/* throttle reception of further messages */
+			if (rxqueues[QUEUE_FLOW].size() >= rx_max_queue_size) {
+				rofsock.rx_disable();
+			}
+
 		} break;
 		case rofl::openflow12::OFPT_HELLO:
 		case rofl::openflow12::OFPT_ECHO_REQUEST:
@@ -742,6 +767,12 @@ crofconn::recv_message(
 		case rofl::openflow13::OFPT_PACKET_OUT: {
 			rxqueues[QUEUE_PKT].store(msg);
 			LOGGING_DEBUG2 << "[rofl-common][crofconn][recv_message] rxqueues[QUEUE_PKT]:" << std::endl << rxqueues[QUEUE_PKT];
+
+			/* throttle reception of further messages */
+			if (rxqueues[QUEUE_PKT].size() >= rx_max_queue_size) {
+				rofsock.rx_disable();
+			}
+
 		} break;
 		case rofl::openflow13::OFPT_FLOW_MOD:
 		case rofl::openflow13::OFPT_FLOW_REMOVED:
@@ -754,6 +785,12 @@ crofconn::recv_message(
 		case rofl::openflow13::OFPT_BARRIER_REPLY: {
 			rxqueues[QUEUE_FLOW].store(msg);
 			LOGGING_DEBUG2 << "[rofl-common][crofconn][recv_message] rxqueues[QUEUE_FLOW]:" << std::endl << rxqueues[QUEUE_FLOW];
+
+			/* throttle reception of further messages */
+			if (rxqueues[QUEUE_FLOW].size() >= rx_max_queue_size) {
+				rofsock.rx_disable();
+			}
+
 		} break;
 		case rofl::openflow13::OFPT_HELLO:
 		case rofl::openflow13::OFPT_ECHO_REQUEST:
@@ -950,6 +987,9 @@ crofconn::handle_messages()
 		// reset timer for transmitting next Echo.request, if we have seen a life signal from our peer
 		timer_start_life_check();
 	}
+
+	// reenable socket
+	rofsock->rx_enable();
 }
 
 

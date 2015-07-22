@@ -230,6 +230,24 @@ public:
 	is_established() const
 	{ return socket->is_established(); };
 
+	/**
+	 * @brief	Instructs crofsock to disable reception of messages on the socket.
+	 */
+	void
+	rx_disable()
+	{ rx_disabled = true; };
+
+	/**
+	 * @brief	Instructs crofsock to re-enable reception of messages on the socket.
+	 */
+	void
+	rx_enable()
+	{
+		if (rx_disabled)
+			rofl::ciosrv::notify(rofl::cevent(EVENT_RX_QUEUE));
+		rx_disabled = false;
+	};
+
 private:
 
 
@@ -243,6 +261,8 @@ private:
 		state(STATE_INIT),
 		fragment(NULL),
 		msg_bytes_read(0),
+		max_pkts_rcvd_per_round(DEFAULT_MAX_PKTS_RVCD_PER_ROUND),
+		rx_disabled(false),
 		socket_type(rofl::csocket::SOCKET_TYPE_UNKNOWN),
 		sd(-1)
 	{};
@@ -642,6 +662,8 @@ private:
     unsigned int                max_pkts_rcvd_per_round;
     // default value for max_pkts_rcvd_per_round
     static unsigned int const   DEFAULT_MAX_PKTS_RVCD_PER_ROUND = 16;
+    // flag for RX reception on socket
+    bool                        rx_disabled;
 
 	/*
 	 * scheduler and txqueues

@@ -239,7 +239,7 @@ crofsock::handle_read(
 
 	try {
 
-		while (true) {
+		while (not rx_disabled) {
 
 			if (0 == fragment) {
 				fragment = new cmemory(sizeof(struct openflow::ofp_header));

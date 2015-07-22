@@ -890,6 +890,11 @@ private:
 
 	bool                rx_pending_messages;
 
+	// maximum number of messages inside a rofqueue, before blocking the socket
+	unsigned int        rx_max_queue_size;
+	// default value for rx_max_queue_size (128)
+	static const int    DEFAULT_RX_MAX_QUEUE_SIZE = 128;
+
 	bool                rx_need_lifecheck;
 
 	std::vector<unsigned int>
