@@ -243,8 +243,7 @@ public:
 	void
 	rx_enable()
 	{
-		if (rx_disabled)
-			rofl::ciosrv::notify(rofl::cevent(EVENT_RX_QUEUE));
+		rofl::ciosrv::notify(rofl::cevent(EVENT_RX_QUEUE));
 		rx_disabled = false;
 	};
 

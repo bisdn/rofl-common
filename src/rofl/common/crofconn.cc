@@ -44,10 +44,10 @@ crofconn::crofconn(
 				echo_interval(DEFAULT_ECHO_INTERVAL * (1 + crandom::draw_random_number()))
 {
 	// scheduler weights for transmission
-	rxweights[QUEUE_OAM ] = 4;
-	rxweights[QUEUE_MGMT] = 8;
-	rxweights[QUEUE_FLOW] = 4;
-	rxweights[QUEUE_PKT ] = 2;
+	rxweights[QUEUE_OAM ] = 16;
+	rxweights[QUEUE_MGMT] = 32;
+	rxweights[QUEUE_FLOW] = 16;
+	rxweights[QUEUE_PKT ] = 8;
 	LOGGING_DEBUG << "[rofl-common][crofconn] "
 			<< "connection created, auxid: " << auxiliary_id.str() << std::endl;
 
@@ -840,6 +840,9 @@ crofconn::send_message_to_env(
 void
 crofconn::handle_messages()
 {
+	// reenable socket
+	rofsock->rx_enable();
+
 	/* we start with handling incoming messages */
 	rx_pending_messages = false;
 
@@ -987,9 +990,6 @@ crofconn::handle_messages()
 		// reset timer for transmitting next Echo.request, if we have seen a life signal from our peer
 		timer_start_life_check();
 	}
-
-	// reenable socket
-	rofsock->rx_enable();
 }
 
 
