@@ -36,6 +36,7 @@ crofconn::crofconn(
 				state(STATE_INIT),
 				rxqueues(QUEUE_MAX, crofqueue()),
 				rx_pending_messages(false),
+				rx_need_lifecheck(false),
 				rxweights(QUEUE_MAX, 1),
 				hello_timeout(DEFAULT_HELLO_TIMEOUT),
 				echo_timeout(DEFAULT_ECHO_TIMEOUT),
@@ -545,7 +546,10 @@ void
 crofconn::event_need_life_check()
 {
 	LOGGING_DEBUG << "[rofl-common][crofconn] event-need-life-check" << std::endl;
-	action_send_echo_request();
+	if (rx_need_lifecheck)
+		action_send_echo_request();
+	else
+		timer_start_life_check();
 }
 
 
@@ -800,6 +804,10 @@ crofconn::handle_messages()
 	/* we start with handling incoming messages */
 	rx_pending_messages = false;
 
+	rx_need_lifecheck = false;
+
+	timer_stop_life_check();
+
 	bool reschedule = false;
 
 	flags.set(FLAGS_RXQUEUE_CONSUMING);
@@ -833,9 +841,6 @@ crofconn::handle_messages()
 
 				delete msg; continue;
 			}
-
-			// reset timer for transmitting next Echo.request, if we have seen a life signal from our peer
-			timer_start_life_check();
 
 			switch (msg->get_type()) {
 			case OFPT_HELLO: {
@@ -930,6 +935,12 @@ crofconn::handle_messages()
 			rofl::ciosrv::notify(rofl::cevent(EVENT_RXQUEUE));
 			rx_pending_messages = true;
 		}
+	} else {
+
+		rx_need_lifecheck = true;
+
+		// reset timer for transmitting next Echo.request, if we have seen a life signal from our peer
+		timer_start_life_check();
 	}
 }
 

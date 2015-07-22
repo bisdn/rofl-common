@@ -890,6 +890,8 @@ private:
 
 	bool                rx_pending_messages;
 
+	bool                rx_need_lifecheck;
+
 	std::vector<unsigned int>
 						rxweights;				// relative scheduling weights for txqueues
 
