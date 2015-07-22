@@ -18,6 +18,7 @@ crofsock::crofsock(
 				state(STATE_INIT),
 				fragment((cmemory*)0),
 				msg_bytes_read(0),
+				max_pkts_rcvd_per_round(DEFAULT_MAX_PKTS_RVCD_PER_ROUND),
 				txqueues(QUEUE_MAX, crofqueue()),
 				txweights(QUEUE_MAX, 1),
 				socket_type(rofl::csocket::SOCKET_TYPE_UNKNOWN),
@@ -211,6 +212,10 @@ crofsock::handle_event(
 	case EVENT_NONE: {
 
 	} break;
+	case EVENT_RX_QUEUE: {
+		if (socket)
+			handle_read(*socket);
+	} break;
 	case EVENT_CONGESTION_SOLVED: {
 		send_from_queue();
 	} break;
@@ -283,6 +288,14 @@ crofsock::handle_read(
 					parse_message(mem);
 
 					pkts_rcvd_in_round++;
+                    // read at most max_pkts_rcvd_per_round (default: 16) packets from socket, reschedule afterwards
+                    if (pkts_rcvd_in_round >= max_pkts_rcvd_per_round) {
+                            LOGGING_DEBUG2 << "[rofl-common][crofsock] "
+                                            << "received " << pkts_rcvd_in_round
+                                            << " packet(s) from peer, rescheduling." << std::endl;
+                            rofl::ciosrv::notify(rofl::cevent(EVENT_RX_QUEUE));
+                            return;
+                    }
 				}
 			}
 		}

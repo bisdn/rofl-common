@@ -35,6 +35,7 @@ crofconn::crofconn(
 				newsd(0),
 				state(STATE_INIT),
 				rxqueues(QUEUE_MAX, crofqueue()),
+				rx_pending_messages(false),
 				rxweights(QUEUE_MAX, 1),
 				hello_timeout(DEFAULT_HELLO_TIMEOUT),
 				echo_timeout(DEFAULT_ECHO_TIMEOUT),
@@ -663,6 +664,12 @@ crofconn::recv_message(
 		rofl::openflow::cofmsg *msg) {
 	LOGGING_DEBUG2 << "[rofl-common][crofconn][recv_message] received message" << std::endl << *msg;
 
+	if (not rx_pending_messages) {
+		LOGGING_DEBUG3 << "[rofl-common][crofconn][recv_message] -EVENT-RXQUEUE-" << std::endl;
+		rofl::ciosrv::notify(rofl::cevent(EVENT_RXQUEUE));
+	}
+	rx_pending_messages = true;
+
 	switch (msg->get_version()) {
 	case rofl::openflow10::OFP_VERSION: {
 		switch (msg->get_type()) {
@@ -769,8 +776,6 @@ crofconn::recv_message(
 	};
 	}
 
-	LOGGING_DEBUG3 << "[rofl-common][crofconn][recv_message] -EVENT-RXQUEUE-" << std::endl;
-	rofl::ciosrv::notify(rofl::cevent(EVENT_RXQUEUE));
 }
 
 
@@ -792,6 +797,9 @@ crofconn::send_message_to_env(
 void
 crofconn::handle_messages()
 {
+	/* we start with handling incoming messages */
+	rx_pending_messages = false;
+
 	bool reschedule = false;
 
 	flags.set(FLAGS_RXQUEUE_CONSUMING);
@@ -918,7 +926,10 @@ crofconn::handle_messages()
 	if (reschedule) {
 		LOGGING_DEBUG3 << "[rofl-common][crofconn][handle_messages] "
 				<< "rescheduling -EVENT-RXQUEUE-" << std::endl;
-		rofl::ciosrv::notify(rofl::cevent(EVENT_RXQUEUE));
+		if (not rx_pending_messages) {
+			rofl::ciosrv::notify(rofl::cevent(EVENT_RXQUEUE));
+			rx_pending_messages = true;
+		}
 	}
 }
 

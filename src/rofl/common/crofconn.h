@@ -888,6 +888,8 @@ private:
 	std::vector<crofqueue>
 						rxqueues;				// queues for receiving messages from crofsock instance => // QUEUE_MAX txqueues
 
+	bool                rx_pending_messages;
+
 	std::vector<unsigned int>
 						rxweights;				// relative scheduling weights for txqueues
 
