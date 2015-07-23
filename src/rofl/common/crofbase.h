@@ -688,7 +688,7 @@ public:
 	virtual void
 	handle_dpt_open(
 			rofl::crofdpt& dpt) {
-		rofl::logging::info << "[rofl-common][crofbase] "
+		LOGGING_INFO << "[rofl-common][crofbase] "
 				<< "dptid: " << dpt.get_dptid().str() << " "
 				<< "control channel established " << std::endl;
 	};
@@ -707,7 +707,7 @@ public:
 	virtual void
 	handle_dpt_close(
 			const rofl::cdptid& dptid) {
-		rofl::logging::info << "[rofl-common][crofbase] "
+		LOGGING_INFO << "[rofl-common][crofbase] "
 				<< "dptid: " << dptid.str() << " "
 				<< "control channel terminated " << std::endl;
 	};
@@ -722,7 +722,7 @@ public:
 	handle_conn_established(
 			rofl::crofdpt& dpt,
 			const rofl::cauxid& auxid) {
-		rofl::logging::info << "[rofl-common][crofbase] "
+		LOGGING_INFO << "[rofl-common][crofbase] "
 				<< "dptid: " << dpt.get_dptid().str() << " "
 				<< "control connection established, "
 				<< "auxid: " << auxid.str() << std::endl;
@@ -738,7 +738,7 @@ public:
 	handle_conn_terminated(
 			rofl::crofdpt& dpt,
 			const rofl::cauxid& auxid) {
-		rofl::logging::info << "[rofl-common][crofbase] "
+		LOGGING_INFO << "[rofl-common][crofbase] "
 				<< "dptid: " << dpt.get_dptid().str() << " "
 				<< "control connection terminated, "
 				<< "auxid: " << auxid.str() << std::endl;
@@ -758,7 +758,7 @@ public:
 	handle_conn_refused(
 			rofl::crofdpt& dpt,
 			const rofl::cauxid& auxid) {
-		rofl::logging::info << "[rofl-common][crofbase] connection refused, "
+		LOGGING_INFO << "[rofl-common][crofbase] connection refused, "
 				<< "dptid: " << dpt.get_dptid().str()  << " auxid: " << auxid.str() << std::endl;
 	};
 
@@ -776,7 +776,7 @@ public:
 	handle_conn_failed(
 			rofl::crofdpt& dpt,
 			const rofl::cauxid& auxid) {
-		rofl::logging::info << "[rofl-common][crofbase] connection failed, "
+		LOGGING_INFO << "[rofl-common][crofbase] connection failed, "
 				<< "dptid: " << dpt.get_dptid().str()  << " auxid: " << auxid.str() << std::endl;
 	};
 
@@ -800,7 +800,7 @@ public:
 	handle_conn_writable(
 			rofl::crofdpt& dpt,
 			const rofl::cauxid& auxid) {
-		rofl::logging::info << "[rofl-common][crofbase] connection is writable, "
+		LOGGING_INFO << "[rofl-common][crofbase] connection is writable, "
 				<< "dptid: " << dpt.get_dptid().str()  << " auxid: " << auxid.str() << std::endl;
 	};
 
@@ -827,7 +827,7 @@ public:
 	virtual void
 	handle_ctl_open(
 			rofl::crofctl& ctl) {
-		rofl::logging::info << "[rofl-common][crofbase] "
+		LOGGING_INFO << "[rofl-common][crofbase] "
 				<< "ctlid: " << ctl.get_ctlid().str() << " "
 				<< "control channel established " << std::endl;
 	};
@@ -846,7 +846,7 @@ public:
 	virtual void
 	handle_ctl_close(
 			const rofl::cctlid& ctlid) {
-		rofl::logging::info << "[rofl-common][crofbase] "
+		LOGGING_INFO << "[rofl-common][crofbase] "
 				<< "ctlid: " << ctlid.str() << " "
 				<< "control channel terminated " << std::endl;
 	};
@@ -861,7 +861,7 @@ public:
 	handle_conn_established(
 			rofl::crofctl& ctl,
 			const rofl::cauxid& auxid) {
-		rofl::logging::info << "[rofl-common][crofbase] "
+		LOGGING_INFO << "[rofl-common][crofbase] "
 				<< "ctlid: " << ctl.get_ctlid().str() << " "
 				<< "control connection established, "
 				<< "auxid: " << auxid.str() << std::endl;
@@ -877,7 +877,7 @@ public:
 	handle_conn_terminated(
 			rofl::crofctl& ctl,
 			const rofl::cauxid& auxid) {
-		rofl::logging::info << "[rofl-common][crofbase] "
+		LOGGING_INFO << "[rofl-common][crofbase] "
 				<< "ctlid: " << ctl.get_ctlid().str() << " "
 				<< "control connection terminated, "
 				<< "auxid: " << auxid.str() << std::endl;
@@ -897,7 +897,7 @@ public:
 	handle_conn_refused(
 			rofl::crofctl& ctl,
 			const rofl::cauxid& auxid) {
-		rofl::logging::info << "[rofl-common][crofbase] connection refused, "
+		LOGGING_INFO << "[rofl-common][crofbase] connection refused, "
 				<< "ctlid: " << ctl.get_ctlid().str()  << " auxid: " << auxid.str() << std::endl;
 	};
 
@@ -915,7 +915,7 @@ public:
 	handle_conn_failed(
 			rofl::crofctl& ctl,
 			const rofl::cauxid& auxid) {
-		rofl::logging::info << "[rofl-common][crofbase] connection failed, "
+		LOGGING_INFO << "[rofl-common][crofbase] connection failed, "
 				<< "ctlid: " << ctl.get_ctlid().str()  << " auxid: " << auxid.str() << std::endl;
 	};
 
@@ -939,7 +939,7 @@ public:
 	handle_conn_writable(
 			rofl::crofctl& ctl,
 			const rofl::cauxid& auxid) {
-		rofl::logging::info << "[rofl-common][crofbase] connection is writable, "
+		LOGGING_INFO << "[rofl-common][crofbase] connection is writable, "
 				<< "ctlid: " << ctl.get_ctlid().str()  << " auxid: " << auxid.str() << std::endl;
 	};
 

@@ -70,7 +70,7 @@ private:
 		// run io loop for this thread until someone calls method rofl::cioloop::get_loop().stop()
 		rofl::cioloop::get_loop(tid).run();
 
-		logging::debug << "[rofl-common][thread] stopping, tid: 0x" << std::hex << tid << std::dec << std::endl;
+		LOGGING_DEBUG << "[rofl-common][thread] stopping, tid: 0x" << std::hex << tid << std::dec << std::endl;
 
 		// set result code, usually just 0
 		rofl::cioloop::threads[tid] = 0;
@@ -97,7 +97,7 @@ public:
 		if ((rc = pthread_create(&tid, NULL, &cioloop::run_thread, NULL)) < 0) {
 			throw eSysCall("pthread_create() failed");
 		}
-		logging::debug << "[rofl-common][cioloop][thread] starting, tid: 0x"
+		LOGGING_DEBUG << "[rofl-common][cioloop][thread] starting, tid: 0x"
 				<< std::hex << tid << std::dec << std::endl;
 		RwLock(cioloop::threads_lock, RwLock::RWLOCK_WRITE);
 		cioloop::threads[tid] = 0;
@@ -113,7 +113,7 @@ public:
 	 */
 	static void
 	drop_thread(pthread_t tid, bool busy = false) {
-		logging::debug << "[rofl-common][cioloop][thread] done, tid: 0x"
+		LOGGING_DEBUG << "[rofl-common][cioloop][thread] done, tid: 0x"
 				<< std::hex << tid << std::dec << std::endl;
 		int rc = 0;
 		RwLock(cioloop::threads_lock, RwLock::RWLOCK_WRITE);
@@ -123,20 +123,20 @@ public:
 		if (busy && cioloop::get_loop(tid).has_active_elements()) {
 			throw eRofIoLoopBusy("loop has still active elements");
 		}
-		logging::debug << "[rofl-common][cioloop][thread] calling stop, tid: 0x"
+		LOGGING_DEBUG << "[rofl-common][cioloop][thread] calling stop, tid: 0x"
 				<< std::hex << tid << std::dec << std::endl;
 
 		cioloop::get_loop(tid).stop();
-		logging::debug << "[rofl-common][cioloop][thread] joining thread, tid: 0x"
+		LOGGING_DEBUG << "[rofl-common][cioloop][thread] joining thread, tid: 0x"
 				<< std::hex << tid << std::dec << std::endl;
 
 		if ((rc = pthread_join(tid, NULL)) < 0) {
-			logging::debug << "[rofl-common][cioloop][thread] cancelling thread, tid: 0x"
+			LOGGING_DEBUG << "[rofl-common][cioloop][thread] cancelling thread, tid: 0x"
 					<< std::hex << tid << std::dec << std::endl;
 
 			pthread_cancel(tid);
 		}
-		logging::debug << "[rofl-common][cioloop][thread] thread terminated, dropping loop, tid: 0x"
+		LOGGING_DEBUG << "[rofl-common][cioloop][thread] thread terminated, dropping loop, tid: 0x"
 				<< std::hex << tid << std::dec << std::endl;
 
 		cioloop::threads.erase(tid);
@@ -170,7 +170,7 @@ public:
 		}
 		RwLock lock(rofl::cioloop::loops_rwlock, RwLock::RWLOCK_WRITE);
 		if (cioloop::loops.find(tid) == cioloop::loops.end()) {
-			logging::debug << "[rofl-common][cioloop][loop] creating loop, tid: 0x"
+			LOGGING_DEBUG << "[rofl-common][cioloop][loop] creating loop, tid: 0x"
 					<< std::hex << tid << std::dec << std::endl;
 			cioloop::loops[tid] = new cioloop(tid);
 		}
@@ -186,7 +186,7 @@ public:
 		if (cioloop::loops.find(tid) == cioloop::loops.end()) {
 			return;
 		}
-		logging::debug << "[rofl-common][cioloop][loop] destroying loop, tid: 0x"
+		LOGGING_DEBUG << "[rofl-common][cioloop][loop] destroying loop, tid: 0x"
 				<< std::hex << tid << std::dec << std::endl;
 		delete cioloop::loops[tid];
 		cioloop::loops.erase(tid);
@@ -299,7 +299,7 @@ protected:
 	 */
 	void
 	register_ciosrv(ciosrv* elem) {
-		rofl::logging::debug << "[rofl-common][cioloop][register_ciosrv] svc:"
+		LOGGING_DEBUG << "[rofl-common][cioloop][register_ciosrv] svc:"
 				<< elem << ", target tid: 0x" << std::hex << tid << std::dec
 				<< ", running tid: 0x" << std::hex << pthread_self() << std::dec << std::endl;
 		{
@@ -324,7 +324,7 @@ protected:
 	 */
 	void
 	deregister_ciosrv(ciosrv* elem) {
-		rofl::logging::debug << "[rofl-common][cioloop][deregister_ciosrv] svc:"
+		LOGGING_DEBUG << "[rofl-common][cioloop][deregister_ciosrv] svc:"
 				<< elem << ", target tid: 0x" << std::hex << tid << std::dec
 				<< ", running tid: 0x" << std::hex << pthread_self() << std::dec << std::endl;
 		{
@@ -399,7 +399,7 @@ protected:
 				}
 			}
 		}
-		rofl::logging::debug << "[rofl-common][cioloop][add_readfd] fd:" << fd
+		LOGGING_DEBUG << "[rofl-common][cioloop][add_readfd] fd:" << fd
 				<< ", tid: 0x" << std::hex << tid << std::dec << std::endl;
 		wakeup(); // wakeup main loop, just in case
 	};
@@ -442,7 +442,7 @@ protected:
 				}
 			}
 			}
-		rofl::logging::debug << "[rofl-common][cioloop][drop_readfd] fd:" << fd
+		LOGGING_DEBUG << "[rofl-common][cioloop][drop_readfd] fd:" << fd
 				<< ", tid: 0x" << std::hex << tid << std::dec << std::endl;
 		wakeup(); // wakeup main loop, just in case
 	};
@@ -483,7 +483,7 @@ protected:
 				}
 			}
 		}
-		rofl::logging::debug << "[rofl-common][cioloop][add_writefd] fd:" << fd
+		LOGGING_DEBUG << "[rofl-common][cioloop][add_writefd] fd:" << fd
 				<< ", tid: 0x" << std::hex << tid << std::dec << std::endl;
 		wakeup(); // wakeup main loop, just in case
 	};
@@ -526,7 +526,7 @@ protected:
 				}
 			}
 		}
-		rofl::logging::debug << "[rofl-common][cioloop][drop_writefd] fd:" << fd
+		LOGGING_DEBUG << "[rofl-common][cioloop][drop_writefd] fd:" << fd
 				<< ", tid: 0x" << std::hex << tid << std::dec << std::endl;
 		wakeup(); // wakeup main loop, just in case
 	};
@@ -590,7 +590,7 @@ private:
 		}
 
 #ifndef NDEBUG
-		rofl::logging::trace << "[rofl-common][cioloop][0x"
+		LOGGING_TRACE << "[rofl-common][cioloop][0x"
 			<< std::hex << pthread_self() << std::dec << "] new loop " << std::endl;
 #endif
 
@@ -610,7 +610,7 @@ private:
 	virtual
 	~cioloop() {
 #ifndef NDEBUG
-		rofl::logging::trace << "[rofl-common][cioloop][0x"
+		LOGGING_TRACE << "[rofl-common][cioloop][0x"
 			<< std::hex << pthread_self() << std::dec << "] delete loop " << std::endl;
 #endif
 		close(epollfd);
@@ -653,7 +653,7 @@ private:
 	void
 	wakeup() {
 #ifndef NDEBUG
-		logging::trace << "[rofl-common][cioloop][wakeup] waking up thread, "
+		LOGGING_TRACE << "[rofl-common][cioloop][wakeup] waking up thread, "
 				<< "tid: 0x" << std::hex << tid << std::dec << std::endl;
 #endif
 		if (not flag_waking_up) {

@@ -158,7 +158,7 @@ private:
 				cached_generation_id((uint64_t)((int64_t)-1))
 	{
 #ifndef NDEBUG
-		rofl::logging::trace << "[rofl-common][crofcore] new crofcore "
+		LOGGING_TRACE << "[rofl-common][crofcore] new crofcore "
 				<< "this: " << std::hex << this << std::dec << " "
 				<< "target tid: 0x" << std::hex << rofcore_tid << std::dec << " "
 				<< "running tid: 0x" << std::hex << pthread_self() << std::dec << " "
@@ -173,7 +173,7 @@ private:
 	virtual
 	~crofcore() {
 #ifndef NDEBUG
-		rofl::logging::trace << "[rofl-common][crofcore] delete crofcore "
+		LOGGING_TRACE << "[rofl-common][crofcore] delete crofcore "
 				<< "this: " << std::hex << this << std::dec << " "
 				<< "target tid: 0x" << std::hex << rofcore_tid << std::dec << " "
 				<< "running tid: 0x" << std::hex << pthread_self() << std::dec << " "
