@@ -14,6 +14,7 @@ v0.6.2
 [B] fixed stalling situation in crofsock under higher load
 [B] making class indent thread aware
 [B] fixed buffer bloat like situation in crofqueue under high loads
+[O] fixed hex output in some coxmatch classes (Fixed issue #14)
 
 v0.6.1
 
