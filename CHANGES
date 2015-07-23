@@ -20,6 +20,9 @@ v0.6.2
 [B] fixed stalling situation in crofsock under higher load
 [B] making class indent thread aware
 [B] fixed buffer bloat like situation in crofqueue under high loads
+[O] fixed hex output in some coxmatch classes (Fixed issue #14)
+[O] fixed hex output for classes cofgroupmod and cofmsg_group_mod 
+    for group-id. Fixes issue #13.
 
 v0.6.1
 

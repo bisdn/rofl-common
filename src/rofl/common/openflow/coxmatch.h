@@ -857,8 +857,8 @@ public:
 public:
 	friend std::ostream&
 	operator<< (std::ostream& os, const coxmatch_ofb_in_port& oxm) {
-		os << dynamic_cast<const coxmatch_32&>(oxm);
-		os << indent(2) << "<in-port: " << std::hex << (int)oxm.get_u32value() << std::dec << " >" << std::endl;
+		os << dynamic_cast<const coxmatch&>(oxm);
+		os << indent(2) << "<in-port: 0x" << std::hex << (int)oxm.get_u32value() << std::dec << " >" << std::endl;
 		return os;
 	};
 };
@@ -883,8 +883,8 @@ public:
 public:
 	friend std::ostream&
 	operator<< (std::ostream& os, const coxmatch_ofb_in_phy_port& oxm) {
-		os << dynamic_cast<const coxmatch_32&>(oxm);
-		os << indent(2) << "<in-phy-port: " << std::hex << (int)oxm.get_u32value() << std::dec << " >" << std::endl;
+		os << dynamic_cast<const coxmatch&>(oxm);
+		os << indent(2) << "<in-phy-port: 0x" << std::hex << (int)oxm.get_u32value() << std::dec << " >" << std::endl;
 		return os;
 	};
 };
@@ -915,8 +915,8 @@ public:
 	operator<< (std::ostream& os, const coxmatch_ofb_metadata& oxm) {
 		os << dynamic_cast<const coxmatch_64&>(oxm);
 		os << std::hex;
-		os << indent(2) << "<metadata: "
-		<< (unsigned long long)oxm.get_u64value() << "/" << (unsigned long long)oxm.get_u64mask()
+		os << indent(2) << "<metadata: 0x"
+		<< (unsigned long long)oxm.get_u64value() << "/0x" << (unsigned long long)oxm.get_u64mask()
 		<< std::dec
 		<< " >" << std::endl;
 		return os;
