@@ -19,7 +19,7 @@ ciosrv::ciosrv(
 	if (0 == tid) {
 		this->tid = pthread_self();
 	}
-	rofl::logging::debug2 << "[rofl-common][ciosrv] "
+	LOGGING_DEBUG2 << "[rofl-common][ciosrv] "
 			<< "constructor " << std::hex << this << std::dec
 			<< ", parameter tid: " << std::hex << tid << std::dec
 			<< ", target tid: " << std::hex << get_thread_id() << std::dec
@@ -31,7 +31,7 @@ ciosrv::ciosrv(
 
 ciosrv::~ciosrv()
 {
-	rofl::logging::debug2 << "[rofl-common][ciosrv] "
+	LOGGING_DEBUG2 << "[rofl-common][ciosrv] "
 			<< "destructor " << std::hex << this << std::dec
 			<< ", target tid: " << std::hex << get_thread_id() << std::dec
 			<< ", running tid: " << std::hex << pthread_self() << std::dec
@@ -60,7 +60,7 @@ ciosrv::__handle_event()
 	try {
 		if (not has_next_event()) {
 #ifndef NDEBUG
-			rofl::logging::trace << "[rofl-common][ciosrv][event] ciosrv instance deleted, "
+			LOGGING_TRACE << "[rofl-common][ciosrv][event] ciosrv instance deleted, "
 					<< "returning from event loop" << std::endl;
 #endif
 			return;
@@ -71,12 +71,12 @@ ciosrv::__handle_event()
 		while (not clone.empty()) {
 			cevent event = clone.get_event();
 #ifndef NDEBUG
-			rofl::logging::trace << "[rofl-common][ciosrv][handle_event] event: " << event.get_cmd()
+			LOGGING_TRACE << "[rofl-common][ciosrv][handle_event] event: " << event.get_cmd()
 					<< " tid: 0x" << std::hex << tid << std::dec << std::endl;
 #endif
 			if (not rofl::cioloop::get_loop(get_thread_id()).has_ciosrv(this)) {
 #ifndef NDEBUG
-				rofl::logging::trace << "[rofl-common][ciosrv][event] ciosrv instance deleted, "
+				LOGGING_TRACE << "[rofl-common][ciosrv][event] ciosrv instance deleted, "
 						<< "returning from event loop" << std::endl;
 #endif
 				return;
@@ -95,8 +95,10 @@ ciosrv::__handle_event()
 /* static */
 void
 cioloop::child_sig_handler (int x) {
-	rofl::logging::debug <<  "[rofl-common][cioloop][child-sig-handler][0x"
-			<< std::hex << pthread_self() << std::dec << "] got signal: " << x << std::endl;
+
+	LOGGING_DEBUG <<  "[rofl-common][cioloop][child-sig-handler][0x"
+		<< std::hex << pthread_self() << std::dec << "] got signal: " << x << std::endl;
+
     // signal(SIGCHLD, child_sig_handler);
 	switch (x) {
 	case SIGINT:
@@ -185,8 +187,9 @@ cioloop::run_loop()
 
 	flag_keep_on_running = false;
 
-	rofl::logging::debug << "[rofl-common][cioloop][run][0x"
-			<< std::hex << pthread_self() << std::dec << "] terminating,"
+
+	LOGGING_DEBUG << "[rofl-common][cioloop][run][0x"
+		<< std::hex << pthread_self() << std::dec << "] terminating,"
 			<< " tid: 0x" << std::hex << tid << std::dec << std::endl;
 }
 
@@ -197,7 +200,7 @@ cioloop::run_on_timers(
 		std::pair<ciosrv*, ctimespec>& next_timeout)
 {
 #ifndef NDEBUG
-	rofl::logging::trace << "[rofl-common][cioloop][run_on_timers][0x"
+		LOGGING_TRACE << "[rofl-common][cioloop][run_on_timers][0x"
 			<< std::hex << pthread_self() << std::dec << "] looking for timers,"
 			<< " tid: 0x" << std::hex << tid << std::dec << std::endl;
 #endif
@@ -223,7 +226,7 @@ cioloop::run_on_timers(
 		}
 
 #ifndef NDEBUG
-		rofl::logging::trace << "[rofl-common][cioloop][run_on_timers][0x"
+		LOGGING_TRACE << "[rofl-common][cioloop][run_on_timers][0x"
 			<< std::hex << pthread_self() << std::dec << "] there are " << clone.size()
 							<< " active timer(s), tid: 0x" << std::hex << tid << std::dec << std::endl;
 #endif
@@ -245,7 +248,7 @@ cioloop::run_on_timers(
 			if (svc->has_expired_timer()) {
 				try {
 #ifndef NDEBUG
-					rofl::logging::trace << "[rofl-common][cioloop][run_on_timers][0x"
+					LOGGING_TRACE << "[rofl-common][cioloop][run_on_timers][0x"
 			<< std::hex << pthread_self() << std::dec << "] urgent timer found,"
 							<< " tid: 0x" << std::hex << tid << std::dec << std::endl;
 #endif
@@ -259,7 +262,7 @@ cioloop::run_on_timers(
 					(svc->get_next_timer().get_timespec() < next_timeout.second)) {
 				next_timeout = std::pair<ciosrv*, ctimespec>( svc, svc->get_next_timer().get_timespec() );
 #ifndef NDEBUG
-				rofl::logging::trace << "[rofl-common][cioloop][run_on_timers][0x"
+				LOGGING_TRACE << "[rofl-common][cioloop][run_on_timers][0x"
 			<< std::hex << pthread_self() << std::dec << "] normal timer found, "
 						<< "tid: 0x" << std::hex << tid << std::dec << ", timeout: "
 						<< (svc->get_next_timer().get_timespec() - ctimespec::now()).str() << std::endl;
@@ -269,7 +272,7 @@ cioloop::run_on_timers(
 	} while (flag_new_timer_installed);
 
 #ifndef NDEBUG
-	rofl::logging::trace << "[rofl-common][cioloop][run_on_timers][0x"
+	LOGGING_TRACE << "[rofl-common][cioloop][run_on_timers][0x"
 			<< std::hex << pthread_self() << std::dec << "] done with urgent timers,"
 			<< " next timeout: " << (next_timeout.second - ctimespec::now()).str()
 			<< " tid: 0x" << std::hex << tid << std::dec
@@ -284,7 +287,7 @@ cioloop::run_on_events()
 {
 	do {
 #ifndef NDEBUG
-		rofl::logging::trace << "[rofl-common][cioloop][run_on_events][0x"
+		LOGGING_TRACE << "[rofl-common][cioloop][run_on_events][0x"
 			<< std::hex << pthread_self() << std::dec << "] looking for events,"
 				<< " tid: 0x" << std::hex << tid << std::dec << std::endl;
 #endif
@@ -303,7 +306,7 @@ cioloop::run_on_events()
 		}
 
 #ifndef NDEBUG
-		rofl::logging::trace << "[rofl-common][cioloop][run_on_events][0x"
+		LOGGING_TRACE << "[rofl-common][cioloop][run_on_events][0x"
 			<< std::hex << pthread_self() << std::dec << "] there are " << clone.size()
 							<< " active event(s), tid: 0x" << std::hex << tid << std::dec << std::endl;
 #endif
@@ -339,7 +342,7 @@ cioloop::run_on_kernel(std::pair<ciosrv*, ctimespec>& next_timeout)
 	}
 
 #ifndef NDEBUG
-	rofl::logging::trace << "[rofl-common][cioloop][run][0x"
+	LOGGING_TRACE << "[rofl-common][cioloop][run][0x"
 			<< std::hex << pthread_self() << std::dec << "] before epoll_wait,"
 			<< " next timeout: " << ctimespec(ts).str()
 			<< " tid: 0x" << std::hex << tid << std::dec << std::endl << *this;
@@ -353,7 +356,7 @@ cioloop::run_on_kernel(std::pair<ciosrv*, ctimespec>& next_timeout)
 	flag_wait_on_kernel = false;
 
 #ifndef NDEBUG
-	rofl::logging::trace << "[rofl-common][cioloop][run][0x"
+	LOGGING_TRACE << "[rofl-common][cioloop][run][0x"
 			<< std::hex << pthread_self() << std::dec << "] after epoll_wait,"
 			<< " tid: 0x" << std::hex << tid << std::dec << std::endl << *this;
 #endif
@@ -364,7 +367,7 @@ cioloop::run_on_kernel(std::pair<ciosrv*, ctimespec>& next_timeout)
 		case EINTR:
 			break;
 		default:
-			rofl::logging::error << "[rofl-common][cioloop][run][0x"
+			LOGGING_ERROR << "[rofl-common][cioloop][run][0x"
 			<< std::hex << pthread_self() << std::dec << "] " << eSysCall("epoll_wait()") << std::endl;
 			break;
 		}
@@ -373,7 +376,7 @@ cioloop::run_on_kernel(std::pair<ciosrv*, ctimespec>& next_timeout)
 
 		if ((NULL != next_timeout.first) && has_ciosrv(next_timeout.first)) {
 #ifndef NDEBUG
-			rofl::logging::trace << "[rofl-common][cioloop][run][0x"
+			LOGGING_TRACE << "[rofl-common][cioloop][run][0x"
 			<< std::hex << pthread_self() << std::dec << "] timeout event: "
 					<< next_timeout.first << std::endl;
 #endif
@@ -395,7 +398,7 @@ cioloop::run_on_kernel(std::pair<ciosrv*, ctimespec>& next_timeout)
 						// pipe
 						if ((events[i].events & EPOLLIN) && (events[i].data.fd == pipe.pipefd[0])) {
 #ifndef NDEBUG
-							rofl::logging::trace << "[rofl-common][cioloop][run][0x"
+			LOGGING_TRACE << "[rofl-common][cioloop][run][0x"
 			<< std::hex << pthread_self() << std::dec << "] wakeup signal received via pipe"
 									<< " tid: 0x" << std::hex << tid << std::dec << std::endl;
 #endif
@@ -411,7 +414,7 @@ cioloop::run_on_kernel(std::pair<ciosrv*, ctimespec>& next_timeout)
 
 				if ((events[i].events & EPOLLERR) && has_ciosrv(iosrv)) {
 #ifndef NDEBUG
-					rofl::logging::trace << "[rofl-common][cioloop][run][0x"
+					LOGGING_TRACE << "[rofl-common][cioloop][run][0x"
 			<< std::hex << pthread_self() << std::dec << "]"
 							<< " error event: " << events[i].data.fd << " on " << std::hex << iosrv << std::dec
 							<< " tid: 0x" << std::hex << tid << std::dec << std::endl;
@@ -420,7 +423,7 @@ cioloop::run_on_kernel(std::pair<ciosrv*, ctimespec>& next_timeout)
 				}
 				if ((events[i].events & EPOLLOUT) && has_ciosrv(iosrv)) {
 #ifndef NDEBUG
-					rofl::logging::trace << "[rofl-common][cioloop][run][0x"
+					LOGGING_TRACE << "[rofl-common][cioloop][run][0x"
 			<< std::hex << pthread_self() << std::dec << "]"
 							<< " write event: " << events[i].data.fd << " on " << std::hex << iosrv << std::dec
 							<< " tid: 0x" << std::hex << tid << std::dec << std::endl;
@@ -429,7 +432,7 @@ cioloop::run_on_kernel(std::pair<ciosrv*, ctimespec>& next_timeout)
 				}
 				if ((events[i].events & EPOLLIN ) && has_ciosrv(iosrv)) {
 #ifndef NDEBUG
-					rofl::logging::trace << "[rofl-common][cioloop][run][0x"
+					LOGGING_TRACE << "[rofl-common][cioloop][run][0x"
 			<< std::hex << pthread_self() << std::dec << "]"
 							<< " read event: " << events[i].data.fd << " on " << std::hex << iosrv << std::dec
 							<< " tid: 0x" << std::hex << tid << std::dec << std::endl;;
@@ -440,13 +443,13 @@ cioloop::run_on_kernel(std::pair<ciosrv*, ctimespec>& next_timeout)
 			}
 
 		} catch (rofl::RoflException& e) {
-			rofl::logging::error << "[rofl-common][cioloop][run][0x"
+			LOGGING_ERROR << "[rofl-common][cioloop][run][0x"
 			<< std::hex << pthread_self() << std::dec << "] caught "
 					<< "RoflException in main loop: " << e.what() << std::endl;
 			rofl::indent::null();
 
 		} catch (std::exception& e) {
-			rofl::logging::error << "[rofl-common][cioloop][run][0x"
+			LOGGING_ERROR << "[rofl-common][cioloop][run][0x"
 			<< std::hex << pthread_self() << std::dec << "] caught "
 					<< "std::exception in main loop: " << e.what() << std::endl;
 			rofl::indent::null();

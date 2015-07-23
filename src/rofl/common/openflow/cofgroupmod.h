@@ -192,7 +192,7 @@ public:
 			default:
 				throw eBadVersion();
 			}
-			os << "group-id:" << (int)groupmod.get_group_id() << " >" << std::endl;
+			os << "group-id: 0x" << std::hex << (unsigned int)groupmod.get_group_id() << std::dec << " >" << std::endl;
 			os << indent(2) << "<buckets: >" << std::endl;
 			indent i(4);
 			os << groupmod.buckets;

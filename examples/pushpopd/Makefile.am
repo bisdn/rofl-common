@@ -4,7 +4,7 @@ if !ONLY_C_CODE
 
 SUBDIRS = 
 
-sbin_PROGRAMS = pushpopd
+noinst_PROGRAMS = pushpopd
 
 pushpopd_SOURCES = \
 	pushpopd.cpp \

@@ -74,12 +74,14 @@ crofbase::is_ofp_version_supported(
 
 
 
+
 void
 crofbase::set_log_level(
 		unsigned int level)
 {
 	rofl::logging::set_debug_level(level);
 };
+
 
 
 
@@ -122,6 +124,7 @@ crofbase::get_dpt_listening(
 
 
 
+
 void
 crofbase::drop_dpt_listening(
 		unsigned int sockid)
@@ -137,6 +140,7 @@ crofbase::has_dpt_listening(
 {
 	return rofl::crofcore::set_rofcore(this).has_dpt_listening(sockid);
 };
+
 
 
 

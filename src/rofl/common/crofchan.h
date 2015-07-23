@@ -320,7 +320,7 @@ private:
 	 */
 	virtual void
 	handle_connect_refused(crofconn& conn) {
-		rofl::logging::debug2 << "[rofl-common][crofchan] "
+		LOGGING_DEBUG2 << "[rofl-common][crofchan] "
 				<< "connection refused, auxid: " << conn.get_aux_id().str() << std::endl;
 		rofl::RwLock(conns_rwlock, rofl::RwLock::RWLOCK_WRITE);
 		conns_refused.push_back(conn.get_aux_id());
@@ -332,7 +332,7 @@ private:
 	 */
 	virtual void
 	handle_connect_failed(crofconn& conn) {
-		rofl::logging::debug2 << "[rofl-common][crofchan] "
+		LOGGING_DEBUG2 << "[rofl-common][crofchan] "
 				<< "connection failed, auxid: " << conn.get_aux_id().str() << std::endl;
 		rofl::RwLock(conns_rwlock, rofl::RwLock::RWLOCK_WRITE);
 		conns_failed.push_back(conn.get_aux_id());
@@ -344,7 +344,7 @@ private:
 	 */
 	virtual void
 	handle_connected(crofconn& conn, uint8_t ofp_version) {
-		rofl::logging::debug2 << "[rofl-common][crofchan] "
+		LOGGING_DEBUG2 << "[rofl-common][crofchan] "
 				<< "connection established, auxid: " << conn.get_aux_id().str() << std::endl;
 		rofl::RwLock(conns_rwlock, rofl::RwLock::RWLOCK_WRITE);
 		conns_established.push_back(conn.get_aux_id());
@@ -356,7 +356,7 @@ private:
 	 */
 	virtual void
 	handle_closed(crofconn& conn) {
-		rofl::logging::debug2 << "[rofl-common][crofchan] "
+		LOGGING_DEBUG2 << "[rofl-common][crofchan] "
 				<< "connection terminated, auxid: " << conn.get_aux_id().str() << std::endl;
 		rofl::RwLock(conns_rwlock, rofl::RwLock::RWLOCK_WRITE);
 		conns_terminated.push_back(conn.get_aux_id());
