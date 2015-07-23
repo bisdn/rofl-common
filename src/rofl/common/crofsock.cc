@@ -19,6 +19,7 @@ crofsock::crofsock(
 				fragment((cmemory*)0),
 				msg_bytes_read(0),
 				max_pkts_rcvd_per_round(DEFAULT_MAX_PKTS_RVCD_PER_ROUND),
+				rx_disabled(false),
 				txqueues(QUEUE_MAX, crofqueue()),
 				txweights(QUEUE_MAX, 1),
 				socket_type(rofl::csocket::SOCKET_TYPE_UNKNOWN),
