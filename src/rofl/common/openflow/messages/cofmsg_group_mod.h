@@ -200,8 +200,10 @@ public:
 				os << indent(4) << "<command: -UNKNOWN- >" << std::endl;
 			};
 			}
-		os << indent(4) << "<group-type:" 	<< (int)msg.get_group_type() 	<< " >" << std::endl;
-		os << indent(4) << "<group-id:" 	<< (int)msg.get_group_id() 		<< " >" << std::endl;
+		os << indent(4) << "<group-type:"
+				<< (int)msg.get_group_type() << " >" << std::endl;
+		os << indent(4) << "<group-id:"
+				<< std::hex << (unsigned int)msg.get_group_id() << std::dec << " >" << std::endl;
 		rofl::indent i(4);
 		os << msg.buckets;
 		return os;
