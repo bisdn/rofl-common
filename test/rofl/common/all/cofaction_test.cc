@@ -1122,7 +1122,7 @@ cofaction_test::testActionSetField()
 	CPPUNIT_ASSERT(action.get_type() 	== rofl::openflow::OFPAT_SET_FIELD);
 	CPPUNIT_ASSERT(action.get_length() 	== total_length);
 	CPPUNIT_ASSERT(action.length() 		== total_length);
-	CPPUNIT_ASSERT(action.get_oxm()		== oxm);
+	CPPUNIT_ASSERT(action.get_oxm_48()	== oxm);
 
 	rofl::openflow::cofaction_set_field clone(rofl::openflow13::OFP_VERSION);
 
@@ -1133,7 +1133,7 @@ cofaction_test::testActionSetField()
 	CPPUNIT_ASSERT(clone.get_type() 	== rofl::openflow::OFPAT_SET_FIELD);
 	CPPUNIT_ASSERT(clone.get_length() 	== total_length);
 	CPPUNIT_ASSERT(clone.length() 		== total_length);
-	CPPUNIT_ASSERT(clone.get_oxm() 		== oxm);
+	CPPUNIT_ASSERT(clone.get_oxm_48()	== oxm);
 }
 
 

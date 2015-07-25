@@ -118,67 +118,66 @@ cofmatch::pack_of10(uint8_t* buf, size_t buflen)
 	struct rofl::openflow10::ofp_match *m = (struct rofl::openflow10::ofp_match*)buf;
 
 	// in_port
-	if (matches.has_match(OXM_TLV_BASIC_IN_PORT)) {
-		m->in_port = htobe16((uint16_t)(static_cast<const coxmatch_32*>(matches.get_match(OXM_TLV_BASIC_IN_PORT))->get_u32value() & 0x0000ffff));
+	if (matches.has_ofb_in_port()) {
+		m->in_port = htobe16(matches.get_ofb_in_port().get_u32value() & 0x0000ffff);
 	} else {
 		wildcards |= rofl::openflow10::OFPFW_IN_PORT;
 	}
 
 	// dl_src
-	if (matches.has_match(OXM_TLV_BASIC_ETH_SRC)) {
-		memcpy(m->dl_src, static_cast<const coxmatch_48*>(matches.get_match(OXM_TLV_BASIC_ETH_SRC))->get_u48value_as_lladdr().somem(), OFP_ETH_ALEN);
+	if (matches.has_ofb_eth_src()) {
+		matches.get_ofb_eth_src().get_u48value_as_lladdr().pack(m->dl_src, OFP_ETH_ALEN);
 	} else {
 		wildcards |= rofl::openflow10::OFPFW_DL_SRC;
 	}
 
 	// dl_dst
-	if (matches.has_match(OXM_TLV_BASIC_ETH_DST)) {
-		memcpy(m->dl_dst, static_cast<const coxmatch_48*>(matches.get_match(OXM_TLV_BASIC_ETH_DST))->get_u48value_as_lladdr().somem(), OFP_ETH_ALEN);
+	if (matches.has_ofb_eth_dst()) {
+		matches.get_ofb_eth_dst().get_u48value_as_lladdr().pack(m->dl_dst, OFP_ETH_ALEN);
 	} else {
 		wildcards |= rofl::openflow10::OFPFW_DL_DST;
 	}
 
 	// dl_vlan
-	if (matches.has_match(OXM_TLV_BASIC_VLAN_VID)) {
-		m->dl_vlan = htobe16(static_cast<const coxmatch_16*>(matches.get_match(OXM_TLV_BASIC_VLAN_VID))->get_u16value());
+	if (matches.has_ofb_vlan_vid()) {
+		m->dl_vlan = htobe16(matches.get_ofb_vlan_vid().get_u16value());
 	} else {
 		wildcards |= rofl::openflow10::OFPFW_DL_VLAN;
 	}
 
 	// dl_vlan_pcp
-	if (matches.has_match(OXM_TLV_BASIC_VLAN_PCP)) {
-		m->dl_vlan_pcp = static_cast<const coxmatch_8*>(matches.get_match(OXM_TLV_BASIC_VLAN_PCP))->get_u8value();
+	if (matches.has_ofb_vlan_pcp()) {
+		m->dl_vlan_pcp = matches.get_ofb_vlan_pcp().get_u8value();
 	} else {
 		wildcards |= rofl::openflow10::OFPFW_DL_VLAN_PCP;
 	}
 
 	// dl_type
-	if (matches.has_match(OXM_TLV_BASIC_ETH_TYPE)) {
-		m->dl_type = htobe16(static_cast<const coxmatch_16*>(matches.get_match(OXM_TLV_BASIC_ETH_TYPE))->get_u16value());
+	if (matches.has_ofb_eth_type()) {
+		m->dl_type = htobe16(matches.get_ofb_eth_type().get_u16value());
 	} else {
 		wildcards |= rofl::openflow10::OFPFW_DL_TYPE;
 	}
 
 	// nw_tos
-	if (matches.has_match(rofl::openflow::experimental::OXM_TLV_EXPR_NW_TOS)) {
-		m->nw_tos = static_cast<const coxmatch_8*>(matches.get_match(rofl::openflow::experimental::OXM_TLV_EXPR_NW_TOS))->get_u8value();
+	if (matches.has_ofx_nw_tos()) {
+		m->nw_tos = matches.get_ofx_nw_tos().get_u8value();
 	} else {
 		wildcards |= rofl::openflow10::OFPFW_NW_TOS;
 	}
 
 	// nw_proto
-	if (matches.has_match(rofl::openflow::experimental::OXM_TLV_EXPR_NW_PROTO)) {
-		m->nw_proto = static_cast<const coxmatch_8*>(matches.get_match(rofl::openflow::experimental::OXM_TLV_EXPR_NW_PROTO))->get_u8value();
+	if (matches.has_ofx_nw_proto()) {
+		m->nw_proto = matches.get_ofx_nw_proto().get_u8value();
 	} else {
 		wildcards |= rofl::openflow10::OFPFW_NW_PROTO;
 	}
 
 	// nw_src
-	if (matches.has_match(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC)) {
-		coxmatch_32 const *oxm = static_cast<const coxmatch_32*>(matches.get_match(rofl::openflow::experimental::OXM_TLV_EXPR_NW_SRC));
-		m->nw_src = htobe32(oxm->get_u32value());
-		if (oxm->get_oxm_hasmask()) {
-			std::bitset<32> mask(oxm->get_u32mask());
+	if (matches.has_ofx_nw_src()) {
+		m->nw_src = htobe32(matches.get_ofx_nw_src().get_u32value());
+		if (matches.get_ofx_nw_src().get_oxm_hasmask()) {
+			std::bitset<32> mask(matches.get_ofx_nw_src().get_u32mask());
 			wildcards |= ((32 - mask.count()) << rofl::openflow10::OFPFW_NW_SRC_SHIFT) & rofl::openflow10::OFPFW_NW_SRC_MASK;
 		}
 	} else {
@@ -187,11 +186,10 @@ cofmatch::pack_of10(uint8_t* buf, size_t buflen)
 
 
 	// nw_dst
-	if (matches.has_match(rofl::openflow::experimental::OXM_TLV_EXPR_NW_DST)) {
-		coxmatch_32 const *oxm =  static_cast<const coxmatch_32*>(matches.get_match(experimental::OXM_TLV_EXPR_NW_DST));
-		m->nw_dst = htobe32(oxm->get_u32value());
-		if (oxm->get_oxm_hasmask()) {
-			std::bitset<32> mask(oxm->get_u32mask());
+	if (matches.has_ofx_nw_dst()) {
+		m->nw_dst = htobe32(matches.get_ofx_nw_dst().get_u32value());
+		if (matches.get_ofx_nw_dst().get_oxm_hasmask()) {
+			std::bitset<32> mask(matches.get_ofx_nw_dst().get_u32mask());
 			wildcards |= ((32 - mask.count()) << rofl::openflow10::OFPFW_NW_DST_SHIFT) & rofl::openflow10::OFPFW_NW_DST_MASK;
 		}
 	} else {
@@ -199,15 +197,15 @@ cofmatch::pack_of10(uint8_t* buf, size_t buflen)
 	}
 
 	// tp_src
-	if (matches.has_match(rofl::openflow::experimental::OXM_TLV_EXPR_TP_SRC)) {
-		m->tp_src = htobe16(static_cast<const coxmatch_16*>(matches.get_match(rofl::openflow::experimental::OXM_TLV_EXPR_TP_SRC))->get_u16value());
+	if (matches.has_ofx_tp_src()) {
+		m->tp_src = htobe16(matches.get_ofx_tp_src().get_u16value());
 	} else {
 		wildcards |= rofl::openflow10::OFPFW_TP_SRC;
 	}
 
 	// tp_dst
-	if (matches.has_match(rofl::openflow::experimental::OXM_TLV_EXPR_TP_DST)) {
-		m->tp_dst = htobe16(static_cast<const coxmatch_16*>(matches.get_match(rofl::openflow::experimental::OXM_TLV_EXPR_TP_DST))->get_u16value());
+	if (matches.has_ofx_tp_dst()) {
+		m->tp_dst = htobe16(matches.get_ofx_tp_dst().get_u16value());
 	} else {
 		wildcards |= rofl::openflow10::OFPFW_TP_DST;
 	}
@@ -232,33 +230,33 @@ cofmatch::unpack_of10(uint8_t* buf, size_t buflen)
 
 	// in_port
 	if (!(wildcards & rofl::openflow10::OFPFW_IN_PORT)) {
-		matches.add_match(new coxmatch_ofb_in_port(be16toh(m->in_port)));
+		matches.add_ofb_in_port(be16toh(m->in_port));
 	}
 
 	// dl_src
 	if (!(wildcards & rofl::openflow10::OFPFW_DL_SRC)) {
-		matches.add_match(new coxmatch_ofb_eth_src(rofl::cmacaddr(m->dl_src, OFP_ETH_ALEN)));
+		matches.add_ofb_eth_src(rofl::caddress_ll(m->dl_src, OFP_ETH_ALEN));
 	}
 
 	// dl_dst
 	if (!(wildcards & rofl::openflow10::OFPFW_DL_DST)) {
-		matches.add_match(new coxmatch_ofb_eth_dst(rofl::cmacaddr(m->dl_dst, OFP_ETH_ALEN)));
+		matches.add_ofb_eth_dst(rofl::caddress_ll(m->dl_dst, OFP_ETH_ALEN));
 	}
 
 	// dl_vlan
 	if (!(wildcards & rofl::openflow10::OFPFW_DL_VLAN)) {
-		matches.add_match(new coxmatch_ofb_vlan_vid(be16toh(m->dl_vlan)));
+		matches.add_ofb_vlan_vid(be16toh(m->dl_vlan));
 	}
 
 	// dl_vlan_pcp
 	if (!(wildcards & rofl::openflow10::OFPFW_DL_VLAN_PCP) && m->dl_vlan != 0xffff) { //0xFFFF value is used to indicate that no VLAN id eas set.
-		matches.add_match(new coxmatch_ofb_vlan_pcp(m->dl_vlan_pcp));
+		matches.add_ofb_vlan_pcp(m->dl_vlan_pcp);
 	}
 
 	// dl_type
 	if (!(wildcards & rofl::openflow10::OFPFW_DL_TYPE)) {
 		const uint16_t dl_type = be16toh(m->dl_type);
-		matches.add_match(new coxmatch_ofb_eth_type(dl_type));
+		matches.add_ofb_eth_type(dl_type);
 
 		// The following text is added in the OpenFlow 1.0.1 specification:
 		// Protocol-specific fields within ofp_match must be ignored when the corresponding protocol
@@ -279,7 +277,7 @@ cofmatch::unpack_of10(uint8_t* buf, size_t buflen)
 				rofl::caddress_in4 addr; addr.set_addr_nbo(m->nw_src);
 				rofl::caddress_in4 mask; mask.set_addr_nbo(htobe32((uint32_t)u_mask));
 				if (num_of_bits <= 32) {
-					matches.add_match(new coxmatch_ofx_nw_src(addr, mask));
+					matches.add_ofx_nw_src(addr, mask);
 				}
 			}
 
@@ -292,30 +290,30 @@ cofmatch::unpack_of10(uint8_t* buf, size_t buflen)
 				rofl::caddress_in4 addr; addr.set_addr_nbo(m->nw_dst);
 				rofl::caddress_in4 mask; mask.set_addr_nbo(htobe32((uint32_t)u_mask));
 				if (num_of_bits <= 32) {
-					matches.add_match(new coxmatch_ofx_nw_dst(addr, mask));
+					matches.add_ofx_nw_dst(addr, mask);
 				}
 			}
 
 			if (dl_type == 0x0800 /* IPv4 */) {
 				// nw_tos
 				if (!(wildcards & rofl::openflow10::OFPFW_NW_TOS)) {
-					matches.add_match(new coxmatch_ofx_nw_tos(m->nw_tos));
+					matches.add_ofx_nw_tos(m->nw_tos);
 				}
 
 				// nw_proto
 				if (!(wildcards & rofl::openflow10::OFPFW_NW_PROTO)) {
 					const uint8_t nw_proto = m->nw_proto;
-					matches.add_match(new coxmatch_ofx_nw_proto(nw_proto));
+					matches.add_ofx_nw_proto(nw_proto);
 
 					if (nw_proto == 6 /* TCP */ || nw_proto == 17 /* UDP */ || nw_proto == 1 /* ICMP */) {
 						// tp_src
 						if (!(wildcards & rofl::openflow10::OFPFW_TP_SRC)) {
-							matches.add_match(new coxmatch_ofx_tp_src(be16toh(m->tp_src)));
+							matches.add_ofx_tp_src(be16toh(m->tp_src));
 						}
 
 						// tp_dst
 						if (!(wildcards & rofl::openflow10::OFPFW_TP_DST)) {
-							matches.add_match(new coxmatch_ofx_tp_dst(be16toh(m->tp_dst)));
+							matches.add_ofx_tp_dst(be16toh(m->tp_dst));
 						}
 					}
 				}
@@ -325,7 +323,7 @@ cofmatch::unpack_of10(uint8_t* buf, size_t buflen)
 				// arp_opcode
 				if (!(wildcards & rofl::openflow10::OFPFW_NW_PROTO)) {
 					const uint8_t arp_opcode = m->nw_proto;
-					matches.add_match(new coxmatch_ofx_nw_proto(arp_opcode));
+					matches.add_ofb_arp_opcode(arp_opcode);
 				}
 			}
 		}
@@ -390,270 +388,270 @@ cofmatch::check_prerequisites() const
 		/*
 		 * these are generic prerequisites as defined in OF 1.3, section 7.2.3.6, page 53 ff.
 		 */
-		if (matches.has_match(OXM_TLV_BASIC_IN_PHY_PORT)) {
-			if (not matches.has_match(OXM_TLV_BASIC_IN_PORT)) {
+		if (matches.has_ofb_in_phy_port()) {
+			if (not matches.has_ofb_in_port()) {
 				LOGGING_WARN << "[rofl][match] rejecting ofp_match: IN-PHY-PORT defined while no IN-PORT is present" << std::endl << matches;
 				throw eBadMatchBadPrereq();
 			}
 		}
 
-		if (matches.has_match(OXM_TLV_BASIC_VLAN_PCP)) {
-			if (openflow::OFPVID_NONE == static_cast<const coxmatch_16*>(matches.get_match(OXM_TLV_BASIC_VLAN_VID))->get_u16value()) {
+		if (matches.has_ofb_vlan_pcp()) {
+			if (openflow::OFPVID_NONE == matches.get_ofb_vlan_vid().get_u16value()) {
 				LOGGING_WARN << "[rofl][match] rejecting ofp_match: VLAN-PCP defined while VID is set to OFPVID-NONE" << std::endl << matches;
 				throw eBadMatchBadPrereq();
 			}
 		}
 
-		if (matches.has_match(OXM_TLV_BASIC_IP_DSCP)) {
-			if ((not matches.has_match(OXM_TLV_BASIC_ETH_TYPE)) ||
-					((static_cast<const coxmatch_16*>(matches.get_match(OXM_TLV_BASIC_ETH_TYPE))->get_u16value() != 0x0800) &&
-							(static_cast<const coxmatch_16*>(matches.get_match(OXM_TLV_BASIC_ETH_TYPE))->get_u16value() != 0x86dd))) {
+		if (matches.has_ofb_ip_dscp()) {
+			if ((not matches.has_ofb_eth_type()) ||
+					((matches.get_ofb_eth_type().get_u16value() != 0x0800) &&
+					 (matches.get_ofb_eth_type().get_u16value() != 0x86dd))) {
 				LOGGING_WARN << "[rofl][match] rejecting ofp_match: IP-DSCP defined while ETH-TYPE is not IPv4/IPv6" << std::endl << matches;
 				throw eBadMatchBadPrereq();
 			}
 		}
 
-		if (matches.has_match(OXM_TLV_BASIC_IP_ECN)) {
-			if ((not matches.has_match(OXM_TLV_BASIC_ETH_TYPE)) ||
-					((static_cast<const coxmatch_16*>(matches.get_match(OXM_TLV_BASIC_ETH_TYPE))->get_u16value() != 0x0800) &&
-							(static_cast<const coxmatch_16*>(matches.get_match(OXM_TLV_BASIC_ETH_TYPE))->get_u16value() != 0x86dd))) {
+		if (matches.has_ofb_ip_ecn()) {
+			if ((not matches.has_ofb_eth_type()) ||
+					((matches.get_ofb_eth_type().get_u16value() != 0x0800) &&
+					 (matches.get_ofb_eth_type().get_u16value() != 0x86dd))) {
 				LOGGING_WARN << "[rofl][match] rejecting ofp_match: IP-ECN defined while ETH-TYPE is not IPv4/IPv6" << std::endl << matches;
 				throw eBadMatchBadPrereq();
 			}
 		}
 
-		if (matches.has_match(OXM_TLV_BASIC_IP_PROTO)) {
-			if ((not matches.has_match(OXM_TLV_BASIC_ETH_TYPE)) ||
-					((static_cast<const coxmatch_16*>(matches.get_match(OXM_TLV_BASIC_ETH_TYPE))->get_u16value() != 0x0800) &&
-							(static_cast<const coxmatch_16*>(matches.get_match(OXM_TLV_BASIC_ETH_TYPE))->get_u16value() != 0x86dd))) {
+		if (matches.has_ofb_ip_proto()) {
+			if ((not matches.has_ofb_eth_type()) ||
+					((matches.get_ofb_eth_type().get_u16value() != 0x0800) &&
+					 (matches.get_ofb_eth_type().get_u16value() != 0x86dd))) {
 				LOGGING_WARN << "[rofl][match] rejecting ofp_match: IP-PROTO defined while ETH-TYPE is not IPv4/IPv6" << std::endl << matches;
 				throw eBadMatchBadPrereq();
 			}
 		}
 
-		if (matches.has_match(OXM_TLV_BASIC_IPV4_SRC)) {
-			if ((not matches.has_match(OXM_TLV_BASIC_ETH_TYPE)) ||
-					(static_cast<const coxmatch_16*>(matches.get_match(OXM_TLV_BASIC_ETH_TYPE))->get_u16value() != 0x0800)) {
+		if (matches.has_ofb_ipv4_src()) {
+			if ((not matches.has_ofb_eth_type()) ||
+					(matches.get_ofb_eth_type().get_u16value() != 0x0800)) {
 				LOGGING_WARN << "[rofl][match] rejecting ofp_match: IPV4-SRC defined while ETH-TYPE is not IPv4" << std::endl << matches;
 				throw eBadMatchBadPrereq();
 			}
 		}
 
-		if (matches.has_match(OXM_TLV_BASIC_IPV4_DST)) {
-			if ((not matches.has_match(OXM_TLV_BASIC_ETH_TYPE)) ||
-					(static_cast<const coxmatch_16*>(matches.get_match(OXM_TLV_BASIC_ETH_TYPE))->get_u16value() != 0x0800)) {
+		if (matches.has_ofb_ipv4_dst()) {
+			if ((not matches.has_ofb_eth_type()) ||
+					(matches.get_ofb_eth_type().get_u16value() != 0x0800)) {
 				LOGGING_WARN << "[rofl][match] rejecting ofp_match: IPV4-DST defined while ETH-TYPE is not IPv4" << std::endl << matches;
 				throw eBadMatchBadPrereq();
 			}
 		}
 
-		if (matches.has_match(OXM_TLV_BASIC_TCP_SRC)) {
-			if ((not matches.has_match(OXM_TLV_BASIC_IP_PROTO)) ||
-					(static_cast<const coxmatch_8*>(matches.get_match(OXM_TLV_BASIC_IP_PROTO))->get_u8value() != 6)) {
+		if (matches.has_ofb_tcp_src()) {
+			if ((not matches.has_ofb_ip_proto()) ||
+					(matches.get_ofb_ip_proto().get_u8value() != 6)) {
 				LOGGING_WARN << "[rofl][match] rejecting ofp_match: TCP-SRC defined while IP-PROTO is not TCP" << std::endl << matches;
 				throw eBadMatchBadPrereq();
 			}
 		}
 
-		if (matches.has_match(OXM_TLV_BASIC_TCP_DST)) {
-			if ((not matches.has_match(OXM_TLV_BASIC_IP_PROTO)) ||
-					(static_cast<const coxmatch_8*>(matches.get_match(OXM_TLV_BASIC_IP_PROTO))->get_u8value() != 6)) {
+		if (matches.has_ofb_tcp_dst()) {
+			if ((not matches.has_ofb_ip_proto()) ||
+					(matches.get_ofb_ip_proto().get_u8value() != 6)) {
 				LOGGING_WARN << "[rofl][match] rejecting ofp_match: TCP-DST defined while IP-PROTO is not TCP" << std::endl << matches;
 				throw eBadMatchBadPrereq();
 			}
 		}
 
-		if (matches.has_match(OXM_TLV_BASIC_UDP_SRC)) {
-			if ((not matches.has_match(OXM_TLV_BASIC_IP_PROTO)) ||
-					(static_cast<const coxmatch_8*>(matches.get_match(OXM_TLV_BASIC_IP_PROTO))->get_u8value() != 17)) {
+		if (matches.has_ofb_udp_src()) {
+			if ((not matches.has_ofb_ip_proto()) ||
+					(matches.get_ofb_ip_proto().get_u8value() != 17)) {
 				LOGGING_WARN << "[rofl][match] rejecting ofp_match: UDP-SRC defined while IP-PROTO is not UDP" << std::endl << matches;
 				throw eBadMatchBadPrereq();
 			}
 		}
 
-		if (matches.has_match(OXM_TLV_BASIC_UDP_DST)) {
-			if ((not matches.has_match(OXM_TLV_BASIC_IP_PROTO)) ||
-					(static_cast<const coxmatch_8*>(matches.get_match(OXM_TLV_BASIC_IP_PROTO))->get_u8value() != 17)) {
+		if (matches.has_ofb_udp_dst()) {
+			if ((not matches.has_ofb_ip_proto()) ||
+					(matches.get_ofb_ip_proto().get_u8value() != 17)) {
 				LOGGING_WARN << "[rofl][match] rejecting ofp_match: UDP-DST defined while IP-PROTO is not UDP" << std::endl << matches;
 				throw eBadMatchBadPrereq();
 			}
 		}
 
-		if (matches.has_match(OXM_TLV_BASIC_SCTP_SRC)) {
-			if ((not matches.has_match(OXM_TLV_BASIC_IP_PROTO)) ||
-					(static_cast<const coxmatch_8*>(matches.get_match(OXM_TLV_BASIC_IP_PROTO))->get_u8value() != 132)) {
+		if (matches.has_ofb_sctp_src()) {
+			if ((not matches.has_ofb_ip_proto()) ||
+					(matches.get_ofb_ip_proto().get_u8value() != 132)) {
 				LOGGING_WARN << "[rofl][match] rejecting ofp_match: SCTP-SRC defined while IP-PROTO is not SCTP" << std::endl << matches;
 				throw eBadMatchBadPrereq();
 			}
 		}
 
-		if (matches.has_match(OXM_TLV_BASIC_SCTP_DST)) {
-			if ((not matches.has_match(OXM_TLV_BASIC_IP_PROTO)) ||
-					(static_cast<const coxmatch_8*>(matches.get_match(OXM_TLV_BASIC_IP_PROTO))->get_u8value() != 132)) {
+		if (matches.has_ofb_sctp_dst()) {
+			if ((not matches.has_ofb_ip_proto()) ||
+					(matches.get_ofb_ip_proto().get_u8value() != 132)) {
 				LOGGING_WARN << "[rofl][match] rejecting ofp_match: SCTP-DST defined while IP-PROTO is not SCTP" << std::endl << matches;
 				throw eBadMatchBadPrereq();
 			}
 		}
 
-		if (matches.has_match(OXM_TLV_BASIC_ICMPV4_TYPE)) {
-			if ((not matches.has_match(OXM_TLV_BASIC_IP_PROTO)) ||
-					(static_cast<const coxmatch_8*>(matches.get_match(OXM_TLV_BASIC_IP_PROTO))->get_u8value() != 1)) {
+		if (matches.has_ofb_icmpv4_type()) {
+			if ((not matches.has_ofb_ip_proto()) ||
+					(matches.get_ofb_ip_proto().get_u8value() != 1)) {
 				LOGGING_WARN << "[rofl][match] rejecting ofp_match: ICMPV4-TYPE defined while IP-PROTO is not ICMPV4" << std::endl << matches;
 				throw eBadMatchBadPrereq();
 			}
 		}
 
-		if (matches.has_match(OXM_TLV_BASIC_ICMPV4_CODE)) {
-			if ((not matches.has_match(OXM_TLV_BASIC_IP_PROTO)) ||
-					(static_cast<const coxmatch_8*>(matches.get_match(OXM_TLV_BASIC_IP_PROTO))->get_u8value() != 1)) {
+		if (matches.has_ofb_icmpv4_code()) {
+			if ((not matches.has_ofb_ip_proto()) ||
+					(matches.get_ofb_ip_proto().get_u8value() != 1)) {
 				LOGGING_WARN << "[rofl][match] rejecting ofp_match: ICMPV4-CODE defined while IP-PROTO is not ICMPV4" << std::endl << matches;
 				throw eBadMatchBadPrereq();
 			}
 		}
 
-		if (matches.has_match(OXM_TLV_BASIC_ARP_OP)) {
-			if ((not matches.has_match(OXM_TLV_BASIC_ETH_TYPE)) ||
-					(static_cast<const coxmatch_16*>(matches.get_match(OXM_TLV_BASIC_ETH_TYPE))->get_u16value() != 0x0806)) {
+		if (matches.has_ofb_arp_opcode()) {
+			if ((not matches.has_ofb_eth_type()) ||
+					(matches.get_ofb_eth_type().get_u16value() != 0x0806)) {
 				LOGGING_WARN << "[rofl][match] rejecting ofp_match: ARP-OPCODE defined while ETH-TYPE is not ARP" << std::endl << matches;
 				throw eBadMatchBadPrereq();
 			}
 		}
 
-		if (matches.has_match(OXM_TLV_BASIC_ARP_SPA)) {
-			if ((not matches.has_match(OXM_TLV_BASIC_ETH_TYPE)) ||
-					(static_cast<const coxmatch_16*>(matches.get_match(OXM_TLV_BASIC_ETH_TYPE))->get_u16value() != 0x0806)) {
+		if (matches.has_ofb_arp_spa()) {
+			if ((not matches.has_ofb_eth_type()) ||
+					(matches.get_ofb_eth_type().get_u16value() != 0x0806)) {
 				LOGGING_WARN << "[rofl][match] rejecting ofp_match: ARP-SPA defined while ETH-TYPE is not ARP" << std::endl << matches;
 				throw eBadMatchBadPrereq();
 			}
 		}
 
-		if (matches.has_match(OXM_TLV_BASIC_ARP_TPA)) {
-			if ((not matches.has_match(OXM_TLV_BASIC_ETH_TYPE)) ||
-					(static_cast<const coxmatch_16*>(matches.get_match(OXM_TLV_BASIC_ETH_TYPE))->get_u16value() != 0x0806)) {
+		if (matches.has_ofb_arp_tpa()) {
+			if ((not matches.has_ofb_eth_type()) ||
+					(matches.get_ofb_eth_type().get_u16value() != 0x0806)) {
 				LOGGING_WARN << "[rofl][match] rejecting ofp_match: ARP-TPA defined while ETH-TYPE is not ARP" << std::endl << matches;
 				throw eBadMatchBadPrereq();
 			}
 		}
 
-		if (matches.has_match(OXM_TLV_BASIC_ARP_SHA)) {
-			if ((not matches.has_match(OXM_TLV_BASIC_ETH_TYPE)) ||
-					(static_cast<const coxmatch_16*>(matches.get_match(OXM_TLV_BASIC_ETH_TYPE))->get_u16value() != 0x0806)) {
+		if (matches.has_ofb_arp_sha()) {
+			if ((not matches.has_ofb_eth_type()) ||
+					(matches.get_ofb_eth_type().get_u16value() != 0x0806)) {
 				LOGGING_WARN << "[rofl][match] rejecting ofp_match: ARP-SHA defined while ETH-TYPE is not ARP" << std::endl << matches;
 				throw eBadMatchBadPrereq();
 			}
 		}
 
-		if (matches.has_match(OXM_TLV_BASIC_ARP_THA)) {
-			if ((not matches.has_match(OXM_TLV_BASIC_ETH_TYPE)) ||
-					(static_cast<const coxmatch_16*>(matches.get_match(OXM_TLV_BASIC_ETH_TYPE))->get_u16value() != 0x0806)) {
+		if (matches.has_ofb_arp_tha()) {
+			if ((not matches.has_ofb_eth_type()) ||
+					(matches.get_ofb_eth_type().get_u16value() != 0x0806)) {
 				LOGGING_WARN << "[rofl][match] rejecting ofp_match: ARP-THA defined while ETH-TYPE is not ARP" << std::endl << matches;
 				throw eBadMatchBadPrereq();
 			}
 		}
 
-		if (matches.has_match(OXM_TLV_BASIC_IPV6_SRC)) {
-			if ((not matches.has_match(OXM_TLV_BASIC_ETH_TYPE)) ||
-					(static_cast<const coxmatch_16*>(matches.get_match(OXM_TLV_BASIC_ETH_TYPE))->get_u16value() != 0x86dd)) {
+		if (matches.has_ofb_ipv6_src()) {
+			if ((not matches.has_ofb_eth_type()) ||
+					(matches.get_ofb_eth_type().get_u16value() != 0x86dd)) {
 				LOGGING_WARN << "[rofl][match] rejecting ofp_match: IPV6-SRC defined while ETH-TYPE is not IPv6" << std::endl << matches;
 				throw eBadMatchBadPrereq();
 			}
 		}
 
-		if (matches.has_match(OXM_TLV_BASIC_IPV6_DST)) {
-			if ((not matches.has_match(OXM_TLV_BASIC_ETH_TYPE)) ||
-					(static_cast<const coxmatch_16*>(matches.get_match(OXM_TLV_BASIC_ETH_TYPE))->get_u16value() != 0x86dd)) {
+		if (matches.has_ofb_ipv6_dst()) {
+			if ((not matches.has_ofb_eth_type()) ||
+					(matches.get_ofb_eth_type().get_u16value() != 0x86dd)) {
 				LOGGING_WARN << "[rofl][match] rejecting ofp_match: IPV6-DST defined while ETH-TYPE is not IPv6" << std::endl << matches;
 				throw eBadMatchBadPrereq();
 			}
 		}
 
-		if (matches.has_match(OXM_TLV_BASIC_IPV6_FLABEL)) {
-			if ((not matches.has_match(OXM_TLV_BASIC_ETH_TYPE)) ||
-					(static_cast<const coxmatch_16*>(matches.get_match(OXM_TLV_BASIC_ETH_TYPE))->get_u16value() != 0x86dd)) {
+		if (matches.has_ofb_ipv6_flabel()) {
+			if ((not matches.has_ofb_eth_type()) ||
+					(matches.get_ofb_eth_type().get_u16value() != 0x86dd)) {
 				LOGGING_WARN << "[rofl][match] rejecting ofp_match: IPV6-FLABEL defined while ETH-TYPE is not IPv6" << std::endl << matches;
 				throw eBadMatchBadPrereq();
 			}
 		}
 
-		if (matches.has_match(OXM_TLV_BASIC_ICMPV6_TYPE)) {
-			if ((not matches.has_match(OXM_TLV_BASIC_IP_PROTO)) ||
-					(static_cast<const coxmatch_8*>(matches.get_match(OXM_TLV_BASIC_IP_PROTO))->get_u8value() != 58)) {
+		if (matches.has_ofb_icmpv6_type()) {
+			if ((not matches.has_ofb_ip_proto()) ||
+					(matches.get_ofb_ip_proto().get_u8value() != 58)) {
 				LOGGING_WARN << "[rofl][match] rejecting ofp_match: ICMPV6-TYPE defined while IP-PROTO is not ICMPV6" << std::endl << matches;
 				throw eBadMatchBadPrereq();
 			}
 		}
 
-		if (matches.has_match(OXM_TLV_BASIC_ICMPV6_CODE)) {
-			if ((not matches.has_match(OXM_TLV_BASIC_IP_PROTO)) ||
-					(static_cast<const coxmatch_8*>(matches.get_match(OXM_TLV_BASIC_IP_PROTO))->get_u8value() != 58)) {
+		if (matches.has_ofb_icmpv6_code()) {
+			if ((not matches.has_ofb_ip_proto()) ||
+					(matches.get_ofb_ip_proto().get_u8value() != 58)) {
 				LOGGING_WARN << "[rofl][match] rejecting ofp_match: ICMPV6-CODE defined while IP-PROTO is not ICMPV6" << std::endl << matches;
 				throw eBadMatchBadPrereq();
 			}
 		}
 
-		if (matches.has_match(OXM_TLV_BASIC_IPV6_ND_TARGET)) {
-			if ((not matches.has_match(OXM_TLV_BASIC_ICMPV6_TYPE)) ||
-					((static_cast<const coxmatch_8*>(matches.get_match(OXM_TLV_BASIC_ICMPV6_TYPE))->get_u8value() != 135) &&
-							(static_cast<const coxmatch_8*>(matches.get_match(OXM_TLV_BASIC_ICMPV6_TYPE))->get_u8value() != 136))) {
+		if (matches.has_ofb_ipv6_nd_target()) {
+			if ((not matches.has_ofb_icmpv6_type()) ||
+					((matches.get_ofb_icmpv6_type().get_u8value() != 135) &&
+							(matches.get_ofb_icmpv6_type().get_u8value() != 136))) {
 				LOGGING_WARN << "[rofl][match] rejecting ofp_match: IPv6-ND-TARGET defined while ICMPV6-TYPE is not ND-SOLICITATION or ND-ADVERTISEMENT" << std::endl << matches;
 				throw eBadMatchBadPrereq();
 			}
 		}
 
-		if (matches.has_match(OXM_TLV_BASIC_IPV6_ND_SLL)) {
-			if ((not matches.has_match(OXM_TLV_BASIC_ICMPV6_TYPE)) ||
-					(static_cast<const coxmatch_8*>(matches.get_match(OXM_TLV_BASIC_ICMPV6_TYPE))->get_u8value() != 135)) {
+		if (matches.has_ofb_ipv6_nd_sll()) {
+			if ((not matches.has_ofb_icmpv6_type()) ||
+					(matches.get_ofb_icmpv6_type().get_u8value() != 135)) {
 				LOGGING_WARN << "[rofl][match] rejecting ofp_match: IPv6-ND-SLL defined while ICMPV6-TYPE is not ND-SOLICITATION" << std::endl << matches;
 				throw eBadMatchBadPrereq();
 			}
 		}
 
-		if (matches.has_match(OXM_TLV_BASIC_IPV6_ND_TLL)) {
-			if ((not matches.has_match(OXM_TLV_BASIC_ICMPV6_TYPE)) ||
-					(static_cast<const coxmatch_8*>(matches.get_match(OXM_TLV_BASIC_ICMPV6_TYPE))->get_u8value() != 136)) {
+		if (matches.has_ofb_ipv6_nd_tll()) {
+			if ((not matches.has_ofb_icmpv6_type()) ||
+					(matches.get_ofb_icmpv6_type().get_u8value() != 136)) {
 				LOGGING_WARN << "[rofl][match] rejecting ofp_match: IPv6-ND-TLL defined while ICMPV6-TYPE is not ND-ADVERTISEMENT" << std::endl << matches;
 				throw eBadMatchBadPrereq();
 			}
 		}
 
-		if (matches.has_match(OXM_TLV_BASIC_MPLS_LABEL)) {
-			if ((not matches.has_match(OXM_TLV_BASIC_ETH_TYPE)) ||
-					((static_cast<const coxmatch_16*>(matches.get_match(OXM_TLV_BASIC_ETH_TYPE))->get_u16value() != 0x8847) &&
-							(static_cast<const coxmatch_16*>(matches.get_match(OXM_TLV_BASIC_ETH_TYPE))->get_u16value() != 0x8848))) {
+		if (matches.has_ofb_mpls_label()) {
+			if ((not matches.has_ofb_eth_type()) ||
+					((matches.get_ofb_eth_type().get_u16value() != 0x8847) &&
+					 (matches.get_ofb_eth_type().get_u16value() != 0x8848))) {
 				LOGGING_WARN << "[rofl][match] rejecting ofp_match: MPLS-LABEL defined while ETH-TYPE is not MPLS/MPLS-UPSTREAM" << std::endl << matches;
 				throw eBadMatchBadPrereq();
 			}
 		}
 
-		if (matches.has_match(OXM_TLV_BASIC_MPLS_TC)) {
-			if ((not matches.has_match(OXM_TLV_BASIC_ETH_TYPE)) ||
-					((static_cast<const coxmatch_16*>(matches.get_match(OXM_TLV_BASIC_ETH_TYPE))->get_u16value() != 0x8847) &&
-							(static_cast<const coxmatch_16*>(matches.get_match(OXM_TLV_BASIC_ETH_TYPE))->get_u16value() != 0x8848))) {
+		if (matches.has_ofb_mpls_tc()) {
+			if ((not matches.has_ofb_eth_type()) ||
+					((matches.get_ofb_eth_type().get_u16value() != 0x8847) &&
+					 (matches.get_ofb_eth_type().get_u16value() != 0x8848))) {
 				LOGGING_WARN << "[rofl][match] rejecting ofp_match: MPLS-TC defined while ETH-TYPE is not MPLS/MPLS-UPSTREAM" << std::endl << matches;
 				throw eBadMatchBadPrereq();
 			}
 		}
 
-		if (matches.has_match(OXM_TLV_BASIC_MPLS_BOS)) {
-			if ((not matches.has_match(OXM_TLV_BASIC_ETH_TYPE)) ||
-					((static_cast<const coxmatch_16*>(matches.get_match(OXM_TLV_BASIC_ETH_TYPE))->get_u16value() != 0x8847) &&
-							(static_cast<const coxmatch_16*>(matches.get_match(OXM_TLV_BASIC_ETH_TYPE))->get_u16value() != 0x8848))) {
+		if (matches.has_ofb_mpls_bos()) {
+			if ((not matches.has_ofb_eth_type()) ||
+					((matches.get_ofb_eth_type().get_u16value() != 0x8847) &&
+					 (matches.get_ofb_eth_type().get_u16value() != 0x8848))) {
 				LOGGING_WARN << "[rofl][match] rejecting ofp_match: MPLS-BOS defined while ETH-TYPE is not MPLS/MPLS-UPSTREAM" << std::endl << matches;
 				throw eBadMatchBadPrereq();
 			}
 		}
 
-		if (matches.has_match(OXM_TLV_BASIC_PBB_ISID)) {
-			if ((not matches.has_match(OXM_TLV_BASIC_ETH_TYPE)) ||
-					(static_cast<const coxmatch_16*>(matches.get_match(OXM_TLV_BASIC_ETH_TYPE))->get_u16value() != 0x88e7)) {
+		if (matches.has_ofb_pbb_isid()) {
+			if ((not matches.has_ofb_eth_type()) ||
+					(matches.get_ofb_eth_type().get_u16value() != 0x88e7)) {
 				LOGGING_WARN << "[rofl][match] rejecting ofp_match: PBB-ISID defined while ETH-TYPE is not PBB" << std::endl << matches;
 				throw eBadMatchBadPrereq();
 			}
 		}
 
-		if (matches.has_match(OXM_TLV_BASIC_IPV6_EXTHDR)) {
-			if ((not matches.has_match(OXM_TLV_BASIC_ETH_TYPE)) ||
-					(static_cast<const coxmatch_16*>(matches.get_match(OXM_TLV_BASIC_ETH_TYPE))->get_u16value() != 0x86dd)) {
+		if (matches.has_ofb_ipv6_exthdr()) {
+			if ((not matches.has_ofb_eth_type()) ||
+					(matches.get_ofb_eth_type().get_u16value() != 0x86dd)) {
 				LOGGING_WARN << "[rofl][match] rejecting ofp_match: IPV6-EXTHDR defined while ETH-TYPE is not IPv6" << std::endl << matches;
 				throw eBadMatchBadPrereq();
 			}

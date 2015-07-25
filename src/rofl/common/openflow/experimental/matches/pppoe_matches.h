@@ -31,19 +31,22 @@ enum oxm_tlv_match_fields {
 /** OXM_OF_PPPOE_CODE
  *
  */
-class coxmatch_ofx_pppoe_code : public coxmatch_8 {
+class coxmatch_ofx_pppoe_code : public coxmatch_exp {
 public:
 	coxmatch_ofx_pppoe_code(
 			uint8_t code) :
-				coxmatch_8(OXM_TLV_EXPR_PPPOE_CODE, code, COXMATCH_8BIT) {};
+				coxmatch_exp(OXM_TLV_EXPR_PPPOE_CODE, ROFL_EXP_ID, code)
+	{};
 	coxmatch_ofx_pppoe_code(
-			coxmatch const& oxm) :
-				coxmatch_8(oxm) {};
+			const coxmatch_exp& oxm) :
+				coxmatch_exp(oxm)
+	{};
 	virtual
-	~coxmatch_ofx_pppoe_code() {};
+	~coxmatch_ofx_pppoe_code()
+	{};
 	friend std::ostream&
-	operator<< (std::ostream& os, coxmatch_ofx_pppoe_code const& oxm) {
-		os << dynamic_cast<coxmatch const&>(oxm);
+	operator<< (std::ostream& os, const coxmatch_ofx_pppoe_code& oxm) {
+		os << dynamic_cast<const coxmatch_exp&>(oxm);
 		os << indent(2) << "<pppoe-code: "
 						<< (int)oxm.get_u8value()
 						<< " >" << std::endl;
@@ -55,19 +58,22 @@ public:
 /** OXM_OF_PPPOE_TYPE
  *
  */
-class coxmatch_ofx_pppoe_type : public coxmatch_8 {
+class coxmatch_ofx_pppoe_type : public coxmatch_exp {
 public:
 	coxmatch_ofx_pppoe_type(
 			uint8_t type) :
-				coxmatch_8(OXM_TLV_EXPR_PPPOE_TYPE, type, COXMATCH_8BIT) {};
+				coxmatch_exp(OXM_TLV_EXPR_PPPOE_TYPE, ROFL_EXP_ID, type)
+	{};
 	coxmatch_ofx_pppoe_type(
-			coxmatch const& oxm) :
-				coxmatch_8(oxm) {};
+			const coxmatch_exp& oxm) :
+				coxmatch_exp(oxm)
+	{};
 	virtual
-	~coxmatch_ofx_pppoe_type() {};
+	~coxmatch_ofx_pppoe_type()
+	{};
 	friend std::ostream&
 	operator<< (std::ostream& os, coxmatch_ofx_pppoe_type const& oxm) {
-		os << dynamic_cast<coxmatch const&>(oxm);
+		os << dynamic_cast<const coxmatch_exp&>(oxm);
 		os << indent(2) << "<pppoe-type: "
 						<< (int)oxm.get_u8value()
 						<< " >" << std::endl;
@@ -79,19 +85,22 @@ public:
 /** OXM_OF_PPPOE_SID
  *
  */
-class coxmatch_ofx_pppoe_sid : public coxmatch_16 {
+class coxmatch_ofx_pppoe_sid : public coxmatch_exp {
 public:
 	coxmatch_ofx_pppoe_sid(
 			uint16_t sid) :
-				coxmatch_16(OXM_TLV_EXPR_PPPOE_SID, sid, COXMATCH_16BIT) {};
+				coxmatch_exp(OXM_TLV_EXPR_PPPOE_SID, ROFL_EXP_ID, sid)
+	{};
 	coxmatch_ofx_pppoe_sid(
-			coxmatch const& oxm) :
-				coxmatch_16(oxm) {};
+			const coxmatch_exp& oxm) :
+				coxmatch_exp(oxm)
+	{};
 	virtual
-	~coxmatch_ofx_pppoe_sid() {};
+	~coxmatch_ofx_pppoe_sid()
+	{};
 	friend std::ostream&
-	operator<< (std::ostream& os, coxmatch_ofx_pppoe_sid const& oxm) {
-		os << dynamic_cast<coxmatch_16 const&>(oxm);
+	operator<< (std::ostream& os, const coxmatch_ofx_pppoe_sid& oxm) {
+		os << dynamic_cast<const coxmatch_exp&>(oxm);
 		os << indent(2) << "<pppoe-sid: "
 						<< (int)oxm.get_u16value()
 						<< " >" << std::endl;
@@ -103,19 +112,21 @@ public:
 /** OXM_OF_PPP_PROT
  *
  */
-class coxmatch_ofx_ppp_prot : public coxmatch_16 {
+class coxmatch_ofx_ppp_prot : public coxmatch_exp {
 public:
 	coxmatch_ofx_ppp_prot(
 			uint16_t prot) :
-				coxmatch_16(OXM_TLV_EXPR_PPP_PROT, prot, COXMATCH_16BIT) {};
+				coxmatch_exp(OXM_TLV_EXPR_PPP_PROT, ROFL_EXP_ID, prot)
+	{};
 	coxmatch_ofx_ppp_prot(
-			coxmatch const& oxm) :
-				coxmatch_16(oxm) {};
+			const coxmatch_exp& oxm) :
+				coxmatch_exp(oxm)
+	{};
 	virtual
 	~coxmatch_ofx_ppp_prot() {};
 	friend std::ostream&
-	operator<< (std::ostream& os, coxmatch_ofx_ppp_prot const& oxm) {
-		os << dynamic_cast<coxmatch_16 const&>(oxm);
+	operator<< (std::ostream& os, const coxmatch_ofx_ppp_prot& oxm) {
+		os << dynamic_cast<const coxmatch_exp&>(oxm);
 		os << indent(2) << "<ppp-prot: "
 						<< (int)oxm.get_u16value()
 						<< " >" << std::endl;

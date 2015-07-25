@@ -349,6 +349,7 @@ namespace openflow {
 		struct ofp_oxm_hdr oxm_header;	/* oxm_class = OFPXMC_EXPERIMENTER */
 		uint32_t experimenter;			/* Experimenter ID which takes the same
 										   form as in struct ofp_experimenter_header. */
+		uint8_t data[0];
 	} __attribute__((packed));
 
 	struct ofp_oxm_ofb_exp_uint8_t {
@@ -455,6 +456,17 @@ namespace openflow {
 	};
 
 #define HAS_MASK_FLAG (1 << 8)
+
+enum rofl_exp_id_t {
+	ROFL_EXP_ID = 0xa1a2a3a4, // TODO
+};
+
+#define OXM_TYPE(x)  (x & 0x00000000fffffe00ULL)
+#define OXM_CLASS(x) (x & 0x00000000ffff0000ULL)
+#define OXM_FIELD(x) (x & 0x000000000000fe00ULL)
+#define OXM_ROFL_OFB_TYPE(x)    (((uint64_t)          0 << 32) | (OXM_TYPE(x)))
+#define OXM_ROFL_OFX_TYPE(x)    (((uint64_t)ROFL_EXP_ID << 32) | (OXM_TYPE(x)))
+#define OXM_EXPR_OFX_TYPE(w, x) (((uint64_t)          w << 32) | (OXM_TYPE(x)))
 
 	/* OXM Flow match field types for OpenFlow basic class. */
 	enum oxm_tlv_match_fields {

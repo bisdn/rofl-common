@@ -1920,8 +1920,38 @@ cofaction_set_field::length() const
 	switch (get_version()) {
 	case rofl::openflow12::OFP_VERSION:
 	case rofl::openflow13::OFP_VERSION: {
-		size_t total_length = sizeof(struct rofl::openflow::ofp_action_header)
-				- 4*sizeof(uint8_t) + oxm.length();
+		size_t total_length =
+				sizeof(struct rofl::openflow::ofp_action_header) - 4*sizeof(uint8_t);
+
+		switch (oxm_set_field_type) {
+		case OXM_TYPE_8: {
+			total_length += oxm_8.length();
+		} break;
+		case OXM_TYPE_16: {
+			total_length += oxm_16.length();
+		} break;
+		case OXM_TYPE_24: {
+			total_length += oxm_24.length();
+		} break;
+		case OXM_TYPE_32: {
+			total_length += oxm_32.length();
+		} break;
+		case OXM_TYPE_48: {
+			total_length += oxm_48.length();
+		} break;
+		case OXM_TYPE_64: {
+			total_length += oxm_64.length();
+		} break;
+		case OXM_TYPE_128: {
+			total_length += oxm_128.length();
+		} break;
+		case OXM_TYPE_EXP: {
+			total_length += oxm_exp.length();
+		} break;
+		default: {
+
+		};
+		}
 
 		size_t pad = (0x7 & total_length);
 
@@ -1956,7 +1986,35 @@ cofaction_set_field::pack(
 
 		struct rofl::openflow13::ofp_action_set_field* hdr = (struct rofl::openflow13::ofp_action_set_field*)buf;
 
-		oxm.pack(hdr->field, oxm.length());
+		switch (oxm_set_field_type) {
+		case OXM_TYPE_8: {
+			oxm_8.pack(hdr->field, oxm_8.length());
+		} break;
+		case OXM_TYPE_16: {
+			oxm_16.pack(hdr->field, oxm_16.length());
+		} break;
+		case OXM_TYPE_24: {
+			oxm_24.pack(hdr->field, oxm_24.length());
+		} break;
+		case OXM_TYPE_32: {
+			oxm_32.pack(hdr->field, oxm_32.length());
+		} break;
+		case OXM_TYPE_48: {
+			oxm_48.pack(hdr->field, oxm_48.length());
+		} break;
+		case OXM_TYPE_64: {
+			oxm_64.pack(hdr->field, oxm_64.length());
+		} break;
+		case OXM_TYPE_128: {
+			oxm_128.pack(hdr->field, oxm_128.length());
+		} break;
+		case OXM_TYPE_EXP: {
+			oxm_exp.pack(hdr->field, oxm_exp.length());
+		} break;
+		default: {
+
+		};
+		}
 
 	} break;
 	default:
@@ -1994,7 +2052,84 @@ cofaction_set_field::unpack(
 		if (oxm_len > (get_length() - sizeof(struct rofl::openflow13::ofp_action_header) + 4*sizeof(uint8_t)))
 			throw eBadActionBadLen("cofaction_set_field::unpack()");
 
-		oxm.unpack(hdr->field, oxm_len);
+
+		if (oxm_hdr->oxm_field & 0x01 /*has_mask?*/) {
+
+			switch (be16toh(oxm_hdr->oxm_class)) {
+			case rofl::openflow::OFPXMC_OPENFLOW_BASIC: {
+				switch (oxm_hdr->oxm_length) {
+				case 2/*bytes*/: {
+					set_oxm_8().unpack(hdr->field, oxm_len);
+				} break;
+				case 4/*bytes*/: {
+					set_oxm_16().unpack(hdr->field, oxm_len);
+				} break;
+				case 6/*bytes*/: {
+					set_oxm_24().unpack(hdr->field, oxm_len);
+				} break;
+				case 8/*bytes*/: {
+					set_oxm_32().unpack(hdr->field, oxm_len);
+				} break;
+				case 12/*bytes*/: {
+					set_oxm_48().unpack(hdr->field, oxm_len);
+				} break;
+				case 16/*bytes*/: {
+					set_oxm_64().unpack(hdr->field, oxm_len);
+				} break;
+				case 32/*bytes*/: {
+					set_oxm_128().unpack(hdr->field, oxm_len);
+				} break;
+				default: {
+
+				};
+				}
+
+			} break;
+			case rofl::openflow::OFPXMC_EXPERIMENTER: {
+				set_oxm_exp().unpack(hdr->field, oxm_len);
+
+			} break;
+			}
+
+
+		} else {
+
+			switch (be16toh(oxm_hdr->oxm_class)) {
+			case rofl::openflow::OFPXMC_OPENFLOW_BASIC: {
+				switch (oxm_hdr->oxm_length) {
+				case 1/*byte*/: {
+					set_oxm_8().unpack(hdr->field, oxm_len);
+				} break;
+				case 2/*bytes*/: {
+					set_oxm_16().unpack(hdr->field, oxm_len);
+				} break;
+				case 3/*bytes*/: {
+					set_oxm_24().unpack(hdr->field, oxm_len);
+				} break;
+				case 4/*bytes*/: {
+					set_oxm_32().unpack(hdr->field, oxm_len);
+				} break;
+				case 6/*bytes*/: {
+					set_oxm_48().unpack(hdr->field, oxm_len);
+				} break;
+				case 8/*bytes*/: {
+					set_oxm_64().unpack(hdr->field, oxm_len);
+				} break;
+				case 16/*bytes*/: {
+					set_oxm_128().unpack(hdr->field, oxm_len);
+				} break;
+				default: {
+
+				};
+				}
+
+			} break;
+			case rofl::openflow::OFPXMC_EXPERIMENTER: {
+				set_oxm_exp().unpack(hdr->field, oxm_len);
+
+			} break;
+			}
+		}
 
 	} break;
 	default:
