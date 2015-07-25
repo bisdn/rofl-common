@@ -17,11 +17,17 @@ namespace openflow {
 
 class eMsgBase 			: public RoflException {
 public:
-	eMsgBase(const std::string& __arg) : RoflException(__arg) {};
+	eMsgBase(
+			const std::string& __arg) :
+				RoflException(__arg)
+	{};
 };
 class eMsgInval 		: public eMsgBase {
 public:
-	eMsgInval(const std::string& __arg) : eMsgBase(__arg) {};
+	eMsgInval(
+			const std::string& __arg) :
+				eMsgBase(__arg)
+	{};
 };
 
 /**
@@ -196,6 +202,9 @@ public:
 		} break;
 		case rofl::openflow13::OFP_VERSION: {
 			ss << "version: 1.3, ";
+		} break;
+		default: {
+			ss << "version: " << (int)get_version() << "(on wire), ";
 		} break;
 		}
 		ss << "type: " << (int)get_type() << ", ";

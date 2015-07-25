@@ -23,7 +23,7 @@ cofmsg::pack(
 	if ((0 == buf) || (0 == buflen))
 		return;
 
-	if (buflen < len)
+	if (buflen < cofmsg::length())
 		throw eMsgInval("cofmsg::pack() buf too short");
 
 	struct rofl::openflow::ofp_header* hdr =
@@ -45,7 +45,7 @@ cofmsg::unpack(
 		return;
 
 	if (buflen < cofmsg::length())
-		throw eMsgInval("cofmsg::unpack() buf too short (header)");
+		throw eMsgInval("cofmsg::unpack() buf too short");
 
 	struct rofl::openflow::ofp_header* hdr =
 			(struct rofl::openflow::ofp_header*)buf;
