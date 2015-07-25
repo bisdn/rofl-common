@@ -35,7 +35,7 @@ public:
 	cofmsg_features_request(
 			uint8_t version = 0,
 			uint32_t xid = 0) :
-				cofmsg(version, rofl::openflow::OFPT_FEATURES_REQUEST, 0, xid)
+				cofmsg(version, rofl::openflow::OFPT_FEATURES_REQUEST, xid)
 	{};
 
 	/**
@@ -101,7 +101,7 @@ public:
 			uint32_t capabilities = 0,
 			uint32_t actions_bitmap = 0, // OFP 1.0 only
 			const rofl::openflow::cofports& ports = rofl::openflow::cofports()) :
-				cofmsg(version, rofl::openflow::OFPT_FEATURES_REPLY, 0, xid),
+				cofmsg(version, rofl::openflow::OFPT_FEATURES_REPLY, xid),
 				dpid(dpid),
 				n_buffers(n_buffers),
 				n_tables(n_tables),
@@ -109,19 +109,7 @@ public:
 				capabilities(capabilities),
 				actions(actions_bitmap),
 				ports(ports)
-	{
-		switch (get_version()) {
-		case rofl::openflow10::OFP_VERSION: {
-			set_length(sizeof(struct rofl::openflow10::ofp_switch_features)/* =32 */ + ports.length());
-		} break;
-		case rofl::openflow12::OFP_VERSION: {
-			set_length(sizeof(struct rofl::openflow12::ofp_switch_features)/* =32 */ + ports.length());
-		} break;
-		default: {
-			set_length(sizeof(struct rofl::openflow13::ofp_switch_features)/* =32 */);
-		};
-		}
-	};
+	{};
 
 	/**
 	 *

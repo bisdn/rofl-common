@@ -44,7 +44,7 @@ public:
 			uint64_t packet_count = 0,
 			uint64_t byte_count = 0,
 			const rofl::openflow::cofmatch& match = rofl::openflow::cofmatch()) :
-				cofmsg(version, rofl::openflow::OFPT_FLOW_REMOVED, 0, xid),
+				cofmsg(version, rofl::openflow::OFPT_FLOW_REMOVED, xid),
 				cookie(cookie),
 				priority(priority),
 				reason(reason),

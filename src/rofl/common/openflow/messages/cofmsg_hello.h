@@ -35,7 +35,7 @@ public:
 			uint32_t xid = 0,
 			const rofl::openflow::cofhelloelems& helloelems =
 					rofl::openflow::cofhelloelems()) :
-				cofmsg(version, rofl::openflow::OFPT_HELLO, helloelems.length(), xid),
+				cofmsg(version, rofl::openflow::OFPT_HELLO, xid),
 				helloelems(helloelems)
 	{};
 

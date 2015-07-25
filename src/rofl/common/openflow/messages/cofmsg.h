@@ -59,11 +59,10 @@ public:
 	cofmsg(
 			uint8_t version,
 			uint8_t type,
-			uint16_t len,
 			uint32_t xid) :
 				version(version),
 				type(type),
-				len(sizeof(struct rofl::openflow::ofp_header) + len),
+				len(sizeof(struct rofl::openflow::ofp_header)),
 				xid(xid)
 	{};
 
@@ -134,14 +133,6 @@ public:
 	uint16_t
 	get_length() const
 	{ return len; };
-
-	/**
-	 *
-	 */
-	void
-	set_length(
-			uint16_t len)
-	{ this->len = len; };
 
 	/**
 	 *

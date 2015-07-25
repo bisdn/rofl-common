@@ -35,7 +35,7 @@ public:
 			uint32_t xid = 0,
 			uint8_t reason = 0,
 			const rofl::openflow::cofport& port = rofl::openflow::cofport()) :
-				cofmsg(version, rofl::openflow::OFPT_PORT_STATUS, 0, xid),
+				cofmsg(version, rofl::openflow::OFPT_PORT_STATUS, xid),
 				reason(reason),
 				port(port)
 	{};

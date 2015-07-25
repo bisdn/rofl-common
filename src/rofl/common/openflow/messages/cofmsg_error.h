@@ -39,7 +39,7 @@ public:
 			uint16_t err_code = 0,
 			uint8_t* data = 0,
 			size_t datalen = 0) :
-				cofmsg(version, rofl::openflow::OFPT_ERROR, datalen, xid),
+				cofmsg(version, rofl::openflow::OFPT_ERROR, xid),
 				err_type(err_type),
 				err_code(err_code),
 				body(data, datalen)

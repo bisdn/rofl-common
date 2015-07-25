@@ -30,6 +30,8 @@ libopenflow_messages_la_SOURCES = \
 	cofmsg_flow_mod.cc \
 	cofmsg_group_mod.h \
 	cofmsg_group_mod.cc \
+	cofmsg_stats.h \
+	cofmsg_stats.cc \
 	cofmsg_aggr_stats.h \
 	cofmsg_desc_stats.h \
 	cofmsg_experimenter_stats.h \
@@ -43,7 +45,6 @@ libopenflow_messages_la_SOURCES = \
 	cofmsg_queue_get_config.h \
 	cofmsg_queue_stats.h \
 	cofmsg_role.h \
-	cofmsg_stats.h \
 	cofmsg_table_mod.h \
 	cofmsg_table_stats.h \
 	cofmsg_table_features_stats.h \
@@ -60,7 +61,6 @@ libopenflow_messages_la_SOURCES = \
 	cofmsg_queue_get_config.cc \
 	cofmsg_queue_stats.cc \
 	cofmsg_role.cc \
-	cofmsg_stats.cc \
 	cofmsg_table_mod.cc \
 	cofmsg_table_stats.cc \
 	cofmsg_table_features_stats.cc \

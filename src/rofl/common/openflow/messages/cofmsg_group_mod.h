@@ -36,7 +36,7 @@ public:
 			uint8_t version = rofl::openflow::OFP_VERSION_UNKNOWN,
 			uint32_t xid = 0,
 			const rofl::openflow::cofgroupmod& groupmod = rofl::openflow::cofgroupmod()) :
-				cofmsg(version, rofl::openflow12::OFPT_GROUP_MOD, 0, xid),
+				cofmsg(version, rofl::openflow12::OFPT_GROUP_MOD, xid),
 				groupmod(groupmod)
 	{};
 

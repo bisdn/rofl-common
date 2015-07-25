@@ -43,7 +43,7 @@ public:
 			const rofl::openflow::cofmatch& match = rofl::openflow::cofmatch(),
 			uint8_t *data = (uint8_t*)0,
 			size_t datalen = 0) :
-				cofmsg(version, rofl::openflow::OFPT_PACKET_IN, 0/* see below */, xid),
+				cofmsg(version, rofl::openflow::OFPT_PACKET_IN, xid),
 				buffer_id(buffer_id),
 				total_len(total_len),
 				in_port(in_port),
@@ -52,22 +52,7 @@ public:
 				cookie(cookie),
 				match(match),
 				packet(data, datalen)
-	{
-		switch (get_version()) {
-		case rofl::openflow10::OFP_VERSION: {
-			set_length(OFP10_PACKET_IN_STATIC_HDR_LEN
-					+ packet.length());
-		} break;
-		case rofl::openflow12::OFP_VERSION: {
-			set_length(OFP12_PACKET_IN_STATIC_HDR_LEN + match.length() + 2/* bytes padding */
-					+ packet.length());
-		} break;
-		default: {
-			set_length(OFP13_PACKET_IN_STATIC_HDR_LEN + match.length() + 2/* bytes padding */
-					+ packet.length());
-		};
-		}
-	};
+	{};
 
 	/**
 	 *

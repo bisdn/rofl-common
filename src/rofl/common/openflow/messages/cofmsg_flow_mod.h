@@ -34,7 +34,7 @@ public:
 			uint8_t version = rofl::openflow::OFP_VERSION_UNKNOWN,
 			uint32_t xid = 0,
 			const rofl::openflow::cofflowmod& flowmod = rofl::openflow::cofflowmod()) :
-				cofmsg(version, rofl::openflow::OFPT_FLOW_MOD, 0, xid),
+				cofmsg(version, rofl::openflow::OFPT_FLOW_MOD, xid),
 				flowmod(flowmod)
 	{};
 

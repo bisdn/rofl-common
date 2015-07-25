@@ -37,20 +37,11 @@ public:
 			uint32_t exp_type = 0,
 			uint8_t *data = (uint8_t*)0,
 			size_t datalen = 0) :
-				cofmsg(version, rofl::openflow::OFPT_EXPERIMENTER, 0/* see below */, xid),
+				cofmsg(version, rofl::openflow::OFPT_EXPERIMENTER, xid),
 				exp_id(exp_id),
 				exp_type(exp_type),
 				body(data, datalen)
-	{
-		switch (get_version()) {
-		case rofl::openflow10::OFP_VERSION: {
-			set_length(sizeof(struct rofl::openflow10::ofp_vendor_header)/* =12 */ + datalen);
-		} break;
-		default: {
-			set_length(sizeof(struct rofl::openflow12::ofp_experimenter_header)/* =16 */ + datalen);
-		};
-		}
-	};
+	{};
 
 	/**
 	 *

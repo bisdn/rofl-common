@@ -39,21 +39,12 @@ public:
 			const rofl::openflow::cofactions& actions = rofl::openflow::cofactions(),
 			uint8_t *data = (uint8_t*)0,
 			size_t datalen = 0) :
-				cofmsg(version, rofl::openflow::OFPT_PACKET_OUT, 0/* see below */, xid),
+				cofmsg(version, rofl::openflow::OFPT_PACKET_OUT, xid),
 				buffer_id(buffer_id),
 				in_port(in_port),
 				actions(actions),
 				packet(data, datalen)
-	{
-		switch (get_version()) {
-		case rofl::openflow10::OFP_VERSION: {
-			set_length(sizeof(struct rofl::openflow10::ofp_packet_out) + actions.length() + datalen);
-		} break;
-		default: {
-			set_length(sizeof(struct rofl::openflow12::ofp_packet_out) + actions.length() + datalen);
-		};
-		}
-	};
+	{};
 
 	/**
 	 *

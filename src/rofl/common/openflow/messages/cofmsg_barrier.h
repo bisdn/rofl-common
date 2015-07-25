@@ -35,7 +35,7 @@ public:
 			uint32_t xid = 0,
 			uint8_t* data = 0,
 			size_t datalen = 0) :
-				cofmsg(version, 0/* see below */, datalen, xid),
+				cofmsg(version, datalen, xid),
 				body(data, datalen)
 	{
 		switch (get_version()) {
@@ -152,7 +152,7 @@ public:
 			uint32_t xid = 0,
 			uint8_t* data = 0,
 			size_t datalen = 0) :
-				cofmsg(version, 0/* see below */, datalen, xid),
+				cofmsg(version, datalen, xid),
 				body(data, datalen)
 	{
 		switch (get_version()) {

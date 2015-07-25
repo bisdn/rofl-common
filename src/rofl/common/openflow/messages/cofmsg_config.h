@@ -32,7 +32,7 @@ public:
 	cofmsg_get_config_request(
 			uint8_t version = 0,
 			uint32_t xid = 0) :
-				cofmsg(version, rofl::openflow::OFPT_GET_CONFIG_REQUEST, 0, xid)
+				cofmsg(version, rofl::openflow::OFPT_GET_CONFIG_REQUEST, xid)
 	{};
 
 	/**
@@ -93,12 +93,10 @@ public:
 			uint32_t xid = 0,
 			uint16_t flags = 0,
 			uint16_t miss_send_len = 0) :
-				cofmsg(version, rofl::openflow::OFPT_GET_CONFIG_REPLY, 0, xid),
+				cofmsg(version, rofl::openflow::OFPT_GET_CONFIG_REPLY, xid),
 				flags(flags),
 				miss_send_len(miss_send_len)
-	{
-		set_length(sizeof(struct rofl::openflow10::ofp_switch_config)/* =12 */);
-	};
+	{};
 
 	/**
 	 *
@@ -264,12 +262,10 @@ public:
 			uint32_t xid = 0,
 			uint16_t flags = 0,
 			uint16_t miss_send_len = 0) :
-				cofmsg(version, rofl::openflow::OFPT_SET_CONFIG, 0, xid),
+				cofmsg(version, rofl::openflow::OFPT_SET_CONFIG, xid),
 				flags(flags),
 				miss_send_len(miss_send_len)
-	{
-		set_length(sizeof(struct rofl::openflow10::ofp_switch_config)/* =12 */);
-	};
+	{};
 
 	/**
 	 *

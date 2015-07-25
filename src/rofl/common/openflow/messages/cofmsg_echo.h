@@ -35,7 +35,7 @@ public:
 			uint32_t xid = 0,
 			uint8_t* data = 0,
 			size_t datalen = 0) :
-				cofmsg(version, rofl::openflow::OFPT_ECHO_REQUEST, datalen, xid),
+				cofmsg(version, rofl::openflow::OFPT_ECHO_REQUEST, xid),
 				body(data, datalen)
 	{};
 
@@ -142,7 +142,7 @@ public:
 			uint32_t xid = 0,
 			uint8_t* data = 0,
 			size_t datalen = 0) :
-				cofmsg(version, rofl::openflow::OFPT_ECHO_REPLY, datalen, xid),
+				cofmsg(version, rofl::openflow::OFPT_ECHO_REPLY, xid),
 				body(data, datalen)
 	{};
 
