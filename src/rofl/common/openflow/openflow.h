@@ -15,6 +15,7 @@
 #include "rofl/common/openflow/openflow10.h"
 #include "rofl/common/openflow/openflow12.h"
 #include "rofl/common/openflow/openflow13.h"
+#include "rofl/common/openflow/openflow14.h"
 #include "rofl/common/openflow/openflow_experimental.h"
 
 namespace rofl {

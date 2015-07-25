@@ -15,7 +15,6 @@ crofconn::crofconn(
 		crofconn_env *env,
 		rofl::openflow::cofhello_elem_versionbitmap const& versionbitmap,
 		pthread_t tid) :
-				rofl::ciosrv(tid),
 				env(env),
 				dpid(0), // will be determined later via Features.request
 				auxiliary_id(0), // will be determined later via Features.request

@@ -577,10 +577,14 @@ namespace openflow10 {
 
 	/* Value used in "idle_timeout" and "hard_timeout" to indicate that the entry
 	 * is permanent. */
-	#define OFP_FLOW_PERMANENT 0
+	enum ofp_flow_value_t {
+		OFP_FLOW_PERMANENT = 0,
+	};
 
 	/* By default, choose a priority in the middle. */
-	#define OFP_DEFAULT_PRIORITY 0x8000
+	enum ofp_priority_value_t {
+		OFP_DEFAULT_PRIORITY = 0x8000,
+	};
 
 	enum ofp_flow_mod_flags {
 		OFPFF_SEND_FLOW_REM = 1 << 0,  /* Send flow removed message when flow
@@ -914,11 +918,15 @@ namespace openflow10 {
 	};
 	OFP_ASSERT(sizeof(struct ofp_vendor_header) == 12);
 
-	/* All ones is used to indicate all queues in a port (for stats retrieval). */
-	#define OFPQ_ALL      0xffffffff
+	enum ofp_queue_id_t {
+		/* All ones is used to indicate all queues in a port (for stats retrieval). */
+		OFPQ_ALL = 0xffffffff,
+	};
 
-	/* Min rate > 1000 means not configured. */
-	#define OFPQ_MIN_RATE_UNCFG      0xffff
+	enum ofp_queue_rate_value_t {
+		/* Min rate > 1000 means not configured. */
+		OFPQ_MIN_RATE_UNCFG = 0xffff,
+	};
 
 	enum ofp_queue_properties {
 		OFPQT_NONE = 0,       /* No property defined for queue (default). */

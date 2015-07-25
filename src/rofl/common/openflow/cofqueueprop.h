@@ -177,7 +177,7 @@ public:
 	 */
 	cofqueue_prop_min_rate(
 			uint8_t ofp_version = rofl::openflow::OFP_VERSION_UNKNOWN,
-			uint16_t min_rate = OFPQ_MIN_RATE_UNCFG) :
+			uint16_t min_rate = rofl::openflow::OFPQ_MIN_RATE_UNCFG) :
 				cofqueue_prop(ofp_version, rofl::openflow13::OFPQT_MIN_RATE),
 				min_rate(min_rate) {};
 
@@ -273,7 +273,7 @@ public:
 	 */
 	cofqueue_prop_max_rate(
 			uint8_t ofp_version = rofl::openflow::OFP_VERSION_UNKNOWN,
-			uint16_t max_rate = OFPQ_MAX_RATE_UNCFG) :
+			uint16_t max_rate = rofl::openflow::OFPQ_MAX_RATE_UNCFG) :
 				cofqueue_prop(ofp_version, rofl::openflow13::OFPQT_MAX_RATE),
 				max_rate(max_rate) {};
 

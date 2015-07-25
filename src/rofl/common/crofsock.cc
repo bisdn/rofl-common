@@ -389,6 +389,7 @@ crofsock::parse_message(
 		} else {
 			LOGGING_ERROR << "[rofl-common][crofsock] eBadRequestBadType " << std::endl;
 		}
+
 	} catch (RoflException& e) {
 
 		if (msg) {
@@ -410,7 +411,7 @@ crofsock::parse_of10_message(cmemory *mem, rofl::openflow::cofmsg **pmsg)
 
 	switch (header->type) {
 	case rofl::openflow10::OFPT_HELLO: {
-		(*pmsg = new rofl::openflow::cofmsg_hello(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_hello())->unpack(mem->somem(), mem->memlen());
 	} break;
 
 	case rofl::openflow10::OFPT_ERROR: {
@@ -534,7 +535,7 @@ crofsock::parse_of10_message(cmemory *mem, rofl::openflow::cofmsg **pmsg)
 	} break;
 
 	case rofl::openflow10::OFPT_BARRIER_REQUEST: {
-		(*pmsg = new rofl::openflow::cofmsg_barrier_request(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_barrier_request())->unpack(mem->somem(), mem->memlen());
 	} break;
 	case rofl::openflow10::OFPT_BARRIER_REPLY: {
 		(*pmsg = new rofl::openflow::cofmsg_barrier_reply(mem))->validate();

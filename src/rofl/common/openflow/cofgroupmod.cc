@@ -7,51 +7,6 @@
 using namespace rofl::openflow;
 
 
-cofgroupmod::cofgroupmod(
-		uint8_t ofp_version,
-		uint16_t command,
-		uint8_t type,
-		uint32_t group_id) :
-		ofp_version(ofp_version),
-		command(command),
-		type(type),
-		group_id(group_id),
-		buckets(ofp_version)
-{}
-
-
-cofgroupmod::~cofgroupmod()
-{}
-
-
-cofgroupmod&
-cofgroupmod::operator= (const cofgroupmod& ge)
-{
-	if (this == &ge)
-		return *this;
-
-	this->ofp_version 		= ge.ofp_version;
-	this->command           = ge.command;
-	this->type              = ge.type;
-	this->group_id          = ge.group_id;
-	this->buckets 			= ge.buckets;
-
-	return *this;
-}
-
-
-void
-cofgroupmod::clear()
-{
-	command = htobe16(openflow13::OFPGC_ADD);  // = 0
-	type = openflow13::OFPGT_ALL; // = 0
-	group_id = 0;
-
-	buckets.clear();
-}
-
-
-
 size_t
 cofgroupmod::length() const
 {

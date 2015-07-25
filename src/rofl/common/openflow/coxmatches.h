@@ -3521,7 +3521,7 @@ public:
 				os << oxmatches.get_ofx_tp_dst();
 			} break;
 			default: {
-				if (OXM_CLASS(*it) == 0xffff0000) {
+				if (OXM_ROFL_CLASS(*it) == 0xffff0000) {
 					os << oxmatches.get_exp_match(
 							(*it & 0xffffffff00000000) >> 32,
 							(*it & 0x00000000fffffe00) >>  0);

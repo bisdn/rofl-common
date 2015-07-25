@@ -23,75 +23,63 @@ public:
 	/**
 	 *
 	 */
-	cofmsg_flow_mod(
-			uint8_t ofp_version = rofl::openflow::OFP_VERSION_UNKNOWN, uint32_t xid = 0, const cofflowmod& flowmod = cofflowmod());
+	virtual
+	~cofmsg_flow_mod()
+	{};
 
 	/**
 	 *
 	 */
 	cofmsg_flow_mod(
-			const cofmsg_flow_mod& msg);
+			uint8_t version = rofl::openflow::OFP_VERSION_UNKNOWN,
+			uint32_t xid = 0,
+			const rofl::openflow::cofflowmod& flowmod = rofl::openflow::cofflowmod()) :
+				cofmsg(version, rofl::openflow::OFPT_FLOW_MOD, 0, xid),
+				flowmod(flowmod)
+	{};
+
+	/**
+	 *
+	 */
+	cofmsg_flow_mod(
+			const cofmsg_flow_mod& msg)
+	{ *this = msg; };
 
 	/**
 	 *
 	 */
 	cofmsg_flow_mod&
 	operator= (
-			const cofmsg_flow_mod& msg);
-
-	/**
-	 *
-	 */
-	virtual
-	~cofmsg_flow_mod();
-
-	/**
-	 *
-	 */
-	cofmsg_flow_mod(
-			cmemory *memarea);
-
-public:
-
-	/** reset packet content
-	 *
-	 */
-	virtual void
-	reset();
-
-	/** parse packet and validate it
-	 */
-	virtual void
-	validate();
-
-	/**
-	 *
-	 */
-	void
-	check_prerequisites() const;
-
-public:
-
-	/**
-	 *
-	 */
-	virtual void
-	set_version(uint8_t ofp_version) {
-		cofmsg::set_version(ofp_version);
-		flowmod.set_version(ofp_version);
+			const cofmsg_flow_mod& msg) {
+		if (this == &msg)
+			return *this;
+		cofmsg::operator= (msg);
+		flowmod	= msg.flowmod;
+		return *this;
 	};
 
 	/**
 	 *
 	 */
-	rofl::openflow::cofflowmod&
-	set_flowmod() { return flowmod; };
+	void
+	check_prerequisites() const
+	{ flowmod.check_prerequisites(); };
+
+public:
 
 	/**
 	 *
 	 */
 	const rofl::openflow::cofflowmod&
-	get_flowmod() const { return flowmod; };
+	get_flowmod() const
+	{ return flowmod; };
+
+	/**
+	 *
+	 */
+	rofl::openflow::cofflowmod&
+	set_flowmod()
+	{ return flowmod; };
 
 public:
 
@@ -125,9 +113,17 @@ public:
 		return os;
 	};
 
+	std::string
+	str() const {
+		std::stringstream ss;
+		ss << cofmsg::str() << "-Flow-Mod- " << " ";
+		ss << "flowmod: " << flowmod.str() << " ";
+		return ss.str();
+	};
+
 private:
 
-	rofl::openflow::cofflowmod	flowmod;
+	rofl::openflow::cofflowmod flowmod;
 };
 
 } // end of namespace openflow

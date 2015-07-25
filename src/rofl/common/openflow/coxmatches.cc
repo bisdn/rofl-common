@@ -94,7 +94,7 @@ coxmatches::unpack(
 
 			struct rofl::openflow::ofp_oxm_tlv_hdr* oxm = (struct rofl::openflow::ofp_oxm_tlv_hdr*)buf;
 
-			uint64_t oxm_type = OXM_TYPE(be32toh(oxm->oxm_id));
+			uint64_t oxm_type = OXM_ROFL_TYPE(be32toh(oxm->oxm_id));
 
 			switch (oxm_type) {
 			case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IN_PORT): {
@@ -237,7 +237,7 @@ coxmatches::unpack(
 
 			struct rofl::openflow::ofp_oxm_tlv_hdr* hdr =
 					(struct rofl::openflow::ofp_oxm_tlv_hdr*)buf;
-			oxm_type |= OXM_TYPE(be32toh(hdr->oxm_id));
+			oxm_type |= OXM_ROFL_TYPE(be32toh(hdr->oxm_id));
 
 			uint32_t exp_id = be32toh(oxm->experimenter);
 			uint32_t oxm_id = be32toh(hdr->oxm_id);

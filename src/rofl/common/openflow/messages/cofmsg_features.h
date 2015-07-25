@@ -19,80 +19,43 @@ namespace openflow {
 /**
  *
  */
-class cofmsg_features_request :
-	public cofmsg
-{
+class cofmsg_features_request : public cofmsg {
 public:
 
-
-	/** constructor
+	/**
 	 *
 	 */
-	cofmsg_features_request(
-			uint8_t of_version = 0,
-			uint32_t xid = 0);
-
+	virtual
+	~cofmsg_features_request()
+	{};
 
 	/**
 	 *
 	 */
 	cofmsg_features_request(
-			cofmsg_features_request const& features_request);
+			uint8_t version = 0,
+			uint32_t xid = 0) :
+				cofmsg(version, rofl::openflow::OFPT_FEATURES_REQUEST, 0, xid)
+	{};
 
+	/**
+	 *
+	 */
+	cofmsg_features_request(
+			const cofmsg_features_request& msg)
+	{ *this = msg; };
 
 	/**
 	 *
 	 */
 	cofmsg_features_request&
 	operator= (
-			cofmsg_features_request const& features_request);
-
-
-	/** destructor
-	 *
-	 */
-	virtual
-	~cofmsg_features_request();
-
-
-	/**
-	 *
-	 */
-	cofmsg_features_request(cmemory *memarea);
-
-
-	/** reset packet content
-	 *
-	 */
-	virtual void
-	reset();
-
-
-	/** returns length of packet in packed state
-	 *
-	 */
-	virtual size_t
-	length() const;
-
-
-	/**
-	 *
-	 */
-	virtual void
-	pack(uint8_t *buf = (uint8_t*)0, size_t buflen = 0);
-
-
-	/**
-	 *
-	 */
-	virtual void
-	unpack(uint8_t *buf, size_t buflen);
-
-
-	/** parse packet and validate it
-	 */
-	virtual void
-	validate();
+			const cofmsg_features_request& msg) {
+		if (this == &msg)
+			return *this;
+		cofmsg::operator= (msg);
+		return *this;
+	};
 
 public:
 
@@ -106,7 +69,7 @@ public:
 	std::string
 	str() const {
 		std::stringstream ss;
-		ss << "-Features-Request- " << cofmsg::str();
+		ss << cofmsg::str() << "-Features-Request- ";
 		return ss.str();
 	};
 };
@@ -115,204 +78,209 @@ public:
 /**
  *
  */
-class cofmsg_features_reply :
-	public cofmsg
-{
-private:
-
-	rofl::openflow::cofports			ports;
-
-	union {
-		uint8_t*						ofhu_switch_features;
-		struct openflow10::ofp_switch_features*	ofhu10_switch_features;
-		struct openflow12::ofp_switch_features*	ofhu12_switch_features;
-		struct openflow13::ofp_switch_features*	ofhu13_switch_features;
-	} ofhu;
-
-#define ofh_switch_features   ofhu.ofhu_switch_features
-#define ofh10_switch_features ofhu.ofhu10_switch_features
-#define ofh12_switch_features ofhu.ofhu12_switch_features
-#define ofh13_switch_features ofhu.ofhu13_switch_features
-
+class cofmsg_features_reply : public cofmsg {
 public:
 
-
-	/** constructor
+	/**
 	 *
 	 */
-	cofmsg_features_reply(
-			uint8_t of_version = 0,
-			uint32_t xid = 0,
-			uint64_t dpid = 0,
-			uint32_t n_buffers = 0,
-			uint8_t  n_tables = 0,
-			uint32_t capabilities = 0,
-			uint32_t of10_actions_bitmap = 0,
-			uint8_t  of13_auxiliary_id = 0,
-			rofl::openflow::cofports const& ports = rofl::openflow::cofports());
-
+	virtual
+	~cofmsg_features_reply()
+	{};
 
 	/**
 	 *
 	 */
 	cofmsg_features_reply(
-			cofmsg_features_reply const& features_reply);
+			uint8_t version = 0,
+			uint32_t xid = 0,
+			uint64_t dpid = 0,
+			uint32_t n_buffers = 0,
+			uint8_t  n_tables = 0,
+			uint8_t  auxid = 0, // since OFP 1.3
+			uint32_t capabilities = 0,
+			uint32_t actions_bitmap = 0, // OFP 1.0 only
+			const rofl::openflow::cofports& ports = rofl::openflow::cofports()) :
+				cofmsg(version, rofl::openflow::OFPT_FEATURES_REPLY, 0, xid),
+				dpid(dpid),
+				n_buffers(n_buffers),
+				n_tables(n_tables),
+				auxid(auxid),
+				capabilities(capabilities),
+				actions(actions_bitmap),
+				ports(ports)
+	{
+		switch (get_version()) {
+		case rofl::openflow10::OFP_VERSION: {
+			set_length(sizeof(struct rofl::openflow10::ofp_switch_features)/* =32 */ + ports.length());
+		} break;
+		case rofl::openflow12::OFP_VERSION: {
+			set_length(sizeof(struct rofl::openflow12::ofp_switch_features)/* =32 */ + ports.length());
+		} break;
+		default: {
+			set_length(sizeof(struct rofl::openflow13::ofp_switch_features)/* =32 */);
+		};
+		}
+	};
 
+	/**
+	 *
+	 */
+	cofmsg_features_reply(
+			const cofmsg_features_reply& msg)
+	{ *this = msg; };
 
 	/**
 	 *
 	 */
 	cofmsg_features_reply&
 	operator= (
-			cofmsg_features_reply const& features_reply);
+			const cofmsg_features_reply& msg) {
+		if (this == &msg)
+			return *this;
+		dpid         = msg.dpid;
+		n_buffers    = msg.n_buffers;
+		n_tables     = msg.n_tables;
+		auxid        = msg.auxid;
+		capabilities = msg.capabilities;
+		actions      = msg.actions;
+		ports        = msg.ports;
+		return *this;
+	};
 
-
-	/** destructor
-	 *
-	 */
-	virtual
-	~cofmsg_features_reply();
-
-
-	/**
-	 *
-	 */
-	cofmsg_features_reply(cmemory *memarea);
-
-
-	/** reset packet content
-	 *
-	 */
-	virtual void
-	reset();
-
+public:
 
 	/**
-	 *
-	 */
-	virtual uint8_t*
-	resize(size_t len);
-
-
-	/** returns length of packet in packed state
 	 *
 	 */
 	virtual size_t
 	length() const;
 
+	/**
+	 *
+	 */
+	virtual void
+	pack(
+			uint8_t *buf = (uint8_t*)0, size_t buflen = 0);
 
 	/**
 	 *
 	 */
 	virtual void
-	pack(uint8_t *buf = (uint8_t*)0, size_t buflen = 0);
-
-
-	/**
-	 *
-	 */
-	virtual void
-	unpack(uint8_t *buf, size_t buflen);
-
-
-	/** parse packet and validate it
-	 */
-	virtual void
-	validate();
-
+	unpack(
+			uint8_t *buf, size_t buflen);
 
 public:
-
 
 	/**
 	 *
 	 */
 	uint64_t
-	get_dpid() const;
+	get_dpid() const
+	{ return dpid; };
 
 	/**
 	 *
 	 */
 	void
-	set_dpid(uint64_t dpid);
+	set_dpid(
+			uint64_t dpid)
+	{ this->dpid = dpid; };
 
 	/**
 	 *
 	 */
 	uint32_t
-	get_n_buffers() const;
+	get_n_buffers() const
+	{ return n_buffers; };
 
 	/**
 	 *
 	 */
 	void
-	set_n_buffers(uint32_t n_buffers);
+	set_n_buffers(
+			uint32_t n_buffers)
+	{ this->n_buffers = n_buffers; };
 
 	/**
 	 *
 	 */
 	uint8_t
-	get_n_tables() const;
+	get_n_tables() const
+	{ return n_tables; };
 
 	/**
 	 *
 	 */
 	void
-	set_n_tables(uint8_t n_tables);
+	set_n_tables(
+			uint8_t n_tables)
+	{ this->n_tables = n_tables; };
 
-	/** OF1.3
+	/**
 	 *
 	 */
 	uint8_t
-	get_auxiliary_id() const;
+	get_auxid() const
+	{ return auxid; };
 
 	/**
 	 *
 	 */
 	void
-	set_auxiliary_id(uint8_t auxiliary_id);
+	set_auxid(
+			uint8_t auxid)
+	{ this->auxid = auxid; };
 
 	/**
 	 *
 	 */
 	uint32_t
-	get_capabilities() const;
+	get_capabilities() const
+	{ return capabilities; };
 
 	/**
 	 *
 	 */
 	void
-	set_capabilities(uint32_t capabilities);
+	set_capabilities(
+			uint32_t capabilities)
+	{ this->capabilities = capabilities; };
 
-	/** OF1.0 only
+	/**
 	 *
 	 */
 	uint32_t
-	get_actions_bitmap() const;
+	get_actions_bitmap() const
+	{ return actions; };
 
 	/**
 	 *
 	 */
 	void
-	set_actions_bitmap(uint32_t actions_bitmap);
+	set_actions_bitmap(
+			uint32_t actions)
+	{ this->actions = actions; };
+
+	/**
+	 *
+	 */
+	const rofl::openflow::cofports&
+	get_ports() const
+	{ return ports; };
 
 	/**
 	 *
 	 */
 	rofl::openflow::cofports&
-	set_ports();
-
-	/**
-	 *
-	 */
-	rofl::openflow::cofports const&
-	get_ports() const;
+	set_ports()
+	{ return ports; };
 
 public:
 
 	friend std::ostream&
-	operator<< (std::ostream& os, cofmsg_features_reply const& msg) {
-		os << dynamic_cast<cofmsg const&>( msg );
+	operator<< (std::ostream& os, const cofmsg_features_reply& msg) {
+		os << dynamic_cast<const cofmsg&>( msg );
 		os << indent(2) << "<cofmsg_features_reply ";
 		switch (msg.get_version()) {
 		case openflow10::OFP_VERSION: {
@@ -351,15 +319,25 @@ public:
 	std::string
 	str() const {
 		std::stringstream ss;
-		ss << "-Features-Reply- " << cofmsg::str() << " ";
+		ss << cofmsg::str() << "-Features-Reply- " << " ";
 		ss << "dpid: " << cdpid(get_dpid()).str() << ", ";
 		if (get_version() >= rofl::openflow13::OFP_VERSION) {
-			ss << "auxid: " << cauxid(get_auxiliary_id()).str() << ", ";
+			ss << "auxid: " << cauxid(get_auxid()).str() << ", ";
 		}
 		ss << "#buffers: " << (unsigned int)get_n_buffers() << ", ";
 		ss << "#tables: " << (int)get_n_tables() << " ";
 		return ss.str();
 	};
+
+private:
+
+	uint64_t                 dpid;
+	uint32_t                 n_buffers;
+	uint8_t                  n_tables;
+	uint8_t                  auxid;
+	uint32_t                 capabilities;
+	uint32_t                 actions;
+	rofl::openflow::cofports ports;
 };
 
 } // end of namespace openflow
