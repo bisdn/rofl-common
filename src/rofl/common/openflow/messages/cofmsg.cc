@@ -45,7 +45,7 @@ cofmsg::unpack(
 		return;
 
 	if (buflen < cofmsg::length())
-		throw eMsgInval("cofmsg::unpack() buf too short");
+		throw eBadSyntaxTooShort("cofmsg::unpack() buf too short");
 
 	struct rofl::openflow::ofp_header* hdr =
 			(struct rofl::openflow::ofp_header*)buf;

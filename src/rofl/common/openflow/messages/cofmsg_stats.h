@@ -34,7 +34,6 @@ public:
 	 */
 	cofmsg_stats_request(
 			uint8_t version = 0,
-			uint8_t type = 0,
 			uint32_t xid = 0,
 			uint16_t stats_type = 0,
 			uint16_t stats_flags = 0);
@@ -139,17 +138,10 @@ private:
 			if (get_stats_flags() & rofl::openflow10::OFPSF_REPLY_MORE)
 				str.append("MORE ");
 		} break;
-		case rofl::openflow12::OFP_VERSION: {
-			if (get_stats_flags() & rofl::openflow12::OFPSF_REPLY_MORE)
-				str.append("MORE ");
-		} break;
-		case rofl::openflow13::OFP_VERSION: {
+		default: {
 			if (get_stats_flags() & rofl::openflow13::OFPMPF_REPLY_MORE)
 				str.append("MORE ");
-		} break;
-		default: {
-			str.append("unsupported OF version");
-		} break;
+		};
 		}
 		return str;
 	};
@@ -282,17 +274,10 @@ private:
 			if (get_stats_flags() & rofl::openflow10::OFPSF_REPLY_MORE)
 				str.append("MORE ");
 		} break;
-		case rofl::openflow12::OFP_VERSION: {
-			if (get_stats_flags() & rofl::openflow12::OFPSF_REPLY_MORE)
-				str.append("MORE ");
-		} break;
-		case rofl::openflow13::OFP_VERSION: {
+		default: {
 			if (get_stats_flags() & rofl::openflow13::OFPMPF_REPLY_MORE)
 				str.append("MORE ");
-		} break;
-		default: {
-			str.append("unsupported OF version");
-		} break;
+		};
 		}
 		return str;
 	};

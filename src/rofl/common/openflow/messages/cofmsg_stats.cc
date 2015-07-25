@@ -13,14 +13,22 @@ cofmsg_stats_request::~cofmsg_stats_request()
 
 cofmsg_stats_request::cofmsg_stats_request(
 		uint8_t version,
-		uint8_t type,
 		uint32_t xid,
 		uint16_t stats_type,
 		uint16_t stats_flags) :
-				cofmsg(version, type, xid),
+				cofmsg(version, rofl::openflow13::OFPT_MULTIPART_REQUEST, xid),
 				stats_type(stats_type),
 				stats_flags(stats_flags)
-{}
+{
+	switch (version) {
+	case rofl::openflow10::OFP_VERSION: {
+		set_type(rofl::openflow10::OFPT_STATS_REQUEST);
+	} break;
+	default: {
+		// do nothing
+	};
+	}
+}
 
 
 
@@ -53,14 +61,9 @@ cofmsg_stats_request::length() const
 	case rofl::openflow10::OFP_VERSION: {
 		return sizeof(struct rofl::openflow10::ofp_stats_request);
 	} break;
-	case rofl::openflow12::OFP_VERSION: {
-		return sizeof(struct rofl::openflow12::ofp_stats_request);
-	} break;
-	case rofl::openflow13::OFP_VERSION: {
+	default: {
 		return sizeof(struct rofl::openflow13::ofp_multipart_request);
-	} break;
-	default:
-		throw eBadVersion();
+	};
 	}
 	return 0;
 }
@@ -83,21 +86,12 @@ cofmsg_stats_request::pack(
 				(struct rofl::openflow10::ofp_stats_request*)buf;
 		hdr->type 	= htobe16(stats_type);
 		hdr->flags	= htobe16(stats_flags);
-
-	} break;
-	case rofl::openflow12::OFP_VERSION: {
-		struct rofl::openflow12::ofp_stats_request* hdr =
-				(struct rofl::openflow12::ofp_stats_request*)buf;
-		hdr->type 	= htobe16(stats_type);
-		hdr->flags	= htobe16(stats_flags);
-
 	} break;
 	default: {
 		struct rofl::openflow13::ofp_multipart_request* hdr =
 					(struct rofl::openflow13::ofp_multipart_request*)buf;
 		hdr->type 	= htobe16(stats_type);
 		hdr->flags	= htobe16(stats_flags);
-
 	};
 	}
 }
@@ -113,7 +107,7 @@ cofmsg_stats_request::unpack(uint8_t *buf, size_t buflen)
 		return;
 
 	if (buflen < cofmsg_stats_request::length())
-		throw eMsgInval("cofmsg_stats_request::unpack() buf too short");
+		throw eBadSyntaxTooShort("cofmsg_stats_request::unpack() buf too short");
 
 	switch (get_version()) {
 	case rofl::openflow10::OFP_VERSION: {
@@ -121,21 +115,12 @@ cofmsg_stats_request::unpack(uint8_t *buf, size_t buflen)
 				(struct rofl::openflow10::ofp_stats_request*)buf;
 		stats_type	= be16toh(hdr->type);
 		stats_flags	= be16toh(hdr->flags);
-
-	} break;
-	case rofl::openflow12::OFP_VERSION: {
-		struct rofl::openflow12::ofp_stats_request* hdr =
-				(struct rofl::openflow12::ofp_stats_request*)buf;
-		stats_type	= be16toh(hdr->type);
-		stats_flags	= be16toh(hdr->flags);
-
 	} break;
 	default: {
 		struct rofl::openflow13::ofp_multipart_request* hdr =
 				(struct rofl::openflow13::ofp_multipart_request*)buf;
 		stats_type	= be16toh(hdr->type);
 		stats_flags	= be16toh(hdr->flags);
-
 	};
 	}
 
@@ -192,14 +177,9 @@ cofmsg_stats_reply::length() const
 	case rofl::openflow10::OFP_VERSION: {
 		return sizeof(struct rofl::openflow10::ofp_stats_reply);
 	} break;
-	case rofl::openflow12::OFP_VERSION: {
-		return sizeof(struct rofl::openflow12::ofp_stats_reply);
-	} break;
-	case rofl::openflow13::OFP_VERSION: {
+	default: {
 		return sizeof(struct rofl::openflow13::ofp_multipart_reply);
-	} break;
-	default:
-		throw eBadVersion();
+	};
 	}
 	return 0;
 }
@@ -222,21 +202,12 @@ cofmsg_stats_reply::pack(
 				(struct rofl::openflow10::ofp_stats_reply*)buf;
 		hdr->type 	= htobe16(stats_type);
 		hdr->flags	= htobe16(stats_flags);
-
-	} break;
-	case rofl::openflow12::OFP_VERSION: {
-		struct rofl::openflow12::ofp_stats_reply* hdr =
-				(struct rofl::openflow12::ofp_stats_reply*)buf;
-		hdr->type 	= htobe16(stats_type);
-		hdr->flags	= htobe16(stats_flags);
-
 	} break;
 	default: {
 		struct rofl::openflow13::ofp_multipart_reply* hdr =
 					(struct rofl::openflow13::ofp_multipart_reply*)buf;
 		hdr->type 	= htobe16(stats_type);
 		hdr->flags	= htobe16(stats_flags);
-
 	};
 	}
 }
@@ -252,7 +223,7 @@ cofmsg_stats_reply::unpack(uint8_t *buf, size_t buflen)
 		return;
 
 	if (buflen < cofmsg_stats_reply::length())
-		throw eMsgInval("cofmsg_stats_reply::unpack() buf too short");
+		throw eBadSyntaxTooShort("cofmsg_stats_reply::unpack() buf too short");
 
 	switch (get_version()) {
 	case rofl::openflow10::OFP_VERSION: {
@@ -260,21 +231,12 @@ cofmsg_stats_reply::unpack(uint8_t *buf, size_t buflen)
 				(struct rofl::openflow10::ofp_stats_reply*)buf;
 		stats_type	= be16toh(hdr->type);
 		stats_flags	= be16toh(hdr->flags);
-
-	} break;
-	case rofl::openflow12::OFP_VERSION: {
-		struct rofl::openflow12::ofp_stats_reply* hdr =
-				(struct rofl::openflow12::ofp_stats_reply*)buf;
-		stats_type	= be16toh(hdr->type);
-		stats_flags	= be16toh(hdr->flags);
-
 	} break;
 	default: {
 		struct rofl::openflow13::ofp_multipart_reply* hdr =
 				(struct rofl::openflow13::ofp_multipart_reply*)buf;
 		stats_type	= be16toh(hdr->type);
 		stats_flags	= be16toh(hdr->flags);
-
 	};
 	}
 
