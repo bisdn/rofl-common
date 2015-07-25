@@ -18,4 +18,4 @@ script:
   - make -j 2 check
 notifications:
   email:
-    - ci@bisdn.de
+    - andreas.koepsel@bisdn.de
