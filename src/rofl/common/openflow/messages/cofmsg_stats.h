@@ -119,7 +119,7 @@ public:
 		return os;
 	};
 
-	std::string
+	virtual std::string
 	str() const {
 		std::stringstream ss;
 		ss << cofmsg::str() << "-Stats-Request- " << " ";
@@ -254,7 +254,7 @@ public:
 		return os;
 	};
 
-	std::string
+	virtual std::string
 	str() const {
 		std::stringstream ss;
 		ss << cofmsg::str() << "-Stats-Reply- " << " ";

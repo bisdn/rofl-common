@@ -169,7 +169,8 @@ public:
 	 *
 	 */
 	virtual void
-	unpack(uint8_t *buf, size_t buflen);
+	unpack(
+			uint8_t *buf, size_t buflen);
 
 public:
 

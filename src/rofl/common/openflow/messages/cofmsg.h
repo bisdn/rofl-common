@@ -177,7 +177,7 @@ public:
 		return os;
 	};
 
-	std::string
+	virtual std::string
 	str() const {
 		std::stringstream ss;
 		ss << "OFP:{";
