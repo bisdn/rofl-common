@@ -33,42 +33,47 @@ libopenflow_messages_la_SOURCES = \
 	cofmsg_stats.h \
 	cofmsg_stats.cc \
 	cofmsg_aggr_stats.h \
-	cofmsg_desc_stats.h \
-	cofmsg_experimenter_stats.h \
-	cofmsg_flow_stats.h \
-	cofmsg_group_desc_stats.h \
-	cofmsg_group_features_stats.h \
-	cofmsg_group_stats.h \
-	cofmsg_port_mod.h \
-	cofmsg_port_stats.h \
-	cofmsg_port_desc_stats.h \
-	cofmsg_queue_get_config.h \
-	cofmsg_queue_stats.h \
-	cofmsg_role.h \
-	cofmsg_table_mod.h \
-	cofmsg_table_stats.h \
-	cofmsg_table_features_stats.h \
 	cofmsg_aggr_stats.cc \
+	cofmsg_desc_stats.h \
 	cofmsg_desc_stats.cc \
+	cofmsg_experimenter_stats.h \
 	cofmsg_experimenter_stats.cc \
+	cofmsg_flow_stats.h \
 	cofmsg_flow_stats.cc \
+	cofmsg_group_desc_stats.h \
 	cofmsg_group_desc_stats.cc \
+	cofmsg_group_features_stats.h \
 	cofmsg_group_features_stats.cc \
+	cofmsg_group_stats.h \
 	cofmsg_group_stats.cc \
-	cofmsg_port_mod.cc \
-	cofmsg_port_stats.cc \
-	cofmsg_port_desc_stats.cc \
-	cofmsg_queue_get_config.cc \
-	cofmsg_queue_stats.cc \
-	cofmsg_role.cc \
-	cofmsg_table_mod.cc \
-	cofmsg_table_stats.cc \
-	cofmsg_table_features_stats.cc \
-	cofmsg_async_config.cc \
-	cofmsg_meter_mod.cc \
+	cofmsg_meter_features_stats.h \
 	cofmsg_meter_features_stats.cc \
+	cofmsg_meter_stats.h \
 	cofmsg_meter_stats.cc \
-	cofmsg_meter_config_stats.cc
+	cofmsg_meter_config_stats.h \
+	cofmsg_meter_config_stats.cc \
+	cofmsg_port_desc_stats.h \
+	cofmsg_port_desc_stats.cc \
+	cofmsg_port_stats.h \
+	cofmsg_port_stats.cc \
+	cofmsg_queue_stats.h \
+	cofmsg_queue_stats.cc \
+	cofmsg_table_stats.h \
+	cofmsg_table_stats.cc \
+	cofmsg_table_features_stats.h \
+	cofmsg_table_features_stats.cc \
+	cofmsg_queue_get_config.h \
+	cofmsg_queue_get_config.cc \
+	cofmsg_port_mod.h \
+	cofmsg_port_mod.cc \
+	cofmsg_role.h \
+	cofmsg_role.cc \
+	cofmsg_table_mod.h \
+	cofmsg_table_mod.cc \
+	cofmsg_async_config.h \
+	cofmsg_async_config.cc \
+	cofmsg_meter_mod.h \
+	cofmsg_meter_mod.cc
 
 library_includedir=$(includedir)/rofl/common/openflow/messages
 library_include_HEADERS = \
