@@ -114,16 +114,16 @@ cofmsg_aggr_stats_request::unpack(
 	case rofl::openflow10::OFP_VERSION: {
 		struct rofl::openflow10::ofp_stats_request* hdr =
 				(struct rofl::openflow10::ofp_stats_request*)buf;
-		size_t aggr_stats_len = buflen - sizeof(struct rofl::openflow10::ofp_stats_request);
-		if (aggr_stats_len > 0)
-			aggr_stats.unpack(hdr->body, aggr_stats_len);
+		if (buflen > sizeof(struct rofl::openflow10::ofp_stats_request)) {
+			aggr_stats.unpack(hdr->body, buflen - sizeof(struct rofl::openflow10::ofp_stats_request));
+		}
 	} break;
 	default: {
 		struct rofl::openflow13::ofp_multipart_request* hdr =
 				(struct rofl::openflow13::ofp_multipart_request*)buf;
-		size_t aggr_stats_len = buflen - sizeof(struct rofl::openflow13::ofp_multipart_request);
-		if (aggr_stats_len > 0)
-			aggr_stats.unpack(hdr->body, aggr_stats_len);
+		if (buflen > sizeof(struct rofl::openflow13::ofp_multipart_request)) {
+			aggr_stats.unpack(hdr->body, buflen - sizeof(struct rofl::openflow13::ofp_multipart_request));
+		}
 	};
 	}
 
@@ -243,16 +243,16 @@ cofmsg_aggr_stats_reply::unpack(
 	case rofl::openflow10::OFP_VERSION: {
 		struct rofl::openflow10::ofp_stats_reply* hdr =
 				(struct rofl::openflow10::ofp_stats_reply*)buf;
-		size_t aggr_stats_len = buflen - sizeof(struct rofl::openflow10::ofp_stats_reply);
-		if (aggr_stats_len > 0)
-			aggr_stats.unpack(hdr->body, aggr_stats_len);
+		if (buflen > sizeof(struct rofl::openflow10::ofp_stats_reply)) {
+			aggr_stats.unpack(hdr->body, buflen - sizeof(struct rofl::openflow10::ofp_stats_reply));
+		}
 	} break;
 	default: {
 		struct rofl::openflow13::ofp_multipart_reply* hdr =
 				(struct rofl::openflow13::ofp_multipart_reply*)buf;
-		size_t aggr_stats_len = buflen - sizeof(struct rofl::openflow13::ofp_multipart_reply);
-		if (aggr_stats_len > 0)
-			aggr_stats.unpack(hdr->body, aggr_stats_len);
+		if (buflen > sizeof(struct rofl::openflow13::ofp_multipart_reply)) {
+			aggr_stats.unpack(hdr->body, buflen - sizeof(struct rofl::openflow13::ofp_multipart_reply));
+		}
 	};
 	}
 

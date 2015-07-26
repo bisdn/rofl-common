@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 #include "rofl/common/openflow/messages/cofmsg_desc_stats.h"
 
 using namespace rofl::openflow;
@@ -62,7 +66,8 @@ cofmsg_desc_stats_request::length() const
 
 
 void
-cofmsg_desc_stats_request::pack(uint8_t *buf, size_t buflen)
+cofmsg_desc_stats_request::pack(
+		uint8_t *buf, size_t buflen)
 {
 	cofmsg_stats_request::pack(buf, buflen); // copies common statistics header
 
@@ -76,7 +81,8 @@ cofmsg_desc_stats_request::pack(uint8_t *buf, size_t buflen)
 
 
 void
-cofmsg_desc_stats_request::unpack(uint8_t *buf, size_t buflen)
+cofmsg_desc_stats_request::unpack(
+		uint8_t *buf, size_t buflen)
 {
 	cofmsg_stats_request::unpack(buf, buflen);
 
@@ -157,7 +163,8 @@ cofmsg_desc_stats_reply::length() const
 
 
 void
-cofmsg_desc_stats_reply::pack(uint8_t *buf, size_t buflen)
+cofmsg_desc_stats_reply::pack(
+		uint8_t *buf, size_t buflen)
 {
 	cofmsg_stats_reply::pack(buf, buflen); // copies common statistics header
 
@@ -184,7 +191,8 @@ cofmsg_desc_stats_reply::pack(uint8_t *buf, size_t buflen)
 
 
 void
-cofmsg_desc_stats_reply::unpack(uint8_t *buf, size_t buflen)
+cofmsg_desc_stats_reply::unpack(
+		uint8_t *buf, size_t buflen)
 {
 	cofmsg_stats_reply::unpack(buf, buflen);
 
@@ -200,16 +208,16 @@ cofmsg_desc_stats_reply::unpack(uint8_t *buf, size_t buflen)
 	case rofl::openflow10::OFP_VERSION: {
 		struct rofl::openflow10::ofp_stats_reply* hdr =
 				(struct rofl::openflow10::ofp_stats_reply*)buf;
-		size_t desc_stats_len = buflen - sizeof(struct rofl::openflow10::ofp_stats_reply);
-		if (desc_stats_len > 0)
-			desc_stats.unpack(hdr->body, desc_stats_len);
+		if (buflen > sizeof(struct rofl::openflow10::ofp_stats_reply)) {
+			desc_stats.unpack(hdr->body, buflen - sizeof(struct rofl::openflow10::ofp_stats_reply));
+		}
 	} break;
 	default: {
 		struct rofl::openflow13::ofp_multipart_reply* hdr =
 				(struct rofl::openflow13::ofp_multipart_reply*)buf;
-		size_t desc_stats_len = buflen - sizeof(struct rofl::openflow13::ofp_multipart_reply);
-		if (desc_stats_len > 0)
-			desc_stats.unpack(hdr->body, desc_stats_len);
+		if (buflen > sizeof(struct rofl::openflow13::ofp_multipart_reply)) {
+			desc_stats.unpack(hdr->body, buflen - sizeof(struct rofl::openflow13::ofp_multipart_reply));
+		}
 	};
 	}
 
