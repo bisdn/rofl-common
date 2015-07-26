@@ -74,6 +74,8 @@ void
 cofmsg_stats_request::pack(
 		uint8_t *buf, size_t buflen)
 {
+	cofmsg::pack(buf, buflen);
+
 	if ((0 == buf) || (0 == buflen))
 		return;
 
@@ -137,11 +139,10 @@ cofmsg_stats_reply::~cofmsg_stats_reply()
 
 cofmsg_stats_reply::cofmsg_stats_reply(
 		uint8_t version,
-		uint8_t type,
 		uint32_t xid,
 		uint16_t stats_type,
 		uint16_t stats_flags) :
-				cofmsg(version, type, xid),
+				cofmsg(version, rofl::openflow::OFPT_MULTIPART_REPLY, xid),
 				stats_type(stats_type),
 				stats_flags(stats_flags)
 {}
@@ -190,6 +191,8 @@ void
 cofmsg_stats_reply::pack(
 		uint8_t *buf, size_t buflen)
 {
+	cofmsg::pack(buf, buflen);
+
 	if ((0 == buf) || (0 == buflen))
 		return;
 

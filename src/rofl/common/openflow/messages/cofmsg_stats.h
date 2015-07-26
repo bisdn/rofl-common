@@ -169,7 +169,6 @@ public:
 	 */
 	cofmsg_stats_reply(
 			uint8_t version = 0,
-			uint8_t type = 0,
 			uint32_t xid = 0,
 			uint16_t stats_type = 0,
 			uint16_t stats_flags = 0);

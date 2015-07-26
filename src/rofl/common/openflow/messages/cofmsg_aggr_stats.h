@@ -37,7 +37,7 @@ public:
 	 *
 	 */
 	cofmsg_aggr_stats_request(
-			uint8_t of_version = 0,
+			uint8_t version = 0,
 			uint32_t xid = 0,
 			uint16_t stats_flags = 0,
 			const cofaggr_stats_request& aggr_stats = cofaggr_stats_request());
