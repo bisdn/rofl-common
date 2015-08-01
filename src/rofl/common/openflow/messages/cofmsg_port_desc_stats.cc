@@ -184,6 +184,7 @@ cofmsg_port_desc_stats_reply::unpack(
 {
 	cofmsg_stats_reply::unpack(buf, buflen);
 
+	ports.clear();
 	ports.set_version(get_version());
 
 	if ((0 == buf) || (0 == buflen))
