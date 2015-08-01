@@ -217,6 +217,7 @@ cofmsg_meter_config_stats_reply::unpack(
 {
 	cofmsg_stats_reply::unpack(buf, buflen);
 
+	array.clear();
 	array.set_version(get_version());
 
 	if ((0 == buf) || (0 == buflen))
