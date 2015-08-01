@@ -1,123 +1,46 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 #include "rofl/common/openflow/messages/cofmsg_port_stats.h"
 
 using namespace rofl::openflow;
 
+cofmsg_port_stats_request::~cofmsg_port_stats_request()
+{}
+
+
+
 cofmsg_port_stats_request::cofmsg_port_stats_request(
-		uint8_t of_version,
+		uint8_t version,
 		uint32_t xid,
 		uint16_t flags,
-		rofl::openflow::cofport_stats_request const& port_stats) :
-	cofmsg_stats_request(of_version, xid, 0, flags),
-	port_stats(port_stats)
+		const rofl::openflow::cofport_stats_request& port_stats) :
+				cofmsg_stats_request(version, xid, rofl::openflow::OFPMP_PORT_STATS, flags),
+				port_stats(port_stats)
 {
-	switch (of_version) {
-	case rofl::openflow::OFP_VERSION_UNKNOWN: {
-
-	} break;
-	case rofl::openflow10::OFP_VERSION: {
-		set_type(rofl::openflow10::OFPT_STATS_REQUEST);
-		set_stats_type(rofl::openflow10::OFPST_PORT);
-		resize(sizeof(struct rofl::openflow10::ofp_stats_request) + sizeof(struct rofl::openflow10::ofp_port_stats_request));
-		port_stats.pack(soframe(), sizeof(struct rofl::openflow10::ofp_port_stats_request));
-	} break;
-	case rofl::openflow12::OFP_VERSION: {
-		set_type(rofl::openflow12::OFPT_STATS_REQUEST);
-		set_stats_type(rofl::openflow12::OFPST_PORT);
-		resize(sizeof(struct rofl::openflow12::ofp_stats_request) + sizeof(struct rofl::openflow12::ofp_port_stats_request));
-		port_stats.pack(soframe(), sizeof(struct rofl::openflow12::ofp_port_stats_request));
-	} break;
-	case rofl::openflow13::OFP_VERSION: {
-		set_type(rofl::openflow13::OFPT_MULTIPART_REQUEST);
-		set_stats_type(rofl::openflow13::OFPMP_PORT_STATS);
-		resize(sizeof(struct rofl::openflow13::ofp_multipart_request) + sizeof(struct rofl::openflow13::ofp_port_stats_request));
-		port_stats.pack(soframe(), sizeof(struct rofl::openflow13::ofp_port_stats_request));
-	} break;
-	default:
-		throw eBadVersion();
-	}
+	this->port_stats.set_version(version);
 }
 
 
 
 cofmsg_port_stats_request::cofmsg_port_stats_request(
-		cmemory *memarea) :
-	cofmsg_stats_request(memarea),
-	port_stats(get_version())
+		const cofmsg_port_stats_request& msg)
 {
-	switch (get_version()) {
-	case rofl::openflow10::OFP_VERSION: {
-		ofh_port_stats = soframe() + sizeof(struct rofl::openflow10::ofp_stats_request);
-	} break;
-	case rofl::openflow12::OFP_VERSION: {
-		ofh_port_stats = soframe() + sizeof(struct rofl::openflow12::ofp_stats_request);
-	} break;
-	case rofl::openflow13::OFP_VERSION: {
-		ofh_port_stats = soframe() + sizeof(struct rofl::openflow13::ofp_multipart_request);
-	} break;
-	default:
-		throw eBadVersion();
-	}
-}
-
-
-
-cofmsg_port_stats_request::cofmsg_port_stats_request(
-		cofmsg_port_stats_request const& stats)
-{
-	*this = stats;
+	*this = msg;
 }
 
 
 
 cofmsg_port_stats_request&
 cofmsg_port_stats_request::operator= (
-		cofmsg_port_stats_request const& stats)
+		const cofmsg_port_stats_request& msg)
 {
-	if (this == &stats)
+	if (this == &msg)
 		return *this;
-
-	cofmsg_stats::operator =(stats);
-
-	ofh_port_stats = soframe();
-
+	cofmsg_stats_request::operator= (msg);
+	port_stats = msg.port_stats;
 	return *this;
-}
-
-
-
-cofmsg_port_stats_request::~cofmsg_port_stats_request()
-{
-
-}
-
-
-
-void
-cofmsg_port_stats_request::reset()
-{
-	cofmsg_stats::reset();
-}
-
-
-
-uint8_t*
-cofmsg_port_stats_request::resize(size_t len)
-{
-	cofmsg_stats::resize(len);
-	switch (get_version()) {
-	case rofl::openflow10::OFP_VERSION: {
-		ofh_port_stats = soframe() + sizeof(struct rofl::openflow10::ofp_stats_request);
-	} break;
-	case rofl::openflow12::OFP_VERSION: {
-		ofh_port_stats = soframe() + sizeof(struct rofl::openflow12::ofp_stats_request);
-	} break;
-	case rofl::openflow13::OFP_VERSION: {
-		ofh_port_stats = soframe() + sizeof(struct rofl::openflow13::ofp_multipart_request);
-	} break;
-	default:
-		throw eBadVersion();
-	}
-	return soframe();
 }
 
 
@@ -127,13 +50,16 @@ cofmsg_port_stats_request::length() const
 {
 	switch (get_version()) {
 	case rofl::openflow10::OFP_VERSION: {
-		return (sizeof(struct rofl::openflow10::ofp_stats_request) + sizeof(struct rofl::openflow10::ofp_port_stats_request));
+		return (sizeof(struct rofl::openflow10::ofp_stats_request) +
+				sizeof(struct rofl::openflow10::ofp_port_stats_request));
 	} break;
 	case rofl::openflow12::OFP_VERSION: {
-		return (sizeof(struct rofl::openflow12::ofp_stats_request) + sizeof(struct rofl::openflow12::ofp_port_stats_request));
+		return (sizeof(struct rofl::openflow12::ofp_stats_request) +
+				sizeof(struct rofl::openflow12::ofp_port_stats_request));
 	} break;
 	case rofl::openflow13::OFP_VERSION: {
-		return (sizeof(struct rofl::openflow13::ofp_multipart_request) + sizeof(struct rofl::openflow13::ofp_port_stats_request));
+		return (sizeof(struct rofl::openflow13::ofp_multipart_request) +
+				sizeof(struct rofl::openflow13::ofp_port_stats_request));
 	} break;
 	default:
 		throw eBadVersion();
@@ -144,213 +70,112 @@ cofmsg_port_stats_request::length() const
 
 
 void
-cofmsg_port_stats_request::pack(uint8_t *buf, size_t buflen)
+cofmsg_port_stats_request::pack(
+		uint8_t *buf, size_t buflen)
 {
-	cofmsg_stats::pack(buf, buflen); // copies common statistics header
+	cofmsg_stats_request::pack(buf, buflen); // copies common statistics header
 
 	if ((0 == buf) || (0 == buflen))
 		return;
 
-	if (buflen < length())
-		throw eInval();
-
-	set_length(length());
+	if (buflen < cofmsg_port_stats_request::length())
+		throw eMsgInval("cofmsg_meter_config_stats_request::pack() buf too short");
 
 	switch (get_version()) {
 	case rofl::openflow10::OFP_VERSION: {
-		if (buflen < length())
-			throw eInval();
-		port_stats.pack(buf + sizeof(struct rofl::openflow10::ofp_stats_request), sizeof(struct rofl::openflow10::ofp_port_stats_request));
+		struct rofl::openflow10::ofp_stats_request* hdr =
+				(struct rofl::openflow10::ofp_stats_request*)buf;
+		port_stats.pack(hdr->body, port_stats.length());
 	} break;
-	case rofl::openflow12::OFP_VERSION: {
-		if (buflen < length())
-			throw eInval();
-		port_stats.pack(buf + sizeof(struct rofl::openflow12::ofp_stats_request), sizeof(struct rofl::openflow12::ofp_port_stats_request));
-	} break;
-	case rofl::openflow13::OFP_VERSION: {
-		if (buflen < length())
-			throw eInval();
-		port_stats.pack(buf + sizeof(struct rofl::openflow13::ofp_multipart_request), sizeof(struct rofl::openflow13::ofp_port_stats_request));
-	} break;
-	default:
-		throw eBadVersion();
+	default: {
+		struct rofl::openflow13::ofp_multipart_request* hdr =
+				(struct rofl::openflow13::ofp_multipart_request*)buf;
+		port_stats.pack(hdr->body, port_stats.length());
+	};
 	}
 }
 
 
 
 void
-cofmsg_port_stats_request::unpack(uint8_t *buf, size_t buflen)
+cofmsg_port_stats_request::unpack(
+		uint8_t *buf, size_t buflen)
 {
-	cofmsg_stats::unpack(buf, buflen);
+	cofmsg_stats_request::unpack(buf, buflen);
 
-	validate();
-}
+	port_stats.set_version(get_version());
 
+	if ((0 == buf) || (0 == buflen))
+		return;
 
-
-void
-cofmsg_port_stats_request::validate()
-{
-	cofmsg_stats::validate(); // check generic statistics header
+	if (buflen < cofmsg_port_stats_request::length())
+		throw eBadSyntaxTooShort("cofmsg_port_stats_request::unpack() buf too short");
 
 	switch (get_version()) {
 	case rofl::openflow10::OFP_VERSION: {
-		if (get_length() < sizeof(struct rofl::openflow10::ofp_stats_request))
-			throw eBadSyntaxTooShort();
-		port_stats.unpack(soframe() + sizeof(struct rofl::openflow10::ofp_stats_request), sizeof(struct rofl::openflow10::ofp_port_stats_request));
+		struct rofl::openflow10::ofp_stats_request* hdr =
+				(struct rofl::openflow10::ofp_stats_request*)buf;
+		if (buflen > sizeof(struct rofl::openflow10::ofp_stats_request)) {
+			port_stats.unpack(hdr->body, buflen - sizeof(struct rofl::openflow10::ofp_stats_request));
+		}
 	} break;
-	case rofl::openflow12::OFP_VERSION: {
-		if (get_length() < (sizeof(struct rofl::openflow12::ofp_stats_request) + sizeof(struct rofl::openflow12::ofp_port_stats_request)))
-			throw eBadSyntaxTooShort();
-		port_stats.unpack(soframe() + sizeof(struct rofl::openflow12::ofp_stats_request), sizeof(struct rofl::openflow12::ofp_port_stats_request));
-	} break;
-	case rofl::openflow13::OFP_VERSION: {
-		if (get_length() < (sizeof(struct rofl::openflow13::ofp_multipart_request) + sizeof(struct rofl::openflow13::ofp_port_stats_request)))
-			throw eBadSyntaxTooShort();
-		port_stats.unpack(soframe() + sizeof(struct rofl::openflow13::ofp_multipart_request), sizeof(struct rofl::openflow13::ofp_port_stats_request));
-	} break;
-	default:
-		throw eBadRequestBadVersion();
+	default: {
+		struct rofl::openflow13::ofp_multipart_request* hdr =
+				(struct rofl::openflow13::ofp_multipart_request*)buf;
+		if (buflen > sizeof(struct rofl::openflow13::ofp_multipart_request)) {
+			port_stats.unpack(hdr->body, buflen - sizeof(struct rofl::openflow13::ofp_multipart_request));
+		}
+	};
 	}
+
+	if (get_length() < cofmsg_port_stats_request::length())
+		throw eBadSyntaxTooShort("cofmsg_port_stats_request::unpack() buf too short");
 }
 
 
 
-rofl::openflow::cofport_stats_request&
-cofmsg_port_stats_request::set_port_stats()
-{
-	return port_stats;
-}
 
 
 
-rofl::openflow::cofport_stats_request const&
-cofmsg_port_stats_request::get_port_stats() const
-{
-	return port_stats;
-}
 
 
+
+
+cofmsg_port_stats_reply::~cofmsg_port_stats_reply()
+{}
 
 
 
 cofmsg_port_stats_reply::cofmsg_port_stats_reply(
-		uint8_t of_version,
+		uint8_t version,
 		uint32_t xid,
-		uint16_t flags,
-		rofl::openflow::cofportstatsarray const& portstatsarray) :
-	cofmsg_stats_reply(of_version, xid, 0, flags),
-	portstatsarray(portstatsarray)
+		uint16_t stats_flags,
+		const rofl::openflow::cofportstatsarray& portstatsarray) :
+				cofmsg_stats_reply(version, xid, rofl::openflow::OFPMP_PORT_STATS, stats_flags),
+				portstatsarray(portstatsarray)
 {
-	this->portstatsarray.set_version(of_version);
-
-	switch (of_version) {
-	case rofl::openflow::OFP_VERSION_UNKNOWN: {
-
-	} break;
-	case rofl::openflow10::OFP_VERSION: {
-		set_type(rofl::openflow10::OFPT_STATS_REPLY);
-		set_stats_type(rofl::openflow10::OFPST_PORT);
-
-	} break;
-	case rofl::openflow12::OFP_VERSION: {
-		set_type(rofl::openflow12::OFPT_STATS_REPLY);
-		set_stats_type(rofl::openflow12::OFPST_PORT);
-
-	} break;
-	case rofl::openflow13::OFP_VERSION: {
-		set_type(rofl::openflow13::OFPT_MULTIPART_REPLY);
-		set_stats_type(rofl::openflow13::OFPMP_PORT_STATS);
-
-	} break;
-	default:
-		throw eBadVersion();
-	}
+	this->portstatsarray.set_version(version);
 }
 
 
 
 cofmsg_port_stats_reply::cofmsg_port_stats_reply(
-		cmemory *memarea) :
-	cofmsg_stats_reply(memarea)
+		const cofmsg_port_stats_reply& msg)
 {
-	switch (get_version()) {
-	case rofl::openflow10::OFP_VERSION: {
-		ofh_port_stats = soframe() + sizeof(struct rofl::openflow10::ofp_stats_reply);
-	} break;
-	case rofl::openflow12::OFP_VERSION: {
-		ofh_port_stats = soframe() + sizeof(struct rofl::openflow12::ofp_stats_reply);
-	} break;
-	case rofl::openflow13::OFP_VERSION: {
-		ofh_port_stats = soframe() + sizeof(struct rofl::openflow13::ofp_multipart_reply);
-	} break;
-	default:
-		throw eBadVersion();
-	}
-}
-
-
-
-cofmsg_port_stats_reply::cofmsg_port_stats_reply(
-		cofmsg_port_stats_reply const& stats)
-{
-	*this = stats;
+	*this = msg;
 }
 
 
 
 cofmsg_port_stats_reply&
 cofmsg_port_stats_reply::operator= (
-		cofmsg_port_stats_reply const& stats)
+		const cofmsg_port_stats_reply& msg)
 {
-	if (this == &stats)
+	if (this == &msg)
 		return *this;
-
-	cofmsg_stats::operator =(stats);
-
-	ofh_port_stats = soframe();
-
-	portstatsarray = stats.portstatsarray;
-
+	cofmsg_stats_reply::operator= (msg);
+	portstatsarray = msg.portstatsarray;
 	return *this;
-}
-
-
-
-cofmsg_port_stats_reply::~cofmsg_port_stats_reply()
-{
-
-}
-
-
-
-void
-cofmsg_port_stats_reply::reset()
-{
-	cofmsg_stats::reset();
-}
-
-
-
-uint8_t*
-cofmsg_port_stats_reply::resize(size_t len)
-{
-	cofmsg_stats::resize(len);
-	switch (get_version()) {
-	case rofl::openflow10::OFP_VERSION: {
-		ofh_port_stats = soframe() + sizeof(struct rofl::openflow10::ofp_stats_reply);
-	} break;
-	case rofl::openflow12::OFP_VERSION: {
-		ofh_port_stats = soframe() + sizeof(struct rofl::openflow12::ofp_stats_reply);
-	} break;
-	case rofl::openflow13::OFP_VERSION: {
-		ofh_port_stats = soframe() + sizeof(struct rofl::openflow13::ofp_multipart_reply);
-	} break;
-	default:
-		throw eBadVersion();
-	}
-	return soframe();
 }
 
 
@@ -377,84 +202,67 @@ cofmsg_port_stats_reply::length() const
 
 
 void
-cofmsg_port_stats_reply::pack(uint8_t *buf, size_t buflen)
+cofmsg_port_stats_reply::pack(
+		uint8_t *buf, size_t buflen)
 {
-	cofmsg_stats::pack(buf, buflen); // copies common statistics header
+	cofmsg_stats_reply::pack(buf, buflen); // copies common statistics header
 
 	if ((0 == buf) || (0 == buflen))
 		return;
 
-	if (buflen < length())
-		throw eInval();
+	if (buflen < cofmsg_port_stats_reply::length())
+		throw eMsgInval("cofmsg_port_stats_reply::pack() buf too short");
 
 	switch (get_version()) {
 	case rofl::openflow10::OFP_VERSION: {
-
-		portstatsarray.pack(buf + sizeof(struct rofl::openflow10::ofp_stats_reply), buflen - sizeof(struct rofl::openflow10::ofp_stats_reply));
-
+		struct rofl::openflow10::ofp_stats_reply* hdr =
+				(struct rofl::openflow10::ofp_stats_reply*)buf;
+		portstatsarray.pack(hdr->body, portstatsarray.length());
 	} break;
-	case rofl::openflow12::OFP_VERSION: {
-
-		portstatsarray.pack(buf + sizeof(struct rofl::openflow12::ofp_stats_reply), buflen - sizeof(struct rofl::openflow12::ofp_stats_reply));
-
-	} break;
-	case rofl::openflow13::OFP_VERSION: {
-
-		portstatsarray.pack(buf + sizeof(struct rofl::openflow13::ofp_multipart_reply), buflen - sizeof(struct rofl::openflow13::ofp_multipart_reply));
-
-	} break;
-	default:
-		throw eBadVersion();
+	default: {
+		struct rofl::openflow13::ofp_multipart_reply* hdr =
+				(struct rofl::openflow13::ofp_multipart_reply*)buf;
+		portstatsarray.pack(hdr->body, portstatsarray.length());
+	};
 	}
 }
 
 
 
 void
-cofmsg_port_stats_reply::unpack(uint8_t *buf, size_t buflen)
+cofmsg_port_stats_reply::unpack(
+		uint8_t *buf, size_t buflen)
 {
-	cofmsg_stats::unpack(buf, buflen);
+	cofmsg_stats_reply::unpack(buf, buflen);
 
-	validate();
-}
-
-
-
-void
-cofmsg_port_stats_reply::validate()
-{
-	cofmsg_stats::validate(); // check generic statistics header
-
-	portstatsarray.clear();
 	portstatsarray.set_version(get_version());
 
+	if ((0 == buf) || (0 == buflen))
+		return;
+
+	if (buflen < cofmsg_port_stats_reply::length())
+		throw eBadSyntaxTooShort("cofmsg_port_stats_reply::unpack() buf too short");
+
 	switch (get_version()) {
 	case rofl::openflow10::OFP_VERSION: {
-		if (get_length() < sizeof(struct rofl::openflow10::ofp_stats_reply))
-			throw eBadSyntaxTooShort();
-
-		portstatsarray.unpack(soframe() + sizeof(struct rofl::openflow10::ofp_stats_reply), framelen() - sizeof(struct rofl::openflow10::ofp_stats_reply));
-
+		struct rofl::openflow10::ofp_stats_reply* hdr =
+				(struct rofl::openflow10::ofp_stats_reply*)buf;
+		if (buflen > sizeof(struct rofl::openflow10::ofp_stats_reply)) {
+			portstatsarray.unpack(hdr->body, buflen - sizeof(struct rofl::openflow10::ofp_stats_reply));
+		}
 	} break;
-	case rofl::openflow12::OFP_VERSION: {
-		if (get_length() < (sizeof(struct rofl::openflow12::ofp_stats_reply) + sizeof(struct rofl::openflow12::ofp_port_stats)))
-			throw eBadSyntaxTooShort();
-
-		portstatsarray.unpack(soframe() + sizeof(struct rofl::openflow12::ofp_stats_reply), framelen() - sizeof(struct rofl::openflow12::ofp_stats_reply));
-
-	} break;
-	case rofl::openflow13::OFP_VERSION: {
-		if (get_length() < (sizeof(struct rofl::openflow13::ofp_multipart_reply) + sizeof(struct rofl::openflow13::ofp_port_stats)))
-			throw eBadSyntaxTooShort();
-
-		portstatsarray.unpack(soframe() + sizeof(struct rofl::openflow13::ofp_multipart_reply), framelen() - sizeof(struct rofl::openflow13::ofp_multipart_reply));
-
-	} break;
-	default:
-		throw eBadRequestBadVersion();
+	default: {
+		struct rofl::openflow13::ofp_multipart_reply* hdr =
+				(struct rofl::openflow13::ofp_multipart_reply*)buf;
+		if (buflen > sizeof(struct rofl::openflow13::ofp_multipart_reply)) {
+			portstatsarray.unpack(hdr->body, buflen - sizeof(struct rofl::openflow13::ofp_multipart_reply));
+		}
+	};
 	}
-}
 
+	if (get_length() < cofmsg_port_stats_reply::length())
+		throw eBadSyntaxTooShort("cofmsg_port_stats_reply::unpack() buf too short");
+}
 
 
 

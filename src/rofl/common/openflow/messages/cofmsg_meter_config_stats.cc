@@ -73,7 +73,8 @@ cofmsg_meter_config_stats_request::length() const
 
 
 void
-cofmsg_meter_config_stats_request::pack(uint8_t *buf, size_t buflen)
+cofmsg_meter_config_stats_request::pack(
+		uint8_t *buf, size_t buflen)
 {
 	cofmsg_stats_request::pack(buf, buflen); // copies common statistics header
 
@@ -95,7 +96,8 @@ cofmsg_meter_config_stats_request::pack(uint8_t *buf, size_t buflen)
 
 
 void
-cofmsg_meter_config_stats_request::unpack(uint8_t *buf, size_t buflen)
+cofmsg_meter_config_stats_request::unpack(
+		uint8_t *buf, size_t buflen)
 {
 	cofmsg_stats_request::unpack(buf, buflen);
 
@@ -152,7 +154,7 @@ cofmsg_meter_config_stats_reply::cofmsg_meter_config_stats_reply(
 
 
 cofmsg_meter_config_stats_reply::cofmsg_meter_config_stats_reply(
-		cofmsg_meter_config_stats_reply const& msg)
+		const cofmsg_meter_config_stats_reply& msg)
 {
 	*this = msg;
 }
@@ -187,7 +189,8 @@ cofmsg_meter_config_stats_reply::length() const
 
 
 void
-cofmsg_meter_config_stats_reply::pack(uint8_t *buf, size_t buflen)
+cofmsg_meter_config_stats_reply::pack(
+		uint8_t *buf, size_t buflen)
 {
 	cofmsg_stats_reply::pack(buf, buflen); // copies common statistics header
 
@@ -209,7 +212,8 @@ cofmsg_meter_config_stats_reply::pack(uint8_t *buf, size_t buflen)
 
 
 void
-cofmsg_meter_config_stats_reply::unpack(uint8_t *buf, size_t buflen)
+cofmsg_meter_config_stats_reply::unpack(
+		uint8_t *buf, size_t buflen)
 {
 	cofmsg_stats_reply::unpack(buf, buflen);
 
