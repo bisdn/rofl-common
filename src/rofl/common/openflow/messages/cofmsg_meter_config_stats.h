@@ -1,15 +1,19 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 /*
  * cofmsg_meter_config_stats.h
  *
  *  Created on: 28.05.2014
- *      Author: andi
+ *  Revised on: 01.08.2015
+ *      Author: Andreas Koepsel
  */
 
 #ifndef COFMSG_METER_CONFIG_STATS_H_
 #define COFMSG_METER_CONFIG_STATS_H_ 1
 
 #include <inttypes.h>
-#include <map>
 
 #include "rofl/common/openflow/messages/cofmsg_stats.h"
 #include "rofl/common/openflow/cofmeterconfigarray.h"
@@ -21,38 +25,40 @@ namespace openflow {
  *
  */
 class cofmsg_meter_config_stats_request :
-	public cofmsg_stats_request
+		public cofmsg_stats_request
 {
 public:
 
+	/**
+	 *
+	 */
+	virtual
+	~cofmsg_meter_config_stats_request();
 
-	/** constructor
+	/**
 	 *
 	 */
 	cofmsg_meter_config_stats_request(
-			uint8_t of_version,
+			uint8_t version,
 			uint32_t xid,
 			uint16_t stats_flags,
 			uint32_t meter_id);
 
-
-	/** constructor
+	/**
 	 *
 	 */
 	cofmsg_meter_config_stats_request(
-			uint8_t of_version = rofl::openflow::OFP_VERSION_UNKNOWN,
+			uint8_t version = rofl::openflow::OFP_VERSION_UNKNOWN,
 			uint32_t xid = 0,
 			uint16_t stats_flags = 0,
 			const rofl::openflow::cofmeter_config_request& request =
 								rofl::openflow::cofmeter_config_request());
-
 
 	/**
 	 *
 	 */
 	cofmsg_meter_config_stats_request(
 			const cofmsg_meter_config_stats_request& msg);
-
 
 	/**
 	 *
@@ -60,20 +66,6 @@ public:
 	cofmsg_meter_config_stats_request&
 	operator= (
 			const cofmsg_meter_config_stats_request& msg);
-
-
-	/** destructor
-	 *
-	 */
-	virtual
-	~cofmsg_meter_config_stats_request();
-
-
-	/**
-	 *
-	 */
-	cofmsg_meter_config_stats_request(
-			rofl::cmemory *memarea);
 
 public:
 
@@ -83,55 +75,56 @@ public:
 	virtual size_t
 	length() const;
 
+	/**
+	 *
+	 */
+	virtual void
+	pack(
+			uint8_t *buf = (uint8_t*)0, size_t buflen = 0);
 
 	/**
 	 *
 	 */
 	virtual void
-	pack(uint8_t *buf = (uint8_t*)0, size_t buflen = 0);
-
-
-	/**
-	 *
-	 */
-	virtual void
-	unpack(uint8_t *buf, size_t buflen);
-
-
-	/** parse packet and validate it
-	 */
-	virtual void
-	validate();
-
+	unpack(
+			uint8_t *buf, size_t buflen);
 
 public:
-
-	/**
-	 *
-	 */
-	rofl::openflow::cofmeter_config_request&
-	set_meter_config() { return mconfig; };
 
 	/**
 	 *
 	 */
 	const rofl::openflow::cofmeter_config_request&
-	get_meter_config() const { return mconfig; };
+	get_meter_config() const
+	{ return meter_config; };
 
+	/**
+	 *
+	 */
+	rofl::openflow::cofmeter_config_request&
+	set_meter_config()
+	{ return meter_config; };
 
 public:
 
 	friend std::ostream&
-	operator<< (std::ostream& os, cofmsg_meter_config_stats_request const& msg) {
-		os << dynamic_cast<cofmsg_stats_request const&>( msg );
+	operator<< (std::ostream& os, const cofmsg_meter_config_stats_request& msg) {
+		os << dynamic_cast<const cofmsg_stats_request&>( msg );
 		os << indent(2) << "<cofmsg_meter_config_stats_request >" << std::endl;
 		rofl::indent i(4); os << msg.get_meter_config();
 		return os;
 	};
 
+	virtual std::string
+	str() const {
+		std::stringstream ss;
+		ss << cofmsg_stats_request::str() << "-Meter-Config-Stats-Request- " << " ";
+		return ss.str();
+	};
+
 private:
 
-	rofl::openflow::cofmeter_config_request mconfig;
+	rofl::openflow::cofmeter_config_request meter_config;
 };
 
 
@@ -145,28 +138,31 @@ private:
  *
  */
 class cofmsg_meter_config_stats_reply :
-	public cofmsg_stats_reply
+		public cofmsg_stats_reply
 {
 public:
 
+	/**
+	 *
+	 */
+	virtual
+	~cofmsg_meter_config_stats_reply();
 
-	/** constructor
+	/**
 	 *
 	 */
 	cofmsg_meter_config_stats_reply(
-			uint8_t of_version = rofl::openflow::OFP_VERSION_UNKNOWN,
+			uint8_t version = rofl::openflow::OFP_VERSION_UNKNOWN,
 			uint32_t xid = 0,
 			uint16_t stats_flags = 0,
 			const rofl::openflow::cofmeterconfigarray& array =
 								rofl::openflow::cofmeterconfigarray());
-
 
 	/**
 	 *
 	 */
 	cofmsg_meter_config_stats_reply(
 			const cofmsg_meter_config_stats_reply& msg);
-
 
 	/**
 	 *
@@ -175,60 +171,27 @@ public:
 	operator= (
 			const cofmsg_meter_config_stats_reply& msg);
 
-
-	/** destructor
-	 *
-	 */
-	virtual
-	~cofmsg_meter_config_stats_reply();
-
+public:
 
 	/**
-	 *
-	 */
-	cofmsg_meter_config_stats_reply(
-			rofl::cmemory *memarea);
-
-
-	/** reset packet content
-	 *
-	 */
-	virtual void
-	reset();
-
-
-	/**
-	 *
-	 */
-	virtual uint8_t*
-	resize(size_t len);
-
-
-	/** returns length of packet in packed state
 	 *
 	 */
 	virtual size_t
 	length() const;
 
+	/**
+	 *
+	 */
+	virtual void
+	pack(
+			uint8_t *buf = (uint8_t*)0, size_t buflen = 0);
 
 	/**
 	 *
 	 */
 	virtual void
-	pack(uint8_t *buf = (uint8_t*)0, size_t buflen = 0);
-
-
-	/**
-	 *
-	 */
-	virtual void
-	unpack(uint8_t *buf, size_t buflen);
-
-
-	/** parse packet and validate it
-	 */
-	virtual void
-	validate();
+	unpack(
+			uint8_t *buf, size_t buflen);
 
 public:
 
@@ -236,14 +199,15 @@ public:
 	 *
 	 */
 	const rofl::openflow::cofmeterconfigarray&
-	get_meter_config_array() const { return array; };
+	get_meter_config_array() const
+	{ return array; };
 
 	/**
 	 *
 	 */
 	rofl::openflow::cofmeterconfigarray&
-	set_meter_config_array() { return array; };
-
+	set_meter_config_array()
+	{ return array; };
 
 public:
 
@@ -253,6 +217,13 @@ public:
 		os << indent(2) << "<cofmsg_meter_config_stats_reply >" << std::endl;
 		indent i(4); os << msg.get_meter_config_array();
 		return os;
+	};
+
+	virtual std::string
+	str() const {
+		std::stringstream ss;
+		ss << cofmsg_stats_reply::str() << "-Meter-Config-Stats-Reply- " << " ";
+		return ss.str();
 	};
 
 private:
