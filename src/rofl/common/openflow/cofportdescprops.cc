@@ -34,7 +34,7 @@ cofportdesc_props::operator= (
 			add_port_desc_experimenter() = props.get_port_desc_experimenter();
 		} break;
 		default:
-			rofl::logging::warn << "[rofl][cofportdesc_props] ignoring unknown port descrption property, property-type:"
+			LOGGING_WARN << "[rofl][cofportdesc_props] ignoring unknown port descrption property, property-type:"
 						<< it->second->get_type() << std::endl;
 		}
 	}
@@ -143,7 +143,7 @@ cofportdesc_props::unpack(
 				buflen -= set_port_desc_experimenter().length();
 			} break;
 			default: {
-				rofl::logging::warn << "[rofl][cofportdesc_props] ignoring unknown port description property, property-type:"
+				LOGGING_WARN << "[rofl][cofportdesc_props] ignoring unknown port description property, property-type:"
 							<<(unsigned int)type << std::endl;
 				buf += len;
 				buflen -= len;
