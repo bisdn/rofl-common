@@ -1,8 +1,13 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 /*
  * cofmsg_meter_mod.h
  *
  *  Created on: 24.05.2014
- *      Author: andi
+ *  Revised on: 02.08.2015
+ *      Author: Andreas Koepsel
  */
 
 #ifndef COFMSG_METER_MOD_H
@@ -18,12 +23,17 @@ namespace openflow {
  *
  */
 class cofmsg_meter_mod :
-	public cofmsg
+		public cofmsg
 {
 public:
 
+	/**
+	 *
+	 */
+	virtual
+	~cofmsg_meter_mod();
 
-	/** constructor
+	/**
 	 *
 	 */
 	cofmsg_meter_mod(
@@ -34,130 +44,118 @@ public:
 			uint32_t meter_id = 0,
 			const rofl::openflow::cofmeter_bands& mbs = rofl::openflow::cofmeter_bands());
 
-
 	/**
 	 *
 	 */
 	cofmsg_meter_mod(
-			const cofmsg_meter_mod& meter);
-
+			const cofmsg_meter_mod& msg);
 
 	/**
 	 *
 	 */
 	cofmsg_meter_mod&
 	operator= (
-			const cofmsg_meter_mod& meter);
-
-
-	/** destructor
-	 *
-	 */
-	virtual
-	~cofmsg_meter_mod();
-
-
-	/**
-	 *
-	 */
-	cofmsg_meter_mod(
-			rofl::cmemory *memarea);
-
-
-	/** reset packet content
-	 *
-	 */
-	virtual void
-	reset();
+			const cofmsg_meter_mod& msg);
 
 public:
 
-	/** returns length of packet in packed state
+	/**
 	 *
 	 */
 	virtual size_t
 	length() const;
 
+	/**
+	 *
+	 */
+	virtual void
+	pack(
+			uint8_t *buf = (uint8_t*)0, size_t buflen = 0);
 
 	/**
 	 *
 	 */
 	virtual void
-	pack(uint8_t *buf = (uint8_t*)0, size_t buflen = 0);
-
-
-	/**
-	 *
-	 */
-	virtual void
-	unpack(uint8_t *buf, size_t buflen);
-
-
-	/** parse packet and validate it
-	 */
-	virtual void
-	validate();
-
+	unpack(
+			uint8_t *buf, size_t buflen);
 
 public:
 
 	/**
 	 *
 	 */
+	uint16_t
+	get_command() const
+	{ return command; };
+
+	/**
+	 *
+	 */
 	void
-	set_command(uint16_t command) { this->command = command; };
+	set_command(
+			uint16_t command)
+	{ this->command = command; };
 
 	/**
 	 *
 	 */
 	uint16_t
-	get_command() const { return command; };
+	get_flags() const
+	{ return flags; };
 
 	/**
 	 *
 	 */
 	void
-	set_flags(uint16_t flags) { this->flags = flags; };
-
-	/**
-	 *
-	 */
-	uint16_t
-	get_flags() const { return flags; };
-
-	/**
-	 *
-	 */
-	void
-	set_meter_id(uint32_t meter_id) { this->meter_id = meter_id; };
+	set_flags(
+			uint16_t flags)
+	{ this->flags = flags; };
 
 	/**
 	 *
 	 */
 	uint32_t
-	get_meter_id() const { return meter_id; };
+	get_meter_id() const
+	{ return meter_id; };
 
 	/**
 	 *
 	 */
-	rofl::openflow::cofmeter_bands&
-	set_meter_bands() { return meter_bands; };
+	void
+	set_meter_id(
+			uint32_t meter_id)
+	{ this->meter_id = meter_id; };
 
 	/**
 	 *
 	 */
 	const rofl::openflow::cofmeter_bands&
-	get_meter_bands() const { return meter_bands; };
+	get_meter_bands() const
+	{ return meter_bands; };
+
+	/**
+	 *
+	 */
+	rofl::openflow::cofmeter_bands&
+	set_meter_bands()
+	{ return meter_bands; };
 
 public:
 
 	friend std::ostream&
-	operator<< (std::ostream& os, cofmsg_meter_mod const& msg) {
-		os << dynamic_cast<cofmsg const&>( msg );
+	operator<< (std::ostream& os, const cofmsg_meter_mod& msg) {
+		os << dynamic_cast<const cofmsg&>( msg );
 		os << indent(2) << "<cofmsg_meter >" << std::endl;
 		rofl::indent i(4);
 		os << msg.meter_bands;
 		return os;
+	};
+
+	virtual std::string
+	str() const {
+		std::stringstream ss;
+		ss << cofmsg::str() << "-Meter-Mod- ";
+		return ss.str();
 	};
 
 private:
