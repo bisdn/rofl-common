@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 /*
  * cofmsg_table_stats.h
  *
@@ -21,106 +25,72 @@ namespace openflow {
  *
  */
 class cofmsg_table_stats_request :
-	public cofmsg_stats_request
+		public cofmsg_stats_request
 {
-private:
-
-
 public:
 
-
-	/** constructor
+	/**
 	 *
 	 */
-	cofmsg_table_stats_request(
-			uint8_t of_version = 0,
-			uint32_t xid = 0,
-			uint16_t flags = 0);
-
+	virtual
+	~cofmsg_table_stats_request();
 
 	/**
 	 *
 	 */
 	cofmsg_table_stats_request(
-			cofmsg_table_stats_request const& stats);
+			uint8_t version = rofl::openflow::OFP_VERSION_UNKNOWN,
+			uint32_t xid = 0,
+			uint16_t flags = 0);
 
+	/**
+	 *
+	 */
+	cofmsg_table_stats_request(
+			const cofmsg_table_stats_request& msg);
 
 	/**
 	 *
 	 */
 	cofmsg_table_stats_request&
 	operator= (
-			cofmsg_table_stats_request const& stats);
+			const cofmsg_table_stats_request& msg);
 
-
-	/** destructor
-	 *
-	 */
-	virtual
-	~cofmsg_table_stats_request();
-
+public:
 
 	/**
-	 *
-	 */
-	cofmsg_table_stats_request(cmemory *memarea);
-
-
-	/** reset packet content
-	 *
-	 */
-	virtual void
-	reset();
-
-
-	/**
-	 *
-	 */
-	virtual uint8_t*
-	resize(size_t len);
-
-
-	/** returns length of packet in packed state
 	 *
 	 */
 	virtual size_t
 	length() const;
 
+	/**
+	 *
+	 */
+	virtual void
+	pack(
+			uint8_t *buf = (uint8_t*)0, size_t buflen = 0);
 
 	/**
 	 *
 	 */
 	virtual void
-	pack(uint8_t *buf = (uint8_t*)0, size_t buflen = 0);
-
-
-	/**
-	 *
-	 */
-	virtual void
-	unpack(uint8_t *buf, size_t buflen);
-
-
-	/** parse packet and validate it
-	 */
-	virtual void
-	validate();
+	unpack(
+			uint8_t *buf, size_t buflen);
 
 public:
 
 	friend std::ostream&
-	operator<< (std::ostream& os, cofmsg_table_stats_request const& msg) {
-		os << dynamic_cast<cofmsg const&>( msg );
-		indent i(2);
-		os << dynamic_cast<cofmsg_stats const&>( msg );
+	operator<< (std::ostream& os, const cofmsg_table_stats_request& msg) {
+		os << dynamic_cast<const cofmsg_stats_request&>( msg );
 		os << indent(2) << "<cofmsg_table_stats_request >" << std::endl;
 		return os;
 	};
 
-	std::string
+	virtual std::string
 	str() const {
 		std::stringstream ss;
-		ss << "-Table-Stats-Request- " << cofmsg::str() << " ";
+		ss << cofmsg_stats_request::str() << "-Table-Stats-Request- " << " ";
 		return ss.str();
 	};
 };
@@ -130,137 +100,97 @@ public:
  *
  */
 class cofmsg_table_stats_reply :
-	public cofmsg_stats_reply
+		public cofmsg_stats_reply
 {
-private:
-
-	rofl::openflow::coftablestatsarray		tablestatsarray;
-
-	union {
-		uint8_t*							ofhu_table_stats;
-		struct openflow10::ofp_table_stats*	ofhu10_table_stats;
-		struct openflow12::ofp_table_stats*	ofhu12_table_stats;
-		struct openflow13::ofp_table_stats*	ofhu13_table_stats;
-	} ofhu;
-
-#define ofh_table_stats   			ofhu.ofhu_table_stats
-#define ofh10_table_stats 			ofhu.ofhu10_table_stats
-#define ofh12_table_stats 			ofhu.ofhu12_table_stats
-#define ofh13_table_stats 			ofhu.ofhu13_table_stats
-
 public:
 
-
-	/** constructor
+	/**
 	 *
 	 */
-	cofmsg_table_stats_reply(
-			uint8_t of_version = 0,
-			uint32_t xid = 0,
-			uint16_t flags = 0,
-			rofl::openflow::coftablestatsarray const& table_stats = rofl::openflow::coftablestatsarray());
-
+	virtual
+	~cofmsg_table_stats_reply();
 
 	/**
 	 *
 	 */
 	cofmsg_table_stats_reply(
-			cofmsg_table_stats_reply const& stats);
+			uint8_t of_version = rofl::openflow::OFP_VERSION_UNKNOWN,
+			uint32_t xid = 0,
+			uint16_t flags = 0,
+			const rofl::openflow::coftablestatsarray& table_stats = rofl::openflow::coftablestatsarray());
 
+	/**
+	 *
+	 */
+	cofmsg_table_stats_reply(
+			const cofmsg_table_stats_reply& msg);
 
 	/**
 	 *
 	 */
 	cofmsg_table_stats_reply&
 	operator= (
-			cofmsg_table_stats_reply const& stats);
+			const cofmsg_table_stats_reply& msg);
 
-
-	/** destructor
-	 *
-	 */
-	virtual
-	~cofmsg_table_stats_reply();
-
+public:
 
 	/**
-	 *
-	 */
-	cofmsg_table_stats_reply(cmemory *memarea);
-
-
-	/** reset packet content
-	 *
-	 */
-	virtual void
-	reset();
-
-
-	/**
-	 *
-	 */
-	virtual uint8_t*
-	resize(size_t len);
-
-
-	/** returns length of packet in packed state
 	 *
 	 */
 	virtual size_t
 	length() const;
 
+	/**
+	 *
+	 */
+	virtual void
+	pack(
+			uint8_t *buf = (uint8_t*)0, size_t buflen = 0);
 
 	/**
 	 *
 	 */
 	virtual void
-	pack(uint8_t *buf = (uint8_t*)0, size_t buflen = 0);
-
-
-	/**
-	 *
-	 */
-	virtual void
-	unpack(uint8_t *buf, size_t buflen);
-
-
-	/** parse packet and validate it
-	 */
-	virtual void
-	validate();
-
+	unpack(
+			uint8_t *buf, size_t buflen);
 
 public:
+
+	/**
+	 *
+	 */
+	const rofl::openflow::coftablestatsarray&
+	get_table_stats_array() const
+	{ return tablestatsarray; };
 
 	/**
 	 *
 	 */
 	rofl::openflow::coftablestatsarray&
-	set_table_stats_array() { return tablestatsarray; };
-
-	/**
-	 *
-	 */
-	rofl::openflow::coftablestatsarray const&
-	get_table_stats_array() const { return tablestatsarray; };
+	set_table_stats_array()
+	{ return tablestatsarray; };
 
 public:
 
 	friend std::ostream&
-	operator<< (std::ostream& os, cofmsg_table_stats_reply const& msg) {
-		os << indent(0) << dynamic_cast<cofmsg_stats const&>( msg );
-		os << indent(4) << "<cofmsg_table_stats_reply >" << std::endl;
-		indent i(6);
+	operator<< (std::ostream& os, const cofmsg_table_stats_reply& msg) {
+		os << dynamic_cast<const cofmsg_stats_reply&>( msg );
+		os << indent(2) << "<cofmsg_table_stats_reply >" << std::endl;
+		indent i(4);
 		os << msg.tablestatsarray;
 		return os;
 	};
 
-	std::string
+	virtual std::string
 	str() const {
 		std::stringstream ss;
-		ss << "-Table-Stats-Reply- " << cofmsg::str() << " ";
+		ss << cofmsg_stats_reply::str() << "-Table-Stats-Reply- " << " ";
 		return ss.str();
 	};
+
+private:
+
+	rofl::openflow::coftablestatsarray  tablestatsarray;
 };
 
 } // end of namespace openflow
