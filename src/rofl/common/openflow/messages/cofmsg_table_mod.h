@@ -1,8 +1,13 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 /*
  * cofmsg_table_mod.h
  *
  *  Created on: 18.03.2013
- *      Author: andi
+ *  Revised on: 02.08.2015
+ *      Author: Andreas Koepsel
  */
 
 #ifndef COFMSG_TABLE_MOD_H_
@@ -17,128 +22,98 @@ namespace openflow {
  *
  */
 class cofmsg_table_mod :
-	public cofmsg
+		public cofmsg
 {
-private:
-
-	union {
-		uint8_t*					ofhu_table_mod;
-		struct openflow12::ofp_table_mod*		ofhu12_table_mod;
-		struct openflow13::ofp_table_mod*		ofhu13_table_mod;
-	} ofhu;
-
-#define ofh_table_mod   ofhu.ofhu_table_mod
-#define ofh12_table_mod ofhu.ofhu12_table_mod
-#define ofh13_table_mod ofhu.ofhu13_table_mod
-
 public:
 
-
-	/** constructor
+	/**
 	 *
 	 */
-	cofmsg_table_mod(
-			uint8_t of_version = 0,
-			uint32_t xid = 0,
-			uint8_t  table_id = 0,
-			uint32_t config = 0);
-
+	virtual
+	~cofmsg_table_mod();
 
 	/**
 	 *
 	 */
 	cofmsg_table_mod(
-			cofmsg_table_mod const& table_mod);
+			uint8_t version = 0,
+			uint32_t xid = 0,
+			uint8_t  table_id = 0,
+			uint32_t config = 0);
 
+	/**
+	 *
+	 */
+	cofmsg_table_mod(
+			const cofmsg_table_mod& msg);
 
 	/**
 	 *
 	 */
 	cofmsg_table_mod&
 	operator= (
-			cofmsg_table_mod const& table_mod);
+			const cofmsg_table_mod& msg);
 
-
-	/** destructor
-	 *
-	 */
-	virtual
-	~cofmsg_table_mod();
-
+public:
 
 	/**
-	 *
-	 */
-	cofmsg_table_mod(cmemory *memarea);
-
-
-	/** reset packet content
-	 *
-	 */
-	virtual void
-	reset();
-
-
-	/**
-	 *
-	 */
-	virtual uint8_t*
-	resize(size_t len);
-
-
-	/** returns length of packet in packed state
 	 *
 	 */
 	virtual size_t
 	length() const;
 
+	/**
+	 *
+	 */
+	virtual void
+	pack(
+			uint8_t *buf = (uint8_t*)0, size_t buflen = 0);
 
 	/**
 	 *
 	 */
 	virtual void
-	pack(uint8_t *buf = (uint8_t*)0, size_t buflen = 0);
-
-
-	/**
-	 *
-	 */
-	virtual void
-	unpack(uint8_t *buf, size_t buflen);
-
-
-	/** parse packet and validate it
-	 */
-	virtual void
-	validate();
-
+	unpack(
+			uint8_t *buf, size_t buflen);
 
 public:
-
 
 	/**
 	 *
 	 */
 	uint8_t
-	get_table_id() const;
+	get_table_id() const
+	{ return table_id; };
 
 	/**
 	 *
 	 */
 	void
-	set_table_id(uint8_t table_id);
+	set_table_id(
+			uint8_t table_id)
+	{ this->table_id = table_id; };
 
 	/**
 	 *
 	 */
 	uint32_t
-	get_config() const;
+	get_config() const
+	{ return config; };
 
 	/**
 	 *
 	 */
 	void
-	set_config(uint32_t config);
+	set_config(
+			uint32_t config)
+	{ this->config = config; };
+
+	/**
+	 *
+	 */
+	uint32_t&
+	set_config()
+	{ return config; };
 
 public:
 
@@ -146,10 +121,22 @@ public:
 	operator<< (std::ostream& os, cofmsg_table_mod const& msg) {
 		os << dynamic_cast<cofmsg const&>( msg );
 		os << indent(0) << "<cofmsg_table_mod >" << std::endl;
-			os << indent(2) << "<table-id:" << (int)msg.get_table_id() << " >" << std::endl;
-			os << indent(2) << "<config:0x" << std::hex << (int)msg.get_config() << std::dec << " >" << std::endl;
+			os << indent(2) << "<table_id: " << (int)msg.get_table_id() << " >" << std::endl;
+			os << indent(2) << "<config: 0x" << std::hex << (unsigned int)msg.get_config() << std::dec << " >" << std::endl;
 		return os;
 	};
+
+	virtual std::string
+	str() const {
+		std::stringstream ss;
+		ss << cofmsg::str() << "-Table-Mod- " << " ";
+		return ss.str();
+	};
+
+private:
+
+	uint8_t     table_id;
+	uint32_t    config;
 };
 
 } // end of namespace openflow
