@@ -6,13 +6,12 @@
  * cofmsg_table_stats.h
  *
  *  Created on: 18.03.2013
- *      Author: andi
+ *  Revised on: 02.08.2015
+ *      Author: Andreas Koepsel
  */
 
 #ifndef COFMSG_TABLE_STATS_H_
 #define COFMSG_TABLE_STATS_H_ 1
-
-#include <vector>
 
 #include "rofl/common/openflow/messages/cofmsg_stats.h"
 #include "rofl/common/openflow/coftablestats.h"
