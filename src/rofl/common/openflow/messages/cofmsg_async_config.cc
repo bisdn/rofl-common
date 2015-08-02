@@ -1,68 +1,40 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 #include "cofmsg_async_config.h"
 
 using namespace rofl::openflow;
 
+cofmsg_get_async_config_request::~cofmsg_get_async_config_request()
+{}
+
+
+
 cofmsg_get_async_config_request::cofmsg_get_async_config_request(
-		uint8_t of_version,
+		uint8_t version,
 		uint32_t xid) :
-	cofmsg(sizeof(struct rofl::openflow::ofp_header))
-{
-	switch (get_version()) {
-	case rofl::openflow13::OFP_VERSION: {
-		set_version(of_version);
-		set_length(sizeof(struct rofl::openflow::ofp_header));
-		set_type(rofl::openflow13::OFPT_GET_ASYNC_REQUEST);
-		set_xid(xid);
-	} break;
-	default:
-		throw eBadRequestBadVersion();
-	}
-}
+				cofmsg(version, rofl::openflow::OFPT_GET_ASYNC_REQUEST, xid)
+{}
 
 
 
 cofmsg_get_async_config_request::cofmsg_get_async_config_request(
-		cmemory *memarea) :
-	cofmsg(memarea)
+		const cofmsg_get_async_config_request& msg)
 {
-
-}
-
-
-
-cofmsg_get_async_config_request::cofmsg_get_async_config_request(
-		cofmsg_get_async_config_request const& get_async_config_request)
-{
-	*this = get_async_config_request;
+	*this = msg;
 }
 
 
 
 cofmsg_get_async_config_request&
 cofmsg_get_async_config_request::operator= (
-		cofmsg_get_async_config_request const& get_async_config_request)
+		const cofmsg_get_async_config_request& msg)
 {
-	if (this == &get_async_config_request)
+	if (this == &msg)
 		return *this;
-
-	cofmsg::operator =(get_async_config_request);
-
+	cofmsg::operator= (msg);
 	return *this;
-}
-
-
-
-cofmsg_get_async_config_request::~cofmsg_get_async_config_request()
-{
-
-}
-
-
-
-void
-cofmsg_get_async_config_request::reset()
-{
-	cofmsg::reset();
 }
 
 
@@ -82,43 +54,34 @@ cofmsg_get_async_config_request::length() const
 
 
 void
-cofmsg_get_async_config_request::pack(uint8_t *buf, size_t buflen)
+cofmsg_get_async_config_request::pack(
+		uint8_t *buf, size_t buflen)
 {
-	set_length(length());
+	cofmsg::pack(buf, buflen);
 
-	if ((0 == buf) || (buflen == 0))
+	if ((0 == buf) || (0 == buflen))
 		return;
 
-	if (buflen < length())
-		throw eInval();
-
-	cofmsg::pack(buf, buflen);
+	if (buflen < cofmsg_get_async_config_request::length())
+		throw eMsgInval("cofmsg_get_async_config_request::pack() buf too short");
 }
 
 
 
 void
-cofmsg_get_async_config_request::unpack(uint8_t *buf, size_t buflen)
+cofmsg_get_async_config_request::unpack(
+		uint8_t *buf, size_t buflen)
 {
 	cofmsg::unpack(buf, buflen);
 
-	validate();
-}
+	if ((0 == buf) || (0 == buflen))
+		return;
 
+	if (buflen < cofmsg_get_async_config_request::length())
+		throw eBadSyntaxTooShort("cofmsg_get_async_config_request::unpack() buf too short");
 
-
-void
-cofmsg_get_async_config_request::validate()
-{
-	cofmsg::validate(); // check generic OpenFlow header
-
-	switch (get_version()) {
-	case rofl::openflow13::OFP_VERSION: {
-		// nothing to do, ofp header only message, checked in cofmsg::validate() already
-	} break;
-	default:
-		throw eBadRequestBadVersion();
-	}
+	if (get_length() < cofmsg_get_async_config_request::length())
+		throw eBadSyntaxTooShort("cofmsg_get_async_config_request::unpack() buf too short");
 }
 
 
@@ -127,46 +90,29 @@ cofmsg_get_async_config_request::validate()
 
 
 
+
+
+
+
+cofmsg_get_async_config_reply::~cofmsg_get_async_config_reply()
+{}
 
 
 
 cofmsg_get_async_config_reply::cofmsg_get_async_config_reply(
-		uint8_t of_version,
+		uint8_t version,
 		uint32_t xid,
-		rofl::openflow::cofasync_config const& async_config) :
-				cofmsg(sizeof(struct rofl::openflow::ofp_header)),
+		const rofl::openflow::cofasync_config& async_config) :
+				cofmsg(version, rofl::openflow::OFPT_GET_ASYNC_REPLY, xid),
 				async_config(async_config)
 {
-	this->async_config.set_version(of_version);
-
-	set_version(of_version);
-	set_xid(xid);
-
-	switch (get_version()) {
-	case rofl::openflow13::OFP_VERSION: {
-		set_type(rofl::openflow13::OFPT_GET_ASYNC_REPLY);
-		set_length(sizeof(struct rofl::openflow13::ofp_async_config));
-
-	} break;
-	default:
-		throw eBadVersion();
-	}
+	this->async_config.set_version(version);
 }
 
 
 
 cofmsg_get_async_config_reply::cofmsg_get_async_config_reply(
-		cmemory *memarea) :
-	cofmsg(memarea),
-	async_config(get_version())
-{
-
-}
-
-
-
-cofmsg_get_async_config_reply::cofmsg_get_async_config_reply(
-		cofmsg_get_async_config_reply const& msg)
+		const cofmsg_get_async_config_reply& msg)
 {
 	*this = msg;
 }
@@ -175,23 +121,13 @@ cofmsg_get_async_config_reply::cofmsg_get_async_config_reply(
 
 cofmsg_get_async_config_reply&
 cofmsg_get_async_config_reply::operator= (
-		cofmsg_get_async_config_reply const& msg)
+		const cofmsg_get_async_config_reply& msg)
 {
 	if (this == &msg)
 		return *this;
-
 	cofmsg::operator= (msg);
-
 	async_config = msg.async_config;
-
 	return *this;
-}
-
-
-
-cofmsg_get_async_config_reply::~cofmsg_get_async_config_reply()
-{
-
 }
 
 
@@ -199,7 +135,7 @@ cofmsg_get_async_config_reply::~cofmsg_get_async_config_reply()
 size_t
 cofmsg_get_async_config_reply::length() const
 {
-	switch (ofh_header->version) {
+	switch (get_version()) {
 	case rofl::openflow13::OFP_VERSION: {
 		return (sizeof(struct rofl::openflow13::ofp_header) + async_config.length());
 	} break;
@@ -212,60 +148,50 @@ cofmsg_get_async_config_reply::length() const
 
 
 void
-cofmsg_get_async_config_reply::pack(uint8_t *buf, size_t buflen)
+cofmsg_get_async_config_reply::pack(
+		uint8_t *buf, size_t buflen)
 {
-	set_length(length());
+	cofmsg::pack(buf, buflen);
 
 	if ((0 == buf) || (0 == buflen))
 		return;
 
-	if (buflen < length())
-		throw eInval();
+	if (buflen < cofmsg_get_async_config_reply::length())
+		throw eMsgInval("cofmsg_get_async_config_reply::pack() buf too short");
 
 	switch (get_version()) {
-	case rofl::openflow13::OFP_VERSION: {
-		memcpy(buf, soframe(), sizeof(struct rofl::openflow13::ofp_header));
-		async_config.pack(buf + sizeof(struct rofl::openflow13::ofp_header), async_config.length());
-	} break;
-	default:
-		throw eBadVersion();
+	default: {
+		async_config.pack(buf + sizeof(struct rofl::openflow::ofp_header), async_config.length());
+	};
 	}
 }
 
 
 
 void
-cofmsg_get_async_config_reply::unpack(uint8_t *buf, size_t buflen)
+cofmsg_get_async_config_reply::unpack(
+		uint8_t *buf, size_t buflen)
 {
 	cofmsg::unpack(buf, buflen);
 
-	validate();
-}
+	async_config.set_version(get_version());
 
+	if ((0 == buf) || (0 == buflen))
+		return;
 
-
-void
-cofmsg_get_async_config_reply::validate()
-{
-	cofmsg::validate(); // check generic OpenFlow header
-
-	async_config.clear();
+	if (buflen < cofmsg_get_async_config_reply::length())
+		throw eBadSyntaxTooShort("cofmsg_get_async_config_reply::unpack() buf too short");
 
 	switch (get_version()) {
-	case rofl::openflow13::OFP_VERSION: {
-		if (get_length() < sizeof(struct rofl::openflow13::ofp_async_config))
-			throw eBadSyntaxTooShort();
-
-		if (framelen() < sizeof(struct rofl::openflow13::ofp_async_config))
-			throw eBadSyntaxTooShort();
-
-		async_config.unpack(soframe() + sizeof(struct rofl::openflow13::ofp_header),
-				sizeof(struct rofl::openflow::cofasync_config::async_config_t));
-
-	} break;
-	default:
-		throw eBadRequestBadVersion();
+	default: {
+		if (buflen > sizeof(struct rofl::openflow::ofp_header)) {
+			async_config.unpack(buf + sizeof(struct rofl::openflow::ofp_header), buflen - sizeof(struct rofl::openflow::ofp_header));
+		}
+	};
 	}
+
+	if (get_length() < cofmsg_get_async_config_reply::length())
+		throw eBadSyntaxTooShort("cofmsg_get_async_config_reply::unpack() buf too short");
 }
 
 
@@ -277,51 +203,25 @@ cofmsg_get_async_config_reply::validate()
 
 
 
-
-
-
-
-
-
+cofmsg_set_async_config::~cofmsg_set_async_config()
+{}
 
 
 
 cofmsg_set_async_config::cofmsg_set_async_config(
-		uint8_t of_version,
+		uint8_t version,
 		uint32_t xid,
-		rofl::openflow::cofasync_config const& async_config) :
-				cofmsg(sizeof(struct rofl::openflow::ofp_header)),
+		const rofl::openflow::cofasync_config& async_config) :
+				cofmsg(version, rofl::openflow::OFPT_SET_ASYNC, xid),
 				async_config(async_config)
 {
-	this->async_config.set_version(of_version);
-
-	set_version(of_version);
-	set_xid(xid);
-
-	switch (get_version()) {
-	case rofl::openflow13::OFP_VERSION: {
-		set_type(rofl::openflow13::OFPT_GET_ASYNC_REPLY);
-		set_length(sizeof(struct rofl::openflow13::ofp_async_config));
-
-	} break;
-	default:
-		throw eBadVersion();
-	}
+	this->async_config.set_version(version);
 }
 
 
 
 cofmsg_set_async_config::cofmsg_set_async_config(
-		cmemory *memarea) :
-	cofmsg(memarea)
-{
-
-}
-
-
-
-cofmsg_set_async_config::cofmsg_set_async_config(
-		cofmsg_set_async_config const& msg)
+		const cofmsg_set_async_config& msg)
 {
 	*this = msg;
 }
@@ -330,23 +230,13 @@ cofmsg_set_async_config::cofmsg_set_async_config(
 
 cofmsg_set_async_config&
 cofmsg_set_async_config::operator= (
-		cofmsg_set_async_config const& msg)
+		const cofmsg_set_async_config& msg)
 {
 	if (this == &msg)
 		return *this;
-
 	cofmsg::operator= (msg);
-
 	async_config = msg.async_config;
-
 	return *this;
-}
-
-
-
-cofmsg_set_async_config::~cofmsg_set_async_config()
-{
-
 }
 
 
@@ -354,7 +244,7 @@ cofmsg_set_async_config::~cofmsg_set_async_config()
 size_t
 cofmsg_set_async_config::length() const
 {
-	switch (ofh_header->version) {
+	switch (get_version()) {
 	case rofl::openflow13::OFP_VERSION: {
 		return (sizeof(struct rofl::openflow13::ofp_header) + async_config.length());
 	} break;
@@ -367,62 +257,50 @@ cofmsg_set_async_config::length() const
 
 
 void
-cofmsg_set_async_config::pack(uint8_t *buf, size_t buflen)
+cofmsg_set_async_config::pack(
+		uint8_t *buf, size_t buflen)
 {
-	set_length(length());
+	cofmsg::pack(buf, buflen);
 
 	if ((0 == buf) || (0 == buflen))
 		return;
 
-	if (buflen < length())
-		throw eInval();
+	if (buflen < cofmsg_set_async_config::length())
+		throw eMsgInval("cofmsg_set_async_config::pack() buf too short");
 
 	switch (get_version()) {
-	case rofl::openflow13::OFP_VERSION: {
-		memcpy(buf, soframe(), sizeof(struct rofl::openflow13::ofp_header));
-		async_config.pack(buf + sizeof(struct rofl::openflow13::ofp_header), async_config.length());
-	} break;
-	default:
-		throw eBadVersion();
+	default: {
+		async_config.pack(buf + sizeof(struct rofl::openflow::ofp_header), async_config.length());
+	};
 	}
 }
 
 
 
 void
-cofmsg_set_async_config::unpack(uint8_t *buf, size_t buflen)
+cofmsg_set_async_config::unpack(
+		uint8_t *buf, size_t buflen)
 {
 	cofmsg::unpack(buf, buflen);
 
-	validate();
-}
+	async_config.set_version(get_version());
 
+	if ((0 == buf) || (0 == buflen))
+		return;
 
-
-void
-cofmsg_set_async_config::validate()
-{
-	cofmsg::validate(); // check generic OpenFlow header
-
-	async_config.clear();
+	if (buflen < cofmsg_set_async_config::length())
+		throw eBadSyntaxTooShort("cofmsg_set_async_config::unpack() buf too short");
 
 	switch (get_version()) {
-	case rofl::openflow13::OFP_VERSION: {
-		if (get_length() < sizeof(struct rofl::openflow13::ofp_async_config))
-			throw eBadSyntaxTooShort();
-
-		if (framelen() < sizeof(struct rofl::openflow13::ofp_async_config))
-			throw eBadSyntaxTooShort();
-
-		async_config.unpack(soframe() + sizeof(struct rofl::openflow13::ofp_header),
-				sizeof(struct rofl::openflow::cofasync_config::async_config_t));
-
-	} break;
-	default:
-		throw eBadRequestBadVersion();
+	default: {
+		if (buflen > sizeof(struct rofl::openflow::ofp_header)) {
+			async_config.unpack(buf + sizeof(struct rofl::openflow::ofp_header), buflen - sizeof(struct rofl::openflow::ofp_header));
+		}
+	};
 	}
+
+	if (get_length() < cofmsg_set_async_config::length())
+		throw eBadSyntaxTooShort("cofmsg_set_async_config::unpack() buf too short");
 }
-
-
 
 
