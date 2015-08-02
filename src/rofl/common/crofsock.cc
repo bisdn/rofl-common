@@ -359,7 +359,7 @@ crofsock::parse_message(
 			parse_of13_message(mem, &msg);
 		} break;
 		default: {
-			msg = new rofl::openflow::cofmsg(mem);
+			(msg = new rofl::openflow::cofmsg())->unpack(mem->somem(), mem->length());
 		};
 		}
 
@@ -377,12 +377,14 @@ crofsock::parse_message(
 
 		if (msg) {
 			LOGGING_ERROR << "[rofl-common][crofsock] eBadRequestBadType: " << std::endl << *msg;
-			size_t len = (msg->framelen() > 64) ? 64 : msg->framelen();
+			rofl::cmemory mem(msg->length());
+			msg->pack(mem.somem(), mem.length());
+			size_t len = (mem.length() > 64) ? 64 : mem.length();
 			rofl::openflow::cofmsg_error_bad_request_bad_type *error =
 					new rofl::openflow::cofmsg_error_bad_request_bad_type(
 							msg->get_version(),
 							msg->get_xid(),
-							msg->soframe(),
+							mem.somem(),
 							len);
 			send_message(error);
 			delete msg;
@@ -415,120 +417,120 @@ crofsock::parse_of10_message(cmemory *mem, rofl::openflow::cofmsg **pmsg)
 	} break;
 
 	case rofl::openflow10::OFPT_ERROR: {
-		(*pmsg = new rofl::openflow::cofmsg_error(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_error())->unpack(mem->somem(), mem->length());
 	} break;
 
 	case rofl::openflow10::OFPT_ECHO_REQUEST: {
-		(*pmsg = new rofl::openflow::cofmsg_echo_request(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_echo_request())->unpack(mem->somem(), mem->length());
 	} break;
 	case rofl::openflow10::OFPT_ECHO_REPLY: {
-		(*pmsg = new rofl::openflow::cofmsg_echo_reply(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_echo_reply())->unpack(mem->somem(), mem->length());
 	} break;
 
 	case rofl::openflow10::OFPT_VENDOR: {
-		(*pmsg = new rofl::openflow::cofmsg_experimenter(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_experimenter())->unpack(mem->somem(), mem->length());
 	} break;
 
 	case rofl::openflow10::OFPT_FEATURES_REQUEST:	{
-		(*pmsg = new rofl::openflow::cofmsg_features_request(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_features_request())->unpack(mem->somem(), mem->length());
 	} break;
 	case rofl::openflow10::OFPT_FEATURES_REPLY: {
-		(*pmsg = new rofl::openflow::cofmsg_features_reply(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_features_reply())->unpack(mem->somem(), mem->length());
 	} break;
 
 	case rofl::openflow10::OFPT_GET_CONFIG_REQUEST: {
-		(*pmsg = new rofl::openflow::cofmsg_get_config_request(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_get_config_request())->unpack(mem->somem(), mem->length());
 	} break;
 	case rofl::openflow10::OFPT_GET_CONFIG_REPLY: {
-		(*pmsg = new rofl::openflow::cofmsg_get_config_reply(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_get_config_reply())->unpack(mem->somem(), mem->length());
 	} break;
 	case rofl::openflow10::OFPT_SET_CONFIG: {
-		(*pmsg = new rofl::openflow::cofmsg_set_config(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_set_config())->unpack(mem->somem(), mem->length());
 	} break;
 
 	case rofl::openflow10::OFPT_PACKET_OUT: {
-		(*pmsg = new rofl::openflow::cofmsg_packet_out(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_packet_out())->unpack(mem->somem(), mem->length());
 	} break;
 	case rofl::openflow10::OFPT_PACKET_IN: {
-		(*pmsg = new rofl::openflow::cofmsg_packet_in(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_packet_in())->unpack(mem->somem(), mem->length());
 	} break;
 
 	case rofl::openflow10::OFPT_FLOW_MOD: {
-		(*pmsg = new rofl::openflow::cofmsg_flow_mod(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_flow_mod())->unpack(mem->somem(), mem->length());
 	} break;
 	case rofl::openflow10::OFPT_FLOW_REMOVED: {
-		(*pmsg = new rofl::openflow::cofmsg_flow_removed(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_flow_removed())->unpack(mem->somem(), mem->length());
 	} break;
 
 	case rofl::openflow10::OFPT_PORT_MOD: {
-		(*pmsg = new rofl::openflow::cofmsg_port_mod(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_port_mod())->unpack(mem->somem(), mem->length());
 	} break;
 	case rofl::openflow10::OFPT_PORT_STATUS: {
-		(*pmsg = new rofl::openflow::cofmsg_port_status(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_port_status())->unpack(mem->somem(), mem->length());
 	} break;
 
 	case rofl::openflow10::OFPT_STATS_REQUEST: {
 		if (mem->memlen() < sizeof(struct rofl::openflow10::ofp_stats_request)) {
-			*pmsg = new rofl::openflow::cofmsg(mem);
+			(*pmsg = new rofl::openflow::cofmsg())->unpack(mem->somem(), mem->length());
 			throw eBadSyntaxTooShort();
 		}
 		uint16_t stats_type = be16toh(((struct rofl::openflow10::ofp_stats_request*)mem->somem())->type);
 
 		switch (stats_type) {
 		case rofl::openflow10::OFPST_DESC: {
-			(*pmsg = new rofl::openflow::cofmsg_desc_stats_request(mem))->validate();
+			(*pmsg = new rofl::openflow::cofmsg_desc_stats_request())->unpack(mem->somem(), mem->length());
 		} break;
 		case rofl::openflow10::OFPST_FLOW: {
-			(*pmsg = new rofl::openflow::cofmsg_flow_stats_request(mem))->validate();
+			(*pmsg = new rofl::openflow::cofmsg_flow_stats_request())->unpack(mem->somem(), mem->length());
 		} break;
 		case rofl::openflow10::OFPST_AGGREGATE: {
-			(*pmsg = new rofl::openflow::cofmsg_aggr_stats_request(mem))->validate();
+			(*pmsg = new rofl::openflow::cofmsg_aggr_stats_request())->unpack(mem->somem(), mem->length());
 		} break;
 		case rofl::openflow10::OFPST_TABLE: {
-			(*pmsg = new rofl::openflow::cofmsg_table_stats_request(mem))->validate();
+			(*pmsg = new rofl::openflow::cofmsg_table_stats_request())->unpack(mem->somem(), mem->length());
 		} break;
 		case rofl::openflow10::OFPST_PORT: {
-			(*pmsg = new rofl::openflow::cofmsg_port_stats_request(mem))->validate();
+			(*pmsg = new rofl::openflow::cofmsg_port_stats_request())->unpack(mem->somem(), mem->length());
 		} break;
 		case rofl::openflow10::OFPST_QUEUE: {
-			(*pmsg = new rofl::openflow::cofmsg_queue_stats_request(mem))->validate();
+			(*pmsg = new rofl::openflow::cofmsg_queue_stats_request())->unpack(mem->somem(), mem->length());
 		} break;
 		// TODO: experimenter statistics
 		default: {
-			(*pmsg = new rofl::openflow::cofmsg_stats_request(mem))->validate();
+			(*pmsg = new rofl::openflow::cofmsg_stats_request())->unpack(mem->somem(), mem->length());
 		} break;
 		}
 
 	} break;
 	case rofl::openflow10::OFPT_STATS_REPLY: {
 		if (mem->memlen() < sizeof(struct rofl::openflow10::ofp_stats_reply)) {
-			*pmsg = new rofl::openflow::cofmsg(mem);
+			(*pmsg = new rofl::openflow::cofmsg())->unpack(mem->somem(), mem->length());
 			throw eBadSyntaxTooShort();
 		}
 		uint16_t stats_type = be16toh(((struct rofl::openflow10::ofp_stats_reply*)mem->somem())->type);
 
 		switch (stats_type) {
 		case rofl::openflow10::OFPST_DESC: {
-			(*pmsg = new rofl::openflow::cofmsg_desc_stats_reply(mem))->validate();
+			(*pmsg = new rofl::openflow::cofmsg_desc_stats_reply())->unpack(mem->somem(), mem->length());
 		} break;
 		case rofl::openflow10::OFPST_FLOW: {
-			(*pmsg = new rofl::openflow::cofmsg_flow_stats_reply(mem))->validate();
+			(*pmsg = new rofl::openflow::cofmsg_flow_stats_reply())->unpack(mem->somem(), mem->length());
 		} break;
 		case rofl::openflow10::OFPST_AGGREGATE: {
-			(*pmsg = new rofl::openflow::cofmsg_aggr_stats_reply(mem))->validate();
+			(*pmsg = new rofl::openflow::cofmsg_aggr_stats_reply())->unpack(mem->somem(), mem->length());
 		} break;
 		case rofl::openflow10::OFPST_TABLE: {
-			(*pmsg = new rofl::openflow::cofmsg_table_stats_reply(mem))->validate();
+			(*pmsg = new rofl::openflow::cofmsg_table_stats_reply())->unpack(mem->somem(), mem->length());
 		} break;
 		case rofl::openflow10::OFPST_PORT: {
-			(*pmsg = new rofl::openflow::cofmsg_port_stats_reply(mem))->validate();
+			(*pmsg = new rofl::openflow::cofmsg_port_stats_reply())->unpack(mem->somem(), mem->length());
 		} break;
 		case rofl::openflow10::OFPST_QUEUE: {
-			(*pmsg = new rofl::openflow::cofmsg_queue_stats_reply(mem))->validate();
+			(*pmsg = new rofl::openflow::cofmsg_queue_stats_reply())->unpack(mem->somem(), mem->length());
 		} break;
 		// TODO: experimenter statistics
 		default: {
-			(*pmsg = new rofl::openflow::cofmsg_stats_reply(mem))->validate();
+			(*pmsg = new rofl::openflow::cofmsg_stats_reply())->unpack(mem->somem(), mem->length());
 		} break;
 		}
 
@@ -538,17 +540,17 @@ crofsock::parse_of10_message(cmemory *mem, rofl::openflow::cofmsg **pmsg)
 		(*pmsg = new rofl::openflow::cofmsg_barrier_request())->unpack(mem->somem(), mem->memlen());
 	} break;
 	case rofl::openflow10::OFPT_BARRIER_REPLY: {
-		(*pmsg = new rofl::openflow::cofmsg_barrier_reply(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_barrier_reply())->unpack(mem->somem(), mem->length());
 	} break;
 	case rofl::openflow10::OFPT_QUEUE_GET_CONFIG_REQUEST: {
-		(*pmsg = new rofl::openflow::cofmsg_queue_get_config_request(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_queue_get_config_request())->unpack(mem->somem(), mem->length());
 	} break;
 	case rofl::openflow10::OFPT_QUEUE_GET_CONFIG_REPLY: {
-		(*pmsg = new rofl::openflow::cofmsg_queue_get_config_reply(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_queue_get_config_reply())->unpack(mem->somem(), mem->length());
 	} break;
 
 	default: {
-		(*pmsg = new rofl::openflow::cofmsg(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg())->unpack(mem->somem(), mem->length());
 		LOGGING_WARN << "[rofl-common][crofsock] dropping unknown message " << **pmsg << std::endl;
 		throw eBadRequestBadType();
 	} break;
@@ -564,189 +566,189 @@ crofsock::parse_of12_message(cmemory *mem, rofl::openflow::cofmsg **pmsg)
 
 	switch (header->type) {
 	case rofl::openflow12::OFPT_HELLO: {
-		(*pmsg = new rofl::openflow::cofmsg_hello(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_hello())->unpack(mem->somem(), mem->length());
 	} break;
 
 	case rofl::openflow12::OFPT_ERROR: {
-		(*pmsg = new rofl::openflow::cofmsg_error(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_error())->unpack(mem->somem(), mem->length());
 	} break;
 
 	case rofl::openflow12::OFPT_ECHO_REQUEST: {
-		(*pmsg = new rofl::openflow::cofmsg_echo_request(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_echo_request())->unpack(mem->somem(), mem->length());
 	} break;
 	case rofl::openflow12::OFPT_ECHO_REPLY: {
-		(*pmsg = new rofl::openflow::cofmsg_echo_reply(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_echo_reply())->unpack(mem->somem(), mem->length());
 	} break;
 
 	case rofl::openflow12::OFPT_EXPERIMENTER:	{
-		(*pmsg = new rofl::openflow::cofmsg_experimenter(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_experimenter())->unpack(mem->somem(), mem->length());
 	} break;
 
 	case rofl::openflow12::OFPT_FEATURES_REQUEST:	{
-		(*pmsg = new rofl::openflow::cofmsg_features_request(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_features_request())->unpack(mem->somem(), mem->length());
 	} break;
 	case rofl::openflow12::OFPT_FEATURES_REPLY: {
-		(*pmsg = new rofl::openflow::cofmsg_features_reply(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_features_reply())->unpack(mem->somem(), mem->length());
 	} break;
 
 	case rofl::openflow12::OFPT_GET_CONFIG_REQUEST: {
-		(*pmsg = new rofl::openflow::cofmsg_get_config_request(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_get_config_request())->unpack(mem->somem(), mem->length());
 	} break;
 	case rofl::openflow12::OFPT_GET_CONFIG_REPLY: {
-		(*pmsg = new rofl::openflow::cofmsg_get_config_reply(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_get_config_reply())->unpack(mem->somem(), mem->length());
 	} break;
 	case rofl::openflow12::OFPT_SET_CONFIG: {
-		(*pmsg = new rofl::openflow::cofmsg_set_config(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_set_config())->unpack(mem->somem(), mem->length());
 	} break;
 
 	case rofl::openflow12::OFPT_PACKET_OUT: {
-		(*pmsg = new rofl::openflow::cofmsg_packet_out(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_packet_out())->unpack(mem->somem(), mem->length());
 	} break;
 	case rofl::openflow12::OFPT_PACKET_IN: {
-		(*pmsg = new rofl::openflow::cofmsg_packet_in(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_packet_in())->unpack(mem->somem(), mem->length());
 	} break;
 
 	case rofl::openflow12::OFPT_FLOW_MOD: {
-		(*pmsg = new rofl::openflow::cofmsg_flow_mod(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_flow_mod())->unpack(mem->somem(), mem->length());
 	} break;
 	case rofl::openflow12::OFPT_FLOW_REMOVED: {
-		(*pmsg = new rofl::openflow::cofmsg_flow_removed(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_flow_removed())->unpack(mem->somem(), mem->length());
 	} break;
 
 	case rofl::openflow12::OFPT_GROUP_MOD: {
-		(*pmsg = new rofl::openflow::cofmsg_group_mod(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_group_mod())->unpack(mem->somem(), mem->length());
 	} break;
 
 	case rofl::openflow12::OFPT_PORT_MOD: {
-		(*pmsg = new rofl::openflow::cofmsg_port_mod(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_port_mod())->unpack(mem->somem(), mem->length());
 	} break;
 	case rofl::openflow12::OFPT_PORT_STATUS: {
-		(*pmsg = new rofl::openflow::cofmsg_port_status(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_port_status())->unpack(mem->somem(), mem->length());
 	} break;
 
 	case rofl::openflow12::OFPT_TABLE_MOD: {
-		(*pmsg = new rofl::openflow::cofmsg_table_mod(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_table_mod())->unpack(mem->somem(), mem->length());
 	} break;
 
 	case rofl::openflow12::OFPT_STATS_REQUEST: {
 
 		if (mem->memlen() < sizeof(struct rofl::openflow12::ofp_stats_request)) {
-			*pmsg = new rofl::openflow::cofmsg(mem);
+			(*pmsg = new rofl::openflow::cofmsg())->unpack(mem->somem(), mem->length());
 			throw eBadSyntaxTooShort();
 		}
 		uint16_t stats_type = be16toh(((struct rofl::openflow12::ofp_stats_request*)mem->somem())->type);
 
 		switch (stats_type) {
 		case rofl::openflow12::OFPST_DESC: {
-			(*pmsg = new rofl::openflow::cofmsg_desc_stats_request(mem))->validate();
+			(*pmsg = new rofl::openflow::cofmsg_desc_stats_request())->unpack(mem->somem(), mem->length());
 		} break;
 		case rofl::openflow12::OFPST_FLOW: {
-			(*pmsg = new rofl::openflow::cofmsg_flow_stats_request(mem))->validate();
+			(*pmsg = new rofl::openflow::cofmsg_flow_stats_request())->unpack(mem->somem(), mem->length());
 		} break;
 		case rofl::openflow12::OFPST_AGGREGATE: {
-			(*pmsg = new rofl::openflow::cofmsg_aggr_stats_request(mem))->validate();
+			(*pmsg = new rofl::openflow::cofmsg_aggr_stats_request())->unpack(mem->somem(), mem->length());
 		} break;
 		case rofl::openflow12::OFPST_TABLE: {
-			(*pmsg = new rofl::openflow::cofmsg_table_stats_request(mem))->validate();
+			(*pmsg = new rofl::openflow::cofmsg_table_stats_request())->unpack(mem->somem(), mem->length());
 		} break;
 		case rofl::openflow12::OFPST_PORT: {
-			(*pmsg = new rofl::openflow::cofmsg_port_stats_request(mem))->validate();
+			(*pmsg = new rofl::openflow::cofmsg_port_stats_request())->unpack(mem->somem(), mem->length());
 		} break;
 		case rofl::openflow12::OFPST_QUEUE: {
-			(*pmsg = new rofl::openflow::cofmsg_queue_stats_request(mem))->validate();
+			(*pmsg = new rofl::openflow::cofmsg_queue_stats_request())->unpack(mem->somem(), mem->length());
 		} break;
 		case rofl::openflow12::OFPST_GROUP: {
-			(*pmsg = new rofl::openflow::cofmsg_group_stats_request(mem))->validate();
+			(*pmsg = new rofl::openflow::cofmsg_group_stats_request())->unpack(mem->somem(), mem->length());
 		} break;
 		case rofl::openflow12::OFPST_GROUP_DESC: {
-			(*pmsg = new rofl::openflow::cofmsg_group_desc_stats_request(mem))->validate();
+			(*pmsg = new rofl::openflow::cofmsg_group_desc_stats_request())->unpack(mem->somem(), mem->length());
 		} break;
 		case rofl::openflow12::OFPST_GROUP_FEATURES: {
-			(*pmsg = new rofl::openflow::cofmsg_group_features_stats_request(mem))->validate();
+			(*pmsg = new rofl::openflow::cofmsg_group_features_stats_request())->unpack(mem->somem(), mem->length());
 		} break;
 		// TODO: experimenter statistics
 		default: {
-			(*pmsg = new rofl::openflow::cofmsg_stats_request(mem))->validate();
+			(*pmsg = new rofl::openflow::cofmsg_stats_request())->unpack(mem->somem(), mem->length());
 		} break;
 		}
 
 	} break;
 	case rofl::openflow12::OFPT_STATS_REPLY: {
 		if (mem->memlen() < sizeof(struct rofl::openflow12::ofp_stats_reply)) {
-			*pmsg = new rofl::openflow::cofmsg(mem);
+			(*pmsg = new rofl::openflow::cofmsg())->unpack(mem->somem(), mem->length());
 			throw eBadSyntaxTooShort();
 		}
 		uint16_t stats_type = be16toh(((struct rofl::openflow12::ofp_stats_reply*)mem->somem())->type);
 
 		switch (stats_type) {
 		case rofl::openflow12::OFPST_DESC: {
-			(*pmsg = new rofl::openflow::cofmsg_desc_stats_reply(mem))->validate();
+			(*pmsg = new rofl::openflow::cofmsg_desc_stats_reply())->unpack(mem->somem(), mem->length());
 		} break;
 		case rofl::openflow12::OFPST_FLOW: {
-			(*pmsg = new rofl::openflow::cofmsg_flow_stats_reply(mem))->validate();
+			(*pmsg = new rofl::openflow::cofmsg_flow_stats_reply())->unpack(mem->somem(), mem->length());
 		} break;
 		case rofl::openflow12::OFPST_AGGREGATE: {
-			(*pmsg = new rofl::openflow::cofmsg_aggr_stats_reply(mem))->validate();
+			(*pmsg = new rofl::openflow::cofmsg_aggr_stats_reply())->unpack(mem->somem(), mem->length());
 		} break;
 		case rofl::openflow12::OFPST_TABLE: {
-			(*pmsg = new rofl::openflow::cofmsg_table_stats_reply(mem))->validate();
+			(*pmsg = new rofl::openflow::cofmsg_table_stats_reply())->unpack(mem->somem(), mem->length());
 		} break;
 		case rofl::openflow12::OFPST_PORT: {
-			(*pmsg = new rofl::openflow::cofmsg_port_stats_reply(mem))->validate();
+			(*pmsg = new rofl::openflow::cofmsg_port_stats_reply())->unpack(mem->somem(), mem->length());
 		} break;
 		case rofl::openflow12::OFPST_QUEUE: {
-			(*pmsg = new rofl::openflow::cofmsg_queue_stats_reply(mem))->validate();
+			(*pmsg = new rofl::openflow::cofmsg_queue_stats_reply())->unpack(mem->somem(), mem->length());
 		} break;
 		case rofl::openflow12::OFPST_GROUP: {
-			(*pmsg = new rofl::openflow::cofmsg_group_stats_reply(mem))->validate();
+			(*pmsg = new rofl::openflow::cofmsg_group_stats_reply())->unpack(mem->somem(), mem->length());
 		} break;
 		case rofl::openflow12::OFPST_GROUP_DESC: {
-			(*pmsg = new rofl::openflow::cofmsg_group_desc_stats_reply(mem))->validate();
+			(*pmsg = new rofl::openflow::cofmsg_group_desc_stats_reply())->unpack(mem->somem(), mem->length());
 		} break;
 		case rofl::openflow12::OFPST_GROUP_FEATURES: {
-			(*pmsg = new rofl::openflow::cofmsg_group_features_stats_reply(mem))->validate();
+			(*pmsg = new rofl::openflow::cofmsg_group_features_stats_reply())->unpack(mem->somem(), mem->length());
 		} break;
 		// TODO: experimenter statistics
 		default: {
-			(*pmsg = new rofl::openflow::cofmsg_stats_reply(mem))->validate();
+			(*pmsg = new rofl::openflow::cofmsg_stats_reply())->unpack(mem->somem(), mem->length());
 		} break;
 		}
 
 	} break;
 
 	case rofl::openflow12::OFPT_BARRIER_REQUEST: {
-		(*pmsg = new rofl::openflow::cofmsg_barrier_request(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_barrier_request())->unpack(mem->somem(), mem->length());
 	} break;
 	case rofl::openflow12::OFPT_BARRIER_REPLY: {
-		(*pmsg = new rofl::openflow::cofmsg_barrier_reply(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_barrier_reply())->unpack(mem->somem(), mem->length());
 	} break;
 
 	case rofl::openflow12::OFPT_QUEUE_GET_CONFIG_REQUEST: {
-		(*pmsg = new rofl::openflow::cofmsg_queue_get_config_request(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_queue_get_config_request())->unpack(mem->somem(), mem->length());
 	} break;
 	case rofl::openflow12::OFPT_QUEUE_GET_CONFIG_REPLY: {
-		(*pmsg = new rofl::openflow::cofmsg_queue_get_config_reply(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_queue_get_config_reply())->unpack(mem->somem(), mem->length());
 	} break;
 
 	case rofl::openflow12::OFPT_ROLE_REQUEST: {
-		(*pmsg = new rofl::openflow::cofmsg_role_request(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_role_request())->unpack(mem->somem(), mem->length());
 	} break;
 	case rofl::openflow12::OFPT_ROLE_REPLY: {
-		(*pmsg = new rofl::openflow::cofmsg_role_reply(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_role_reply())->unpack(mem->somem(), mem->length());
 	} break;
 
 	case rofl::openflow12::OFPT_GET_ASYNC_REQUEST: {
-    	(*pmsg = new rofl::openflow::cofmsg_get_async_config_request(mem))->validate();
+    	(*pmsg = new rofl::openflow::cofmsg_get_async_config_request())->unpack(mem->somem(), mem->length());
     } break;
 	case rofl::openflow12::OFPT_GET_ASYNC_REPLY: {
-		(*pmsg = new rofl::openflow::cofmsg_get_async_config_reply(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_get_async_config_reply())->unpack(mem->somem(), mem->length());
 	} break;
 	case rofl::openflow12::OFPT_SET_ASYNC: {
-    	(*pmsg = new rofl::openflow::cofmsg_set_async_config(mem))->validate();
+    	(*pmsg = new rofl::openflow::cofmsg_set_async_config())->unpack(mem->somem(), mem->length());
     } break;
 
 	default: {
-		(*pmsg = new rofl::openflow::cofmsg(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg())->unpack(mem->somem(), mem->length());
 		LOGGING_WARN << "[rofl-common][crofsock] dropping unknown message " << **pmsg << std::endl;
 		throw eBadRequestBadType();
 	} return;
@@ -762,223 +764,223 @@ crofsock::parse_of13_message(cmemory *mem, rofl::openflow::cofmsg **pmsg)
 
 	switch (header->type) {
 	case rofl::openflow13::OFPT_HELLO: {
-		(*pmsg = new rofl::openflow::cofmsg_hello(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_hello())->unpack(mem->somem(), mem->length());
 		LOGGING_DEBUG2 << dynamic_cast<rofl::openflow::cofmsg_hello&>( **pmsg );
 	} break;
 
 	case rofl::openflow13::OFPT_ERROR: {
-		(*pmsg = new rofl::openflow::cofmsg_error(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_error())->unpack(mem->somem(), mem->length());
 	} break;
 
 	case rofl::openflow13::OFPT_ECHO_REQUEST: {
-		(*pmsg = new rofl::openflow::cofmsg_echo_request(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_echo_request())->unpack(mem->somem(), mem->length());
 	} break;
 	case rofl::openflow13::OFPT_ECHO_REPLY: {
-		(*pmsg = new rofl::openflow::cofmsg_echo_reply(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_echo_reply())->unpack(mem->somem(), mem->length());
 	} break;
 
 	case rofl::openflow13::OFPT_EXPERIMENTER:	{
-		(*pmsg = new rofl::openflow::cofmsg_experimenter(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_experimenter())->unpack(mem->somem(), mem->length());
 	} break;
 
 	case rofl::openflow13::OFPT_FEATURES_REQUEST:	{
-		(*pmsg = new rofl::openflow::cofmsg_features_request(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_features_request())->unpack(mem->somem(), mem->length());
 	} break;
 	case rofl::openflow13::OFPT_FEATURES_REPLY: {
-		(*pmsg = new rofl::openflow::cofmsg_features_reply(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_features_reply())->unpack(mem->somem(), mem->length());
 	} break;
 
 	case rofl::openflow13::OFPT_GET_CONFIG_REQUEST: {
-		(*pmsg = new rofl::openflow::cofmsg_get_config_request(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_get_config_request())->unpack(mem->somem(), mem->length());
 	} break;
 	case rofl::openflow13::OFPT_GET_CONFIG_REPLY: {
-		(*pmsg = new rofl::openflow::cofmsg_get_config_reply(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_get_config_reply())->unpack(mem->somem(), mem->length());
 	} break;
 	case rofl::openflow13::OFPT_SET_CONFIG: {
-		(*pmsg = new rofl::openflow::cofmsg_set_config(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_set_config())->unpack(mem->somem(), mem->length());
 	} break;
 
 	case rofl::openflow13::OFPT_PACKET_OUT: {
-		(*pmsg = new rofl::openflow::cofmsg_packet_out(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_packet_out())->unpack(mem->somem(), mem->length());
 	} break;
 	case rofl::openflow13::OFPT_PACKET_IN: {
-		(*pmsg = new rofl::openflow::cofmsg_packet_in(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_packet_in())->unpack(mem->somem(), mem->length());
 	} break;
 
 	case rofl::openflow13::OFPT_FLOW_MOD: {
-		(*pmsg = new rofl::openflow::cofmsg_flow_mod(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_flow_mod())->unpack(mem->somem(), mem->length());
 	} break;
 	case rofl::openflow13::OFPT_FLOW_REMOVED: {
-		(*pmsg = new rofl::openflow::cofmsg_flow_removed(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_flow_removed())->unpack(mem->somem(), mem->length());
 	} break;
 
 	case rofl::openflow13::OFPT_GROUP_MOD: {
-		(*pmsg = new rofl::openflow::cofmsg_group_mod(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_group_mod())->unpack(mem->somem(), mem->length());
 	} break;
 
 	case rofl::openflow13::OFPT_PORT_MOD: {
-		(*pmsg = new rofl::openflow::cofmsg_port_mod(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_port_mod())->unpack(mem->somem(), mem->length());
 	} break;
 	case rofl::openflow13::OFPT_PORT_STATUS: {
-		(*pmsg = new rofl::openflow::cofmsg_port_status(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_port_status())->unpack(mem->somem(), mem->length());
 	} break;
 
 	case rofl::openflow13::OFPT_TABLE_MOD: {
-		(*pmsg = new rofl::openflow::cofmsg_table_mod(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_table_mod())->unpack(mem->somem(), mem->length());
 	} break;
 
 	case rofl::openflow13::OFPT_MULTIPART_REQUEST: {
 
 		if (mem->memlen() < sizeof(struct rofl::openflow13::ofp_multipart_request)) {
-			*pmsg = new rofl::openflow::cofmsg(mem);
+			(*pmsg = new rofl::openflow::cofmsg())->unpack(mem->somem(), mem->length());
 			throw eBadSyntaxTooShort();
 		}
 		uint16_t stats_type = be16toh(((struct rofl::openflow13::ofp_multipart_request*)mem->somem())->type);
 
 		switch (stats_type) {
 		case rofl::openflow13::OFPMP_DESC: {
-			(*pmsg = new rofl::openflow::cofmsg_desc_stats_request(mem))->validate();
+			(*pmsg = new rofl::openflow::cofmsg_desc_stats_request())->unpack(mem->somem(), mem->length());
 		} break;
 		case rofl::openflow13::OFPMP_FLOW: {
-			(*pmsg = new rofl::openflow::cofmsg_flow_stats_request(mem))->validate();
+			(*pmsg = new rofl::openflow::cofmsg_flow_stats_request())->unpack(mem->somem(), mem->length());
 		} break;
 		case rofl::openflow13::OFPMP_AGGREGATE: {
-			(*pmsg = new rofl::openflow::cofmsg_aggr_stats_request(mem))->validate();
+			(*pmsg = new rofl::openflow::cofmsg_aggr_stats_request())->unpack(mem->somem(), mem->length());
 		} break;
 		case rofl::openflow13::OFPMP_TABLE: {
-			(*pmsg = new rofl::openflow::cofmsg_table_stats_request(mem))->validate();
+			(*pmsg = new rofl::openflow::cofmsg_table_stats_request())->unpack(mem->somem(), mem->length());
 		} break;
 		case rofl::openflow13::OFPMP_PORT_STATS: {
-			(*pmsg = new rofl::openflow::cofmsg_port_stats_request(mem))->validate();
+			(*pmsg = new rofl::openflow::cofmsg_port_stats_request())->unpack(mem->somem(), mem->length());
 		} break;
 		case rofl::openflow13::OFPMP_QUEUE: {
-			(*pmsg = new rofl::openflow::cofmsg_queue_stats_request(mem))->validate();
+			(*pmsg = new rofl::openflow::cofmsg_queue_stats_request())->unpack(mem->somem(), mem->length());
 		} break;
 		case rofl::openflow13::OFPMP_GROUP: {
-			(*pmsg = new rofl::openflow::cofmsg_group_stats_request(mem))->validate();
+			(*pmsg = new rofl::openflow::cofmsg_group_stats_request())->unpack(mem->somem(), mem->length());
 		} break;
 		case rofl::openflow13::OFPMP_GROUP_DESC: {
-			(*pmsg = new rofl::openflow::cofmsg_group_desc_stats_request(mem))->validate();
+			(*pmsg = new rofl::openflow::cofmsg_group_desc_stats_request())->unpack(mem->somem(), mem->length());
 		} break;
 		case rofl::openflow13::OFPMP_GROUP_FEATURES: {
-			(*pmsg = new rofl::openflow::cofmsg_group_features_stats_request(mem))->validate();
+			(*pmsg = new rofl::openflow::cofmsg_group_features_stats_request())->unpack(mem->somem(), mem->length());
 		} break;
 		case rofl::openflow13::OFPMP_METER: {
-			(*pmsg = new rofl::openflow::cofmsg_meter_stats_request(mem))->validate();
+			(*pmsg = new rofl::openflow::cofmsg_meter_stats_request())->unpack(mem->somem(), mem->length());
 		} break;
 		case rofl::openflow13::OFPMP_METER_CONFIG: {
-			(*pmsg = new rofl::openflow::cofmsg_meter_config_stats_request(mem))->validate();
+			(*pmsg = new rofl::openflow::cofmsg_meter_config_stats_request())->unpack(mem->somem(), mem->length());
 		} break;
 		case rofl::openflow13::OFPMP_METER_FEATURES: {
-			(*pmsg = new rofl::openflow::cofmsg_meter_features_stats_request(mem))->validate();
+			(*pmsg = new rofl::openflow::cofmsg_meter_features_stats_request())->unpack(mem->somem(), mem->length());
 		} break;
 		case rofl::openflow13::OFPMP_TABLE_FEATURES: {
-			(*pmsg = new rofl::openflow::cofmsg_table_features_stats_request(mem))->validate();
+			(*pmsg = new rofl::openflow::cofmsg_table_features_stats_request())->unpack(mem->somem(), mem->length());
 		} break;
 		case rofl::openflow13::OFPMP_PORT_DESC: {
-			(*pmsg = new rofl::openflow::cofmsg_port_desc_stats_request(mem))->validate();
+			(*pmsg = new rofl::openflow::cofmsg_port_desc_stats_request())->unpack(mem->somem(), mem->length());
 		} break;
 		// TODO: experimenter statistics
 		default: {
-			(*pmsg = new rofl::openflow::cofmsg_stats_request(mem))->validate();
+			(*pmsg = new rofl::openflow::cofmsg_stats_request())->unpack(mem->somem(), mem->length());
 		} break;
 		}
 
 	} break;
 	case rofl::openflow13::OFPT_MULTIPART_REPLY: {
 		if (mem->memlen() < sizeof(struct rofl::openflow13::ofp_multipart_reply)) {
-			*pmsg = new rofl::openflow::cofmsg(mem);
+			(*pmsg = new rofl::openflow::cofmsg())->unpack(mem->somem(), mem->length());
 			throw eBadSyntaxTooShort();
 		}
 		uint16_t stats_type = be16toh(((struct rofl::openflow13::ofp_multipart_reply*)mem->somem())->type);
 
 		switch (stats_type) {
 		case rofl::openflow13::OFPMP_DESC: {
-			(*pmsg = new rofl::openflow::cofmsg_desc_stats_reply(mem))->validate();
+			(*pmsg = new rofl::openflow::cofmsg_desc_stats_reply())->unpack(mem->somem(), mem->length());
 		} break;
 		case rofl::openflow13::OFPMP_FLOW: {
-			(*pmsg = new rofl::openflow::cofmsg_flow_stats_reply(mem))->validate();
+			(*pmsg = new rofl::openflow::cofmsg_flow_stats_reply())->unpack(mem->somem(), mem->length());
 		} break;
 		case rofl::openflow13::OFPMP_AGGREGATE: {
-			(*pmsg = new rofl::openflow::cofmsg_aggr_stats_reply(mem))->validate();
+			(*pmsg = new rofl::openflow::cofmsg_aggr_stats_reply())->unpack(mem->somem(), mem->length());
 		} break;
 		case rofl::openflow13::OFPMP_TABLE: {
-			(*pmsg = new rofl::openflow::cofmsg_table_stats_reply(mem))->validate();
+			(*pmsg = new rofl::openflow::cofmsg_table_stats_reply())->unpack(mem->somem(), mem->length());
 		} break;
 		case rofl::openflow13::OFPMP_PORT_STATS: {
-			(*pmsg = new rofl::openflow::cofmsg_port_stats_reply(mem))->validate();
+			(*pmsg = new rofl::openflow::cofmsg_port_stats_reply())->unpack(mem->somem(), mem->length());
 		} break;
 		case rofl::openflow13::OFPMP_QUEUE: {
-			(*pmsg = new rofl::openflow::cofmsg_queue_stats_reply(mem))->validate();
+			(*pmsg = new rofl::openflow::cofmsg_queue_stats_reply())->unpack(mem->somem(), mem->length());
 		} break;
 		case rofl::openflow13::OFPMP_GROUP: {
-			(*pmsg = new rofl::openflow::cofmsg_group_stats_reply(mem))->validate();
+			(*pmsg = new rofl::openflow::cofmsg_group_stats_reply())->unpack(mem->somem(), mem->length());
 		} break;
 		case rofl::openflow13::OFPMP_GROUP_DESC: {
-			(*pmsg = new rofl::openflow::cofmsg_group_desc_stats_reply(mem))->validate();
+			(*pmsg = new rofl::openflow::cofmsg_group_desc_stats_reply())->unpack(mem->somem(), mem->length());
 		} break;
 		case rofl::openflow13::OFPMP_GROUP_FEATURES: {
-			(*pmsg = new rofl::openflow::cofmsg_group_features_stats_reply(mem))->validate();
+			(*pmsg = new rofl::openflow::cofmsg_group_features_stats_reply())->unpack(mem->somem(), mem->length());
 		} break;
 		case rofl::openflow13::OFPMP_METER: {
-			(*pmsg = new rofl::openflow::cofmsg_meter_stats_reply(mem))->validate();
+			(*pmsg = new rofl::openflow::cofmsg_meter_stats_reply())->unpack(mem->somem(), mem->length());
 		} break;
 		case rofl::openflow13::OFPMP_METER_CONFIG: {
-			(*pmsg = new rofl::openflow::cofmsg_meter_config_stats_reply(mem))->validate();
+			(*pmsg = new rofl::openflow::cofmsg_meter_config_stats_reply())->unpack(mem->somem(), mem->length());
 		} break;
 		case rofl::openflow13::OFPMP_METER_FEATURES: {
-			(*pmsg = new rofl::openflow::cofmsg_meter_features_stats_reply(mem))->validate();
+			(*pmsg = new rofl::openflow::cofmsg_meter_features_stats_reply())->unpack(mem->somem(), mem->length());
 		} break;
 		case rofl::openflow13::OFPMP_TABLE_FEATURES: {
-			(*pmsg = new rofl::openflow::cofmsg_table_features_stats_reply(mem))->validate();
+			(*pmsg = new rofl::openflow::cofmsg_table_features_stats_reply())->unpack(mem->somem(), mem->length());
 		} break;
 		case rofl::openflow13::OFPMP_PORT_DESC: {
-			(*pmsg = new rofl::openflow::cofmsg_port_desc_stats_reply(mem))->validate();
+			(*pmsg = new rofl::openflow::cofmsg_port_desc_stats_reply())->unpack(mem->somem(), mem->length());
 		} break;
 		// TODO: experimenter statistics
 		default: {
-			(*pmsg = new rofl::openflow::cofmsg_stats_reply(mem))->validate();
+			(*pmsg = new rofl::openflow::cofmsg_stats_reply())->unpack(mem->somem(), mem->length());
 		} break;
 		}
 
 	} break;
 
 	case rofl::openflow13::OFPT_BARRIER_REQUEST: {
-		(*pmsg = new rofl::openflow::cofmsg_barrier_request(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_barrier_request())->unpack(mem->somem(), mem->length());
 	} break;
 	case rofl::openflow13::OFPT_BARRIER_REPLY: {
-		(*pmsg = new rofl::openflow::cofmsg_barrier_reply(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_barrier_reply())->unpack(mem->somem(), mem->length());
 	} break;
 
 	case rofl::openflow13::OFPT_QUEUE_GET_CONFIG_REQUEST: {
-		(*pmsg = new rofl::openflow::cofmsg_queue_get_config_request(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_queue_get_config_request())->unpack(mem->somem(), mem->length());
 	} break;
 	case rofl::openflow13::OFPT_QUEUE_GET_CONFIG_REPLY: {
-		(*pmsg = new rofl::openflow::cofmsg_queue_get_config_reply(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_queue_get_config_reply())->unpack(mem->somem(), mem->length());
 	} break;
 
 	case rofl::openflow13::OFPT_ROLE_REQUEST: {
-		(*pmsg = new rofl::openflow::cofmsg_role_request(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_role_request())->unpack(mem->somem(), mem->length());
 	} break;
 	case rofl::openflow13::OFPT_ROLE_REPLY: {
-		(*pmsg = new rofl::openflow::cofmsg_role_reply(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_role_reply())->unpack(mem->somem(), mem->length());
 	} break;
 
 	case rofl::openflow13::OFPT_GET_ASYNC_REQUEST: {
-    	(*pmsg = new rofl::openflow::cofmsg_get_async_config_request(mem))->validate();
+    	(*pmsg = new rofl::openflow::cofmsg_get_async_config_request())->unpack(mem->somem(), mem->length());
     } break;
 	case rofl::openflow13::OFPT_GET_ASYNC_REPLY: {
-		(*pmsg = new rofl::openflow::cofmsg_get_async_config_reply(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_get_async_config_reply())->unpack(mem->somem(), mem->length());
 	} break;
 	case rofl::openflow13::OFPT_SET_ASYNC: {
-    	(*pmsg = new rofl::openflow::cofmsg_set_async_config(mem))->validate();
+    	(*pmsg = new rofl::openflow::cofmsg_set_async_config())->unpack(mem->somem(), mem->length());
     } break;
 	case rofl::openflow13::OFPT_METER_MOD: {
-		(*pmsg = new rofl::openflow::cofmsg_meter_mod(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg_meter_mod())->unpack(mem->somem(), mem->length());
 	} break;
 
 	default: {
-		(*pmsg = new rofl::openflow::cofmsg(mem))->validate();
+		(*pmsg = new rofl::openflow::cofmsg())->unpack(mem->somem(), mem->length());
 		LOGGING_WARN << "[rofl-common][crofsock] dropping unknown message " << **pmsg << std::endl;
 		throw eBadRequestBadType();
 	} return;
@@ -1371,7 +1373,7 @@ crofsock::log_of13_message(
 		LOGGING_DEBUG2 << dynamic_cast<rofl::openflow::cofmsg_table_mod const&>( msg );
 	} break;
 	case rofl::openflow13::OFPT_MULTIPART_REQUEST: {
-		rofl::openflow::cofmsg_multipart_request const& stats = dynamic_cast<rofl::openflow::cofmsg_multipart_request const&>( msg );
+		rofl::openflow::cofmsg_stats_request const& stats = dynamic_cast<rofl::openflow::cofmsg_stats_request const&>( msg );
 		switch (stats.get_stats_type()) {
 		case rofl::openflow13::OFPMP_DESC: {
 			LOGGING_DEBUG2 << dynamic_cast<rofl::openflow::cofmsg_desc_stats_request const&>( msg );
@@ -1423,7 +1425,7 @@ crofsock::log_of13_message(
 
 	} break;
 	case rofl::openflow13::OFPT_MULTIPART_REPLY: {
-		rofl::openflow::cofmsg_multipart_reply const& stats = dynamic_cast<rofl::openflow::cofmsg_multipart_reply const&>( msg );
+		rofl::openflow::cofmsg_stats_reply const& stats = dynamic_cast<rofl::openflow::cofmsg_stats_reply const&>( msg );
 		switch (stats.get_stats_type()) {
 		case rofl::openflow13::OFPMP_DESC: {
 			LOGGING_DEBUG2 << dynamic_cast<rofl::openflow::cofmsg_desc_stats_reply const&>( msg );

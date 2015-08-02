@@ -39,9 +39,9 @@ class eSegmentedMessageNotFound		: public eSegmentedMessageBase {};
 
 class csegmsg {
 
-	cclock								expires_at;	// time this cmultipart message will expire
-	uint32_t 							xid;		// transaction id used by this multipart message
-	rofl::openflow::cofmsg_stats*		msg;		// stitched multipart message, allocated on heap
+	cclock					expires_at;	// time this cmultipart message will expire
+	uint32_t 				xid;		// transaction id used by this multipart message
+	rofl::openflow::cofmsg* msg;		// stitched multipart message, allocated on heap
 
 	static time_t const DEFAULT_EXPIRATION_DELTA_SEC 	= 8;
 	static time_t const DEFAULT_EXPIRATION_DELTA_NSEC 	= 0;
@@ -99,7 +99,7 @@ public:
 	/**
 	 *
 	 */
-	rofl::openflow::cofmsg_stats const&
+	const rofl::openflow::cofmsg&
 	get_msg() const {
 		if (0 == msg)
 			throw eInval();
@@ -113,12 +113,13 @@ public:
 	 * @brief	Merges payload from msg within this->msg. Checks stats sub-type first.
 	 */
 	void
-	store_and_merge_msg(rofl::openflow::cofmsg_stats const& msg);
+	store_and_merge_msg(
+			const rofl::openflow::cofmsg& msg);
 
 	/**
 	 * @brief	Returns pointer to this->msg and sets this->msg to NULL. The object resides on heap and must be destroyed by the calling entity.
 	 */
-	rofl::openflow::cofmsg_stats*
+	rofl::openflow::cofmsg*
 	retrieve_and_detach_msg();
 
 private:
@@ -127,24 +128,34 @@ private:
 	 *
 	 */
 	void
-	clone(rofl::openflow::cofmsg_stats const& msg);
+	clone(
+			const rofl::openflow::cofmsg& msg);
 
 public:
 
 	friend std::ostream&
-	operator<< (std::ostream& os, csegmsg const& msg) {
+	operator<< (std::ostream& os, const csegmsg& msg) {
 		os << rofl::indent(0) << "<csegmsg" << " >" << std::endl;
 		os << rofl::indent(2) << "<expires: >" << std::endl;
 		{ rofl::indent i(4); os << msg.expires_at; }
 		os << rofl::indent(2) << "<xid: 0x" << std::hex << (int)msg.xid << std::dec << " >" << std::endl;
 		rofl::indent i(2);
+
+		uint16_t stats_type = 0;
+		if (dynamic_cast<const rofl::openflow::cofmsg_stats_request*>( (msg.msg) )) {
+			stats_type = dynamic_cast<const rofl::openflow::cofmsg_stats_request&>( *(msg.msg) ).get_stats_type();
+		} else
+		if (dynamic_cast<const rofl::openflow::cofmsg_stats_reply*>( (msg.msg) )) {
+			stats_type = dynamic_cast<const rofl::openflow::cofmsg_stats_reply&>( *(msg.msg) ).get_stats_type();
+		}
+
 		switch (msg.msg->get_version()) {
 		case rofl::openflow13::OFP_VERSION: {
 
 			switch (msg.msg->get_type()) {
 			case rofl::openflow13::OFPT_MULTIPART_REQUEST: {
 
-				switch (msg.msg->get_stats_type()) {
+				switch (stats_type) {
 				case rofl::openflow13::OFPMP_DESC: {
 					os << dynamic_cast<rofl::openflow::cofmsg_desc_stats_request const&>( *(msg.msg) );
 				} break;
@@ -187,7 +198,7 @@ public:
 			} break;
 			case rofl::openflow13::OFPT_MULTIPART_REPLY: {
 
-				switch (msg.msg->get_stats_type()) {
+				switch (stats_type) {
 				case rofl::openflow13::OFPMP_DESC: {
 					os << dynamic_cast<rofl::openflow::cofmsg_desc_stats_reply const&>( *(msg.msg) );
 				} break;

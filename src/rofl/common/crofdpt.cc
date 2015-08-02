@@ -837,49 +837,6 @@ crofdpt::send_get_config_request(
 
 
 uint32_t
-crofdpt::send_stats_request(
-		const rofl::cauxid& auxid,
-		uint16_t stats_type,
-		uint16_t stats_flags,
-		uint8_t* body,
-		size_t bodylen,
-		const cclock& timeout)
-{
-	uint32_t xid = 0;
-
-	try {
-		if (not is_established()) {
-			LOGGING_WARN << "[rofl-common][crofdpt] "
-					<< "control channel not connected" << std::endl;
-			throw eRofBaseNotConnected("");
-		}
-
-		xid = transactions.add_ta(timeout, rofl::openflow::OFPT_MULTIPART_REQUEST);
-
-		rofl::openflow::cofmsg_stats *msg =
-				new rofl::openflow::cofmsg_stats(
-						rofchan.get_version(),
-						xid,
-						stats_type,
-						stats_flags,
-						body,
-						bodylen);
-
-		rofchan.send_message(auxid, msg);
-
-		return xid;
-
-	} catch (eRofBaseCongested& e) {
-		LOGGING_WARN << "[rofl-common][crofdpt] "
-				<< "control channel congested" << std::endl;
-		transactions.drop_ta(xid);
-		throw;
-	}
-}
-
-
-
-uint32_t
 crofdpt::send_desc_stats_request(
 		const rofl::cauxid& auxid,
 		uint16_t flags,
@@ -2076,7 +2033,7 @@ crofdpt::multipart_reply_rcvd(
 
 	transactions.drop_ta(msg->get_xid());
 
-	rofl::openflow::cofmsg_multipart_reply *reply = dynamic_cast<rofl::openflow::cofmsg_multipart_reply*>( msg );
+	rofl::openflow::cofmsg_stats_reply *reply = dynamic_cast<rofl::openflow::cofmsg_stats_reply*>( msg );
 	assert(reply != NULL);
 
 	switch (reply->get_stats_type()) {

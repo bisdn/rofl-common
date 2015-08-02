@@ -1505,28 +1505,6 @@ public:
 			const rofl::cclock& timeout = rofl::cclock(/*seconds=*/DEFAULT_REQUEST_TIMEOUT));
 
 	/**
-	 * @brief	Sends OpenFlow Stats-Request message to attached datapath element.
-	 *
-	 * @param auxid controller connection identifier
-	 * @param stats_type OpenFlow statistics subtype
-	 * @param stats_flags OpenFlow statistics flags
-	 * @param body start of message payload
-	 * @param bodylen length of message payload
-	 * @param timeout until this request expires
-	 * @return OpenFlow transaction ID assigned to this request
-	 * @exception rofl::eRofBaseNotConnected
-	 * @exception rofl::eRofBaseCongested
-	 */
-	uint32_t
-	send_stats_request(
-			const rofl::cauxid& auxid,
-			uint16_t stats_type,
-			uint16_t stats_flags,
-			uint8_t *body = NULL,
-			size_t bodylen = 0,
-			const rofl::cclock& timeout = rofl::cclock(/*seconds=*/DEFAULT_REQUEST_TIMEOUT));
-
-	/**
 	 * @brief	Sends OpenFlow Desc-Stats-Request message to attached datapath element.
 	 *
 	 * @param auxid controller connection identifier

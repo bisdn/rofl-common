@@ -80,13 +80,22 @@ csegmsg::set_expiration_in(time_t delta_sec, time_t delta_nsec)
 
 
 void
-csegmsg::clone(rofl::openflow::cofmsg_stats const& msg_stats)
+csegmsg::clone(
+		const rofl::openflow::cofmsg& msg_stats)
 {
 	if (NULL != msg) { delete msg; msg = NULL; }
 
+	uint16_t stats_type = 0;
+	if (dynamic_cast<const rofl::openflow::cofmsg_stats_request*>( &msg_stats )) {
+		stats_type = dynamic_cast<const rofl::openflow::cofmsg_stats_request&>( msg_stats ).get_stats_type();
+	} else
+	if (dynamic_cast<const rofl::openflow::cofmsg_stats_reply*>( &msg_stats )) {
+		stats_type = dynamic_cast<const rofl::openflow::cofmsg_stats_reply&>( msg_stats ).get_stats_type();
+	}
+
 	switch (msg_stats.get_type()) {
 	case rofl::openflow13::OFPT_MULTIPART_REQUEST: {
-		switch (msg_stats.get_stats_type()) {
+		switch (stats_type) {
 		case rofl::openflow13::OFPMP_DESC: {
 			msg = new rofl::openflow::cofmsg_desc_stats_request(dynamic_cast<rofl::openflow::cofmsg_desc_stats_request const&>(msg_stats));
 		} break;
@@ -135,12 +144,19 @@ csegmsg::clone(rofl::openflow::cofmsg_stats const& msg_stats)
 		}
 
 		if (NULL != msg) {
-			msg->set_stats_flags(msg->get_stats_flags() & ~rofl::openflow13::OFPMPF_REQ_MORE);
+			if (dynamic_cast<rofl::openflow::cofmsg_stats_request*>( msg )) {
+				rofl::openflow::cofmsg_stats_request& req = dynamic_cast<rofl::openflow::cofmsg_stats_request&>( *msg );
+				req.set_stats_flags(req.get_stats_flags() & ~rofl::openflow13::OFPMPF_REQ_MORE);
+			} else
+			if (dynamic_cast<rofl::openflow::cofmsg_stats_reply*>( msg )) {
+				rofl::openflow::cofmsg_stats_reply& rep = dynamic_cast<rofl::openflow::cofmsg_stats_reply&>( *msg );
+				rep.set_stats_flags(rep.get_stats_flags() & ~rofl::openflow13::OFPMPF_REQ_MORE);
+			}
 		}
 
 	} break;
 	case rofl::openflow13::OFPT_MULTIPART_REPLY: {
-		switch (msg_stats.get_stats_type()) {
+		switch (stats_type) {
 		case rofl::openflow13::OFPMP_DESC: {
 			msg = new rofl::openflow::cofmsg_desc_stats_reply(dynamic_cast<rofl::openflow::cofmsg_desc_stats_reply const&>(msg_stats));
 		} break;
@@ -189,7 +205,14 @@ csegmsg::clone(rofl::openflow::cofmsg_stats const& msg_stats)
 		}
 
 		if (NULL != msg) {
-			msg->set_stats_flags(msg->get_stats_flags() & ~rofl::openflow13::OFPMPF_REPLY_MORE);
+			if (dynamic_cast<rofl::openflow::cofmsg_stats_request*>( msg )) {
+				rofl::openflow::cofmsg_stats_request& req = dynamic_cast<rofl::openflow::cofmsg_stats_request&>( *msg );
+				req.set_stats_flags(req.get_stats_flags() & ~rofl::openflow13::OFPMPF_REQ_MORE);
+			} else
+			if (dynamic_cast<rofl::openflow::cofmsg_stats_reply*>( msg )) {
+				rofl::openflow::cofmsg_stats_reply& rep = dynamic_cast<rofl::openflow::cofmsg_stats_reply&>( *msg );
+				rep.set_stats_flags(rep.get_stats_flags() & ~rofl::openflow13::OFPMPF_REQ_MORE);
+			}
 		}
 
 	} break;
@@ -203,7 +226,8 @@ csegmsg::clone(rofl::openflow::cofmsg_stats const& msg_stats)
 
 
 void
-csegmsg::store_and_merge_msg(rofl::openflow::cofmsg_stats const& msg_stats)
+csegmsg::store_and_merge_msg(
+		const rofl::openflow::cofmsg& msg_stats)
 {
 	if (NULL == msg) {
 
@@ -211,18 +235,37 @@ csegmsg::store_and_merge_msg(rofl::openflow::cofmsg_stats const& msg_stats)
 
 	} else {
 
+		uint16_t stats_type = 0;
+		if (dynamic_cast<const rofl::openflow::cofmsg_stats_request*>( &msg_stats )) {
+			stats_type = dynamic_cast<const rofl::openflow::cofmsg_stats_request&>( msg_stats ).get_stats_type();
+		} else
+		if (dynamic_cast<const rofl::openflow::cofmsg_stats_reply*>( &msg_stats )) {
+			stats_type = dynamic_cast<const rofl::openflow::cofmsg_stats_reply&>( msg_stats ).get_stats_type();
+		}
+
+
 		if (msg->get_type() != msg_stats.get_type()) { // message types must match
 			throw eSegmentedMessageInval();
 		}
 
-		if (msg->get_stats_type() != msg_stats.get_stats_type()) { // stats types must match
+
+		uint16_t a_stats_type = 0;
+		if (dynamic_cast<const rofl::openflow::cofmsg_stats_request*>( msg )) {
+			stats_type = dynamic_cast<const rofl::openflow::cofmsg_stats_request&>( *msg ).get_stats_type();
+		} else
+		if (dynamic_cast<const rofl::openflow::cofmsg_stats_reply*>( msg )) {
+			stats_type = dynamic_cast<const rofl::openflow::cofmsg_stats_reply&>( *msg ).get_stats_type();
+		}
+
+
+		if (a_stats_type != stats_type) { // stats types must match
 			throw eSegmentedMessageInval();
 		}
 
 		switch (msg_stats.get_type()) {
 		case rofl::openflow13::OFPT_MULTIPART_REQUEST: {
 
-			switch (msg_stats.get_stats_type()) {
+			switch (stats_type) {
 			case rofl::openflow13::OFPMP_TABLE_FEATURES: {
 
 				rofl::openflow::cofmsg_table_features_stats_request* msg_table =
@@ -242,7 +285,7 @@ csegmsg::store_and_merge_msg(rofl::openflow::cofmsg_stats const& msg_stats)
 		} break;
 		case rofl::openflow13::OFPT_MULTIPART_REPLY: {
 
-			switch (msg_stats.get_stats_type()) {
+			switch (stats_type) {
 			case rofl::openflow13::OFPMP_FLOW: {
 
 				rofl::openflow::cofmsg_flow_stats_reply* msg_flow =
@@ -369,10 +412,10 @@ csegmsg::store_and_merge_msg(rofl::openflow::cofmsg_stats const& msg_stats)
 
 
 
-rofl::openflow::cofmsg_stats*
+rofl::openflow::cofmsg*
 csegmsg::retrieve_and_detach_msg()
 {
-	rofl::openflow::cofmsg_stats *tmp = msg; msg = NULL; return tmp;
+	rofl::openflow::cofmsg* tmp = msg; msg = NULL; return tmp;
 }
 
 

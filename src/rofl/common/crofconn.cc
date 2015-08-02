@@ -585,26 +585,11 @@ crofconn::action_send_hello_message()
 			return;
 		}
 
-
-		cmemory body(0);
-
-		switch (versionbitmap.get_highest_ofp_version()) {
-		case rofl::openflow10::OFP_VERSION: {
-			// do nothing, as there should be no padding to prevent NOX from crashing
-
-		} break;
-		default: {
-			body.resize(versionbitmap.length());
-			versionbitmap.pack(body.somem(), body.memlen());
-
-		};
-		}
-
 		rofl::openflow::cofmsg_hello *hello =
 				new rofl::openflow::cofmsg_hello(
 						versionbitmap.get_highest_ofp_version(),
 						env->get_async_xid(*this),
-						body.somem(), body.memlen());
+						versionbitmap);
 
 		LOGGING_DEBUG << "[rofl-common][crofconn] sending HELLO message: "
 				<< hello->str() << versionbitmap.str() << std::endl;
@@ -825,19 +810,12 @@ crofconn::recv_message(
 	} break;
 	default: {
 		LOGGING_ALERT << "[rofl-common][rofsock] dropping message with unsupported OpenFlow version" << std::endl;
-#if 0
-		//throw eBadRequestBadVersion();
-		size_t len = (msg->framelen() > 64) ? 64 : msg->framelen();
-		rofl::openflow::cofmsg_error_bad_request_bad_version *error = 
-				new rofl::openflow::cofmsg_error_bad_request_bad_version(
-					get_version(),
-					msg->get_xid(),
-					msg->soframe(),
-					len);
-		send_message(error);
-#endif
+
+		rofl::cmemory mem(msg->length());
+		msg->pack(mem.somem(), mem.length());
+		size_t len = (mem.length() < 64) ? mem.length() : 64;
 		send_message(new rofl::openflow::cofmsg_error_bad_request_bad_version(
-						get_version(), msg->get_xid(), msg->soframe(), (msg->framelen() > 64) ? 64 : msg->framelen()));
+						get_version(), msg->get_xid(), mem.somem(), len));
 		delete msg; return;
 	};
 	}
@@ -903,8 +881,11 @@ crofconn::handle_messages()
 					LOGGING_ERROR << "[rofl-common][crofconn][handle_messages] "
 							<< "received message with unknown version, dropping." << std::endl;
 
+					rofl::cmemory mem(msg->length());
+					msg->pack(mem.somem(), mem.length());
+					size_t len = (mem.length() < 64) ? mem.length() : 64;
 					send_message(new rofl::openflow::cofmsg_error_bad_request_bad_version(
-							get_version(), msg->get_xid(), msg->soframe(), msg->framelen()));
+									get_version(), msg->get_xid(), mem.somem(), len));
 
 					delete msg; continue;
 				}
@@ -925,14 +906,13 @@ crofconn::handle_messages()
 				case OFPT_FEATURES_REPLY: {
 					features_reply_rcvd(msg);
 				} break;
-				case OFPT_MULTIPART_REQUEST:
-				case OFPT_MULTIPART_REPLY: {
+				case OFPT_MULTIPART_REQUEST: {
 					/*
 					 * add multipart support here for receiving messages
 					 */
 					switch (msg->get_version()) {
 					case rofl::openflow13::OFP_VERSION: {
-						rofl::openflow::cofmsg_stats *stats = dynamic_cast<rofl::openflow::cofmsg_stats*>( msg );
+						rofl::openflow::cofmsg_stats_request *stats = dynamic_cast<rofl::openflow::cofmsg_stats_request*>( msg );
 
 						if (NULL == stats) {
 							LOGGING_WARN << "[rofl-common][crofconn] dropping multipart message, invalid message type." << str() << std::endl;
@@ -942,7 +922,7 @@ crofconn::handle_messages()
 						// start new or continue pending transaction
 						if (stats->get_stats_flags() & rofl::openflow13::OFPMPF_REQ_MORE) {
 
-							sar.set_transaction(msg->get_xid()).store_and_merge_msg(dynamic_cast<rofl::openflow::cofmsg_stats const&>(*msg));
+							sar.set_transaction(msg->get_xid()).store_and_merge_msg(*msg);
 							delete msg; // delete msg here, we store a copy in the transaction
 
 						// end pending transaction or multipart message with single message only
@@ -950,7 +930,52 @@ crofconn::handle_messages()
 
 							if (sar.has_transaction(msg->get_xid())) {
 
-								sar.set_transaction(msg->get_xid()).store_and_merge_msg(dynamic_cast<rofl::openflow::cofmsg_stats const&>(*msg));
+								sar.set_transaction(msg->get_xid()).store_and_merge_msg(*msg);
+
+								rofl::openflow::cofmsg* reassembled_msg = sar.set_transaction(msg->get_xid()).retrieve_and_detach_msg();
+
+								sar.drop_transaction(msg->get_xid());
+
+								delete msg; // delete msg here, we may get an exception from the next line
+
+								send_message_to_env(reassembled_msg);
+							} else {
+								// do not delete msg here, will be done by higher layers
+								send_message_to_env(msg);
+							}
+						}
+					} break;
+					default: {
+						// no segmentation and reassembly below OF13, so send message directly to our environment
+						send_message_to_env(msg);
+					};
+					}
+				} break;
+				case OFPT_MULTIPART_REPLY: {
+					/*
+					 * add multipart support here for receiving messages
+					 */
+					switch (msg->get_version()) {
+					case rofl::openflow13::OFP_VERSION: {
+						rofl::openflow::cofmsg_stats_reply *stats = dynamic_cast<rofl::openflow::cofmsg_stats_reply*>( msg );
+
+						if (NULL == stats) {
+							LOGGING_WARN << "[rofl-common][crofconn] dropping multipart message, invalid message type." << str() << std::endl;
+							delete msg; continue;
+						}
+
+						// start new or continue pending transaction
+						if (stats->get_stats_flags() & rofl::openflow13::OFPMPF_REQ_MORE) {
+
+							sar.set_transaction(msg->get_xid()).store_and_merge_msg(*msg);
+							delete msg; // delete msg here, we store a copy in the transaction
+
+						// end pending transaction or multipart message with single message only
+						} else {
+
+							if (sar.has_transaction(msg->get_xid())) {
+
+								sar.set_transaction(msg->get_xid()).store_and_merge_msg(*msg);
 
 								rofl::openflow::cofmsg* reassembled_msg = sar.set_transaction(msg->get_xid()).retrieve_and_detach_msg();
 
@@ -1042,7 +1067,7 @@ crofconn::hello_rcvd(
 			versionbitmap_peer.add_ofp_version(hello->get_version());
 		} break;
 		default: { // msg->get_version() should contain the highest number of supported OFP versions encoded in versionbitmap
-			rofl::openflow::cofhelloelems helloIEs(hello->get_body());
+			rofl::openflow::cofhelloelems helloIEs(hello->get_helloelems());
 			if (not helloIEs.has_hello_elem_versionbitmap()) {
 				LOGGING_WARN << "[rofl-common][crofconn] HELLO message rcvd without HelloIE -VersionBitmap-" << std::endl << *hello << std::endl;
 				versionbitmap_peer.add_ofp_version(hello->get_version());
@@ -1092,18 +1117,28 @@ crofconn::hello_rcvd(
 	} catch (eHelloIncompatible& e) {
 
 		LOGGING_WARN << "[rofl-common][crofconn] eHelloIncompatible " << *msg << std::endl;
-		if (rofsock) rofsock->send_message(
+		if (rofsock) {
+			rofl::cmemory mem(hello->length());
+			hello->pack(mem.somem(), mem.length());
+			size_t len = (mem.length() < 64) ? mem.length() : 64;
+			rofsock->send_message(
 				new rofl::openflow::cofmsg_error_hello_failed_incompatible(
-						hello->get_version(), hello->get_xid(), hello->soframe(), hello->framelen()));
+						hello->get_version(), hello->get_xid(), mem.somem(), len));
+		}
 
 		run_engine(EVENT_DISCONNECTED);
 
 	} catch (eHelloEperm& e) {
 
 		LOGGING_WARN << "[rofl-common][crofconn] eHelloEperm " << *msg << std::endl;
-		if (rofsock) rofsock->send_message(
+		if (rofsock) {
+			rofl::cmemory mem(hello->length());
+			hello->pack(mem.somem(), mem.length());
+			size_t len = (mem.length() < 64) ? mem.length() : 64;
+			rofsock->send_message(
 				new rofl::openflow::cofmsg_error_hello_failed_eperm(
-						hello->get_version(), hello->get_xid(), hello->soframe(), hello->framelen()));
+						hello->get_version(), hello->get_xid(), mem.somem(), len));
+		}
 
 		run_engine(EVENT_DISCONNECTED);
 
@@ -1133,8 +1168,15 @@ crofconn::echo_request_rcvd(
 
 		if (request->get_version() != get_version()) {
 
-			if (rofsock) rofsock->send_message(new rofl::openflow::cofmsg_error_bad_request_bad_version(
-					get_version(), request->get_xid(), request->soframe(), request->framelen()));
+			if (rofsock) {
+				rofl::cmemory mem(request->length());
+				request->pack(mem.somem(), mem.length());
+				size_t len = (mem.length() < 64) ? mem.length() : 64;
+				rofsock->send_message(
+					new rofl::openflow::cofmsg_error_bad_request_bad_version(
+							request->get_version(), request->get_xid(), mem.somem(), len));
+			}
+
 			delete msg; return;
 		}
 
@@ -1249,7 +1291,7 @@ crofconn::features_reply_rcvd(
 
 			dpid 			= reply->get_dpid();
 			if (ofp_version >= rofl::openflow13::OFP_VERSION) {
-				auxiliary_id 	= reply->get_auxiliary_id();
+				auxiliary_id 	= reply->get_auxid();
 			} else {
 				auxiliary_id 	= 0;
 			}

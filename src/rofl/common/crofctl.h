@@ -1055,24 +1055,6 @@ public:
 			uint16_t miss_send_len);
 
 	/**
-	 * @brief	Sends OpenFlow Stats-Reply message to attached controller entity.
-	 *
-	 * @param xid OpenFlow transaction identifier
-	 * @param stats_type one of the OFPST_* constants
-	 * @param body body of a STATS.reply
-	 * @param bodylen length of STATS.reply body
-	 * @param more flag if multiple STATS.reply messages will be sent
-	 */
-	void
-	send_stats_reply(
-			const rofl::cauxid& auxid,
-			uint32_t xid,
-			uint16_t stats_type,
-			uint16_t stats_flags,
-			uint8_t *body = NULL,
-			size_t bodylen = 0);
-
-	/**
 	 * @brief	Sends OpenFlow Desc-Stats-Reply message to attached controller entity.
 	 *
 	 * @param xid OpenFlow transaction identifier
@@ -1689,7 +1671,7 @@ private:
 	void
 	stats_request_rcvd(
 			const rofl::cauxid& auxid,
-			rofl::openflow::cofmsg_stats* msg);
+			rofl::openflow::cofmsg_stats_request* msg);
 
 	void
 	desc_stats_request_rcvd(
