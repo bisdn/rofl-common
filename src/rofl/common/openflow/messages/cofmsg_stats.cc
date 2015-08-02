@@ -145,7 +145,16 @@ cofmsg_stats_reply::cofmsg_stats_reply(
 				cofmsg(version, rofl::openflow::OFPT_MULTIPART_REPLY, xid),
 				stats_type(stats_type),
 				stats_flags(stats_flags)
-{}
+{
+	switch (version) {
+	case rofl::openflow10::OFP_VERSION: {
+		set_type(rofl::openflow10::OFPT_STATS_REPLY);
+	} break;
+	default: {
+		// do nothing
+	};
+	}
+}
 
 
 

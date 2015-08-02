@@ -239,7 +239,7 @@ cofaggr_stats_request::pack(uint8_t *buf, size_t buflen)
 {
 	switch (of_version) {
 	case rofl::openflow10::OFP_VERSION: {
-		if (buflen < (sizeof(struct openflow10::ofp_flow_stats_request) - 4 + match.length()))
+		if (buflen < (sizeof(struct openflow10::ofp_flow_stats_request)))
 			throw eInval();
 
 		struct openflow10::ofp_flow_stats_request *req = (struct openflow10::ofp_flow_stats_request*)buf;

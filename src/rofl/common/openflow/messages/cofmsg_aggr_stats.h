@@ -96,8 +96,8 @@ public:
 public:
 
 	friend std::ostream&
-	operator<< (std::ostream& os, cofmsg_aggr_stats_request const& msg) {
-		os << indent(0) << dynamic_cast<cofmsg const&>( msg );
+	operator<< (std::ostream& os, const cofmsg_aggr_stats_request& msg) {
+		os << indent(0) << dynamic_cast<const cofmsg_stats_request&>( msg );
 		os << indent(2) << "<cofmsg_aggr_stats_request >" << std::endl;
 		indent i(4);
 		os << msg.aggr_stats;
@@ -196,8 +196,8 @@ public:
 public:
 
 	friend std::ostream&
-	operator<< (std::ostream& os, cofmsg_aggr_stats_reply const& msg) {
-		os << indent(0) << dynamic_cast<cofmsg const&>( msg );
+	operator<< (std::ostream& os, const cofmsg_aggr_stats_reply& msg) {
+		os << indent(0) << dynamic_cast<const cofmsg_stats_reply&>( msg );
 		os << indent(2) << "<cofmsg_aggr_stats_reply >" << std::endl;
 		indent i(4);
 		os << msg.aggr_stats;

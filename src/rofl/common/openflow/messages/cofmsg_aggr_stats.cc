@@ -19,6 +19,8 @@ cofmsg_aggr_stats_request::cofmsg_aggr_stats_request(
 				cofmsg_stats_request(version, xid, rofl::openflow::OFPMP_AGGREGATE, stats_flags),
 				aggr_stats(aggr_stats)
 {
+	this->aggr_stats.set_version(version);
+
 	switch (version) {
 	case rofl::openflow10::OFP_VERSION: {
 		set_stats_type(rofl::openflow10::OFPST_AGGREGATE);
@@ -147,6 +149,8 @@ cofmsg_aggr_stats_reply::cofmsg_aggr_stats_reply(
 				cofmsg_stats_reply(version, xid, rofl::openflow::OFPMP_AGGREGATE, stats_flags),
 				aggr_stats(aggr_stats)
 {
+	this->aggr_stats.set_version(version);
+
 	switch (version) {
 	case rofl::openflow10::OFP_VERSION: {
 		set_stats_type(rofl::openflow10::OFPST_AGGREGATE);

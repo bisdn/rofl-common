@@ -161,7 +161,7 @@ crofbasetest::handle_features_reply(
 	CPPUNIT_ASSERT(msg.get_n_buffers() == n_buffers);
 	CPPUNIT_ASSERT(msg.get_n_tables() == n_tables);
 	CPPUNIT_ASSERT(msg.get_capabilities() == capabilities);
-	CPPUNIT_ASSERT(msg.get_auxiliary_id() == tauxid);
+	CPPUNIT_ASSERT(msg.get_auxid() == tauxid);
 }
 
 

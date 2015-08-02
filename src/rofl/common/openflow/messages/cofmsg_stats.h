@@ -114,7 +114,7 @@ public:
 		os << dynamic_cast<cofmsg const&>( msg );
 		os << indent(2) << "<cofmsg_stats_request ";
 		os << "type:" << (int)msg.get_stats_type() << " ";
-		os << "flags:" << msg.s_flags() << " ";
+		os << "flags: 0x" << std::hex << (int)msg.get_stats_flags() << std::dec << " " << msg.s_flags() << " ";
 		os << ">" << std::endl;;
 		return os;
 	};
@@ -124,7 +124,7 @@ public:
 		std::stringstream ss;
 		ss << cofmsg::str() << "-Stats-Request- " << " ";
 		ss << "type: " << (unsigned int)get_stats_type() << ", ";
-		ss << "flags: " << s_flags() << " ";
+		ss << "flags: 0x" << std::hex << (int)get_stats_flags() << std::dec << " " << s_flags() << " ";
 		return ss.str();
 	};
 
@@ -249,7 +249,7 @@ public:
 		os << dynamic_cast<cofmsg const&>( msg );
 		os << indent(2) << "<cofmsg_stats_reply ";
 		os << "type:" << (int)msg.get_stats_type() << " ";
-		os << "flags:" << msg.s_flags() << " ";
+		os << "flags: 0x" << std::hex << (int)msg.get_stats_flags() << std::dec << " " << msg.s_flags() << " ";
 		os << ">" << std::endl;;
 		return os;
 	};
@@ -259,7 +259,7 @@ public:
 		std::stringstream ss;
 		ss << cofmsg::str() << "-Stats-Reply- " << " ";
 		ss << "type: " << (unsigned int)get_stats_type() << ", ";
-		ss << "flags: " << s_flags() << " ";
+		ss << "flags: 0x" << std::hex << (int)get_stats_flags() << std::dec << " " << s_flags() << " ";
 		return ss.str();
 	};
 

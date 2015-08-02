@@ -5,30 +5,25 @@
  *      Author: andi
  */
 
-#ifndef TEST_SRC_ROFL_COMMON_OPENFLOW_COXMATCH_TEST_HPP_
-#define TEST_SRC_ROFL_COMMON_OPENFLOW_COXMATCH_TEST_HPP_
+#ifndef TEST_SRC_ROFL_COMMON_OPENFLOW_MESSAGES_COFMSGAGGRSTATS_TEST_HPP_
+#define TEST_SRC_ROFL_COMMON_OPENFLOW_MESSAGES_COFMSGAGGRSTATS_TEST_HPP_
 
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 
-#include "rofl/common/openflow/coxmatches.h"
+#include "rofl/common/openflow/messages/cofmsg_aggr_stats.h"
 #include "rofl/common/cmemory.h"
 
-class coxmatchestest :
+class cofmsgaggrstatstest :
 		public CppUnit::TestFixture
 {
-	CPPUNIT_TEST_SUITE( coxmatchestest );
-	CPPUNIT_TEST( testPack );
-	CPPUNIT_TEST( testUnPack );
-	CPPUNIT_TEST( testAddMatch );
-	CPPUNIT_TEST( testDropMatch );
-	CPPUNIT_TEST( testSetMatch );
-	CPPUNIT_TEST( testGetMatch );
-	CPPUNIT_TEST( testHasMatch );
-	CPPUNIT_TEST( testStrictMatching );
-	CPPUNIT_TEST( testNonStrictMatching );
-	CPPUNIT_TEST( testOxmVlanVidUnpack );
-	CPPUNIT_TEST( testExp );
+	CPPUNIT_TEST_SUITE( cofmsgaggrstatstest );
+	CPPUNIT_TEST( testRequest10 );
+	CPPUNIT_TEST( testRequest12 );
+	CPPUNIT_TEST( testRequest13 );
+	CPPUNIT_TEST( testReply10 );
+	CPPUNIT_TEST( testReply12 );
+	CPPUNIT_TEST( testReply13 );
 	CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -36,19 +31,19 @@ public:
 	void tearDown();
 
 public:
-	void testPack();
-	void testUnPack();
-	void testAddMatch();
-	void testDropMatch();
-	void testSetMatch();
-	void testGetMatch();
-	void testHasMatch();
-	void testStrictMatching();
-	void testNonStrictMatching();
+	void testRequest10();
+	void testRequest12();
+	void testRequest13();
+	void testReply10();
+	void testReply12();
+	void testReply13();
 
-	void testOxmVlanVidUnpack();
+private:
 
-	void testExp();
+	void testRequest(
+			uint8_t version, uint8_t type, uint32_t xid, uint16_t stats_type, uint16_t stats_flags);
+	void testReply(
+			uint8_t version, uint8_t type, uint32_t xid, uint16_t stats_type, uint16_t stats_flags);
 };
 
-#endif /* TEST_SRC_ROFL_COMMON_OPENFLOW_COXMATCH_TEST_HPP_ */
+#endif /* TEST_SRC_ROFL_COMMON_OPENFLOW_MESSAGES_COFMSGAGGRSTATS_TEST_HPP_ */
