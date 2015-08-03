@@ -55,8 +55,10 @@ cofmsg::unpack(
 	len     = be16toh(hdr->length);
 	xid     = be32toh(hdr->xid);
 
-	if ((len < cofmsg::length()) || (len > buflen))
-		throw eMsgInval("cofmsg::unpack() buf too short (payload)");
+	if (len < cofmsg::length())
+		throw eBadSyntaxTooShort("cofmsg::unpack() buf too short (header)");
+	if (len > buflen)
+		throw eBadSyntaxTooShort("cofmsg::unpack() buf too short (payload)");
 }
 
 

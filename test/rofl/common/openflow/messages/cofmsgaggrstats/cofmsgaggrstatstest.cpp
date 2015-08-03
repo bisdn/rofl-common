@@ -160,3 +160,296 @@ cofmsgaggrstatstest::testReply(
 
 
 
+void
+cofmsgaggrstatstest::testRequestParser10()
+{
+	uint8_t version = rofl::openflow10::OFP_VERSION;
+	rofl::openflow::cofmatch match(version);
+	uint8_t table_id = 0xf4;
+	uint32_t out_port = 0xd0d1d2d3;
+
+	cofaggr_stats_request aggr(
+			version,
+			match,
+			table_id,
+			out_port);
+
+	rofl::cmemory mem(sizeof(struct rofl::openflow10::ofp_stats_request) + aggr.length());
+	struct rofl::openflow10::ofp_stats_request* stats =
+			(struct rofl::openflow10::ofp_stats_request*)(mem.somem());
+
+	stats->header.version = version;
+	stats->header.type = rofl::openflow10::OFPT_STATS_REQUEST;
+	stats->header.xid = htobe32(0xa0a1a2a3);
+	stats->header.length = htobe16(0);
+	stats->type = htobe16(rofl::openflow10::OFPST_AGGREGATE);
+	stats->flags = htobe16(0xb1b2);
+	aggr.pack(stats->body, aggr.length());
+
+
+	for (int i = 0; i < mem.length()+4; i++) {
+		std::cerr << ">>> testing length values (len: " << i << ") <<< " << std::endl;
+		stats->header.length = htobe16(i);
+		std::cerr << ">>> memory <<<" << std::endl << mem;
+
+		try {
+			rofl::openflow::cofmsg_aggr_stats_request msg;
+			msg.unpack(mem.somem(), i);
+			std::cerr << ">>> request <<<" << std::endl << msg;
+
+		} catch (rofl::eBadSyntaxTooShort& e) {
+			std::cerr << "exception (eBadSyntaxTooShort): " << e.what() << std::endl;
+			CPPUNIT_ASSERT(56 != i);
+
+		}
+	}
+}
+
+
+
+void
+cofmsgaggrstatstest::testRequestParser12()
+{
+	uint8_t version = rofl::openflow12::OFP_VERSION;
+	rofl::openflow::cofmatch match(version);
+	uint8_t table_id = 0xf4;
+	uint64_t cookie = 0xb0b1b2b3b4b5b6b7;
+	uint64_t cookie_mask = 0xffffffffffffffff;
+	uint32_t out_group = 0xc0c1c2c3;
+	uint32_t out_port = 0xd0d1d2d3;
+
+	cofaggr_stats_request aggr(
+			version,
+			match,
+			table_id,
+			out_port,
+			out_group,
+			cookie,
+			cookie_mask);
+
+	rofl::cmemory mem(sizeof(struct rofl::openflow12::ofp_stats_request) + aggr.length());
+	struct rofl::openflow12::ofp_stats_request* stats =
+			(struct rofl::openflow12::ofp_stats_request*)(mem.somem());
+
+	stats->header.version = version;
+	stats->header.type = rofl::openflow12::OFPT_STATS_REQUEST;
+	stats->header.xid = htobe32(0xa0a1a2a3);
+	stats->header.length = htobe16(0);
+	stats->type = htobe16(rofl::openflow12::OFPST_AGGREGATE);
+	stats->flags = htobe16(0xb1b2);
+	aggr.pack(stats->body, aggr.length());
+
+
+	for (int i = 0; i < mem.length()+4; i++) {
+		std::cerr << ">>> testing length values (len: " << i << ") <<< " << std::endl;
+		stats->header.length = htobe16(i);
+		std::cerr << ">>> memory <<<" << std::endl << mem;
+
+		try {
+			rofl::openflow::cofmsg_aggr_stats_request msg;
+			msg.unpack(mem.somem(), i);
+			std::cerr << ">>> request <<<" << std::endl << msg;
+
+		} catch (rofl::eBadSyntaxTooShort& e) {
+			std::cerr << "exception (eBadSyntaxTooShort): " << e.what() << std::endl;
+			CPPUNIT_ASSERT(56 != i);
+
+		}
+	}
+}
+
+
+
+void
+cofmsgaggrstatstest::testRequestParser13()
+{
+	uint8_t version = rofl::openflow13::OFP_VERSION;
+	rofl::openflow::cofmatch match(version);
+	uint8_t table_id = 0xf4;
+	uint64_t cookie = 0xb0b1b2b3b4b5b6b7;
+	uint64_t cookie_mask = 0xffffffffffffffff;
+	uint32_t out_group = 0xc0c1c2c3;
+	uint32_t out_port = 0xd0d1d2d3;
+
+	cofaggr_stats_request aggr(
+			version,
+			match,
+			table_id,
+			out_port,
+			out_group,
+			cookie,
+			cookie_mask);
+
+	rofl::cmemory mem(sizeof(struct rofl::openflow13::ofp_multipart_request) + aggr.length());
+	struct rofl::openflow13::ofp_multipart_request* stats =
+			(struct rofl::openflow13::ofp_multipart_request*)(mem.somem());
+
+	stats->header.version = version;
+	stats->header.type = rofl::openflow13::OFPT_MULTIPART_REQUEST;
+	stats->header.xid = htobe32(0xa0a1a2a3);
+	stats->header.length = htobe16(0);
+	stats->type = htobe16(rofl::openflow13::OFPMP_AGGREGATE);
+	stats->flags = htobe16(0xb1b2);
+	aggr.pack(stats->body, aggr.length());
+
+
+	for (int i = 0; i < mem.length()+4; i++) {
+		std::cerr << ">>> testing length values (len: " << i << ") <<< " << std::endl;
+		stats->header.length = htobe16(i);
+		std::cerr << ">>> memory <<<" << std::endl << mem;
+
+		try {
+			rofl::openflow::cofmsg_aggr_stats_request msg;
+			msg.unpack(mem.somem(), i);
+			std::cerr << ">>> request <<<" << std::endl << msg;
+
+		} catch (rofl::eBadSyntaxTooShort& e) {
+			std::cerr << "exception (eBadSyntaxTooShort): " << e.what() << std::endl;
+			CPPUNIT_ASSERT(56 != i);
+		}
+	}
+}
+
+
+
+void
+cofmsgaggrstatstest::testReplyParser10()
+{
+	uint8_t version = rofl::openflow10::OFP_VERSION;
+	uint64_t packet_count = 0xa0a1a2a3a4a5a6a7;
+	uint64_t byte_count = 0xb0b1b2b3b4b5b6b7;
+	uint32_t flow_count = 0xc0c1c2c3;
+
+	cofaggr_stats_reply aggr(
+			version,
+			packet_count,
+			byte_count,
+			flow_count);
+
+	rofl::cmemory mem(sizeof(struct rofl::openflow10::ofp_stats_reply) + aggr.length());
+	struct rofl::openflow10::ofp_stats_reply* stats =
+			(struct rofl::openflow10::ofp_stats_reply*)(mem.somem());
+
+	stats->header.version = version;
+	stats->header.type = rofl::openflow10::OFPT_STATS_REPLY;
+	stats->header.xid = htobe32(0xa0a1a2a3);
+	stats->header.length = htobe16(0);
+	stats->type = htobe16(rofl::openflow10::OFPST_AGGREGATE);
+	stats->flags = htobe16(0xb1b2);
+	aggr.pack(stats->body, aggr.length());
+
+
+	for (int i = 0; i < mem.length()+4; i++) {
+		std::cerr << ">>> testing length values (len: " << i << ") <<< " << std::endl;
+		stats->header.length = htobe16(i);
+		std::cerr << ">>> memory <<<" << std::endl << mem;
+
+		try {
+			rofl::openflow::cofmsg_aggr_stats_reply msg;
+			msg.unpack(mem.somem(), i);
+			std::cerr << ">>> request <<<" << std::endl << msg;
+
+		} catch (rofl::eBadSyntaxTooShort& e) {
+			std::cerr << "exception (eBadSyntaxTooShort): " << e.what() << std::endl;
+			CPPUNIT_ASSERT(36 != i);
+
+		}
+	}
+}
+
+
+
+void
+cofmsgaggrstatstest::testReplyParser12()
+{
+	uint8_t version = rofl::openflow12::OFP_VERSION;
+	uint64_t packet_count = 0xa0a1a2a3a4a5a6a7;
+	uint64_t byte_count = 0xb0b1b2b3b4b5b6b7;
+	uint32_t flow_count = 0xc0c1c2c3;
+
+	cofaggr_stats_reply aggr(
+			version,
+			packet_count,
+			byte_count,
+			flow_count);
+
+	rofl::cmemory mem(sizeof(struct rofl::openflow12::ofp_stats_reply) + aggr.length());
+	struct rofl::openflow12::ofp_stats_reply* stats =
+			(struct rofl::openflow12::ofp_stats_reply*)(mem.somem());
+
+	stats->header.version = version;
+	stats->header.type = rofl::openflow12::OFPT_STATS_REPLY;
+	stats->header.xid = htobe32(0xa0a1a2a3);
+	stats->header.length = htobe16(0);
+	stats->type = htobe16(rofl::openflow12::OFPST_AGGREGATE);
+	stats->flags = htobe16(0xb1b2);
+	aggr.pack(stats->body, aggr.length());
+
+
+	for (int i = 0; i < mem.length()+4; i++) {
+		std::cerr << ">>> testing length values (len: " << i << ") <<< " << std::endl;
+		stats->header.length = htobe16(i);
+		std::cerr << ">>> memory <<<" << std::endl << mem;
+
+		try {
+			rofl::openflow::cofmsg_aggr_stats_reply msg;
+			msg.unpack(mem.somem(), i);
+			std::cerr << ">>> request <<<" << std::endl << msg;
+
+		} catch (rofl::eBadSyntaxTooShort& e) {
+			std::cerr << "exception (eBadSyntaxTooShort): " << e.what() << std::endl;
+			CPPUNIT_ASSERT(40 != i);
+
+		}
+	}
+}
+
+
+
+void
+cofmsgaggrstatstest::testReplyParser13()
+{
+	uint8_t version = rofl::openflow13::OFP_VERSION;
+	uint64_t packet_count = 0xa0a1a2a3a4a5a6a7;
+	uint64_t byte_count = 0xb0b1b2b3b4b5b6b7;
+	uint32_t flow_count = 0xc0c1c2c3;
+
+	cofaggr_stats_reply aggr(
+			version,
+			packet_count,
+			byte_count,
+			flow_count);
+
+	rofl::cmemory mem(sizeof(struct rofl::openflow13::ofp_multipart_reply) + aggr.length());
+	struct rofl::openflow13::ofp_multipart_reply* stats =
+			(struct rofl::openflow13::ofp_multipart_reply*)(mem.somem());
+
+	stats->header.version = version;
+	stats->header.type = rofl::openflow13::OFPT_MULTIPART_REPLY;
+	stats->header.xid = htobe32(0xa0a1a2a3);
+	stats->header.length = htobe16(0);
+	stats->type = htobe16(rofl::openflow13::OFPMP_AGGREGATE);
+	stats->flags = htobe16(0xb1b2);
+	aggr.pack(stats->body, aggr.length());
+
+
+	for (int i = 0; i < mem.length()+4; i++) {
+		std::cerr << ">>> testing length values (len: " << i << ") <<< " << std::endl;
+		stats->header.length = htobe16(i);
+		std::cerr << ">>> memory <<<" << std::endl << mem;
+
+		try {
+			rofl::openflow::cofmsg_aggr_stats_reply msg;
+			msg.unpack(mem.somem(), i);
+			std::cerr << ">>> request <<<" << std::endl << msg;
+
+		} catch (rofl::eBadSyntaxTooShort& e) {
+			std::cerr << "exception (eBadSyntaxTooShort): " << e.what() << std::endl;
+			CPPUNIT_ASSERT(40 != i);
+
+		}
+	}
+}
+
+
+

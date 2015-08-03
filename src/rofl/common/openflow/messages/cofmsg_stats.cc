@@ -113,12 +113,18 @@ cofmsg_stats_request::unpack(uint8_t *buf, size_t buflen)
 
 	switch (get_version()) {
 	case rofl::openflow10::OFP_VERSION: {
+		if (get_type() != rofl::openflow10::OFPT_STATS_REQUEST)
+			throw eMsgInval("cofmsg_stats_request::unpack() invalid message type");
+
 		struct rofl::openflow10::ofp_stats_request* hdr =
 				(struct rofl::openflow10::ofp_stats_request*)buf;
 		stats_type	= be16toh(hdr->type);
 		stats_flags	= be16toh(hdr->flags);
 	} break;
 	default: {
+		if (get_type() != rofl::openflow13::OFPT_MULTIPART_REQUEST)
+			throw eMsgInval("cofmsg_stats_request::unpack() invalid message type");
+
 		struct rofl::openflow13::ofp_multipart_request* hdr =
 				(struct rofl::openflow13::ofp_multipart_request*)buf;
 		stats_type	= be16toh(hdr->type);
@@ -239,12 +245,18 @@ cofmsg_stats_reply::unpack(uint8_t *buf, size_t buflen)
 
 	switch (get_version()) {
 	case rofl::openflow10::OFP_VERSION: {
+		if (get_type() != rofl::openflow10::OFPT_STATS_REPLY)
+			throw eMsgInval("cofmsg_stats_reply::unpack() invalid message type");
+
 		struct rofl::openflow10::ofp_stats_reply* hdr =
 				(struct rofl::openflow10::ofp_stats_reply*)buf;
 		stats_type	= be16toh(hdr->type);
 		stats_flags	= be16toh(hdr->flags);
 	} break;
 	default: {
+		if (get_type() != rofl::openflow13::OFPT_MULTIPART_REPLY)
+			throw eMsgInval("cofmsg_stats_reply::unpack() invalid message type");
+
 		struct rofl::openflow13::ofp_multipart_reply* hdr =
 				(struct rofl::openflow13::ofp_multipart_reply*)buf;
 		stats_type	= be16toh(hdr->type);

@@ -33,7 +33,9 @@ cofaggr_stats_request::cofaggr_stats_request(
 				out_group(0),
 				cookie(0),
 				cookie_mask(0)
-{}
+{
+	this->match.set_version(of_version);
+}
 
 
 
@@ -52,7 +54,9 @@ cofaggr_stats_request::cofaggr_stats_request(
 			out_group(out_group),
 			cookie(cookie),
 			cookie_mask(cookie_mask)
-{}
+{
+	this->match.set_version(of_version);
+}
 
 
 
