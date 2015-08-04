@@ -1,5 +1,5 @@
 /*
- * cofmsgaggrstatstest.cpp
+ * cofmsgdescstatstest.cpp
  *
  *  Created on: Apr 26, 2015
  *      Author: andi
@@ -10,69 +10,69 @@
 #include <cppunit/extensions/TestFactoryRegistry.h>
 #include <cppunit/ui/text/TestRunner.h>
 
-#include "cofmsgaggrstatstest.hpp"
+#include "cofmsgdescstatstest.hpp"
 
 using namespace rofl::openflow;
 
-CPPUNIT_TEST_SUITE_REGISTRATION( cofmsgaggrstatstest );
+CPPUNIT_TEST_SUITE_REGISTRATION( cofmsgdescstatstest );
 
 void
-cofmsgaggrstatstest::setUp()
+cofmsgdescstatstest::setUp()
 {}
 
 
 
 void
-cofmsgaggrstatstest::tearDown()
+cofmsgdescstatstest::tearDown()
 {}
 
 
 
 void
-cofmsgaggrstatstest::testRequest10()
+cofmsgdescstatstest::testRequest10()
 {
 	testRequest(
 			rofl::openflow10::OFP_VERSION,
 			rofl::openflow10::OFPT_STATS_REQUEST,
 			0xa1a2a3a4,
-			rofl::openflow10::OFPST_AGGREGATE,
+			rofl::openflow10::OFPST_DESC,
 			0xb1b2);
 }
 
 
 
 void
-cofmsgaggrstatstest::testRequest12()
+cofmsgdescstatstest::testRequest12()
 {
 	testRequest(
 			rofl::openflow12::OFP_VERSION,
 			rofl::openflow12::OFPT_STATS_REQUEST,
 			0xa1a2a3a4,
-			rofl::openflow12::OFPST_AGGREGATE,
+			rofl::openflow12::OFPST_DESC,
 			0xb1b2);
 }
 
 
 
 void
-cofmsgaggrstatstest::testRequest13()
+cofmsgdescstatstest::testRequest13()
 {
 	testRequest(
 			rofl::openflow13::OFP_VERSION,
 			rofl::openflow13::OFPT_MULTIPART_REQUEST,
 			0xa1a2a3a4,
-			rofl::openflow13::OFPMP_AGGREGATE,
+			rofl::openflow13::OFPMP_DESC,
 			0xb1b2);
 }
 
 
 
 void
-cofmsgaggrstatstest::testRequest(
+cofmsgdescstatstest::testRequest(
 		uint8_t version, uint8_t type, uint32_t xid, uint16_t stats_type, uint16_t stats_flags)
 {
-	rofl::openflow::cofmsg_aggr_stats_request msg1(version, xid, stats_flags);
-	rofl::openflow::cofmsg_aggr_stats_request msg2;
+	rofl::openflow::cofmsg_desc_stats_request msg1(version, xid, stats_flags);
+	rofl::openflow::cofmsg_desc_stats_request msg2;
 	rofl::cmemory mem(msg1.length());
 
 	try {
@@ -85,7 +85,6 @@ cofmsgaggrstatstest::testRequest(
 		CPPUNIT_ASSERT(msg2.get_xid() == xid);
 		CPPUNIT_ASSERT(msg2.get_stats_type() == stats_type);
 		CPPUNIT_ASSERT(msg2.get_stats_flags() == stats_flags);
-		CPPUNIT_ASSERT(msg2.get_aggr_stats().get_version() == version);
 
 	} catch (...) {
 		std::cerr << ">>> request <<<" << std::endl << msg1;
@@ -99,50 +98,50 @@ cofmsgaggrstatstest::testRequest(
 
 
 void
-cofmsgaggrstatstest::testReply10()
+cofmsgdescstatstest::testReply10()
 {
 	testReply(
 			rofl::openflow10::OFP_VERSION,
 			rofl::openflow10::OFPT_STATS_REPLY,
 			0xa1a2a3a4,
-			rofl::openflow10::OFPST_AGGREGATE,
+			rofl::openflow10::OFPST_DESC,
 			0xb1b2);
 }
 
 
 
 void
-cofmsgaggrstatstest::testReply12()
+cofmsgdescstatstest::testReply12()
 {
 	testReply(
 			rofl::openflow12::OFP_VERSION,
 			rofl::openflow12::OFPT_STATS_REPLY,
 			0xa1a2a3a4,
-			rofl::openflow12::OFPST_AGGREGATE,
+			rofl::openflow12::OFPST_DESC,
 			0xb1b2);
 }
 
 
 
 void
-cofmsgaggrstatstest::testReply13()
+cofmsgdescstatstest::testReply13()
 {
 	testReply(
 			rofl::openflow13::OFP_VERSION,
 			rofl::openflow13::OFPT_MULTIPART_REPLY,
 			0xa1a2a3a4,
-			rofl::openflow13::OFPMP_AGGREGATE,
+			rofl::openflow13::OFPMP_DESC,
 			0xb1b2);
 }
 
 
 
 void
-cofmsgaggrstatstest::testReply(
+cofmsgdescstatstest::testReply(
 		uint8_t version, uint8_t type, uint32_t xid, uint16_t stats_type, uint16_t stats_flags)
 {
-	rofl::openflow::cofmsg_aggr_stats_reply msg1(version, xid, stats_flags);
-	rofl::openflow::cofmsg_aggr_stats_reply msg2;
+	rofl::openflow::cofmsg_desc_stats_reply msg1(version, xid, stats_flags);
+	rofl::openflow::cofmsg_desc_stats_reply msg2;
 	rofl::cmemory mem(msg1.length());
 
 	try {
@@ -155,7 +154,7 @@ cofmsgaggrstatstest::testReply(
 		CPPUNIT_ASSERT(msg2.get_xid() == xid);
 		CPPUNIT_ASSERT(msg2.get_stats_type() == stats_type);
 		CPPUNIT_ASSERT(msg2.get_stats_flags() == stats_flags);
-		CPPUNIT_ASSERT(msg2.get_aggr_stats().get_version() == version);
+		CPPUNIT_ASSERT(msg2.get_desc_stats().get_version() == version);
 
 	} catch (...) {
 		std::cerr << ">>> request <<<" << std::endl << msg1;
@@ -168,20 +167,11 @@ cofmsgaggrstatstest::testReply(
 
 
 void
-cofmsgaggrstatstest::testRequestParser10()
+cofmsgdescstatstest::testRequestParser10()
 {
 	uint8_t version = rofl::openflow10::OFP_VERSION;
-	rofl::openflow::cofmatch match(version);
-	uint8_t table_id = 0xf4;
-	uint32_t out_port = 0xd0d1d2d3;
 
-	cofaggr_stats_request aggr(
-			version,
-			match,
-			table_id,
-			out_port);
-
-	size_t msglen = sizeof(struct rofl::openflow10::ofp_stats_request) + aggr.length();
+	size_t msglen = sizeof(struct rofl::openflow10::ofp_stats_request);
 	size_t memlen = msglen + /*test overhead*/4;
 
 	rofl::cmemory mem(memlen);
@@ -192,13 +182,12 @@ cofmsgaggrstatstest::testRequestParser10()
 	stats->header.type = rofl::openflow10::OFPT_STATS_REQUEST;
 	stats->header.xid = htobe32(0xa0a1a2a3);
 	stats->header.length = htobe16(0);
-	stats->type = htobe16(rofl::openflow10::OFPST_AGGREGATE);
+	stats->type = htobe16(rofl::openflow10::OFPST_DESC);
 	stats->flags = htobe16(0xb1b2);
-	aggr.pack(stats->body, aggr.length());
 
 
 	for (int i = 1; i < msglen; i++) {
-		rofl::openflow::cofmsg_aggr_stats_request msg;
+		rofl::openflow::cofmsg_desc_stats_request msg;
 		try {
 			stats->header.length = htobe16(i);
 			msg.unpack(mem.somem(), i);
@@ -217,7 +206,7 @@ cofmsgaggrstatstest::testRequestParser10()
 	}
 
 	for (int i = msglen; i == msglen; i++) {
-		rofl::openflow::cofmsg_aggr_stats_request msg;
+		rofl::openflow::cofmsg_desc_stats_request msg;
 		try {
 			stats->header.length = htobe16(i);
 			msg.unpack(mem.somem(), i);
@@ -235,7 +224,7 @@ cofmsgaggrstatstest::testRequestParser10()
 	}
 
 	for (int i = msglen + 1; i < memlen; i++) {
-		rofl::openflow::cofmsg_aggr_stats_request msg;
+		rofl::openflow::cofmsg_desc_stats_request msg;
 		try {
 			stats->header.length = htobe16(i);
 			msg.unpack(mem.somem(), i);
@@ -254,20 +243,11 @@ cofmsgaggrstatstest::testRequestParser10()
 
 
 void
-cofmsgaggrstatstest::testRequestParser12()
+cofmsgdescstatstest::testRequestParser12()
 {
 	uint8_t version = rofl::openflow12::OFP_VERSION;
-	rofl::openflow::cofmatch match(version);
-	uint8_t table_id = 0xf4;
-	uint32_t out_port = 0xd0d1d2d3;
 
-	cofaggr_stats_request aggr(
-			version,
-			match,
-			table_id,
-			out_port);
-
-	size_t msglen = sizeof(struct rofl::openflow12::ofp_stats_request) + aggr.length();
+	size_t msglen = sizeof(struct rofl::openflow12::ofp_stats_request);
 	size_t memlen = msglen + /*test overhead*/4;
 
 	rofl::cmemory mem(memlen);
@@ -278,13 +258,12 @@ cofmsgaggrstatstest::testRequestParser12()
 	stats->header.type = rofl::openflow12::OFPT_STATS_REQUEST;
 	stats->header.xid = htobe32(0xa0a1a2a3);
 	stats->header.length = htobe16(0);
-	stats->type = htobe16(rofl::openflow12::OFPST_AGGREGATE);
+	stats->type = htobe16(rofl::openflow12::OFPST_DESC);
 	stats->flags = htobe16(0xb1b2);
-	aggr.pack(stats->body, aggr.length());
 
 
 	for (int i = 1; i < msglen; i++) {
-		rofl::openflow::cofmsg_aggr_stats_request msg;
+		rofl::openflow::cofmsg_desc_stats_request msg;
 		try {
 			stats->header.length = htobe16(i);
 			msg.unpack(mem.somem(), i);
@@ -303,7 +282,7 @@ cofmsgaggrstatstest::testRequestParser12()
 	}
 
 	for (int i = msglen; i == msglen; i++) {
-		rofl::openflow::cofmsg_aggr_stats_request msg;
+		rofl::openflow::cofmsg_desc_stats_request msg;
 		try {
 			stats->header.length = htobe16(i);
 			msg.unpack(mem.somem(), i);
@@ -321,7 +300,7 @@ cofmsgaggrstatstest::testRequestParser12()
 	}
 
 	for (int i = msglen + 1; i < memlen; i++) {
-		rofl::openflow::cofmsg_aggr_stats_request msg;
+		rofl::openflow::cofmsg_desc_stats_request msg;
 		try {
 			stats->header.length = htobe16(i);
 			msg.unpack(mem.somem(), i);
@@ -340,20 +319,11 @@ cofmsgaggrstatstest::testRequestParser12()
 
 
 void
-cofmsgaggrstatstest::testRequestParser13()
+cofmsgdescstatstest::testRequestParser13()
 {
 	uint8_t version = rofl::openflow13::OFP_VERSION;
-	rofl::openflow::cofmatch match(version);
-	uint8_t table_id = 0xf4;
-	uint32_t out_port = 0xd0d1d2d3;
 
-	cofaggr_stats_request aggr(
-			version,
-			match,
-			table_id,
-			out_port);
-
-	size_t msglen = sizeof(struct rofl::openflow13::ofp_multipart_request) + aggr.length();
+	size_t msglen = sizeof(struct rofl::openflow13::ofp_multipart_request);
 	size_t memlen = msglen + /*test overhead*/4;
 
 	rofl::cmemory mem(memlen);
@@ -364,13 +334,12 @@ cofmsgaggrstatstest::testRequestParser13()
 	stats->header.type = rofl::openflow13::OFPT_MULTIPART_REQUEST;
 	stats->header.xid = htobe32(0xa0a1a2a3);
 	stats->header.length = htobe16(0);
-	stats->type = htobe16(rofl::openflow13::OFPMP_AGGREGATE);
+	stats->type = htobe16(rofl::openflow13::OFPMP_DESC);
 	stats->flags = htobe16(0xb1b2);
-	aggr.pack(stats->body, aggr.length());
 
 
 	for (int i = 1; i < msglen; i++) {
-		rofl::openflow::cofmsg_aggr_stats_request msg;
+		rofl::openflow::cofmsg_desc_stats_request msg;
 		try {
 			stats->header.length = htobe16(i);
 			msg.unpack(mem.somem(), i);
@@ -389,7 +358,7 @@ cofmsgaggrstatstest::testRequestParser13()
 	}
 
 	for (int i = msglen; i == msglen; i++) {
-		rofl::openflow::cofmsg_aggr_stats_request msg;
+		rofl::openflow::cofmsg_desc_stats_request msg;
 		try {
 			stats->header.length = htobe16(i);
 			msg.unpack(mem.somem(), i);
@@ -407,7 +376,7 @@ cofmsgaggrstatstest::testRequestParser13()
 	}
 
 	for (int i = msglen + 1; i < memlen; i++) {
-		rofl::openflow::cofmsg_aggr_stats_request msg;
+		rofl::openflow::cofmsg_desc_stats_request msg;
 		try {
 			stats->header.length = htobe16(i);
 			msg.unpack(mem.somem(), i);
@@ -425,20 +394,24 @@ cofmsgaggrstatstest::testRequestParser13()
 
 
 void
-cofmsgaggrstatstest::testReplyParser10()
+cofmsgdescstatstest::testReplyParser10()
 {
 	uint8_t version = rofl::openflow10::OFP_VERSION;
-	uint64_t packet_count = 0xa0a1a2a3a4a5a6a7;
-	uint64_t byte_count = 0xb0b1b2b3b4b5b6b7;
-	uint32_t flow_count = 0xc0c1c2c3;
+	std::string mfr_desc("mrf_desc");
+	std::string	hw_desc("hw_desc");
+	std::string	sw_desc("sw_desc");
+	std::string	serial_num("serial_num");
+	std::string	dp_desc("dp_desc");
 
-	cofaggr_stats_reply aggr(
+	cofdesc_stats_reply desc(
 			version,
-			packet_count,
-			byte_count,
-			flow_count);
+			mfr_desc,
+			hw_desc,
+			sw_desc,
+			serial_num,
+			dp_desc);
 
-	size_t msglen = sizeof(struct rofl::openflow10::ofp_stats_request) + aggr.length();
+	size_t msglen = sizeof(struct rofl::openflow10::ofp_stats_request) + desc.length();
 	size_t memlen = msglen + /*test overhead*/4;
 
 	rofl::cmemory mem(memlen);
@@ -449,13 +422,13 @@ cofmsgaggrstatstest::testReplyParser10()
 	stats->header.type = rofl::openflow10::OFPT_STATS_REPLY;
 	stats->header.xid = htobe32(0xa0a1a2a3);
 	stats->header.length = htobe16(0);
-	stats->type = htobe16(rofl::openflow10::OFPST_AGGREGATE);
+	stats->type = htobe16(rofl::openflow10::OFPST_DESC);
 	stats->flags = htobe16(0xb1b2);
-	aggr.pack(stats->body, aggr.length());
+	desc.pack(stats->body, desc.length());
 
 
 	for (int i = 1; i < msglen; i++) {
-		rofl::openflow::cofmsg_aggr_stats_reply msg;
+		rofl::openflow::cofmsg_desc_stats_reply msg;
 		try {
 			stats->header.length = htobe16(i);
 			msg.unpack(mem.somem(), i);
@@ -474,7 +447,7 @@ cofmsgaggrstatstest::testReplyParser10()
 	}
 
 	for (int i = msglen; i == msglen; i++) {
-		rofl::openflow::cofmsg_aggr_stats_reply msg;
+		rofl::openflow::cofmsg_desc_stats_reply msg;
 		try {
 			stats->header.length = htobe16(i);
 			msg.unpack(mem.somem(), i);
@@ -492,7 +465,7 @@ cofmsgaggrstatstest::testReplyParser10()
 	}
 
 	for (int i = msglen + 1; i < memlen; i++) {
-		rofl::openflow::cofmsg_aggr_stats_reply msg;
+		rofl::openflow::cofmsg_desc_stats_reply msg;
 		try {
 			stats->header.length = htobe16(i);
 			msg.unpack(mem.somem(), i);
@@ -511,20 +484,24 @@ cofmsgaggrstatstest::testReplyParser10()
 
 
 void
-cofmsgaggrstatstest::testReplyParser12()
+cofmsgdescstatstest::testReplyParser12()
 {
 	uint8_t version = rofl::openflow12::OFP_VERSION;
-	uint64_t packet_count = 0xa0a1a2a3a4a5a6a7;
-	uint64_t byte_count = 0xb0b1b2b3b4b5b6b7;
-	uint32_t flow_count = 0xc0c1c2c3;
+	std::string mfr_desc("mrf_desc");
+	std::string	hw_desc("hw_desc");
+	std::string	sw_desc("sw_desc");
+	std::string	serial_num("serial_num");
+	std::string	dp_desc("dp_desc");
 
-	cofaggr_stats_reply aggr(
+	cofdesc_stats_reply desc(
 			version,
-			packet_count,
-			byte_count,
-			flow_count);
+			mfr_desc,
+			hw_desc,
+			sw_desc,
+			serial_num,
+			dp_desc);
 
-	size_t msglen = sizeof(struct rofl::openflow12::ofp_stats_request) + aggr.length();
+	size_t msglen = sizeof(struct rofl::openflow12::ofp_stats_request) + desc.length();
 	size_t memlen = msglen + /*test overhead*/4;
 
 	rofl::cmemory mem(memlen);
@@ -535,13 +512,13 @@ cofmsgaggrstatstest::testReplyParser12()
 	stats->header.type = rofl::openflow12::OFPT_STATS_REPLY;
 	stats->header.xid = htobe32(0xa0a1a2a3);
 	stats->header.length = htobe16(0);
-	stats->type = htobe16(rofl::openflow12::OFPST_AGGREGATE);
+	stats->type = htobe16(rofl::openflow12::OFPST_DESC);
 	stats->flags = htobe16(0xb1b2);
-	aggr.pack(stats->body, aggr.length());
+	desc.pack(stats->body, desc.length());
 
 
 	for (int i = 1; i < msglen; i++) {
-		rofl::openflow::cofmsg_aggr_stats_reply msg;
+		rofl::openflow::cofmsg_desc_stats_reply msg;
 		try {
 			stats->header.length = htobe16(i);
 			msg.unpack(mem.somem(), i);
@@ -560,7 +537,7 @@ cofmsgaggrstatstest::testReplyParser12()
 	}
 
 	for (int i = msglen; i == msglen; i++) {
-		rofl::openflow::cofmsg_aggr_stats_reply msg;
+		rofl::openflow::cofmsg_desc_stats_reply msg;
 		try {
 			stats->header.length = htobe16(i);
 			msg.unpack(mem.somem(), i);
@@ -578,7 +555,7 @@ cofmsgaggrstatstest::testReplyParser12()
 	}
 
 	for (int i = msglen + 1; i < memlen; i++) {
-		rofl::openflow::cofmsg_aggr_stats_reply msg;
+		rofl::openflow::cofmsg_desc_stats_reply msg;
 		try {
 			stats->header.length = htobe16(i);
 			msg.unpack(mem.somem(), i);
@@ -597,20 +574,24 @@ cofmsgaggrstatstest::testReplyParser12()
 
 
 void
-cofmsgaggrstatstest::testReplyParser13()
+cofmsgdescstatstest::testReplyParser13()
 {
 	uint8_t version = rofl::openflow13::OFP_VERSION;
-	uint64_t packet_count = 0xa0a1a2a3a4a5a6a7;
-	uint64_t byte_count = 0xb0b1b2b3b4b5b6b7;
-	uint32_t flow_count = 0xc0c1c2c3;
+	std::string mfr_desc("mrf_desc");
+	std::string	hw_desc("hw_desc");
+	std::string	sw_desc("sw_desc");
+	std::string	serial_num("serial_num");
+	std::string	dp_desc("dp_desc");
 
-	cofaggr_stats_reply aggr(
+	cofdesc_stats_reply desc(
 			version,
-			packet_count,
-			byte_count,
-			flow_count);
+			mfr_desc,
+			hw_desc,
+			sw_desc,
+			serial_num,
+			dp_desc);
 
-	size_t msglen = sizeof(struct rofl::openflow13::ofp_multipart_request) + aggr.length();
+	size_t msglen = sizeof(struct rofl::openflow13::ofp_multipart_request) + desc.length();
 	size_t memlen = msglen + /*test overhead*/4;
 
 	rofl::cmemory mem(memlen);
@@ -621,13 +602,13 @@ cofmsgaggrstatstest::testReplyParser13()
 	stats->header.type = rofl::openflow13::OFPT_MULTIPART_REPLY;
 	stats->header.xid = htobe32(0xa0a1a2a3);
 	stats->header.length = htobe16(0);
-	stats->type = htobe16(rofl::openflow13::OFPMP_AGGREGATE);
+	stats->type = htobe16(rofl::openflow13::OFPMP_DESC);
 	stats->flags = htobe16(0xb1b2);
-	aggr.pack(stats->body, aggr.length());
+	desc.pack(stats->body, desc.length());
 
 
 	for (int i = 1; i < msglen; i++) {
-		rofl::openflow::cofmsg_aggr_stats_reply msg;
+		rofl::openflow::cofmsg_desc_stats_reply msg;
 		try {
 			stats->header.length = htobe16(i);
 			msg.unpack(mem.somem(), i);
@@ -646,7 +627,7 @@ cofmsgaggrstatstest::testReplyParser13()
 	}
 
 	for (int i = msglen; i == msglen; i++) {
-		rofl::openflow::cofmsg_aggr_stats_reply msg;
+		rofl::openflow::cofmsg_desc_stats_reply msg;
 		try {
 			stats->header.length = htobe16(i);
 			msg.unpack(mem.somem(), i);
@@ -664,7 +645,7 @@ cofmsgaggrstatstest::testReplyParser13()
 	}
 
 	for (int i = msglen + 1; i < memlen; i++) {
-		rofl::openflow::cofmsg_aggr_stats_reply msg;
+		rofl::openflow::cofmsg_desc_stats_reply msg;
 		try {
 			stats->header.length = htobe16(i);
 			msg.unpack(mem.somem(), i);

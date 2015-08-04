@@ -1,23 +1,23 @@
 /*
- * cofmsgaggrstatstest.hpp
+ * cofmsgdescstatstest.hpp
  *
  *  Created on: Apr 26, 2015
  *      Author: andi
  */
 
-#ifndef TEST_SRC_ROFL_COMMON_OPENFLOW_MESSAGES_COFMSGAGGRSTATS_TEST_HPP_
-#define TEST_SRC_ROFL_COMMON_OPENFLOW_MESSAGES_COFMSGAGGRSTATS_TEST_HPP_
+#ifndef TEST_SRC_ROFL_COMMON_OPENFLOW_MESSAGES_COFMSGDESCSTATS_TEST_HPP_
+#define TEST_SRC_ROFL_COMMON_OPENFLOW_MESSAGES_COFMSGDESCSTATS_TEST_HPP_
 
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 
-#include "rofl/common/openflow/messages/cofmsg_aggr_stats.h"
+#include "rofl/common/openflow/messages/cofmsg_desc_stats.h"
 #include "rofl/common/cmemory.h"
 
-class cofmsgaggrstatstest :
+class cofmsgdescstatstest :
 		public CppUnit::TestFixture
 {
-	CPPUNIT_TEST_SUITE( cofmsgaggrstatstest );
+	CPPUNIT_TEST_SUITE( cofmsgdescstatstest );
 	CPPUNIT_TEST( testRequest10 );
 	CPPUNIT_TEST( testRequest12 );
 	CPPUNIT_TEST( testRequest13 );
@@ -58,4 +58,4 @@ private:
 			uint8_t version, uint8_t type, uint32_t xid, uint16_t stats_type, uint16_t stats_flags);
 };
 
-#endif /* TEST_SRC_ROFL_COMMON_OPENFLOW_MESSAGES_COFMSGAGGRSTATS_TEST_HPP_ */
+#endif /* TEST_SRC_ROFL_COMMON_OPENFLOW_MESSAGES_COFMSGDESCSTATS_TEST_HPP_ */

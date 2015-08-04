@@ -113,6 +113,8 @@ cofmsg_desc_stats_reply::cofmsg_desc_stats_reply(
 				cofmsg_stats_reply(version, xid, rofl::openflow::OFPMP_DESC, stats_flags),
 				desc_stats(desc_stats)
 {
+	this->desc_stats.set_version(version);
+
 	switch (version) {
 	case rofl::openflow10::OFP_VERSION: {
 		set_stats_type(rofl::openflow10::OFPST_DESC);
