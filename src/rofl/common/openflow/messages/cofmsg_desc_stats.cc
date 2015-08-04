@@ -208,6 +208,12 @@ cofmsg_desc_stats_reply::unpack(
 
 	switch (get_version()) {
 	case rofl::openflow10::OFP_VERSION: {
+		if (get_type() != rofl::openflow10::OFPT_STATS_REPLY)
+			throw eMsgInval("cofmsg_desc_stats_reply::unpack() invalid message type");
+
+		if (get_stats_type() != rofl::openflow10::OFPST_DESC)
+			throw eMsgInval("cofmsg_desc_stats_reply::unpack() invalid statistics type");
+
 		struct rofl::openflow10::ofp_stats_reply* hdr =
 				(struct rofl::openflow10::ofp_stats_reply*)buf;
 		if (buflen > sizeof(struct rofl::openflow10::ofp_stats_reply)) {
@@ -215,6 +221,12 @@ cofmsg_desc_stats_reply::unpack(
 		}
 	} break;
 	default: {
+		if (get_type() != rofl::openflow13::OFPT_MULTIPART_REPLY)
+			throw eMsgInval("cofmsg_desc_stats_reply::unpack() invalid message type");
+
+		if (get_stats_type() != rofl::openflow13::OFPMP_DESC)
+			throw eMsgInval("cofmsg_desc_stats_reply::unpack() invalid statistics type");
+
 		struct rofl::openflow13::ofp_multipart_reply* hdr =
 				(struct rofl::openflow13::ofp_multipart_reply*)buf;
 		if (buflen > sizeof(struct rofl::openflow13::ofp_multipart_reply)) {
