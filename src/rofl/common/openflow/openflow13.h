@@ -2070,8 +2070,6 @@ namespace openflow13 {
 	};
 	OFP_ASSERT(sizeof(struct ofp_experimenter_header) == 16);
 
-
-
 }; // end of namespace openflow13
 }; // end of namespace rofl
 

@@ -4,5 +4,6 @@ MAINTAINERCLEANFILES = Makefile.in
 #be compiled before the subdirs.
 SUBDIRS = \
 	cofmsgaggrstats \
-	cofmsgdescstats
+	cofmsgdescstats \
+	cofmsgexperimenterstats
 

@@ -115,15 +115,15 @@ public:
 	 *
 	 */
 	const cmemory&
-	get_body() const
-	{ return body; };
+	get_exp_body() const
+	{ return exp_body; };
 
 	/**
 	 *
 	 */
 	cmemory&
-	set_body()
-	{ return body; };
+	set_exp_body()
+	{ return exp_body; };
 
 public:
 
@@ -134,7 +134,7 @@ public:
 		os << indent(4) << "<exp_id: 0x" << std::hex << (unsigned int)msg.get_exp_id() << std::dec << " >" << std::endl;
 		os << indent(4) << "<exp_type: 0x" << std::hex << (unsigned int)msg.get_exp_type() << std::dec << " >" << std::endl;
 		indent i(4);
-		os << msg.body;
+		os << msg.exp_body;
 		return os;
 	};
 
@@ -151,7 +151,7 @@ private:
 
 	uint32_t                exp_id;
 	uint32_t                exp_type;
-	rofl::cmemory			body;
+	rofl::cmemory			exp_body;
 };
 
 /**
@@ -250,15 +250,15 @@ public:
 	 *
 	 */
 	const cmemory&
-	get_body() const
-	{ return body; };
+	get_exp_body() const
+	{ return exp_body; };
 
 	/**
 	 *
 	 */
 	cmemory&
-	set_body()
-	{ return body; };
+	set_exp_body()
+	{ return exp_body; };
 
 public:
 
@@ -269,7 +269,7 @@ public:
 		os << indent(4) << "<exp_id: 0x" << std::hex << (unsigned int)msg.get_exp_id() << std::dec << " >" << std::endl;
 		os << indent(4) << "<exp_type: 0x" << std::hex << (unsigned int)msg.get_exp_type() << std::dec << " >" << std::endl;
 		indent i(4);
-		os << msg.body;
+		os << msg.exp_body;
 		return os;
 	};
 
@@ -286,7 +286,7 @@ private:
 
 	uint32_t                exp_id;
 	uint32_t                exp_type;
-	rofl::cmemory			body;
+	rofl::cmemory			exp_body;
 };
 
 
