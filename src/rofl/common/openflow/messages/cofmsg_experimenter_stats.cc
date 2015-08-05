@@ -127,9 +127,6 @@ cofmsg_experimenter_stats_request::unpack(
 
 	switch (get_version()) {
 	case rofl::openflow10::OFP_VERSION: {
-		if (get_type() != rofl::openflow10::OFPT_STATS_REQUEST)
-			throw eMsgInval("cofmsg_experimenter_stats_request::unpack() invalid message type");
-
 		if (get_stats_type() != rofl::openflow10::OFPST_VENDOR)
 			throw eMsgInval("cofmsg_experimenter_stats_request::unpack() invalid statistics type");
 
@@ -147,9 +144,6 @@ cofmsg_experimenter_stats_request::unpack(
 		}
 	} break;
 	default: {
-		if (get_type() != rofl::openflow13::OFPT_MULTIPART_REQUEST)
-			throw eMsgInval("cofmsg_experimenter_stats_request::unpack() invalid message type");
-
 		if (get_stats_type() != rofl::openflow13::OFPMP_EXPERIMENTER)
 			throw eMsgInval("cofmsg_experimenter_stats_request::unpack() invalid statistics type");
 
@@ -296,9 +290,6 @@ cofmsg_experimenter_stats_reply::unpack(
 
 	switch (get_version()) {
 	case rofl::openflow10::OFP_VERSION: {
-		if (get_type() != rofl::openflow10::OFPT_STATS_REPLY)
-			throw eMsgInval("cofmsg_experimenter_stats_reply::unpack() invalid message type");
-
 		if (get_stats_type() != rofl::openflow10::OFPST_VENDOR)
 			throw eMsgInval("cofmsg_experimenter_stats_reply::unpack() invalid statistics type");
 
@@ -316,9 +307,6 @@ cofmsg_experimenter_stats_reply::unpack(
 		}
 	} break;
 	default: {
-		if (get_type() != rofl::openflow13::OFPT_MULTIPART_REPLY)
-			throw eMsgInval("cofmsg_experimenter_stats_reply::unpack() invalid message type");
-
 		if (get_stats_type() != rofl::openflow13::OFPMP_EXPERIMENTER)
 			throw eMsgInval("cofmsg_experimenter_stats_reply::unpack() invalid statistics type");
 

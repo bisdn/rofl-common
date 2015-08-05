@@ -105,6 +105,9 @@ cofmsg_flow_stats_request::unpack(
 
 	switch (get_version()) {
 	case rofl::openflow10::OFP_VERSION: {
+		if (get_stats_type() != rofl::openflow10::OFPST_FLOW)
+			throw eMsgInval("cofmsg_flow_stats_request::unpack() invalid statistics type");
+
 		struct rofl::openflow10::ofp_stats_request* hdr =
 				(struct rofl::openflow10::ofp_stats_request*)buf;
 		if (buflen > sizeof(struct rofl::openflow10::ofp_stats_request)) {
@@ -112,6 +115,9 @@ cofmsg_flow_stats_request::unpack(
 		}
 	} break;
 	default: {
+		if (get_stats_type() != rofl::openflow13::OFPMP_FLOW)
+			throw eMsgInval("cofmsg_flow_stats_request::unpack() invalid statistics type");
+
 		struct rofl::openflow13::ofp_multipart_request* hdr =
 				(struct rofl::openflow13::ofp_multipart_request*)buf;
 		if (buflen > sizeof(struct rofl::openflow13::ofp_multipart_request)) {
@@ -186,7 +192,8 @@ cofmsg_flow_stats_reply::length() const
 
 
 void
-cofmsg_flow_stats_reply::pack(uint8_t *buf, size_t buflen)
+cofmsg_flow_stats_reply::pack(
+		uint8_t *buf, size_t buflen)
 {
 	cofmsg_stats_reply::pack(buf, buflen); // copies common statistics header
 
@@ -213,7 +220,8 @@ cofmsg_flow_stats_reply::pack(uint8_t *buf, size_t buflen)
 
 
 void
-cofmsg_flow_stats_reply::unpack(uint8_t *buf, size_t buflen)
+cofmsg_flow_stats_reply::unpack(
+		uint8_t *buf, size_t buflen)
 {
 	cofmsg_stats_reply::unpack(buf, buflen);
 
@@ -227,6 +235,9 @@ cofmsg_flow_stats_reply::unpack(uint8_t *buf, size_t buflen)
 
 	switch (get_version()) {
 	case rofl::openflow10::OFP_VERSION: {
+		if (get_stats_type() != rofl::openflow10::OFPST_FLOW)
+			throw eMsgInval("cofmsg_flow_stats_reply::unpack() invalid statistics type");
+
 		struct rofl::openflow10::ofp_stats_reply* hdr =
 				(struct rofl::openflow10::ofp_stats_reply*)buf;
 		if (buflen > sizeof(struct rofl::openflow10::ofp_stats_reply)) {
@@ -234,6 +245,9 @@ cofmsg_flow_stats_reply::unpack(uint8_t *buf, size_t buflen)
 		}
 	} break;
 	default: {
+		if (get_stats_type() != rofl::openflow13::OFPMP_FLOW)
+			throw eMsgInval("cofmsg_flow_stats_reply::unpack() invalid statistics type");
+
 		struct rofl::openflow13::ofp_multipart_reply* hdr =
 				(struct rofl::openflow13::ofp_multipart_reply*)buf;
 		if (buflen > sizeof(struct rofl::openflow13::ofp_multipart_reply)) {

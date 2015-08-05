@@ -5,5 +5,6 @@ MAINTAINERCLEANFILES = Makefile.in
 SUBDIRS = \
 	cofmsgaggrstats \
 	cofmsgdescstats \
-	cofmsgexperimenterstats
+	cofmsgexperimenterstats \
+	cofmsgflowstats
 

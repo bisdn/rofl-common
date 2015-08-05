@@ -247,7 +247,7 @@ cofflow_stats_request::pack(uint8_t *buf, size_t buflen)
 
 	} break;
 	case rofl::openflow10::OFP_VERSION: {
-		if (buflen < (sizeof(struct rofl::openflow10::ofp_flow_stats_request) - 4 + match.length()))
+		if (buflen < cofflow_stats_request::length())
 			throw eInval();
 
 		struct rofl::openflow10::ofp_flow_stats_request *req = (struct rofl::openflow10::ofp_flow_stats_request*)buf;
@@ -257,7 +257,7 @@ cofflow_stats_request::pack(uint8_t *buf, size_t buflen)
 	} break;
 	case rofl::openflow12::OFP_VERSION:
 	case rofl::openflow13::OFP_VERSION: {
-		if (buflen < (sizeof(struct rofl::openflow12::ofp_flow_stats_request) - sizeof(struct rofl::openflow12::ofp_match) + match.length()))
+		if (buflen < cofflow_stats_request::length())
 			throw eInval();
 
 		struct rofl::openflow12::ofp_flow_stats_request *req = (struct rofl::openflow12::ofp_flow_stats_request*)buf;

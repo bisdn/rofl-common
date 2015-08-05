@@ -92,6 +92,8 @@ cofmsgexperimenterstatstest::testRequest(
 		CPPUNIT_ASSERT(msg2.get_stats_type() == stats_type);
 		CPPUNIT_ASSERT(msg2.get_stats_flags() == stats_flags);
 		CPPUNIT_ASSERT(msg2.get_exp_id() == exp_id);
+		if (rofl::openflow10::OFP_VERSION != version)
+			CPPUNIT_ASSERT(msg2.get_exp_type() == exp_type);
 		CPPUNIT_ASSERT(msg2.get_exp_body() == exp_body);
 
 	} catch (...) {
@@ -169,6 +171,8 @@ cofmsgexperimenterstatstest::testReply(
 		CPPUNIT_ASSERT(msg2.get_stats_type() == stats_type);
 		CPPUNIT_ASSERT(msg2.get_stats_flags() == stats_flags);
 		CPPUNIT_ASSERT(msg2.get_exp_id() == exp_id);
+		if (rofl::openflow10::OFP_VERSION != version)
+			CPPUNIT_ASSERT(msg2.get_exp_type() == exp_type);
 		CPPUNIT_ASSERT(msg2.get_exp_body() == exp_body);
 
 	} catch (...) {

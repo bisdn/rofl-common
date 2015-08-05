@@ -92,6 +92,19 @@ cofmsg_desc_stats_request::unpack(
 	if (buflen < cofmsg_desc_stats_request::length())
 		throw eBadSyntaxTooShort("cofmsg_desc_stats_request::unpack() buf too short");
 
+	switch (get_version()) {
+	case rofl::openflow10::OFP_VERSION: {
+		if (get_stats_type() != rofl::openflow10::OFPST_DESC)
+			throw eMsgInval("cofmsg_desc_stats_request::unpack() invalid statistics type");
+
+	} break;
+	default: {
+		if (get_stats_type() != rofl::openflow13::OFPMP_DESC)
+			throw eMsgInval("cofmsg_desc_stats_request::unpack() invalid statistics type");
+
+	};
+	}
+
 	if (get_length() < cofmsg_desc_stats_request::length())
 		throw eBadSyntaxTooShort("cofmsg_desc_stats_request::unpack() buf too short");
 }
@@ -208,9 +221,6 @@ cofmsg_desc_stats_reply::unpack(
 
 	switch (get_version()) {
 	case rofl::openflow10::OFP_VERSION: {
-		if (get_type() != rofl::openflow10::OFPT_STATS_REPLY)
-			throw eMsgInval("cofmsg_desc_stats_reply::unpack() invalid message type");
-
 		if (get_stats_type() != rofl::openflow10::OFPST_DESC)
 			throw eMsgInval("cofmsg_desc_stats_reply::unpack() invalid statistics type");
 
@@ -221,9 +231,6 @@ cofmsg_desc_stats_reply::unpack(
 		}
 	} break;
 	default: {
-		if (get_type() != rofl::openflow13::OFPT_MULTIPART_REPLY)
-			throw eMsgInval("cofmsg_desc_stats_reply::unpack() invalid message type");
-
 		if (get_stats_type() != rofl::openflow13::OFPMP_DESC)
 			throw eMsgInval("cofmsg_desc_stats_reply::unpack() invalid statistics type");
 
