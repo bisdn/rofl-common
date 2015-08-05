@@ -78,6 +78,13 @@ cofmsg_meter_features_stats_request::unpack(
 	if ((0 == buf) || (0 == buflen))
 		return;
 
+	switch (get_version()) {
+	default: {
+		if (get_stats_type() != rofl::openflow13::OFPMP_METER_FEATURES)
+			throw eMsgInval("cofmsg_meter_features_stats_request::unpack() invalid statistics type");
+	};
+	}
+
 	if (buflen < cofmsg_meter_features_stats_request::length())
 		throw eBadSyntaxTooShort("cofmsg_meter_features_stats_request::unpack() buf too short");
 
@@ -103,7 +110,9 @@ cofmsg_meter_features_stats_reply::cofmsg_meter_features_stats_reply(
 		const rofl::openflow::cofmeter_features_reply& meter_features) :
 				cofmsg_stats_reply(version, xid, rofl::openflow::OFPMP_METER_FEATURES, stats_flags),
 				meter_features(meter_features)
-{}
+{
+	this->meter_features.set_version(version);
+}
 
 
 
@@ -177,6 +186,9 @@ cofmsg_meter_features_stats_reply::unpack(uint8_t *buf, size_t buflen)
 
 	switch (get_version()) {
 	default: {
+		if (get_stats_type() != rofl::openflow13::OFPMP_METER_FEATURES)
+			throw eMsgInval("cofmsg_meter_features_stats_reply::unpack() invalid statistics type");
+
 		struct rofl::openflow13::ofp_multipart_reply* hdr =
 				(struct rofl::openflow13::ofp_multipart_reply*)buf;
 		if (buflen > sizeof(struct rofl::openflow13::ofp_multipart_reply)) {

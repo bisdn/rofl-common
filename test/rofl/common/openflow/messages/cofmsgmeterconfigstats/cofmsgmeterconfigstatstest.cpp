@@ -186,7 +186,7 @@ cofmsgmeterconfigstatstest::testRequestParser13()
 
 		} catch (rofl::eBadSyntaxTooShort& e) {
 			std::cerr << ">>> testing length values (len: " << i << ") <<< " << std::endl;
-			std::cerr << "[FAILURE] unpack() no exception seen" << std::endl;
+			std::cerr << "[FAILURE] unpack() exception seen" << std::endl;
 			std::cerr << ">>> request <<<" << std::endl << msg;
 			std::cerr << ">>> memory <<<" << std::endl << mem;
 
@@ -270,7 +270,7 @@ cofmsgmeterconfigstatstest::testReplyParser13()
 
 		} catch (rofl::eBadSyntaxTooShort& e) {
 			std::cerr << ">>> testing length values (len: " << i << ") <<< " << std::endl;
-			std::cerr << "[FAILURE] unpack() no exception seen" << std::endl;
+			std::cerr << "[FAILURE] unpack() exception seen" << std::endl;
 			std::cerr << ">>> reply <<<" << std::endl << msg;
 			std::cerr << ">>> memory <<<" << std::endl << mem;
 
