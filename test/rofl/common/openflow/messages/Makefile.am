@@ -8,5 +8,6 @@ SUBDIRS = \
 	cofmsgexperimenterstats \
 	cofmsgflowstats \
 	cofmsggroupdescstats \
-	cofmsggroupfeaturesstats
+	cofmsggroupfeaturesstats \
+	cofmsggroupstats
 

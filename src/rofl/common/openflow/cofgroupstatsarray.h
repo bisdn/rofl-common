@@ -151,7 +151,7 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, cofgroupstatsarray const& groupstatsarray) {
-		os << "<cofgroupstatsarray #groups:" << (int)groupstatsarray.array.size() << " >" << std::endl;
+		os << rofl::indent(0) << "<cofgroupstatsarray #groups:" << (int)groupstatsarray.array.size() << " >" << std::endl;
 		rofl::indent i(2);
 		for (std::map<uint32_t, cofgroup_stats_reply>::const_iterator
 				it = groupstatsarray.array.begin(); it != groupstatsarray.array.end(); ++it) {
