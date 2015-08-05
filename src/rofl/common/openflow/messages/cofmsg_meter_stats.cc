@@ -71,7 +71,8 @@ cofmsg_meter_stats_request::length() const
 
 
 void
-cofmsg_meter_stats_request::pack(uint8_t *buf, size_t buflen)
+cofmsg_meter_stats_request::pack(
+		uint8_t *buf, size_t buflen)
 {
 	cofmsg_stats_request::pack(buf, buflen); // copies common statistics header
 
@@ -93,7 +94,8 @@ cofmsg_meter_stats_request::pack(uint8_t *buf, size_t buflen)
 
 
 void
-cofmsg_meter_stats_request::unpack(uint8_t *buf, size_t buflen)
+cofmsg_meter_stats_request::unpack(
+		uint8_t *buf, size_t buflen)
 {
 	cofmsg_stats_request::unpack(buf, buflen);
 
@@ -107,6 +109,9 @@ cofmsg_meter_stats_request::unpack(uint8_t *buf, size_t buflen)
 
 	switch (get_version()) {
 	default: {
+		if (get_stats_type() != rofl::openflow13::OFPMP_METER)
+			throw eMsgInval("cofmsg_meter_stats_request::unpack() invalid statistics type");
+
 		struct rofl::openflow13::ofp_multipart_request* hdr =
 				(struct rofl::openflow13::ofp_multipart_request*)buf;
 		if (buflen > sizeof(struct rofl::openflow13::ofp_multipart_request)) {
@@ -205,6 +210,7 @@ cofmsg_meter_stats_reply::unpack(
 	cofmsg_stats_reply::unpack(buf, buflen);
 
 	meterstatsarray.set_version(get_version());
+	meterstatsarray.clear();
 
 	if ((0 == buf) || (0 == buflen))
 		return;
@@ -214,6 +220,9 @@ cofmsg_meter_stats_reply::unpack(
 
 	switch (get_version()) {
 	default: {
+		if (get_stats_type() != rofl::openflow13::OFPMP_METER)
+			throw eMsgInval("cofmsg_meter_stats_reply::unpack() invalid statistics type");
+
 		struct rofl::openflow13::ofp_multipart_reply* hdr =
 				(struct rofl::openflow13::ofp_multipart_reply*)buf;
 		if (buflen > sizeof(struct rofl::openflow13::ofp_multipart_reply)) {

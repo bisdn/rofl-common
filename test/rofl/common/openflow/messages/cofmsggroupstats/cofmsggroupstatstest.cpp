@@ -164,7 +164,7 @@ cofmsggroupstatstest::testRequestParser12()
 	group.pack(stats->body, group.length());
 
 
-	for (int i = 1; i < msglen; i++) {
+	for (unsigned int i = 1; i < msglen; i++) {
 		rofl::openflow::cofmsg_group_stats_request msg;
 		try {
 			stats->header.length = htobe16(i);
@@ -183,7 +183,7 @@ cofmsggroupstatstest::testRequestParser12()
 		}
 	}
 
-	for (int i = msglen; i == msglen; i++) {
+	for (unsigned int i = msglen; i == msglen; i++) {
 		rofl::openflow::cofmsg_group_stats_request msg;
 		try {
 			stats->header.length = htobe16(i);
@@ -201,7 +201,7 @@ cofmsggroupstatstest::testRequestParser12()
 		}
 	}
 
-	for (int i = msglen + 1; i < memlen; i++) {
+	for (unsigned int i = msglen + 1; i < memlen; i++) {
 		rofl::openflow::cofmsg_group_stats_request msg;
 		try {
 			stats->header.length = htobe16(i);
@@ -243,7 +243,7 @@ cofmsggroupstatstest::testRequestParser13()
 	group.pack(stats->body, group.length());
 
 
-	for (int i = 1; i < msglen; i++) {
+	for (unsigned int i = 1; i < msglen; i++) {
 		rofl::openflow::cofmsg_group_stats_request msg;
 		try {
 			stats->header.length = htobe16(i);
@@ -262,7 +262,7 @@ cofmsggroupstatstest::testRequestParser13()
 		}
 	}
 
-	for (int i = msglen; i == msglen; i++) {
+	for (unsigned int i = msglen; i == msglen; i++) {
 		rofl::openflow::cofmsg_group_stats_request msg;
 		try {
 			stats->header.length = htobe16(i);
@@ -280,7 +280,7 @@ cofmsggroupstatstest::testRequestParser13()
 		}
 	}
 
-	for (int i = msglen + 1; i < memlen; i++) {
+	for (unsigned int i = msglen + 1; i < memlen; i++) {
 		rofl::openflow::cofmsg_group_stats_request msg;
 		try {
 			stats->header.length = htobe16(i);
@@ -306,7 +306,7 @@ cofmsggroupstatstest::testReplyParser12()
 	uint64_t byte_count = 0xb1b2b3b4b5b6b7b8;
 
 	cofgroupstatsarray group(version);
-	for (int i = 0; i < 4; i++) {
+	for (unsigned int i = 0; i < 4; i++) {
 		group.set_group_stats(i).set_group_id(i);
 		group.set_group_stats(i).set_byte_count(byte_count);
 	}
@@ -327,7 +327,7 @@ cofmsggroupstatstest::testReplyParser12()
 	group.pack(stats->body, group.length());
 
 
-	for (int i = 1; i < msglen; i++) {
+	for (unsigned int i = 1; i < msglen; i++) {
 		rofl::openflow::cofmsg_group_stats_reply msg;
 		try {
 			stats->header.length = htobe16(i);
@@ -346,7 +346,7 @@ cofmsggroupstatstest::testReplyParser12()
 		}
 	}
 
-	for (int i = msglen; i == msglen; i++) {
+	for (unsigned int i = msglen; i == msglen; i++) {
 		rofl::openflow::cofmsg_group_stats_reply msg;
 		try {
 			stats->header.length = htobe16(i);
@@ -364,7 +364,7 @@ cofmsggroupstatstest::testReplyParser12()
 		}
 	}
 
-	for (int i = msglen + 1; i < memlen; i++) {
+	for (unsigned int i = msglen + 1; i < memlen; i++) {
 		rofl::openflow::cofmsg_group_stats_reply msg;
 		try {
 			stats->header.length = htobe16(i);
@@ -390,7 +390,7 @@ cofmsggroupstatstest::testReplyParser13()
 	uint64_t byte_count = 0xb1b2b3b4b5b6b7b8;
 
 	cofgroupstatsarray group(version);
-	for (int i = 0; i < 4; i++) {
+	for (unsigned int i = 0; i < 4; i++) {
 		group.set_group_stats(i).set_group_id(i);
 		group.set_group_stats(i).set_byte_count(byte_count);
 	}
@@ -411,7 +411,7 @@ cofmsggroupstatstest::testReplyParser13()
 	group.pack(stats->body, group.length());
 
 
-	for (int i = 1; i < msglen; i++) {
+	for (unsigned int i = 1; i < msglen; i++) {
 		rofl::openflow::cofmsg_group_stats_reply msg;
 		try {
 			stats->header.length = htobe16(i);
@@ -430,7 +430,7 @@ cofmsggroupstatstest::testReplyParser13()
 		}
 	}
 
-	for (int i = msglen; i == msglen; i++) {
+	for (unsigned int i = msglen; i == msglen; i++) {
 		rofl::openflow::cofmsg_group_stats_reply msg;
 		try {
 			stats->header.length = htobe16(i);
@@ -448,7 +448,7 @@ cofmsggroupstatstest::testReplyParser13()
 		}
 	}
 
-	for (int i = msglen + 1; i < memlen; i++) {
+	for (unsigned int i = msglen + 1; i < memlen; i++) {
 		rofl::openflow::cofmsg_group_stats_reply msg;
 		try {
 			stats->header.length = htobe16(i);

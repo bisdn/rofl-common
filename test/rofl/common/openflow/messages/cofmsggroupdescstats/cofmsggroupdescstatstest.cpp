@@ -160,7 +160,7 @@ cofmsggroupdescstatstest::testRequestParser12()
 	stats->flags = htobe16(0xb1b2);
 
 
-	for (int i = 1; i < msglen; i++) {
+	for (unsigned int i = 1; i < msglen; i++) {
 		rofl::openflow::cofmsg_group_desc_stats_request msg;
 		try {
 			stats->header.length = htobe16(i);
@@ -179,7 +179,7 @@ cofmsggroupdescstatstest::testRequestParser12()
 		}
 	}
 
-	for (int i = msglen; i == msglen; i++) {
+	for (unsigned int i = msglen; i == msglen; i++) {
 		rofl::openflow::cofmsg_group_desc_stats_request msg;
 		try {
 			stats->header.length = htobe16(i);
@@ -197,7 +197,7 @@ cofmsggroupdescstatstest::testRequestParser12()
 		}
 	}
 
-	for (int i = msglen + 1; i < memlen; i++) {
+	for (unsigned int i = msglen + 1; i < memlen; i++) {
 		rofl::openflow::cofmsg_group_desc_stats_request msg;
 		try {
 			stats->header.length = htobe16(i);
@@ -236,7 +236,7 @@ cofmsggroupdescstatstest::testRequestParser13()
 	stats->flags = htobe16(0xb1b2);
 
 
-	for (int i = 1; i < msglen; i++) {
+	for (unsigned int i = 1; i < msglen; i++) {
 		rofl::openflow::cofmsg_group_desc_stats_request msg;
 		try {
 			stats->header.length = htobe16(i);
@@ -255,7 +255,7 @@ cofmsggroupdescstatstest::testRequestParser13()
 		}
 	}
 
-	for (int i = msglen; i == msglen; i++) {
+	for (unsigned int i = msglen; i == msglen; i++) {
 		rofl::openflow::cofmsg_group_desc_stats_request msg;
 		try {
 			stats->header.length = htobe16(i);
@@ -273,7 +273,7 @@ cofmsggroupdescstatstest::testRequestParser13()
 		}
 	}
 
-	for (int i = msglen + 1; i < memlen; i++) {
+	for (unsigned int i = msglen + 1; i < memlen; i++) {
 		rofl::openflow::cofmsg_group_desc_stats_request msg;
 		try {
 			stats->header.length = htobe16(i);
@@ -298,7 +298,7 @@ cofmsggroupdescstatstest::testReplyParser12()
 	uint8_t version = rofl::openflow12::OFP_VERSION;
 
 	cofgroupdescstatsarray groupdesc(version);
-	for (int i = 0; i < 4; i++) {
+	for (unsigned int i = 0; i < 4; i++) {
 		groupdesc.add_group_desc_stats(i).set_group_id(i);
 		groupdesc.set_group_desc_stats(i).set_group_type(OFPGT_SELECT);
 	}
@@ -319,7 +319,7 @@ cofmsggroupdescstatstest::testReplyParser12()
 	groupdesc.pack(stats->body, groupdesc.length());
 
 
-	for (int i = 1; i < msglen; i++) {
+	for (unsigned int i = 1; i < msglen; i++) {
 		rofl::openflow::cofmsg_group_desc_stats_reply msg;
 		try {
 			stats->header.length = htobe16(i);
@@ -338,7 +338,7 @@ cofmsggroupdescstatstest::testReplyParser12()
 		}
 	}
 
-	for (int i = msglen; i == msglen; i++) {
+	for (unsigned int i = msglen; i == msglen; i++) {
 		rofl::openflow::cofmsg_group_desc_stats_reply msg;
 		try {
 			stats->header.length = htobe16(i);
@@ -356,7 +356,7 @@ cofmsggroupdescstatstest::testReplyParser12()
 		}
 	}
 
-	for (int i = msglen + 1; i < memlen; i++) {
+	for (unsigned int i = msglen + 1; i < memlen; i++) {
 		rofl::openflow::cofmsg_group_desc_stats_reply msg;
 		try {
 			stats->header.length = htobe16(i);
@@ -381,7 +381,7 @@ cofmsggroupdescstatstest::testReplyParser13()
 	uint8_t version = rofl::openflow13::OFP_VERSION;
 
 	cofgroupdescstatsarray groupdesc(version);
-	for (int i = 0; i < 4; i++) {
+	for (unsigned int i = 0; i < 4; i++) {
 		groupdesc.add_group_desc_stats(i).set_group_id(i);
 		groupdesc.set_group_desc_stats(i).set_group_type(OFPGT_SELECT);
 	}
@@ -402,7 +402,7 @@ cofmsggroupdescstatstest::testReplyParser13()
 	groupdesc.pack(stats->body, groupdesc.length());
 
 
-	for (int i = 1; i < msglen; i++) {
+	for (unsigned int i = 1; i < msglen; i++) {
 		rofl::openflow::cofmsg_group_desc_stats_reply msg;
 		try {
 			stats->header.length = htobe16(i);
@@ -421,7 +421,7 @@ cofmsggroupdescstatstest::testReplyParser13()
 		}
 	}
 
-	for (int i = msglen; i == msglen; i++) {
+	for (unsigned int i = msglen; i == msglen; i++) {
 		rofl::openflow::cofmsg_group_desc_stats_reply msg;
 		try {
 			stats->header.length = htobe16(i);
@@ -439,7 +439,7 @@ cofmsggroupdescstatstest::testReplyParser13()
 		}
 	}
 
-	for (int i = msglen + 1; i < memlen; i++) {
+	for (unsigned int i = msglen + 1; i < memlen; i++) {
 		rofl::openflow::cofmsg_group_desc_stats_reply msg;
 		try {
 			stats->header.length = htobe16(i);

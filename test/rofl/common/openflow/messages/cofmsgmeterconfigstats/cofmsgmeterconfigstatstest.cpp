@@ -141,7 +141,7 @@ cofmsgmeterconfigstatstest::testRequestParser13()
 	meterconfig.pack(stats->body, meterconfig.length());
 
 
-	for (int i = 1; i < msglen; i++) {
+	for (unsigned int i = 1; i < msglen; i++) {
 		rofl::openflow::cofmsg_meter_config_stats_request msg;
 		try {
 			stats->header.length = htobe16(i);
@@ -160,7 +160,7 @@ cofmsgmeterconfigstatstest::testRequestParser13()
 		}
 	}
 
-	for (int i = msglen; i == msglen; i++) {
+	for (unsigned int i = msglen; i == msglen; i++) {
 		rofl::openflow::cofmsg_meter_config_stats_request msg;
 		try {
 			stats->header.length = htobe16(i);
@@ -178,7 +178,7 @@ cofmsgmeterconfigstatstest::testRequestParser13()
 		}
 	}
 
-	for (int i = msglen + 1; i < memlen; i++) {
+	for (unsigned int i = msglen + 1; i < memlen; i++) {
 		rofl::openflow::cofmsg_meter_config_stats_request msg;
 		try {
 			stats->header.length = htobe16(i);
@@ -204,7 +204,7 @@ cofmsgmeterconfigstatstest::testReplyParser13()
 	uint32_t meter_id = 0xd0d1d2d3;
 
 	cofmeterconfigarray meterconfig(version);
-	for (int i = 0; i < 4; i++) {
+	for (unsigned int i = 0; i < 4; i++) {
 		meterconfig.set_meter_config(i).set_flags(flags);
 		meterconfig.set_meter_config(i).set_meter_id(meter_id);
 	}
@@ -225,7 +225,7 @@ cofmsgmeterconfigstatstest::testReplyParser13()
 	meterconfig.pack(stats->body, meterconfig.length());
 
 
-	for (int i = 1; i < msglen; i++) {
+	for (unsigned int i = 1; i < msglen; i++) {
 		rofl::openflow::cofmsg_meter_config_stats_reply msg;
 		try {
 			stats->header.length = htobe16(i);
@@ -244,7 +244,7 @@ cofmsgmeterconfigstatstest::testReplyParser13()
 		}
 	}
 
-	for (int i = msglen; i == msglen; i++) {
+	for (unsigned int i = msglen; i == msglen; i++) {
 		rofl::openflow::cofmsg_meter_config_stats_reply msg;
 		try {
 			stats->header.length = htobe16(i);
@@ -262,7 +262,7 @@ cofmsgmeterconfigstatstest::testReplyParser13()
 		}
 	}
 
-	for (int i = msglen + 1; i < memlen; i++) {
+	for (unsigned int i = msglen + 1; i < memlen; i++) {
 		rofl::openflow::cofmsg_meter_config_stats_reply msg;
 		try {
 			stats->header.length = htobe16(i);

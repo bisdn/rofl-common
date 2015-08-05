@@ -1,5 +1,5 @@
 /*
- * cofmsgmeterconfigstatstest.cpp
+ * cofmsgmeterstatstest.cpp
  *
  *  Created on: Apr 26, 2015
  *      Author: andi
@@ -10,43 +10,43 @@
 #include <cppunit/extensions/TestFactoryRegistry.h>
 #include <cppunit/ui/text/TestRunner.h>
 
-#include "cofmsgmeterconfigstatstest.hpp"
+#include "cofmsgmeterstatstest.hpp"
 
 using namespace rofl::openflow;
 
-CPPUNIT_TEST_SUITE_REGISTRATION( cofmsgmeterconfigstatstest );
+CPPUNIT_TEST_SUITE_REGISTRATION( cofmsgmeterstatstest );
 
 void
-cofmsgmeterconfigstatstest::setUp()
+cofmsgmeterstatstest::setUp()
 {}
 
 
 
 void
-cofmsgmeterconfigstatstest::tearDown()
+cofmsgmeterstatstest::tearDown()
 {}
 
 
 
 void
-cofmsgmeterconfigstatstest::testRequest13()
+cofmsgmeterstatstest::testRequest13()
 {
 	testRequest(
 			rofl::openflow13::OFP_VERSION,
 			rofl::openflow13::OFPT_MULTIPART_REQUEST,
 			0xa1a2a3a4,
-			rofl::openflow13::OFPMP_METER_CONFIG,
+			rofl::openflow13::OFPMP_METER,
 			0xb1b2);
 }
 
 
 
 void
-cofmsgmeterconfigstatstest::testRequest(
+cofmsgmeterstatstest::testRequest(
 		uint8_t version, uint8_t type, uint32_t xid, uint16_t stats_type, uint16_t stats_flags)
 {
-	rofl::openflow::cofmsg_meter_config_stats_request msg1(version, xid, stats_flags);
-	rofl::openflow::cofmsg_meter_config_stats_request msg2;
+	rofl::openflow::cofmsg_meter_stats_request msg1(version, xid, stats_flags);
+	rofl::openflow::cofmsg_meter_stats_request msg2;
 	rofl::cmemory mem(msg1.length());
 
 	try {
@@ -59,7 +59,7 @@ cofmsgmeterconfigstatstest::testRequest(
 		CPPUNIT_ASSERT(msg2.get_xid() == xid);
 		CPPUNIT_ASSERT(msg2.get_stats_type() == stats_type);
 		CPPUNIT_ASSERT(msg2.get_stats_flags() == stats_flags);
-		CPPUNIT_ASSERT(msg2.get_meter_config().get_version() == version);
+		CPPUNIT_ASSERT(msg2.get_meter_stats().get_version() == version);
 
 	} catch (...) {
 		std::cerr << ">>> request <<<" << std::endl << msg1;
@@ -73,24 +73,24 @@ cofmsgmeterconfigstatstest::testRequest(
 
 
 void
-cofmsgmeterconfigstatstest::testReply13()
+cofmsgmeterstatstest::testReply13()
 {
 	testReply(
 			rofl::openflow13::OFP_VERSION,
 			rofl::openflow13::OFPT_MULTIPART_REPLY,
 			0xa1a2a3a4,
-			rofl::openflow13::OFPMP_METER_CONFIG,
+			rofl::openflow13::OFPMP_METER,
 			0xb1b2);
 }
 
 
 
 void
-cofmsgmeterconfigstatstest::testReply(
+cofmsgmeterstatstest::testReply(
 		uint8_t version, uint8_t type, uint32_t xid, uint16_t stats_type, uint16_t stats_flags)
 {
-	rofl::openflow::cofmsg_meter_config_stats_reply msg1(version, xid, stats_flags);
-	rofl::openflow::cofmsg_meter_config_stats_reply msg2;
+	rofl::openflow::cofmsg_meter_stats_reply msg1(version, xid, stats_flags);
+	rofl::openflow::cofmsg_meter_stats_reply msg2;
 	rofl::cmemory mem(msg1.length());
 
 	try {
@@ -103,7 +103,7 @@ cofmsgmeterconfigstatstest::testReply(
 		CPPUNIT_ASSERT(msg2.get_xid() == xid);
 		CPPUNIT_ASSERT(msg2.get_stats_type() == stats_type);
 		CPPUNIT_ASSERT(msg2.get_stats_flags() == stats_flags);
-		CPPUNIT_ASSERT(msg2.get_meter_config_array().get_version() == version);
+		CPPUNIT_ASSERT(msg2.get_meter_stats_array().get_version() == version);
 
 	} catch (...) {
 		std::cerr << ">>> request <<<" << std::endl << msg1;
@@ -116,16 +116,14 @@ cofmsgmeterconfigstatstest::testReply(
 
 
 void
-cofmsgmeterconfigstatstest::testRequestParser13()
+cofmsgmeterstatstest::testRequestParser13()
 {
 	uint8_t version = rofl::openflow13::OFP_VERSION;
-	uint32_t port_no = 0xd0d1d2d3;
+	uint32_t portno = 0xb1b2b3b4;
 
-	cofmeter_config_request meterconfig(
-			version,
-			port_no);
+	cofmeter_stats_request meter(version, portno);
 
-	size_t msglen = sizeof(struct rofl::openflow13::ofp_multipart_request) + meterconfig.length();
+	size_t msglen = sizeof(struct rofl::openflow13::ofp_multipart_request) + meter.length();
 	size_t memlen = msglen + /*test overhead*/4;
 
 	rofl::cmemory mem(memlen);
@@ -136,13 +134,13 @@ cofmsgmeterconfigstatstest::testRequestParser13()
 	stats->header.type = rofl::openflow13::OFPT_MULTIPART_REQUEST;
 	stats->header.xid = htobe32(0xa0a1a2a3);
 	stats->header.length = htobe16(0);
-	stats->type = htobe16(rofl::openflow13::OFPMP_METER_CONFIG);
+	stats->type = htobe16(rofl::openflow13::OFPMP_METER);
 	stats->flags = htobe16(0xb1b2);
-	meterconfig.pack(stats->body, meterconfig.length());
+	meter.pack(stats->body, meter.length());
 
 
-	for (int i = 1; i < msglen; i++) {
-		rofl::openflow::cofmsg_meter_config_stats_request msg;
+	for (unsigned int i = 1; i < msglen; i++) {
+		rofl::openflow::cofmsg_meter_stats_request msg;
 		try {
 			stats->header.length = htobe16(i);
 			msg.unpack(mem.somem(), i);
@@ -160,8 +158,8 @@ cofmsgmeterconfigstatstest::testRequestParser13()
 		}
 	}
 
-	for (int i = msglen; i == msglen; i++) {
-		rofl::openflow::cofmsg_meter_config_stats_request msg;
+	for (unsigned int i = msglen; i == msglen; i++) {
+		rofl::openflow::cofmsg_meter_stats_request msg;
 		try {
 			stats->header.length = htobe16(i);
 			msg.unpack(mem.somem(), i);
@@ -178,8 +176,8 @@ cofmsgmeterconfigstatstest::testRequestParser13()
 		}
 	}
 
-	for (int i = msglen + 1; i < memlen; i++) {
-		rofl::openflow::cofmsg_meter_config_stats_request msg;
+	for (unsigned int i = msglen + 1; i < memlen; i++) {
+		rofl::openflow::cofmsg_meter_stats_request msg;
 		try {
 			stats->header.length = htobe16(i);
 			msg.unpack(mem.somem(), i);
@@ -197,20 +195,19 @@ cofmsgmeterconfigstatstest::testRequestParser13()
 
 
 void
-cofmsgmeterconfigstatstest::testReplyParser13()
+cofmsgmeterstatstest::testReplyParser13()
 {
 	uint8_t version = rofl::openflow13::OFP_VERSION;
-	uint16_t flags = 0xc5c6;
-	uint32_t meter_id = 0xd0d1d2d3;
+	uint64_t byte_count = 0xd0d1d2d3d4d5d6d7;
 
-	cofmeterconfigarray meterconfig(version);
-	for (int i = 0; i < 4; i++) {
-		meterconfig.set_meter_config(i).set_flags(flags);
-		meterconfig.set_meter_config(i).set_meter_id(meter_id);
+	cofmeterstatsarray meter(version);
+	for (unsigned int i = 0; i < 4; i++) {
+		meter.set_meter_stats(i).set_meter_id(i);
+		meter.set_meter_stats(i).set_byte_in_count(byte_count);
 	}
 
 	size_t msglen = sizeof(struct rofl::openflow13::ofp_multipart_request);
-	size_t memlen = msglen + meterconfig.length() + /*test overhead*/4;
+	size_t memlen = msglen + meter.length() + /*test overhead*/4;
 
 	rofl::cmemory mem(memlen);
 	struct rofl::openflow13::ofp_multipart_request* stats =
@@ -220,13 +217,13 @@ cofmsgmeterconfigstatstest::testReplyParser13()
 	stats->header.type = rofl::openflow13::OFPT_MULTIPART_REPLY;
 	stats->header.xid = htobe32(0xa0a1a2a3);
 	stats->header.length = htobe16(0);
-	stats->type = htobe16(rofl::openflow13::OFPMP_METER_CONFIG);
+	stats->type = htobe16(rofl::openflow13::OFPMP_METER);
 	stats->flags = htobe16(0xb1b2);
-	meterconfig.pack(stats->body, meterconfig.length());
+	meter.pack(stats->body, meter.length());
 
 
-	for (int i = 1; i < msglen; i++) {
-		rofl::openflow::cofmsg_meter_config_stats_reply msg;
+	for (unsigned int i = 1; i < msglen; i++) {
+		rofl::openflow::cofmsg_meter_stats_reply msg;
 		try {
 			stats->header.length = htobe16(i);
 			msg.unpack(mem.somem(), i);
@@ -244,8 +241,8 @@ cofmsgmeterconfigstatstest::testReplyParser13()
 		}
 	}
 
-	for (int i = msglen; i == msglen; i++) {
-		rofl::openflow::cofmsg_meter_config_stats_reply msg;
+	for (unsigned int i = msglen; i == msglen; i++) {
+		rofl::openflow::cofmsg_meter_stats_reply msg;
 		try {
 			stats->header.length = htobe16(i);
 			msg.unpack(mem.somem(), i);
@@ -262,8 +259,8 @@ cofmsgmeterconfigstatstest::testReplyParser13()
 		}
 	}
 
-	for (int i = msglen + 1; i < memlen; i++) {
-		rofl::openflow::cofmsg_meter_config_stats_reply msg;
+	for (unsigned int i = msglen + 1; i < memlen; i++) {
+		rofl::openflow::cofmsg_meter_stats_reply msg;
 		try {
 			stats->header.length = htobe16(i);
 			msg.unpack(mem.somem(), i);

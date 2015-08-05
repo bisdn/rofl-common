@@ -74,7 +74,7 @@ cofmsgexperimenterstatstest::testRequest(
 	uint32_t exp_id = 0xe0e1e2e3;
 	uint32_t exp_type = 0xf0f1f2f3;
 	rofl::cmemory exp_body(64);
-	for (int i = 0; i < exp_body.length(); ++i) {
+	for (unsigned int i = 0; i < exp_body.length(); ++i) {
 		exp_body[i] = i % 16;
 	}
 	rofl::openflow::cofmsg_experimenter_stats_request msg1(version, xid, stats_flags, exp_id, exp_type, exp_body);
@@ -153,7 +153,7 @@ cofmsgexperimenterstatstest::testReply(
 	uint32_t exp_id = 0xe0e1e2e3;
 	uint32_t exp_type = 0xf0f1f2f3;
 	rofl::cmemory exp_body(64);
-	for (int i = 0; i < exp_body.length(); ++i) {
+	for (unsigned int i = 0; i < exp_body.length(); ++i) {
 		exp_body[i] = i % 16;
 	}
 	rofl::openflow::cofmsg_experimenter_stats_reply msg1(version, xid, stats_flags, exp_id, exp_type, exp_body);
@@ -191,7 +191,7 @@ cofmsgexperimenterstatstest::testRequestParser10()
 	uint8_t version = rofl::openflow10::OFP_VERSION;
 	uint32_t exp_id = 0xe0e1e2e3;
 	rofl::cmemory exp_body(64);
-	for (int i = 0; i < exp_body.length(); ++i) {
+	for (unsigned int i = 0; i < exp_body.length(); ++i) {
 		exp_body[i] = i % 16;
 	}
 
@@ -216,7 +216,7 @@ cofmsgexperimenterstatstest::testRequestParser10()
 	exp_body.pack(body, exp_body.length());
 
 
-	for (int i = 1; i < msglen; i++) {
+	for (unsigned int i = 1; i < msglen; i++) {
 		rofl::openflow::cofmsg_experimenter_stats_request msg;
 		try {
 			stats->header.length = htobe16(i);
@@ -235,7 +235,7 @@ cofmsgexperimenterstatstest::testRequestParser10()
 		}
 	}
 
-	for (int i = msglen; i == msglen; i++) {
+	for (unsigned int i = msglen; i == msglen; i++) {
 		rofl::openflow::cofmsg_experimenter_stats_request msg;
 		try {
 			stats->header.length = htobe16(i);
@@ -253,7 +253,7 @@ cofmsgexperimenterstatstest::testRequestParser10()
 		}
 	}
 
-	for (int i = msglen + 1; i < memlen; i++) {
+	for (unsigned int i = msglen + 1; i < memlen; i++) {
 		rofl::openflow::cofmsg_experimenter_stats_request msg;
 		try {
 			stats->header.length = htobe16(i);
@@ -279,7 +279,7 @@ cofmsgexperimenterstatstest::testRequestParser12()
 	uint32_t exp_id = 0xe0e1e2e3;
 	uint32_t exp_type = 0xf0f1f2f3;
 	rofl::cmemory exp_body(64);
-	for (int i = 0; i < exp_body.length(); ++i) {
+	for (unsigned int i = 0; i < exp_body.length(); ++i) {
 		exp_body[i] = i % 16;
 	}
 
@@ -305,7 +305,7 @@ cofmsgexperimenterstatstest::testRequestParser12()
 	exp_body.pack(body, exp_body.length());
 
 
-	for (int i = 1; i < msglen; i++) {
+	for (unsigned int i = 1; i < msglen; i++) {
 		rofl::openflow::cofmsg_experimenter_stats_request msg;
 		try {
 			stats->header.length = htobe16(i);
@@ -324,7 +324,7 @@ cofmsgexperimenterstatstest::testRequestParser12()
 		}
 	}
 
-	for (int i = msglen; i == msglen; i++) {
+	for (unsigned int i = msglen; i == msglen; i++) {
 		rofl::openflow::cofmsg_experimenter_stats_request msg;
 		try {
 			stats->header.length = htobe16(i);
@@ -342,7 +342,7 @@ cofmsgexperimenterstatstest::testRequestParser12()
 		}
 	}
 
-	for (int i = msglen + 1; i < memlen; i++) {
+	for (unsigned int i = msglen + 1; i < memlen; i++) {
 		rofl::openflow::cofmsg_experimenter_stats_request msg;
 		try {
 			stats->header.length = htobe16(i);
@@ -368,7 +368,7 @@ cofmsgexperimenterstatstest::testRequestParser13()
 	uint32_t exp_id = 0xe0e1e2e3;
 	uint32_t exp_type = 0xf0f1f2f3;
 	rofl::cmemory exp_body(64);
-	for (int i = 0; i < exp_body.length(); ++i) {
+	for (unsigned int i = 0; i < exp_body.length(); ++i) {
 		exp_body[i] = i % 16;
 	}
 
@@ -394,7 +394,7 @@ cofmsgexperimenterstatstest::testRequestParser13()
 	exp_body.pack(body, exp_body.length());
 
 
-	for (int i = 1; i < msglen; i++) {
+	for (unsigned int i = 1; i < msglen; i++) {
 		rofl::openflow::cofmsg_experimenter_stats_request msg;
 		try {
 			stats->header.length = htobe16(i);
@@ -413,7 +413,7 @@ cofmsgexperimenterstatstest::testRequestParser13()
 		}
 	}
 
-	for (int i = msglen; i == msglen; i++) {
+	for (unsigned int i = msglen; i == msglen; i++) {
 		rofl::openflow::cofmsg_experimenter_stats_request msg;
 		try {
 			stats->header.length = htobe16(i);
@@ -431,7 +431,7 @@ cofmsgexperimenterstatstest::testRequestParser13()
 		}
 	}
 
-	for (int i = msglen + 1; i < memlen; i++) {
+	for (unsigned int i = msglen + 1; i < memlen; i++) {
 		rofl::openflow::cofmsg_experimenter_stats_request msg;
 		try {
 			stats->header.length = htobe16(i);
@@ -455,7 +455,7 @@ cofmsgexperimenterstatstest::testReplyParser10()
 	uint8_t version = rofl::openflow10::OFP_VERSION;
 	uint32_t exp_id = 0xe0e1e2e3;
 	rofl::cmemory exp_body(64);
-	for (int i = 0; i < exp_body.length(); ++i) {
+	for (unsigned int i = 0; i < exp_body.length(); ++i) {
 		exp_body[i] = i % 16;
 	}
 
@@ -480,7 +480,7 @@ cofmsgexperimenterstatstest::testReplyParser10()
 	exp_body.pack(body, exp_body.length());
 
 
-	for (int i = 1; i < msglen; i++) {
+	for (unsigned int i = 1; i < msglen; i++) {
 		rofl::openflow::cofmsg_experimenter_stats_reply msg;
 		try {
 			stats->header.length = htobe16(i);
@@ -499,7 +499,7 @@ cofmsgexperimenterstatstest::testReplyParser10()
 		}
 	}
 
-	for (int i = msglen; i == msglen; i++) {
+	for (unsigned int i = msglen; i == msglen; i++) {
 		rofl::openflow::cofmsg_experimenter_stats_reply msg;
 		try {
 			stats->header.length = htobe16(i);
@@ -517,7 +517,7 @@ cofmsgexperimenterstatstest::testReplyParser10()
 		}
 	}
 
-	for (int i = msglen + 1; i < memlen; i++) {
+	for (unsigned int i = msglen + 1; i < memlen; i++) {
 		rofl::openflow::cofmsg_experimenter_stats_reply msg;
 		try {
 			stats->header.length = htobe16(i);
@@ -543,7 +543,7 @@ cofmsgexperimenterstatstest::testReplyParser12()
 	uint32_t exp_id = 0xe0e1e2e3;
 	uint32_t exp_type = 0xf0f1f2f3;
 	rofl::cmemory exp_body(64);
-	for (int i = 0; i < exp_body.length(); ++i) {
+	for (unsigned int i = 0; i < exp_body.length(); ++i) {
 		exp_body[i] = i % 16;
 	}
 
@@ -569,7 +569,7 @@ cofmsgexperimenterstatstest::testReplyParser12()
 	exp_body.pack(body, exp_body.length());
 
 
-	for (int i = 1; i < msglen; i++) {
+	for (unsigned int i = 1; i < msglen; i++) {
 		rofl::openflow::cofmsg_experimenter_stats_reply msg;
 		try {
 			stats->header.length = htobe16(i);
@@ -588,7 +588,7 @@ cofmsgexperimenterstatstest::testReplyParser12()
 		}
 	}
 
-	for (int i = msglen; i == msglen; i++) {
+	for (unsigned int i = msglen; i == msglen; i++) {
 		rofl::openflow::cofmsg_experimenter_stats_reply msg;
 		try {
 			stats->header.length = htobe16(i);
@@ -606,7 +606,7 @@ cofmsgexperimenterstatstest::testReplyParser12()
 		}
 	}
 
-	for (int i = msglen + 1; i < memlen; i++) {
+	for (unsigned int i = msglen + 1; i < memlen; i++) {
 		rofl::openflow::cofmsg_experimenter_stats_reply msg;
 		try {
 			stats->header.length = htobe16(i);
@@ -632,7 +632,7 @@ cofmsgexperimenterstatstest::testReplyParser13()
 	uint32_t exp_id = 0xe0e1e2e3;
 	uint32_t exp_type = 0xf0f1f2f3;
 	rofl::cmemory exp_body(64);
-	for (int i = 0; i < exp_body.length(); ++i) {
+	for (unsigned int i = 0; i < exp_body.length(); ++i) {
 		exp_body[i] = i % 16;
 	}
 
@@ -658,7 +658,7 @@ cofmsgexperimenterstatstest::testReplyParser13()
 	exp_body.pack(body, exp_body.length());
 
 
-	for (int i = 1; i < msglen; i++) {
+	for (unsigned int i = 1; i < msglen; i++) {
 		rofl::openflow::cofmsg_experimenter_stats_reply msg;
 		try {
 			stats->header.length = htobe16(i);
@@ -677,7 +677,7 @@ cofmsgexperimenterstatstest::testReplyParser13()
 		}
 	}
 
-	for (int i = msglen; i == msglen; i++) {
+	for (unsigned int i = msglen; i == msglen; i++) {
 		rofl::openflow::cofmsg_experimenter_stats_reply msg;
 		try {
 			stats->header.length = htobe16(i);
@@ -695,7 +695,7 @@ cofmsgexperimenterstatstest::testReplyParser13()
 		}
 	}
 
-	for (int i = msglen + 1; i < memlen; i++) {
+	for (unsigned int i = msglen + 1; i < memlen; i++) {
 		rofl::openflow::cofmsg_experimenter_stats_reply msg;
 		try {
 			stats->header.length = htobe16(i);
