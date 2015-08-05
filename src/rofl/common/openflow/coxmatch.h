@@ -24,7 +24,6 @@
 #include "rofl/common/croflexception.h"
 #include "rofl/common/cmemory.h"
 #include "rofl/common/caddress.h"
-#include "rofl/common/fframe.h"
 #include "rofl/common/logging.h"
 #include "rofl/common/thread_helper.h"
 

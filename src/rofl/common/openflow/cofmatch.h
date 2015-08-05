@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <endian.h>
+#include <bitset>
 #ifndef be32toh
 	#include "../endian_conversion.h"
 #endif
