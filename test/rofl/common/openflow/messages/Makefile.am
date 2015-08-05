@@ -9,5 +9,6 @@ SUBDIRS = \
 	cofmsgflowstats \
 	cofmsggroupdescstats \
 	cofmsggroupfeaturesstats \
-	cofmsggroupstats
+	cofmsggroupstats \
+	cofmsgmeterconfigstats
 
