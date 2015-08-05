@@ -15,7 +15,11 @@ ethswctld_SOURCES = \
 	cflowtable.h \
 	cflowtable.cc \
 	cflowentry.h \
-	cflowentry.cc
+	cflowentry.cc \
+	cdaemon.cc \
+	cdaemon.h \
+	cunixenv.cc \
+	cunixenv.h
 
 ethswctld_LDADD = ../../src/rofl/librofl_common.la 
 	-lpthread \

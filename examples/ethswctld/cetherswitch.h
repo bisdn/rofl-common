@@ -8,12 +8,12 @@
 #include <rofl/common/caddress.h>
 #include <rofl/common/crofbase.h>
 #include <rofl/common/crofdpt.h>
-#include <rofl/platform/unix/cunixenv.h>
-#include <rofl/platform/unix/cdaemon.h>
 #include <rofl/common/cparams.h>
 
 #include "cfibtable.h"
 #include "cflowtable.h"
+#include "cunixenv.h"
+#include "cdaemon.h"
 
 namespace rofl {
 namespace examples {

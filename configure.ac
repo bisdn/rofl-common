@@ -63,19 +63,14 @@ AC_CONFIG_FILES([
 	src/rofl/common/utils/Makefile
 	src/rofl/common/Makefile
 	
-	src/rofl/platform/Makefile
-	src/rofl/platform/unix/Makefile
-	
 	src/rofl/Makefile
 	src/rofl/rofl_common.pc
 
 	examples/Makefile
 	examples/ethswctld/Makefile
-	examples/testomat/Makefile
 	examples/proxyd/Makefile
 
 	tools/Makefile
-	tools/spray/Makefile
 
 	test/Makefile
 	test/rofl/Makefile

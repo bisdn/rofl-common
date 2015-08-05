@@ -5,7 +5,7 @@
  *      Author: andreas
  */
 
-#include "rofl/platform/unix/cdaemon.h"
+#include "cdaemon.h"
 #include <stdexcept> 
 
 using namespace rofl;
