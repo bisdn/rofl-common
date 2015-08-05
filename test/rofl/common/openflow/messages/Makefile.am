@@ -6,5 +6,6 @@ SUBDIRS = \
 	cofmsgaggrstats \
 	cofmsgdescstats \
 	cofmsgexperimenterstats \
-	cofmsgflowstats
+	cofmsgflowstats \
+	cofmsggroupdescstats
 
