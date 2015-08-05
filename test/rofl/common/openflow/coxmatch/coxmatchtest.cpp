@@ -608,7 +608,7 @@ coxmatchtest::testExp8()
 	CPPUNIT_ASSERT(clone.get_oxm_class() == oxm_class);
 	CPPUNIT_ASSERT(clone.get_oxm_field() == oxm_field);
 	CPPUNIT_ASSERT(clone.get_oxm_hasmask() == false);
-	CPPUNIT_ASSERT(OXM_TYPE(clone.get_oxm_id()) == oxm_id);
+	CPPUNIT_ASSERT(OXM_ROFL_TYPE(clone.get_oxm_id()) == oxm_id);
 	CPPUNIT_ASSERT(clone.get_oxm_type() == oxm_id);
 	CPPUNIT_ASSERT(clone.length() == oxm.length());
 	CPPUNIT_ASSERT(clone.get_oxm_length() == sizeof(uint32_t) + sizeof(uint8_t));
@@ -632,7 +632,7 @@ coxmatchtest::testExp8()
 	CPPUNIT_ASSERT(clone.get_oxm_class() == oxm_class);
 	CPPUNIT_ASSERT(clone.get_oxm_field() == oxm_field);
 	CPPUNIT_ASSERT(clone.get_oxm_hasmask() == true);
-	CPPUNIT_ASSERT(OXM_TYPE(clone.get_oxm_id()) == oxm_id);
+	CPPUNIT_ASSERT(OXM_ROFL_TYPE(clone.get_oxm_id()) == oxm_id);
 	CPPUNIT_ASSERT(clone.get_oxm_type() == oxm_id);
 	CPPUNIT_ASSERT(clone.length() == oxm.length());
 	CPPUNIT_ASSERT(clone.get_oxm_length() == sizeof(uint32_t) + 2*sizeof(uint8_t));
@@ -673,7 +673,7 @@ coxmatchtest::testExp16()
 	CPPUNIT_ASSERT(clone.get_oxm_class() == oxm_class);
 	CPPUNIT_ASSERT(clone.get_oxm_field() == oxm_field);
 	CPPUNIT_ASSERT(clone.get_oxm_hasmask() == false);
-	CPPUNIT_ASSERT(OXM_TYPE(clone.get_oxm_id()) == oxm_id);
+	CPPUNIT_ASSERT(OXM_ROFL_TYPE(clone.get_oxm_id()) == oxm_id);
 	CPPUNIT_ASSERT(clone.get_oxm_type() == oxm_id);
 	CPPUNIT_ASSERT(clone.length() == oxm.length());
 	CPPUNIT_ASSERT(clone.get_oxm_length() == sizeof(uint32_t) + sizeof(uint16_t));
@@ -697,7 +697,7 @@ coxmatchtest::testExp16()
 	CPPUNIT_ASSERT(clone.get_oxm_class() == oxm_class);
 	CPPUNIT_ASSERT(clone.get_oxm_field() == oxm_field);
 	CPPUNIT_ASSERT(clone.get_oxm_hasmask() == true);
-	CPPUNIT_ASSERT(OXM_TYPE(clone.get_oxm_id()) == oxm_id);
+	CPPUNIT_ASSERT(OXM_ROFL_TYPE(clone.get_oxm_id()) == oxm_id);
 	CPPUNIT_ASSERT(clone.get_oxm_type() == oxm_id);
 	CPPUNIT_ASSERT(clone.length() == oxm.length());
 	CPPUNIT_ASSERT(clone.get_oxm_length() == sizeof(uint32_t) + 2*sizeof(uint16_t));
@@ -738,7 +738,7 @@ coxmatchtest::testExp32()
 	CPPUNIT_ASSERT(clone.get_oxm_class() == oxm_class);
 	CPPUNIT_ASSERT(clone.get_oxm_field() == oxm_field);
 	CPPUNIT_ASSERT(clone.get_oxm_hasmask() == false);
-	CPPUNIT_ASSERT(OXM_TYPE(clone.get_oxm_id()) == oxm_id);
+	CPPUNIT_ASSERT(OXM_ROFL_TYPE(clone.get_oxm_id()) == oxm_id);
 	CPPUNIT_ASSERT(clone.get_oxm_type() == oxm_id);
 	CPPUNIT_ASSERT(clone.length() == oxm.length());
 	CPPUNIT_ASSERT(clone.get_oxm_length() == sizeof(uint32_t) + sizeof(uint32_t));
@@ -762,7 +762,7 @@ coxmatchtest::testExp32()
 	CPPUNIT_ASSERT(clone.get_oxm_class() == oxm_class);
 	CPPUNIT_ASSERT(clone.get_oxm_field() == oxm_field);
 	CPPUNIT_ASSERT(clone.get_oxm_hasmask() == true);
-	CPPUNIT_ASSERT(OXM_TYPE(clone.get_oxm_id()) == oxm_id);
+	CPPUNIT_ASSERT(OXM_ROFL_TYPE(clone.get_oxm_id()) == oxm_id);
 	CPPUNIT_ASSERT(clone.get_oxm_type() == oxm_id);
 	CPPUNIT_ASSERT(clone.length() == oxm.length());
 	CPPUNIT_ASSERT(clone.get_oxm_length() == sizeof(uint32_t) + 2*sizeof(uint32_t));
@@ -803,7 +803,7 @@ coxmatchtest::testExp48()
 	CPPUNIT_ASSERT(clone.get_oxm_class() == oxm_class);
 	CPPUNIT_ASSERT(clone.get_oxm_field() == oxm_field);
 	CPPUNIT_ASSERT(clone.get_oxm_hasmask() == false);
-	CPPUNIT_ASSERT(OXM_TYPE(clone.get_oxm_id()) == oxm_id);
+	CPPUNIT_ASSERT(OXM_ROFL_TYPE(clone.get_oxm_id()) == oxm_id);
 	CPPUNIT_ASSERT(clone.get_oxm_type() == oxm_id);
 	CPPUNIT_ASSERT(clone.length() == oxm.length());
 	CPPUNIT_ASSERT(clone.get_oxm_length() == sizeof(uint32_t) + 6*sizeof(uint8_t));
@@ -827,7 +827,7 @@ coxmatchtest::testExp48()
 	CPPUNIT_ASSERT(clone.get_oxm_class() == oxm_class);
 	CPPUNIT_ASSERT(clone.get_oxm_field() == oxm_field);
 	CPPUNIT_ASSERT(clone.get_oxm_hasmask() == true);
-	CPPUNIT_ASSERT(OXM_TYPE(clone.get_oxm_id()) == oxm_id);
+	CPPUNIT_ASSERT(OXM_ROFL_TYPE(clone.get_oxm_id()) == oxm_id);
 	CPPUNIT_ASSERT(clone.get_oxm_type() == oxm_id);
 	CPPUNIT_ASSERT(clone.length() == oxm.length());
 	CPPUNIT_ASSERT(clone.get_oxm_length() == sizeof(uint32_t) + 2*6*sizeof(uint8_t));
@@ -868,7 +868,7 @@ coxmatchtest::testExp64()
 	CPPUNIT_ASSERT(clone.get_oxm_class() == oxm_class);
 	CPPUNIT_ASSERT(clone.get_oxm_field() == oxm_field);
 	CPPUNIT_ASSERT(clone.get_oxm_hasmask() == false);
-	CPPUNIT_ASSERT(OXM_TYPE(clone.get_oxm_id()) == oxm_id);
+	CPPUNIT_ASSERT(OXM_ROFL_TYPE(clone.get_oxm_id()) == oxm_id);
 	CPPUNIT_ASSERT(clone.get_oxm_type() == oxm_id);
 	CPPUNIT_ASSERT(clone.length() == oxm.length());
 	CPPUNIT_ASSERT(clone.get_oxm_length() == sizeof(uint32_t) + sizeof(uint64_t));
@@ -892,7 +892,7 @@ coxmatchtest::testExp64()
 	CPPUNIT_ASSERT(clone.get_oxm_class() == oxm_class);
 	CPPUNIT_ASSERT(clone.get_oxm_field() == oxm_field);
 	CPPUNIT_ASSERT(clone.get_oxm_hasmask() == true);
-	CPPUNIT_ASSERT(OXM_TYPE(clone.get_oxm_id()) == oxm_id);
+	CPPUNIT_ASSERT(OXM_ROFL_TYPE(clone.get_oxm_id()) == oxm_id);
 	CPPUNIT_ASSERT(clone.get_oxm_type() == oxm_id);
 	CPPUNIT_ASSERT(clone.length() == oxm.length());
 	CPPUNIT_ASSERT(clone.get_oxm_length() == sizeof(uint32_t) + 2*sizeof(uint64_t));

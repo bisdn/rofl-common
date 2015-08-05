@@ -90,6 +90,7 @@ AC_CONFIG_FILES([
 	test/rofl/common/openflow/messages/cofmsgexperimenterstats/Makefile
 	test/rofl/common/openflow/messages/cofmsgflowstats/Makefile
 	test/rofl/common/openflow/messages/cofmsggroupdescstats/Makefile
+	test/rofl/common/openflow/messages/cofmsggroupfeaturesstats/Makefile
 	test/rofl/common/crofbase/Makefile
 	test/rofl/common/all/Makefile
 	test/rofl/common/all/messages/Makefile

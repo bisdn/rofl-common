@@ -80,6 +80,13 @@ cofmsg_group_features_stats_request::unpack(
 	if (buflen < cofmsg_group_features_stats_request::length())
 		throw eBadSyntaxTooShort("cofmsg_group_features_stats_request::unpack() buf too short");
 
+	switch (get_version()) {
+	default: {
+		if (get_stats_type() != rofl::openflow13::OFPMP_GROUP_FEATURES)
+			throw eMsgInval("cofmsg_group_features_stats_request::unpack() invalid statistics type");
+	};
+	}
+
 	if (get_length() < cofmsg_group_features_stats_request::length())
 		throw eBadSyntaxTooShort("cofmsg_group_features_stats_request::unpack() buf too short");
 }
@@ -182,6 +189,9 @@ cofmsg_group_features_stats_reply::unpack(
 
 	switch (get_version()) {
 	default: {
+		if (get_stats_type() != rofl::openflow13::OFPMP_GROUP_FEATURES)
+			throw eMsgInval("cofmsg_group_features_stats_reply::unpack() invalid statistics type");
+
 		struct rofl::openflow13::ofp_multipart_reply* hdr =
 				(struct rofl::openflow13::ofp_multipart_reply*)buf;
 		if (buflen > sizeof(struct rofl::openflow13::ofp_multipart_reply)) {
