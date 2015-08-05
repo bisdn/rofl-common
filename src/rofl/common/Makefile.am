@@ -1,6 +1,6 @@
 MAINTAINERCLEANFILES = Makefile.in
 
-SUBDIRS = openflow protocols utils 
+SUBDIRS = openflow utils 
 
 noinst_LTLIBRARIES = librofl_common_base.la
 
@@ -87,7 +87,7 @@ librofl_common_base_la_SOURCES += \
 		csocket_openssl.cc
 endif
 
-librofl_common_base_la_LIBADD=openflow/libopenflow.la protocols/libprotocols.la utils/librofl_common_utils.la -lrt
+librofl_common_base_la_LIBADD=openflow/libopenflow.la utils/librofl_common_utils.la -lrt
 
 library_includedir=$(includedir)/rofl/common
 library_include_HEADERS= \

@@ -54,7 +54,6 @@ AC_CONFIG_FILES([
 
 	Makefile
 	src/Makefile
-	src/rofl/common/protocols/Makefile
 	src/rofl/common/openflow/messages/Makefile
 	src/rofl/common/openflow/extensions/Makefile
 	src/rofl/common/openflow/experimental/Makefile
@@ -100,7 +99,6 @@ AC_CONFIG_FILES([
 	test/rofl/common/crofbase/Makefile
 	test/rofl/common/all/Makefile
 	test/rofl/common/all/messages/Makefile
-	test/rofl/common/protocols/Makefile
 	test/unit/Makefile
 	
 	src/rofl_common_conf.h])
