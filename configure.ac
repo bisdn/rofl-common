@@ -54,16 +54,14 @@ AC_CONFIG_FILES([
 
 	Makefile
 	src/Makefile
+	src/rofl/Makefile
+	src/rofl/common/Makefile
+	src/rofl/common/openflow/Makefile
 	src/rofl/common/openflow/messages/Makefile
-	src/rofl/common/openflow/extensions/Makefile
 	src/rofl/common/openflow/experimental/Makefile
 	src/rofl/common/openflow/experimental/actions/Makefile
 	src/rofl/common/openflow/experimental/matches/Makefile
-	src/rofl/common/openflow/Makefile
-	src/rofl/common/utils/Makefile
-	src/rofl/common/Makefile
 	
-	src/rofl/Makefile
 	src/rofl/rofl_common.pc
 
 	examples/Makefile
