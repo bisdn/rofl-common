@@ -12,5 +12,6 @@ SUBDIRS = \
 	cofmsggroupstats \
 	cofmsgmeterconfigstats \
 	cofmsgmeterfeaturesstats \
-	cofmsgmeterstats
+	cofmsgmeterstats \
+	cofmsgportdescstats
 

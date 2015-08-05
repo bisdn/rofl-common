@@ -70,7 +70,10 @@ public:
 				state(0),
 				properties(ofp_version),
 				port_stats(ofp_version)
-	{};
+	{
+		if (rofl::openflow14::OFP_VERSION > ofp_version)
+			add_ethernet();
+	};
 
 	/**
 	 *
