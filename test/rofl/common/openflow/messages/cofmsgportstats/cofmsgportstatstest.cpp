@@ -42,6 +42,19 @@ cofmsgportstatstest::testRequest10()
 
 
 void
+cofmsgportstatstest::testRequest12()
+{
+	testRequest(
+			rofl::openflow12::OFP_VERSION,
+			rofl::openflow12::OFPT_STATS_REQUEST,
+			0xa1a2a3a4,
+			rofl::openflow12::OFPST_PORT,
+			0xb1b2);
+}
+
+
+
+void
 cofmsgportstatstest::testRequest13()
 {
 	testRequest(
@@ -93,6 +106,19 @@ cofmsgportstatstest::testReply10()
 			rofl::openflow10::OFPT_STATS_REPLY,
 			0xa1a2a3a4,
 			rofl::openflow10::OFPST_PORT,
+			0xb1b2);
+}
+
+
+
+void
+cofmsgportstatstest::testReply12()
+{
+	testReply(
+			rofl::openflow12::OFP_VERSION,
+			rofl::openflow12::OFPT_STATS_REPLY,
+			0xa1a2a3a4,
+			rofl::openflow12::OFPST_PORT,
 			0xb1b2);
 }
 
@@ -161,6 +187,86 @@ cofmsgportstatstest::testRequestParser10()
 	stats->header.xid = htobe32(0xa0a1a2a3);
 	stats->header.length = htobe16(0);
 	stats->type = htobe16(rofl::openflow10::OFPST_PORT);
+	stats->flags = htobe16(0xb1b2);
+	port.pack(stats->body, port.length());
+
+
+	for (unsigned int i = 1; i < msglen; i++) {
+		rofl::openflow::cofmsg_port_stats_request msg;
+		try {
+			stats->header.length = htobe16(i);
+			msg.unpack(mem.somem(), i);
+
+			std::cerr << ">>> testing length values (len: " << i << ") <<< " << std::endl;
+			std::cerr << "[FAILURE] unpack() no exception seen" << std::endl;
+			std::cerr << ">>> request <<<" << std::endl << msg;
+			std::cerr << ">>> memory <<<" << std::endl << mem;
+
+			/* unpack() Must yield an axception */
+			CPPUNIT_ASSERT(false);
+
+		} catch (rofl::eBadSyntaxTooShort& e) {
+			CPPUNIT_ASSERT(i < msglen);
+		}
+	}
+
+	for (unsigned int i = msglen; i == msglen; i++) {
+		rofl::openflow::cofmsg_port_stats_request msg;
+		try {
+			stats->header.length = htobe16(i);
+			msg.unpack(mem.somem(), i);
+
+		} catch (rofl::eBadSyntaxTooShort& e) {
+
+			std::cerr << ">>> testing length values (len: " << i << ") <<< " << std::endl;
+			std::cerr << "[FAILURE] unpack() exception seen" << std::endl;
+			std::cerr << ">>> request <<<" << std::endl << msg;
+			std::cerr << ">>> memory <<<" << std::endl << mem;
+
+			/* unpack() Must yield an axception */
+			CPPUNIT_ASSERT(false);
+		}
+	}
+
+	for (unsigned int i = msglen + 1; i < memlen; i++) {
+		rofl::openflow::cofmsg_port_stats_request msg;
+		try {
+			stats->header.length = htobe16(i);
+			msg.unpack(mem.somem(), i);
+
+		} catch (rofl::eBadSyntaxTooShort& e) {
+			std::cerr << ">>> testing length values (len: " << i << ") <<< " << std::endl;
+			std::cerr << "[FAILURE] unpack() exception seen" << std::endl;
+			std::cerr << ">>> request <<<" << std::endl << msg;
+			std::cerr << ">>> memory <<<" << std::endl << mem;
+
+			CPPUNIT_ASSERT(false);
+		}
+	}
+}
+
+
+
+void
+cofmsgportstatstest::testRequestParser12()
+{
+	uint8_t version = rofl::openflow12::OFP_VERSION;
+	uint32_t portno = 0xb1b2b3b4;
+
+	cofport_stats_request port(version, portno);
+
+	size_t msglen = sizeof(struct rofl::openflow12::ofp_stats_request) + port.length();
+	size_t memlen = msglen + /*test overhead*/4;
+
+	rofl::cmemory mem(memlen);
+	struct rofl::openflow12::ofp_stats_request* stats =
+			(struct rofl::openflow12::ofp_stats_request*)(mem.somem());
+
+	stats->header.version = version;
+	stats->header.type = rofl::openflow12::OFPT_STATS_REQUEST;
+	stats->header.xid = htobe32(0xa0a1a2a3);
+	stats->header.length = htobe16(0);
+	stats->type = htobe16(rofl::openflow12::OFPST_PORT);
 	stats->flags = htobe16(0xb1b2);
 	port.pack(stats->body, port.length());
 
@@ -314,18 +420,103 @@ cofmsgportstatstest::testReplyParser10()
 		ports.set_port_stats(i).set_tx_packets(tx_packets);
 	}
 
-	size_t msglen = sizeof(struct rofl::openflow10::ofp_stats_request);
+	size_t msglen = sizeof(struct rofl::openflow10::ofp_stats_reply);
 	size_t memlen = msglen + ports.length() + /*test overhead*/4;
 
 	rofl::cmemory mem(memlen);
-	struct rofl::openflow10::ofp_stats_request* stats =
-			(struct rofl::openflow10::ofp_stats_request*)(mem.somem());
+	struct rofl::openflow10::ofp_stats_reply* stats =
+			(struct rofl::openflow10::ofp_stats_reply*)(mem.somem());
 
 	stats->header.version = version;
 	stats->header.type = rofl::openflow10::OFPT_STATS_REPLY;
 	stats->header.xid = htobe32(0xa0a1a2a3);
 	stats->header.length = htobe16(0);
 	stats->type = htobe16(rofl::openflow10::OFPST_PORT);
+	stats->flags = htobe16(0xb1b2);
+	ports.pack(stats->body, ports.length());
+
+
+	for (unsigned int i = 1; i < msglen; i++) {
+		rofl::openflow::cofmsg_port_stats_reply msg;
+		try {
+			stats->header.length = htobe16(i);
+			msg.unpack(mem.somem(), i);
+
+			std::cerr << ">>> testing length values (len: " << i << ") <<< " << std::endl;
+			std::cerr << "[FAILURE] unpack() no exception seen" << std::endl;
+			std::cerr << ">>> reply <<<" << std::endl << msg;
+			std::cerr << ">>> memory <<<" << std::endl << mem;
+
+			/* unpack() Must yield an axception */
+			CPPUNIT_ASSERT(false);
+
+		} catch (rofl::eBadSyntaxTooShort& e) {
+			CPPUNIT_ASSERT(i < msglen);
+		}
+	}
+
+	for (unsigned int i = msglen; i == msglen; i++) {
+		rofl::openflow::cofmsg_port_stats_reply msg;
+		try {
+			stats->header.length = htobe16(i);
+			msg.unpack(mem.somem(), i);
+
+		} catch (rofl::eBadSyntaxTooShort& e) {
+
+			std::cerr << ">>> testing length values (len: " << i << ") <<< " << std::endl;
+			std::cerr << "[FAILURE] unpack() exception seen" << std::endl;
+			std::cerr << ">>> reply <<<" << std::endl << msg;
+			std::cerr << ">>> memory <<<" << std::endl << mem;
+
+			/* unpack() Must yield an axception */
+			CPPUNIT_ASSERT(false);
+		}
+	}
+
+	for (unsigned int i = msglen + 1; i < memlen; i++) {
+		rofl::openflow::cofmsg_port_stats_reply msg;
+		try {
+			stats->header.length = htobe16(i);
+			msg.unpack(mem.somem(), i);
+
+		} catch (rofl::eBadSyntaxTooShort& e) {
+			std::cerr << ">>> testing length values (len: " << i << ") <<< " << std::endl;
+			std::cerr << "[FAILURE] unpack() exception seen" << std::endl;
+			std::cerr << ">>> reply <<<" << std::endl << msg;
+			std::cerr << ">>> memory <<<" << std::endl << mem;
+
+			CPPUNIT_ASSERT(false);
+		}
+	}
+}
+
+
+
+void
+cofmsgportstatstest::testReplyParser12()
+{
+	uint8_t version = rofl::openflow12::OFP_VERSION;
+	uint64_t rx_bytes = 0x4142434445464748;
+	uint64_t tx_packets = 0x6162636465666768;
+
+	cofportstatsarray ports(version);
+	for (unsigned int i = 0; i < 4; i++) {
+		ports.set_port_stats(i).set_rx_bytes(rx_bytes);
+		ports.set_port_stats(i).set_tx_packets(tx_packets);
+	}
+
+	size_t msglen = sizeof(struct rofl::openflow12::ofp_stats_reply);
+	size_t memlen = msglen + ports.length() + /*test overhead*/4;
+
+	rofl::cmemory mem(memlen);
+	struct rofl::openflow12::ofp_stats_reply* stats =
+			(struct rofl::openflow12::ofp_stats_reply*)(mem.somem());
+
+	stats->header.version = version;
+	stats->header.type = rofl::openflow12::OFPT_STATS_REPLY;
+	stats->header.xid = htobe32(0xa0a1a2a3);
+	stats->header.length = htobe16(0);
+	stats->type = htobe16(rofl::openflow12::OFPST_PORT);
 	stats->flags = htobe16(0xb1b2);
 	ports.pack(stats->body, ports.length());
 
@@ -399,12 +590,12 @@ cofmsgportstatstest::testReplyParser13()
 		ports.set_port_stats(i).set_tx_packets(tx_packets);
 	}
 
-	size_t msglen = sizeof(struct rofl::openflow13::ofp_multipart_request);
+	size_t msglen = sizeof(struct rofl::openflow13::ofp_multipart_reply);
 	size_t memlen = msglen + ports.length() + ports.length() + /*test overhead*/4;
 
 	rofl::cmemory mem(memlen);
-	struct rofl::openflow13::ofp_multipart_request* stats =
-			(struct rofl::openflow13::ofp_multipart_request*)(mem.somem());
+	struct rofl::openflow13::ofp_multipart_reply* stats =
+			(struct rofl::openflow13::ofp_multipart_reply*)(mem.somem());
 
 	stats->header.version = version;
 	stats->header.type = rofl::openflow13::OFPT_MULTIPART_REPLY;

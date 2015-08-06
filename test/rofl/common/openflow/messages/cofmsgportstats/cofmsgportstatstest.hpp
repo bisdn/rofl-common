@@ -20,11 +20,15 @@ class cofmsgportstatstest :
 	CPPUNIT_TEST_SUITE( cofmsgportstatstest );
 	CPPUNIT_TEST( testRequest10 );
 	CPPUNIT_TEST( testReply10 );
+	CPPUNIT_TEST( testRequest12 );
+	CPPUNIT_TEST( testReply12 );
 	CPPUNIT_TEST( testRequest13 );
 	CPPUNIT_TEST( testReply13 );
 	CPPUNIT_TEST( testRequestParser10 );
+	CPPUNIT_TEST( testRequestParser12 );
 	CPPUNIT_TEST( testRequestParser13 );
 	CPPUNIT_TEST( testReplyParser10 );
+	CPPUNIT_TEST( testReplyParser12 );
 	CPPUNIT_TEST( testReplyParser13 );
 	CPPUNIT_TEST_SUITE_END();
 
@@ -34,12 +38,16 @@ public:
 
 public:
 	void testRequest10();
+	void testRequest12();
 	void testRequest13();
 	void testReply10();
+	void testReply12();
 	void testReply13();
 	void testRequestParser10();
+	void testRequestParser12();
 	void testRequestParser13();
 	void testReplyParser10();
+	void testReplyParser12();
 	void testReplyParser13();
 
 private:
