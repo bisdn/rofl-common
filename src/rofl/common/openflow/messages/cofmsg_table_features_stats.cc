@@ -99,6 +99,9 @@ cofmsg_table_features_stats_request::unpack(
 
 	switch (get_version()) {
 	default: {
+		if (get_stats_type() != rofl::openflow13::OFPMP_TABLE_FEATURES)
+			throw eMsgInval("cofmsg_table_features_stats_request::unpack() invalid statistics type");
+
 		struct rofl::openflow13::ofp_multipart_request* hdr =
 				(struct rofl::openflow13::ofp_multipart_request*)buf;
 		if (buflen > sizeof(struct rofl::openflow13::ofp_multipart_request)) {
@@ -216,6 +219,9 @@ cofmsg_table_features_stats_reply::unpack(
 
 	switch (get_version()) {
 	default: {
+		if (get_stats_type() != rofl::openflow13::OFPMP_TABLE_FEATURES)
+			throw eMsgInval("cofmsg_table_features_stats_reply::unpack() invalid statistics type");
+
 		struct rofl::openflow13::ofp_multipart_reply* hdr =
 				(struct rofl::openflow13::ofp_multipart_reply*)buf;
 		if (buflen > sizeof(struct rofl::openflow13::ofp_multipart_reply)) {

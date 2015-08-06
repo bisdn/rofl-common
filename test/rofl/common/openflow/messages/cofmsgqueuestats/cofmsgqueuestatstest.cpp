@@ -597,7 +597,7 @@ cofmsgqueuestatstest::testReplyParser13()
 	}
 
 	size_t msglen = sizeof(struct rofl::openflow13::ofp_multipart_reply);
-	size_t memlen = msglen + queues.length() + queues.length() + /*test overhead*/4;
+	size_t memlen = msglen + queues.length() + /*test overhead*/4;
 
 	rofl::cmemory mem(memlen);
 	struct rofl::openflow13::ofp_multipart_reply* stats =
