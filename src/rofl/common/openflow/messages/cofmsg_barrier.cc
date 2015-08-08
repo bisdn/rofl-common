@@ -34,7 +34,7 @@ cofmsg_barrier_request::unpack(
 {
 	cofmsg::unpack(buf, buflen);
 
-	body.clear();
+	body.resize(0);
 
 	if ((0 == buf) || (0 == buflen))
 		return;
@@ -84,7 +84,7 @@ cofmsg_barrier_reply::pack(
 {
 	cofmsg::pack(buf, buflen);
 
-	body.clear();
+	body.resize(0);
 
 	if ((0 == buf) || (0 == buflen))
 		return;
