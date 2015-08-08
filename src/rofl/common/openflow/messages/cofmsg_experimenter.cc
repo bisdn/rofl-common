@@ -27,7 +27,7 @@ cofmsg_experimenter::pack(
 	if ((0 == buf) || (0 == buflen))
 		return;
 
-	if (buflen < get_length())
+	if (buflen < cofmsg_experimenter::length())
 		throw eMsgInval("cofmsg_experimenter::pack() buf too short");
 
 	switch (get_version()) {
@@ -65,40 +65,47 @@ cofmsg_experimenter::unpack(
 {
 	cofmsg::unpack(buf, buflen);
 
+	body.resize(0);
+
 	if ((0 == buf) || (0 == buflen))
 		return;
 
+	if (buflen < cofmsg_experimenter::length())
+		throw eBadSyntaxTooShort("cofmsg_experimenter::unpack() buf too short");
+
 	switch (get_version()) {
 	case rofl::openflow10::OFP_VERSION: {
-
-		if (get_length() <= sizeof(struct rofl::openflow10::ofp_vendor_header))
-			return;
 
 		struct rofl::openflow10::ofp_vendor_header* hdr =
 				(struct rofl::openflow10::ofp_vendor_header*)buf;
 
 		exp_id = be32toh(hdr->vendor);
+		exp_type = 0;
 
-		body.unpack(buf + sizeof(struct rofl::openflow10::ofp_vendor_header),
-				buflen - sizeof(struct rofl::openflow10::ofp_vendor_header));
+		if (buflen > sizeof(struct rofl::openflow10::ofp_vendor_header)) {
+			body.unpack(buf + sizeof(struct rofl::openflow10::ofp_vendor_header),
+					buflen - sizeof(struct rofl::openflow10::ofp_vendor_header));
+		}
 
 	} break;
 	default: {
 
-		if (get_length() <= sizeof(struct rofl::openflow12::ofp_experimenter_header))
-			return;
-
-		struct rofl::openflow12::ofp_experimenter_header* hdr =
-				(struct rofl::openflow12::ofp_experimenter_header*)buf;
+		struct rofl::openflow13::ofp_experimenter_header* hdr =
+				(struct rofl::openflow13::ofp_experimenter_header*)buf;
 
 		exp_id   = be32toh(hdr->experimenter);
 		exp_type = be32toh(hdr->exp_type);
 
-		body.unpack(buf + sizeof(struct rofl::openflow12::ofp_experimenter_header),
-				buflen - sizeof(struct rofl::openflow12::ofp_experimenter_header));
+		if (buflen > sizeof(struct rofl::openflow13::ofp_experimenter_header)) {
+			body.unpack(buf + sizeof(struct rofl::openflow13::ofp_experimenter_header),
+					buflen - sizeof(struct rofl::openflow13::ofp_experimenter_header));
+		}
 
 	};
 	}
+
+	if (get_length() < cofmsg_experimenter::length())
+		throw eBadSyntaxTooShort("cofmsg_experimenter::unpack() buf too short");
 }
 
 

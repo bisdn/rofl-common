@@ -22,5 +22,6 @@ SUBDIRS = \
 	cofmsgbarrier \
 	cofmsgconfig \
 	cofmsgecho \
-	cofmsgerror
+	cofmsgerror \
+	cofmsgexperimenter
 
