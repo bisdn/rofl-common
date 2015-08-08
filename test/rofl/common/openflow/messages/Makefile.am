@@ -18,5 +18,6 @@ SUBDIRS = \
 	cofmsgqueuestats \
 	cofmsgtablefeaturesstats \
 	cofmsgtablestats \
-	cofmsgasyncconfig
+	cofmsgasyncconfig \
+	cofmsgbarrier
 

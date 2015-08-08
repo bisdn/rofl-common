@@ -177,8 +177,6 @@ cofmsgasyncconfigtest::testRequestParser13()
 
 		} catch (rofl::eBadSyntaxTooShort& e) {
 			CPPUNIT_ASSERT(i < msglen);
-		} catch (rofl::eTableFeaturesReqBadLen& e) {
-			CPPUNIT_ASSERT(i < msglen);
 		}
 	}
 
@@ -197,8 +195,6 @@ cofmsgasyncconfigtest::testRequestParser13()
 
 			/* unpack() Must yield an exception */
 			CPPUNIT_ASSERT(false);
-		} catch (rofl::eTableFeaturesReqBadLen& e) {
-
 		}
 	}
 
@@ -215,8 +211,6 @@ cofmsgasyncconfigtest::testRequestParser13()
 			std::cerr << ">>> memory <<<" << std::endl << mem;
 
 			CPPUNIT_ASSERT(false);
-		} catch (rofl::eTableFeaturesReqBadLen& e) {
-
 		}
 	}
 }
@@ -272,8 +266,6 @@ cofmsgasyncconfigtest::testReplyParser13()
 
 		} catch (rofl::eBadSyntaxTooShort& e) {
 			CPPUNIT_ASSERT(i < msglen);
-		} catch (rofl::eTableFeaturesReqBadLen& e) {
-			CPPUNIT_ASSERT(i < msglen);
 		}
 	}
 
@@ -292,8 +284,6 @@ cofmsgasyncconfigtest::testReplyParser13()
 
 			/* unpack() Must yield an axception */
 			CPPUNIT_ASSERT(false);
-		} catch (rofl::eTableFeaturesReqBadLen& e) {
-
 		}
 	}
 
@@ -310,8 +300,6 @@ cofmsgasyncconfigtest::testReplyParser13()
 			std::cerr << ">>> memory <<<" << std::endl << mem;
 
 			CPPUNIT_ASSERT(false);
-		} catch (rofl::eTableFeaturesReqBadLen& e) {
-
 		}
 	}
 }
@@ -370,8 +358,6 @@ cofmsgasyncconfigtest::testSetParser13()
 
 		} catch (rofl::eBadSyntaxTooShort& e) {
 			CPPUNIT_ASSERT(i < msglen);
-		} catch (rofl::eTableFeaturesReqBadLen& e) {
-			CPPUNIT_ASSERT(i < msglen);
 		}
 	}
 
@@ -390,8 +376,6 @@ cofmsgasyncconfigtest::testSetParser13()
 
 			/* unpack() Must yield an axception */
 			CPPUNIT_ASSERT(false);
-		} catch (rofl::eTableFeaturesReqBadLen& e) {
-
 		}
 	}
 
@@ -408,8 +392,6 @@ cofmsgasyncconfigtest::testSetParser13()
 			std::cerr << ">>> memory <<<" << std::endl << mem;
 
 			CPPUNIT_ASSERT(false);
-		} catch (rofl::eTableFeaturesReqBadLen& e) {
-
 		}
 	}
 }
