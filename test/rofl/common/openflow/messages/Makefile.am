@@ -21,5 +21,6 @@ SUBDIRS = \
 	cofmsgasyncconfig \
 	cofmsgbarrier \
 	cofmsgconfig \
-	cofmsgecho
+	cofmsgecho \
+	cofmsgerror
 
