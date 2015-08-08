@@ -36,7 +36,9 @@ public:
 			const rofl::openflow::cofflowmod& flowmod = rofl::openflow::cofflowmod()) :
 				cofmsg(version, rofl::openflow::OFPT_FLOW_MOD, xid),
 				flowmod(flowmod)
-	{};
+	{
+		this->flowmod.set_version(version);
+	};
 
 	/**
 	 *

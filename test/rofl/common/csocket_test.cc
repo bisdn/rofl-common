@@ -166,7 +166,7 @@ testSocket::terminate()
 }
 
 
-
+#if 0
 #ifdef ROFL_HAVE_OPENSSL 
 
 void
@@ -233,7 +233,7 @@ csocket_test::testSocketOpenSSL()
 	}
 }
 #endif
-
+#endif
 
 void
 testSocket::handle_timeout(int opaque, void* data)

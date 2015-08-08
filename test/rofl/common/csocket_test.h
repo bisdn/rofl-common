@@ -125,8 +125,10 @@ class csocket_test : public CppUnit::TestFixture {
 
 	CPPUNIT_TEST_SUITE( csocket_test );
 	CPPUNIT_TEST( testSocketImpl );
+#if 0
 #ifdef ROFL_HAVE_OPENSSL
 	CPPUNIT_TEST( testSocketOpenSSL );
+#endif
 #endif
 	CPPUNIT_TEST_SUITE_END();
 
@@ -139,10 +141,11 @@ public:
 	void tearDown();
 
 	void testSocketImpl();
+#if 0
 #ifdef ROFL_HAVE_OPENSSL
 	void testSocketOpenSSL();
 #endif
-
+#endif
 };
 
 

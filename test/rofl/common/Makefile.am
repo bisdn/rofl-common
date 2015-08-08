@@ -1,6 +1,6 @@
 MAINTAINERCLEANFILES = Makefile.in
 
-SUBDIRS = openflow all # crofbase
+SUBDIRS = openflow # all # crofbase
 
 export INCLUDES += -I$(abs_srcdir)/../src/
 
@@ -35,5 +35,5 @@ unittest_LDADD=$(top_builddir)/src/rofl/librofl_common.la -lcppunit -lpthread
 
 check_PROGRAMS=unittest 
 
-TESTS=unittest
+#TESTS=unittest
 
