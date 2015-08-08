@@ -80,6 +80,13 @@ cofmsg_get_async_config_request::unpack(
 	if (buflen < cofmsg_get_async_config_request::length())
 		throw eBadSyntaxTooShort("cofmsg_get_async_config_request::unpack() buf too short");
 
+	switch (get_version()) {
+	default: {
+		if (get_type() != rofl::openflow13::OFPT_GET_ASYNC_REQUEST)
+			throw eMsgInval("cofmsg_get_async_config_request::unpack() invalid message type");
+	};
+	}
+
 	if (get_length() < cofmsg_get_async_config_request::length())
 		throw eBadSyntaxTooShort("cofmsg_get_async_config_request::unpack() buf too short");
 }
@@ -184,6 +191,10 @@ cofmsg_get_async_config_reply::unpack(
 
 	switch (get_version()) {
 	default: {
+
+		if (get_type() != rofl::openflow13::OFPT_GET_ASYNC_REPLY)
+			throw eMsgInval("cofmsg_get_async_config_request::unpack() invalid message type");
+
 		if (buflen > sizeof(struct rofl::openflow::ofp_header)) {
 			async_config.unpack(buf + sizeof(struct rofl::openflow::ofp_header), buflen - sizeof(struct rofl::openflow::ofp_header));
 		}
@@ -293,6 +304,10 @@ cofmsg_set_async_config::unpack(
 
 	switch (get_version()) {
 	default: {
+
+		if (get_type() != rofl::openflow13::OFPT_SET_ASYNC)
+			throw eMsgInval("cofmsg_get_async_config_request::unpack() invalid message type");
+
 		if (buflen > sizeof(struct rofl::openflow::ofp_header)) {
 			async_config.unpack(buf + sizeof(struct rofl::openflow::ofp_header), buflen - sizeof(struct rofl::openflow::ofp_header));
 		}

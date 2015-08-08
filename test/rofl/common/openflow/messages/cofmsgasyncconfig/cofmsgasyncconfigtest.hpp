@@ -20,8 +20,10 @@ class cofmsgasyncconfigtest :
 	CPPUNIT_TEST_SUITE( cofmsgasyncconfigtest );
 	CPPUNIT_TEST( testRequest13 );
 	CPPUNIT_TEST( testReply13 );
+	CPPUNIT_TEST( testSet13 );
 	CPPUNIT_TEST( testRequestParser13 );
 	CPPUNIT_TEST( testReplyParser13 );
+	CPPUNIT_TEST( testSetParser13 );
 	CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -31,15 +33,20 @@ public:
 public:
 	void testRequest13();
 	void testReply13();
+	void testSet13();
 	void testRequestParser13();
 	void testReplyParser13();
+	void testSetParser13();
 
 private:
 
 	void testRequest(
-			uint8_t version, uint8_t type, uint32_t xid, uint16_t stats_type, uint16_t stats_flags);
+			uint8_t version, uint8_t type, uint32_t xid);
 	void testReply(
-			uint8_t version, uint8_t type, uint32_t xid, uint16_t stats_type, uint16_t stats_flags);
+			uint8_t version, uint8_t type, uint32_t xid);
+	void testSet(
+			uint8_t version, uint8_t type, uint32_t xid);
+
 };
 
 #endif /* TEST_SRC_ROFL_COMMON_OPENFLOW_MESSAGES_COFMSGASYNCCONFIG_TEST_HPP_ */
