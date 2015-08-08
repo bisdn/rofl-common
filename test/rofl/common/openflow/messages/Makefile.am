@@ -23,5 +23,6 @@ SUBDIRS = \
 	cofmsgconfig \
 	cofmsgecho \
 	cofmsgerror \
-	cofmsgexperimenter
+	cofmsgexperimenter \
+	cofmsgfeatures
 

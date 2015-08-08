@@ -109,7 +109,9 @@ public:
 				capabilities(capabilities),
 				actions(actions_bitmap),
 				ports(ports)
-	{};
+	{
+		this->ports.set_version(version);
+	};
 
 	/**
 	 *

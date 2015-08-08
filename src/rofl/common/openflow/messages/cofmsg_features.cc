@@ -85,14 +85,17 @@ cofmsg_features_reply::unpack(
 {
 	cofmsg::unpack(buf, buflen);
 
+	this->ports.clear();
+	this->ports.set_version(get_version());
+
 	if ((0 == buf) || (0 == buflen))
 		return;
 
+	if (buflen < cofmsg_features_reply::length())
+		throw eBadSyntaxTooShort("cofmsg_features_reply::unpack() buf too short");
+
 	switch (get_version()) {
 	case rofl::openflow10::OFP_VERSION: {
-
-		if (get_length() <= sizeof(struct rofl::openflow10::ofp_switch_features))
-			return;
 
 		struct rofl::openflow10::ofp_switch_features* hdr =
 				(struct rofl::openflow10::ofp_switch_features*)buf;
@@ -103,14 +106,13 @@ cofmsg_features_reply::unpack(
 		capabilities = be32toh(hdr->capabilities);
 		actions      = be32toh(hdr->actions);
 
-		ports.unpack(buf + sizeof(struct rofl::openflow10::ofp_switch_features),
-				buflen - sizeof(struct rofl::openflow10::ofp_switch_features));
+		if (buflen > sizeof(struct rofl::openflow10::ofp_switch_features)) {
+			ports.unpack(buf + sizeof(struct rofl::openflow10::ofp_switch_features),
+					buflen - sizeof(struct rofl::openflow10::ofp_switch_features));
+		}
 
 	} break;
 	case rofl::openflow12::OFP_VERSION: {
-
-		if (get_length() <= sizeof(struct rofl::openflow12::ofp_switch_features))
-			return;
 
 		struct rofl::openflow12::ofp_switch_features* hdr =
 				(struct rofl::openflow12::ofp_switch_features*)buf;
@@ -120,14 +122,13 @@ cofmsg_features_reply::unpack(
 		n_tables     = hdr->n_tables;
 		capabilities = be32toh(hdr->capabilities);
 
-		ports.unpack(buf + sizeof(struct rofl::openflow12::ofp_switch_features),
-				buflen - sizeof(struct rofl::openflow12::ofp_switch_features));
+		if (buflen > sizeof(struct rofl::openflow12::ofp_switch_features)) {
+			ports.unpack(buf + sizeof(struct rofl::openflow12::ofp_switch_features),
+					buflen - sizeof(struct rofl::openflow12::ofp_switch_features));
+		}
 
 	} break;
 	default: {
-
-		if (get_length() <= sizeof(struct rofl::openflow13::ofp_switch_features))
-			return;
 
 		struct rofl::openflow13::ofp_switch_features* hdr =
 				(struct rofl::openflow13::ofp_switch_features*)buf;
@@ -140,6 +141,9 @@ cofmsg_features_reply::unpack(
 
 	};
 	}
+
+	if (get_length() < cofmsg_features_reply::length())
+		throw eBadSyntaxTooShort("cofmsg_features_reply::unpack() buf too short");
 }
 
 
