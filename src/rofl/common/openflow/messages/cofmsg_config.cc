@@ -40,14 +40,25 @@ cofmsg_get_config_reply::unpack(
 	if ((0 == buf) || (0 == buflen))
 		return;
 
-	if (get_length() <= sizeof(struct rofl::openflow10::ofp_switch_config))
-		throw eSwitchConfigBadLen();
+	if (buflen < cofmsg_get_config_reply::length())
+		throw eBadSyntaxTooShort("cofmsg_get_config_reply::unpack() but too short");
 
-	struct rofl::openflow10::ofp_switch_config* hdr =
-			(struct rofl::openflow10::ofp_switch_config*)buf;
+	switch (get_version()) {
+	default: {
+		struct rofl::openflow10::ofp_switch_config* hdr =
+				(struct rofl::openflow10::ofp_switch_config*)buf;
 
-	flags         = be16toh(hdr->flags);
-	miss_send_len = be16toh(hdr->miss_send_len);
+		if (get_type() != rofl::openflow10::OFPT_GET_CONFIG_REPLY)
+			throw eMsgInval("cofmsg_get_config_reply::unpack() invalid message type");
+
+		flags         = be16toh(hdr->flags);
+		miss_send_len = be16toh(hdr->miss_send_len);
+
+	};
+	}
+
+	if (get_length() < cofmsg_get_config_reply::length())
+		throw eBadSyntaxTooShort("cofmsg_get_config_reply::unpack() but too short");
 }
 
 
@@ -90,14 +101,25 @@ cofmsg_set_config::unpack(
 	if ((0 == buf) || (0 == buflen))
 		return;
 
-	if (get_length() <= sizeof(struct rofl::openflow10::ofp_switch_config))
-		throw eSwitchConfigBadLen();
+	if (buflen < cofmsg_set_config::length())
+		throw eBadSyntaxTooShort("cofmsg_set_config::unpack() but too short");
 
-	struct rofl::openflow10::ofp_switch_config* hdr =
-			(struct rofl::openflow10::ofp_switch_config*)buf;
+	switch (get_version()) {
+	default: {
+		if (get_type() != rofl::openflow10::OFPT_SET_CONFIG)
+			throw eMsgInval("cofmsg_set_config::unpack() invalid message type");
 
-	flags         = be16toh(hdr->flags);
-	miss_send_len = be16toh(hdr->miss_send_len);
+		struct rofl::openflow10::ofp_switch_config* hdr =
+				(struct rofl::openflow10::ofp_switch_config*)buf;
+
+		flags         = be16toh(hdr->flags);
+		miss_send_len = be16toh(hdr->miss_send_len);
+
+	};
+	}
+
+	if (get_length() < cofmsg_set_config::length())
+		throw eBadSyntaxTooShort("cofmsg_set_config::unpack() but too short");
 }
 
 

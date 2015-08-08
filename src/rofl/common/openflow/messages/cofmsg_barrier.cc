@@ -39,8 +39,8 @@ cofmsg_barrier_request::unpack(
 	if ((0 == buf) || (0 == buflen))
 		return;
 
-	if (get_length() <= sizeof(struct rofl::openflow::ofp_header))
-		return;
+	if (buflen < cofmsg_barrier_request::length())
+		throw eBadSyntaxTooShort("cofmsg_barrier_request::unpack() buf too short");
 
 	switch (get_version()) {
 	case rofl::openflow10::OFP_VERSION: {
@@ -107,8 +107,8 @@ cofmsg_barrier_reply::unpack(
 	if ((0 == buf) || (0 == buflen))
 		return;
 
-	if (get_length() <= sizeof(struct rofl::openflow::ofp_header))
-		return;
+	if (buflen < cofmsg_barrier_reply::length())
+		throw eBadSyntaxTooShort("cofmsg_barrier_reply::unpack() buf too short");
 
 	switch (get_version()) {
 	case rofl::openflow10::OFP_VERSION: {
