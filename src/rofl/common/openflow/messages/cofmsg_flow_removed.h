@@ -369,7 +369,7 @@ public:
 private:
 
 	static const size_t OFP10_FLOW_REMOVED_STATIC_HDR_LEN;
-	static const size_t OFP12_FLOW_REMOVED_STATIC_HDR_LEN;
+	static const size_t OFP13_FLOW_REMOVED_STATIC_HDR_LEN;
 
 	uint64_t cookie;
 	uint16_t priority;

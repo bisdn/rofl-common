@@ -4,8 +4,8 @@ using namespace rofl::openflow;
 
 /*static*/const size_t cofmsg_flow_removed::OFP10_FLOW_REMOVED_STATIC_HDR_LEN =
 		sizeof(struct rofl::openflow10::ofp_flow_removed);
-/*static*/const size_t cofmsg_flow_removed::OFP12_FLOW_REMOVED_STATIC_HDR_LEN =
-		sizeof(struct rofl::openflow12::ofp_flow_removed) - sizeof(struct rofl::openflow::ofp_match);
+/*static*/const size_t cofmsg_flow_removed::OFP13_FLOW_REMOVED_STATIC_HDR_LEN =
+		sizeof(struct rofl::openflow13::ofp_flow_removed) - sizeof(struct rofl::openflow13::ofp_match);
 
 size_t
 cofmsg_flow_removed::length() const
@@ -15,7 +15,7 @@ cofmsg_flow_removed::length() const
 		return (OFP10_FLOW_REMOVED_STATIC_HDR_LEN);
 	} break;
 	default: {
-		return (OFP12_FLOW_REMOVED_STATIC_HDR_LEN + match.length());
+		return (OFP13_FLOW_REMOVED_STATIC_HDR_LEN + match.length());
 	};
 	}
 	return 0;
@@ -32,7 +32,7 @@ cofmsg_flow_removed::pack(
 	if ((0 == buf) || (0 == buflen))
 		return;
 
-	if (buflen < get_length())
+	if (buflen < cofmsg_flow_removed::length())
 		throw eMsgInval("cofmsg_flow_removed::pack()");
 
 	switch (get_version()) {
@@ -51,13 +51,13 @@ cofmsg_flow_removed::pack(
 		hdr->byte_count    = htobe64(byte_count);
 
 		match.pack((uint8_t*)&(hdr->match),
-				sizeof(struct rofl::openflow10::ofp_match));
+					sizeof(struct rofl::openflow10::ofp_match));
 
 	} break;
 	default: {
 
-		struct rofl::openflow12::ofp_flow_removed* hdr =
-				(struct rofl::openflow12::ofp_flow_removed*)buf;
+		struct rofl::openflow13::ofp_flow_removed* hdr =
+				(struct rofl::openflow13::ofp_flow_removed*)buf;
 
 		hdr->cookie        = htobe64(cookie);
 		hdr->priority      = htobe16(priority);
@@ -70,8 +70,8 @@ cofmsg_flow_removed::pack(
 		hdr->packet_count  = htobe64(packet_count);
 		hdr->byte_count    = htobe64(byte_count);
 
-		match.pack(buf + OFP12_FLOW_REMOVED_STATIC_HDR_LEN,
-				buflen - OFP12_FLOW_REMOVED_STATIC_HDR_LEN);
+		match.pack(buf + OFP13_FLOW_REMOVED_STATIC_HDR_LEN,
+					buflen - OFP13_FLOW_REMOVED_STATIC_HDR_LEN);
 
 	};
 	}
@@ -83,9 +83,10 @@ void
 cofmsg_flow_removed::unpack(
 		uint8_t *buf, size_t buflen)
 {
-	match.clear();
-
 	cofmsg::unpack(buf, buflen);
+
+	match.set_version(get_version());
+	match.clear();
 
 	if ((0 == buf) || (0 == buflen))
 		return;
@@ -93,8 +94,8 @@ cofmsg_flow_removed::unpack(
 	switch (get_version()) {
 	case rofl::openflow10::OFP_VERSION: {
 
-		if (get_length() < sizeof(struct rofl::openflow10::ofp_flow_removed))
-			throw eBadSyntaxTooShort("cofmsg_flow_removed::unpack()");
+		if (buflen < sizeof(struct rofl::openflow10::ofp_flow_removed))
+			throw eBadSyntaxTooShort("cofmsg_flow_removed::unpack() buf too short");
 
 		struct rofl::openflow10::ofp_flow_removed* hdr =
 				(struct rofl::openflow10::ofp_flow_removed*)buf;
@@ -113,10 +114,13 @@ cofmsg_flow_removed::unpack(
 		match.unpack((uint8_t*)&(hdr->match),
 				sizeof(struct rofl::openflow10::ofp_match));
 
+		if (get_length() < sizeof(struct rofl::openflow10::ofp_flow_removed))
+			throw eBadSyntaxTooShort("cofmsg_flow_removed::unpack() buf too short");
+
 	} break;
 	default: {
 
-		if (get_length() < sizeof(struct rofl::openflow12::ofp_flow_removed))
+		if (buflen < sizeof(struct rofl::openflow13::ofp_flow_removed))
 			throw eBadSyntaxTooShort("cofmsg_flow_removed::unpack()");
 
 		struct rofl::openflow12::ofp_flow_removed* hdr =
@@ -133,14 +137,14 @@ cofmsg_flow_removed::unpack(
 		packet_count  = be64toh(hdr->packet_count);
 		byte_count    = be64toh(hdr->byte_count);
 
-		size_t matchlen = get_length() - OFP12_FLOW_REMOVED_STATIC_HDR_LEN;
+		if (buflen > OFP13_FLOW_REMOVED_STATIC_HDR_LEN) {
+			match.unpack((uint8_t*)&(hdr->match), buflen - OFP13_FLOW_REMOVED_STATIC_HDR_LEN);
+		}
 
-		if (matchlen < 2*sizeof(uint16_t))
+		if (get_length() < sizeof(struct rofl::openflow13::ofp_flow_removed))
 			throw eBadSyntaxTooShort("cofmsg_flow_removed::unpack()");
-
-		match.unpack((uint8_t*)&(hdr->match), matchlen);
-
 	};
 	}
 }
+
 

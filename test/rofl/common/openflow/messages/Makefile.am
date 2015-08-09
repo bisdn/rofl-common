@@ -25,5 +25,6 @@ SUBDIRS = \
 	cofmsgerror \
 	cofmsgexperimenter \
 	cofmsgfeatures \
-	cofmsgflowmod
+	cofmsgflowmod \
+	cofmsgflowremoved
 
