@@ -26,5 +26,6 @@ SUBDIRS = \
 	cofmsgexperimenter \
 	cofmsgfeatures \
 	cofmsgflowmod \
-	cofmsgflowremoved
+	cofmsgflowremoved \
+	cofmsggroupmod
 

@@ -19,7 +19,7 @@ cofmsg_group_mod::pack(
 	if ((0 == buf) || (0 == buflen))
 		return;
 
-	if (buflen < get_length())
+	if (buflen < cofmsg_group_mod::length())
 		throw eMsgInval("cofmsg_group_mod::pack()");
 
 	switch (get_version()) {
@@ -36,31 +36,37 @@ cofmsg_group_mod::pack(
 
 
 void
-cofmsg_group_mod::unpack(uint8_t *buf, size_t buflen)
+cofmsg_group_mod::unpack(
+		uint8_t *buf, size_t buflen)
 {
-	groupmod.clear();
-
 	cofmsg::unpack(buf, buflen);
+
+	groupmod.set_version(get_version());
+	groupmod.clear();
 
 	if ((0 == buf) || (0 == buflen))
 		return;
 
+	if (buflen < cofmsg_group_mod::length())
+		throw eBadSyntaxTooShort("cofmsg_group_mod::unpack() buf too short");
+
 	switch (get_version()) {
 	default: {
 
-		if (buflen < get_length())
-			throw eBadSyntaxTooShort("cofmsg_group_mod::unpack()");
+		if (get_type() != rofl::openflow::OFPT_GROUP_MOD)
+			throw eMsgInval("cofmsg_group_mod::unpack() invalid message type");
 
 		struct rofl::openflow::ofp_header* hdr =
 				(struct rofl::openflow::ofp_header*)buf;
 
-		size_t groupmodlen = buflen - sizeof(struct rofl::openflow::ofp_header);
-
-		if (groupmodlen > 0) {
-			groupmod.unpack(hdr->body, groupmodlen);
+		if (buflen > sizeof(struct rofl::openflow::ofp_header)) {
+			groupmod.unpack(hdr->body, buflen - sizeof(struct rofl::openflow::ofp_header));
 		}
 	};
 	}
+
+	if (get_length() < cofmsg_group_mod::length())
+		throw eBadSyntaxTooShort("cofmsg_group_mod::unpack() buf too short");
 }
 
 

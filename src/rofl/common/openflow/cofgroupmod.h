@@ -62,7 +62,9 @@ public:
 				type(type),
 				group_id(group_id),
 				buckets(buckets)
-	{};
+	{
+		this->buckets.set_version(version);
+	};
 
 	/**
 	 *
@@ -206,7 +208,7 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, cofgroupmod const& groupmod) {
-		os << "<cgroupentry ";
+		os << rofl::indent(0) << "<cofgroupmod ";
 			os << "cmd:";
 			switch (groupmod.ofp_version) {
 			case openflow12::OFP_VERSION:
@@ -222,8 +224,8 @@ public:
 				case rofl::openflow13::OFPGT_ALL:		os << "ALL ";			break;
 				case rofl::openflow13::OFPGT_SELECT:	os << "SELECT "; 		break;
 				case rofl::openflow13::OFPGT_INDIRECT:  os << "INDIRECT ";		break;
-				case rofl::openflow13::OFPGT_FF:		os << "FAST-FAILOVER"; 	break;
-				default:						        os << "UNKNOWN";		break;
+				case rofl::openflow13::OFPGT_FF:		os << "FAST-FAILOVER "; break;
+				default:						        os << "UNKNOWN ";		break;
 				}
 			} break;
 			default:

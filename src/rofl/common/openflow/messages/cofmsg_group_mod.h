@@ -38,7 +38,9 @@ public:
 			const rofl::openflow::cofgroupmod& groupmod = rofl::openflow::cofgroupmod()) :
 				cofmsg(version, rofl::openflow12::OFPT_GROUP_MOD, xid),
 				groupmod(groupmod)
-	{};
+	{
+		this->groupmod.set_version(version);
+	};
 
 	/**
 	 *

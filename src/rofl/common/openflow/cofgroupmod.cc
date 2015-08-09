@@ -29,7 +29,7 @@ cofgroupmod::pack(
 	if ((0 == buf) || (0 == buflen))
 		return;
 
-	if (buflen < length())
+	if (buflen < cofgroupmod::length())
 		throw eInval("cofgroupmod::pack() buflen too short");
 
 	switch (get_version()) {
@@ -56,17 +56,18 @@ void
 cofgroupmod::unpack(
 		uint8_t *buf, size_t buflen)
 {
+	buckets.set_version(get_version());
+	buckets.clear();
+
 	if ((0 == buf) || (0 == buflen))
 		return;
 
-	buckets.clear();
+	if (buflen < cofgroupmod::length())
+		throw eInval("cofgroupmod::unpack() buflen too short");
 
 	switch (get_version()) {
 	case rofl::openflow12::OFP_VERSION:
 	case rofl::openflow13::OFP_VERSION: {
-
-		if (buflen < sizeof(struct ofp_group_mod))
-			throw eInval("cofgroupmod::unpack() buflen too short");
 
 		struct ofp_group_mod* hdr = (struct ofp_group_mod*)buf;
 
@@ -74,10 +75,9 @@ cofgroupmod::unpack(
 		type     = hdr->type;
 		group_id = be32toh(hdr->group_id);
 
-		size_t buckets_len = buflen - sizeof(struct ofp_group_mod);
-
-		if (buckets_len > 0)
-			buckets.unpack((uint8_t*)hdr->buckets, buckets_len);
+		if (buflen > sizeof(struct ofp_group_mod)) {
+			buckets.unpack((uint8_t*)hdr->buckets, buflen - sizeof(struct ofp_group_mod));
+		}
 
 	} break;
 	default:

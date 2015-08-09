@@ -97,6 +97,9 @@ cofmsg_flow_removed::unpack(
 		if (buflen < sizeof(struct rofl::openflow10::ofp_flow_removed))
 			throw eBadSyntaxTooShort("cofmsg_flow_removed::unpack() buf too short");
 
+		if (get_type() != rofl::openflow10::OFPT_FLOW_REMOVED)
+			throw eMsgInval("cofmsg_flow_removed::unpack() invalid message type");
+
 		struct rofl::openflow10::ofp_flow_removed* hdr =
 				(struct rofl::openflow10::ofp_flow_removed*)buf;
 
@@ -122,6 +125,9 @@ cofmsg_flow_removed::unpack(
 
 		if (buflen < sizeof(struct rofl::openflow13::ofp_flow_removed))
 			throw eBadSyntaxTooShort("cofmsg_flow_removed::unpack()");
+
+		if (get_type() != rofl::openflow13::OFPT_FLOW_REMOVED)
+			throw eMsgInval("cofmsg_flow_removed::unpack() invalid message type");
 
 		struct rofl::openflow12::ofp_flow_removed* hdr =
 				(struct rofl::openflow12::ofp_flow_removed*)buf;

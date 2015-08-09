@@ -56,7 +56,9 @@ public:
 				packet_count(packet_count),
 				byte_count(byte_count),
 				match(match)
-	{};
+	{
+		this->match.set_version(version);
+	};
 
 	/**
 	 *
