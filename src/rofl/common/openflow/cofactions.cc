@@ -255,6 +255,9 @@ cofactions::unpack(uint8_t* buf, size_t buflen)
 		uint16_t type = be16toh(hdr->type);
 		uint16_t len  = be16toh(hdr->len);
 
+		if (len < sizeof(struct rofl::openflow::ofp_action_header))
+			return;
+
 		if (len > buflen)
 			throw eBadActionBadLen("cofactions::unpack() invalid length field in action");
 

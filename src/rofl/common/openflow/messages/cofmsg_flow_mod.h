@@ -24,8 +24,7 @@ public:
 	 *
 	 */
 	virtual
-	~cofmsg_flow_mod()
-	{};
+	~cofmsg_flow_mod();
 
 	/**
 	 *
@@ -33,55 +32,26 @@ public:
 	cofmsg_flow_mod(
 			uint8_t version = rofl::openflow::OFP_VERSION_UNKNOWN,
 			uint32_t xid = 0,
-			const rofl::openflow::cofflowmod& flowmod = rofl::openflow::cofflowmod()) :
-				cofmsg(version, rofl::openflow::OFPT_FLOW_MOD, xid),
-				flowmod(flowmod)
-	{
-		this->flowmod.set_version(version);
-	};
+			const rofl::openflow::cofflowmod& flowmod = rofl::openflow::cofflowmod());
 
 	/**
 	 *
 	 */
 	cofmsg_flow_mod(
-			const cofmsg_flow_mod& msg)
-	{ *this = msg; };
+			const cofmsg_flow_mod& msg);
 
 	/**
 	 *
 	 */
 	cofmsg_flow_mod&
 	operator= (
-			const cofmsg_flow_mod& msg) {
-		if (this == &msg)
-			return *this;
-		cofmsg::operator= (msg);
-		flowmod	= msg.flowmod;
-		return *this;
-	};
+			const cofmsg_flow_mod& msg);
 
 	/**
 	 *
 	 */
 	void
-	check_prerequisites() const
-	{ flowmod.check_prerequisites(); };
-
-public:
-
-	/**
-	 *
-	 */
-	const rofl::openflow::cofflowmod&
-	get_flowmod() const
-	{ return flowmod; };
-
-	/**
-	 *
-	 */
-	rofl::openflow::cofflowmod&
-	set_flowmod()
-	{ return flowmod; };
+	check_prerequisites() const;
 
 public:
 
@@ -104,6 +74,22 @@ public:
 	virtual void
 	unpack(
 			uint8_t *buf, size_t buflen);
+
+public:
+
+	/**
+	 *
+	 */
+	const rofl::openflow::cofflowmod&
+	get_flowmod() const
+	{ return flowmod; };
+
+	/**
+	 *
+	 */
+	rofl::openflow::cofflowmod&
+	set_flowmod()
+	{ return flowmod; };
 
 public:
 

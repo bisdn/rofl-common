@@ -2,6 +2,49 @@
 
 using namespace rofl::openflow;
 
+cofmsg_flow_mod::~cofmsg_flow_mod()
+{}
+
+
+
+cofmsg_flow_mod::cofmsg_flow_mod(
+		uint8_t version, uint32_t xid, const rofl::openflow::cofflowmod& flowmod) :
+			cofmsg(version, rofl::openflow::OFPT_FLOW_MOD, xid),
+			flowmod(flowmod)
+{
+	this->flowmod.set_version(version);
+}
+
+
+
+cofmsg_flow_mod::cofmsg_flow_mod(
+		const cofmsg_flow_mod& msg)
+{
+	*this = msg;
+}
+
+
+
+cofmsg_flow_mod&
+cofmsg_flow_mod::operator= (
+		const cofmsg_flow_mod& msg) {
+	if (this == &msg)
+		return *this;
+	cofmsg::operator= (msg);
+	flowmod	= msg.flowmod;
+	return *this;
+}
+
+
+
+void
+cofmsg_flow_mod::check_prerequisites() const
+{
+	flowmod.check_prerequisites();
+}
+
+
+
 size_t
 cofmsg_flow_mod::length() const
 {
@@ -16,7 +59,8 @@ cofmsg_flow_mod::length() const
 
 
 void
-cofmsg_flow_mod::pack(uint8_t *buf, size_t buflen)
+cofmsg_flow_mod::pack(
+		uint8_t *buf, size_t buflen)
 {
 	cofmsg::pack(buf, buflen);
 
@@ -40,31 +84,37 @@ cofmsg_flow_mod::pack(uint8_t *buf, size_t buflen)
 
 
 void
-cofmsg_flow_mod::unpack(uint8_t *buf, size_t buflen)
+cofmsg_flow_mod::unpack(
+		uint8_t *buf, size_t buflen)
 {
-	flowmod.clear();
-
 	cofmsg::unpack(buf, buflen);
+
+	flowmod.set_version(get_version());
+	flowmod.clear();
 
 	if ((0 == buf) || (0 == buflen))
 		return;
 
+	if (buflen < cofmsg_flow_mod::length())
+		throw eBadSyntaxTooShort("cofmsg_flow_mod::unpack() buf too short");
+
 	switch (get_version()) {
 	default: {
 
-		if (buflen < get_length())
-			throw eBadSyntaxTooShort("cofmsg_flow_mod::unpack()");
+		if (get_type() != rofl::openflow::OFPT_FLOW_MOD)
+			throw eMsgInval("cofmsg_flow_mod::unpack() invalid message type");
 
 		struct rofl::openflow::ofp_header* hdr =
 				(struct rofl::openflow::ofp_header*)buf;
 
-		size_t flowmodlen = buflen - sizeof(struct rofl::openflow::ofp_header);
-
-		if (flowmodlen > 0) {
-			flowmod.unpack(hdr->body, flowmodlen);
+		if (buflen > sizeof(struct rofl::openflow::ofp_header)) {
+			flowmod.unpack(hdr->body, buflen - sizeof(struct rofl::openflow::ofp_header));
 		}
 	};
 	}
+
+	if (get_length() < cofmsg_flow_mod::length())
+		throw eBadSyntaxTooShort("cofmsg_flow_mod::unpack() buf too short");
 }
 
 
