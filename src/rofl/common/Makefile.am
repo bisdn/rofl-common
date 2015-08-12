@@ -5,6 +5,16 @@ SUBDIRS = openflow
 noinst_LTLIBRARIES = librofl_common_base.la
 
 librofl_common_base_la_SOURCES = \
+		exception.hpp \
+		logging.cpp \
+		logging.hpp \
+		locking.hpp \
+		ctimespec.cpp \
+		ctimespec.hpp \
+		ctimer.cpp \
+		ctimer.hpp \
+		cthread.cpp \
+		cthread.hpp \
 		endian_conversion.h \
 		rofcommon.h \
 		croflexception.h \
@@ -19,15 +29,6 @@ librofl_common_base_la_SOURCES = \
 		cpipe.cc \
 		cclock.h \
 		cclock.cc \
-		ctimespec.h \
-		ctimespec.cc \
-		ctimer.h \
-		ctimers.h \
-		cevent.h \
-		cevents.h \
-		cevents.cc \
-		ciosrv.h \
-		ciosrv.cc \
 		cmemory.h \
 		cmemory.cc \
 		csocket.h \
@@ -54,8 +55,6 @@ librofl_common_base_la_SOURCES = \
 		crofchan.cc \
 		crofshim.h \
 		crofshim.cc \
-		logging.h \
-		logging.cc \
 		csegmentation.h \
 		csegmentation.cc \
 		csegmsg.h \
@@ -105,19 +104,12 @@ library_include_HEADERS= \
 		crofshim.h \
 		cclock.h \
 		croflexception.h \
-		ctimespec.h \
-		ctimer.h \
-		ctimers.h \
-		cevent.h \
-		cevents.h \
-		ciosrv.h \
 		cmemory.h \
 		csocket.h \
 		csocket_plain.h \
 		thread_helper.h \
 		ctransaction.h \
 		ctransactions.h \
-		logging.h \
 		csegmentation.h \
 		csegmsg.h \
 		cparam.h \
