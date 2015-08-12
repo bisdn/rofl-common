@@ -73,7 +73,8 @@ cofmsg_queue_get_config_request::length() const
 
 
 void
-cofmsg_queue_get_config_request::pack(uint8_t *buf, size_t buflen)
+cofmsg_queue_get_config_request::pack(
+		uint8_t *buf, size_t buflen)
 {
 	cofmsg::pack(buf, buflen);
 
@@ -100,7 +101,8 @@ cofmsg_queue_get_config_request::pack(uint8_t *buf, size_t buflen)
 
 
 void
-cofmsg_queue_get_config_request::unpack(uint8_t *buf, size_t buflen)
+cofmsg_queue_get_config_request::unpack(
+		uint8_t *buf, size_t buflen)
 {
 	cofmsg::unpack(buf, buflen);
 
@@ -112,11 +114,15 @@ cofmsg_queue_get_config_request::unpack(uint8_t *buf, size_t buflen)
 
 	switch (get_version()) {
 	case rofl::openflow10::OFP_VERSION: {
+		if (get_type() != rofl::openflow10::OFPT_QUEUE_GET_CONFIG_REQUEST)
+			throw eMsgInval("cofmsg_queue_get_config_reply::unpack() invalid message type");
 		struct rofl::openflow10::ofp_queue_get_config_request* hdr =
 				(struct rofl::openflow10::ofp_queue_get_config_request*)buf;
 		portno = be16toh(hdr->port);
 	} break;
 	default: {
+		if (get_type() != rofl::openflow13::OFPT_QUEUE_GET_CONFIG_REQUEST)
+			throw eMsgInval("cofmsg_queue_get_config_reply::unpack() invalid message type");
 		struct rofl::openflow13::ofp_queue_get_config_request* hdr =
 				(struct rofl::openflow13::ofp_queue_get_config_request*)buf;
 		portno = be32toh(hdr->port);
@@ -208,7 +214,8 @@ cofmsg_queue_get_config_reply::length() const
 
 
 void
-cofmsg_queue_get_config_reply::pack(uint8_t *buf, size_t buflen)
+cofmsg_queue_get_config_reply::pack(
+		uint8_t *buf, size_t buflen)
 {
 	cofmsg::pack(buf, buflen); // copies common statistics header
 
@@ -237,18 +244,24 @@ cofmsg_queue_get_config_reply::pack(uint8_t *buf, size_t buflen)
 
 
 void
-cofmsg_queue_get_config_reply::unpack(uint8_t *buf, size_t buflen)
+cofmsg_queue_get_config_reply::unpack(
+		uint8_t *buf, size_t buflen)
 {
 	cofmsg::unpack(buf, buflen);
 
 	if ((0 == buf) || (0 == buflen))
 		return;
 
+	queues.clear();
+	queues.set_version(get_version());
+
 	if (buflen < cofmsg_queue_get_config_reply::length())
 		throw eBadSyntaxTooShort("cofmsg_queue_get_config_reply::unpack() buf too short");
 
 	switch (get_version()) {
 	case rofl::openflow10::OFP_VERSION: {
+		if (get_type() != rofl::openflow10::OFPT_QUEUE_GET_CONFIG_REPLY)
+			throw eMsgInval("cofmsg_queue_get_config_reply::unpack() invalid message type");
 		struct rofl::openflow10::ofp_queue_get_config_reply* hdr =
 				(struct rofl::openflow10::ofp_queue_get_config_reply*)buf;
 		portno = be16toh(hdr->port);
@@ -257,6 +270,8 @@ cofmsg_queue_get_config_reply::unpack(uint8_t *buf, size_t buflen)
 		}
 	} break;
 	default: {
+		if (get_type() != rofl::openflow13::OFPT_QUEUE_GET_CONFIG_REPLY)
+			throw eMsgInval("cofmsg_queue_get_config_reply::unpack() invalid message type");
 		struct rofl::openflow13::ofp_queue_get_config_reply* hdr =
 				(struct rofl::openflow13::ofp_queue_get_config_reply*)buf;
 		portno = be32toh(hdr->port);
