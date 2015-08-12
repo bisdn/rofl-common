@@ -35,5 +35,6 @@ SUBDIRS = \
 	cofmsgportmod \
 	cofmsgportstatus \
 	cofmsgqueueconfig \
-	cofmsgrole
+	cofmsgrole \
+	cofmsgtablemod
 

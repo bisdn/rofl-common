@@ -99,6 +99,10 @@ cofmsg_table_mod::unpack(
 
 	switch (get_version()) {
 	default: {
+
+		if (get_type() != rofl::openflow13::OFPT_TABLE_MOD)
+			throw eMsgInval("cofmsg_table_mod::unpack() invalid message type");
+
 		struct rofl::openflow13::ofp_table_mod* hdr =
 				(struct rofl::openflow13::ofp_table_mod*)buf;
 		table_id = hdr->table_id;
