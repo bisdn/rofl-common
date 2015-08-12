@@ -22,23 +22,9 @@ class eHelloElemsBase 		: public RoflException {};
 class eHelloElemsInval		: public eHelloElemsBase {};
 class eHelloElemsNotFound	: public eHelloElemsBase {};
 
-class cofhelloelems :
-		public std::map<uint8_t, cofhello_elem*>
+class cofhelloelems
 {
-public: // iterators
-
-	typedef std::map<uint8_t, cofhello_elem*>::iterator iterator;
-	typedef std::map<uint8_t, cofhello_elem*>::const_iterator const_iterator;
-
-	typedef std::map<uint8_t, cofhello_elem*>::reverse_iterator reverse_iterator;
-	typedef std::map<uint8_t, cofhello_elem*>::const_reverse_iterator const_reverse_iterator;
-
 public:
-
-	/**
-	 *
-	 */
-	cofhelloelems();
 
 	/**
 	 *
@@ -49,47 +35,44 @@ public:
 	/**
 	 *
 	 */
-	cofhelloelems(
-			uint8_t *buf, size_t buflen);
+	cofhelloelems();
 
 	/**
 	 *
 	 */
 	cofhelloelems(
-			cmemory const& body);
-
-	/**
-	 *
-	 */
-	cofhelloelems(
-			cofhelloelems const& elems);
+			const cofhelloelems& elems);
 
 	/**
 	 *
 	 */
 	cofhelloelems&
 	operator= (
-			cofhelloelems const& elems);
+			const cofhelloelems& elems);
 
 public:
 
 	/**
 	 *
 	 */
-	void
-	unpack(uint8_t *buf, size_t buflen);
-
-	/**
-	 *
-	 */
-	void
-	pack(uint8_t* buf, size_t buflen);
-
-	/**
-	 *
-	 */
 	size_t
 	length() const;
+
+	/**
+	 *
+	 */
+	void
+	pack(
+			uint8_t* buf, size_t buflen);
+
+	/**
+	 *
+	 */
+	void
+	unpack(
+			uint8_t *buf, size_t buflen);
+
+public:
 
 	/**
 	 *
@@ -129,25 +112,16 @@ public:
 	bool
 	has_hello_elem_versionbitmap() const;
 
-private:
-
-	/**
-	 *
-	 */
-	void
-	map_and_insert(
-			cofhello_elem const& elem);
-
 public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, cofhelloelems const& elems) {
-		os << indent(0) << "<cofhelloelems #elems:" << (int)elems.size() <<
+		os << indent(0) << "<cofhelloelems #elems:" << (int)elems.elems.size() <<
 				" length:" << (int)elems.length() << " >" << std::endl;
 		indent i(2);
-		for (cofhelloelems::const_iterator
-				it = elems.begin(); it != elems.end(); ++it) {
-			cofhello_elem const& elem = *(it->second);
+		for (std::map<uint8_t, cofhello_elem*>::const_iterator
+				it = elems.elems.begin(); it != elems.elems.end(); ++it) {
+			const cofhello_elem& elem = *(it->second);
 			switch (elem.get_type()) {
 			case openflow13::OFPHET_VERSIONBITMAP: {
 				os << cofhello_elem_versionbitmap(elem);
@@ -159,6 +133,9 @@ public:
 		}
 		return os;
 	};
+private:
+
+	std::map<uint8_t, cofhello_elem*>   elems;
 };
 
 }; /* namespace openflow */

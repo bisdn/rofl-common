@@ -585,11 +585,13 @@ crofconn::action_send_hello_message()
 			return;
 		}
 
+		rofl::openflow::cofhelloelems helloIEs;
+		helloIEs.add_hello_elem_versionbitmap() = versionbitmap;
 		rofl::openflow::cofmsg_hello *hello =
 				new rofl::openflow::cofmsg_hello(
 						versionbitmap.get_highest_ofp_version(),
 						env->get_async_xid(*this),
-						versionbitmap);
+						helloIEs);
 
 		LOGGING_DEBUG << "[rofl-common][crofconn] sending HELLO message: "
 				<< hello->str() << versionbitmap.str() << std::endl;

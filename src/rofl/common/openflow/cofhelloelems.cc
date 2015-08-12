@@ -9,12 +9,6 @@
 
 using namespace rofl::openflow;
 
-cofhelloelems::cofhelloelems()
-{
-
-}
-
-
 cofhelloelems::~cofhelloelems()
 {
 	clear();
@@ -22,24 +16,13 @@ cofhelloelems::~cofhelloelems()
 
 
 
-cofhelloelems::cofhelloelems(
-		uint8_t *buf, size_t buflen)
-{
-	unpack(buf, buflen);
-}
+cofhelloelems::cofhelloelems()
+{}
 
 
 
 cofhelloelems::cofhelloelems(
-		cmemory const& body)
-{
-	unpack(body.somem(), body.memlen());
-}
-
-
-
-cofhelloelems::cofhelloelems(
-		cofhelloelems const& elems)
+		const cofhelloelems& elems)
 {
 	*this = elems;
 }
@@ -48,16 +31,23 @@ cofhelloelems::cofhelloelems(
 
 cofhelloelems&
 cofhelloelems::operator= (
-		cofhelloelems const& elems)
+		const cofhelloelems& elems)
 {
 	if (this == &elems)
 		return *this;
 
 	clear();
 
-	for (cofhelloelems::const_iterator
-			it = elems.begin(); it != elems.end(); ++it) {
-		map_and_insert(*(it->second));
+	for (std::map<uint8_t, cofhello_elem*>::const_iterator
+			it = elems.elems.begin(); it != elems.elems.end(); ++it) {
+		switch (it->first) {
+		case rofl::openflow13::OFPHET_VERSIONBITMAP: {
+			add_hello_elem_versionbitmap() = elems.get_hello_elem_versionbitmap();
+		} break;
+		default: {
+
+		};
+		}
 	}
 
 	return *this;
@@ -68,32 +58,11 @@ cofhelloelems::operator= (
 void
 cofhelloelems::clear()
 {
-	for (cofhelloelems::iterator
-			it = begin(); it != end(); ++it) {
-		delete (it->second);
+	for (std::map<uint8_t, cofhello_elem*>::const_iterator
+			it = elems.begin(); it != elems.end(); ++it) {
+		delete it->second;
 	}
-	std::map<uint8_t, cofhello_elem*>::clear();
-}
-
-
-
-void
-cofhelloelems::map_and_insert(
-		cofhello_elem const& elem)
-{
-	if (find(elem.get_type()) != end()) {
-		delete operator[](elem.get_type());
-		erase(elem.get_type());
-	}
-
-	switch (elem.get_type()) {
-	case openflow13::OFPHET_VERSIONBITMAP: {
-		operator[] (elem.get_type()) = new cofhello_elem_versionbitmap(elem);
-	} break;
-	default: {
-		operator[] (elem.get_type()) = new cofhello_elem(elem);
-	} break;
-	}
+	elems.clear();
 }
 
 
@@ -102,10 +71,9 @@ size_t
 cofhelloelems::length() const
 {
 	size_t len = 0;
-	for (cofhelloelems::const_iterator
-			it = begin(); it != end(); ++it) {
-		cofhello_elem& elem = *(it->second);
-		len += elem.length();
+	for (std::map<uint8_t, cofhello_elem*>::const_iterator
+			it = elems.begin(); it != elems.end(); ++it) {
+		len += it->second->length();
 	}
 	return len;
 }
@@ -116,11 +84,11 @@ void
 cofhelloelems::pack(
 		uint8_t *buf, size_t buflen)
 {
-	if (buflen < length())
+	if (buflen < cofhelloelems::length())
 		throw eHelloElemsInval();
 
-	for (cofhelloelems::iterator
-			it = begin(); it != end(); ++it) {
+	for (std::map<uint8_t, cofhello_elem*>::const_iterator
+			it = elems.begin(); it != elems.end(); ++it) {
 		cofhello_elem& elem = *(it->second);
 		elem.pack(buf, elem.length());
 		buf += elem.length();
@@ -135,12 +103,22 @@ cofhelloelems::unpack(
 {
 	clear();
 
-	while (buflen > sizeof(struct openflow13::ofp_hello_elem_header)) {
-		struct openflow13::ofp_hello_elem_header* hello =
-				(struct openflow13::ofp_hello_elem_header*)buf;
+	while (buflen > sizeof(struct rofl::openflow13::ofp_hello_elem_header)) {
+
+		struct rofl::openflow13::ofp_hello_elem_header* hello =
+				(struct rofl::openflow13::ofp_hello_elem_header*)buf;
+
 		if ((be16toh(hello->length) > buflen) || (be16toh(hello->length) == 0))
 			break;
-		map_and_insert(cofhello_elem(buf, be16toh(hello->length)));
+
+		switch (be16toh(hello->type)) {
+		case rofl::openflow13::OFPHET_VERSIONBITMAP: {
+			add_hello_elem_versionbitmap().unpack(buf, be16toh(hello->length));
+		} break;
+		default: {
+
+		};
+		}
 
 		/* calculate padded length */
 		size_t total_length = be16toh(hello->length);
@@ -161,13 +139,11 @@ cofhelloelems::unpack(
 cofhello_elem_versionbitmap&
 cofhelloelems::add_hello_elem_versionbitmap()
 {
-	std::map<uint8_t, cofhello_elem*>& elems = *this;
-
-	if (elems.find(openflow13::OFPHET_VERSIONBITMAP) != elems.end()) {
-		delete elems[openflow13::OFPHET_VERSIONBITMAP];
+	if (elems.find(rofl::openflow13::OFPHET_VERSIONBITMAP) != elems.end()) {
+		delete elems[rofl::openflow13::OFPHET_VERSIONBITMAP];
 	}
-	elems[openflow13::OFPHET_VERSIONBITMAP] = new cofhello_elem_versionbitmap();
-	return *dynamic_cast<cofhello_elem_versionbitmap*>(elems[openflow13::OFPHET_VERSIONBITMAP]);
+	elems[rofl::openflow13::OFPHET_VERSIONBITMAP] = new cofhello_elem_versionbitmap();
+	return *dynamic_cast<cofhello_elem_versionbitmap*>(elems[rofl::openflow13::OFPHET_VERSIONBITMAP]);
 }
 
 
@@ -175,12 +151,10 @@ cofhelloelems::add_hello_elem_versionbitmap()
 cofhello_elem_versionbitmap&
 cofhelloelems::set_hello_elem_versionbitmap()
 {
-	std::map<uint8_t, cofhello_elem*>& elems = *this;
-
-	if (elems.find(openflow13::OFPHET_VERSIONBITMAP) == elems.end()) {
-		elems[openflow13::OFPHET_VERSIONBITMAP] = new cofhello_elem_versionbitmap();
+	if (elems.find(rofl::openflow13::OFPHET_VERSIONBITMAP) == elems.end()) {
+		elems[rofl::openflow13::OFPHET_VERSIONBITMAP] = new cofhello_elem_versionbitmap();
 	}
-	return *dynamic_cast<cofhello_elem_versionbitmap*>(elems[openflow13::OFPHET_VERSIONBITMAP]);
+	return *dynamic_cast<cofhello_elem_versionbitmap*>(elems[rofl::openflow13::OFPHET_VERSIONBITMAP]);
 }
 
 
@@ -188,12 +162,10 @@ cofhelloelems::set_hello_elem_versionbitmap()
 const cofhello_elem_versionbitmap&
 cofhelloelems::get_hello_elem_versionbitmap() const
 {
-	const std::map<uint8_t, cofhello_elem*>& elems = *this;
-
-	if (elems.find(openflow13::OFPHET_VERSIONBITMAP) == elems.end()) {
+	if (elems.find(rofl::openflow13::OFPHET_VERSIONBITMAP) == elems.end()) {
 		throw eHelloElemsNotFound();
 	}
-	return *dynamic_cast<cofhello_elem_versionbitmap*>(elems.at(openflow13::OFPHET_VERSIONBITMAP));
+	return *dynamic_cast<cofhello_elem_versionbitmap*>(elems.at(rofl::openflow13::OFPHET_VERSIONBITMAP));
 }
 
 
@@ -201,13 +173,11 @@ cofhelloelems::get_hello_elem_versionbitmap() const
 void
 cofhelloelems::drop_hello_elem_versionbitmap()
 {
-	std::map<uint8_t, cofhello_elem*>& elems = *this;
-
-	if (elems.find(openflow13::OFPHET_VERSIONBITMAP) == elems.end()) {
+	if (elems.find(rofl::openflow13::OFPHET_VERSIONBITMAP) == elems.end()) {
 		return;
 	}
-	delete elems[openflow13::OFPHET_VERSIONBITMAP];
-	elems.erase(openflow13::OFPHET_VERSIONBITMAP);
+	delete elems[rofl::openflow13::OFPHET_VERSIONBITMAP];
+	elems.erase(rofl::openflow13::OFPHET_VERSIONBITMAP);
 }
 
 
@@ -215,9 +185,7 @@ cofhelloelems::drop_hello_elem_versionbitmap()
 bool
 cofhelloelems::has_hello_elem_versionbitmap() const
 {
-	const std::map<uint8_t, cofhello_elem*>& elems = *this;
-
-	return (elems.find(openflow13::OFPHET_VERSIONBITMAP) != elems.end());
+	return (elems.find(rofl::openflow13::OFPHET_VERSIONBITMAP) != elems.end());
 }
 
 
