@@ -77,10 +77,11 @@ void
 cofmsg_packet_out::unpack(
 		uint8_t *buf, size_t buflen)
 {
-	actions.clear();
-	packet.clear();
-
 	cofmsg::unpack(buf, buflen);
+
+	actions.clear();
+	actions.set_version(get_version());
+	packet.clear();
 
 	if ((0 == buf) || (0 == buflen))
 		return;
@@ -90,6 +91,9 @@ cofmsg_packet_out::unpack(
 
 		if (get_length() < sizeof(struct rofl::openflow10::ofp_packet_out))
 			throw eBadSyntaxTooShort("cofmsg_packet_out::unpack()");
+
+		if (get_type() != rofl::openflow10::OFPT_PACKET_OUT)
+			throw eMsgInval("cofmsg_packet_out::unpack() invalid message type");
 
 		struct rofl::openflow10::ofp_packet_out* hdr =
 				(struct rofl::openflow10::ofp_packet_out*)buf;
@@ -105,9 +109,6 @@ cofmsg_packet_out::unpack(
 
 		actions.unpack((uint8_t*)hdr->actions, actions_len);
 
-		if (rofl::openflow10::OFP_NO_BUFFER != get_buffer_id())
-			return;
-
 		packet.unpack(buf + packet_offset, buflen - packet_offset);
 
 	} break;
@@ -115,6 +116,9 @@ cofmsg_packet_out::unpack(
 
 		if (get_length() < sizeof(struct rofl::openflow12::ofp_packet_out))
 			throw eBadSyntaxTooShort("cofmsg_packet_out::unpack()");
+
+		if (get_type() != rofl::openflow13::OFPT_PACKET_OUT)
+			throw eMsgInval("cofmsg_packet_out::unpack() invalid message type");
 
 		struct rofl::openflow12::ofp_packet_out* hdr =
 				(struct rofl::openflow12::ofp_packet_out*)buf;
@@ -129,9 +133,6 @@ cofmsg_packet_out::unpack(
 			throw eBadSyntaxTooShort("cofmsg_packet_out::unpack()");
 
 		actions.unpack((uint8_t*)hdr->actions, actions_len);
-
-		if (rofl::openflow12::OFP_NO_BUFFER != get_buffer_id())
-			return;
 
 		packet.unpack(buf + packet_offset, buflen - packet_offset);
 
