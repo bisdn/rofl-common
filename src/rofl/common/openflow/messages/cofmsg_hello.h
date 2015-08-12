@@ -31,7 +31,7 @@ public:
 	 *
 	 */
 	cofmsg_hello(
-			uint8_t version = 0,
+			uint8_t version = rofl::openflow::OFP_VERSION_UNKNOWN,
 			uint32_t xid = 0,
 			const rofl::openflow::cofhelloelems& helloelems =
 					rofl::openflow::cofhelloelems()) :

@@ -27,5 +27,6 @@ SUBDIRS = \
 	cofmsgfeatures \
 	cofmsgflowmod \
 	cofmsgflowremoved \
-	cofmsggroupmod
+	cofmsggroupmod \
+	cofmsghello
 

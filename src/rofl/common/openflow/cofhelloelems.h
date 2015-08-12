@@ -114,8 +114,8 @@ public:
 	/**
 	 *
 	 */
-	cofhello_elem_versionbitmap&
-	get_hello_elem_versionbitmap();
+	const cofhello_elem_versionbitmap&
+	get_hello_elem_versionbitmap() const;
 
 	/**
 	 *
@@ -127,7 +127,7 @@ public:
 	 *
 	 */
 	bool
-	has_hello_elem_versionbitmap();
+	has_hello_elem_versionbitmap() const;
 
 private:
 

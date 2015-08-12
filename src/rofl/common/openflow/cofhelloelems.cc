@@ -185,10 +185,10 @@ cofhelloelems::set_hello_elem_versionbitmap()
 
 
 
-cofhello_elem_versionbitmap&
-cofhelloelems::get_hello_elem_versionbitmap()
+const cofhello_elem_versionbitmap&
+cofhelloelems::get_hello_elem_versionbitmap() const
 {
-	std::map<uint8_t, cofhello_elem*>& elems = *this;
+	const std::map<uint8_t, cofhello_elem*>& elems = *this;
 
 	if (elems.find(openflow13::OFPHET_VERSIONBITMAP) == elems.end()) {
 		throw eHelloElemsNotFound();
@@ -213,9 +213,9 @@ cofhelloelems::drop_hello_elem_versionbitmap()
 
 
 bool
-cofhelloelems::has_hello_elem_versionbitmap()
+cofhelloelems::has_hello_elem_versionbitmap() const
 {
-	std::map<uint8_t, cofhello_elem*>& elems = *this;
+	const std::map<uint8_t, cofhello_elem*>& elems = *this;
 
 	return (elems.find(openflow13::OFPHET_VERSIONBITMAP) != elems.end());
 }

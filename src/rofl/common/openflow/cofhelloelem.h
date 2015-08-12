@@ -63,6 +63,12 @@ public:
 	operator= (
 			cofhello_elem const& elem);
 
+	/**
+	 *
+	 */
+	virtual cofhello_elem*
+	clone() = 0;
+
 public:
 
 	/**
