@@ -106,10 +106,11 @@ cofmsg_packet_in::pack(uint8_t *buf, size_t buflen)
 void
 cofmsg_packet_in::unpack(uint8_t *buf, size_t buflen)
 {
-	match.clear();
-	packet.clear();
-
 	cofmsg::unpack(buf, buflen);
+
+	match.clear();
+	match.set_version(get_version());
+	packet.clear();
 
 	if ((0 == buf) || (0 == buflen))
 		return;
@@ -119,6 +120,9 @@ cofmsg_packet_in::unpack(uint8_t *buf, size_t buflen)
 
 		if (get_length() < sizeof(struct rofl::openflow10::ofp_packet_in))
 			throw eBadSyntaxTooShort("cofmsg_packet_in::unpack()");
+
+		if (get_type() != rofl::openflow10::OFPT_PACKET_IN)
+			throw eMsgInval("cofmsg_packet_in::unpack() invalid message type");
 
 		struct rofl::openflow10::ofp_packet_in* hdr =
 				(struct rofl::openflow10::ofp_packet_in*)buf;
@@ -140,6 +144,9 @@ cofmsg_packet_in::unpack(uint8_t *buf, size_t buflen)
 
 		if (get_length() < sizeof(struct rofl::openflow12::ofp_packet_in))
 			throw eBadSyntaxTooShort("cofmsg_packet_in::unpack()");
+
+		if (get_type() != rofl::openflow12::OFPT_PACKET_IN)
+			throw eMsgInval("cofmsg_packet_in::unpack() invalid message type");
 
 		struct rofl::openflow12::ofp_packet_in* hdr =
 				(struct rofl::openflow12::ofp_packet_in*)buf;
@@ -174,6 +181,9 @@ cofmsg_packet_in::unpack(uint8_t *buf, size_t buflen)
 
 		if (get_length() < sizeof(struct rofl::openflow13::ofp_packet_in))
 			throw eBadSyntaxTooShort("cofmsg_packet_in::unpack()");
+
+		if (get_type() != rofl::openflow13::OFPT_PACKET_IN)
+			throw eMsgInval("cofmsg_packet_in::unpack() invalid message type");
 
 		struct rofl::openflow13::ofp_packet_in* hdr =
 				(struct rofl::openflow13::ofp_packet_in*)buf;
