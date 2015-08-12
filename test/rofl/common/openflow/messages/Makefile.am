@@ -31,5 +31,6 @@ SUBDIRS = \
 	cofmsghello \
 	cofmsgmetermod \
 	cofmsgpacketin \
-	cofmsgpacketout
+	cofmsgpacketout \
+	cofmsgportmod
 

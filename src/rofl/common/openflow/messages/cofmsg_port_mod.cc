@@ -134,6 +134,10 @@ cofmsg_port_mod::unpack(
 
 	switch (get_version()) {
 	case rofl::openflow10::OFP_VERSION: {
+
+		if (get_type() != rofl::openflow10::OFPT_PORT_MOD)
+			throw eMsgInval("cofmsg_port_mod::unpack() invalid message type");
+
 		struct rofl::openflow10::ofp_port_mod* hdr =
 				(struct rofl::openflow10::ofp_port_mod*)buf;
 		portno = be16toh(hdr->port_no);
@@ -143,6 +147,10 @@ cofmsg_port_mod::unpack(
 		advertise = be32toh(hdr->advertise);
 	} break;
 	default: {
+
+		if (get_type() != rofl::openflow13::OFPT_PORT_MOD)
+			throw eMsgInval("cofmsg_port_mod::unpack() invalid message type");
+
 		struct rofl::openflow13::ofp_port_mod* hdr =
 				(struct rofl::openflow13::ofp_port_mod*)buf;
 		portno = be32toh(hdr->port_no);
