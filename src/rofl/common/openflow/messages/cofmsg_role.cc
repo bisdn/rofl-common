@@ -63,7 +63,8 @@ cofmsg_role_request::length() const
 
 
 void
-cofmsg_role_request::pack(uint8_t *buf, size_t buflen)
+cofmsg_role_request::pack(
+		uint8_t *buf, size_t buflen)
 {
 	cofmsg::pack(buf, buflen);
 
@@ -83,7 +84,8 @@ cofmsg_role_request::pack(uint8_t *buf, size_t buflen)
 
 
 void
-cofmsg_role_request::unpack(uint8_t *buf, size_t buflen)
+cofmsg_role_request::unpack(
+		uint8_t *buf, size_t buflen)
 {
 	cofmsg::unpack(buf, buflen);
 
@@ -97,6 +99,10 @@ cofmsg_role_request::unpack(uint8_t *buf, size_t buflen)
 
 	switch (get_version()) {
 	default: {
+
+		if (get_type() != rofl::openflow13::OFPT_ROLE_REQUEST)
+			throw eMsgInval("cofmsg_role_reply::unpack() invalid message type");
+
 		if (buflen > sizeof(struct rofl::openflow13::ofp_header)) {
 			role.unpack(buf + sizeof(struct rofl::openflow13::ofp_header), buflen - sizeof(struct rofl::openflow13::ofp_header));
 		}
@@ -172,7 +178,8 @@ cofmsg_role_reply::length() const
 
 
 void
-cofmsg_role_reply::pack(uint8_t *buf, size_t buflen)
+cofmsg_role_reply::pack(
+		uint8_t *buf, size_t buflen)
 {
 	cofmsg::pack(buf, buflen);
 
@@ -192,7 +199,8 @@ cofmsg_role_reply::pack(uint8_t *buf, size_t buflen)
 
 
 void
-cofmsg_role_reply::unpack(uint8_t *buf, size_t buflen)
+cofmsg_role_reply::unpack(
+		uint8_t *buf, size_t buflen)
 {
 	cofmsg::unpack(buf, buflen);
 
@@ -206,6 +214,10 @@ cofmsg_role_reply::unpack(uint8_t *buf, size_t buflen)
 
 	switch (get_version()) {
 	default: {
+
+		if (get_type() != rofl::openflow13::OFPT_ROLE_REPLY)
+			throw eMsgInval("cofmsg_role_reply::unpack() invalid message type");
+
 		if (buflen > sizeof(struct rofl::openflow13::ofp_header)) {
 			role.unpack(buf + sizeof(struct rofl::openflow13::ofp_header), buflen - sizeof(struct rofl::openflow13::ofp_header));
 		}
