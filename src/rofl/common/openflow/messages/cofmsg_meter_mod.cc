@@ -111,6 +111,10 @@ cofmsg_meter_mod::unpack(
 
 	switch (get_version()) {
 	default: {
+
+		if (get_type() != rofl::openflow13::OFPT_METER_MOD)
+			throw eMsgInval("cofmsg_meter_mod::unpack() invalid message type");
+
 		struct rofl::openflow13::ofp_meter_mod* hdr =
 				(struct rofl::openflow13::ofp_meter_mod*)buf;
 		command = be16toh(hdr->command);

@@ -32,14 +32,24 @@ cofmsg_hello::unpack(uint8_t *buf, size_t buflen)
 {
 	cofmsg::unpack(buf, buflen);
 
+	helloelems.clear();
+
 	if ((0 == buf) || (0 == buflen))
 		return;
 
-	if (get_length() <= sizeof(struct rofl::openflow::ofp_header))
+	if (buflen < cofmsg_hello::length())
 		return;
 
-	helloelems.unpack(buf + sizeof(struct rofl::openflow::ofp_header),
-			buflen - sizeof(struct rofl::openflow::ofp_header));
+	if (get_type() != rofl::openflow::OFPT_HELLO)
+		throw eMsgInval("cofmsg_hello::unpack() invalid message type");
+
+	if (buflen > sizeof(struct rofl::openflow::ofp_header)) {
+		helloelems.unpack(buf + sizeof(struct rofl::openflow::ofp_header),
+				buflen - sizeof(struct rofl::openflow::ofp_header));
+	}
+
+	if (get_length() < cofmsg_hello::length())
+		return;
 }
 
 
