@@ -56,20 +56,22 @@ cofmsg_port_status::pack(uint8_t *buf, size_t buflen)
 void
 cofmsg_port_status::unpack(uint8_t *buf, size_t buflen)
 {
-	port.clear();
-
 	cofmsg::unpack(buf, buflen);
+
+	port.clear();
+	port.set_version(get_version());
 
 	if ((0 == buf) || (0 == buflen))
 		return;
 
-	switch (get_version()) {
-	case rofl::openflow10::OFP_VERSION:
-	case rofl::openflow12::OFP_VERSION:
-	case rofl::openflow13::OFP_VERSION: {
+	if (buflen < cofmsg_port_status::length())
+		throw eBadSyntaxTooShort("cofmsg_port_status::unpack() buf too short");
 
-		if (get_length() < sizeof(struct rofl::openflow10::ofp_port_status))
-			throw eBadSyntaxTooShort("cofmsg_port_status::unpack()");
+	switch (get_version()) {
+	case rofl::openflow10::OFP_VERSION: {
+
+		if (get_type() != rofl::openflow10::OFPT_PORT_STATUS)
+			throw eMsgInval("cofmsg_port_status::unpack() invalid message type");
 
 		struct rofl::openflow10::ofp_port_status* hdr =
 				(struct rofl::openflow10::ofp_port_status*)buf;
@@ -79,11 +81,25 @@ cofmsg_port_status::unpack(uint8_t *buf, size_t buflen)
 		port.unpack((uint8_t*)&(hdr->desc), sizeof(struct rofl::openflow10::ofp_port));
 
 	} break;
+	case rofl::openflow12::OFP_VERSION:
+	case rofl::openflow13::OFP_VERSION: {
+
+		if (get_type() != rofl::openflow13::OFPT_PORT_STATUS)
+			throw eMsgInval("cofmsg_port_status::unpack() invalid message type");
+
+		struct rofl::openflow13::ofp_port_status* hdr =
+				(struct rofl::openflow13::ofp_port_status*)buf;
+
+		reason = hdr->reason;
+
+		port.unpack((uint8_t*)&(hdr->desc), sizeof(struct rofl::openflow13::ofp_port));
+
+	} break;
 	case rofl::openflow14::OFP_VERSION:
 	default: {
 
-		if (get_length() < sizeof(struct rofl::openflow14::ofp_port_status))
-			throw eBadSyntaxTooShort("cofmsg_port_status::unpack()");
+		if (get_type() != rofl::openflow14::OFPT_PORT_STATUS)
+			throw eMsgInval("cofmsg_port_status::unpack() invalid message type");
 
 		struct rofl::openflow14::ofp_port_status* hdr =
 				(struct rofl::openflow14::ofp_port_status*)buf;
@@ -98,6 +114,9 @@ cofmsg_port_status::unpack(uint8_t *buf, size_t buflen)
 
 	};
 	}
+
+	if (get_length() < cofmsg_port_status::length())
+		throw eBadSyntaxTooShort("cofmsg_port_status::unpack() buf too short");
 }
 
 

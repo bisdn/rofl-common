@@ -31,14 +31,16 @@ public:
 	 *
 	 */
 	cofmsg_port_status(
-			uint8_t version = 0,
+			uint8_t version = rofl::openflow::OFP_VERSION_UNKNOWN,
 			uint32_t xid = 0,
 			uint8_t reason = 0,
 			const rofl::openflow::cofport& port = rofl::openflow::cofport()) :
 				cofmsg(version, rofl::openflow::OFPT_PORT_STATUS, xid),
 				reason(reason),
 				port(port)
-	{};
+	{
+		this->port.set_version(version);
+	};
 
 	/**
 	 *

@@ -141,6 +141,18 @@ public:
 	/**
 	 *
 	 */
+	void
+	set_version(
+			uint8_t version)
+	{
+		this->ofp_version = version;
+		properties.set_version(version);
+		port_stats.set_version(version);
+	};
+
+	/**
+	 *
+	 */
 	uint8_t
 	get_version() const;
 
