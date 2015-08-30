@@ -181,6 +181,6 @@ bool
 ctimespec::operator== (
 		const ctimespec& t) const
 {
-	return not ((*this < t) && (t < *this));
+	return ((not (*this < t)) && (not (t < *this)));
 }
 
