@@ -90,7 +90,7 @@ cofmsg_packet_out::unpack(
 	case rofl::openflow10::OFP_VERSION: {
 
 		if (get_length() < sizeof(struct rofl::openflow10::ofp_packet_out))
-			throw eBadSyntaxTooShort("cofmsg_packet_out::unpack()");
+			throw eBadRequestBadLen("cofmsg_packet_out::unpack()");
 
 		if (get_type() != rofl::openflow10::OFPT_PACKET_OUT)
 			throw eMsgInval("cofmsg_packet_out::unpack() invalid message type");
@@ -105,7 +105,7 @@ cofmsg_packet_out::unpack(
 		uint16_t packet_offset = sizeof(struct rofl::openflow10::ofp_packet_out) + actions_len;
 
 		if (get_length() < packet_offset)
-			throw eBadSyntaxTooShort("cofmsg_packet_out::unpack()");
+			throw eBadRequestBadLen("cofmsg_packet_out::unpack()");
 
 		actions.unpack((uint8_t*)hdr->actions, actions_len);
 
@@ -115,7 +115,7 @@ cofmsg_packet_out::unpack(
 	default: {
 
 		if (get_length() < sizeof(struct rofl::openflow12::ofp_packet_out))
-			throw eBadSyntaxTooShort("cofmsg_packet_out::unpack()");
+			throw eBadRequestBadLen("cofmsg_packet_out::unpack()");
 
 		if (get_type() != rofl::openflow13::OFPT_PACKET_OUT)
 			throw eMsgInval("cofmsg_packet_out::unpack() invalid message type");
@@ -130,7 +130,7 @@ cofmsg_packet_out::unpack(
 		uint16_t packet_offset = sizeof(struct rofl::openflow12::ofp_packet_out) + actions_len;
 
 		if (get_length() < packet_offset)
-			throw eBadSyntaxTooShort("cofmsg_packet_out::unpack()");
+			throw eBadRequestBadLen("cofmsg_packet_out::unpack()");
 
 		actions.unpack((uint8_t*)hdr->actions, actions_len);
 

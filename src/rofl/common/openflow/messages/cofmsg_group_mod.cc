@@ -48,7 +48,7 @@ cofmsg_group_mod::unpack(
 		return;
 
 	if (buflen < cofmsg_group_mod::length())
-		throw eBadSyntaxTooShort("cofmsg_group_mod::unpack() buf too short");
+		throw eBadRequestBadLen("cofmsg_group_mod::unpack() buf too short");
 
 	switch (get_version()) {
 	default: {
@@ -66,7 +66,7 @@ cofmsg_group_mod::unpack(
 	}
 
 	if (get_length() < cofmsg_group_mod::length())
-		throw eBadSyntaxTooShort("cofmsg_group_mod::unpack() buf too short");
+		throw eBadRequestBadLen("cofmsg_group_mod::unpack() buf too short");
 }
 
 

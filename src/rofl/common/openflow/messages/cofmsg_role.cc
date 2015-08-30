@@ -95,7 +95,7 @@ cofmsg_role_request::unpack(
 		return;
 
 	if (buflen < cofmsg_role_request::length())
-		throw eBadSyntaxTooShort("cofmsg_role_request::unpack() buf too short");
+		throw eBadRequestBadLen("cofmsg_role_request::unpack() buf too short");
 
 	switch (get_version()) {
 	default: {
@@ -110,7 +110,7 @@ cofmsg_role_request::unpack(
 	}
 
 	if (get_length() < cofmsg_role_request::length())
-		throw eBadSyntaxTooShort("cofmsg_role_request::unpack() buf too short");
+		throw eBadRequestBadLen("cofmsg_role_request::unpack() buf too short");
 }
 
 
@@ -210,7 +210,7 @@ cofmsg_role_reply::unpack(
 		return;
 
 	if (buflen < cofmsg_role_reply::length())
-		throw eBadSyntaxTooShort("cofmsg_role_reply::unpack() buf too short");
+		throw eBadRequestBadLen("cofmsg_role_reply::unpack() buf too short");
 
 	switch (get_version()) {
 	default: {
@@ -225,7 +225,7 @@ cofmsg_role_reply::unpack(
 	}
 
 	if (get_length() < cofmsg_role_reply::length())
-		throw eBadSyntaxTooShort("cofmsg_role_reply::unpack() buf too short");
+		throw eBadRequestBadLen("cofmsg_role_reply::unpack() buf too short");
 }
 
 

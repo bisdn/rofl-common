@@ -40,7 +40,7 @@ cofmsg_barrier_request::unpack(
 		return;
 
 	if (buflen < cofmsg_barrier_request::length())
-		throw eBadSyntaxTooShort("cofmsg_barrier_request::unpack() buf too short");
+		throw eBadRequestBadLen("cofmsg_barrier_request::unpack() buf too short");
 
 	switch (get_version()) {
 	case rofl::openflow10::OFP_VERSION: {
@@ -65,7 +65,7 @@ cofmsg_barrier_request::unpack(
 	}
 
 	if (get_length() < cofmsg_barrier_request::length())
-		throw eBadSyntaxTooShort("cofmsg_barrier_request::unpack() buf too short");
+		throw eBadRequestBadLen("cofmsg_barrier_request::unpack() buf too short");
 }
 
 
@@ -108,7 +108,7 @@ cofmsg_barrier_reply::unpack(
 		return;
 
 	if (buflen < cofmsg_barrier_reply::length())
-		throw eBadSyntaxTooShort("cofmsg_barrier_reply::unpack() buf too short");
+		throw eBadRequestBadLen("cofmsg_barrier_reply::unpack() buf too short");
 
 	switch (get_version()) {
 	case rofl::openflow10::OFP_VERSION: {
@@ -133,7 +133,7 @@ cofmsg_barrier_reply::unpack(
 	}
 
 	if (get_length() < cofmsg_barrier_reply::length())
-		throw eBadSyntaxTooShort("cofmsg_barrier_reply::unpack() buf too short");
+		throw eBadRequestBadLen("cofmsg_barrier_reply::unpack() buf too short");
 }
 
 

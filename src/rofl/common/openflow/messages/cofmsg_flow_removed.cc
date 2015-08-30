@@ -95,7 +95,7 @@ cofmsg_flow_removed::unpack(
 	case rofl::openflow10::OFP_VERSION: {
 
 		if (buflen < sizeof(struct rofl::openflow10::ofp_flow_removed))
-			throw eBadSyntaxTooShort("cofmsg_flow_removed::unpack() buf too short");
+			throw eBadRequestBadLen("cofmsg_flow_removed::unpack() buf too short");
 
 		if (get_type() != rofl::openflow10::OFPT_FLOW_REMOVED)
 			throw eMsgInval("cofmsg_flow_removed::unpack() invalid message type");
@@ -118,13 +118,13 @@ cofmsg_flow_removed::unpack(
 				sizeof(struct rofl::openflow10::ofp_match));
 
 		if (get_length() < sizeof(struct rofl::openflow10::ofp_flow_removed))
-			throw eBadSyntaxTooShort("cofmsg_flow_removed::unpack() buf too short");
+			throw eBadRequestBadLen("cofmsg_flow_removed::unpack() buf too short");
 
 	} break;
 	default: {
 
 		if (buflen < sizeof(struct rofl::openflow13::ofp_flow_removed))
-			throw eBadSyntaxTooShort("cofmsg_flow_removed::unpack()");
+			throw eBadRequestBadLen("cofmsg_flow_removed::unpack()");
 
 		if (get_type() != rofl::openflow13::OFPT_FLOW_REMOVED)
 			throw eMsgInval("cofmsg_flow_removed::unpack() invalid message type");
@@ -148,7 +148,7 @@ cofmsg_flow_removed::unpack(
 		}
 
 		if (get_length() < sizeof(struct rofl::openflow13::ofp_flow_removed))
-			throw eBadSyntaxTooShort("cofmsg_flow_removed::unpack()");
+			throw eBadRequestBadLen("cofmsg_flow_removed::unpack()");
 	};
 	}
 }

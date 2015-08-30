@@ -45,7 +45,7 @@ cofmsg::unpack(
 		return;
 
 	if (buflen < cofmsg::length())
-		throw eBadSyntaxTooShort("cofmsg::unpack() buf too short");
+		throw eBadRequestBadLen("cofmsg::unpack() buf too short");
 
 	struct rofl::openflow::ofp_header* hdr =
 			(struct rofl::openflow::ofp_header*)buf;
@@ -56,9 +56,9 @@ cofmsg::unpack(
 	xid     = be32toh(hdr->xid);
 
 	if (len < cofmsg::length())
-		throw eBadSyntaxTooShort("cofmsg::unpack() buf too short (header)");
+		throw eBadRequestBadLen("cofmsg::unpack() buf too short (header)");
 	if (len > buflen)
-		throw eBadSyntaxTooShort("cofmsg::unpack() buf too short (payload)");
+		throw eBadRequestBadLen("cofmsg::unpack() buf too short (payload)");
 }
 
 

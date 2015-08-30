@@ -110,7 +110,7 @@ cofmsg_queue_get_config_request::unpack(
 		return;
 
 	if (buflen < cofmsg_queue_get_config_request::length())
-		throw eBadSyntaxTooShort("cofmsg_queue_get_config_request::unpack() buf too short");
+		throw eBadRequestBadLen("cofmsg_queue_get_config_request::unpack() buf too short");
 
 	switch (get_version()) {
 	case rofl::openflow10::OFP_VERSION: {
@@ -130,7 +130,7 @@ cofmsg_queue_get_config_request::unpack(
 	}
 
 	if (get_length() < cofmsg_queue_get_config_request::length())
-		throw eBadSyntaxTooShort("cofmsg_queue_get_config_request::unpack() buf too short");
+		throw eBadRequestBadLen("cofmsg_queue_get_config_request::unpack() buf too short");
 }
 
 
@@ -256,7 +256,7 @@ cofmsg_queue_get_config_reply::unpack(
 	queues.set_version(get_version());
 
 	if (buflen < cofmsg_queue_get_config_reply::length())
-		throw eBadSyntaxTooShort("cofmsg_queue_get_config_reply::unpack() buf too short");
+		throw eBadRequestBadLen("cofmsg_queue_get_config_reply::unpack() buf too short");
 
 	switch (get_version()) {
 	case rofl::openflow10::OFP_VERSION: {
@@ -282,7 +282,7 @@ cofmsg_queue_get_config_reply::unpack(
 	}
 
 	if (get_length() < cofmsg_queue_get_config_reply::length())
-		throw eBadSyntaxTooShort("cofmsg_queue_get_config_reply::unpack() buf too short");
+		throw eBadRequestBadLen("cofmsg_queue_get_config_reply::unpack() buf too short");
 }
 
 

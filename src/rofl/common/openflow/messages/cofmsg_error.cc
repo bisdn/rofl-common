@@ -46,7 +46,7 @@ cofmsg_error::unpack(
 		return;
 
 	if (buflen < cofmsg_error::length())
-		throw eBadSyntaxTooShort("cofmsg_error::unpack() buf too short");
+		throw eBadRequestBadLen("cofmsg_error::unpack() buf too short");
 
 	switch (get_version()) {
 	default: {
@@ -67,7 +67,7 @@ cofmsg_error::unpack(
 	}
 
 	if (get_length() < cofmsg_error::length())
-		throw eBadSyntaxTooShort("cofmsg_error::unpack() buf too short");
+		throw eBadRequestBadLen("cofmsg_error::unpack() buf too short");
 }
 
 

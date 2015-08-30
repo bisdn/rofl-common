@@ -107,7 +107,7 @@ cofmsg_meter_mod::unpack(
 		return;
 
 	if (buflen < cofmsg_meter_mod::length())
-		throw eBadSyntaxTooShort("cofmsg_meter_mod::unpack() buf too short");
+		throw eBadRequestBadLen("cofmsg_meter_mod::unpack() buf too short");
 
 	switch (get_version()) {
 	default: {
@@ -127,7 +127,7 @@ cofmsg_meter_mod::unpack(
 	}
 
 	if (get_length() < cofmsg_meter_mod::length())
-		throw eBadSyntaxTooShort("cofmsg_meter_mod::unpack() buf too short");
+		throw eBadRequestBadLen("cofmsg_meter_mod::unpack() buf too short");
 }
 
 

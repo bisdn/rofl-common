@@ -41,7 +41,7 @@ cofmsg_get_config_reply::unpack(
 		return;
 
 	if (buflen < cofmsg_get_config_reply::length())
-		throw eBadSyntaxTooShort("cofmsg_get_config_reply::unpack() but too short");
+		throw eBadRequestBadLen("cofmsg_get_config_reply::unpack() but too short");
 
 	switch (get_version()) {
 	default: {
@@ -58,7 +58,7 @@ cofmsg_get_config_reply::unpack(
 	}
 
 	if (get_length() < cofmsg_get_config_reply::length())
-		throw eBadSyntaxTooShort("cofmsg_get_config_reply::unpack() but too short");
+		throw eBadRequestBadLen("cofmsg_get_config_reply::unpack() but too short");
 }
 
 
@@ -102,7 +102,7 @@ cofmsg_set_config::unpack(
 		return;
 
 	if (buflen < cofmsg_set_config::length())
-		throw eBadSyntaxTooShort("cofmsg_set_config::unpack() but too short");
+		throw eBadRequestBadLen("cofmsg_set_config::unpack() but too short");
 
 	switch (get_version()) {
 	default: {
@@ -119,7 +119,7 @@ cofmsg_set_config::unpack(
 	}
 
 	if (get_length() < cofmsg_set_config::length())
-		throw eBadSyntaxTooShort("cofmsg_set_config::unpack() but too short");
+		throw eBadRequestBadLen("cofmsg_set_config::unpack() but too short");
 }
 
 

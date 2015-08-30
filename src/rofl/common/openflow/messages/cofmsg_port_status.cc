@@ -65,7 +65,7 @@ cofmsg_port_status::unpack(uint8_t *buf, size_t buflen)
 		return;
 
 	if (buflen < cofmsg_port_status::length())
-		throw eBadSyntaxTooShort("cofmsg_port_status::unpack() buf too short");
+		throw eBadRequestBadLen("cofmsg_port_status::unpack() buf too short");
 
 	switch (get_version()) {
 	case rofl::openflow10::OFP_VERSION: {
@@ -116,7 +116,7 @@ cofmsg_port_status::unpack(uint8_t *buf, size_t buflen)
 	}
 
 	if (get_length() < cofmsg_port_status::length())
-		throw eBadSyntaxTooShort("cofmsg_port_status::unpack() buf too short");
+		throw eBadRequestBadLen("cofmsg_port_status::unpack() buf too short");
 }
 
 

@@ -71,7 +71,7 @@ cofmsg_experimenter::unpack(
 		return;
 
 	if (buflen < cofmsg_experimenter::length())
-		throw eBadSyntaxTooShort("cofmsg_experimenter::unpack() buf too short");
+		throw eBadRequestBadLen("cofmsg_experimenter::unpack() buf too short");
 
 	switch (get_version()) {
 	case rofl::openflow10::OFP_VERSION: {
@@ -105,7 +105,7 @@ cofmsg_experimenter::unpack(
 	}
 
 	if (get_length() < cofmsg_experimenter::length())
-		throw eBadSyntaxTooShort("cofmsg_experimenter::unpack() buf too short");
+		throw eBadRequestBadLen("cofmsg_experimenter::unpack() buf too short");
 }
 
 

@@ -40,7 +40,7 @@ cofmsg_echo_request::unpack(
 		return;
 
 	if (buflen < cofmsg_echo_request::length())
-		throw eBadSyntaxTooShort("cofmsg_echo_request::unpack() buf too short");
+		throw eBadRequestBadLen("cofmsg_echo_request::unpack() buf too short");
 
 	switch (get_version()) {
 	default: {
@@ -55,7 +55,7 @@ cofmsg_echo_request::unpack(
 	}
 
 	if (get_length() < cofmsg_echo_request::length())
-		throw eBadSyntaxTooShort("cofmsg_echo_request::unpack() buf too short");
+		throw eBadRequestBadLen("cofmsg_echo_request::unpack() buf too short");
 }
 
 
@@ -98,7 +98,7 @@ cofmsg_echo_reply::unpack(
 		return;
 
 	if (buflen < cofmsg_echo_reply::length())
-		throw eBadSyntaxTooShort("cofmsg_echo_reply::unpack() buf too short");
+		throw eBadRequestBadLen("cofmsg_echo_reply::unpack() buf too short");
 
 	switch (get_version()) {
 	default: {
@@ -113,7 +113,7 @@ cofmsg_echo_reply::unpack(
 	}
 
 	if (get_length() < cofmsg_echo_reply::length())
-		throw eBadSyntaxTooShort("cofmsg_echo_reply::unpack() buf too short");
+		throw eBadRequestBadLen("cofmsg_echo_reply::unpack() buf too short");
 }
 
 
