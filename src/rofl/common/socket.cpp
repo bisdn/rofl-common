@@ -730,148 +730,135 @@ socket_t::parse_of10_message(
 
 	switch (header->type) {
 	case rofl::openflow10::OFPT_HELLO: {
-		(*pmsg = new rofl::openflow::cofmsg_hello())->unpack(rxbuffer.somem(), rxbuffer.memlen());
+		*pmsg = new rofl::openflow::cofmsg_hello();
 	} break;
-
 	case rofl::openflow10::OFPT_ERROR: {
-		(*pmsg = new rofl::openflow::cofmsg_error())->unpack(rxbuffer.somem(), rxbuffer.length());
+		*pmsg = new rofl::openflow::cofmsg_error();
 	} break;
-
 	case rofl::openflow10::OFPT_ECHO_REQUEST: {
-		(*pmsg = new rofl::openflow::cofmsg_echo_request())->unpack(rxbuffer.somem(), rxbuffer.length());
+		*pmsg = new rofl::openflow::cofmsg_echo_request();
 	} break;
 	case rofl::openflow10::OFPT_ECHO_REPLY: {
-		(*pmsg = new rofl::openflow::cofmsg_echo_reply())->unpack(rxbuffer.somem(), rxbuffer.length());
+		*pmsg = new rofl::openflow::cofmsg_echo_reply();
 	} break;
-
 	case rofl::openflow10::OFPT_VENDOR: {
-		(*pmsg = new rofl::openflow::cofmsg_experimenter())->unpack(rxbuffer.somem(), rxbuffer.length());
+		*pmsg = new rofl::openflow::cofmsg_experimenter();
 	} break;
-
 	case rofl::openflow10::OFPT_FEATURES_REQUEST:	{
-		(*pmsg = new rofl::openflow::cofmsg_features_request())->unpack(rxbuffer.somem(), rxbuffer.length());
+		*pmsg = new rofl::openflow::cofmsg_features_request();
 	} break;
 	case rofl::openflow10::OFPT_FEATURES_REPLY: {
-		(*pmsg = new rofl::openflow::cofmsg_features_reply())->unpack(rxbuffer.somem(), rxbuffer.length());
+		*pmsg = new rofl::openflow::cofmsg_features_reply();
 	} break;
-
 	case rofl::openflow10::OFPT_GET_CONFIG_REQUEST: {
-		(*pmsg = new rofl::openflow::cofmsg_get_config_request())->unpack(rxbuffer.somem(), rxbuffer.length());
+		*pmsg = new rofl::openflow::cofmsg_get_config_request();
 	} break;
 	case rofl::openflow10::OFPT_GET_CONFIG_REPLY: {
-		(*pmsg = new rofl::openflow::cofmsg_get_config_reply())->unpack(rxbuffer.somem(), rxbuffer.length());
+		*pmsg = new rofl::openflow::cofmsg_get_config_reply();
 	} break;
 	case rofl::openflow10::OFPT_SET_CONFIG: {
-		(*pmsg = new rofl::openflow::cofmsg_set_config())->unpack(rxbuffer.somem(), rxbuffer.length());
+		*pmsg = new rofl::openflow::cofmsg_set_config();
 	} break;
-
 	case rofl::openflow10::OFPT_PACKET_OUT: {
-		(*pmsg = new rofl::openflow::cofmsg_packet_out())->unpack(rxbuffer.somem(), rxbuffer.length());
+		*pmsg = new rofl::openflow::cofmsg_packet_out();
 	} break;
 	case rofl::openflow10::OFPT_PACKET_IN: {
-		(*pmsg = new rofl::openflow::cofmsg_packet_in())->unpack(rxbuffer.somem(), rxbuffer.length());
+		*pmsg = new rofl::openflow::cofmsg_packet_in();
 	} break;
-
 	case rofl::openflow10::OFPT_FLOW_MOD: {
-		(*pmsg = new rofl::openflow::cofmsg_flow_mod())->unpack(rxbuffer.somem(), rxbuffer.length());
+		*pmsg = new rofl::openflow::cofmsg_flow_mod();
 	} break;
 	case rofl::openflow10::OFPT_FLOW_REMOVED: {
-		(*pmsg = new rofl::openflow::cofmsg_flow_removed())->unpack(rxbuffer.somem(), rxbuffer.length());
+		*pmsg = new rofl::openflow::cofmsg_flow_removed();
 	} break;
-
 	case rofl::openflow10::OFPT_PORT_MOD: {
-		(*pmsg = new rofl::openflow::cofmsg_port_mod())->unpack(rxbuffer.somem(), rxbuffer.length());
+		*pmsg = new rofl::openflow::cofmsg_port_mod();
 	} break;
 	case rofl::openflow10::OFPT_PORT_STATUS: {
-		(*pmsg = new rofl::openflow::cofmsg_port_status())->unpack(rxbuffer.somem(), rxbuffer.length());
+		*pmsg = new rofl::openflow::cofmsg_port_status();
 	} break;
-
 	case rofl::openflow10::OFPT_STATS_REQUEST: {
-		if (rxbuffer.memlen() < sizeof(struct rofl::openflow10::ofp_stats_request)) {
-			(*pmsg = new rofl::openflow::cofmsg())->unpack(rxbuffer.somem(), rxbuffer.length());
-			throw eBadSyntaxTooShort();
+		if (rxbuffer.length() < sizeof(struct rofl::openflow10::ofp_stats_request)) {
+			throw eBadSyntaxTooShort("socket_t::parse_of10_message() stats buf too short");
 		}
 		uint16_t stats_type = be16toh(((struct rofl::openflow10::ofp_stats_request*)rxbuffer.somem())->type);
-
 		switch (stats_type) {
 		case rofl::openflow10::OFPST_DESC: {
-			(*pmsg = new rofl::openflow::cofmsg_desc_stats_request())->unpack(rxbuffer.somem(), rxbuffer.length());
+			*pmsg = new rofl::openflow::cofmsg_desc_stats_request();
 		} break;
 		case rofl::openflow10::OFPST_FLOW: {
-			(*pmsg = new rofl::openflow::cofmsg_flow_stats_request())->unpack(rxbuffer.somem(), rxbuffer.length());
+			*pmsg = new rofl::openflow::cofmsg_flow_stats_request();
 		} break;
 		case rofl::openflow10::OFPST_AGGREGATE: {
-			(*pmsg = new rofl::openflow::cofmsg_aggr_stats_request())->unpack(rxbuffer.somem(), rxbuffer.length());
+			*pmsg = new rofl::openflow::cofmsg_aggr_stats_request();
 		} break;
 		case rofl::openflow10::OFPST_TABLE: {
-			(*pmsg = new rofl::openflow::cofmsg_table_stats_request())->unpack(rxbuffer.somem(), rxbuffer.length());
+			*pmsg = new rofl::openflow::cofmsg_table_stats_request();
 		} break;
 		case rofl::openflow10::OFPST_PORT: {
-			(*pmsg = new rofl::openflow::cofmsg_port_stats_request())->unpack(rxbuffer.somem(), rxbuffer.length());
+			*pmsg = new rofl::openflow::cofmsg_port_stats_request();
 		} break;
 		case rofl::openflow10::OFPST_QUEUE: {
-			(*pmsg = new rofl::openflow::cofmsg_queue_stats_request())->unpack(rxbuffer.somem(), rxbuffer.length());
+			*pmsg = new rofl::openflow::cofmsg_queue_stats_request();
 		} break;
-		// TODO: experimenter statistics
+		case rofl::openflow10::OFPST_VENDOR: {
+			*pmsg = new rofl::openflow::cofmsg_experimenter_stats_request();
+		} break;
 		default: {
-			(*pmsg = new rofl::openflow::cofmsg_stats_request())->unpack(rxbuffer.somem(), rxbuffer.length());
-		} break;
+			throw eBadRequestBadStat("socket_t::parse_of10_message() invalid stats message type");
+		};
 		}
-
 	} break;
 	case rofl::openflow10::OFPT_STATS_REPLY: {
-		if (rxbuffer.memlen() < sizeof(struct rofl::openflow10::ofp_stats_reply)) {
-			(*pmsg = new rofl::openflow::cofmsg())->unpack(rxbuffer.somem(), rxbuffer.length());
-			throw eBadSyntaxTooShort();
+		if (rxbuffer.length() < sizeof(struct rofl::openflow10::ofp_stats_reply)) {
+			throw eBadSyntaxTooShort("socket_t::parse_of10_message() stats buf too short");
 		}
 		uint16_t stats_type = be16toh(((struct rofl::openflow10::ofp_stats_reply*)rxbuffer.somem())->type);
-
 		switch (stats_type) {
 		case rofl::openflow10::OFPST_DESC: {
-			(*pmsg = new rofl::openflow::cofmsg_desc_stats_reply())->unpack(rxbuffer.somem(), rxbuffer.length());
+			*pmsg = new rofl::openflow::cofmsg_desc_stats_reply();
 		} break;
 		case rofl::openflow10::OFPST_FLOW: {
-			(*pmsg = new rofl::openflow::cofmsg_flow_stats_reply())->unpack(rxbuffer.somem(), rxbuffer.length());
+			*pmsg = new rofl::openflow::cofmsg_flow_stats_reply();
 		} break;
 		case rofl::openflow10::OFPST_AGGREGATE: {
-			(*pmsg = new rofl::openflow::cofmsg_aggr_stats_reply())->unpack(rxbuffer.somem(), rxbuffer.length());
+			*pmsg = new rofl::openflow::cofmsg_aggr_stats_reply();
 		} break;
 		case rofl::openflow10::OFPST_TABLE: {
-			(*pmsg = new rofl::openflow::cofmsg_table_stats_reply())->unpack(rxbuffer.somem(), rxbuffer.length());
+			*pmsg = new rofl::openflow::cofmsg_table_stats_reply();
 		} break;
 		case rofl::openflow10::OFPST_PORT: {
-			(*pmsg = new rofl::openflow::cofmsg_port_stats_reply())->unpack(rxbuffer.somem(), rxbuffer.length());
+			*pmsg = new rofl::openflow::cofmsg_port_stats_reply();
 		} break;
 		case rofl::openflow10::OFPST_QUEUE: {
-			(*pmsg = new rofl::openflow::cofmsg_queue_stats_reply())->unpack(rxbuffer.somem(), rxbuffer.length());
+			*pmsg = new rofl::openflow::cofmsg_queue_stats_reply();
 		} break;
-		// TODO: experimenter statistics
+		case rofl::openflow10::OFPST_VENDOR: {
+			*pmsg = new rofl::openflow::cofmsg_experimenter_stats_reply();
+		} break;
 		default: {
-			(*pmsg = new rofl::openflow::cofmsg_stats_reply())->unpack(rxbuffer.somem(), rxbuffer.length());
-		} break;
+			throw eBadRequestBadStat("socket_t::parse_of12_message() invalid stats message type");
+		};
 		}
-
 	} break;
-
 	case rofl::openflow10::OFPT_BARRIER_REQUEST: {
-		(*pmsg = new rofl::openflow::cofmsg_barrier_request())->unpack(rxbuffer.somem(), rxbuffer.memlen());
+		*pmsg = new rofl::openflow::cofmsg_barrier_request();
 	} break;
 	case rofl::openflow10::OFPT_BARRIER_REPLY: {
-		(*pmsg = new rofl::openflow::cofmsg_barrier_reply())->unpack(rxbuffer.somem(), rxbuffer.length());
+		*pmsg = new rofl::openflow::cofmsg_barrier_reply();
 	} break;
 	case rofl::openflow10::OFPT_QUEUE_GET_CONFIG_REQUEST: {
-		(*pmsg = new rofl::openflow::cofmsg_queue_get_config_request())->unpack(rxbuffer.somem(), rxbuffer.length());
+		*pmsg = new rofl::openflow::cofmsg_queue_get_config_request();
 	} break;
 	case rofl::openflow10::OFPT_QUEUE_GET_CONFIG_REPLY: {
-		(*pmsg = new rofl::openflow::cofmsg_queue_get_config_reply())->unpack(rxbuffer.somem(), rxbuffer.length());
+		*pmsg = new rofl::openflow::cofmsg_queue_get_config_reply();
 	} break;
-
 	default: {
-		(*pmsg = new rofl::openflow::cofmsg())->unpack(rxbuffer.somem(), rxbuffer.length());
-		LOGGING_WARN << "[rofl-common][crofsock] dropping unknown message " << **pmsg << std::endl;
-		throw eBadRequestBadType();
-	} break;
+		throw eBadRequestBadType("socket_t::parse_of10_message() invalid message type");
+	};
 	}
+
+	(**pmsg)).unpack(rxbuffer.somem(), rxbuffer.length());
 }
 
 
@@ -884,193 +871,174 @@ socket_t::parse_of12_message(
 
 	switch (header->type) {
 	case rofl::openflow12::OFPT_HELLO: {
-		(*pmsg = new rofl::openflow::cofmsg_hello())->unpack(rxbuffer.somem(), rxbuffer.length());
+		*pmsg = new rofl::openflow::cofmsg_hello();
 	} break;
-
 	case rofl::openflow12::OFPT_ERROR: {
-		(*pmsg = new rofl::openflow::cofmsg_error())->unpack(rxbuffer.somem(), rxbuffer.length());
+		*pmsg = new rofl::openflow::cofmsg_error();
 	} break;
-
 	case rofl::openflow12::OFPT_ECHO_REQUEST: {
-		(*pmsg = new rofl::openflow::cofmsg_echo_request())->unpack(rxbuffer.somem(), rxbuffer.length());
+		*pmsg = new rofl::openflow::cofmsg_echo_request();
 	} break;
 	case rofl::openflow12::OFPT_ECHO_REPLY: {
-		(*pmsg = new rofl::openflow::cofmsg_echo_reply())->unpack(rxbuffer.somem(), rxbuffer.length());
+		*pmsg = new rofl::openflow::cofmsg_echo_reply();
 	} break;
-
 	case rofl::openflow12::OFPT_EXPERIMENTER:	{
-		(*pmsg = new rofl::openflow::cofmsg_experimenter())->unpack(rxbuffer.somem(), rxbuffer.length());
+		*pmsg = new rofl::openflow::cofmsg_experimenter();
 	} break;
-
 	case rofl::openflow12::OFPT_FEATURES_REQUEST:	{
-		(*pmsg = new rofl::openflow::cofmsg_features_request())->unpack(rxbuffer.somem(), rxbuffer.length());
+		*pmsg = new rofl::openflow::cofmsg_features_request();
 	} break;
 	case rofl::openflow12::OFPT_FEATURES_REPLY: {
-		(*pmsg = new rofl::openflow::cofmsg_features_reply())->unpack(rxbuffer.somem(), rxbuffer.length());
+		*pmsg = new rofl::openflow::cofmsg_features_reply();
 	} break;
-
 	case rofl::openflow12::OFPT_GET_CONFIG_REQUEST: {
-		(*pmsg = new rofl::openflow::cofmsg_get_config_request())->unpack(rxbuffer.somem(), rxbuffer.length());
+		*pmsg = new rofl::openflow::cofmsg_get_config_request();
 	} break;
 	case rofl::openflow12::OFPT_GET_CONFIG_REPLY: {
-		(*pmsg = new rofl::openflow::cofmsg_get_config_reply())->unpack(rxbuffer.somem(), rxbuffer.length());
+		*pmsg = new rofl::openflow::cofmsg_get_config_reply();
 	} break;
 	case rofl::openflow12::OFPT_SET_CONFIG: {
-		(*pmsg = new rofl::openflow::cofmsg_set_config())->unpack(rxbuffer.somem(), rxbuffer.length());
+		*pmsg = new rofl::openflow::cofmsg_set_config();
 	} break;
-
 	case rofl::openflow12::OFPT_PACKET_OUT: {
-		(*pmsg = new rofl::openflow::cofmsg_packet_out())->unpack(rxbuffer.somem(), rxbuffer.length());
+		*pmsg = new rofl::openflow::cofmsg_packet_out();
 	} break;
 	case rofl::openflow12::OFPT_PACKET_IN: {
-		(*pmsg = new rofl::openflow::cofmsg_packet_in())->unpack(rxbuffer.somem(), rxbuffer.length());
+		*pmsg = new rofl::openflow::cofmsg_packet_in();
 	} break;
-
 	case rofl::openflow12::OFPT_FLOW_MOD: {
-		(*pmsg = new rofl::openflow::cofmsg_flow_mod())->unpack(rxbuffer.somem(), rxbuffer.length());
+		*pmsg = new rofl::openflow::cofmsg_flow_mod();
 	} break;
 	case rofl::openflow12::OFPT_FLOW_REMOVED: {
-		(*pmsg = new rofl::openflow::cofmsg_flow_removed())->unpack(rxbuffer.somem(), rxbuffer.length());
+		*pmsg = new rofl::openflow::cofmsg_flow_removed();
 	} break;
-
 	case rofl::openflow12::OFPT_GROUP_MOD: {
-		(*pmsg = new rofl::openflow::cofmsg_group_mod())->unpack(rxbuffer.somem(), rxbuffer.length());
+		*pmsg = new rofl::openflow::cofmsg_group_mod();
 	} break;
-
 	case rofl::openflow12::OFPT_PORT_MOD: {
-		(*pmsg = new rofl::openflow::cofmsg_port_mod())->unpack(rxbuffer.somem(), rxbuffer.length());
+		*pmsg = new rofl::openflow::cofmsg_port_mod();
 	} break;
 	case rofl::openflow12::OFPT_PORT_STATUS: {
-		(*pmsg = new rofl::openflow::cofmsg_port_status())->unpack(rxbuffer.somem(), rxbuffer.length());
+		*pmsg = new rofl::openflow::cofmsg_port_status();
 	} break;
-
 	case rofl::openflow12::OFPT_TABLE_MOD: {
-		(*pmsg = new rofl::openflow::cofmsg_table_mod())->unpack(rxbuffer.somem(), rxbuffer.length());
+		*pmsg = new rofl::openflow::cofmsg_table_mod();
 	} break;
-
 	case rofl::openflow12::OFPT_STATS_REQUEST: {
-
-		if (rxbuffer.memlen() < sizeof(struct rofl::openflow12::ofp_stats_request)) {
-			(*pmsg = new rofl::openflow::cofmsg())->unpack(rxbuffer.somem(), rxbuffer.length());
-			throw eBadSyntaxTooShort();
+		if (rxbuffer.length() < sizeof(struct rofl::openflow12::ofp_stats_request)) {
+			throw eBadSyntaxTooShort("socket_t::parse_of12_message() stats buf too short");
 		}
 		uint16_t stats_type = be16toh(((struct rofl::openflow12::ofp_stats_request*)rxbuffer.somem())->type);
-
 		switch (stats_type) {
 		case rofl::openflow12::OFPST_DESC: {
-			(*pmsg = new rofl::openflow::cofmsg_desc_stats_request())->unpack(rxbuffer.somem(), rxbuffer.length());
+			*pmsg = new rofl::openflow::cofmsg_desc_stats_request();
 		} break;
 		case rofl::openflow12::OFPST_FLOW: {
-			(*pmsg = new rofl::openflow::cofmsg_flow_stats_request())->unpack(rxbuffer.somem(), rxbuffer.length());
+			*pmsg = new rofl::openflow::cofmsg_flow_stats_request();
 		} break;
 		case rofl::openflow12::OFPST_AGGREGATE: {
-			(*pmsg = new rofl::openflow::cofmsg_aggr_stats_request())->unpack(rxbuffer.somem(), rxbuffer.length());
+			*pmsg = new rofl::openflow::cofmsg_aggr_stats_request();
 		} break;
 		case rofl::openflow12::OFPST_TABLE: {
-			(*pmsg = new rofl::openflow::cofmsg_table_stats_request())->unpack(rxbuffer.somem(), rxbuffer.length());
+			*pmsg = new rofl::openflow::cofmsg_table_stats_request();
 		} break;
 		case rofl::openflow12::OFPST_PORT: {
-			(*pmsg = new rofl::openflow::cofmsg_port_stats_request())->unpack(rxbuffer.somem(), rxbuffer.length());
+			*pmsg = new rofl::openflow::cofmsg_port_stats_request();
 		} break;
 		case rofl::openflow12::OFPST_QUEUE: {
-			(*pmsg = new rofl::openflow::cofmsg_queue_stats_request())->unpack(rxbuffer.somem(), rxbuffer.length());
+			*pmsg = new rofl::openflow::cofmsg_queue_stats_request();
 		} break;
 		case rofl::openflow12::OFPST_GROUP: {
-			(*pmsg = new rofl::openflow::cofmsg_group_stats_request())->unpack(rxbuffer.somem(), rxbuffer.length());
+			*pmsg = new rofl::openflow::cofmsg_group_stats_request();
 		} break;
 		case rofl::openflow12::OFPST_GROUP_DESC: {
-			(*pmsg = new rofl::openflow::cofmsg_group_desc_stats_request())->unpack(rxbuffer.somem(), rxbuffer.length());
+			*pmsg = new rofl::openflow::cofmsg_group_desc_stats_request();
 		} break;
 		case rofl::openflow12::OFPST_GROUP_FEATURES: {
-			(*pmsg = new rofl::openflow::cofmsg_group_features_stats_request())->unpack(rxbuffer.somem(), rxbuffer.length());
+			*pmsg = new rofl::openflow::cofmsg_group_features_stats_request();
 		} break;
-		// TODO: experimenter statistics
+		case rofl::openflow12::OFPST_EXPERIMENTER: {
+			*pmsg = new rofl::openflow::cofmsg_experimenter_stats_request();
+		} break;
 		default: {
-			(*pmsg = new rofl::openflow::cofmsg_stats_request())->unpack(rxbuffer.somem(), rxbuffer.length());
-		} break;
+			throw eBadRequestBadStat("socket_t::parse_of12_message() invalid stats message type");
+		};
 		}
-
 	} break;
 	case rofl::openflow12::OFPT_STATS_REPLY: {
-		if (rxbuffer.memlen() < sizeof(struct rofl::openflow12::ofp_stats_reply)) {
-			(*pmsg = new rofl::openflow::cofmsg())->unpack(rxbuffer.somem(), rxbuffer.length());
-			throw eBadSyntaxTooShort();
+		if (rxbuffer.length() < sizeof(struct rofl::openflow12::ofp_stats_reply)) {
+			throw eBadSyntaxTooShort("socket_t::parse_of12_message() stats buf too short");
 		}
 		uint16_t stats_type = be16toh(((struct rofl::openflow12::ofp_stats_reply*)rxbuffer.somem())->type);
-
 		switch (stats_type) {
 		case rofl::openflow12::OFPST_DESC: {
-			(*pmsg = new rofl::openflow::cofmsg_desc_stats_reply())->unpack(rxbuffer.somem(), rxbuffer.length());
+			*pmsg = new rofl::openflow::cofmsg_desc_stats_reply();
 		} break;
 		case rofl::openflow12::OFPST_FLOW: {
-			(*pmsg = new rofl::openflow::cofmsg_flow_stats_reply())->unpack(rxbuffer.somem(), rxbuffer.length());
+			*pmsg = new rofl::openflow::cofmsg_flow_stats_reply();
 		} break;
 		case rofl::openflow12::OFPST_AGGREGATE: {
-			(*pmsg = new rofl::openflow::cofmsg_aggr_stats_reply())->unpack(rxbuffer.somem(), rxbuffer.length());
+			*pmsg = new rofl::openflow::cofmsg_aggr_stats_reply();
 		} break;
 		case rofl::openflow12::OFPST_TABLE: {
-			(*pmsg = new rofl::openflow::cofmsg_table_stats_reply())->unpack(rxbuffer.somem(), rxbuffer.length());
+			*pmsg = new rofl::openflow::cofmsg_table_stats_reply();
 		} break;
 		case rofl::openflow12::OFPST_PORT: {
-			(*pmsg = new rofl::openflow::cofmsg_port_stats_reply())->unpack(rxbuffer.somem(), rxbuffer.length());
+			*pmsg = new rofl::openflow::cofmsg_port_stats_reply();
 		} break;
 		case rofl::openflow12::OFPST_QUEUE: {
-			(*pmsg = new rofl::openflow::cofmsg_queue_stats_reply())->unpack(rxbuffer.somem(), rxbuffer.length());
+			*pmsg = new rofl::openflow::cofmsg_queue_stats_reply();
 		} break;
 		case rofl::openflow12::OFPST_GROUP: {
-			(*pmsg = new rofl::openflow::cofmsg_group_stats_reply())->unpack(rxbuffer.somem(), rxbuffer.length());
+			*pmsg = new rofl::openflow::cofmsg_group_stats_reply();
 		} break;
 		case rofl::openflow12::OFPST_GROUP_DESC: {
-			(*pmsg = new rofl::openflow::cofmsg_group_desc_stats_reply())->unpack(rxbuffer.somem(), rxbuffer.length());
+			*pmsg = new rofl::openflow::cofmsg_group_desc_stats_reply();
 		} break;
 		case rofl::openflow12::OFPST_GROUP_FEATURES: {
-			(*pmsg = new rofl::openflow::cofmsg_group_features_stats_reply())->unpack(rxbuffer.somem(), rxbuffer.length());
+			*pmsg = new rofl::openflow::cofmsg_group_features_stats_reply();
 		} break;
-		// TODO: experimenter statistics
+		case rofl::openflow12::OFPST_EXPERIMENTER: {
+			*pmsg = new rofl::openflow::cofmsg_experimenter_stats_reply();
+		} break;
 		default: {
-			(*pmsg = new rofl::openflow::cofmsg_stats_reply())->unpack(rxbuffer.somem(), rxbuffer.length());
-		} break;
+			throw eBadRequestBadStat("socket_t::parse_of12_message() invalid stats message type");
+		};
 		}
-
 	} break;
-
 	case rofl::openflow12::OFPT_BARRIER_REQUEST: {
-		(*pmsg = new rofl::openflow::cofmsg_barrier_request())->unpack(rxbuffer.somem(), rxbuffer.length());
+		*pmsg = new rofl::openflow::cofmsg_barrier_request();
 	} break;
 	case rofl::openflow12::OFPT_BARRIER_REPLY: {
-		(*pmsg = new rofl::openflow::cofmsg_barrier_reply())->unpack(rxbuffer.somem(), rxbuffer.length());
+		*pmsg = new rofl::openflow::cofmsg_barrier_reply();
 	} break;
-
 	case rofl::openflow12::OFPT_QUEUE_GET_CONFIG_REQUEST: {
-		(*pmsg = new rofl::openflow::cofmsg_queue_get_config_request())->unpack(rxbuffer.somem(), rxbuffer.length());
+		*pmsg = new rofl::openflow::cofmsg_queue_get_config_request();
 	} break;
 	case rofl::openflow12::OFPT_QUEUE_GET_CONFIG_REPLY: {
-		(*pmsg = new rofl::openflow::cofmsg_queue_get_config_reply())->unpack(rxbuffer.somem(), rxbuffer.length());
+		*pmsg = new rofl::openflow::cofmsg_queue_get_config_reply();
 	} break;
-
 	case rofl::openflow12::OFPT_ROLE_REQUEST: {
-		(*pmsg = new rofl::openflow::cofmsg_role_request())->unpack(rxbuffer.somem(), rxbuffer.length());
+		*pmsg = new rofl::openflow::cofmsg_role_request();
 	} break;
 	case rofl::openflow12::OFPT_ROLE_REPLY: {
-		(*pmsg = new rofl::openflow::cofmsg_role_reply())->unpack(rxbuffer.somem(), rxbuffer.length());
+		*pmsg = new rofl::openflow::cofmsg_role_reply();
 	} break;
-
 	case rofl::openflow12::OFPT_GET_ASYNC_REQUEST: {
-    	(*pmsg = new rofl::openflow::cofmsg_get_async_config_request())->unpack(rxbuffer.somem(), rxbuffer.length());
+    	*pmsg = new rofl::openflow::cofmsg_get_async_config_request();
     } break;
 	case rofl::openflow12::OFPT_GET_ASYNC_REPLY: {
-		(*pmsg = new rofl::openflow::cofmsg_get_async_config_reply())->unpack(rxbuffer.somem(), rxbuffer.length());
+		*pmsg = new rofl::openflow::cofmsg_get_async_config_reply();
 	} break;
 	case rofl::openflow12::OFPT_SET_ASYNC: {
-    	(*pmsg = new rofl::openflow::cofmsg_set_async_config())->unpack(rxbuffer.somem(), rxbuffer.length());
+    	*pmsg = new rofl::openflow::cofmsg_set_async_config();
     } break;
-
 	default: {
-		(*pmsg = new rofl::openflow::cofmsg())->unpack(rxbuffer.somem(), rxbuffer.length());
-		LOGGING_WARN << "[rofl-common][crofsock] dropping unknown message " << **pmsg << std::endl;
-		throw eBadRequestBadType();
-	} return;
+		throw eBadRequestBadType("socket_t::parse_of12_message() invalid message type");
+	};
 	}
+
+	(**pmsg)).unpack(rxbuffer.somem(), rxbuffer.length());
 }
 
 
@@ -1189,7 +1157,7 @@ socket_t::parse_of13_message(
 		} break;
 		default: {
 			throw eBadRequestBadStat("socket_t::parse_of13_message() invalid stats message type");
-		} break;
+		};
 		}
 	} break;
 	case rofl::openflow13::OFPT_MULTIPART_REPLY: {
@@ -1245,7 +1213,7 @@ socket_t::parse_of13_message(
 		} break;
 		default: {
 			throw eBadRequestBadStat("socket_t::parse_of13_message() invalid stats message type");
-		} break;
+		};
 		}
 	} break;
 	case rofl::openflow13::OFPT_BARRIER_REQUEST: {
