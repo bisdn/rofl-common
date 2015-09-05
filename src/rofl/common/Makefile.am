@@ -49,8 +49,8 @@ librofl_common_base_la_SOURCES = \
 		crofctl.cc \
 		crofdpt.h \
 		crofdpt.cc \
-		socket.hpp \
-		socket.cpp \
+		crofsock.h \
+		crofsock.cc \
 		crofconn.h \
 		crofconn.cc \
 		crofchan.h \
