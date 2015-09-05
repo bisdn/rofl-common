@@ -503,16 +503,18 @@ crofsock::send_from_queue()
 					};
 					}
 
-				} else
-				/* short write */
-				if (nbytes < txlen) {
-					msg_bytes_sent += nbytes;
-					tx_fragment_pending = true;
-
-				/* transmission successfully queued on socket, drop msg from our queue */
+				/* at least some bytes were sent successfully */
 				} else {
-					txqueues[queue_id].pop();
-					delete msg;
+					msg_bytes_sent += nbytes;
+
+					/* short write */
+					if (msg_bytes_sent < txlen) {
+						tx_fragment_pending = true;
+					} else {
+						tx_fragment_pending = false;
+						txqueues[queue_id].pop();
+						delete msg;
+					}
 				}
 
 			}
