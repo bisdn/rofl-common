@@ -29,7 +29,7 @@
 #include <algorithm>
 
 #include "rofl/common/cmemory.h"
-#include "rofl/common/logging.hpp"
+#include "rofl/common/logging.h"
 #include "rofl/common/crofqueue.h"
 #include "rofl/common/thread_helper.h"
 #include "rofl/common/croflexception.h"

@@ -12,9 +12,11 @@
 #ifndef SRC_ROFL_COMMON_LOGGING_HPP_
 #define SRC_ROFL_COMMON_LOGGING_HPP_
 
+#include <map>
 #include <deque>
 #include <iostream>
 #include <sstream>
+#include <iomanip>
 
 #include "rofl/common/locking.hpp"
 
@@ -358,6 +360,45 @@ public:
 	operator<< (logging& log, const set_log_level_flush& m)
 	{ dynamic_cast<std::ostream&>(log).flush(); return log; };
 };
+
+
+class indent
+{
+	static std::map<pthread_t, unsigned int> width;
+	std::map<pthread_t, unsigned int> my_width;
+public:
+	indent(unsigned int my_width = 0) {
+		pthread_t tid = pthread_self();
+		this->my_width[tid] = my_width;
+		indent::width[tid] += my_width;
+	};
+	virtual ~indent() {
+		pthread_t tid = pthread_self();
+		indent::width[tid] = (indent::width[tid] >= my_width[tid]) ? (indent::width[tid] - my_width[tid]) : 0;
+	};
+	static void inc(unsigned int width) {
+		pthread_t tid = pthread_self();
+		indent::width[tid] += width;
+	};
+	static void dec(unsigned int width) {
+		pthread_t tid = pthread_self();
+		indent::width[tid] = (indent::width[tid] >= width) ? (indent::width[tid] - width) : 0;
+	};
+	static void null() {
+		pthread_t tid = pthread_self();
+		indent::width[tid] = 0;
+	};
+	friend std::ostream&
+	operator<< (std::ostream& os, indent const& i) {
+		pthread_t tid = pthread_self();
+		if (indent::width[tid]) {
+			os << std::setw(indent::width[tid]) << " " << std::setw(0);
+		}
+		return os;
+	};
+};
+
+
 
 }; // end of namespace rofl
 

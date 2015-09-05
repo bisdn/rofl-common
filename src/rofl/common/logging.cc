@@ -9,7 +9,7 @@
  *      Author: andi
  */
 
-#include "logging.hpp"
+#include "logging.h"
 
 using namespace rofl;
 
