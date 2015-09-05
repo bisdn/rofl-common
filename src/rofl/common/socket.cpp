@@ -19,7 +19,10 @@ socket_t::~socket_t()
 socket_t::socket_t(
 		socket_env_t* env) :
 				env(env),
+				rxthread(this),
+				txthread(this),
 				state(STATE_UNKNOWN),
+				reconnect_on_failure(true),
 				ts_rec_sec(0),
 				ts_rec_nsec(200000/*200ms*/),
 				sd(-1),
@@ -27,8 +30,15 @@ socket_t::socket_t(
 				type(SOCK_STREAM),
 				protocol(IPPROTO_TCP),
 				backlog(10),
-				fragment_pending(false),
-				rxbuffer((size_t)65536)
+				rx_fragment_pending(false),
+				rxbuffer((size_t)65536),
+				msg_bytes_read(0),
+				max_pkts_rcvd_per_round(0),
+				rx_disabled(false),
+				tx_is_running(false),
+				tx_fragment_pending(false),
+				txbuffer((size_t)65536),
+				msg_bytes_sent(0)
 {
 	// scheduler weights for transmission
 	txweights[QUEUE_OAM ] = 16;
@@ -48,7 +58,7 @@ socket_t::close()
 
 	} break;
 	default: {
-		txthread.drop_timer(TIMER_RECONNECT);
+		txthread.drop_timer(TIMER_ID_RECONNECT);
 		rxthread.drop_read_fd(sd);
 		rxthread.drop_write_fd(sd);
 		::close(sd); sd = -1;
@@ -69,17 +79,17 @@ socket_t::listen()
 
 	/* open socket */
 	if ((sd = socket(domain, type, protocol)) < 0) {
-		throw eSysCall("socket");
+		throw eSysCall("socket()");
 	}
 
 	/* make socket non-blocking */
 	long flags;
 	if ((flags = fcntl(sd, F_GETFL)) < 0) {
-		throw eSysCall("fnctl(F_GETFL)");
+		throw eSysCall("fnctl() F_GETFL");
 	}
 	flags |= O_NONBLOCK;
 	if ((rc = fcntl(sd, F_SETFL, flags)) < 0) {
-		throw eSysCall("fcntl(F_SETGL)");
+		throw eSysCall("fcntl() F_SETGL");
 	}
 
 	if ((SOCK_STREAM == type) && (IPPROTO_TCP == protocol)) {
@@ -87,7 +97,7 @@ socket_t::listen()
 
 		// set SO_REUSEADDR option on TCP sockets
 		if ((rc = setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, (int*)&optval, sizeof(optval))) < 0) {
-			throw eSysCall("setsockopt(SOL_SOCKET, SO_REUSEADDR)");
+			throw eSysCall("setsockopt() SOL_SOCKET, SO_REUSEADDR");
 		}
 
 #if 0
@@ -99,19 +109,19 @@ socket_t::listen()
 
 		// set TCP_NODELAY option on TCP sockets
 		if ((rc = setsockopt(sd, IPPROTO_TCP, TCP_NODELAY, (int*)&optval, sizeof(optval))) < 0) {
-			throw eSysCall("setsockopt(IPPROTO_TCP, TCP_NODELAY)");
+			throw eSysCall("setsockopt() IPPROTO_TCP, TCP_NODELAY");
 		}
 
 		// set SO_RCVLOWAT
 		if ((rc = setsockopt(sd, SOL_SOCKET, SO_RCVLOWAT, (int*)&optval, sizeof(optval))) < 0) {
-			throw eSysCall("setsockopt(SOL_SOCKET, SO_RCVLOWAT)");
+			throw eSysCall("setsockopt() SOL_SOCKET, SO_RCVLOWAT");
 		}
 
 		// read TCP_NODELAY option for debugging purposes
 		socklen_t optlen = sizeof(int);
 		int optvalc;
 		if ((rc = getsockopt(sd, IPPROTO_TCP, TCP_NODELAY, (int*)&optvalc, &optlen)) < 0) {
-			throw eSysCall("getsockopt(IPPROTO_TCP, TCP_NODELAY)");
+			throw eSysCall("getsockopt() IPPROTO_TCP, TCP_NODELAY");
 		}
 	}
 
@@ -204,7 +214,7 @@ socket_t::connect(
 
 		if ((reconnect_on_failure = reconnect) == true) {
 			/* start pending timer for reconnect */
-			txthread.add_timer(TIMER_RECONNECT, ctimespec().expire_in(ts_rec_sec, ts_rec_nsec));
+			txthread.add_timer(TIMER_ID_RECONNECT, ctimespec().expire_in(ts_rec_sec, ts_rec_nsec));
 		}
 
 		int rc;
@@ -272,7 +282,7 @@ socket_t::connect(
 			rxthread.add_read_fd(sd);
 
 			/* stop pending timer for reconnect */
-			txthread.drop_timer(TIMER_RECONNECT);
+			txthread.drop_timer(TIMER_ID_RECONNECT);
 
 			if ((getsockname(sd, laddr.ca_saddr, &(laddr.salen))) < 0) {
 				throw eSysCall("getsockname()");
@@ -293,193 +303,32 @@ socket_t::connect(
 
 
 void
-socket_t::handle_read_event(
-		cthread& thread, int fd)
+socket_t::backoff_reconnect(
+		bool reset_timeout)
 {
-	if (&thread == &rxthread)
-		handle_read_event_rxthread(thread, fd);
-	else
-	if (&thread == &txthread)
-		handle_read_event_txthread(thread, fd);
-}
+	if (rxthread.drop_timer(TIMER_ID_RECONNECT)) {
+		return;
+	}
 
+	if (reset_timeout) {
 
+		reconnect_variance.expire_in(crandom::draw_random_number(), crandom::draw_random_number());
+		reconnect_counter = 0;
 
-void
-socket_t::handle_read_event_rxthread(
-		cthread& thread, int fd)
-{
-	try {
-		switch (state) {
-		case STATE_LISTENING: {
-			int new_sd = -1;
-			csockaddr ra;
+	} else {
+		reconnect_timespec += reconnect_timespec;
 
-			if ((new_sd = ::accept(sd, (struct sockaddr*)(ra.somem()), &(ra.salen))) < 0) {
-				switch (errno) {
-				case EAGAIN:
-					// do nothing, just wait for the next event
-					return;
-				default:
-					throw eSysCall("accept");
-				}
-			}
-
-			socket_env_t::call_env(env).handle_listen(*this, new_sd);
-		} break;
-		case STATE_CONNECTING: {
-
-			int rc;
-			int optval = 0;
-			int optlen = sizeof(optval);
-			if ((rc = getsockopt(sd, SOL_SOCKET, SO_ERROR,
-								 (void*)&optval, (socklen_t*)&optlen)) < 0) {
-				throw eSysCall("getsockopt() SOL_SOCKET, SO_ERROR");
-			}
-
-			switch (optval) {
-			case /*EISCONN=*/0: {
-				state = STATE_ESTABLISHED;
-				rxthread.drop_write_fd(sd);
-				rxthread.add_read_fd(sd);
-
-				if ((getsockname(sd, laddr.ca_saddr, &(laddr.salen))) < 0) {
-
-				}
-
-				if ((getpeername(sd, raddr.ca_saddr, &(raddr.salen))) < 0) {
-
-				}
-
-				if (reconnect_on_failure) {
-					rxthread.drop_timer(TIMER_RECONNECT);
-				}
-
-				socket_env_t::call_env(env).handle_connected(*this);
-			} break;
-			case EINPROGRESS: {
-				/* do nothing, just wait */
-			} break;
-			case ECONNREFUSED: {
-				close();
-				if (reconnect_on_failure) {
-					backoff_reconnect(false);
-				} else {
-					socket_env_t::call_env(env).handle_connect_refused(*this);
-				}
-			} break;
-			default: {
-				close();
-				if (reconnect_on_failure) {
-					backoff_reconnect(false);
-				} else {
-					socket_env_t::call_env(env).handle_connect_failed(*this);
-				}
-			};
-			}
-
-		} break;
-		case STATE_ACCEPTING: {
-
-
-
-		} break;
-		case STATE_ESTABLISHED: {
-
-			while (not rx_disabled) {
-
-				if (not fragment_pending) {
-					msg_bytes_read = 0;
-				}
-
-				uint16_t msg_len = 0;
-
-				/* how many bytes do we have to read? */
-				if (msg_bytes_read < sizeof(struct openflow::ofp_header)) {
-					msg_len = sizeof(struct openflow::ofp_header);
-				} else {
-					struct openflow::ofp_header *header = (struct openflow::ofp_header*)(rxbuffer.somem());
-					msg_len = be16toh(header->length);
-				}
-
-				/* sanity check: 8 <= msg_len <= 2^16 */
-				if (msg_len < sizeof(struct openflow::ofp_header)) {
-					close(); /* enforce reconnect, just in case */
-					return;
-				}
-
-				/* read from socket more bytes, at most "msg_len - msg_bytes_read" */
-				int rc = ::read(sd, (void*)(rxbuffer.somem() + msg_bytes_read), msg_len - msg_bytes_read);
-
-				if (rc < 0) {
-					switch (errno) {
-					case EAGAIN: {
-						/* do not continue and let kernel inform us, once more data is available */
-						return;
-					} break;
-					default: {
-						/* oops, error */
-						close();
-						return;
-					};
-					}
-				}
-
-				msg_bytes_read += rc;
-
-				/* minimum message length received, check completeness of message */
-				if (rxbuffer.memlen() >= sizeof(struct openflow::ofp_header)) {
-					struct openflow::ofp_header *header =
-							(struct openflow::ofp_header*)(rxbuffer.somem());
-					uint16_t msg_len = be16toh(header->length);
-
-					/* ok, message was received completely */
-					if (msg_len == msg_bytes_read) {
-						fragment_pending = false;
-						msg_bytes_read = 0;
-						parse_message(mem);
-					} else {
-						fragment_pending = true;
-					}
-				}
-			}
-
-		} break;
-		default: {
-			/* do nothing */
-		};
+		if (reconnect_timespec > max_backoff) {
+			reconnect_timespec = max_backoff;
 		}
-
-	} catch (...) {
-
 	}
-}
 
+	std::cerr << "[rofl-common][crofconn][backoff] "
+			<< " scheduled reconnect in: " << reconnect_timespec << std::endl;
 
+	rxthread.add_timer(TIMER_ID_RECONNECT, reconnect_timespec);
 
-void
-socket_t::handle_write_event(
-		cthread& thread, int fd)
-{
-	if (&thread == &txthread)
-		handle_write_event_txthread(thread, fd);
-}
-
-
-
-void
-socket_t::handle_write_event_txthread(
-		cthread& thread, int fd)
-{
-	try {
-		dequeue_packet();
-
-		handle_write();
-	} catch (eSysCall& e) {
-		LOGGING_ERROR << "[rofl-common][csocket][plain] eSysCall " << e << std::endl;
-	} catch (RoflException& e) {
-		LOGGING_ERROR << "[rofl-common][csocket][plain] RoflException " << e << std::endl;
-	}
+	++reconnect_counter;
 }
 
 
@@ -558,7 +407,9 @@ socket_t::send_message(
 		};
 		}
 
-		txthread.wakeup();
+		if (not tx_is_running) {
+			txthread.wakeup();
+		}
 
 	} break;
 	default: {
@@ -571,77 +422,261 @@ socket_t::send_message(
 
 
 void
-crofsock::send_from_queue()
+socket_t::handle_wakeup(
+		cthread& thread)
 {
-	bool reschedule = false;
-
-	for (unsigned int queue_id = 0; queue_id < QUEUE_MAX; ++queue_id) {
-
-		for (unsigned int num = 0; num < txweights[queue_id]; ++num) {
-
-			cmemory *mem = (cmemory*)0;
-
-			try {
-				rofl::openflow::cofmsg *msg = txqueues[queue_id].front();
-				if (NULL == msg)
-					break;
-
-				mem = new cmemory(msg->length());
-				msg->pack(mem->somem(), mem->memlen());
-
-				LOGGING_DEBUG2 << "[rofl-common][crofsock][send-from-queue] msg:"
-						<< std::endl << *msg;
-
-				LOGGING_DEBUG2 << "[rofl-common][crofsock][send-from-queue] mem:"
-						<< std::endl << *mem;
-
-				socket->send(mem); // may throw exception
-
-				txqueues[queue_id].pop();
-				delete msg;
-
-
-			} catch (eSocketTxAgain& e) {
-				LOGGING_ERROR << "[rofl-common][crofsock][send-from-queue] transport "
-						<< "connection congested, waiting." << std::endl;
-
-				flags.set(FLAGS_CONGESTED);
-			}
-		}
-
-		if (not txqueues[queue_id].empty()) {
-			reschedule = true;
-		}
-	}
-
-	if (flags.test(FLAGS_CONGESTED)) {
-		env->handle_write(*this);
-	}
-
-	if (reschedule && not flags.test(FLAGS_CONGESTED)) {
-		rofl::ciosrv::notify(EVENT_CONGESTION_SOLVED);
+	if (&thread == &txthread) {
+		send_from_queue();
 	}
 }
 
 
 
 void
-crofsock::handle_event(
-		cevent const &ev)
+socket_t::handle_write_event(
+		cthread& thread, int fd)
 {
-	switch (ev.cmd) {
-	case EVENT_NONE: {
-
-	} break;
-	case EVENT_RX_QUEUE: {
-		if (socket)
-			handle_read(*socket);
-	} break;
-	case EVENT_CONGESTION_SOLVED: {
+	if (&thread == &txthread) {
+		assert(fd == sd);
+		flags.reset(FLAGS_CONGESTED);
+		txthread.drop_write_fd(sd);
 		send_from_queue();
-	} break;
-	default:
-		LOGGING_DEBUG3 << "[rofl-common][crofsock] unknown event type:" << (int)ev.cmd << std::endl;
+	}
+}
+
+
+
+void
+socket_t::send_from_queue()
+{
+	bool reschedule = false;
+
+	tx_is_running = true;
+
+	do {
+		for (unsigned int queue_id = 0; queue_id < QUEUE_MAX; ++queue_id) {
+			for (unsigned int num = 0; num < txweights[queue_id]; ++num) {
+
+				int nbytes = 0;
+				rofl::openflow::cofmsg *msg = nullptr;
+
+				/* we still have to sent bytes from the previous message */
+				if (tx_fragment_pending) {
+
+					/* send memory block via socket in non-blocking mode */
+					nbytes = ::send(sd, txbuffer.somem() + msg_bytes_sent, txlen - msg_bytes_sent, MSG_DONTWAIT);
+
+				/* fetch a new message for transmission from tx queue */
+				} else {
+
+					if ((msg = txqueues[queue_id].front()) == NULL)
+						break;
+
+					msg_bytes_sent = 0;
+					tx_fragment_pending = false;
+					txlen = msg->length();
+					msg->pack(txbuffer.somem(), txlen);
+
+					std::cerr << "[rofl-common][crofsock][send-from-queue] msg:"
+							<< std::endl << *msg;
+
+					/* send memory block via socket in non-blocking mode */
+					nbytes = ::send(sd, txbuffer.somem(), txlen, MSG_DONTWAIT);
+				}
+
+				/* error occured */
+				if (nbytes < 0) {
+					switch (errno) {
+					case EAGAIN: /* socket would block */ {
+						flags.set(FLAGS_CONGESTED);
+						txthread.add_write_fd(sd);
+						env->handle_write(*this);
+					} return;
+					default: {
+						// TODO
+					};
+					}
+
+				} else
+				/* short write */
+				if (nbytes < txlen) {
+					msg_bytes_sent += nbytes;
+					tx_fragment_pending = true;
+
+				/* transmission successfully queued on socket, drop msg from our queue */
+				} else {
+					txqueues[queue_id].pop();
+					delete msg;
+				}
+
+			}
+
+			if (not txqueues[queue_id].empty()) {
+				reschedule = true;
+			}
+		}
+	} while (reschedule);
+
+	tx_is_running = false;
+}
+
+
+
+void
+socket_t::handle_read_event(
+		cthread& thread, int fd)
+{
+	if (&thread == &rxthread) {
+		handle_read_event_rxthread(thread, fd);
+	}
+}
+
+
+
+void
+socket_t::handle_read_event_rxthread(
+		cthread& thread, int fd)
+{
+	try {
+		switch (state) {
+		case STATE_LISTENING: {
+			int new_sd = -1;
+			csockaddr ra;
+
+			if ((new_sd = ::accept(sd, (struct sockaddr*)(ra.somem()), &(ra.salen))) < 0) {
+				switch (errno) {
+				case EAGAIN:
+					// do nothing, just wait for the next event
+					return;
+				default:
+					throw eSysCall("accept");
+				}
+			}
+
+			socket_env_t::call_env(env).handle_listen(*this, new_sd);
+		} break;
+		case STATE_CONNECTING: {
+
+			int rc;
+			int optval = 0;
+			int optlen = sizeof(optval);
+			if ((rc = getsockopt(sd, SOL_SOCKET, SO_ERROR,
+								 (void*)&optval, (socklen_t*)&optlen)) < 0) {
+				throw eSysCall("getsockopt() SOL_SOCKET, SO_ERROR");
+			}
+
+			switch (optval) {
+			case /*EISCONN=*/0: {
+				state = STATE_ESTABLISHED;
+				rxthread.drop_timer(TIMER_ID_RECONNECT);
+				rxthread.drop_write_fd(sd);
+				rxthread.add_read_fd(sd);
+
+				if ((getsockname(sd, laddr.ca_saddr, &(laddr.salen))) < 0) {
+
+				}
+
+				if ((getpeername(sd, raddr.ca_saddr, &(raddr.salen))) < 0) {
+
+				}
+
+				socket_env_t::call_env(env).handle_connected(*this);
+			} break;
+			case EINPROGRESS: {
+				/* do nothing, just wait */
+			} break;
+			case ECONNREFUSED: {
+				close();
+				if (reconnect_on_failure) {
+					backoff_reconnect(false);
+				} else {
+					socket_env_t::call_env(env).handle_connect_refused(*this);
+				}
+			} break;
+			default: {
+				close();
+				if (reconnect_on_failure) {
+					backoff_reconnect(false);
+				} else {
+					socket_env_t::call_env(env).handle_connect_failed(*this);
+				}
+			};
+			}
+
+		} break;
+		case STATE_ACCEPTING: {
+
+
+
+		} break;
+		case STATE_ESTABLISHED: {
+
+			while (true) {
+
+				if (not rx_fragment_pending) {
+					msg_bytes_read = 0;
+				}
+
+				uint16_t msg_len = 0;
+
+				/* how many bytes do we have to read? */
+				if (msg_bytes_read < sizeof(struct openflow::ofp_header)) {
+					msg_len = sizeof(struct openflow::ofp_header);
+				} else {
+					struct openflow::ofp_header *header = (struct openflow::ofp_header*)(rxbuffer.somem());
+					msg_len = be16toh(header->length);
+				}
+
+				/* sanity check: 8 <= msg_len <= 2^16 */
+				if (msg_len < sizeof(struct openflow::ofp_header)) {
+					close(); /* enforce reconnect, just in case */
+					return;
+				}
+
+				/* read from socket more bytes, at most "msg_len - msg_bytes_read" */
+				int rc = ::read(sd, (void*)(rxbuffer.somem() + msg_bytes_read), msg_len - msg_bytes_read);
+
+				if (rc < 0) {
+					switch (errno) {
+					case EAGAIN: {
+						/* do not continue and let kernel inform us, once more data is available */
+						return;
+					} break;
+					default: {
+						/* oops, error */
+						close();
+						return;
+					};
+					}
+				}
+
+				msg_bytes_read += rc;
+
+				/* minimum message length received, check completeness of message */
+				if (rxbuffer.memlen() >= sizeof(struct openflow::ofp_header)) {
+					struct openflow::ofp_header *header =
+							(struct openflow::ofp_header*)(rxbuffer.somem());
+					uint16_t msg_len = be16toh(header->length);
+
+					/* ok, message was received completely */
+					if (msg_len == msg_bytes_read) {
+						rx_fragment_pending = false;
+						msg_bytes_read = 0;
+						parse_message();
+					} else {
+						rx_fragment_pending = true;
+					}
+				}
+			}
+
+		} break;
+		default: {
+			/* do nothing */
+		};
+		}
+
+	} catch (...) {
+
 	}
 }
 
@@ -655,11 +690,12 @@ socket_t::parse_message()
 
 	rofl::openflow::cofmsg *msg = (rofl::openflow::cofmsg*)0;
 	try {
-		struct openflow::ofp_header* header =
-				(struct openflow::ofp_header*)(rxbuffer.somem());
+		if (rxbuffer.length() < sizeof(struct rofl::openflow::ofp_header)) {
+			throw eBadRequestBadLen("socket_t::parse_message() buf too short");
+		}
 
 		/* make sure to have a valid cofmsg* msg object after parsing */
-		switch (header->version) {
+		switch (hdr->version) {
 		case rofl::openflow10::OFP_VERSION: {
 			parse_of10_message(&msg);
 		} break;
@@ -670,7 +706,7 @@ socket_t::parse_message()
 			parse_of13_message(&msg);
 		} break;
 		default: {
-			throw eBadRequestBadVersion("socket_t::parse_message() invalid OpenFlow version");
+			throw eBadRequestBadVersion("socket_t::parse_message() unsupported OpenFlow version");
 		};
 		}
 
@@ -779,7 +815,7 @@ socket_t::parse_of10_message(
 	} break;
 	case rofl::openflow10::OFPT_STATS_REQUEST: {
 		if (rxbuffer.length() < sizeof(struct rofl::openflow10::ofp_stats_request)) {
-			throw eBadSyntaxTooShort("socket_t::parse_of10_message() stats buf too short");
+			throw eBadRequestBadLen("socket_t::parse_of10_message() stats buf too short");
 		}
 		uint16_t stats_type = be16toh(((struct rofl::openflow10::ofp_stats_request*)rxbuffer.somem())->type);
 		switch (stats_type) {
@@ -811,7 +847,7 @@ socket_t::parse_of10_message(
 	} break;
 	case rofl::openflow10::OFPT_STATS_REPLY: {
 		if (rxbuffer.length() < sizeof(struct rofl::openflow10::ofp_stats_reply)) {
-			throw eBadSyntaxTooShort("socket_t::parse_of10_message() stats buf too short");
+			throw eBadRequestBadLen("socket_t::parse_of10_message() stats buf too short");
 		}
 		uint16_t stats_type = be16toh(((struct rofl::openflow10::ofp_stats_reply*)rxbuffer.somem())->type);
 		switch (stats_type) {
@@ -858,7 +894,7 @@ socket_t::parse_of10_message(
 	};
 	}
 
-	(**pmsg)).unpack(rxbuffer.somem(), rxbuffer.length());
+	(*(*pmsg)).unpack(rxbuffer.somem(), rxbuffer.length());
 }
 
 
@@ -926,7 +962,7 @@ socket_t::parse_of12_message(
 	} break;
 	case rofl::openflow12::OFPT_STATS_REQUEST: {
 		if (rxbuffer.length() < sizeof(struct rofl::openflow12::ofp_stats_request)) {
-			throw eBadSyntaxTooShort("socket_t::parse_of12_message() stats buf too short");
+			throw eBadRequestBadLen("socket_t::parse_of12_message() stats buf too short");
 		}
 		uint16_t stats_type = be16toh(((struct rofl::openflow12::ofp_stats_request*)rxbuffer.somem())->type);
 		switch (stats_type) {
@@ -967,7 +1003,7 @@ socket_t::parse_of12_message(
 	} break;
 	case rofl::openflow12::OFPT_STATS_REPLY: {
 		if (rxbuffer.length() < sizeof(struct rofl::openflow12::ofp_stats_reply)) {
-			throw eBadSyntaxTooShort("socket_t::parse_of12_message() stats buf too short");
+			throw eBadRequestBadLen("socket_t::parse_of12_message() stats buf too short");
 		}
 		uint16_t stats_type = be16toh(((struct rofl::openflow12::ofp_stats_reply*)rxbuffer.somem())->type);
 		switch (stats_type) {
@@ -1038,7 +1074,7 @@ socket_t::parse_of12_message(
 	};
 	}
 
-	(**pmsg)).unpack(rxbuffer.somem(), rxbuffer.length());
+	(*(*pmsg)).unpack(rxbuffer.somem(), rxbuffer.length());
 }
 
 
@@ -1106,7 +1142,7 @@ socket_t::parse_of13_message(
 	} break;
 	case rofl::openflow13::OFPT_MULTIPART_REQUEST: {
 		if (rxbuffer.memlen() < sizeof(struct rofl::openflow13::ofp_multipart_request)) {
-			throw eBadSyntaxTooShort("socket_t::parse_of13_message() stats buf too short");
+			throw eBadRequestBadLen("socket_t::parse_of13_message() stats buf too short");
 		}
 		uint16_t stats_type = be16toh(((struct rofl::openflow13::ofp_multipart_request*)rxbuffer.somem())->type);
 		switch (stats_type) {
@@ -1162,7 +1198,7 @@ socket_t::parse_of13_message(
 	} break;
 	case rofl::openflow13::OFPT_MULTIPART_REPLY: {
 		if (rxbuffer.memlen() < sizeof(struct rofl::openflow13::ofp_multipart_reply)) {
-			throw eBadSyntaxTooShort("socket_t::parse_of13_message() stats buf too short");
+			throw eBadRequestBadLen("socket_t::parse_of13_message() stats buf too short");
 		}
 		uint16_t stats_type = be16toh(((struct rofl::openflow13::ofp_multipart_reply*)rxbuffer.somem())->type);
 		switch (stats_type) {

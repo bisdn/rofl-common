@@ -6,9 +6,11 @@ noinst_LTLIBRARIES = librofl_common_base.la
 
 librofl_common_base_la_SOURCES = \
 		exception.hpp \
-		logging.cpp \
-		logging.hpp \
+		logging.cc \
+		logging.h \
 		locking.hpp \
+		socket.cpp \
+		socket.hpp \
 		ctimespec.cpp \
 		ctimespec.hpp \
 		ctimer.cpp \

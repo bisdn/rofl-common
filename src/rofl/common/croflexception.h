@@ -37,6 +37,7 @@ public:
 	};
 };
 
+#if 0
 class eSysCall : public RoflException {
 public:
 	eSysCall(std::string const& syscall = std::string("unknown")) :
@@ -55,6 +56,7 @@ private:
 	int			n_err;
 	std::string	s_err;
 };
+#endif
 
 class eNotImplemented : public RoflException {
 public:

@@ -42,7 +42,7 @@ void
 caddress_ll::str2addr(
 		const std::string& addr)
 {
-    sscanf(addr.c_str(), "%"SCNx8":%"SCNx8":%"SCNx8":%"SCNx8":%"SCNx8":%"SCNx8,
+    sscanf(addr.c_str(), "%" SCNx8":%" SCNx8":%" SCNx8":%" SCNx8":%" SCNx8":%" SCNx8,
                     (uint8_t*)&((*this)[0]),
                     (uint8_t*)&((*this)[1]),
                     (uint8_t*)&((*this)[2]),

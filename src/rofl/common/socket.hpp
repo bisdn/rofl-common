@@ -8,6 +8,7 @@
 #ifndef CROFENDPNT_H_
 #define CROFENDPNT_H_
 
+#include <assert.h>
 #include <inttypes.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -24,15 +25,17 @@
 #include <set>
 #include <deque>
 #include <bitset>
+#include <iostream>
 #include <algorithm>
 
 #include "rofl/common/cmemory.h"
-#include "rofl/common/logging.h"
+#include "rofl/common/logging.hpp"
 #include "rofl/common/crofqueue.h"
 #include "rofl/common/thread_helper.h"
 #include "rofl/common/croflexception.h"
 #include "rofl/common/cthread.hpp"
 #include "rofl/common/csockaddr.h"
+#include "rofl/common/crandom.h"
 
 #include "rofl/common/openflow/messages/cofmsg.h"
 #include "rofl/common/openflow/messages/cofmsg_hello.h"
@@ -118,7 +121,7 @@ public:
 	call_env(socket_env_t* env) {
 		AcquireReadLock lock(socket_env_t::socket_envs_lock);
 		if (socket_env_t::socket_envs.find(env) == socket_env_t::socket_envs.end()) {
-			throw eRofSockNotFound("socket_env_t::call_env() socket_env_t instance not found");
+			throw eSocketNotFound("socket_env_t::call_env() socket_env_t instance not found");
 		}
 		return *(env);
 	};
@@ -183,8 +186,7 @@ class eRofSockMsgTooLarge 	: public eRofSockBase {};
  * @brief	A socket capable of talking OpenFlow via TCP and vice versa
  */
 class socket_t :
-		public cthread_env,
-		public csocket_env
+		public cthread_env
 {
 	enum outqueue_type_t {
 		QUEUE_OAM  = 0, // Echo.request/Echo.reply
@@ -226,8 +228,8 @@ class socket_t :
 	};
 
 	enum socket_timer_t {
-		TIMER_UNKNOWN           = 0,
-		TIMER_RECONNECT         = 1,
+		TIMER_ID_UNKNOWN        = 0,
+		TIMER_ID_RECONNECT      = 1,
 	};
 
 public:
@@ -300,14 +302,24 @@ public:
 	 */
 	bool
 	is_established() const
-	{ return socket->is_established(); };
+	{ return (STATE_ESTABLISHED == state); };
 
 	/**
 	 * @brief	Instructs socket_t to disable reception of messages on the socket.
 	 */
 	void
 	rx_disable()
-	{ rx_disabled = true; };
+	{
+		switch (state) {
+		case STATE_ESTABLISHED: {
+			rxthread.add_read_fd(sd);
+			rx_disabled = true;
+		} break;
+		default: {
+
+		};
+		}
+	};
 
 	/**
 	 * @brief	Instructs socket_t to re-enable reception of messages on the socket.
@@ -315,9 +327,15 @@ public:
 	void
 	rx_enable()
 	{
-		rofl::ciosrv::notify(rofl::cevent(EVENT_RX_QUEUE));
-		rxthread.wakeup();
-		rx_disabled = false;
+		switch (state) {
+		case STATE_ESTABLISHED: {
+			rxthread.drop_read_fd(sd);
+			rx_disabled = false;
+		} break;
+		default: {
+
+		};
+		}
 	};
 
 private:
@@ -340,8 +358,7 @@ private:
 
 	virtual void
 	handle_wakeup(
-			cthread& thread)
-	{};
+			cthread& thread);
 
 	virtual void
 	handle_timeout(
@@ -357,25 +374,6 @@ private:
 			cthread& thread, int fd);
 
 private:
-
-	/**
-	 * @brief
-	 */
-	void
-	__close() {
-		if (STATE_CLOSED == state)
-			return;
-		state = STATE_CLOSED;
-		if (rxbuffer) {
-			delete rxbuffer; rxbuffer = NULL;
-		}
-		for (std::vector<crofqueue>::iterator
-				it = txqueues.begin(); it != txqueues.end(); ++it) {
-			(*it).clear();
-		}
-		ciosrv::cancel_all_timers();
-		ciosrv::cancel_all_events();
-	};
 
 	/**
 	 *
@@ -414,14 +412,14 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, socket_t const& rofsock) {
-		os << indent(0) << "<socket_t: transport-connection-established: " << rofsock.get_socket().is_established() << ">" << std::endl;
+		os << indent(0) << "<socket_t: transport-connection-established: " << rofsock.is_established() << ">" << std::endl;
 		return os;
 	};
 
 	std::string
 	str() const {
 		std::stringstream ss;
-		if (STATE_INIT == state) {
+		if (STATE_UNKNOWN == state) {
 			ss << "state: -INIT- ";
 		} else
 		if (STATE_CLOSED == state) {
@@ -430,7 +428,7 @@ public:
 		if (STATE_CONNECTING == state) {
 			ss << "state: -CONNECTING- ";
 		} else
-		if (STATE_CONNECTED == state) {
+		if (STATE_ESTABLISHED == state) {
 			ss << "state: -CONNECTED- ";
 		}
 		return ss.str();
@@ -439,19 +437,15 @@ public:
 private:
 
 	void
+	backoff_reconnect(
+			bool reset_timeout = false);
+
+	void
 	handle_read_event_rxthread(
 			cthread& thread, int fd);
 
 	void
 	handle_write_event_rxthread(
-			cthread& thread, int fd);
-
-	void
-	handle_read_event_txthread(
-			cthread& thread, int fd);
-
-	void
-	handle_write_event_txthread(
 			cthread& thread, int fd);
 
 private:
@@ -474,9 +468,21 @@ private:
 	// do an automatic reconnect on loss of a connection or failure on connect()
 	bool                        reconnect_on_failure;
 
-	// timer interval for reconnecting
+	//
 	int                         ts_rec_sec;
 	int                         ts_rec_nsec;
+
+	/*
+	 * reconnect
+	 */
+
+	ctimespec			max_backoff;
+	ctimespec			reconnect_start_timeout;
+	ctimespec			reconnect_timespec; 	// reconnect in x seconds
+	ctimespec			reconnect_variance;
+	int 				reconnect_counter;
+
+
 
 	/* socket parameters */
 
@@ -509,7 +515,7 @@ private:
 	 */
 
 	// fragment pending
-	bool                        fragment_pending;
+	bool                        rx_fragment_pending;
 
 	// incomplete fragment message fragment received in last round
 	cmemory 					rxbuffer;
@@ -536,10 +542,24 @@ private:
 	// relative scheduling weights for txqueues
 	std::vector<unsigned int>	txweights;
 
-	enum rofl::csocket::socket_type_t
-								socket_type;
+	/*
+	 * sending messages
+	 */
 
-	rofl::cparams 				socket_params;
+	// txthread is actively sending messages
+	bool                        tx_is_running;
+
+	// fragment pending
+	bool                        tx_fragment_pending;
+
+	// transmission buffer fir packing cofmsg instances
+	cmemory                     txbuffer;
+
+	// number of bytes already sent for current message fragment
+	unsigned int				msg_bytes_sent;
+
+	// message length of current tx-fragment
+	size_t                      txlen;
 
 	// read write lock
 	PthreadRwLock				rwlock;
