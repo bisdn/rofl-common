@@ -61,9 +61,13 @@ crofsock::close()
 	} break;
 	default: {
 		txthread.drop_timer(TIMER_ID_RECONNECT);
+		txthread.drop_write_fd(sd);
 		rxthread.drop_read_fd(sd);
 		rxthread.drop_write_fd(sd);
 		::close(sd); sd = -1;
+		for (auto queue : txqueues) {
+			queue.clear();
+		}
 	};
 	}
 }
