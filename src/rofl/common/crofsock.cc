@@ -5,19 +5,19 @@
  *      Author: andreas
  */
 
-#include "socket.hpp"
+#include "crofsock.h"
 
 using namespace rofl;
 
-socket_t::~socket_t()
+crofsock::~crofsock()
 {
 	close();
 }
 
 
 
-socket_t::socket_t(
-		socket_env_t* env) :
+crofsock::crofsock(
+		crofsock_env* env) :
 				env(env),
 				rxthread(this),
 				txthread(this),
@@ -25,6 +25,7 @@ socket_t::socket_t(
 				reconnect_on_failure(true),
 				ts_rec_sec(0),
 				ts_rec_nsec(200000/*200ms*/),
+				reconnect_counter(0),
 				sd(-1),
 				domain(AF_INET6),
 				type(SOCK_STREAM),
@@ -38,7 +39,8 @@ socket_t::socket_t(
 				tx_is_running(false),
 				tx_fragment_pending(false),
 				txbuffer((size_t)65536),
-				msg_bytes_sent(0)
+				msg_bytes_sent(0),
+				txlen(0)
 {
 	// scheduler weights for transmission
 	txweights[QUEUE_OAM ] = 16;
@@ -50,7 +52,7 @@ socket_t::socket_t(
 
 
 void
-socket_t::close()
+crofsock::close()
 {
 	switch (state) {
 	case STATE_CLOSED:
@@ -69,7 +71,7 @@ socket_t::close()
 
 
 void
-socket_t::listen()
+crofsock::listen()
 {
 	int rc;
 
@@ -144,7 +146,7 @@ socket_t::listen()
 
 
 void
-socket_t::accept(
+crofsock::accept(
 		int sockfd)
 {
 	try {
@@ -197,7 +199,7 @@ socket_t::accept(
 		state = STATE_ESTABLISHED;
 		rxthread.add_read_fd(sd);
 
-		socket_env_t::call_env(env).handle_accepted(*this);
+		crofsock_env::call_env(env).handle_accepted(*this);
 
 	} catch (...) {
 
@@ -207,7 +209,7 @@ socket_t::accept(
 
 
 void
-socket_t::connect(
+crofsock::connect(
 		bool reconnect)
 {
 	try {
@@ -268,11 +270,11 @@ socket_t::connect(
 			case ECONNREFUSED: {
 				close();
 				backoff_reconnect(false);
-				socket_env_t::call_env(env).handle_connect_refused(*this);
+				crofsock_env::call_env(env).handle_connect_refused(*this);
 			} break;
 			default: {
 				close();
-				socket_env_t::call_env(env).handle_connect_failed(*this);
+				crofsock_env::call_env(env).handle_connect_failed(*this);
 			};
 			}
 		} else {
@@ -292,7 +294,7 @@ socket_t::connect(
 				throw eSysCall("getpeername()");
 			}
 
-			socket_env_t::call_env(env).handle_connected(*this);
+			crofsock_env::call_env(env).handle_connected(*this);
 		}
 
 	} catch(...) {
@@ -303,7 +305,7 @@ socket_t::connect(
 
 
 void
-socket_t::backoff_reconnect(
+crofsock::backoff_reconnect(
 		bool reset_timeout)
 {
 	if (rxthread.drop_timer(TIMER_ID_RECONNECT)) {
@@ -334,7 +336,7 @@ socket_t::backoff_reconnect(
 
 
 void
-socket_t::send_message(
+crofsock::send_message(
 		rofl::openflow::cofmsg *msg)
 {
 	switch (state) {
@@ -414,7 +416,7 @@ socket_t::send_message(
 	} break;
 	default: {
 		delete msg;
-		throw eSocketNotEstablished("socket_t::send_message() socket not established");
+		throw eSocketNotEstablished("crofsock::send_message() socket not established");
 	};
 	}
 }
@@ -422,7 +424,7 @@ socket_t::send_message(
 
 
 void
-socket_t::handle_wakeup(
+crofsock::handle_wakeup(
 		cthread& thread)
 {
 	if (&thread == &txthread) {
@@ -433,7 +435,7 @@ socket_t::handle_wakeup(
 
 
 void
-socket_t::handle_write_event(
+crofsock::handle_write_event(
 		cthread& thread, int fd)
 {
 	if (&thread == &txthread) {
@@ -447,7 +449,7 @@ socket_t::handle_write_event(
 
 
 void
-socket_t::send_from_queue()
+crofsock::send_from_queue()
 {
 	bool reschedule = false;
 
@@ -523,7 +525,7 @@ socket_t::send_from_queue()
 
 
 void
-socket_t::handle_read_event(
+crofsock::handle_read_event(
 		cthread& thread, int fd)
 {
 	if (&thread == &rxthread) {
@@ -534,7 +536,7 @@ socket_t::handle_read_event(
 
 
 void
-socket_t::handle_read_event_rxthread(
+crofsock::handle_read_event_rxthread(
 		cthread& thread, int fd)
 {
 	try {
@@ -553,7 +555,7 @@ socket_t::handle_read_event_rxthread(
 				}
 			}
 
-			socket_env_t::call_env(env).handle_listen(*this, new_sd);
+			crofsock_env::call_env(env).handle_listen(*this, new_sd);
 		} break;
 		case STATE_CONNECTING: {
 
@@ -580,7 +582,7 @@ socket_t::handle_read_event_rxthread(
 
 				}
 
-				socket_env_t::call_env(env).handle_connected(*this);
+				crofsock_env::call_env(env).handle_connected(*this);
 			} break;
 			case EINPROGRESS: {
 				/* do nothing, just wait */
@@ -590,7 +592,7 @@ socket_t::handle_read_event_rxthread(
 				if (reconnect_on_failure) {
 					backoff_reconnect(false);
 				} else {
-					socket_env_t::call_env(env).handle_connect_refused(*this);
+					crofsock_env::call_env(env).handle_connect_refused(*this);
 				}
 			} break;
 			default: {
@@ -598,7 +600,7 @@ socket_t::handle_read_event_rxthread(
 				if (reconnect_on_failure) {
 					backoff_reconnect(false);
 				} else {
-					socket_env_t::call_env(env).handle_connect_failed(*this);
+					crofsock_env::call_env(env).handle_connect_failed(*this);
 				}
 			};
 			}
@@ -683,7 +685,7 @@ socket_t::handle_read_event_rxthread(
 
 
 void
-socket_t::parse_message()
+crofsock::parse_message()
 {
 	struct rofl::openflow::ofp_header* hdr =
 			(struct rofl::openflow::ofp_header*)rxbuffer.somem();
@@ -691,7 +693,7 @@ socket_t::parse_message()
 	rofl::openflow::cofmsg *msg = (rofl::openflow::cofmsg*)0;
 	try {
 		if (rxbuffer.length() < sizeof(struct rofl::openflow::ofp_header)) {
-			throw eBadRequestBadLen("socket_t::parse_message() buf too short");
+			throw eBadRequestBadLen("crofsock::parse_message() buf too short");
 		}
 
 		/* make sure to have a valid cofmsg* msg object after parsing */
@@ -706,11 +708,11 @@ socket_t::parse_message()
 			parse_of13_message(&msg);
 		} break;
 		default: {
-			throw eBadRequestBadVersion("socket_t::parse_message() unsupported OpenFlow version");
+			throw eBadRequestBadVersion("crofsock::parse_message() unsupported OpenFlow version");
 		};
 		}
 
-		socket_env_t::call_env(env).handle_recv(*this, msg);
+		crofsock_env::call_env(env).handle_recv(*this, msg);
 
 	} catch (eBadRequestBadType& e) {
 
@@ -759,7 +761,7 @@ socket_t::parse_message()
 
 
 void
-socket_t::parse_of10_message(
+crofsock::parse_of10_message(
 		rofl::openflow::cofmsg **pmsg)
 {
 	struct openflow::ofp_header* header = (struct openflow::ofp_header*)rxbuffer.somem();
@@ -815,7 +817,7 @@ socket_t::parse_of10_message(
 	} break;
 	case rofl::openflow10::OFPT_STATS_REQUEST: {
 		if (rxbuffer.length() < sizeof(struct rofl::openflow10::ofp_stats_request)) {
-			throw eBadRequestBadLen("socket_t::parse_of10_message() stats buf too short");
+			throw eBadRequestBadLen("crofsock::parse_of10_message() stats buf too short");
 		}
 		uint16_t stats_type = be16toh(((struct rofl::openflow10::ofp_stats_request*)rxbuffer.somem())->type);
 		switch (stats_type) {
@@ -841,13 +843,13 @@ socket_t::parse_of10_message(
 			*pmsg = new rofl::openflow::cofmsg_experimenter_stats_request();
 		} break;
 		default: {
-			throw eBadRequestBadStat("socket_t::parse_of10_message() invalid stats message type");
+			throw eBadRequestBadStat("crofsock::parse_of10_message() invalid stats message type");
 		};
 		}
 	} break;
 	case rofl::openflow10::OFPT_STATS_REPLY: {
 		if (rxbuffer.length() < sizeof(struct rofl::openflow10::ofp_stats_reply)) {
-			throw eBadRequestBadLen("socket_t::parse_of10_message() stats buf too short");
+			throw eBadRequestBadLen("crofsock::parse_of10_message() stats buf too short");
 		}
 		uint16_t stats_type = be16toh(((struct rofl::openflow10::ofp_stats_reply*)rxbuffer.somem())->type);
 		switch (stats_type) {
@@ -873,7 +875,7 @@ socket_t::parse_of10_message(
 			*pmsg = new rofl::openflow::cofmsg_experimenter_stats_reply();
 		} break;
 		default: {
-			throw eBadRequestBadStat("socket_t::parse_of12_message() invalid stats message type");
+			throw eBadRequestBadStat("crofsock::parse_of12_message() invalid stats message type");
 		};
 		}
 	} break;
@@ -890,7 +892,7 @@ socket_t::parse_of10_message(
 		*pmsg = new rofl::openflow::cofmsg_queue_get_config_reply();
 	} break;
 	default: {
-		throw eBadRequestBadType("socket_t::parse_of10_message() invalid message type");
+		throw eBadRequestBadType("crofsock::parse_of10_message() invalid message type");
 	};
 	}
 
@@ -900,7 +902,7 @@ socket_t::parse_of10_message(
 
 
 void
-socket_t::parse_of12_message(
+crofsock::parse_of12_message(
 		rofl::openflow::cofmsg **pmsg)
 {
 	struct openflow::ofp_header* header = (struct openflow::ofp_header*)rxbuffer.somem();
@@ -962,7 +964,7 @@ socket_t::parse_of12_message(
 	} break;
 	case rofl::openflow12::OFPT_STATS_REQUEST: {
 		if (rxbuffer.length() < sizeof(struct rofl::openflow12::ofp_stats_request)) {
-			throw eBadRequestBadLen("socket_t::parse_of12_message() stats buf too short");
+			throw eBadRequestBadLen("crofsock::parse_of12_message() stats buf too short");
 		}
 		uint16_t stats_type = be16toh(((struct rofl::openflow12::ofp_stats_request*)rxbuffer.somem())->type);
 		switch (stats_type) {
@@ -997,13 +999,13 @@ socket_t::parse_of12_message(
 			*pmsg = new rofl::openflow::cofmsg_experimenter_stats_request();
 		} break;
 		default: {
-			throw eBadRequestBadStat("socket_t::parse_of12_message() invalid stats message type");
+			throw eBadRequestBadStat("crofsock::parse_of12_message() invalid stats message type");
 		};
 		}
 	} break;
 	case rofl::openflow12::OFPT_STATS_REPLY: {
 		if (rxbuffer.length() < sizeof(struct rofl::openflow12::ofp_stats_reply)) {
-			throw eBadRequestBadLen("socket_t::parse_of12_message() stats buf too short");
+			throw eBadRequestBadLen("crofsock::parse_of12_message() stats buf too short");
 		}
 		uint16_t stats_type = be16toh(((struct rofl::openflow12::ofp_stats_reply*)rxbuffer.somem())->type);
 		switch (stats_type) {
@@ -1038,7 +1040,7 @@ socket_t::parse_of12_message(
 			*pmsg = new rofl::openflow::cofmsg_experimenter_stats_reply();
 		} break;
 		default: {
-			throw eBadRequestBadStat("socket_t::parse_of12_message() invalid stats message type");
+			throw eBadRequestBadStat("crofsock::parse_of12_message() invalid stats message type");
 		};
 		}
 	} break;
@@ -1070,7 +1072,7 @@ socket_t::parse_of12_message(
     	*pmsg = new rofl::openflow::cofmsg_set_async_config();
     } break;
 	default: {
-		throw eBadRequestBadType("socket_t::parse_of12_message() invalid message type");
+		throw eBadRequestBadType("crofsock::parse_of12_message() invalid message type");
 	};
 	}
 
@@ -1080,7 +1082,7 @@ socket_t::parse_of12_message(
 
 
 void
-socket_t::parse_of13_message(
+crofsock::parse_of13_message(
 		rofl::openflow::cofmsg **pmsg)
 {
 	struct openflow::ofp_header* header = (struct openflow::ofp_header*)rxbuffer.somem();
@@ -1142,7 +1144,7 @@ socket_t::parse_of13_message(
 	} break;
 	case rofl::openflow13::OFPT_MULTIPART_REQUEST: {
 		if (rxbuffer.memlen() < sizeof(struct rofl::openflow13::ofp_multipart_request)) {
-			throw eBadRequestBadLen("socket_t::parse_of13_message() stats buf too short");
+			throw eBadRequestBadLen("crofsock::parse_of13_message() stats buf too short");
 		}
 		uint16_t stats_type = be16toh(((struct rofl::openflow13::ofp_multipart_request*)rxbuffer.somem())->type);
 		switch (stats_type) {
@@ -1192,13 +1194,13 @@ socket_t::parse_of13_message(
 			*pmsg = new rofl::openflow::cofmsg_experimenter_stats_request();
 		} break;
 		default: {
-			throw eBadRequestBadStat("socket_t::parse_of13_message() invalid stats message type");
+			throw eBadRequestBadStat("crofsock::parse_of13_message() invalid stats message type");
 		};
 		}
 	} break;
 	case rofl::openflow13::OFPT_MULTIPART_REPLY: {
 		if (rxbuffer.memlen() < sizeof(struct rofl::openflow13::ofp_multipart_reply)) {
-			throw eBadRequestBadLen("socket_t::parse_of13_message() stats buf too short");
+			throw eBadRequestBadLen("crofsock::parse_of13_message() stats buf too short");
 		}
 		uint16_t stats_type = be16toh(((struct rofl::openflow13::ofp_multipart_reply*)rxbuffer.somem())->type);
 		switch (stats_type) {
@@ -1248,7 +1250,7 @@ socket_t::parse_of13_message(
 			*pmsg = new rofl::openflow::cofmsg_experimenter_stats_reply();
 		} break;
 		default: {
-			throw eBadRequestBadStat("socket_t::parse_of13_message() invalid stats message type");
+			throw eBadRequestBadStat("crofsock::parse_of13_message() invalid stats message type");
 		};
 		}
 	} break;
@@ -1283,7 +1285,7 @@ socket_t::parse_of13_message(
 		*pmsg = new rofl::openflow::cofmsg_meter_mod();
 	} break;
 	default: {
-		throw eBadRequestBadType("socket_t::parse_of13_message() invalid message type");
+		throw eBadRequestBadType("crofsock::parse_of13_message() invalid message type");
 	};
 	}
 

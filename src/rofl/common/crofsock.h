@@ -106,74 +106,74 @@ public:
 
 
 
-class socket_t; // forward declaration
+class crofsock; // forward declaration
 
 /**
- * @interface socket_env_t
+ * @interface crofsock_env
  * @ingroup common_devel_workflow
- * @brief Environment expected by a rofl::socket_t instance.
+ * @brief Environment expected by a rofl::crofsock instance.
  */
-class socket_env_t {
-	friend class socket_t;
+class crofsock_env {
+	friend class crofsock;
 public:
 	static
-	socket_env_t&
-	call_env(socket_env_t* env) {
-		AcquireReadLock lock(socket_env_t::socket_envs_lock);
-		if (socket_env_t::socket_envs.find(env) == socket_env_t::socket_envs.end()) {
-			throw eSocketNotFound("socket_env_t::call_env() socket_env_t instance not found");
+	crofsock_env&
+	call_env(crofsock_env* env) {
+		AcquireReadLock lock(crofsock_env::socket_envs_lock);
+		if (crofsock_env::socket_envs.find(env) == crofsock_env::socket_envs.end()) {
+			throw eSocketNotFound("crofsock_env::call_env() crofsock_env instance not found");
 		}
 		return *(env);
 	};
 public:
 	virtual
-	~socket_env_t() {
-		AcquireReadWriteLock lock(socket_env_t::socket_envs_lock);
-		socket_env_t::socket_envs.erase(this);
+	~crofsock_env() {
+		AcquireReadWriteLock lock(crofsock_env::socket_envs_lock);
+		crofsock_env::socket_envs.erase(this);
 	};
-	socket_env_t() {
-		AcquireReadWriteLock lock(socket_env_t::socket_envs_lock);
-		socket_env_t::socket_envs.insert(this);
+	crofsock_env() {
+		AcquireReadWriteLock lock(crofsock_env::socket_envs_lock);
+		crofsock_env::socket_envs.insert(this);
 	};
 
 protected:
 
-	friend class socket_t;
+	friend class crofsock;
 
 	virtual void
 	handle_listen(
-			socket_t& socket, int sd) = 0;
+			crofsock& socket, int sd) = 0;
 
 	virtual void
 	handle_connect_refused(
-			socket_t& socket) = 0;
+			crofsock& socket) = 0;
 
 	virtual void
 	handle_connect_failed(
-			socket_t& socket) = 0;
+			crofsock& socket) = 0;
 
 	virtual void
 	handle_connected(
-			socket_t& socket) = 0;
+			crofsock& socket) = 0;
 
 	virtual void
 	handle_accepted(
-			socket_t& socket) = 0;
+			crofsock& socket) = 0;
 
 	virtual void
 	handle_closed(
-			socket_t& socket) = 0;
+			crofsock& socket) = 0;
 
 	virtual void
 	handle_write(
-			socket_t& socket) = 0;
+			crofsock& socket) = 0;
 
 	virtual void
 	handle_recv(
-			socket_t& socket, rofl::openflow::cofmsg *msg) = 0;
+			crofsock& socket, rofl::openflow::cofmsg *msg) = 0;
 
 private:
-	static std::set<socket_env_t*>  socket_envs;
+	static std::set<crofsock_env*>  socket_envs;
 	static crwlock                  socket_envs_lock;
 };
 
@@ -185,7 +185,7 @@ class eRofSockMsgTooLarge 	: public eRofSockBase {};
  * @ingroup common_devel_workflow
  * @brief	A socket capable of talking OpenFlow via TCP and vice versa
  */
-class socket_t :
+class crofsock :
 		public cthread_env
 {
 	enum outqueue_type_t {
@@ -196,7 +196,7 @@ class socket_t :
 		QUEUE_MAX,		// do not use
 	};
 
-	enum socket_t_event_t {
+	enum crofsock_event_t {
 		EVENT_NONE				= 0,
 		EVENT_CONNECT			= 1,
 		EVENT_CONNECT_FAILED	= 2,
@@ -211,7 +211,7 @@ class socket_t :
 		EVENT_RX_QUEUE          = 11,
 	};
 
-	enum socket_t_flag_t {
+	enum crofsock_flag_t {
 		FLAGS_CONGESTED 		= 1,
 		FLAG_RECONNECT_ON_FAILURE = 2,
 	};
@@ -227,7 +227,7 @@ class socket_t :
 		STATE_ESTABLISHED		= 7,
 	};
 
-	enum socket_timer_t {
+	enum crofsockimer_t {
 		TIMER_ID_UNKNOWN        = 0,
 		TIMER_ID_RECONNECT      = 1,
 	};
@@ -238,13 +238,13 @@ public:
 	 *
 	 */
 	virtual
-	~socket_t();
+	~crofsock();
 
 	/**
 	 *
 	 */
-	socket_t(
-			socket_env_t *env);
+	crofsock(
+			crofsock_env *env);
 
 public:
 
@@ -305,7 +305,7 @@ public:
 	{ return (STATE_ESTABLISHED == state); };
 
 	/**
-	 * @brief	Instructs socket_t to disable reception of messages on the socket.
+	 * @brief	Instructs crofsock to disable reception of messages on the socket.
 	 */
 	void
 	rx_disable()
@@ -322,7 +322,7 @@ public:
 	};
 
 	/**
-	 * @brief	Instructs socket_t to re-enable reception of messages on the socket.
+	 * @brief	Instructs crofsock to re-enable reception of messages on the socket.
 	 */
 	void
 	rx_enable()
@@ -344,15 +344,15 @@ private:
 	/**
 	 * @brief	Private copy constructor for suppressing any copy attempt.
 	 */
-	socket_t(
-			const socket_t& socket);
+	crofsock(
+			const crofsock& socket);
 
 	/**
 	 * @brief	Private assignment operator.
 	 */
-	socket_t&
+	crofsock&
 	operator= (
-			const socket_t& socket);
+			const crofsock& socket);
 
 private:
 
@@ -411,8 +411,8 @@ private:
 public:
 
 	friend std::ostream&
-	operator<< (std::ostream& os, socket_t const& rofsock) {
-		os << indent(0) << "<socket_t: transport-connection-established: " << rofsock.is_established() << ">" << std::endl;
+	operator<< (std::ostream& os, crofsock const& rofsock) {
+		os << indent(0) << "<crofsock: transport-connection-established: " << rofsock.is_established() << ">" << std::endl;
 		return os;
 	};
 
@@ -450,8 +450,8 @@ private:
 
 private:
 
-	// environment for this socket_t instance
-	socket_env_t*				env;
+	// environment for this crofsock instance
+	crofsock_env*				env;
 
 	// RX thread
 	cthread                     rxthread;
@@ -459,7 +459,7 @@ private:
 	// TX thread
 	cthread                     txthread;
 
-	// various flags for this socket_t instance
+	// various flags for this crofsock instance
 	std::bitset<32>				flags;
 
 	// connection state
