@@ -32,6 +32,8 @@ void
 crofsocktest::test()
 {
 	try {
+		keep_running = true;
+
 		slisten = new rofl::crofsock(this);
 		sclient = new rofl::crofsock(this);
 
@@ -41,23 +43,12 @@ crofsocktest::test()
 
 		sclient->set_raddr(baddr).connect(false);
 
-		sleep(1);
-
-		rofl::openflow::cofmsg_hello* hello =
-				new cofmsg_hello(rofl::openflow13::OFP_VERSION, 0xa1a2a3a4);
-
-		sclient->send_message(hello);
-
-		sleep(1);
+		while (keep_running) {
+			sleep(1);
+		}
 
 		sclient->close();
-
-		sleep(1);
-
 		sserver->close();
-
-		sleep(1);
-
 		slisten->close();
 
 		sleep(1);
@@ -111,6 +102,11 @@ crofsocktest::handle_connected(
 		rofl::crofsock& socket)
 {
 	std::cerr << "handle connected" << std::endl;
+
+	rofl::openflow::cofmsg_hello* hello =
+			new cofmsg_hello(rofl::openflow13::OFP_VERSION, 0xa1a2a3a4);
+
+	sclient->send_message(hello);
 }
 
 
@@ -148,6 +144,8 @@ crofsocktest::handle_recv(
 {
 	std::cerr << "handle recv " << std::endl << *msg;
 	delete msg;
+
+	keep_running = false;
 }
 
 

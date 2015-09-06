@@ -65,6 +65,7 @@ private:
 
 private:
 
+	bool                keep_running = true;
 	rofl::crofsock*		slisten;
 	rofl::crofsock*     sclient;
 	rofl::crofsock*     sserver;
