@@ -9,8 +9,8 @@ librofl_common_base_la_SOURCES = \
 		logging.cc \
 		logging.h \
 		locking.hpp \
-		socket.cpp \
-		socket.hpp \
+		crofsock.cc \
+		crofsock.h \
 		ctimespec.cpp \
 		ctimespec.hpp \
 		ctimer.cpp \
@@ -33,38 +33,6 @@ librofl_common_base_la_SOURCES = \
 		cclock.cc \
 		cmemory.h \
 		cmemory.cc \
-		csocket.h \
-		csocket.cc \
-		csocket_plain.h \
-		csocket_plain.cc \
-		ctransaction.h \
-		ctransaction.cc \
-		ctransactions.h \
-		ctransactions.cc \
-		crofcore.h \
-		crofcore.cc \
-		crofbase.h \
-		crofbase.cc \
-		crofctl.h \
-		crofctl.cc \
-		crofdpt.h \
-		crofdpt.cc \
-		crofsock.h \
-		crofsock.cc \
-		crofconn.h \
-		crofconn.cc \
-		crofchan.h \
-		crofchan.cc \
-		crofshim.h \
-		crofshim.cc \
-		csegmentation.h \
-		csegmentation.cc \
-		csegmsg.h \
-		csegmsg.cc \
-		cparam.h \
-		cparam.cc \
-		cparams.h \
-		cparams.cc \
 		ctimerid.h \
 		ctimerid.cc \
 		cauxid.h \
@@ -79,12 +47,8 @@ librofl_common_base_la_SOURCES = \
 		cindex.h \
 		cdpid.h \
 		crofqueue.h
+
 		
-if ROFL_HAVE_OPENSSL
-librofl_common_base_la_SOURCES += \
-		csocket_openssl.h \
-		csocket_openssl.cc
-endif
 
 librofl_common_base_la_LIBADD=openflow/libopenflow.la -lrt
 
@@ -100,7 +64,6 @@ library_include_HEADERS= \
 		crofbase.h \
 		crofctl.h \
 		crofdpt.h \
-		socket.hpp \
 		crofconn.h \
 		crofchan.h \
 		crofshim.h \

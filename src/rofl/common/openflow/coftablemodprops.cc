@@ -34,7 +34,7 @@ coftablemod_props::operator= (
 			add_table_mod_experimenter() = props.get_table_mod_experimenter();
 		} break;
 		default:
-			LOGGING_WARN << "[rofl][coftablemod_props] ignoring unknown port descrption property, property-type:"
+			std::cerr << "[rofl][coftablemod_props] ignoring unknown port descrption property, property-type:"
 						<< it->second->get_type() << std::endl;
 		}
 	}
@@ -143,7 +143,7 @@ coftablemod_props::unpack(
 				buflen -= set_table_mod_experimenter().length();
 			} break;
 			default: {
-				LOGGING_WARN << "[rofl][coftablemod_props] ignoring unknown port description property, property-type:"
+				std::cerr << "[rofl][coftablemod_props] ignoring unknown port description property, property-type:"
 							<<(unsigned int)type << std::endl;
 				buf += len;
 				buflen -= len;

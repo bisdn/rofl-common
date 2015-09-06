@@ -31,7 +31,7 @@
 
 #include "rofl/common/exception.hpp"
 #include "rofl/common/locking.hpp"
-#include "rofl/common/logging.hpp"
+#include "rofl/common/logging.h"
 #include "rofl/common/ctimer.hpp"
 
 namespace rofl {

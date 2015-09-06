@@ -10,12 +10,12 @@
 #include <fcntl.h>
 #include <inttypes.h>
 
-#include "rofl/common/croflexception.h"
+#include "rofl/common/exception.hpp"
 
 namespace rofl
 {
 
-class ePipeBase : public RoflException {};
+class ePipeBase : public exception {};
 class ePipeInit : public ePipeBase {}; // initialization of pipe failed
 class ePipeInval : public ePipeBase {}; // invalid parameter
 

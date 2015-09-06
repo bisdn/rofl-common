@@ -32,7 +32,6 @@
 #include "rofl/common/logging.h"
 #include "rofl/common/crofqueue.h"
 #include "rofl/common/thread_helper.h"
-#include "rofl/common/croflexception.h"
 #include "rofl/common/cthread.hpp"
 #include "rofl/common/csockaddr.h"
 #include "rofl/common/crandom.h"
@@ -212,8 +211,15 @@ class crofsock :
 	};
 
 	enum crofsock_flag_t {
-		FLAGS_CONGESTED 		= 1,
+		FLAGS_CONGESTED 		  = 1,
 		FLAG_RECONNECT_ON_FAILURE = 2,
+	};
+
+	enum socket_mode_t {
+		MODE_UNKNOWN    = 0,
+		MODE_TCP_LISTEN = 1,
+		MODE_TCP_CLIENT = 2,
+		MODE_TCP_SERVER = 3,
 	};
 
 	enum socket_state_t {
@@ -337,6 +343,53 @@ public:
 		};
 		}
 	};
+
+public:
+
+	/**
+	 *
+	 */
+	crofsock&
+	set_baddr(
+			const csockaddr& baddr)
+	{ this->baddr = baddr; return *this; };
+
+	/**
+	 *
+	 */
+	const csockaddr&
+	get_baddr() const
+	{ return baddr; };
+
+	/**
+	 *
+	 */
+	crofsock&
+	set_laddr(
+			const csockaddr& laddr)
+	{ this->laddr = laddr; return *this; };
+
+	/**
+	 *
+	 */
+	const csockaddr&
+	get_laddr() const
+	{ return laddr; };
+
+	/**
+	 *
+	 */
+	crofsock&
+	set_raddr(
+			const csockaddr& raddr)
+	{ this->raddr = raddr; return *this; };
+
+	/**
+	 *
+	 */
+	const csockaddr&
+	get_raddr() const
+	{ return raddr; };
 
 private:
 
@@ -465,8 +518,8 @@ private:
 	// connection state
 	enum socket_state_t		    state;
 
-	// do an automatic reconnect on loss of a connection or failure on connect()
-	bool                        reconnect_on_failure;
+	// socket mode (TCP_SERVER, TCP CLIENT)
+	enum socket_mode_t          mode;
 
 	//
 	int                         ts_rec_sec;

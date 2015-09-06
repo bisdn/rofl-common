@@ -214,8 +214,7 @@ void
 cclock::current_time()
 {
 	if (clock_gettime(CLOCK_REALTIME, &ts) < 0) {
-		LOGGING_ERROR << "cclock: failed to read time: "
-				<< eSysCall("clock_gettime") << std::endl;
+		std::cerr << "cclock: failed to read time" << std::endl;
 	}
 }
 

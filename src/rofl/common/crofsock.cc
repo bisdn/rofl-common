@@ -22,7 +22,7 @@ crofsock::crofsock(
 				rxthread(this),
 				txthread(this),
 				state(STATE_UNKNOWN),
-				reconnect_on_failure(true),
+				mode(MODE_UNKNOWN),
 				ts_rec_sec(0),
 				ts_rec_nsec(200000/*200ms*/),
 				reconnect_counter(0),
@@ -60,6 +60,7 @@ crofsock::close()
 
 	} break;
 	default: {
+		state = STATE_CLOSED;
 		txthread.drop_timer(TIMER_ID_RECONNECT);
 		txthread.drop_write_fd(sd);
 		rxthread.drop_read_fd(sd);
@@ -83,18 +84,27 @@ crofsock::listen()
 		close();
 	}
 
+	/* cancel potentially pending reconnect timer */
+	rxthread.drop_timer(TIMER_ID_RECONNECT);
+
+	/* socket in server mode */
+	mode = MODE_TCP_LISTEN;
+
+	/* reconnect does not make sense for listening sockets */
+	flags.set(FLAG_RECONNECT_ON_FAILURE, false);
+
 	/* open socket */
-	if ((sd = socket(domain, type, protocol)) < 0) {
+	if ((sd = ::socket(domain, type, protocol)) < 0) {
 		throw eSysCall("socket()");
 	}
 
 	/* make socket non-blocking */
 	long flags;
-	if ((flags = fcntl(sd, F_GETFL)) < 0) {
+	if ((flags = ::fcntl(sd, F_GETFL)) < 0) {
 		throw eSysCall("fnctl() F_GETFL");
 	}
 	flags |= O_NONBLOCK;
-	if ((rc = fcntl(sd, F_SETFL, flags)) < 0) {
+	if ((rc = ::fcntl(sd, F_SETFL, flags)) < 0) {
 		throw eSysCall("fcntl() F_SETGL");
 	}
 
@@ -102,37 +112,37 @@ crofsock::listen()
 		int optval = 1;
 
 		// set SO_REUSEADDR option on TCP sockets
-		if ((rc = setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, (int*)&optval, sizeof(optval))) < 0) {
+		if ((rc = ::setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, (int*)&optval, sizeof(optval))) < 0) {
 			throw eSysCall("setsockopt() SOL_SOCKET, SO_REUSEADDR");
 		}
 
 #if 0
 		int on = 1;
-		if ((rc = setsockopt(sd, SOL_SOCKET, SO_REUSEPORT, &on, sizeof(on))) < 0) {
+		if ((rc = ::setsockopt(sd, SOL_SOCKET, SO_REUSEPORT, &on, sizeof(on))) < 0) {
 			throw eSysCall("setsockopt(SOL_SOCKET, SO_REUSEPORT)");
 		}
 #endif
 
 		// set TCP_NODELAY option on TCP sockets
-		if ((rc = setsockopt(sd, IPPROTO_TCP, TCP_NODELAY, (int*)&optval, sizeof(optval))) < 0) {
+		if ((rc = ::setsockopt(sd, IPPROTO_TCP, TCP_NODELAY, (int*)&optval, sizeof(optval))) < 0) {
 			throw eSysCall("setsockopt() IPPROTO_TCP, TCP_NODELAY");
 		}
 
 		// set SO_RCVLOWAT
-		if ((rc = setsockopt(sd, SOL_SOCKET, SO_RCVLOWAT, (int*)&optval, sizeof(optval))) < 0) {
+		if ((rc = ::setsockopt(sd, SOL_SOCKET, SO_RCVLOWAT, (int*)&optval, sizeof(optval))) < 0) {
 			throw eSysCall("setsockopt() SOL_SOCKET, SO_RCVLOWAT");
 		}
 
 		// read TCP_NODELAY option for debugging purposes
 		socklen_t optlen = sizeof(int);
 		int optvalc;
-		if ((rc = getsockopt(sd, IPPROTO_TCP, TCP_NODELAY, (int*)&optvalc, &optlen)) < 0) {
+		if ((rc = ::getsockopt(sd, IPPROTO_TCP, TCP_NODELAY, (int*)&optvalc, &optlen)) < 0) {
 			throw eSysCall("getsockopt() IPPROTO_TCP, TCP_NODELAY");
 		}
 	}
 
 	/* bind to local address */
-	if ((rc = bind(sd, baddr.ca_saddr, (socklen_t)(baddr.salen))) < 0) {
+	if ((rc = ::bind(sd, baddr.ca_saddr, (socklen_t)(baddr.salen))) < 0) {
 		throw eSysCall("bind");
 	}
 
@@ -143,7 +153,7 @@ crofsock::listen()
 
 	state = STATE_LISTENING;
 
-	// setup was successful, register sd for read events
+	/* instruct rxthread to read from socket descriptor */
 	rxthread.add_read_fd(sd);
 }
 
@@ -158,49 +168,63 @@ crofsock::accept(
 			close();
 		}
 
+		/* cancel potentially pending reconnect timer */
+		rxthread.drop_timer(TIMER_ID_RECONNECT);
+
+		/* socket in server mode */
+		mode = MODE_TCP_SERVER;
+
+		/* reconnect is not possible for server sockets */
+		flags.set(FLAG_RECONNECT_ON_FAILURE, false);
+
+		/* new state */
+		state = STATE_ACCEPTING;
+
 		sd = sockfd;
 
 		/* make socket non-blocking, as this status is not inherited */
-		long flags;
-		if ((flags = fcntl(sd, F_GETFL)) < 0) {
-			throw eSysCall("fnctl(F_GETFL)");
+		long flags = 0;
+		if ((flags = ::fcntl(sd, F_GETFL)) < 0) {
+			throw eSysCall("fnctl() F_GETFL");
 		}
 		flags |= O_NONBLOCK;
-		if ((fcntl(sd, F_SETFL, flags)) < 0) {
-			throw eSysCall("fcntl(F_SETGL)");
+		if ((::fcntl(sd, F_SETFL, flags)) < 0) {
+			throw eSysCall("fcntl() F_SETGL");
 		}
 
 		socklen_t optlen = 0;
-		if ((getsockname(sd, laddr.ca_saddr, &(laddr.salen))) < 0) {
-
+		if ((::getsockname(sd, laddr.ca_saddr, &(laddr.salen))) < 0) {
+			throw eSysCall("getsockname()");
 		}
 
-		if ((getpeername(sd, raddr.ca_saddr, &(raddr.salen))) < 0) {
-
+		if ((::getpeername(sd, raddr.ca_saddr, &(raddr.salen))) < 0) {
+			throw eSysCall("getpeername()");
 		}
 
 /* Some kernels do not define this option */
 #ifdef SO_PROTOCOL
 		optlen = sizeof(domain);
-		if ((getsockopt(sd, SOL_SOCKET, SO_DOMAIN, &domain, &optlen)) < 0) {
-
+		if ((::getsockopt(sd, SOL_SOCKET, SO_DOMAIN, &domain, &optlen)) < 0) {
+			throw eSysCall("getsockopt() SO_DOMAIN");
 		}
 #endif
 
 		optlen = sizeof(type);
-		if ((getsockopt(sd, SOL_SOCKET, SO_TYPE, &type, &optlen)) < 0) {
-
+		if ((::getsockopt(sd, SOL_SOCKET, SO_TYPE, &type, &optlen)) < 0) {
+			throw eSysCall("getsockopt() SO_TYPE");
 		}
 
 /* Some kernels do not define this option */
 #ifdef SO_PROTOCOL
 		optlen = sizeof(protocol);
-		if ((getsockopt(sd, SOL_SOCKET, SO_PROTOCOL, &protocol, &optlen)) < 0) {
-
+		if ((::getsockopt(sd, SOL_SOCKET, SO_PROTOCOL, &protocol, &optlen)) < 0) {
+			throw eSysCall("getsockopt() SO_PROTOCOL");
 		}
 #endif
 
 		state = STATE_ESTABLISHED;
+
+		/* instruct rxthread to read from socket descriptor */
 		rxthread.add_read_fd(sd);
 
 		crofsock_env::call_env(env).handle_accepted(*this);
@@ -217,30 +241,36 @@ crofsock::connect(
 		bool reconnect)
 {
 	try {
-
-		if ((reconnect_on_failure = reconnect) == true) {
-			/* start pending timer for reconnect */
-			txthread.add_timer(TIMER_ID_RECONNECT, ctimespec().expire_in(ts_rec_sec, ts_rec_nsec));
-		}
-
 		int rc;
 
 		if (sd > 0) {
 			close();
 		}
 
+		/* cancel potentially pending reconnect timer */
+		rxthread.drop_timer(TIMER_ID_RECONNECT);
+
+		/* we do an active connect */
+		mode = MODE_TCP_CLIENT;
+
+		/* reconnect in case of an error? */
+		flags.set(FLAG_RECONNECT_ON_FAILURE, reconnect);
+
+		/* new state */
+		state = STATE_CONNECTING;
+
 		/* open socket */
-		if ((sd = socket(domain, type, protocol)) < 0) {
+		if ((sd = ::socket(domain, type, protocol)) < 0) {
 			throw eSysCall("socket");
 		}
 
 		/* make socket non-blocking */
-		long flags;
-		if ((flags = fcntl(sd, F_GETFL)) < 0) {
+		long sockflags;
+		if ((sockflags = ::fcntl(sd, F_GETFL)) < 0) {
 			throw eSysCall("fnctl() F_GETFL");
 		}
-		flags |= O_NONBLOCK;
-		if ((rc = fcntl(sd, F_SETFL, flags)) < 0) {
+		sockflags |= O_NONBLOCK;
+		if ((rc = ::fcntl(sd, F_SETFL, sockflags)) < 0) {
 			throw eSysCall("fnctl() F_SETFL");
 		}
 
@@ -249,19 +279,19 @@ crofsock::connect(
 			int optval = 1;
 
 			/* set SO_REUSEADDR option */
-			if ((rc = setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval))) < 0) {
+			if ((rc = ::setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval))) < 0) {
 				throw eSysCall("setsockopt() SOL_SOCKET, SO_REUSEADDR");
 			}
 
 			/* set TCP_NODELAY option */
-			if ((rc = setsockopt(sd, IPPROTO_TCP, TCP_NODELAY, &optval, sizeof(optval))) < 0) {
+			if ((rc = ::setsockopt(sd, IPPROTO_TCP, TCP_NODELAY, &optval, sizeof(optval))) < 0) {
 				throw eSysCall("setsockopt() IPPROTO_TCP, TCP_NODELAY");
 			}
 		}
 
 		/* bind to local address */
-		if ((rc = bind(sd, baddr.ca_saddr, (socklen_t)(baddr.salen))) < 0) {
-			throw eSysCall("bind");
+		if ((rc = ::bind(sd, baddr.ca_saddr, (socklen_t)(baddr.salen))) < 0) {
+			throw eSysCall("bind()");
 		}
 
 		/* connect to remote address */
@@ -269,26 +299,26 @@ crofsock::connect(
 			/* connect did not succeed, handle error */
 			switch (errno) {
 			case EINPROGRESS: {
+				/* register socket descriptor for write operations */
 				rxthread.add_write_fd(sd);
 			} break;
 			case ECONNREFUSED: {
 				close();
-				backoff_reconnect(false);
+				if (flags.test(FLAG_RECONNECT_ON_FAILURE)) {
+					backoff_reconnect(false);
+				}
 				crofsock_env::call_env(env).handle_connect_refused(*this);
 			} break;
 			default: {
 				close();
+				if (flags.test(FLAG_RECONNECT_ON_FAILURE)) {
+					backoff_reconnect(false);
+				}
 				crofsock_env::call_env(env).handle_connect_failed(*this);
 			};
 			}
 		} else {
 			/* connect succeeded */
-
-			/* register socket descriptor for read operations */
-			rxthread.add_read_fd(sd);
-
-			/* stop pending timer for reconnect */
-			txthread.drop_timer(TIMER_ID_RECONNECT);
 
 			if ((getsockname(sd, laddr.ca_saddr, &(laddr.salen))) < 0) {
 				throw eSysCall("getsockname()");
@@ -297,6 +327,11 @@ crofsock::connect(
 			if ((getpeername(sd, raddr.ca_saddr, &(raddr.salen))) < 0) {
 				throw eSysCall("getpeername()");
 			}
+
+			state = STATE_ESTABLISHED;
+
+			/* register socket descriptor for read operations */
+			rxthread.add_read_fd(sd);
 
 			crofsock_env::call_env(env).handle_connected(*this);
 		}
@@ -312,7 +347,7 @@ void
 crofsock::backoff_reconnect(
 		bool reset_timeout)
 {
-	if (rxthread.drop_timer(TIMER_ID_RECONNECT)) {
+	if (rxthread.has_timer(TIMER_ID_RECONNECT)) {
 		return;
 	}
 
@@ -574,40 +609,40 @@ crofsock::handle_read_event_rxthread(
 			}
 
 			switch (optval) {
-			case /*EISCONN=*/0: {
-				state = STATE_ESTABLISHED;
-				rxthread.drop_timer(TIMER_ID_RECONNECT);
+			case EISCONN/*=0*/: {
 				rxthread.drop_write_fd(sd);
-				rxthread.add_read_fd(sd);
 
 				if ((getsockname(sd, laddr.ca_saddr, &(laddr.salen))) < 0) {
-
+					throw eSysCall("getsockname()");
 				}
 
 				if ((getpeername(sd, raddr.ca_saddr, &(raddr.salen))) < 0) {
-
+					throw eSysCall("getpeername()");
 				}
+
+				state = STATE_ESTABLISHED;
+
+				/* register socket descriptor for read operations */
+				rxthread.add_read_fd(sd);
 
 				crofsock_env::call_env(env).handle_connected(*this);
 			} break;
 			case EINPROGRESS: {
-				/* do nothing, just wait */
+				/* connect still pending, just wait */
 			} break;
 			case ECONNREFUSED: {
 				close();
-				if (reconnect_on_failure) {
+				if (flags.test(FLAG_RECONNECT_ON_FAILURE)) {
 					backoff_reconnect(false);
-				} else {
-					crofsock_env::call_env(env).handle_connect_refused(*this);
 				}
+				crofsock_env::call_env(env).handle_connect_refused(*this);
 			} break;
 			default: {
 				close();
-				if (reconnect_on_failure) {
+				if (flags.test(FLAG_RECONNECT_ON_FAILURE)) {
 					backoff_reconnect(false);
-				} else {
-					crofsock_env::call_env(env).handle_connect_failed(*this);
 				}
+				crofsock_env::call_env(env).handle_connect_failed(*this);
 			};
 			}
 
@@ -656,12 +691,16 @@ crofsock::handle_read_event_rxthread(
 						return;
 					};
 					}
+				} else
+				if (rc == 0) {
+					close();
+					return;
 				}
 
 				msg_bytes_read += rc;
 
 				/* minimum message length received, check completeness of message */
-				if (rxbuffer.memlen() >= sizeof(struct openflow::ofp_header)) {
+				if (msg_bytes_read >= sizeof(struct openflow::ofp_header)) {
 					struct openflow::ofp_header *header =
 							(struct openflow::ofp_header*)(rxbuffer.somem());
 					uint16_t msg_len = be16toh(header->length);
@@ -758,8 +797,9 @@ crofsock::parse_message()
 						rxbuffer.somem(),
 						(rxbuffer.length() > 64) ? 64 : rxbuffer.length()));
 
-	} catch (RoflException& e) {
+	} catch (std::runtime_error& e) {
 
+		if (msg) delete msg;
 
 	}
 }

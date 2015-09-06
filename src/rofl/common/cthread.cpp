@@ -444,8 +444,10 @@ cthread::run_loop()
 
 		} catch (eThreadNotFound& e) {
 			log << logging::error << "cthread::run_loop() env not found" << std::flush;
+		} catch (std::runtime_error& e) {
+			log << logging::error << "cthread::run_loop() exception, what: " << e.what() << std::flush;
 		} catch (...) {
-			log << logging::error << "cthread::run_loop() oops ..." << std::flush;
+			log << logging::error << "cthread::run_loop() exception" << std::flush;
 		}
 	}
 
