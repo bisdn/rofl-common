@@ -78,9 +78,13 @@ crofsock::close()
 			rxthread.drop_write_fd(sd);
 		}
 		::close(sd); sd = -1;
+		rxthread.stop_thread();
+		txthread.stop_thread();
+		std::cerr << "XXXXXXXXXXXXXXXXXXX [1]" << std::endl;
 		for (auto queue : txqueues) {
 			queue.clear();
 		}
+		std::cerr << "XXXXXXXXXXXXXXXXXXX [2]" << std::endl;
 	};
 	}
 }
@@ -95,6 +99,10 @@ crofsock::listen()
 	if (sd >= 0) {
 		close();
 	}
+
+	/* start thread */
+	rxthread.start_thread();
+	txthread.start_thread();
 
 	/* cancel potentially pending reconnect timer */
 	rxthread.drop_timer(TIMER_ID_RECONNECT);
@@ -180,6 +188,10 @@ crofsock::accept(
 			close();
 		}
 
+		/* start thread */
+		rxthread.start_thread();
+		txthread.start_thread();
+
 		/* cancel potentially pending reconnect timer */
 		rxthread.drop_timer(TIMER_ID_RECONNECT);
 
@@ -258,6 +270,10 @@ crofsock::connect(
 		if (sd > 0) {
 			close();
 		}
+
+		/* start thread */
+		rxthread.start_thread();
+		txthread.start_thread();
 
 		/* cancel potentially pending reconnect timer */
 		rxthread.drop_timer(TIMER_ID_RECONNECT);
@@ -515,34 +531,33 @@ crofsock::send_from_queue()
 
 	do {
 		for (unsigned int queue_id = 0; queue_id < QUEUE_MAX; ++queue_id) {
+
 			for (unsigned int num = 0; num < txweights[queue_id]; ++num) {
 
-				int nbytes = 0;
-				rofl::openflow::cofmsg *msg = nullptr;
+				/* no pending fragment */
+				if (not tx_fragment_pending) {
+					rofl::openflow::cofmsg *msg = nullptr;
 
-				/* we still have to sent bytes from the previous message */
-				if (tx_fragment_pending) {
-
-					/* send memory block via socket in non-blocking mode */
-					nbytes = ::send(sd, txbuffer.somem() + msg_bytes_sent, txlen - msg_bytes_sent, MSG_DONTWAIT);
-
-				/* fetch a new message for transmission from tx queue */
-				} else {
-
+					/* fetch a new message for transmission from tx queue */
 					if ((msg = txqueues[queue_id].front()) == NULL)
 						break;
+					txqueues[queue_id].pop();
 
+					/* bytes of this message sent so far */
 					msg_bytes_sent = 0;
-					tx_fragment_pending = false;
+
+					/* overall length of this message */
 					txlen = msg->length();
+
+					/* pack message into txbuffer */
 					msg->pack(txbuffer.somem(), txlen);
 
-					std::cerr << "[rofl-common][crofsock][send-from-queue] msg:"
-							<< std::endl << *msg;
-
-					/* send memory block via socket in non-blocking mode */
-					nbytes = ::send(sd, txbuffer.somem(), txlen, MSG_DONTWAIT);
+					/* remove message from heap */
+					delete msg;
 				}
+
+				/* send memory block via socket in non-blocking mode */
+				int nbytes = ::send(sd, txbuffer.somem() + msg_bytes_sent, txlen - msg_bytes_sent, MSG_DONTWAIT);
 
 				/* error occured */
 				if (nbytes < 0) {
@@ -566,8 +581,6 @@ crofsock::send_from_queue()
 						tx_fragment_pending = true;
 					} else {
 						tx_fragment_pending = false;
-						txqueues[queue_id].pop();
-						delete msg;
 					}
 				}
 
@@ -713,7 +726,9 @@ crofsock::handle_read_event_rxthread(
 					}
 				} else
 				if (rc == 0) {
+					std::cerr << "ZZZZZZZZZZZZZZZZZZZ [1]" << std::endl;
 					close();
+					std::cerr << "ZZZZZZZZZZZZZZZZZZZ [2]" << std::endl;
 					return;
 				}
 
@@ -819,7 +834,7 @@ crofsock::parse_message()
 
 	} catch (std::runtime_error& e) {
 
-		if (msg) delete msg;
+		//if (msg) delete msg;
 
 	}
 }

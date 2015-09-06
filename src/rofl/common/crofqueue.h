@@ -71,7 +71,7 @@ public:
 	size_t
 	store(rofl::openflow::cofmsg* msg) {
 		RwLock rwlock(queuelock, RwLock::RWLOCK_WRITE);
-		std::cerr << "[rofl-common][crofqueue][store] msg: " << std::endl << *msg;
+		//std::cerr << "[rofl-common][crofqueue][store] msg: " << std::endl << *msg;
 		queue.push_back(msg);
 		return queue.size();
 	};
@@ -87,7 +87,7 @@ public:
 			return msg;
 		}
 		msg = queue.front(); queue.pop_front();
-		std::cerr << "[rofl-common][crofqueue][retrieve] msg: " << std::endl << *msg;
+		//std::cerr << "[rofl-common][crofqueue][retrieve] msg: " << std::endl << *msg;
 		return msg;
 	};
 
@@ -102,7 +102,7 @@ public:
 			return msg;
 		}
 		msg = queue.front();
-		std::cerr << "[rofl-common][crofqueue][front] msg: " << std::endl << *msg;
+		//std::cerr << "[rofl-common][crofqueue][front] msg: " << std::endl << *msg;
 		return msg;
 	};
 
@@ -116,7 +116,7 @@ public:
 			return;
 		}
 		queue.pop_front();
-		std::cerr << "[rofl-common][crofqueue][pop] " << std::endl;
+		//std::cerr << "[rofl-common][crofqueue][pop] " << std::endl;
 	};
 
 public:

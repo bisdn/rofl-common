@@ -41,7 +41,7 @@ cthread::initialize()
 
 	add_read_fd(pipefd[PIPE_READ_FD]);
 
-	start_thread();
+	//start_thread();
 }
 
 

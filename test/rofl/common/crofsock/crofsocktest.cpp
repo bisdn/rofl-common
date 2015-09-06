@@ -33,6 +33,7 @@ crofsocktest::test()
 {
 	try {
 		keep_running = true;
+		msg_counter = 0;
 
 		slisten = new rofl::crofsock(this);
 		sclient = new rofl::crofsock(this);
@@ -44,13 +45,23 @@ crofsocktest::test()
 		sclient->set_raddr(baddr).connect(false);
 
 		while (keep_running) {
-			sleep(1);
+			struct timespec ts;
+			ts.tv_sec = 0;
+			ts.tv_nsec = 1000;
+			pselect(0, NULL, NULL, NULL, &ts, NULL);
 		}
 
+		std::cerr << "YYYYYYYYYYYYYYYYYYY [1]" << std::endl;
 		sclient->close();
+		std::cerr << "YYYYYYYYYYYYYYYYYYY [2]" << std::endl;
+		sleep(1);
+		std::cerr << "YYYYYYYYYYYYYYYYYYY [3]" << std::endl;
 		sserver->close();
+		std::cerr << "YYYYYYYYYYYYYYYYYYY [4]" << std::endl;
+		sleep(1);
+		std::cerr << "YYYYYYYYYYYYYYYYYYY [5]" << std::endl;
 		slisten->close();
-
+		std::cerr << "YYYYYYYYYYYYYYYYYYY [6]" << std::endl;
 		sleep(1);
 
 		delete slisten;
@@ -116,6 +127,11 @@ crofsocktest::handle_accepted(
 		rofl::crofsock& socket)
 {
 	std::cerr << "handle accepted" << std::endl;
+
+	rofl::openflow::cofmsg_features_request* features =
+			new cofmsg_features_request(rofl::openflow13::OFP_VERSION, 0xb1b2b3b4);
+
+	sserver->send_message(features);
 }
 
 
@@ -142,10 +158,31 @@ void
 crofsocktest::handle_recv(
 		rofl::crofsock& socket, rofl::openflow::cofmsg *msg)
 {
-	std::cerr << "handle recv " << std::endl << *msg;
-	delete msg;
+	if (&socket == sserver) {
+		std::cerr << "sserver => handle recv " << std::endl << *msg;
+		delete msg;
 
-	keep_running = false;
+		rofl::openflow::cofmsg_features_request* features =
+				new cofmsg_features_request(rofl::openflow13::OFP_VERSION, 0xb1b2b3b4);
+
+		sserver->send_message(features);
+
+	} else
+	if (&socket == sclient) {
+		std::cerr << "sclient => handle recv " << std::endl << *msg;
+		delete msg;
+
+		rofl::openflow::cofmsg_hello* hello =
+				new cofmsg_hello(rofl::openflow13::OFP_VERSION, 0xa1a2a3a4);
+
+		sclient->send_message(hello);
+
+	}
+
+	std::cerr << "AAAAAAAAAAAAAA msg_counter: " << msg_counter << std::endl;
+	if (++msg_counter > 10) {
+		keep_running = false;
+	}
 }
 
 

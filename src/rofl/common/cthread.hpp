@@ -207,6 +207,27 @@ public:
 	has_timer(
 			uint32_t timer_id) const;
 
+public:
+
+	/**
+	 * @brief	Starts worker thread
+	 *
+	 * Sets run flag run_rx_thread to true and calls
+	 * syscall pthread_create() for starting worker thread.
+	 */
+	void
+	start_thread();
+
+	/**
+	 * @brief	Stops worker thread
+	 *
+	 * Stops worker thread by setting variable run_rx_thread
+	 * to false and waking up the thread. Waits for thread termination via pthread_join().
+	 * If joining the thread fails, syscall pthread_cancel() destroys ultimately the thread.
+	 */
+	void
+	stop_thread();
+
 private:
 
 	/**
@@ -228,25 +249,6 @@ private:
 	 */
 	void
 	release();
-
-	/**
-	 * @brief	Starts worker thread
-	 *
-	 * Sets run flag run_rx_thread to true and calls
-	 * syscall pthread_create() for starting worker thread.
-	 */
-	void
-	start_thread();
-
-	/**
-	 * @brief	Stops worker thread
-	 *
-	 * Stops worker thread by setting variable run_rx_thread
-	 * to false and waking up the thread. Waits for thread termination via pthread_join().
-	 * If joining the thread fails, syscall pthread_cancel() destroys ultimately the thread.
-	 */
-	void
-	stop_thread();
 
 	/**
 	 * @brief	Static function for starting RX thread for this cradsock instance
