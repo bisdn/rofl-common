@@ -13,6 +13,8 @@
 
 using namespace rofl;
 
+/*static*/ std::map<pthread_t, unsigned int> indent::width;
+
 /*static*/set_log_level_emerg  logging::emerg;
 /*static*/set_log_level_alert  logging::alert;
 /*static*/set_log_level_crit   logging::crit;

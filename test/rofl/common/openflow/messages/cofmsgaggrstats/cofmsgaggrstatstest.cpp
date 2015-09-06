@@ -211,7 +211,7 @@ cofmsgaggrstatstest::testRequestParser10()
 			/* unpack() Must yield an axception */
 			CPPUNIT_ASSERT(false);
 
-		} catch (rofl::eBadSyntaxTooShort& e) {
+		} catch (rofl::eBadRequestBadLen& e) {
 			CPPUNIT_ASSERT(i < msglen);
 		}
 	}
@@ -222,7 +222,7 @@ cofmsgaggrstatstest::testRequestParser10()
 			stats->header.length = htobe16(i);
 			msg.unpack(mem.somem(), i);
 
-		} catch (rofl::eBadSyntaxTooShort& e) {
+		} catch (rofl::eBadRequestBadLen& e) {
 
 			std::cerr << ">>> testing length values (len: " << i << ") <<< " << std::endl;
 			std::cerr << "[FAILURE] unpack() exception seen" << std::endl;
@@ -240,7 +240,7 @@ cofmsgaggrstatstest::testRequestParser10()
 			stats->header.length = htobe16(i);
 			msg.unpack(mem.somem(), i);
 
-		} catch (rofl::eBadSyntaxTooShort& e) {
+		} catch (rofl::eBadRequestBadLen& e) {
 			std::cerr << ">>> testing length values (len: " << i << ") <<< " << std::endl;
 			std::cerr << "[FAILURE] unpack() no exception seen" << std::endl;
 			std::cerr << ">>> request <<<" << std::endl << msg;
@@ -297,7 +297,7 @@ cofmsgaggrstatstest::testRequestParser12()
 			/* unpack() Must yield an axception */
 			CPPUNIT_ASSERT(false);
 
-		} catch (rofl::eBadSyntaxTooShort& e) {
+		} catch (rofl::eBadRequestBadLen& e) {
 			CPPUNIT_ASSERT(i < msglen);
 		}
 	}
@@ -308,7 +308,7 @@ cofmsgaggrstatstest::testRequestParser12()
 			stats->header.length = htobe16(i);
 			msg.unpack(mem.somem(), i);
 
-		} catch (rofl::eBadSyntaxTooShort& e) {
+		} catch (rofl::eBadRequestBadLen& e) {
 
 			std::cerr << ">>> testing length values (len: " << i << ") <<< " << std::endl;
 			std::cerr << "[FAILURE] unpack() exception seen" << std::endl;
@@ -326,7 +326,7 @@ cofmsgaggrstatstest::testRequestParser12()
 			stats->header.length = htobe16(i);
 			msg.unpack(mem.somem(), i);
 
-		} catch (rofl::eBadSyntaxTooShort& e) {
+		} catch (rofl::eBadRequestBadLen& e) {
 			std::cerr << ">>> testing length values (len: " << i << ") <<< " << std::endl;
 			std::cerr << "[FAILURE] unpack() no exception seen" << std::endl;
 			std::cerr << ">>> request <<<" << std::endl << msg;
@@ -383,7 +383,7 @@ cofmsgaggrstatstest::testRequestParser13()
 			/* unpack() Must yield an axception */
 			CPPUNIT_ASSERT(false);
 
-		} catch (rofl::eBadSyntaxTooShort& e) {
+		} catch (rofl::eBadRequestBadLen& e) {
 			CPPUNIT_ASSERT(i < msglen);
 		}
 	}
@@ -394,7 +394,7 @@ cofmsgaggrstatstest::testRequestParser13()
 			stats->header.length = htobe16(i);
 			msg.unpack(mem.somem(), i);
 
-		} catch (rofl::eBadSyntaxTooShort& e) {
+		} catch (rofl::eBadRequestBadLen& e) {
 
 			std::cerr << ">>> testing length values (len: " << i << ") <<< " << std::endl;
 			std::cerr << "[FAILURE] unpack() exception seen" << std::endl;
@@ -412,7 +412,7 @@ cofmsgaggrstatstest::testRequestParser13()
 			stats->header.length = htobe16(i);
 			msg.unpack(mem.somem(), i);
 
-		} catch (rofl::eBadSyntaxTooShort& e) {
+		} catch (rofl::eBadRequestBadLen& e) {
 			std::cerr << ">>> testing length values (len: " << i << ") <<< " << std::endl;
 			std::cerr << "[FAILURE] unpack() no exception seen" << std::endl;
 			std::cerr << ">>> request <<<" << std::endl << msg;
@@ -468,7 +468,7 @@ cofmsgaggrstatstest::testReplyParser10()
 			/* unpack() Must yield an axception */
 			CPPUNIT_ASSERT(false);
 
-		} catch (rofl::eBadSyntaxTooShort& e) {
+		} catch (rofl::eBadRequestBadLen& e) {
 			CPPUNIT_ASSERT(i < msglen);
 		}
 	}
@@ -479,7 +479,7 @@ cofmsgaggrstatstest::testReplyParser10()
 			stats->header.length = htobe16(i);
 			msg.unpack(mem.somem(), i);
 
-		} catch (rofl::eBadSyntaxTooShort& e) {
+		} catch (rofl::eBadRequestBadLen& e) {
 
 			std::cerr << ">>> testing length values (len: " << i << ") <<< " << std::endl;
 			std::cerr << "[FAILURE] unpack() exception seen" << std::endl;
@@ -497,7 +497,7 @@ cofmsgaggrstatstest::testReplyParser10()
 			stats->header.length = htobe16(i);
 			msg.unpack(mem.somem(), i);
 
-		} catch (rofl::eBadSyntaxTooShort& e) {
+		} catch (rofl::eBadRequestBadLen& e) {
 			std::cerr << ">>> testing length values (len: " << i << ") <<< " << std::endl;
 			std::cerr << "[FAILURE] unpack() no exception seen" << std::endl;
 			std::cerr << ">>> reply <<<" << std::endl << msg;
@@ -554,7 +554,7 @@ cofmsgaggrstatstest::testReplyParser12()
 			/* unpack() Must yield an axception */
 			CPPUNIT_ASSERT(false);
 
-		} catch (rofl::eBadSyntaxTooShort& e) {
+		} catch (rofl::eBadRequestBadLen& e) {
 			CPPUNIT_ASSERT(i < msglen);
 		}
 	}
@@ -565,7 +565,7 @@ cofmsgaggrstatstest::testReplyParser12()
 			stats->header.length = htobe16(i);
 			msg.unpack(mem.somem(), i);
 
-		} catch (rofl::eBadSyntaxTooShort& e) {
+		} catch (rofl::eBadRequestBadLen& e) {
 
 			std::cerr << ">>> testing length values (len: " << i << ") <<< " << std::endl;
 			std::cerr << "[FAILURE] unpack() exception seen" << std::endl;
@@ -583,7 +583,7 @@ cofmsgaggrstatstest::testReplyParser12()
 			stats->header.length = htobe16(i);
 			msg.unpack(mem.somem(), i);
 
-		} catch (rofl::eBadSyntaxTooShort& e) {
+		} catch (rofl::eBadRequestBadLen& e) {
 			std::cerr << ">>> testing length values (len: " << i << ") <<< " << std::endl;
 			std::cerr << "[FAILURE] unpack() no exception seen" << std::endl;
 			std::cerr << ">>> reply <<<" << std::endl << msg;
@@ -640,7 +640,7 @@ cofmsgaggrstatstest::testReplyParser13()
 			/* unpack() Must yield an axception */
 			CPPUNIT_ASSERT(false);
 
-		} catch (rofl::eBadSyntaxTooShort& e) {
+		} catch (rofl::eBadRequestBadLen& e) {
 			CPPUNIT_ASSERT(i < msglen);
 		}
 	}
@@ -651,7 +651,7 @@ cofmsgaggrstatstest::testReplyParser13()
 			stats->header.length = htobe16(i);
 			msg.unpack(mem.somem(), i);
 
-		} catch (rofl::eBadSyntaxTooShort& e) {
+		} catch (rofl::eBadRequestBadLen& e) {
 
 			std::cerr << ">>> testing length values (len: " << i << ") <<< " << std::endl;
 			std::cerr << "[FAILURE] unpack() exception seen" << std::endl;
@@ -669,7 +669,7 @@ cofmsgaggrstatstest::testReplyParser13()
 			stats->header.length = htobe16(i);
 			msg.unpack(mem.somem(), i);
 
-		} catch (rofl::eBadSyntaxTooShort& e) {
+		} catch (rofl::eBadRequestBadLen& e) {
 			std::cerr << ">>> testing length values (len: " << i << ") <<< " << std::endl;
 			std::cerr << "[FAILURE] unpack() no exception seen" << std::endl;
 			std::cerr << ">>> reply <<<" << std::endl << msg;
