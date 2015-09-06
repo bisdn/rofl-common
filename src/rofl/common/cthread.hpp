@@ -116,7 +116,8 @@ public:
 	 */
 	cthread(
 			cthread_env* env) :
-				env(env)
+				env(env),
+				state(STATE_IDLE)
 	{ initialize(); };
 
 public:
@@ -216,7 +217,7 @@ public:
 	 * syscall pthread_create() for starting worker thread.
 	 */
 	void
-	start_thread();
+	start();
 
 	/**
 	 * @brief	Stops worker thread
@@ -226,7 +227,7 @@ public:
 	 * If joining the thread fails, syscall pthread_cancel() destroys ultimately the thread.
 	 */
 	void
-	stop_thread();
+	stop();
 
 private:
 
@@ -289,6 +290,13 @@ private:
 
 	std::set<ctimespec> ordered_timers;     // ordered set of timers
 	std::map<uint32_t, ctimer*> timers;     // map of timers
+
+	enum thread_state_t {
+		STATE_IDLE      = 0,
+		STATE_RUNNING   = 1,
+	};
+
+	enum thread_state_t state;
 };
 
 }; // end of namespace rofl

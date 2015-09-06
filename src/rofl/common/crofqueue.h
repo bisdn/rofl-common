@@ -59,10 +59,10 @@ public:
 	void
 	clear() {
 		RwLock rwlock(queuelock, RwLock::RWLOCK_WRITE);
-		while (not queue.empty()) {
-			delete queue.front();
-			queue.pop_front();
+		for (auto msg : queue) {
+			delete msg;
 		}
+		queue.clear();
 	};
 
 	/**

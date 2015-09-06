@@ -51,19 +51,6 @@ crofsocktest::test()
 			pselect(0, NULL, NULL, NULL, &ts, NULL);
 		}
 
-		std::cerr << "YYYYYYYYYYYYYYYYYYY [1]" << std::endl;
-		sclient->close();
-		std::cerr << "YYYYYYYYYYYYYYYYYYY [2]" << std::endl;
-		sleep(1);
-		std::cerr << "YYYYYYYYYYYYYYYYYYY [3]" << std::endl;
-		sserver->close();
-		std::cerr << "YYYYYYYYYYYYYYYYYYY [4]" << std::endl;
-		sleep(1);
-		std::cerr << "YYYYYYYYYYYYYYYYYYY [5]" << std::endl;
-		slisten->close();
-		std::cerr << "YYYYYYYYYYYYYYYYYYY [6]" << std::endl;
-		sleep(1);
-
 		delete slisten;
 		delete sclient;
 		delete sserver;
@@ -162,27 +149,41 @@ crofsocktest::handle_recv(
 		std::cerr << "sserver => handle recv " << std::endl << *msg;
 		delete msg;
 
-		rofl::openflow::cofmsg_features_request* features =
-				new cofmsg_features_request(rofl::openflow13::OFP_VERSION, 0xb1b2b3b4);
+		if (server_msg_counter < 10) {
+			rofl::openflow::cofmsg_features_request* features =
+					new cofmsg_features_request(rofl::openflow13::OFP_VERSION, 0xb1b2b3b4);
 
-		sserver->send_message(features);
+			sserver->send_message(features);
+
+			server_msg_counter++;
+		}
+
+		if ((server_msg_counter >= 10) && (client_msg_counter >= 10)) {
+			std::cerr << "AAAAAAAAAAAAAA [sserver]" << std::endl;
+			keep_running = false;
+		}
 
 	} else
 	if (&socket == sclient) {
 		std::cerr << "sclient => handle recv " << std::endl << *msg;
 		delete msg;
 
-		rofl::openflow::cofmsg_hello* hello =
-				new cofmsg_hello(rofl::openflow13::OFP_VERSION, 0xa1a2a3a4);
+		if (client_msg_counter < 10) {
+			rofl::openflow::cofmsg_hello* hello =
+					new cofmsg_hello(rofl::openflow13::OFP_VERSION, 0xa1a2a3a4);
 
-		sclient->send_message(hello);
+			sclient->send_message(hello);
+
+			client_msg_counter++;
+		}
+
+		if ((server_msg_counter >= 10) && (client_msg_counter >= 10)) {
+			std::cerr << "AAAAAAAAAAAAAA [sclient]" << std::endl;
+			keep_running = false;
+		}
 
 	}
 
-	std::cerr << "AAAAAAAAAAAAAA msg_counter: " << msg_counter << std::endl;
-	if (++msg_counter > 10) {
-		keep_running = false;
-	}
 }
 
 

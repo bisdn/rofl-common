@@ -58,7 +58,7 @@ crofsock::crofsock(
 
 
 void
-crofsock::close()
+crofsock::shutdown()
 {
 	switch (state) {
 	case STATE_CLOSED:
@@ -68,23 +68,44 @@ crofsock::close()
 	default: {
 		state = STATE_CLOSED;
 		txthread.drop_timer(TIMER_ID_RECONNECT);
-		if (flags.test(FLAGS_CONGESTED)) {
-			txthread.drop_write_fd(sd);
-		}
+
 		if (STATE_ESTABLISHED == state) {
 			rxthread.drop_read_fd(sd);
+			if (flags.test(FLAGS_CONGESTED)) {
+				txthread.drop_write_fd(sd);
+			}
 		}
 		if (STATE_CONNECTING == state) {
 			rxthread.drop_write_fd(sd);
 		}
 		::close(sd); sd = -1;
-		rxthread.stop_thread();
-		txthread.stop_thread();
-		std::cerr << "XXXXXXXXXXXXXXXXXXX [1]" << std::endl;
+	};
+	}
+}
+
+
+
+void
+crofsock::close()
+{
+	switch (state) {
+	case STATE_CLOSED:
+	case STATE_UNKNOWN: {
+		std::cerr << "RRRRRRRRRR [1]" << std::endl;
+	} break;
+	default: {
+		std::cerr << "RRRRRRRRRR [2.1]" << std::endl;
+
+		shutdown();
+
+		rxthread.stop();
+		txthread.stop();
+
 		for (auto queue : txqueues) {
 			queue.clear();
 		}
-		std::cerr << "XXXXXXXXXXXXXXXXXXX [2]" << std::endl;
+
+		std::cerr << "RRRRRRRRRR [2.2]" << std::endl;
 	};
 	}
 }
@@ -101,8 +122,8 @@ crofsock::listen()
 	}
 
 	/* start thread */
-	rxthread.start_thread();
-	txthread.start_thread();
+	rxthread.start();
+	txthread.start();
 
 	/* cancel potentially pending reconnect timer */
 	rxthread.drop_timer(TIMER_ID_RECONNECT);
@@ -189,8 +210,8 @@ crofsock::accept(
 		}
 
 		/* start thread */
-		rxthread.start_thread();
-		txthread.start_thread();
+		rxthread.start();
+		txthread.start();
 
 		/* cancel potentially pending reconnect timer */
 		rxthread.drop_timer(TIMER_ID_RECONNECT);
@@ -272,8 +293,8 @@ crofsock::connect(
 		}
 
 		/* start thread */
-		rxthread.start_thread();
-		txthread.start_thread();
+		rxthread.start();
+		txthread.start();
 
 		/* cancel potentially pending reconnect timer */
 		rxthread.drop_timer(TIMER_ID_RECONNECT);
@@ -331,14 +352,14 @@ crofsock::connect(
 				rxthread.add_write_fd(sd);
 			} break;
 			case ECONNREFUSED: {
-				close();
+				shutdown();
 				if (flags.test(FLAG_RECONNECT_ON_FAILURE)) {
 					backoff_reconnect(false);
 				}
 				crofsock_env::call_env(env).handle_connect_refused(*this);
 			} break;
 			default: {
-				close();
+				shutdown();
 				if (flags.test(FLAG_RECONNECT_ON_FAILURE)) {
 					backoff_reconnect(false);
 				}
@@ -534,6 +555,11 @@ crofsock::send_from_queue()
 
 			for (unsigned int num = 0; num < txweights[queue_id]; ++num) {
 
+				if (state < STATE_ESTABLISHED) {
+					tx_is_running= false;
+					return;
+				}
+
 				/* no pending fragment */
 				if (not tx_fragment_pending) {
 					rofl::openflow::cofmsg *msg = nullptr;
@@ -552,12 +578,12 @@ crofsock::send_from_queue()
 					/* pack message into txbuffer */
 					msg->pack(txbuffer.somem(), txlen);
 
-					/* remove message from heap */
+					/* remove C++ message object from heap */
 					delete msg;
 				}
 
 				/* send memory block via socket in non-blocking mode */
-				int nbytes = ::send(sd, txbuffer.somem() + msg_bytes_sent, txlen - msg_bytes_sent, MSG_DONTWAIT);
+				int nbytes = ::send(sd, txbuffer.somem() + msg_bytes_sent, txlen - msg_bytes_sent, MSG_DONTWAIT | MSG_NOSIGNAL);
 
 				/* error occured */
 				if (nbytes < 0) {
@@ -567,8 +593,10 @@ crofsock::send_from_queue()
 						txthread.add_write_fd(sd);
 						env->handle_write(*this);
 					} return;
+					case SIGPIPE:
 					default: {
-						// TODO
+						tx_is_running= false;
+						return;
 					};
 					}
 
@@ -664,14 +692,14 @@ crofsock::handle_read_event_rxthread(
 				/* connect still pending, just wait */
 			} break;
 			case ECONNREFUSED: {
-				close();
+				shutdown();
 				if (flags.test(FLAG_RECONNECT_ON_FAILURE)) {
 					backoff_reconnect(false);
 				}
 				crofsock_env::call_env(env).handle_connect_refused(*this);
 			} break;
 			default: {
-				close();
+				shutdown();
 				if (flags.test(FLAG_RECONNECT_ON_FAILURE)) {
 					backoff_reconnect(false);
 				}
@@ -689,6 +717,10 @@ crofsock::handle_read_event_rxthread(
 
 			while (true) {
 
+				if (state < STATE_ESTABLISHED) {
+					return;
+				}
+
 				if (not rx_fragment_pending) {
 					msg_bytes_read = 0;
 				}
@@ -705,7 +737,7 @@ crofsock::handle_read_event_rxthread(
 
 				/* sanity check: 8 <= msg_len <= 2^16 */
 				if (msg_len < sizeof(struct openflow::ofp_header)) {
-					close(); /* enforce reconnect, just in case */
+					shutdown(); /* enforce reconnect, just in case */
 					return;
 				}
 
@@ -720,15 +752,13 @@ crofsock::handle_read_event_rxthread(
 					} break;
 					default: {
 						/* oops, error */
-						close();
+						shutdown();
 						return;
 					};
 					}
 				} else
 				if (rc == 0) {
-					std::cerr << "ZZZZZZZZZZZZZZZZZZZ [1]" << std::endl;
-					close();
-					std::cerr << "ZZZZZZZZZZZZZZZZZZZ [2]" << std::endl;
+					shutdown();
 					return;
 				}
 

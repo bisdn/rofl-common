@@ -51,7 +51,7 @@ cthread::release()
 {
 	clear_timers();
 
-	stop_thread();
+	stop();
 
 	drop_read_fd(pipefd[PIPE_READ_FD]);
 
@@ -258,35 +258,58 @@ cthread::has_timer(
 
 
 void
-cthread::start_thread()
+cthread::start()
 {
-	run_thread = true;
-	if (pthread_create(&tid, NULL, &(cthread::start_loop), this) < 0) {
-		log << logging::error << "cthread::start_thread() failed to start worker thread: "
-						<< "errno=" << errno << " (" << strerror(errno) << ")" << std::flush;
-		throw eSysCall("cthread::start_thread() failed to start RX thread");
+	switch (state) {
+	case STATE_IDLE: {
+
+		run_thread = true;
+		if (pthread_create(&tid, NULL, &(cthread::start_loop), this) < 0) {
+			log << logging::error << "cthread::start_thread() failed to start worker thread: "
+							<< "errno=" << errno << " (" << strerror(errno) << ")" << std::flush;
+			throw eSysCall("cthread::start_thread() failed to start RX thread");
+		}
+
+		state = STATE_RUNNING;
+
+	} break;
+	default: {
+
+	};
 	}
 }
 
 
 
 void
-cthread::stop_thread()
+cthread::stop()
 {
-	run_thread = false;
+	switch (state) {
+	case STATE_RUNNING: {
 
-	/* deletion of thread initiated within this thread */
-	if (pthread_self() == tid) {
-		pthread_cancel(tid);
+		state = STATE_IDLE;
 
-	/* deletion of thread initiated from external thread */
-	} else {
-		wakeup();
-		if (pthread_join(tid, NULL) < 0) {
-			log << logging::error << "cthread::stop_thread() failed to stop worker thread: "
-							<< "errno: " << errno << " (" << strerror(errno) << ")" << std::flush;
-			pthread_cancel(tid);
+		run_thread = false;
+
+		/* deletion of thread not initiated within this thread */
+		if (not (pthread_self() == tid)) {
+
+			wakeup();
+
+			if (pthread_join(tid, NULL) < 0) {
+
+				log << logging::error << "cthread::stop_thread() failed to stop worker thread: "
+								<< "errno: " << errno << " (" << strerror(errno) << ")" << std::flush;
+				pthread_cancel(tid);
+			}
+		} else {
+			std::cerr << "UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU" << std::endl;
 		}
+
+	} break;
+	default: {
+
+	};
 	}
 }
 

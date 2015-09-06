@@ -433,6 +433,12 @@ private:
 	 *
 	 */
 	void
+	shutdown();
+
+	/**
+	 *
+	 */
+	void
 	parse_message();
 
 	/**
