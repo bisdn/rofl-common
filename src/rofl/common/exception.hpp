@@ -12,6 +12,9 @@
 #ifndef SRC_ROFL_COMMON_EXCEPTION_HPP_
 #define SRC_ROFL_COMMON_EXCEPTION_HPP_
 
+#include <errno.h>
+#include <string.h>
+#include <sstream>
 #include <stdexcept>
 
 namespace rofl {
@@ -53,8 +56,18 @@ class eSysCall : exception {
 public:
 	eSysCall(
 			const std::string& __arg) :
-					exception(__arg)
+				exception(__arg),
+				__errno(errno)
 	{};
+    virtual
+	const char*
+    what() const _GLIBCXX_USE_NOEXCEPT {
+    	std::stringstream ss;
+    	ss << exception::what() <<  " errno: " << __errno << " (" << strerror(__errno) << ")";
+    	return ss.str().c_str();
+    }
+private:
+    int __errno;
 };
 
 }; // end of namespace rofl

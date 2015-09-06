@@ -8,6 +8,7 @@
 #ifndef CROFENDPNT_H_
 #define CROFENDPNT_H_
 
+#include <string.h>
 #include <assert.h>
 #include <inttypes.h>
 #include <unistd.h>
@@ -506,12 +507,6 @@ private:
 	// environment for this crofsock instance
 	crofsock_env*				env;
 
-	// RX thread
-	cthread                     rxthread;
-
-	// TX thread
-	cthread                     txthread;
-
 	// various flags for this crofsock instance
 	std::bitset<32>				flags;
 
@@ -520,6 +515,12 @@ private:
 
 	// socket mode (TCP_SERVER, TCP CLIENT)
 	enum socket_mode_t          mode;
+
+	// RX thread
+	cthread                     rxthread;
+
+	// TX thread
+	cthread                     txthread;
 
 	//
 	int                         ts_rec_sec;

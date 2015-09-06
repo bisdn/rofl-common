@@ -9,6 +9,10 @@
 
 using namespace rofl;
 
+/*static*/std::set<crofsock_env*>  crofsock_env::socket_envs;
+/*static*/crwlock                  crofsock_env::socket_envs_lock;
+
+
 crofsock::~crofsock()
 {
 	close();
@@ -19,15 +23,15 @@ crofsock::~crofsock()
 crofsock::crofsock(
 		crofsock_env* env) :
 				env(env),
-				rxthread(this),
-				txthread(this),
 				state(STATE_UNKNOWN),
 				mode(MODE_UNKNOWN),
+				rxthread(this),
+				txthread(this),
 				ts_rec_sec(0),
 				ts_rec_nsec(200000/*200ms*/),
 				reconnect_counter(0),
 				sd(-1),
-				domain(AF_INET6),
+				domain(AF_INET),
 				type(SOCK_STREAM),
 				protocol(IPPROTO_TCP),
 				backlog(10),
@@ -36,6 +40,8 @@ crofsock::crofsock(
 				msg_bytes_read(0),
 				max_pkts_rcvd_per_round(0),
 				rx_disabled(false),
+				txqueues(QUEUE_MAX),
+				txweights(QUEUE_MAX),
 				tx_is_running(false),
 				tx_fragment_pending(false),
 				txbuffer((size_t)65536),
@@ -62,9 +68,15 @@ crofsock::close()
 	default: {
 		state = STATE_CLOSED;
 		txthread.drop_timer(TIMER_ID_RECONNECT);
-		txthread.drop_write_fd(sd);
-		rxthread.drop_read_fd(sd);
-		rxthread.drop_write_fd(sd);
+		if (flags.test(FLAGS_CONGESTED)) {
+			txthread.drop_write_fd(sd);
+		}
+		if (STATE_ESTABLISHED == state) {
+			rxthread.drop_read_fd(sd);
+		}
+		if (STATE_CONNECTING == state) {
+			rxthread.drop_write_fd(sd);
+		}
 		::close(sd); sd = -1;
 		for (auto queue : txqueues) {
 			queue.clear();
@@ -94,7 +106,7 @@ crofsock::listen()
 	flags.set(FLAG_RECONNECT_ON_FAILURE, false);
 
 	/* open socket */
-	if ((sd = ::socket(domain, type, protocol)) < 0) {
+	if ((sd = ::socket(baddr.get_family(), type, protocol)) < 0) {
 		throw eSysCall("socket()");
 	}
 
@@ -260,7 +272,7 @@ crofsock::connect(
 		state = STATE_CONNECTING;
 
 		/* open socket */
-		if ((sd = ::socket(domain, type, protocol)) < 0) {
+		if ((sd = ::socket(raddr.get_family(), type, protocol)) < 0) {
 			throw eSysCall("socket");
 		}
 
@@ -482,6 +494,10 @@ crofsock::handle_write_event(
 		flags.reset(FLAGS_CONGESTED);
 		txthread.drop_write_fd(sd);
 		send_from_queue();
+	} else
+	if (&thread == &rxthread) {
+		assert(fd == sd);
+		handle_read_event_rxthread(thread, fd);
 	}
 }
 
@@ -490,6 +506,9 @@ crofsock::handle_write_event(
 void
 crofsock::send_from_queue()
 {
+	if (state < STATE_ESTABLISHED)
+		return;
+
 	bool reschedule = false;
 
 	tx_is_running = true;
@@ -609,7 +628,8 @@ crofsock::handle_read_event_rxthread(
 			}
 
 			switch (optval) {
-			case EISCONN/*=0*/: {
+			case 0:
+			case EISCONN: {
 				rxthread.drop_write_fd(sd);
 
 				if ((getsockname(sd, laddr.ca_saddr, &(laddr.salen))) < 0) {
@@ -677,7 +697,7 @@ crofsock::handle_read_event_rxthread(
 				}
 
 				/* read from socket more bytes, at most "msg_len - msg_bytes_read" */
-				int rc = ::read(sd, (void*)(rxbuffer.somem() + msg_bytes_read), msg_len - msg_bytes_read);
+				int rc = ::recv(sd, (void*)(rxbuffer.somem() + msg_bytes_read), msg_len - msg_bytes_read, MSG_DONTWAIT);
 
 				if (rc < 0) {
 					switch (errno) {
