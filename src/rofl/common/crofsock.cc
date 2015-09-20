@@ -1,7 +1,12 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 /*
- * cchannel.cpp
+ * crofsock.cpp
  *
  *  Created on: 31.12.2013
+ *  Revised on: 20.09.2015
  *      Author: andreas
  */
 
@@ -43,6 +48,14 @@ crofsock::crofsock(
 				ctx(NULL),
 				ssl(NULL),
 				bio(NULL),
+				capath("."),
+				cafile("ca.pem"),
+				certfile("crt.pem"),
+				keyfile("key.pem"),
+				password(""),
+				verify_mode("PEER"),
+				verify_depth("1"),
+				ciphers("EECDH+ECDSA+AESGCM EECDH+aRSA+AESGCM EECDH+ECDSA+SHA256 EECDH+aRSA+RC4 EDH+aRSA EECDH RC4 !aNULL !eNULL !LOW !3DES !MD5 !EXP !PSK !SRP !DSS"),
 				rx_fragment_pending(false),
 				rxbuffer((size_t)65536),
 				msg_bytes_read(0),
@@ -75,7 +88,7 @@ crofsock::close()
 	switch (state) {
 	case STATE_IDLE: {
 
-		/* TLS down, TCP down, threads stopped => do nothing */
+		/* TLS down, TCP down => do nothing */
 
 	} break;
 	case STATE_CLOSED: {
@@ -116,7 +129,7 @@ crofsock::close()
 	case STATE_TCP_ESTABLISHED: {
 
 		rxthread.drop_read_fd(sd);
-		if (flags.test(FLAGS_CONGESTED)) {
+		if (flags.test(FLAG_CONGESTED)) {
 			txthread.drop_write_fd(sd);
 		}
 		::close(sd); sd = -1;
@@ -502,13 +515,11 @@ crofsock::tls_init_context()
 		mode = SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT;
 	}
 
-	SSL_CTX_set_verify(ctx, mode, NULL); // TODO: verify callback
+	SSL_CTX_set_verify(ctx, mode, NULL);
 
 	int depth; std::istringstream( verify_depth ) >> depth;
 
 	SSL_CTX_set_verify_depth(ctx, depth);
-
-	// TODO: get random numbers
 }
 
 
@@ -977,6 +988,48 @@ crofsock::backoff_reconnect(
 
 
 
+bool
+crofsock::is_established() const
+{
+	return (STATE_TCP_ESTABLISHED <= state);
+}
+
+
+
+void
+crofsock::rx_disable()
+{
+	switch (state) {
+	case STATE_TCP_ESTABLISHED:
+	case STATE_TLS_ESTABLISHED: {
+		rxthread.drop_read_fd(sd);
+		rx_disabled = true;
+	} break;
+	default: {
+
+	};
+	}
+}
+
+
+
+void
+crofsock::rx_enable()
+{
+	switch (state) {
+	case STATE_TCP_ESTABLISHED:
+	case STATE_TLS_ESTABLISHED: {
+		rxthread.add_read_fd(sd);
+		rx_disabled = false;
+	} break;
+	default: {
+
+	};
+	}
+}
+
+
+
 void
 crofsock::handle_timeout(
 		cthread& thread, uint32_t timer_id, const std::list<unsigned int>& ttypes)
@@ -1084,7 +1137,7 @@ crofsock::send_message(
 	} break;
 	default: {
 		delete msg;
-		throw eSocketNotEstablished("crofsock::send_message() socket not established");
+		throw eRofSockNotEstablished("crofsock::send_message() socket not established");
 	};
 	}
 }
@@ -1108,7 +1161,7 @@ crofsock::handle_write_event(
 {
 	if (&thread == &txthread) {
 		assert(fd == sd);
-		flags.reset(FLAGS_CONGESTED);
+		flags.reset(FLAG_CONGESTED);
 		txthread.drop_write_fd(sd);
 		send_from_queue();
 	} else
@@ -1169,7 +1222,7 @@ crofsock::send_from_queue()
 				if (nbytes < 0) {
 					switch (errno) {
 					case EAGAIN: /* socket would block */ {
-						flags.set(FLAGS_CONGESTED);
+						flags.set(FLAG_CONGESTED);
 						txthread.add_write_fd(sd);
 						env->handle_write(*this);
 					} return;
@@ -1267,6 +1320,10 @@ crofsock::handle_read_event_rxthread(
 				rxthread.add_read_fd(sd);
 
 				crofsock_env::call_env(env).handle_tcp_connected(*this);
+
+				if (MODE_TLS_CLIENT == mode) {
+					crofsock::tls_connect(flags.test(FLAG_RECONNECT_ON_FAILURE));
+				}
 			} break;
 			case EINPROGRESS: {
 				/* connect still pending, just wait */

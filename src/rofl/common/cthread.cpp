@@ -302,8 +302,6 @@ cthread::stop()
 								<< "errno: " << errno << " (" << strerror(errno) << ")" << std::flush;
 				pthread_cancel(tid);
 			}
-		} else {
-			std::cerr << "UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU" << std::endl;
 		}
 
 	} break;

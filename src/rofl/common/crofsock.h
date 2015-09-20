@@ -1,12 +1,17 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 /*
- * crofendpnt.h
+ * crofsock.h
  *
  *  Created on: 31.12.2013
+ *  Revised on: 20.09.2015
  *      Author: andreas
  */
 
-#ifndef CROFENDPNT_H_
-#define CROFENDPNT_H_
+#ifndef CROFSOCK_H_
+#define CROFSOCK_H_
 
 #include <string.h>
 #include <assert.h>
@@ -83,29 +88,57 @@
 namespace rofl {
 
 
-class eSocketBase : public exception {
+
+class eRofSockBase : public RoflException {
 public:
-	eSocketBase(
+	eRofSockBase(
 			const std::string& __arg) :
-				exception(__arg)
+				RoflException(__arg)
+	{};
+};
+class eRofSockTxAgain : public eRofSockBase {
+public:
+	eRofSockTxAgain(
+			const std::string& __arg) :
+				eRofSockBase(__arg)
+	{};
+};
+class eRofSockMsgTooLarge : public eRofSockBase {
+public:
+	eRofSockMsgTooLarge(
+			const std::string& __arg) :
+				eRofSockBase(__arg)
+	{};
+};
+class eRofSockInvalid : public eRofSockBase {
+public:
+	eRofSockInvalid(
+			const std::string& __arg) :
+				eRofSockBase(__arg)
+	{};
+};
+class eRofSockNotFound : public eRofSockBase {
+public:
+	eRofSockNotFound(
+			const std::string& __arg) :
+				eRofSockBase(__arg)
+	{};
+};
+class eRofSockError : public eRofSockBase {
+public:
+	eRofSockError(
+			const std::string& __arg) :
+				eRofSockBase(__arg)
+	{};
+};
+class eRofSockNotEstablished : public eRofSockBase {
+public:
+	eRofSockNotEstablished(
+			const std::string& __arg) :
+				eRofSockBase(__arg)
 	{};
 };
 
-class eSocketNotFound : public eSocketBase {
-public:
-	eSocketNotFound(
-			const std::string& __arg) :
-				eSocketBase(__arg)
-	{};
-};
-
-class eSocketNotEstablished : public eSocketBase {
-public:
-	eSocketNotEstablished(
-			const std::string& __arg) :
-				eSocketBase(__arg)
-	{};
-};
 
 
 
@@ -125,7 +158,7 @@ public:
 	call_env(crofsock_env* env) {
 		AcquireReadLock lock(crofsock_env::socket_envs_lock);
 		if (crofsock_env::socket_envs.find(env) == crofsock_env::socket_envs.end()) {
-			throw eSocketNotFound("crofsock_env::call_env() crofsock_env instance not found");
+			throw eRofSockNotFound("crofsock_env::call_env() crofsock_env instance not found");
 		}
 		return *(env);
 	};
@@ -205,42 +238,6 @@ private:
 	static crwlock                  socket_envs_lock;
 };
 
-class eRofSockBase : public RoflException {
-public:
-	eRofSockBase(
-			const std::string& __arg) :
-				RoflException(__arg)
-	{};
-};
-class eRofSockTxAgain : public eRofSockBase {
-public:
-	eRofSockTxAgain(
-			const std::string& __arg) :
-				eRofSockBase(__arg)
-	{};
-};
-class eRofSockMsgTooLarge : public eRofSockBase {
-public:
-	eRofSockMsgTooLarge(
-			const std::string& __arg) :
-				eRofSockBase(__arg)
-	{};
-};
-class eRofSockInvalid : public eRofSockBase {
-public:
-	eRofSockInvalid(
-			const std::string& __arg) :
-				eRofSockBase(__arg)
-	{};
-};
-class eRofSockError : public eRofSockBase {
-public:
-	eRofSockError(
-			const std::string& __arg) :
-				eRofSockBase(__arg)
-	{};
-};
-
 
 
 /**
@@ -258,23 +255,8 @@ class crofsock :
 		QUEUE_MAX,		// do not use
 	};
 
-	enum crofsock_event_t {
-		EVENT_NONE				= 0,
-		EVENT_CONNECT			= 1,
-		EVENT_CONNECT_FAILED	= 2,
-		EVENT_CONNECT_REFUSED	= 3,
-		EVENT_CONNECTED			= 4,
-		EVENT_ACCEPT			= 5,
-		EVENT_ACCEPT_REFUSED	= 6,
-		EVENT_ACCEPTED			= 7,
-		EVENT_PEER_DISCONNECTED	= 8,
-		EVENT_LOCAL_DISCONNECT	= 9,
-		EVENT_CONGESTION_SOLVED	= 10,
-		EVENT_RX_QUEUE          = 11,
-	};
-
 	enum crofsock_flag_t {
-		FLAGS_CONGESTED 		  = 1,
+		FLAG_CONGESTED 		    = 1,
 		FLAG_RECONNECT_ON_FAILURE = 2,
 		FLAG_TLS_INITIALIZED    = 3,
 	};
@@ -375,42 +357,19 @@ public:
 	 *
 	 */
 	bool
-	is_established() const
-	{ return (STATE_TCP_ESTABLISHED == state); };
+	is_established() const;
 
 	/**
-	 * @brief	Instructs crofsock to disable reception of messages on the socket.
+	 * @brief	Disable reception of messages on this socket.
 	 */
 	void
-	rx_disable()
-	{
-		switch (state) {
-		case STATE_TCP_ESTABLISHED: {
-			rxthread.add_read_fd(sd);
-			rx_disabled = true;
-		} break;
-		default: {
-
-		};
-		}
-	};
+	rx_disable();
 
 	/**
-	 * @brief	Instructs crofsock to re-enable reception of messages on the socket.
+	 * @brief	Reenable reception of messages on this socket.
 	 */
 	void
-	rx_enable()
-	{
-		switch (state) {
-		case STATE_TCP_ESTABLISHED: {
-			rxthread.drop_read_fd(sd);
-			rx_disabled = false;
-		} break;
-		default: {
-
-		};
-		}
-	};
+	rx_enable();
 
 public:
 
@@ -465,6 +424,74 @@ public:
 	 *
 	 */
 	const std::string&
+	get_tls_capath() const
+	{ return capath; };
+
+	/**
+	 *
+	 */
+	crofsock&
+	set_tls_capath(
+			const std::string& capath)
+	{ this->capath = capath; return *this; };
+
+public:
+
+	/**
+	 *
+	 */
+	const std::string&
+	get_tls_cafile() const
+	{ return cafile; };
+
+	/**
+	 *
+	 */
+	crofsock&
+	set_tls_cafile(
+			const std::string& cafile)
+	{ this->cafile = cafile; return *this; };
+
+public:
+
+	/**
+	 *
+	 */
+	const std::string&
+	get_tls_certfile() const
+	{ return certfile; };
+
+	/**
+	 *
+	 */
+	crofsock&
+	set_tls_certfile(
+			const std::string& certfile)
+	{ this->certfile = certfile; return *this; };
+
+public:
+
+	/**
+	 *
+	 */
+	const std::string&
+	get_tls_keyfile() const
+	{ return keyfile; };
+
+	/**
+	 *
+	 */
+	crofsock&
+	set_tls_keyfile(
+			const std::string& keyfile)
+	{ this->keyfile = keyfile; return *this; };
+
+public:
+
+	/**
+	 *
+	 */
+	const std::string&
 	get_tls_pswd() const
 	{ return password; };
 
@@ -475,6 +502,103 @@ public:
 	set_tls_pswd(
 			const std::string& password)
 	{ this->password = password; return *this; };
+
+public:
+
+	/**
+	 *
+	 */
+	const std::string&
+	get_tls_verify_mode() const
+	{ return verify_mode; };
+
+	/**
+	 *
+	 */
+	crofsock&
+	set_tls_verify_mode(
+			const std::string& verify_mode)
+	{ this->verify_mode = verify_mode; return *this; };
+
+public:
+
+	/**
+	 *
+	 */
+	const std::string&
+	get_tls_verify_depth() const
+	{ return verify_depth; };
+
+	/**
+	 *
+	 */
+	crofsock&
+	set_tls_verify_depth(
+			const std::string& verify_depth)
+	{ this->verify_depth = verify_depth; return *this; };
+
+public:
+
+	/**
+	 *
+	 */
+	const std::string&
+	get_tls_ciphers() const
+	{ return ciphers; };
+
+	/**
+	 *
+	 */
+	crofsock&
+	set_tls_ciphers(
+			const std::string& ciphers)
+	{ this->ciphers = ciphers; return *this; };
+
+public:
+
+	friend std::ostream&
+	operator<< (std::ostream& os, crofsock const& rofsock) {
+		os << indent(0) << "<crofsock: transport-connection-established: " << rofsock.is_established() << ">" << std::endl;
+		return os;
+	};
+
+	std::string
+	str() const {
+		std::stringstream ss;
+		switch (state) {
+		case STATE_IDLE: {
+			ss << "state: -IDLE- ";
+		} break;
+		case STATE_CLOSED: {
+			ss << "state: -CLOSED- ";
+		} break;
+		case STATE_LISTENING: {
+			ss << "state: -LISTENING- ";
+		} break;
+		case STATE_TCP_ACCEPTING: {
+			ss << "state: -ACCEPTING- ";
+		} break;
+		case STATE_TLS_ACCEPTING: {
+			ss << "state: -TLS-ACCEPTING- ";
+		} break;
+		case STATE_TCP_CONNECTING: {
+			ss << "state: -CONNECTING- ";
+		} break;
+		case STATE_TLS_CONNECTING: {
+			ss << "state: -TLS-CONNECTING- ";
+		} break;
+		case STATE_TCP_ESTABLISHED: {
+			ss << "state: -ESTABLISHED- ";
+		} break;
+		case STATE_TLS_ESTABLISHED: {
+			ss << "state: -TLS-ESTABLISHED- ";
+		} break;
+		default: {
+			ss << "state: -unknown- ";
+		};
+		}
+		return ss.str();
+	};
 
 private:
 
@@ -512,118 +636,44 @@ private:
 
 private:
 
-	/**
-	 *
-	 */
 	void
 	tls_init();
 
-	/**
-	 *
-	 */
 	void
 	tls_destroy();
 
-	/**
-	 *
-	 */
 	void
 	tls_init_context();
 
-	/**
-	 *
-	 */
 	void
 	tls_destroy_context();
 
-	/**
-	 * @brief	OpenSSL password callback.
-	 */
 	static int
 	tls_pswd_cb(
 			char *buf, int size, int rwflag, void *userdata);
 
-	/**
-	 *
-	 */
 	bool
 	tls_verify_ok();
 
-	/**
-	 *
-	 */
+private:
+
 	void
 	parse_message();
 
-	/**
-	 *
-	 */
 	void
 	parse_of10_message(
 			rofl::openflow::cofmsg **pmsg);
 
-	/**
-	 *
-	 */
 	void
 	parse_of12_message(
 			rofl::openflow::cofmsg **pmsg);
 
-	/**
-	 *
-	 */
 	void
 	parse_of13_message(
 			rofl::openflow::cofmsg **pmsg);
 
-	/**
-	 *
-	 */
 	void
 	send_from_queue();
-
-public:
-
-	friend std::ostream&
-	operator<< (std::ostream& os, crofsock const& rofsock) {
-		os << indent(0) << "<crofsock: transport-connection-established: " << rofsock.is_established() << ">" << std::endl;
-		return os;
-	};
-
-	std::string
-	str() const {
-		std::stringstream ss;
-		switch (state) {
-		case STATE_CLOSED: {
-			ss << "state: -CLOSED- ";
-		} break;
-		case STATE_LISTENING: {
-			ss << "state: -LISTENING- ";
-		} break;
-		case STATE_TCP_ACCEPTING: {
-			ss << "state: -ACCEPTING- ";
-		} break;
-		case STATE_TLS_ACCEPTING: {
-			ss << "state: -TLS-ACCEPTING- ";
-		} break;
-		case STATE_TCP_CONNECTING: {
-			ss << "state: -CONNECTING- ";
-		} break;
-		case STATE_TLS_CONNECTING: {
-			ss << "state: -TLS-CONNECTING- ";
-		} break;
-		case STATE_TCP_ESTABLISHED: {
-			ss << "state: -ESTABLISHED- ";
-		} break;
-		case STATE_TLS_ESTABLISHED: {
-			ss << "state: -TLS-ESTABLISHED- ";
-		} break;
-		default: {
-			ss << "state: -unknown- ";
-		};
-		}
-		return ss.str();
-	};
 
 private:
 
@@ -772,4 +822,4 @@ private:
 
 } /* namespace rofl */
 
-#endif /* CROFENDPNT_H_ */
+#endif /* CROFSOCK_H_ */
