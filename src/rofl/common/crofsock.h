@@ -259,16 +259,14 @@ class crofsock :
 		FLAG_CONGESTED 		    = 1,
 		FLAG_RECONNECT_ON_FAILURE = 2,
 		FLAG_TLS_INITIALIZED    = 3,
+		FLAG_TLS_IN_USE         = 4,
 	};
 
 	enum socket_mode_t {
 		MODE_UNKNOWN            = 0,
-		MODE_TCP_LISTEN         = 1,
-		MODE_TCP_CLIENT         = 2,
-		MODE_TCP_SERVER         = 3,
-		MODE_TLS_LISTEN         = 4,
-		MODE_TLS_CLIENT         = 5,
-		MODE_TLS_SERVER         = 6,
+		MODE_LISTEN             = 1,
+		MODE_CLIENT             = 2,
+		MODE_SERVER             = 3,
 	};
 
 	enum socket_state_t {

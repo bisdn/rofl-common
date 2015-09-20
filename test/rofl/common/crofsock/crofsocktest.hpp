@@ -19,7 +19,8 @@ class crofsocktest :
 		public rofl::crofsock_env
 {
 	CPPUNIT_TEST_SUITE( crofsocktest );
-	CPPUNIT_TEST( test );
+	CPPUNIT_TEST( test_tls );
+	//CPPUNIT_TEST( test );
 	CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -28,6 +29,7 @@ public:
 
 public:
 	void test();
+	void test_tls();
 
 private:
 
@@ -89,6 +91,12 @@ private:
 
 private:
 
+	enum crofsock_test_mode_t {
+		TEST_MODE_TCP = 1,
+		TEST_MODE_TLS = 2,
+	};
+
+	enum crofsock_test_mode_t test_mode;
 	bool                keep_running = true;
 	int                 msg_counter;
 	int                 server_msg_counter;

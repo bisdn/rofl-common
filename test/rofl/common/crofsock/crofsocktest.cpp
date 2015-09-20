@@ -32,6 +32,7 @@ void
 crofsocktest::test()
 {
 	try {
+		test_mode = TEST_MODE_TCP;
 		keep_running = true;
 		msg_counter = 0;
 
@@ -66,6 +67,51 @@ crofsocktest::test()
 
 
 
+
+void
+crofsocktest::test_tls()
+{
+	try {
+		test_mode = TEST_MODE_TLS;
+		keep_running = true;
+		msg_counter = 0;
+
+		slisten = new rofl::crofsock(this);
+		sclient = new rofl::crofsock(this);
+
+		rofl::csockaddr baddr(rofl::caddress_in4("127.0.0.1"), 4999);
+
+		sclient->set_raddr(baddr).
+					set_tls_cafile("../../../../../tools/xca/ca.rofl-core.crt.pem").
+					set_tls_certfile("../../../../../tools/xca/client.crt.pem").
+					set_tls_keyfile("../../../../../tools/xca/client.key.pem").
+						tls_connect(true);
+
+		sleep(5);
+
+		slisten->set_baddr(baddr).listen();
+
+		while (keep_running) {
+			struct timespec ts;
+			ts.tv_sec = 0;
+			ts.tv_nsec = 1000;
+			pselect(0, NULL, NULL, NULL, &ts, NULL);
+		}
+
+		delete slisten;
+		delete sclient;
+		delete sserver;
+
+	} catch (rofl::eSysCall& e) {
+		std::cerr << "crofsocktest::test() exception, what: " << e.what() << std::endl;
+	} catch (std::runtime_error& e) {
+		std::cerr << "crofsocktest::test() exception, what: " << e.what() << std::endl;
+	}
+}
+
+
+
+
 void
 crofsocktest::handle_listen(
 		rofl::crofsock& socket, int sd)
@@ -74,7 +120,21 @@ crofsocktest::handle_listen(
 
 	sserver = new rofl::crofsock(this);
 
-	sserver->tcp_accept(sd);
+	switch (test_mode) {
+	case TEST_MODE_TCP: {
+		sserver->tcp_accept(sd);
+
+	} break;
+	case TEST_MODE_TLS: {
+		sserver->set_tls_cafile("../../../../../tools/xca/ca.rofl-core.crt.pem").
+					set_tls_certfile("../../../../../tools/xca/server.crt.pem").
+					set_tls_keyfile("../../../../../tools/xca/server.key.pem").
+						tls_accept(sd);
+	} break;
+	default: {
+
+	};
+	}
 }
 
 
@@ -83,7 +143,7 @@ void
 crofsocktest::handle_tcp_connect_refused(
 		rofl::crofsock& socket)
 {
-	std::cerr << "handle connect refused" << std::endl;
+	std::cerr << "handle tcp connect refused" << std::endl;
 }
 
 
@@ -92,7 +152,7 @@ void
 crofsocktest::handle_tcp_connect_failed(
 		rofl::crofsock& socket)
 {
-	std::cerr << "handle connect failed" << std::endl;
+	std::cerr << "handle tcp connect failed" << std::endl;
 }
 
 
@@ -103,10 +163,22 @@ crofsocktest::handle_tcp_connected(
 {
 	std::cerr << "handle connected" << std::endl;
 
-	rofl::openflow::cofmsg_hello* hello =
-			new cofmsg_hello(rofl::openflow13::OFP_VERSION, 0xa1a2a3a4);
+	switch (test_mode) {
+	case TEST_MODE_TCP: {
 
-	sclient->send_message(hello);
+		rofl::openflow::cofmsg_hello* hello =
+				new cofmsg_hello(rofl::openflow13::OFP_VERSION, 0xa1a2a3a4);
+
+		sclient->send_message(hello);
+
+	} break;
+	case TEST_MODE_TLS: {
+
+	} break;
+	default: {
+
+	};
+	}
 }
 
 
@@ -115,7 +187,7 @@ void
 crofsocktest::handle_tcp_accept_refused(
 		rofl::crofsock& socket)
 {
-
+	std::cerr << "handle tcp accept refused" << std::endl;
 }
 
 
@@ -124,7 +196,7 @@ void
 crofsocktest::handle_tcp_accept_failed(
 		rofl::crofsock& socket)
 {
-
+	std::cerr << "handle tcp accept failed" << std::endl;
 }
 
 
@@ -133,12 +205,24 @@ void
 crofsocktest::handle_tcp_accepted(
 		rofl::crofsock& socket)
 {
-	std::cerr << "handle accepted" << std::endl;
+	std::cerr << "handle tcp accepted" << std::endl;
 
-	rofl::openflow::cofmsg_features_request* features =
-			new cofmsg_features_request(rofl::openflow13::OFP_VERSION, 0xb1b2b3b4);
+	switch (test_mode) {
+	case TEST_MODE_TCP: {
 
-	sserver->send_message(features);
+		rofl::openflow::cofmsg_features_request* features =
+				new cofmsg_features_request(rofl::openflow13::OFP_VERSION, 0xb1b2b3b4);
+
+		sserver->send_message(features);
+
+	} break;
+	case TEST_MODE_TLS: {
+
+	} break;
+	default: {
+
+	};
+	}
 }
 
 
@@ -212,7 +296,7 @@ void
 crofsocktest::handle_tls_connect_failed(
 		rofl::crofsock& socket)
 {
-
+	std::cerr << "handle tls connect failed" << std::endl;
 }
 
 
@@ -221,7 +305,12 @@ void
 crofsocktest::handle_tls_connected(
 		rofl::crofsock& socket)
 {
+	std::cerr << "handle tls connected" << std::endl;
 
+	rofl::openflow::cofmsg_hello* hello =
+			new cofmsg_hello(rofl::openflow13::OFP_VERSION, 0xa1a2a3a4);
+
+	sclient->send_message(hello);
 }
 
 
@@ -230,7 +319,7 @@ void
 crofsocktest::handle_tls_accept_failed(
 		rofl::crofsock& socket)
 {
-
+	std::cerr << "handle tls accept failed" << std::endl;
 }
 
 
@@ -239,7 +328,12 @@ void
 crofsocktest::handle_tls_accepted(
 		rofl::crofsock& socket)
 {
+	std::cerr << "handle tls accepted" << std::endl;
 
+	rofl::openflow::cofmsg_features_request* features =
+			new cofmsg_features_request(rofl::openflow13::OFP_VERSION, 0xb1b2b3b4);
+
+	sserver->send_message(features);
 }
 
 

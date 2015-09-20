@@ -88,7 +88,8 @@ crofsock::close()
 	switch (state) {
 	case STATE_IDLE: {
 
-		/* TLS down, TCP down => do nothing */
+		/* TLS down, TCP down => set rx_disabled flag back to false */
+		rx_disabled = false;
 
 	} break;
 	case STATE_CLOSED: {
@@ -128,6 +129,9 @@ crofsock::close()
 	case STATE_TCP_ACCEPTING:
 	case STATE_TCP_ESTABLISHED: {
 
+		/* block reception of any further data from remote side */
+		rx_disable();
+
 		rxthread.drop_read_fd(sd);
 		if (flags.test(FLAG_CONGESTED)) {
 			txthread.drop_write_fd(sd);
@@ -142,9 +146,11 @@ crofsock::close()
  	case STATE_TLS_CONNECTING:
 	case STATE_TLS_ACCEPTING: {
 
-		SSL_free(ssl); ssl = NULL;
-		BIO_free(bio); bio = NULL;
+		if (ssl) {
+			SSL_free(ssl); ssl = NULL;
+		}
 		tls_destroy_context();
+		flags.reset(FLAG_TLS_IN_USE);
 
 		state = STATE_TCP_ESTABLISHED;
 
@@ -153,10 +159,15 @@ crofsock::close()
 	} break;
 	case STATE_TLS_ESTABLISHED: {
 
-		SSL_shutdown(ssl);
-		SSL_free(ssl); ssl = NULL;
-		BIO_free(bio); bio = NULL;
+		/* block reception of any further data from remote side */
+		rx_disable();
+
+		if (ssl) {
+			SSL_shutdown(ssl);
+			SSL_free(ssl); ssl = NULL;
+		}
 		tls_destroy_context();
+		flags.reset(FLAG_TLS_IN_USE);
 
 		state = STATE_TCP_ESTABLISHED;
 
@@ -184,7 +195,7 @@ crofsock::listen()
 	rxthread.drop_timer(TIMER_ID_RECONNECT);
 
 	/* socket in server mode */
-	mode = MODE_TCP_LISTEN;
+	mode = MODE_LISTEN;
 
 	/* reconnect does not make sense for listening sockets */
 	flags.set(FLAG_RECONNECT_ON_FAILURE, false);
@@ -268,7 +279,7 @@ crofsock::tcp_accept(
 		rxthread.drop_timer(TIMER_ID_RECONNECT);
 
 		/* socket in server mode */
-		mode = MODE_TCP_SERVER;
+		mode = MODE_SERVER;
 
 		/* reconnect is not possible for server sockets */
 		flags.set(FLAG_RECONNECT_ON_FAILURE, false);
@@ -279,12 +290,12 @@ crofsock::tcp_accept(
 		sd = sockfd;
 
 		/* make socket non-blocking, as this status is not inherited */
-		long flags = 0;
-		if ((flags = ::fcntl(sd, F_GETFL)) < 0) {
+		long sockflags = 0;
+		if ((sockflags = ::fcntl(sd, F_GETFL)) < 0) {
 			throw eSysCall("fnctl() F_GETFL");
 		}
-		flags |= O_NONBLOCK;
-		if ((::fcntl(sd, F_SETFL, flags)) < 0) {
+		sockflags |= O_NONBLOCK;
+		if ((::fcntl(sd, F_SETFL, sockflags)) < 0) {
 			throw eSysCall("fcntl() F_SETGL");
 		}
 
@@ -323,7 +334,11 @@ crofsock::tcp_accept(
 		/* instruct rxthread to read from socket descriptor */
 		rxthread.add_read_fd(sd);
 
-		crofsock_env::call_env(env).handle_tcp_accepted(*this);
+		if (flags.test(FLAG_TLS_IN_USE)) {
+			crofsock::tls_accept(sockfd);
+		} else {
+			crofsock_env::call_env(env).handle_tcp_accepted(*this);
+		}
 
 	} catch (...) {
 
@@ -347,7 +362,7 @@ crofsock::tcp_connect(
 		rxthread.drop_timer(TIMER_ID_RECONNECT);
 
 		/* we do an active connect */
-		mode = MODE_TCP_CLIENT;
+		mode = MODE_CLIENT;
 
 		/* reconnect in case of an error? */
 		flags.set(FLAG_RECONNECT_ON_FAILURE, reconnect);
@@ -433,7 +448,11 @@ crofsock::tcp_connect(
 			/* register socket descriptor for read operations */
 			rxthread.add_read_fd(sd);
 
-			crofsock_env::call_env(env).handle_tcp_connected(*this);
+			if (flags.test(FLAG_TLS_IN_USE)) {
+				crofsock::tls_connect(flags.test(FLAG_RECONNECT_ON_FAILURE));
+			} else {
+				crofsock_env::call_env(env).handle_tcp_connected(*this);
+			}
 		}
 
 	} catch(...) {
@@ -559,14 +578,13 @@ crofsock::tls_accept(
 		int sockfd)
 {
 	switch (state) {
+	case STATE_IDLE:
 	case STATE_CLOSED:
 	case STATE_TCP_ACCEPTING: {
 
-		crofsock::tcp_accept(sockfd);
+		flags.set(FLAG_TLS_IN_USE);
 
-		if (STATE_TCP_ESTABLISHED == state) {
-			crofsock::tls_accept(sockfd);
-		}
+		crofsock::tcp_accept(sockfd);
 
 	} break;
 	case STATE_TCP_ESTABLISHED: {
@@ -586,9 +604,6 @@ crofsock::tls_accept(
 		SSL_set_bio(ssl, /*rbio*/bio, /*wbio*/bio);
 
 		SSL_set_accept_state(ssl);
-
-		/* socket in server mode */
-		mode = MODE_TLS_SERVER;
 
 		state = STATE_TLS_ACCEPTING;
 
@@ -689,14 +704,13 @@ crofsock::tls_connect(
 		bool reconnect)
 {
 	switch (state) {
+	case STATE_IDLE:
 	case STATE_CLOSED:
 	case STATE_TCP_CONNECTING: {
 
-		crofsock::tcp_connect(reconnect);
+		flags.set(FLAG_TLS_IN_USE);
 
-		if (STATE_TCP_ESTABLISHED == state) {
-			crofsock::tls_connect(reconnect);
-		}
+		crofsock::tcp_connect(reconnect);
 
 	} break;
 	case STATE_TCP_ESTABLISHED: {
@@ -717,8 +731,7 @@ crofsock::tls_connect(
 
 		SSL_set_connect_state(ssl);
 
-		/* socket in server mode */
-		mode = MODE_TLS_CLIENT;
+		state = STATE_TLS_CONNECTING;
 
 		crofsock::tls_connect(reconnect);
 
@@ -794,6 +807,8 @@ crofsock::tls_connect(
 			}
 
 			std::cerr << "[rofl][crofsock][tls_connect] SSL_connect() succeeded " << std::endl;
+
+			state = STATE_TLS_ESTABLISHED;
 
 			crofsock_env::call_env(env).handle_tls_connected(*this);
 		}
@@ -1036,16 +1051,10 @@ crofsock::handle_timeout(
 {
 	switch (timer_id) {
 	case TIMER_ID_RECONNECT: {
-		switch (mode) {
-		case MODE_TCP_CLIENT: {
-			tcp_connect(true);
-		} break;
-		case MODE_TLS_CLIENT: {
+		if (flags.test(FLAG_TLS_IN_USE)) {
 			tls_connect(true);
-		} break;
-		default: {
-			/* do nothing */
-		};
+		} else {
+			tcp_connect(true);
 		}
 	} break;
 	default: {
@@ -1061,7 +1070,8 @@ crofsock::send_message(
 		rofl::openflow::cofmsg *msg)
 {
 	switch (state) {
-	case STATE_TCP_ESTABLISHED: {
+	case STATE_TCP_ESTABLISHED:
+	case STATE_TLS_ESTABLISHED: {
 
 		switch (msg->get_version()) {
 		case rofl::openflow10::OFP_VERSION: {
@@ -1319,10 +1329,10 @@ crofsock::handle_read_event_rxthread(
 				/* register socket descriptor for read operations */
 				rxthread.add_read_fd(sd);
 
-				crofsock_env::call_env(env).handle_tcp_connected(*this);
-
-				if (MODE_TLS_CLIENT == mode) {
+				if (flags.test(FLAG_TLS_IN_USE)) {
 					crofsock::tls_connect(flags.test(FLAG_RECONNECT_ON_FAILURE));
+				} else {
+					crofsock_env::call_env(env).handle_tcp_connected(*this);
 				}
 			} break;
 			case EINPROGRESS: {
@@ -1351,7 +1361,15 @@ crofsock::handle_read_event_rxthread(
 		} break;
 		case STATE_TCP_ACCEPTING: {
 
+		} break;
+		case STATE_TLS_CONNECTING: {
 
+			tls_connect(flags.test(FLAG_RECONNECT_ON_FAILURE));
+
+		} break;
+		case STATE_TLS_ACCEPTING: {
+
+			tls_accept(fd);
 
 		} break;
 		case STATE_TCP_ESTABLISHED:
@@ -1359,7 +1377,7 @@ crofsock::handle_read_event_rxthread(
 
 			while (true) {
 
-				if (state < STATE_TCP_ESTABLISHED) {
+				if (state < STATE_TLS_ESTABLISHED) {
 					return;
 				}
 
@@ -1428,6 +1446,11 @@ crofsock::handle_read_event_rxthread(
 			/* do nothing */
 		};
 		}
+
+
+	} catch (std::runtime_error& e) {
+
+		std::cerr << "crofsock::handle_read_event_rxthread() exception caught, what: " << e.what() << std::endl;
 
 	} catch (...) {
 
