@@ -402,7 +402,7 @@ private:
 	 *
 	 */
 	virtual void
-	handle_connect_refused(crofsock& rofsock) {
+	handle_tcp_connect_refused(crofsock& rofsock) {
 		delete &rofsock;
 	};
 
@@ -410,7 +410,7 @@ private:
 	 *
 	 */
 	virtual void
-	handle_connect_failed(crofsock& rofsock) {
+	handle_tcp_connect_failed(crofsock& rofsock) {
 		delete &rofsock;
 	};
 
@@ -418,7 +418,7 @@ private:
 	 *
 	 */
 	virtual void
-	handle_connected(crofsock& rofsock) {
+	handle_tcp_connected(crofsock& rofsock) {
 		std::cerr << "RADDR:" << rofsock.get_socket().get_raddr();
 		switch (rofsock.get_socket().get_domain()) {
 		case AF_INET: {
@@ -445,6 +445,30 @@ private:
 			delete &rofsock;
 		};
 		}
+	};
+
+	virtual void
+	handle_tls_connect_failed(
+			crofsock& socket) {
+
+	};
+
+	virtual void
+	handle_tls_connected(
+			crofsock& socket) {
+
+	};
+
+	virtual void
+	handle_tls_accept_failed(
+			crofsock& socket) {
+
+	};
+
+	virtual void
+	handle_tls_accepted(
+			crofsock& socket) {
+
 	};
 
 	virtual void

@@ -16,6 +16,10 @@ using namespace rofl;
 crofsock::~crofsock()
 {
 	close();
+
+	/* stop rx and tx threads */
+	rxthread.stop();
+	txthread.stop();
 }
 
 
@@ -23,18 +27,22 @@ crofsock::~crofsock()
 crofsock::crofsock(
 		crofsock_env* env) :
 				env(env),
-				state(STATE_UNKNOWN),
+				state(STATE_IDLE),
 				mode(MODE_UNKNOWN),
 				rxthread(this),
 				txthread(this),
-				ts_rec_sec(0),
-				ts_rec_nsec(200000/*200ms*/),
+				reconnect_backoff_max(60/*secs*/),
+				reconnect_backoff_start(1/*secs*/),
+				reconnect_backoff_current(1/*secs*/),
 				reconnect_counter(0),
 				sd(-1),
 				domain(AF_INET),
 				type(SOCK_STREAM),
 				protocol(IPPROTO_TCP),
 				backlog(10),
+				ctx(NULL),
+				ssl(NULL),
+				bio(NULL),
 				rx_fragment_pending(false),
 				rxbuffer((size_t)65536),
 				msg_bytes_read(0),
@@ -53,34 +61,10 @@ crofsock::crofsock(
 	txweights[QUEUE_MGMT] = 32;
 	txweights[QUEUE_FLOW] = 16;
 	txweights[QUEUE_PKT ] =  8;
-}
 
-
-
-void
-crofsock::shutdown()
-{
-	switch (state) {
-	case STATE_CLOSED:
-	case STATE_UNKNOWN: {
-
-	} break;
-	default: {
-		state = STATE_CLOSED;
-		txthread.drop_timer(TIMER_ID_RECONNECT);
-
-		if (STATE_ESTABLISHED == state) {
-			rxthread.drop_read_fd(sd);
-			if (flags.test(FLAGS_CONGESTED)) {
-				txthread.drop_write_fd(sd);
-			}
-		}
-		if (STATE_CONNECTING == state) {
-			rxthread.drop_write_fd(sd);
-		}
-		::close(sd); sd = -1;
-	};
-	}
+	/* start thread */
+	rxthread.start();
+	txthread.start();
 }
 
 
@@ -89,23 +73,85 @@ void
 crofsock::close()
 {
 	switch (state) {
-	case STATE_CLOSED:
-	case STATE_UNKNOWN: {
-		std::cerr << "RRRRRRRRRR [1]" << std::endl;
+	case STATE_IDLE: {
+
+		/* TLS down, TCP down, threads stopped => do nothing */
+
 	} break;
-	default: {
-		std::cerr << "RRRRRRRRRR [2.1]" << std::endl;
+	case STATE_CLOSED: {
 
-		shutdown();
-
-		rxthread.stop();
-		txthread.stop();
-
+		/* remove all pending messages from tx queues */
 		for (auto queue : txqueues) {
 			queue.clear();
 		}
 
-		std::cerr << "RRRRRRRRRR [2.2]" << std::endl;
+		state = STATE_IDLE;
+
+		crofsock::close();
+
+	} break;
+	case STATE_LISTENING: {
+
+		rxthread.drop_read_fd(sd);
+		::close(sd); sd = -1;
+
+		state = STATE_CLOSED;
+
+		crofsock::close();
+
+	} break;
+	case STATE_TCP_CONNECTING: {
+
+		txthread.drop_timer(TIMER_ID_RECONNECT);
+
+		rxthread.drop_write_fd(sd);
+		::close(sd); sd = -1;
+
+		state = STATE_CLOSED;
+
+		crofsock::close();
+
+	} break;
+	case STATE_TCP_ACCEPTING:
+	case STATE_TCP_ESTABLISHED: {
+
+		rxthread.drop_read_fd(sd);
+		if (flags.test(FLAGS_CONGESTED)) {
+			txthread.drop_write_fd(sd);
+		}
+		::close(sd); sd = -1;
+
+		state = STATE_CLOSED;
+
+		crofsock::close();
+
+	} break;
+ 	case STATE_TLS_CONNECTING:
+	case STATE_TLS_ACCEPTING: {
+
+		SSL_free(ssl); ssl = NULL;
+		BIO_free(bio); bio = NULL;
+		tls_destroy_context();
+
+		state = STATE_TCP_ESTABLISHED;
+
+		crofsock::close();
+
+	} break;
+	case STATE_TLS_ESTABLISHED: {
+
+		SSL_shutdown(ssl);
+		SSL_free(ssl); ssl = NULL;
+		BIO_free(bio); bio = NULL;
+		tls_destroy_context();
+
+		state = STATE_TCP_ESTABLISHED;
+
+		crofsock::close();
+
+	} break;
+	default: {
+
 	};
 	}
 }
@@ -120,10 +166,6 @@ crofsock::listen()
 	if (sd >= 0) {
 		close();
 	}
-
-	/* start thread */
-	rxthread.start();
-	txthread.start();
 
 	/* cancel potentially pending reconnect timer */
 	rxthread.drop_timer(TIMER_ID_RECONNECT);
@@ -201,17 +243,13 @@ crofsock::listen()
 
 
 void
-crofsock::accept(
+crofsock::tcp_accept(
 		int sockfd)
 {
 	try {
 		if (sd >= 0) {
 			close();
 		}
-
-		/* start thread */
-		rxthread.start();
-		txthread.start();
 
 		/* cancel potentially pending reconnect timer */
 		rxthread.drop_timer(TIMER_ID_RECONNECT);
@@ -223,7 +261,7 @@ crofsock::accept(
 		flags.set(FLAG_RECONNECT_ON_FAILURE, false);
 
 		/* new state */
-		state = STATE_ACCEPTING;
+		state = STATE_TCP_ACCEPTING;
 
 		sd = sockfd;
 
@@ -267,12 +305,12 @@ crofsock::accept(
 		}
 #endif
 
-		state = STATE_ESTABLISHED;
+		state = STATE_TCP_ESTABLISHED;
 
 		/* instruct rxthread to read from socket descriptor */
 		rxthread.add_read_fd(sd);
 
-		crofsock_env::call_env(env).handle_accepted(*this);
+		crofsock_env::call_env(env).handle_tcp_accepted(*this);
 
 	} catch (...) {
 
@@ -282,7 +320,7 @@ crofsock::accept(
 
 
 void
-crofsock::connect(
+crofsock::tcp_connect(
 		bool reconnect)
 {
 	try {
@@ -291,10 +329,6 @@ crofsock::connect(
 		if (sd > 0) {
 			close();
 		}
-
-		/* start thread */
-		rxthread.start();
-		txthread.start();
 
 		/* cancel potentially pending reconnect timer */
 		rxthread.drop_timer(TIMER_ID_RECONNECT);
@@ -306,7 +340,7 @@ crofsock::connect(
 		flags.set(FLAG_RECONNECT_ON_FAILURE, reconnect);
 
 		/* new state */
-		state = STATE_CONNECTING;
+		state = STATE_TCP_CONNECTING;
 
 		/* open socket */
 		if ((sd = ::socket(raddr.get_family(), type, protocol)) < 0) {
@@ -352,18 +386,22 @@ crofsock::connect(
 				rxthread.add_write_fd(sd);
 			} break;
 			case ECONNREFUSED: {
-				shutdown();
 				if (flags.test(FLAG_RECONNECT_ON_FAILURE)) {
 					backoff_reconnect(false);
+					::close(sd); sd = -1;
+				} else {
+					close();
 				}
-				crofsock_env::call_env(env).handle_connect_refused(*this);
+				crofsock_env::call_env(env).handle_tcp_connect_refused(*this);
 			} break;
 			default: {
-				shutdown();
 				if (flags.test(FLAG_RECONNECT_ON_FAILURE)) {
 					backoff_reconnect(false);
+					::close(sd); sd = -1;
+				} else {
+					close();
 				}
-				crofsock_env::call_env(env).handle_connect_failed(*this);
+				crofsock_env::call_env(env).handle_tcp_connect_failed(*this);
 			};
 			}
 		} else {
@@ -377,17 +415,532 @@ crofsock::connect(
 				throw eSysCall("getpeername()");
 			}
 
-			state = STATE_ESTABLISHED;
+			state = STATE_TCP_ESTABLISHED;
 
 			/* register socket descriptor for read operations */
 			rxthread.add_read_fd(sd);
 
-			crofsock_env::call_env(env).handle_connected(*this);
+			crofsock_env::call_env(env).handle_tcp_connected(*this);
 		}
 
 	} catch(...) {
 
 	}
+}
+
+
+
+void
+crofsock::tls_init()
+{
+	if (flags.test(FLAG_TLS_INITIALIZED))
+		return;
+
+	SSL_library_init();
+	SSL_load_error_strings();
+	ERR_load_ERR_strings();
+	ERR_load_BIO_strings();
+	OpenSSL_add_all_algorithms();
+	OpenSSL_add_all_ciphers();
+	OpenSSL_add_all_digests();
+	BIO_new_fp(stderr, BIO_NOCLOSE);
+
+	flags.set(FLAG_TLS_INITIALIZED);
+}
+
+
+
+void
+crofsock::tls_destroy()
+{
+
+}
+
+
+
+void
+crofsock::tls_init_context()
+{
+	tls_init();
+
+	if (ctx) {
+		tls_destroy_context();
+	}
+
+	ctx = SSL_CTX_new(TLSv1_2_method());
+
+	// certificate
+	if (!SSL_CTX_use_certificate_file(ctx, certfile.c_str(), SSL_FILETYPE_PEM)) {
+		throw eSysCall("[rofl][crofsock][tls_init_context] unable to read certfile: " + certfile);
+	}
+
+	// private key
+	SSL_CTX_set_default_passwd_cb(ctx, &crofsock::tls_pswd_cb);
+	SSL_CTX_set_default_passwd_cb_userdata(ctx, (void*)this);
+
+	if (!SSL_CTX_use_PrivateKey_file(ctx, keyfile.c_str(), SSL_FILETYPE_PEM)) {
+		throw eSysCall("[rofl][crofsock][tls_init_context] unable to read keyfile: " + keyfile);
+	}
+
+	// ciphers
+	if ((not ciphers.empty()) && (0 == SSL_CTX_set_cipher_list(ctx, ciphers.c_str()))) {
+		throw eSysCall("[rofl][crofsock][tls_init_context] unable to set ciphers: " + ciphers);
+	}
+
+	// capath/cafile
+	if (!SSL_CTX_load_verify_locations(ctx,
+			cafile.empty() ? NULL : cafile.c_str(),
+			capath.empty() ? NULL : capath.c_str())) {
+		throw eSysCall("[rofl][crofsock][tls_init_context] unable to load ca locations");
+	}
+
+	int mode = SSL_VERIFY_NONE;
+	if (verify_mode == "NONE") {
+		mode = SSL_VERIFY_NONE;
+	} else
+	if (verify_mode == "PEER") {
+		mode = SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT;
+	}
+
+	SSL_CTX_set_verify(ctx, mode, NULL); // TODO: verify callback
+
+	int depth; std::istringstream( verify_depth ) >> depth;
+
+	SSL_CTX_set_verify_depth(ctx, depth);
+
+	// TODO: get random numbers
+}
+
+
+
+void
+crofsock::tls_destroy_context()
+{
+	if (ctx) {
+		SSL_CTX_free(ctx); ctx = NULL;
+	}
+}
+
+
+
+int
+crofsock::tls_pswd_cb(
+		char *buf, int size, int rwflag, void *userdata)
+{
+	if (userdata == NULL)
+		return 0;
+
+	crofsock& socket = *(static_cast<crofsock*>(userdata));
+
+	if (socket.get_tls_pswd().empty()) {
+		return 0;
+	}
+
+	strncpy(buf, socket.get_tls_pswd().c_str(), size);
+
+	return strnlen(buf, size);
+}
+
+
+
+void
+crofsock::tls_accept(
+		int sockfd)
+{
+	switch (state) {
+	case STATE_CLOSED:
+	case STATE_TCP_ACCEPTING: {
+
+		crofsock::tcp_accept(sockfd);
+
+		if (STATE_TCP_ESTABLISHED == state) {
+			crofsock::tls_accept(sockfd);
+		}
+
+	} break;
+	case STATE_TCP_ESTABLISHED: {
+
+		tls_init_context();
+
+		if ((ssl = SSL_new(ctx)) == NULL) {
+			throw eSysCall("[rofl][crofsock][tls_accept] unable to create new SSL object");
+		}
+
+		if ((bio = BIO_new(BIO_s_socket())) == NULL) {
+			throw eSysCall("[rofl][crofsock][tls_accept] unable to create new BIO object");
+		}
+
+		BIO_set_fd(bio, sd, BIO_NOCLOSE);
+
+		SSL_set_bio(ssl, /*rbio*/bio, /*wbio*/bio);
+
+		SSL_set_accept_state(ssl);
+
+		/* socket in server mode */
+		mode = MODE_TLS_SERVER;
+
+		state = STATE_TLS_ACCEPTING;
+
+	} break;
+	case STATE_TLS_ACCEPTING: {
+
+		int rc = 0, err_code = 0;
+
+		std::cerr << "[rofl][crofsock][tls_accept] SSL accepting..." << std::endl;
+
+		if ((rc = SSL_accept(ssl)) <= 0) {
+			switch (err_code = SSL_get_error(ssl, rc)) {
+			case SSL_ERROR_WANT_READ: {
+				std::cerr << "[rofl][crofsock][tls_accept] accepting => SSL_ERROR_WANT_READ" << std::endl;
+			} return;
+			case SSL_ERROR_WANT_WRITE: {
+				std::cerr << "[rofl][crofsock][tls_accept] accepting => SSL_ERROR_WANT_WRITE" << std::endl;
+			} return;
+			case SSL_ERROR_WANT_ACCEPT: {
+				std::cerr << "[rofl][crofsock][tls_accept] accepting => SSL_ERROR_WANT_ACCEPT" << std::endl;
+			} return;
+			case SSL_ERROR_WANT_CONNECT: {
+				std::cerr << "[rofl][crofsock][tls_accept] accepting => SSL_ERROR_WANT_CONNECT" << std::endl;
+			} return;
+
+
+			case SSL_ERROR_NONE: {
+				std::cerr << "[rofl][crofsock][tls_accept] SSL_accept() failed SSL_ERROR_NONE" << std::endl;
+			} break;
+			case SSL_ERROR_SSL: {
+				std::cerr << "[rofl][crofsock][tls_accept] SSL_accept() failed SSL_ERROR_SSL" << std::endl;
+			} break;
+			case SSL_ERROR_SYSCALL: {
+				std::cerr << "[rofl][crofsock][tls_accept] SSL_accept() failed SSL_ERROR_SYSCALL" << std::endl;
+			} break;
+			case SSL_ERROR_ZERO_RETURN: {
+				std::cerr << "[rofl][crofsock][tls_accept] SSL_accept() failed SSL_ERROR_ZERO_RETURN" << std::endl;
+			} break;
+			default: {
+				std::cerr << "[rofl][crofsock][tls_accept] SSL_accept() failed " << std::endl;
+			};
+			}
+
+			std::cerr << "[rofl][crofsock][tls_accept] SSL_accept() failed " << std::endl;
+
+			ERR_print_errors_fp(stderr);
+
+			SSL_free(ssl); ssl = NULL; bio = NULL;
+
+			tls_destroy_context();
+
+			crofsock::close();
+
+			crofsock_env::call_env(env).handle_tls_accept_failed(*this);
+
+		} else
+		if (rc == 1) {
+
+			if (not tls_verify_ok()) {
+				std::cerr << "[rofl][crofsock][tls_accept] SSL_accept() peer verification failed " << std::endl;
+
+				ERR_print_errors_fp(stderr);
+
+				SSL_free(ssl); ssl = NULL; bio = NULL;
+
+				tls_destroy_context();
+
+				crofsock::close();
+
+				crofsock_env::call_env(env).handle_tls_accept_failed(*this);
+
+				return;
+			}
+
+			std::cerr << "[rofl][crofsock][tls_accept] SSL_accept() succeeded " << std::endl;
+
+			state = STATE_TLS_ESTABLISHED;
+
+			crofsock_env::call_env(env).handle_tls_accepted(*this);
+		}
+
+	} break;
+	case STATE_TLS_ESTABLISHED: {
+
+		/* do nothing */
+
+	} break;
+	default: {
+		throw eRofSockError("[rofl][crofsock][tls_accept] called in invalid state");
+	};
+	}
+}
+
+
+
+void
+crofsock::tls_connect(
+		bool reconnect)
+{
+	switch (state) {
+	case STATE_CLOSED:
+	case STATE_TCP_CONNECTING: {
+
+		crofsock::tcp_connect(reconnect);
+
+		if (STATE_TCP_ESTABLISHED == state) {
+			crofsock::tls_connect(reconnect);
+		}
+
+	} break;
+	case STATE_TCP_ESTABLISHED: {
+
+		tls_init_context();
+
+		if ((ssl = SSL_new(ctx)) == NULL) {
+			throw eSysCall("[rofl][crofsock][tls_connect] unable to create new SSL object");
+		}
+
+		if ((bio = BIO_new(BIO_s_socket())) == NULL) {
+			throw eSysCall("[rofl][crofsock][tls_connect] unable to create new BIO object");
+		}
+
+		BIO_set_fd(bio, sd, BIO_NOCLOSE);
+
+		SSL_set_bio(ssl, /*rbio*/bio, /*wbio*/bio);
+
+		SSL_set_connect_state(ssl);
+
+		/* socket in server mode */
+		mode = MODE_TLS_CLIENT;
+
+		crofsock::tls_connect(reconnect);
+
+	} break;
+	case STATE_TLS_CONNECTING: {
+
+		int rc = 0, err_code = 0;
+
+		std::cerr << "[rofl][crofsock][tls_connect] SSL connecting..." << std::endl;
+
+		if ((rc = SSL_connect(ssl)) <= 0) {
+			switch (err_code = SSL_get_error(ssl, rc)) {
+			case SSL_ERROR_WANT_READ: {
+				std::cerr << "[rofl][crofsock][tls_connect] connecting => SSL_ERROR_WANT_READ" << std::endl;
+			} return;
+			case SSL_ERROR_WANT_WRITE: {
+				std::cerr << "[rofl][crofsock][tls_connect] connecting => SSL_ERROR_WANT_WRITE" << std::endl;
+			} return;
+			case SSL_ERROR_WANT_ACCEPT: {
+				std::cerr << "[rofl][crofsock][tls_connect] connecting => SSL_ERROR_WANT_ACCEPT" << std::endl;
+			} return;
+			case SSL_ERROR_WANT_CONNECT: {
+				std::cerr << "[rofl][crofsock][tls_connect] connecting => SSL_ERROR_WANT_CONNECT" << std::endl;
+			} return;
+
+
+			case SSL_ERROR_NONE: {
+				std::cerr << "[rofl][crofsock][tls_connect] SSL_connect() failed SSL_ERROR_NONE" << std::endl;
+			} break;
+			case SSL_ERROR_SSL: {
+				std::cerr << "[rofl][crofsock][tls_connect] SSL_connect() failed SSL_ERROR_SSL" << std::endl;
+			} break;
+			case SSL_ERROR_SYSCALL: {
+				std::cerr << "[rofl][crofsock][tls_connect] SSL_connect() failed SSL_ERROR_SYSCALL" << std::endl;
+			} break;
+			case SSL_ERROR_ZERO_RETURN: {
+				std::cerr << "[rofl][crofsock][tls_connect] SSL_connect() failed SSL_ERROR_ZERO_RETURN" << std::endl;
+			} break;
+			default: {
+				std::cerr << "[rofl][crofsock][tls_connect] SSL_connect() failed " << std::endl;
+			};
+			}
+
+			std::cerr << "[rofl][crofsock][tls_connect] SSL_connect() failed " << std::endl;
+
+			ERR_print_errors_fp(stderr);
+
+			SSL_free(ssl); ssl = NULL; bio = NULL;
+
+			tls_destroy_context();
+
+			crofsock::close();
+
+			crofsock_env::call_env(env).handle_tls_connect_failed(*this);
+
+		} else
+		if (rc == 1) {
+
+			if (not tls_verify_ok()) {
+				std::cerr << "[rofl][crofsock][tls_connect] SSL_connect() peer verification failed " << std::endl;
+
+				ERR_print_errors_fp(stderr);
+
+				SSL_free(ssl); ssl = NULL; bio = NULL;
+
+				tls_destroy_context();
+
+				crofsock::close();
+
+				crofsock_env::call_env(env).handle_tls_connect_failed(*this);
+
+				return;
+			}
+
+			std::cerr << "[rofl][crofsock][tls_connect] SSL_connect() succeeded " << std::endl;
+
+			crofsock_env::call_env(env).handle_tls_connected(*this);
+		}
+
+	} break;
+	default: {
+		throw eRofSockError("[rofl][crofsock][tls_connect] called in invalid state");
+	};
+	}
+}
+
+
+
+bool
+crofsock::tls_verify_ok()
+{
+	/* strategy:
+	 * - always check peer certificate in client mode
+	 * - check peer certificate in server mode when explicitly enabled (mode == SSL_VERIFY_PEER)
+	 */
+	if ((verify_mode == "PEER") || (STATE_TLS_CONNECTING == state)) {
+
+		/*
+		 * there must be a certificate presented by the peer in mode SSL_VERIFY_PEER
+		 */
+		X509* cert = (X509*)NULL;
+		if ((cert = SSL_get_peer_certificate(ssl)) == NULL) {
+
+			std::cerr << "[rofl][crofsock][tls_verify_ok] peer verification failed " << std::endl;
+
+			ERR_print_errors_fp(stderr);
+
+			SSL_free(ssl); ssl = NULL; bio = NULL;
+
+			tls_destroy_context();
+
+			crofsock::close();
+
+			crofsock_env::call_env(env).handle_tcp_accept_refused(*this);
+
+			return false;
+		}
+		/*
+		 * check verification result
+		 */
+		long result = 0;
+		if ((result = SSL_get_verify_result(ssl)) != X509_V_OK) {
+
+			switch (result) {
+			case X509_V_OK: {
+				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: ok" << std::endl;
+			} break;
+			case X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT: {
+				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: unable to get issuer certificate" << std::endl;
+			} break;
+			case X509_V_ERR_UNABLE_TO_GET_CRL: {
+				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: unable to get certificate CRL" << std::endl;
+			} break;
+			case X509_V_ERR_UNABLE_TO_DECRYPT_CERT_SIGNATURE: {
+				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: unable to decrypt certificate's signature" << std::endl;
+			} break;
+			case X509_V_ERR_UNABLE_TO_DECRYPT_CRL_SIGNATURE: {
+				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: unable to decrypt CRL's signature" << std::endl;
+			} break;
+			case X509_V_ERR_UNABLE_TO_DECODE_ISSUER_PUBLIC_KEY: {
+				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: unable to decode issuer public key" << std::endl;
+			} break;
+			case X509_V_ERR_CERT_SIGNATURE_FAILURE: {
+				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: certificate signature failure" << std::endl;
+			} break;
+			case X509_V_ERR_CRL_SIGNATURE_FAILURE: {
+				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: CRL signature failure" << std::endl;
+			} break;
+			case X509_V_ERR_CERT_NOT_YET_VALID: {
+				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: certificate is not yet valid" << std::endl;
+			} break;
+			case X509_V_ERR_CERT_HAS_EXPIRED: {
+				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: certificate has expired" << std::endl;
+			} break;
+			case X509_V_ERR_CRL_NOT_YET_VALID: {
+				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: CRL is not yet valid" << std::endl;
+			} break;
+			case X509_V_ERR_CRL_HAS_EXPIRED: {
+				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: CRL has expired" << std::endl;
+			} break;
+			case X509_V_ERR_ERROR_IN_CERT_NOT_BEFORE_FIELD: {
+				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: format error in certificate's notBefore field" << std::endl;
+			} break;
+			case X509_V_ERR_ERROR_IN_CERT_NOT_AFTER_FIELD: {
+				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: format error in certificate's notAfter field" << std::endl;
+			} break;
+			case X509_V_ERR_ERROR_IN_CRL_LAST_UPDATE_FIELD: {
+				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: format error in CRL's lastUpdate field" << std::endl;
+			} break;
+			case X509_V_ERR_ERROR_IN_CRL_NEXT_UPDATE_FIELD: {
+				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: format error in CRL's nextUpdate field" << std::endl;
+			} break;
+			case X509_V_ERR_OUT_OF_MEM: {
+				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: out of memory" << std::endl;
+			} break;
+			case X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT: {
+				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: self signed certificate" << std::endl;
+			} break;
+			case X509_V_ERR_SELF_SIGNED_CERT_IN_CHAIN: {
+				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: self signed certificate in certificate chain" << std::endl;
+			} break;
+			case X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT_LOCALLY: {
+				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: unable to get local issuer certificate" << std::endl;
+			} break;
+			case X509_V_ERR_UNABLE_TO_VERIFY_LEAF_SIGNATURE: {
+				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: unable to verify the first certificate" << std::endl;
+			} break;
+			case X509_V_ERR_CERT_CHAIN_TOO_LONG: {
+				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: certificate chain too long" << std::endl;
+			} break;
+			case X509_V_ERR_CERT_REVOKED: {
+				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: certificate revoked" << std::endl;
+			} break;
+			case X509_V_ERR_INVALID_CA: {
+				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: invalid CA certificate" << std::endl;
+			} break;
+			case X509_V_ERR_PATH_LENGTH_EXCEEDED: {
+				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: path length constraint exceeded" << std::endl;
+			} break;
+			case X509_V_ERR_INVALID_PURPOSE: {
+				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: unsupported certificate purpose" << std::endl;
+			} break;
+			case X509_V_ERR_CERT_UNTRUSTED: {
+				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: certificate not trusted" << std::endl;
+			} break;
+			case X509_V_ERR_CERT_REJECTED: {
+				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: certificate rejected" << std::endl;
+			} break;
+			case X509_V_ERR_SUBJECT_ISSUER_MISMATCH: {
+				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: subject issuer mismatch" << std::endl;
+			} break;
+			case X509_V_ERR_AKID_SKID_MISMATCH: {
+				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: authority and subject key identifier mismatch" << std::endl;
+			} break;
+			case X509_V_ERR_AKID_ISSUER_SERIAL_MISMATCH: {
+				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: authority and issuer serial number mismatch" << std::endl;
+			} break;
+			case X509_V_ERR_KEYUSAGE_NO_CERTSIGN: {
+				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: key usage does not include certificate signing" << std::endl;
+			} break;
+			case X509_V_ERR_APPLICATION_VERIFICATION: {
+				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: application verification failure" << std::endl;
+			} break;
+			default: {
+				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: unknown error" << std::endl;
+			};
+			}
+
+			return false;
+		}
+	}
+
+	return true;
 }
 
 
@@ -402,23 +955,50 @@ crofsock::backoff_reconnect(
 
 	if (reset_timeout) {
 
-		reconnect_variance.expire_in(crandom::draw_random_number(), crandom::draw_random_number());
+		reconnect_backoff_current = reconnect_backoff_start;
 		reconnect_counter = 0;
 
 	} else {
-		reconnect_timespec += reconnect_timespec;
 
-		if (reconnect_timespec > max_backoff) {
-			reconnect_timespec = max_backoff;
+		if (reconnect_backoff_current >= reconnect_backoff_max) {
+			reconnect_backoff_current = reconnect_backoff_max;
+		} else {
+			reconnect_backoff_current *= 2;
 		}
 	}
 
-	std::cerr << "[rofl-common][crofconn][backoff] "
-			<< " scheduled reconnect in: " << reconnect_timespec << std::endl;
+	std::cerr << "[rofl-common][crofsock][backoff] "
+			<< " scheduled reconnect in: " << reconnect_backoff_current << "secs" << std::endl;
 
-	rxthread.add_timer(TIMER_ID_RECONNECT, reconnect_timespec);
+	rxthread.add_timer(TIMER_ID_RECONNECT, ctimespec().expire_in(reconnect_backoff_current, 0));
 
 	++reconnect_counter;
+}
+
+
+
+void
+crofsock::handle_timeout(
+		cthread& thread, uint32_t timer_id, const std::list<unsigned int>& ttypes)
+{
+	switch (timer_id) {
+	case TIMER_ID_RECONNECT: {
+		switch (mode) {
+		case MODE_TCP_CLIENT: {
+			tcp_connect(true);
+		} break;
+		case MODE_TLS_CLIENT: {
+			tls_connect(true);
+		} break;
+		default: {
+			/* do nothing */
+		};
+		}
+	} break;
+	default: {
+		/* do nothing */
+	};
+	}
 }
 
 
@@ -428,7 +1008,7 @@ crofsock::send_message(
 		rofl::openflow::cofmsg *msg)
 {
 	switch (state) {
-	case STATE_ESTABLISHED: {
+	case STATE_TCP_ESTABLISHED: {
 
 		switch (msg->get_version()) {
 		case rofl::openflow10::OFP_VERSION: {
@@ -543,7 +1123,7 @@ crofsock::handle_write_event(
 void
 crofsock::send_from_queue()
 {
-	if (state < STATE_ESTABLISHED)
+	if (state < STATE_TCP_ESTABLISHED)
 		return;
 
 	bool reschedule = false;
@@ -555,7 +1135,7 @@ crofsock::send_from_queue()
 
 			for (unsigned int num = 0; num < txweights[queue_id]; ++num) {
 
-				if (state < STATE_ESTABLISHED) {
+				if (state < STATE_TCP_ESTABLISHED) {
 					tx_is_running= false;
 					return;
 				}
@@ -658,7 +1238,7 @@ crofsock::handle_read_event_rxthread(
 
 			crofsock_env::call_env(env).handle_listen(*this, new_sd);
 		} break;
-		case STATE_CONNECTING: {
+		case STATE_TCP_CONNECTING: {
 
 			int rc;
 			int optval = 0;
@@ -681,43 +1261,48 @@ crofsock::handle_read_event_rxthread(
 					throw eSysCall("getpeername()");
 				}
 
-				state = STATE_ESTABLISHED;
+				state = STATE_TCP_ESTABLISHED;
 
 				/* register socket descriptor for read operations */
 				rxthread.add_read_fd(sd);
 
-				crofsock_env::call_env(env).handle_connected(*this);
+				crofsock_env::call_env(env).handle_tcp_connected(*this);
 			} break;
 			case EINPROGRESS: {
 				/* connect still pending, just wait */
 			} break;
 			case ECONNREFUSED: {
-				shutdown();
 				if (flags.test(FLAG_RECONNECT_ON_FAILURE)) {
 					backoff_reconnect(false);
+					::close(sd); sd = -1;
+				} else {
+					close();
 				}
-				crofsock_env::call_env(env).handle_connect_refused(*this);
+				crofsock_env::call_env(env).handle_tcp_connect_refused(*this);
 			} break;
 			default: {
-				shutdown();
 				if (flags.test(FLAG_RECONNECT_ON_FAILURE)) {
 					backoff_reconnect(false);
+					::close(sd); sd = -1;
+				} else {
+					close();
 				}
-				crofsock_env::call_env(env).handle_connect_failed(*this);
+				crofsock_env::call_env(env).handle_tcp_connect_failed(*this);
 			};
 			}
 
 		} break;
-		case STATE_ACCEPTING: {
+		case STATE_TCP_ACCEPTING: {
 
 
 
 		} break;
-		case STATE_ESTABLISHED: {
+		case STATE_TCP_ESTABLISHED:
+		case STATE_TLS_ESTABLISHED: {
 
 			while (true) {
 
-				if (state < STATE_ESTABLISHED) {
+				if (state < STATE_TCP_ESTABLISHED) {
 					return;
 				}
 
@@ -737,7 +1322,7 @@ crofsock::handle_read_event_rxthread(
 
 				/* sanity check: 8 <= msg_len <= 2^16 */
 				if (msg_len < sizeof(struct openflow::ofp_header)) {
-					shutdown(); /* enforce reconnect, just in case */
+					close(); /* enforce reconnect, just in case */
 					return;
 				}
 
@@ -752,13 +1337,13 @@ crofsock::handle_read_event_rxthread(
 					} break;
 					default: {
 						/* oops, error */
-						shutdown();
+						close();
 						return;
 					};
 					}
 				} else
 				if (rc == 0) {
-					shutdown();
+					close();
 					return;
 				}
 

@@ -36,19 +36,43 @@ private:
 			rofl::crofsock& socket, int sd);
 
 	virtual void
-	handle_connect_refused(
+	handle_tcp_connect_refused(
 			rofl::crofsock& socket);
 
 	virtual void
-	handle_connect_failed(
+	handle_tcp_connect_failed(
 			rofl::crofsock& socket);
 
 	virtual void
-	handle_connected(
+	handle_tcp_connected(
 			rofl::crofsock& socket);
 
 	virtual void
-	handle_accepted(
+	handle_tcp_accept_refused(
+			rofl::crofsock& socket);
+
+	virtual void
+	handle_tcp_accept_failed(
+			rofl::crofsock& socket);
+
+	virtual void
+	handle_tcp_accepted(
+			rofl::crofsock& socket);
+
+	virtual void
+	handle_tls_connect_failed(
+			rofl::crofsock& socket);
+
+	virtual void
+	handle_tls_connected(
+			rofl::crofsock& socket);
+
+	virtual void
+	handle_tls_accept_failed(
+			rofl::crofsock& socket);
+
+	virtual void
+	handle_tls_accepted(
 			rofl::crofsock& socket);
 
 	virtual void

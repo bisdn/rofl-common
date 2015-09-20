@@ -374,24 +374,48 @@ public:
 private:
 
 	virtual void
-	handle_connect_refused(
+	handle_tcp_connect_refused(
 			crofsock& rofsock) {
 		LOGGING_WARN << "[rofl-common][crofconn] transport connection: connect refused " << std::endl;
 		rofl::ciosrv::notify(rofl::cevent(EVENT_CONNECT_REFUSED));
 	};
 
 	virtual void
-	handle_connect_failed(
+	handle_tcp_connect_failed(
 			crofsock& rofsock) {
 		LOGGING_DEBUG << "[rofl-common][crofconn] transport connection: connect failed " << std::endl;
 		rofl::ciosrv::notify(rofl::cevent(EVENT_CONNECT_FAILED));
 	};
 
 	virtual void
-	handle_connected (
+	handle_tcp_connected (
 			crofsock& rofsock) {
 		LOGGING_DEBUG << "[rofl-common][crofconn] transport connection established " << std::endl;
 		rofl::ciosrv::notify(rofl::cevent(EVENT_TCP_CONNECTED));
+	};
+
+	virtual void
+	handle_tls_connect_failed(
+			crofsock& socket) {
+
+	};
+
+	virtual void
+	handle_tls_connected(
+			crofsock& socket) {
+
+	};
+
+	virtual void
+	handle_tls_accept_failed(
+			crofsock& socket) {
+
+	};
+
+	virtual void
+	handle_tls_accepted(
+			crofsock& socket) {
+
 	};
 
 	virtual void

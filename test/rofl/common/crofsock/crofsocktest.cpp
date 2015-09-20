@@ -40,9 +40,11 @@ crofsocktest::test()
 
 		rofl::csockaddr baddr(rofl::caddress_in4("127.0.0.1"), 4999);
 
-		slisten->set_baddr(baddr).listen();
+		sclient->set_raddr(baddr).tcp_connect(true);
 
-		sclient->set_raddr(baddr).connect(false);
+		sleep(5);
+
+		slisten->set_baddr(baddr).listen();
 
 		while (keep_running) {
 			struct timespec ts;
@@ -72,13 +74,13 @@ crofsocktest::handle_listen(
 
 	sserver = new rofl::crofsock(this);
 
-	sserver->accept(sd);
+	sserver->tcp_accept(sd);
 }
 
 
 
 void
-crofsocktest::handle_connect_refused(
+crofsocktest::handle_tcp_connect_refused(
 		rofl::crofsock& socket)
 {
 	std::cerr << "handle connect refused" << std::endl;
@@ -87,7 +89,7 @@ crofsocktest::handle_connect_refused(
 
 
 void
-crofsocktest::handle_connect_failed(
+crofsocktest::handle_tcp_connect_failed(
 		rofl::crofsock& socket)
 {
 	std::cerr << "handle connect failed" << std::endl;
@@ -96,7 +98,7 @@ crofsocktest::handle_connect_failed(
 
 
 void
-crofsocktest::handle_connected(
+crofsocktest::handle_tcp_connected(
 		rofl::crofsock& socket)
 {
 	std::cerr << "handle connected" << std::endl;
@@ -110,7 +112,25 @@ crofsocktest::handle_connected(
 
 
 void
-crofsocktest::handle_accepted(
+crofsocktest::handle_tcp_accept_refused(
+		rofl::crofsock& socket)
+{
+
+}
+
+
+
+void
+crofsocktest::handle_tcp_accept_failed(
+		rofl::crofsock& socket)
+{
+
+}
+
+
+
+void
+crofsocktest::handle_tcp_accepted(
 		rofl::crofsock& socket)
 {
 	std::cerr << "handle accepted" << std::endl;
@@ -183,6 +203,42 @@ crofsocktest::handle_recv(
 		}
 
 	}
+
+}
+
+
+
+void
+crofsocktest::handle_tls_connect_failed(
+		rofl::crofsock& socket)
+{
+
+}
+
+
+
+void
+crofsocktest::handle_tls_connected(
+		rofl::crofsock& socket)
+{
+
+}
+
+
+
+void
+crofsocktest::handle_tls_accept_failed(
+		rofl::crofsock& socket)
+{
+
+}
+
+
+
+void
+crofsocktest::handle_tls_accepted(
+		rofl::crofsock& socket)
+{
 
 }
 

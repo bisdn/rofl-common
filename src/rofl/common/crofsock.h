@@ -29,6 +29,10 @@
 #include <iostream>
 #include <algorithm>
 
+#include <openssl/bio.h>
+#include <openssl/ssl.h>
+#include <openssl/err.h>
+
 #include "rofl/common/cmemory.h"
 #include "rofl/common/logging.h"
 #include "rofl/common/crofqueue.h"
@@ -145,19 +149,43 @@ protected:
 			crofsock& socket, int sd) = 0;
 
 	virtual void
-	handle_connect_refused(
+	handle_tcp_connect_refused(
 			crofsock& socket) = 0;
 
 	virtual void
-	handle_connect_failed(
+	handle_tcp_connect_failed(
 			crofsock& socket) = 0;
 
 	virtual void
-	handle_connected(
+	handle_tcp_connected(
 			crofsock& socket) = 0;
 
 	virtual void
-	handle_accepted(
+	handle_tcp_accept_refused(
+			crofsock& socket) = 0;
+
+	virtual void
+	handle_tcp_accept_failed(
+			crofsock& socket) = 0;
+
+	virtual void
+	handle_tcp_accepted(
+			crofsock& socket) = 0;
+
+	virtual void
+	handle_tls_connect_failed(
+			crofsock& socket) = 0;
+
+	virtual void
+	handle_tls_connected(
+			crofsock& socket) = 0;
+
+	virtual void
+	handle_tls_accept_failed(
+			crofsock& socket) = 0;
+
+	virtual void
+	handle_tls_accepted(
 			crofsock& socket) = 0;
 
 	virtual void
@@ -177,9 +205,43 @@ private:
 	static crwlock                  socket_envs_lock;
 };
 
-class eRofSockBase			: public RoflException {};
-class eRofSockTxAgain		: public eRofSockBase {};
-class eRofSockMsgTooLarge 	: public eRofSockBase {};
+class eRofSockBase : public RoflException {
+public:
+	eRofSockBase(
+			const std::string& __arg) :
+				RoflException(__arg)
+	{};
+};
+class eRofSockTxAgain : public eRofSockBase {
+public:
+	eRofSockTxAgain(
+			const std::string& __arg) :
+				eRofSockBase(__arg)
+	{};
+};
+class eRofSockMsgTooLarge : public eRofSockBase {
+public:
+	eRofSockMsgTooLarge(
+			const std::string& __arg) :
+				eRofSockBase(__arg)
+	{};
+};
+class eRofSockInvalid : public eRofSockBase {
+public:
+	eRofSockInvalid(
+			const std::string& __arg) :
+				eRofSockBase(__arg)
+	{};
+};
+class eRofSockError : public eRofSockBase {
+public:
+	eRofSockError(
+			const std::string& __arg) :
+				eRofSockBase(__arg)
+	{};
+};
+
+
 
 /**
  * @ingroup common_devel_workflow
@@ -214,24 +276,29 @@ class crofsock :
 	enum crofsock_flag_t {
 		FLAGS_CONGESTED 		  = 1,
 		FLAG_RECONNECT_ON_FAILURE = 2,
+		FLAG_TLS_INITIALIZED    = 3,
 	};
 
 	enum socket_mode_t {
-		MODE_UNKNOWN    = 0,
-		MODE_TCP_LISTEN = 1,
-		MODE_TCP_CLIENT = 2,
-		MODE_TCP_SERVER = 3,
+		MODE_UNKNOWN            = 0,
+		MODE_TCP_LISTEN         = 1,
+		MODE_TCP_CLIENT         = 2,
+		MODE_TCP_SERVER         = 3,
+		MODE_TLS_LISTEN         = 4,
+		MODE_TLS_CLIENT         = 5,
+		MODE_TLS_SERVER         = 6,
 	};
 
 	enum socket_state_t {
-		STATE_UNKNOWN			= 0,
+		STATE_IDLE              = 0,
 		STATE_CLOSED			= 1,
 		STATE_LISTENING         = 2,
-		STATE_CONNECTING		= 3,
+		STATE_TCP_CONNECTING	= 3,
 		STATE_TLS_CONNECTING	= 4,
-		STATE_ACCEPTING 		= 5,
+		STATE_TCP_ACCEPTING 	= 5,
 		STATE_TLS_ACCEPTING 	= 6,
-		STATE_ESTABLISHED		= 7,
+		STATE_TCP_ESTABLISHED	= 7,
+		STATE_TLS_ESTABLISHED	= 8,
 	};
 
 	enum crofsockimer_t {
@@ -271,14 +338,14 @@ public:
 	 *
 	 */
 	void
-	accept(
+	tcp_accept(
 			int sd);
 
 	/**
 	 *
 	 */
 	void
-	connect(
+	tcp_connect(
 			bool reconnect = true);
 
 	/**
@@ -309,7 +376,7 @@ public:
 	 */
 	bool
 	is_established() const
-	{ return (STATE_ESTABLISHED == state); };
+	{ return (STATE_TCP_ESTABLISHED == state); };
 
 	/**
 	 * @brief	Instructs crofsock to disable reception of messages on the socket.
@@ -318,7 +385,7 @@ public:
 	rx_disable()
 	{
 		switch (state) {
-		case STATE_ESTABLISHED: {
+		case STATE_TCP_ESTABLISHED: {
 			rxthread.add_read_fd(sd);
 			rx_disabled = true;
 		} break;
@@ -335,7 +402,7 @@ public:
 	rx_enable()
 	{
 		switch (state) {
-		case STATE_ESTABLISHED: {
+		case STATE_TCP_ESTABLISHED: {
 			rxthread.drop_read_fd(sd);
 			rx_disabled = false;
 		} break;
@@ -392,6 +459,23 @@ public:
 	get_raddr() const
 	{ return raddr; };
 
+public:
+
+	/**
+	 *
+	 */
+	const std::string&
+	get_tls_pswd() const
+	{ return password; };
+
+	/**
+	 *
+	 */
+	crofsock&
+	set_tls_pswd(
+			const std::string& password)
+	{ this->password = password; return *this; };
+
 private:
 
 
@@ -416,8 +500,7 @@ private:
 
 	virtual void
 	handle_timeout(
-			cthread& thread, uint32_t timer_id, const std::list<unsigned int>& ttypes)
-	{};
+			cthread& thread, uint32_t timer_id, const std::list<unsigned int>& ttypes);
 
 	virtual void
 	handle_read_event(
@@ -433,7 +516,38 @@ private:
 	 *
 	 */
 	void
-	shutdown();
+	tls_init();
+
+	/**
+	 *
+	 */
+	void
+	tls_destroy();
+
+	/**
+	 *
+	 */
+	void
+	tls_init_context();
+
+	/**
+	 *
+	 */
+	void
+	tls_destroy_context();
+
+	/**
+	 * @brief	OpenSSL password callback.
+	 */
+	static int
+	tls_pswd_cb(
+			char *buf, int size, int rwflag, void *userdata);
+
+	/**
+	 *
+	 */
+	bool
+	tls_verify_ok();
 
 	/**
 	 *
@@ -479,17 +593,34 @@ public:
 	std::string
 	str() const {
 		std::stringstream ss;
-		if (STATE_UNKNOWN == state) {
-			ss << "state: -INIT- ";
-		} else
-		if (STATE_CLOSED == state) {
+		switch (state) {
+		case STATE_CLOSED: {
 			ss << "state: -CLOSED- ";
-		} else
-		if (STATE_CONNECTING == state) {
+		} break;
+		case STATE_LISTENING: {
+			ss << "state: -LISTENING- ";
+		} break;
+		case STATE_TCP_ACCEPTING: {
+			ss << "state: -ACCEPTING- ";
+		} break;
+		case STATE_TLS_ACCEPTING: {
+			ss << "state: -TLS-ACCEPTING- ";
+		} break;
+		case STATE_TCP_CONNECTING: {
 			ss << "state: -CONNECTING- ";
-		} else
-		if (STATE_ESTABLISHED == state) {
-			ss << "state: -CONNECTED- ";
+		} break;
+		case STATE_TLS_CONNECTING: {
+			ss << "state: -TLS-CONNECTING- ";
+		} break;
+		case STATE_TCP_ESTABLISHED: {
+			ss << "state: -ESTABLISHED- ";
+		} break;
+		case STATE_TLS_ESTABLISHED: {
+			ss << "state: -TLS-ESTABLISHED- ";
+		} break;
+		default: {
+			ss << "state: -unknown- ";
+		};
 		}
 		return ss.str();
 	};
@@ -528,21 +659,13 @@ private:
 	// TX thread
 	cthread                     txthread;
 
-	//
-	int                         ts_rec_sec;
-	int                         ts_rec_nsec;
-
 	/*
 	 * reconnect
 	 */
-
-	ctimespec			max_backoff;
-	ctimespec			reconnect_start_timeout;
-	ctimespec			reconnect_timespec; 	// reconnect in x seconds
-	ctimespec			reconnect_variance;
-	int 				reconnect_counter;
-
-
+	int                         reconnect_backoff_max;
+	int                         reconnect_backoff_start;
+	int                         reconnect_backoff_current;
+	int 						reconnect_counter;
 
 	/* socket parameters */
 
@@ -569,6 +692,28 @@ private:
 
 	/* remote address */
 	csockaddr                   raddr;
+
+	/*
+	 * OpenSSL related structures
+	 */
+
+	// SSL context
+	SSL_CTX*                    ctx;
+
+	// SSL session
+	SSL*                        ssl;
+
+	// basic input/output
+	BIO*                        bio;
+
+	std::string					capath;
+	std::string					cafile;
+	std::string					certfile;
+	std::string 				keyfile;
+	std::string					password;
+	std::string					verify_mode;
+	std::string					verify_depth;
+	std::string					ciphers;
 
 	/*
 	 * receiving messages
