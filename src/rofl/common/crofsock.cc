@@ -16,7 +16,8 @@ using namespace rofl;
 
 /*static*/std::set<crofsock_env*>  crofsock_env::socket_envs;
 /*static*/crwlock                  crofsock_env::socket_envs_lock;
-
+/*static*/crwlock                  crofsock::rwlock;
+/*static*/bool                     crofsock::tls_initialized = false;
 
 crofsock::~crofsock()
 {
@@ -130,9 +131,9 @@ crofsock::close()
 	case STATE_TCP_ESTABLISHED: {
 
 		/* block reception of any further data from remote side */
-		rx_disable();
+		rx_disabled = true;
 
-		rxthread.drop_read_fd(sd);
+		rxthread.drop_read_fd(sd, false);
 		if (flags.test(FLAG_CONGESTED)) {
 			txthread.drop_write_fd(sd);
 		}
@@ -465,7 +466,8 @@ crofsock::tcp_connect(
 void
 crofsock::tls_init()
 {
-	if (flags.test(FLAG_TLS_INITIALIZED))
+	AcquireReadWriteLock lock(crofsock::rwlock);
+	if (crofsock::tls_initialized)
 		return;
 
 	SSL_library_init();
@@ -477,7 +479,7 @@ crofsock::tls_init()
 	OpenSSL_add_all_digests();
 	BIO_new_fp(stderr, BIO_NOCLOSE);
 
-	flags.set(FLAG_TLS_INITIALIZED);
+	crofsock::tls_initialized = true;
 }
 
 
@@ -485,7 +487,13 @@ crofsock::tls_init()
 void
 crofsock::tls_destroy()
 {
+	AcquireReadWriteLock lock(crofsock::rwlock);
+	if (not crofsock::tls_initialized)
+		return;
 
+	ERR_free_strings();
+
+	crofsock::tls_initialized = false;
 }
 
 
@@ -549,6 +557,8 @@ crofsock::tls_destroy_context()
 	if (ctx) {
 		SSL_CTX_free(ctx); ctx = NULL;
 	}
+
+	tls_destroy();
 }
 
 
@@ -582,12 +592,16 @@ crofsock::tls_accept(
 	case STATE_CLOSED:
 	case STATE_TCP_ACCEPTING: {
 
+		std::cerr << ">>> tls_accept() [1] <<<" << std::endl;
+
 		flags.set(FLAG_TLS_IN_USE);
 
 		crofsock::tcp_accept(sockfd);
 
 	} break;
 	case STATE_TCP_ESTABLISHED: {
+
+		std::cerr << ">>> tls_accept() [2] <<<" << std::endl;
 
 		tls_init_context();
 
@@ -609,6 +623,8 @@ crofsock::tls_accept(
 
 	} break;
 	case STATE_TLS_ACCEPTING: {
+
+		std::cerr << ">>> tls_accept() [3] <<<" << std::endl;
 
 		int rc = 0, err_code = 0;
 
@@ -688,10 +704,14 @@ crofsock::tls_accept(
 	} break;
 	case STATE_TLS_ESTABLISHED: {
 
+		std::cerr << ">>> tls_accept() [4] <<<" << std::endl;
+
 		/* do nothing */
 
 	} break;
 	default: {
+		std::cerr << ">>> tls_accept() [E] <<<" << std::endl;
+
 		throw eRofSockError("[rofl][crofsock][tls_accept] called in invalid state");
 	};
 	}
@@ -708,12 +728,16 @@ crofsock::tls_connect(
 	case STATE_CLOSED:
 	case STATE_TCP_CONNECTING: {
 
+		std::cerr << ">>> tls_connect() [1] <<<" << std::endl;
+
 		flags.set(FLAG_TLS_IN_USE);
 
 		crofsock::tcp_connect(reconnect);
 
 	} break;
 	case STATE_TCP_ESTABLISHED: {
+
+		std::cerr << ">>> tls_connect() [2] <<<" << std::endl;
 
 		tls_init_context();
 
@@ -737,6 +761,8 @@ crofsock::tls_connect(
 
 	} break;
 	case STATE_TLS_CONNECTING: {
+
+		std::cerr << ">>> tls_connect() [3] <<<" << std::endl;
 
 		int rc = 0, err_code = 0;
 
@@ -814,7 +840,15 @@ crofsock::tls_connect(
 		}
 
 	} break;
+	case STATE_TLS_ESTABLISHED: {
+
+		std::cerr << ">>> tls_connect() [4] <<<" << std::endl;
+		/* do nothing */
+
+	} break;
 	default: {
+		std::cerr << ">>> tls_connect() [E] <<<" << std::endl;
+
 		throw eRofSockError("[rofl][crofsock][tls_connect] called in invalid state");
 	};
 	}
@@ -1016,9 +1050,9 @@ crofsock::rx_disable()
 {
 	switch (state) {
 	case STATE_TCP_ESTABLISHED:
-	case STATE_TLS_ESTABLISHED: {
-		rxthread.drop_read_fd(sd);
+	case STATE_TLS_ESTABLISHED:{
 		rx_disabled = true;
+		rxthread.drop_read_fd(sd, false);
 	} break;
 	default: {
 
@@ -1034,8 +1068,8 @@ crofsock::rx_enable()
 	switch (state) {
 	case STATE_TCP_ESTABLISHED:
 	case STATE_TLS_ESTABLISHED: {
-		rxthread.add_read_fd(sd);
 		rx_disabled = false;
+		rxthread.add_read_fd(sd);
 	} break;
 	default: {
 
@@ -1372,74 +1406,18 @@ crofsock::handle_read_event_rxthread(
 			tls_accept(fd);
 
 		} break;
-		case STATE_TCP_ESTABLISHED:
+		case STATE_TCP_ESTABLISHED: {
+
+			if (flags.test(FLAG_TLS_IN_USE))
+				return;
+			recv_message();
+
+		} break;
 		case STATE_TLS_ESTABLISHED: {
 
-			while (true) {
-
-				if (state < STATE_TLS_ESTABLISHED) {
-					return;
-				}
-
-				if (not rx_fragment_pending) {
-					msg_bytes_read = 0;
-				}
-
-				uint16_t msg_len = 0;
-
-				/* how many bytes do we have to read? */
-				if (msg_bytes_read < sizeof(struct openflow::ofp_header)) {
-					msg_len = sizeof(struct openflow::ofp_header);
-				} else {
-					struct openflow::ofp_header *header = (struct openflow::ofp_header*)(rxbuffer.somem());
-					msg_len = be16toh(header->length);
-				}
-
-				/* sanity check: 8 <= msg_len <= 2^16 */
-				if (msg_len < sizeof(struct openflow::ofp_header)) {
-					close(); /* enforce reconnect, just in case */
-					return;
-				}
-
-				/* read from socket more bytes, at most "msg_len - msg_bytes_read" */
-				int rc = ::recv(sd, (void*)(rxbuffer.somem() + msg_bytes_read), msg_len - msg_bytes_read, MSG_DONTWAIT);
-
-				if (rc < 0) {
-					switch (errno) {
-					case EAGAIN: {
-						/* do not continue and let kernel inform us, once more data is available */
-						return;
-					} break;
-					default: {
-						/* oops, error */
-						close();
-						return;
-					};
-					}
-				} else
-				if (rc == 0) {
-					close();
-					return;
-				}
-
-				msg_bytes_read += rc;
-
-				/* minimum message length received, check completeness of message */
-				if (msg_bytes_read >= sizeof(struct openflow::ofp_header)) {
-					struct openflow::ofp_header *header =
-							(struct openflow::ofp_header*)(rxbuffer.somem());
-					uint16_t msg_len = be16toh(header->length);
-
-					/* ok, message was received completely */
-					if (msg_len == msg_bytes_read) {
-						rx_fragment_pending = false;
-						msg_bytes_read = 0;
-						parse_message();
-					} else {
-						rx_fragment_pending = true;
-					}
-				}
-			}
+			if (not flags.test(FLAG_TLS_IN_USE))
+				return;
+			recv_message();
 
 		} break;
 		default: {
@@ -1454,6 +1432,87 @@ crofsock::handle_read_event_rxthread(
 
 	} catch (...) {
 
+	}
+}
+
+
+
+void
+crofsock::recv_message()
+{
+	while (not rx_disabled) {
+
+		if (not rx_fragment_pending) {
+			msg_bytes_read = 0;
+		}
+
+		uint16_t msg_len = 0;
+
+		/* how many bytes do we have to read? */
+		if (msg_bytes_read < sizeof(struct openflow::ofp_header)) {
+			msg_len = sizeof(struct openflow::ofp_header);
+		} else {
+			struct openflow::ofp_header *header = (struct openflow::ofp_header*)(rxbuffer.somem());
+			msg_len = be16toh(header->length);
+		}
+
+		/* sanity check: 8 <= msg_len <= 2^16 */
+		if (msg_len < sizeof(struct openflow::ofp_header)) {
+			/* out-of-sync => enforce reconnect in client mode */
+			goto on_error;
+		}
+
+		/* read from socket more bytes, at most "msg_len - msg_bytes_read" */
+		int rc = ::recv(sd, (void*)(rxbuffer.somem() + msg_bytes_read), msg_len - msg_bytes_read, MSG_DONTWAIT);
+
+		if (rc < 0) {
+			switch (errno) {
+			case EAGAIN: {
+				/* do not continue and let kernel inform us, once more data is available */
+				return;
+			} break;
+			default: {
+				/* oops, error */
+				goto on_error;
+			};
+			}
+		} else
+		if (rc == 0) {
+			/* shutdown from peer */
+			goto on_error;
+		}
+
+		msg_bytes_read += rc;
+
+		/* minimum message length received, check completeness of message */
+		if (msg_bytes_read >= sizeof(struct openflow::ofp_header)) {
+			struct openflow::ofp_header *header =
+					(struct openflow::ofp_header*)(rxbuffer.somem());
+			uint16_t msg_len = be16toh(header->length);
+
+			/* ok, message was received completely */
+			if (msg_len == msg_bytes_read) {
+				rx_fragment_pending = false;
+				msg_bytes_read = 0;
+				parse_message();
+			} else {
+				rx_fragment_pending = true;
+			}
+		}
+	}
+
+	return;
+
+on_error:
+
+	close();
+
+	if (flags.test(FLAG_RECONNECT_ON_FAILURE)) {
+		if (flags.test(FLAG_TLS_IN_USE)) {
+			tls_connect(true);
+		} else {
+			tcp_connect(true);
+		}
 	}
 }
 

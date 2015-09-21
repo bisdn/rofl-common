@@ -87,7 +87,7 @@ cthread::add_read_fd(
 
 void
 cthread::drop_read_fd(
-		int fd)
+		int fd, bool exception)
 {
 	AcquireReadWriteLock lock(tlock);
 	rfds.erase(fd);
@@ -99,7 +99,10 @@ cthread::drop_read_fd(
 	if (epoll_ctl(epfd, EPOLL_CTL_DEL, fd, &epev) < 0) {
 		log << logging::error << "cthread::drop_read_fd() failed to add fd to epoll set: "
 				<< "errno: " << errno << " (" << strerror(errno) << ")" << std::flush;
-		throw eSysCall("cthread::drop_read_fd() syscall epoll_ctl() failed");
+		if (exception)
+			throw eSysCall("cthread::drop_read_fd() syscall epoll_ctl() failed");
+		else
+			return;
 	}
 
 	wakeup();

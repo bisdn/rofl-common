@@ -258,8 +258,7 @@ class crofsock :
 	enum crofsock_flag_t {
 		FLAG_CONGESTED 		    = 1,
 		FLAG_RECONNECT_ON_FAILURE = 2,
-		FLAG_TLS_INITIALIZED    = 3,
-		FLAG_TLS_IN_USE         = 4,
+		FLAG_TLS_IN_USE         = 3,
 	};
 
 	enum socket_mode_t {
@@ -656,6 +655,9 @@ private:
 private:
 
 	void
+	recv_message();
+
+	void
 	parse_message();
 
 	void
@@ -745,6 +747,12 @@ private:
 	 * OpenSSL related structures
 	 */
 
+	// read write lock
+	static crwlock      		rwlock;
+
+	// OpenSSL initialized
+	static bool                 tls_initialized;
+
 	// SSL context
 	SSL_CTX*                    ctx;
 
@@ -813,9 +821,6 @@ private:
 
 	// message length of current tx-fragment
 	size_t                      txlen;
-
-	// read write lock
-	PthreadRwLock				rwlock;
 };
 
 } /* namespace rofl */
