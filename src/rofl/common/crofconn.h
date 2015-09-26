@@ -12,7 +12,7 @@
 #include <bitset>
 #include <set>
 
-#include "rofl/common/ciosrv.h"
+#include "rofl/common/cthread.hpp"
 #include "rofl/common/crofsock.h"
 #include "rofl/common/openflow/cofhelloelems.h"
 #include "rofl/common/openflow/cofhelloelemversionbitmap.h"
@@ -24,10 +24,43 @@
 
 namespace rofl {
 
-class eRofConnBase 					: public RoflException {};
-class eRofConnXidSpaceExhausted		: public eRofConnBase {};
-class eRofConnBusy					: public eRofConnBase {}; // connection already established
-class eRofConnNotFound				: public eRofConnBase {};
+class eRofConnBase : public RoflException {
+public:
+	eRofConnBase(
+			const std::string& __arg) :
+				RoflException(__arg)
+	{};
+};
+class eRofConnXidSpaceExhausted : public eRofConnBase {
+public:
+	eRofConnXidSpaceExhausted(
+			const std::string& __arg) :
+				eRofConnBase(__arg)
+	{};
+};
+class eRofConnBusy : public eRofConnBase {
+public:
+	eRofConnBusy(
+			const std::string& __arg) :
+				eRofConnBase(__arg)
+	{};
+}; // connection already established
+class eRofConnNotFound : public eRofConnBase {
+public:
+	eRofConnNotFound(
+			const std::string& __arg) :
+				eRofConnBase(__arg)
+	{};
+};
+class eRofConnInvalid : public eRofConnBase {
+public:
+	eRofConnInvalid(
+			const std::string& __arg) :
+				eRofConnBase(__arg)
+	{};
+};
+
+
 
 class crofconn; // forward declaration
 
@@ -37,101 +70,77 @@ class crofconn; // forward declaration
  * @brief Environment expected by a rofl::crofconn instance.
  */
 class crofconn_env {
-	static std::set<crofconn_env*> rofconn_envs;
+	friend class crofconn;
 public:
-
-	/**
-	 *
-	 */
-	static crofconn_env&
-	set_env(crofconn_env* env) {
-		if (crofconn_env::rofconn_envs.find(env) == crofconn_env::rofconn_envs.end()) {
-			throw eRofConnNotFound();
+	static
+	crofconn_env&
+	call_env(crofconn_env* env) {
+		AcquireReadLock lock(crofconn_env::connection_envs_lock);
+		if (crofconn_env::connection_envs.find(env) == crofconn_env::connection_envs.end()) {
+			throw eRofSockNotFound("crofconn_env::call_env() crofconn_env instance not found");
 		}
 		return *(env);
 	};
-
-	/**
-	 *
-	 */
-	static bool
-	has_env(crofconn_env* env) {
-		return (not (crofconn_env::rofconn_envs.find(env) == crofconn_env::rofconn_envs.end()));
-	};
-
 public:
-
-	/**
-	 *
-	 */
-	crofconn_env() {
-		crofconn_env::rofconn_envs.insert(this);
+	virtual
+	~crofconn_env() {
+		AcquireReadWriteLock lock(crofconn_env::connection_envs_lock);
+		crofconn_env::connection_envs.erase(this);
 	};
-
-	/**
-	 *
-	 */
-	virtual ~crofconn_env() {
-		crofconn_env::rofconn_envs.erase(this);
+	crofconn_env() {
+		AcquireReadWriteLock lock(crofconn_env::connection_envs_lock);
+		crofconn_env::connection_envs.insert(this);
 	};
 
 protected:
 
-	friend class crofconn;
-
-	/**
-	 *
-	 */
 	virtual void
-	handle_connect_refused(crofconn& conn) = 0;
+	handle_established(
+			crofconn& conn, uint8_t ofp_version) = 0;
 
-	/**
-	 *
-	 */
 	virtual void
-	handle_connect_failed(crofconn& conn) = 0;
+	handle_connect_refused(
+			crofconn& conn) = 0;
 
-	/**
-	 *
-	 */
 	virtual void
-	handle_connected(crofconn& conn, uint8_t ofp_version) = 0;
+	handle_connect_failed(
+			crofconn& conn) = 0;
 
-	/**
-	 *
-	 */
 	virtual void
-	handle_closed(crofconn& conn) = 0;
+	handle_accept_failed(
+			crofconn& conn) = 0;
 
-	/**
-	 *
-	 */
 	virtual void
-	handle_write(crofconn& conn) = 0;
+	handle_negotiation_failed(
+			crofconn& conn) = 0;
 
-	/**
-	 *
-	 */
 	virtual void
-	recv_message(crofconn& conn, rofl::openflow::cofmsg *msg) = 0;
+	handle_closed(
+			crofconn& conn) = 0;
 
-	/**
-	 *
-	 */
+	virtual void
+	handle_send(
+			crofconn& conn) = 0;
+
+	virtual void
+	handle_recv(
+			crofconn& conn, rofl::openflow::cofmsg *msg) = 0;
+
 	virtual uint32_t
-	get_async_xid(crofconn& conn) = 0;
+	get_async_xid(
+			crofconn& conn) = 0;
 
-	/**
-	 *
-	 */
 	virtual uint32_t
-	get_sync_xid(crofconn& conn, uint8_t msg_type = 0, uint16_t msg_sub_type = 0) = 0;
+	get_sync_xid(
+			crofconn& conn, uint8_t msg_type = 0, uint16_t msg_sub_type = 0) = 0;
 
-	/**
-	 *
-	 */
 	virtual void
-	release_sync_xid(crofconn& conn, uint32_t xid) = 0;
+	release_sync_xid(
+			crofconn& conn, uint32_t xid) = 0;
+
+private:
+	static std::set<crofconn_env*>  connection_envs;
+	static crwlock                  connection_envs_lock;
 };
 
 
@@ -142,8 +151,8 @@ protected:
  * @brief	A single OpenFlow control connection
  */
 class crofconn :
-		public crofsock_env,
-		public ciosrv
+		public cthread_env,
+		public crofsock_env
 {
 	enum outqueue_type_t {
 		QUEUE_OAM  = 0, // Echo.request/Echo.reply
@@ -154,149 +163,178 @@ class crofconn :
 	};
 
 	enum msg_type_t {
-		OFPT_HELLO = 0,
-		OFPT_ERROR = 1,
-		OFPT_ECHO_REQUEST = 2,
-		OFPT_ECHO_REPLY = 3,
-		OFPT_FEATURES_REPLY = 6,
-		OFPT_MULTIPART_REQUEST = 18,
-		OFPT_MULTIPART_REPLY = 19,
-	};
-
-	enum crofconn_event_t {
-		EVENT_NONE				= 0,
-		EVENT_RECONNECT			= 1,
-		EVENT_TCP_CONNECTED 	= 2,
-		EVENT_DISCONNECTED 		= 3,
-		EVENT_HELLO_RCVD 		= 4,
-		EVENT_HELLO_EXPIRED		= 5,
-		EVENT_FEATURES_RCVD		= 6,
-		EVENT_FEATURES_EXPIRED	= 7,
-		EVENT_ECHO_RCVD			= 8,
-		EVENT_ECHO_EXPIRED		= 9,
-		EVENT_NEED_LIFE_CHECK	= 10,
-		//
-		EVENT_RXQUEUE			= 11,
-		EVENT_CONNECT_FAILED	= 13,
-		EVENT_CONNECT_REFUSED	= 14,
-		EVENT_LOCAL_DISCONNECT	= 15,
-		EVENT_CONGESTION_SOLVED	= 16,
-		EVENT_PEER_DISCONNECTED	= 17,	// socket was closed by peer entity
+		OFPT_HELLO                 = 0,
+		OFPT_ERROR                 = 1,
+		OFPT_ECHO_REQUEST          = 2,
+		OFPT_ECHO_REPLY            = 3,
+		OFPT_FEATURES_REQUEST      = 5,
+		OFPT_FEATURES_REPLY        = 6,
+		OFPT_MULTIPART_REQUEST     = 18,
+		OFPT_MULTIPART_REPLY       = 19,
 	};
 
 	enum crofconn_state_t {
-		STATE_INIT				= 0,
-		STATE_DISCONNECTED 		= 1,
-		STATE_CONNECT_PENDING	= 2,
-		STATE_ACCEPT_PENDING	= 3,
-		STATE_WAIT_FOR_HELLO	= 4,
-		STATE_WAIT_FOR_FEATURES = 5,
-		STATE_CONNECTED 		= 6,
+		STATE_NEGOTIATION_FAILED   = -2,
+		STATE_CLOSING              = -1,
+		STATE_DISCONNECTED 		   = 0,
+		STATE_CONNECT_PENDING	   = 1,
+		STATE_ACCEPT_PENDING	   = 2,
+		STATE_NEGOTIATING          = 3,
+		STATE_NEGOTIATING2         = 4,
+		STATE_ESTABLISHED          = 5,
 	};
 
 	enum crofconn_timer_t {
-		TIMER_NEXT_RECONNECT	= 1,
-		TIMER_WAIT_FOR_HELLO	= 2,
-		TIMER_WAIT_FOR_FEATURES = 3,
-		TIMER_NEED_LIFE_CHECK	= 4,
-		TIMER_WAIT_FOR_ECHO		= 5,
+		TIMER_ID_WAIT_FOR_HELLO	   = 1,
+		TIMER_ID_WAIT_FOR_FEATURES = 2,
+		TIMER_ID_WAIT_FOR_ECHO	   = 3,
+		TIMER_ID_NEED_LIFE_CHECK   = 4,
 	};
 
 	enum crofconn_flags_t {
-		FLAGS_PASSIVE			= 1,
-		FLAGS_CONNECT_REFUSED	= 2,
-		FLAGS_CONNECT_FAILED	= 3,
-		FLAGS_LOCAL_DISCONNECT	= 4,
-		FLAGS_RECONNECTING		= 5,
-		FLAGS_RXQUEUE_CONSUMING = 6,
-		FLAGS_CONGESTED			= 7,
-		FLAGS_PEER_DISCONNECTED	= 8,
+		FLAG_CONNECT_REFUSED	   = 1,
+		FLAG_CONNECT_FAILED	       = 2,
+		FLAG_LOCAL_DISCONNECT	   = 3,
+		FLAG_RECONNECTING		   = 4,
+		FLAG_RXQUEUE_CONSUMING     = 5,
+		FLAG_CONGESTED			   = 6,
+		FLAG_PEER_DISCONNECTED	   = 7,
 	};
 
 public:
 
-	enum crofconn_flavour_t {
-		FLAVOUR_UNSPECIFIED		= 0,
-		FLAVOUR_CTL 			= 1,
-		FLAVOUR_DPT				= 2,
+	enum crofconn_mode_t {
+		MODE_UNKNOWN               = 0,
+		MODE_CONTROLLER            = 1,
+		MODE_DATAPATH              = 2,
 	};
 
 public:
 
 	/**
-	 * controller mode
+	 *
+	 */
+	virtual
+	~crofconn();
+
+	/**
+	 *
 	 */
 	crofconn(
-			crofconn_env *env,
-			const rofl::openflow::cofhello_elem_versionbitmap& versionbitmap,
-			pthread_t tid = 0);
-
-	/**
-	 *
-	 */
-	virtual ~crofconn();
+			crofconn_env *env);
 
 public:
 
 	/**
 	 *
 	 */
-	enum crofconn_flavour_t
-	get_flavour() const
-	{ return flavour; };
-
-	/**
-	 *
-	 */
-	void
-	accept(
-			enum rofl::csocket::socket_type_t socket_type,
-			const cparams& socket_params,
-			int newsd,
-			enum crofconn_flavour_t flavour);
-
-	/**
-	 * @brief	Instruct crofsock instance to connect to peer using specified parameters.
-	 */
-	void
-	connect(
-			const cauxid& aux_id,
-			enum rofl::csocket::socket_type_t socket_type,
-			const cparams& socket_params);
-
-	/**
-	 * @brief	Instruct crofsock instance to reconnect to previously connected peer.
-	 */
-	void
-	reconnect(
-			bool reset_backoff_timer = false);
-
-	/**
-	 * @brief	Instruct crofsock instance to close connection to peer.
-	 */
-	void
+	virtual void
 	close();
 
 	/**
-	 * @brief	Returns whether this connection is established
+	 *
+	 */
+	virtual void
+	tcp_accept(
+			int sd,
+			const rofl::openflow::cofhello_elem_versionbitmap& versionbitmap,
+			enum crofconn_mode_t mode);
+
+	/**
+	 *
+	 */
+	virtual void
+	tcp_connect(
+			const cauxid& auxid,
+			const rofl::openflow::cofhello_elem_versionbitmap& versionbitmap,
+			enum crofconn_mode_t mode,
+			bool reconnect = true);
+
+	/**
+	 *
+	 */
+	virtual void
+	tls_accept(
+			int sd,
+			const rofl::openflow::cofhello_elem_versionbitmap& versionbitmap,
+			enum crofconn_mode_t mode);
+
+	/**
+	 *
+	 */
+	virtual void
+	tls_connect(
+			const cauxid& auxid,
+			const rofl::openflow::cofhello_elem_versionbitmap& versionbitmap,
+			enum crofconn_mode_t mode,
+			bool reconnect = true);
+
+public:
+
+	/**
+	 *
+	 */
+	enum crofconn_mode_t
+	get_mode() const
+	{ return mode; };
+
+	/**
+	 *
+	 */
+	enum crofconn_state_t
+	get_state() const
+	{ return state; };
+
+	/**
+	 * @brief	Returns true for an established connection
 	 */
 	bool
 	is_established() const
-	{ return (STATE_CONNECTED == state); }
+	{ return (STATE_ESTABLISHED == state); }
 
 	/**
-	 * @brief	Returns true when this connection has been actively established
-	 */
-	bool
-	is_actively_established() const
-	{ return not flags.test(FLAGS_PASSIVE); };
-
-	/**
-	 * @brief	Returns true, when the underlying TCP connection is congested
+	 * @brief	Returns true in case of a congested underlying TCP connection
 	 */
 	bool
 	is_congested() const
-	{ return flags.test(FLAGS_CONGESTED); };
+	{ return flags.test(FLAG_CONGESTED); };
+
+	/**
+	 *
+	 */
+	bool
+	is_transport_established() const
+	{ return rofsock.is_established(); };
+
+	/**
+	 *
+	 */
+	bool
+	is_tls_encrypted() const
+	{ return rofsock.is_tls_encrypted(); };
+
+	/**
+	 *
+	 */
+	bool
+	is_passive() const
+	{ return rofsock.is_passive(); };
+
+	/**
+	 * @brief	Disable reception of messages on this socket.
+	 */
+	void
+	rx_disable()
+	{ rofsock.rx_disable(); };
+
+	/**
+	 * @brief	Reenable reception of messages on this socket.
+	 */
+	void
+	rx_enable()
+	{ rofsock.rx_enable(); };
+
+public:
 
 	/**
 	 * @brief	Returns a reference to the versionbitmap announced by this entity
@@ -320,7 +358,7 @@ public:
 	{ return ofp_version; };
 
 	/**
-	 * @brief	Returns data path id assigned to this connection
+	 * @brief	Returns data pagth id assigned to this connection
 	 */
 	uint64_t
 	get_dpid() const
@@ -330,23 +368,8 @@ public:
 	 * @brief	Return auxiliary_id
 	 */
 	cauxid const&
-	get_aux_id() const
-	{ return auxiliary_id; };
-
-	/**
-	 * @brief	Set auxiliary_id (Used only by crofchan)
-	 */
-	void
-	set_aux_id(
-			const cauxid& auxid)
-	{ this->auxiliary_id = auxid; };
-
-	/**
-	 * @brief
-	 */
-	crofsock const&
-	get_rofsocket() const
-	{ return *rofsock; };
+	get_auxid() const
+	{ return auxid; };
 
 	/**
 	 * @brief	Send OFP message via socket
@@ -356,268 +379,326 @@ public:
 			rofl::openflow::cofmsg *msg)
 	{ return fragment_and_send_message(msg); };
 
-	/**
-	 *
-	 */
-	void
-	set_env(
-			crofconn_env* env)
-	{ this->env = env; };
+public:
 
 	/**
 	 *
 	 */
-	void
-	set_max_backoff(
-			const ctimespec& timespec);
+	const csockaddr&
+	get_laddr() const
+	{ return rofsock.get_laddr(); };
+
+	/**
+	 *
+	 */
+	const csockaddr&
+	get_raddr() const
+	{ return rofsock.get_raddr(); };
+
+public:
+
+	/**
+	 *
+	 */
+	const std::string&
+	get_tls_capath() const
+	{ return rofsock.get_tls_capath(); };
+
+	/**
+	 *
+	 */
+	crofconn&
+	set_tls_capath(
+			const std::string& capath)
+	{ rofsock.set_tls_capath(capath); return *this; };
+
+public:
+
+	/**
+	 *
+	 */
+	const std::string&
+	get_tls_cafile() const
+	{ return rofsock.get_tls_cafile(); };
+
+	/**
+	 *
+	 */
+	crofconn&
+	set_tls_cafile(
+			const std::string& cafile)
+	{ rofsock.set_tls_cafile(cafile); return *this; };
+
+public:
+
+	/**
+	 *
+	 */
+	const std::string&
+	get_tls_certfile() const
+	{ return rofsock.get_tls_certfile(); };
+
+	/**
+	 *
+	 */
+	crofconn&
+	set_tls_certfile(
+			const std::string& certfile)
+	{ rofsock.set_tls_certfile(certfile); return *this; };
+
+public:
+
+	/**
+	 *
+	 */
+	const std::string&
+	get_tls_keyfile() const
+	{ return rofsock.get_tls_keyfile(); };
+
+	/**
+	 *
+	 */
+	crofconn&
+	set_tls_keyfile(
+			const std::string& keyfile)
+	{ rofsock.set_tls_keyfile(keyfile); return *this; };
+
+public:
+
+	/**
+	 *
+	 */
+	const std::string&
+	get_tls_pswd() const
+	{ return rofsock.get_tls_pswd(); };
+
+	/**
+	 *
+	 */
+	crofconn&
+	set_tls_pswd(
+			const std::string& password)
+	{ rofsock.set_tls_pswd(password); return *this; };
+
+public:
+
+	/**
+	 *
+	 */
+	const std::string&
+	get_tls_verify_mode() const
+	{ return rofsock.get_tls_verify_mode(); };
+
+	/**
+	 *
+	 */
+	crofconn&
+	set_tls_verify_mode(
+			const std::string& verify_mode)
+	{ rofsock.set_tls_verify_mode(verify_mode); return *this; };
+
+public:
+
+	/**
+	 *
+	 */
+	const std::string&
+	get_tls_verify_depth() const
+	{ return rofsock.get_tls_verify_depth(); };
+
+	/**
+	 *
+	 */
+	crofconn&
+	set_tls_verify_depth(
+			const std::string& verify_depth)
+	{ rofsock.set_tls_verify_depth(verify_depth); return *this; };
+
+public:
+
+	/**
+	 *
+	 */
+	const std::string&
+	get_tls_ciphers() const
+	{ return rofsock.get_tls_ciphers(); };
+
+	/**
+	 *
+	 */
+	crofconn&
+	set_tls_ciphers(
+			const std::string& ciphers)
+	{ rofsock.set_tls_ciphers(ciphers); return *this; };
 
 private:
+
+	void
+	set_mode(
+			enum crofconn_mode_t mode)
+	{ this->mode = mode; };
+
+	void
+	set_state(
+			enum crofconn_state_t state);
+
+	void
+	set_versionbitmap(
+			const rofl::openflow::cofhello_elem_versionbitmap& versionbitmap)
+	{
+		if (versionbitmap.get_highest_ofp_version() == rofl::openflow::OFP_VERSION_UNKNOWN) {
+			throw eRofConnInvalid("crofconn::set_versionbitmap() versionbitmap invalid");
+		}
+		this->versionbitmap = versionbitmap;
+	};
+
+	void
+	set_versionbitmap_peer(
+			const rofl::openflow::cofhello_elem_versionbitmap& versionbitmap_peer)
+	{ this->versionbitmap_peer = versionbitmap_peer; };
+
+	void
+	set_version(
+			uint8_t ofp_version)
+	{ this->ofp_version = ofp_version; };
+
+	void
+	set_dpid(
+			uint64_t dpid)
+	{ this->dpid = dpid; };
+
+	void
+	set_auxid(
+			const cauxid& auxid)
+	{ this->auxid = auxid; };
+
+private:
+
+	virtual void
+	handle_listen(
+			crofsock& socket, int sd)
+	{ /* not used */ };
 
 	virtual void
 	handle_tcp_connect_refused(
-			crofsock& rofsock) {
-		LOGGING_WARN << "[rofl-common][crofconn] transport connection: connect refused " << std::endl;
-		rofl::ciosrv::notify(rofl::cevent(EVENT_CONNECT_REFUSED));
-	};
+			crofsock& rofsock);
 
 	virtual void
 	handle_tcp_connect_failed(
-			crofsock& rofsock) {
-		LOGGING_DEBUG << "[rofl-common][crofconn] transport connection: connect failed " << std::endl;
-		rofl::ciosrv::notify(rofl::cevent(EVENT_CONNECT_FAILED));
-	};
+			crofsock& rofsock);
 
 	virtual void
 	handle_tcp_connected (
-			crofsock& rofsock) {
-		LOGGING_DEBUG << "[rofl-common][crofconn] transport connection established " << std::endl;
-		rofl::ciosrv::notify(rofl::cevent(EVENT_TCP_CONNECTED));
-	};
+			crofsock& rofsock);
+
+	virtual void
+	handle_tcp_accept_refused(
+			crofsock& socket);
+
+	virtual void
+	handle_tcp_accept_failed(
+			crofsock& socket);
+
+	virtual void
+	handle_tcp_accepted(
+			crofsock& socket);
 
 	virtual void
 	handle_tls_connect_failed(
-			crofsock& socket) {
-
-	};
+			crofsock& socket);
 
 	virtual void
 	handle_tls_connected(
-			crofsock& socket) {
-
-	};
+			crofsock& socket);
 
 	virtual void
 	handle_tls_accept_failed(
-			crofsock& socket) {
-
-	};
+			crofsock& socket);
 
 	virtual void
 	handle_tls_accepted(
-			crofsock& socket) {
-
-	};
+			crofsock& socket);
 
 	virtual void
 	handle_closed(
-			crofsock& rofsock) {
-		LOGGING_DEBUG << "[rofl-common][crofconn] transport connection closed " << std::endl;
-		if (STATE_DISCONNECTED != state) {
-			rofl::ciosrv::notify(rofl::cevent(EVENT_PEER_DISCONNECTED));
-		}
-	};
+			crofsock& rofsock);
 
 	virtual void
-	handle_write(
-			crofsock& rofsock) {
-		LOGGING_DEBUG << "[rofl-common][crofconn] transport connection congested " << std::endl;
-		rofl::ciosrv::notify(rofl::cevent(EVENT_CONGESTION_SOLVED));
-	};
+	handle_send(
+			crofsock& rofsock);
 
 	virtual void
-	recv_message(
-			crofsock& rofsock,
-			rofl::openflow::cofmsg *msg);
+	handle_recv(
+			crofsock& socket, rofl::openflow::cofmsg *msg);
 
 private:
 
-	/**
-	 *
-	 */
-	void
-	handle_messages();
+	virtual void
+	handle_wakeup(
+			cthread& thread);
 
-	/**
-	 *
-	 */
-	void
-	send_message_to_env(
-			rofl::openflow::cofmsg* msg);
-
-	/**
-	 *
-	 */
 	virtual void
 	handle_timeout(
-			int opaque,
-			void *data = (void*)0);
+			cthread& thread, uint32_t timer_id, const std::list<unsigned int>& ttypes);
 
-	/**
-	 *
-	 */
 	virtual void
-	handle_event(
-			const cevent& ev) {
-		switch (ev.get_cmd()) {
-		case EVENT_RXQUEUE: {
-			handle_messages();
-		} break;
-		case EVENT_TCP_CONNECTED: {
-			flags.reset(FLAGS_RECONNECTING);
-			run_engine(EVENT_TCP_CONNECTED);
-		} break;
-		case EVENT_CONNECT_FAILED: {
-			flags.set(FLAGS_CONNECT_FAILED);
-			run_engine(EVENT_DISCONNECTED);
-		} break;
-		case EVENT_CONNECT_REFUSED: {
-			flags.set(FLAGS_CONNECT_REFUSED);
-			run_engine(EVENT_DISCONNECTED);
-		} break;
-		case EVENT_LOCAL_DISCONNECT: {
-			flags.set(FLAGS_LOCAL_DISCONNECT);
-			run_engine(EVENT_DISCONNECTED);
-		} break;
-		case EVENT_CONGESTION_SOLVED: {
-			flags.reset(FLAGS_CONGESTED);
-			crofconn_env::set_env(env).handle_write(*this);
-		} break;
-		case EVENT_PEER_DISCONNECTED: {
-			flags.set(FLAGS_PEER_DISCONNECTED);
-			run_engine(EVENT_DISCONNECTED);
-		} break;
-		}
-	};
+	handle_read_event(
+			cthread& thread, int fd);
 
-	/**
-	 *
-	 */
-	void
-	run_engine(
-			enum crofconn_event_t event = EVENT_NONE);
-
-	/**
-	 *
-	 */
-	void
-	event_reconnect();
-
-	/**
-	 *
-	 */
-	void
-	event_tcp_connected();
-
-	/**
-	 *
-	 */
-	void
-	event_disconnected();
-
-	/**
-	 *
-	 */
-	void
-	event_hello_rcvd();
-
-	/**
-	 *
-	 */
-	void
-	event_hello_expired();
-
-	/**
-	 *
-	 */
-	void
-	event_features_rcvd();
-
-	/**
-	 *
-	 */
-	void
-	event_features_expired();
-
-	/**
-	 *
-	 */
-	void
-	event_echo_rcvd();
-
-	/**
-	 *
-	 */
-	void
-	event_echo_expired();
-
-	/**
-	 *
-	 */
-	void
-	event_need_life_check();
-
-	/**
-	 *
-	 */
-	void
-	action_send_hello_message();
-
-	/**
-	 *
-	 */
-	void
-	action_send_features_request();
-
-	/**
-	 *
-	 */
-	void
-	action_disconnect();
-
-	/**
-	 *
-	 */
-	void
-	action_send_echo_request();
-
-	/**
-	 *
-	 */
-	void
-	backoff_reconnect(
-			bool reset_timeout = false);
+	virtual void
+	handle_write_event(
+			cthread& thread, int fd);
 
 private:
 
-	/**
-	 *
-	 */
+	void
+	handle_rx_internal();
+
+	void
+	handle_rx_external();
+
+private:
+
+	void
+	send_hello_message();
+
 	void
 	hello_rcvd(
-			rofl::openflow::cofmsg *msg);
+			rofl::openflow::cofmsg* msg);
 
-	/**
-	 *
-	 */
 	void
-	echo_request_rcvd(
-			rofl::openflow::cofmsg *msg);
+	hello_expired();
 
-	/**
-	 *
-	 */
+private:
+
+	void
+	send_features_request();
+
+	void
+	features_reply_rcvd(
+			rofl::openflow::cofmsg* msg);
+
+	void
+	features_request_expired();
+
+private:
+
+	void
+	send_echo_request();
+
 	void
 	echo_reply_rcvd(
+			rofl::openflow::cofmsg* msg);
+
+	void
+	echo_request_expired();
+
+private:
+
+
+
+	void
+	echo_request_rcvd(
 			rofl::openflow::cofmsg *msg);
 
 	/**
@@ -718,109 +799,22 @@ private:
 	fragment_meter_config_stats_reply(
 			rofl::openflow::cofmsg_meter_config_stats_reply *msg);
 
-	/**
-	 *
-	 */
-	void
-	timer_start(
-			crofconn_timer_t type, const ctimespec& timespec);
-
-	/**
-	 *
-	 */
-	void
-	timer_stop(
-			crofconn_timer_t type);
-
-	/**
-	 *
-	 */
-	void
-	timer_start_next_reconnect() {
-		timer_start(TIMER_NEXT_RECONNECT, reconnect_timespec);
-	};
-
-	/**
-	 *
-	 */
-	void
-	timer_stop_next_reconnect() {
-		timer_stop(TIMER_NEXT_RECONNECT);
-	};
-
-	/**
-	 *
-	 */
-	void
-	timer_start_life_check() {
-		timer_start(TIMER_NEED_LIFE_CHECK, echo_interval);
-	};
-
-	/**
-	 *
-	 */
-	void
-	timer_stop_life_check() {
-		timer_stop(TIMER_NEED_LIFE_CHECK);
-	};
-
-	/**
-	 *
-	 */
-	void
-	timer_start_wait_for_hello() {
-		timer_start(TIMER_WAIT_FOR_HELLO, hello_timeout);
-	};
-
-	/**
-	 *
-	 */
-	void
-	timer_stop_wait_for_hello() {
-		timer_stop(TIMER_WAIT_FOR_HELLO);
-	};
-
-	/**
-	 *
-	 */
-	void
-	timer_start_wait_for_features() {
-		timer_start(TIMER_WAIT_FOR_FEATURES, echo_interval);
-	};
-
-	/**
-	 *
-	 */
-	void
-	timer_stop_wait_for_features() {
-		timer_stop(TIMER_WAIT_FOR_FEATURES);
-	};
-
-	/**
-	 *
-	 */
-	void
-	timer_start_wait_for_echo() {
-		timer_start(TIMER_WAIT_FOR_ECHO, echo_timeout);
-	};
-
-	/**
-	 *
-	 */
-	void
-	timer_stop_wait_for_echo() {
-		timer_stop(TIMER_WAIT_FOR_ECHO);
-	};
-
 public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, const crofconn& conn) {
-		os << indent(0) << "<crofconn ofp-version:" << (int)conn.ofp_version
-				<< " OFP-transport-connection-established: " << (bool)(conn.state == STATE_CONNECTED)
-				<< " >" << std::endl;
-		{ rofl::indent i(2); os << conn.get_aux_id(); }
-		if (conn.state == STATE_DISCONNECTED) {
+		os << indent(0) << "<crofconn ofp-version:" << (int)conn.ofp_version << " "
+				<< "connection-established: " << conn.is_established() << " "
+				<< "transport-connection-established: " << conn.is_transport_established() << " "
+				<< ">" << std::endl;
+		{ rofl::indent i(2); os << conn.get_auxid(); }
+		if (conn.state == STATE_NEGOTIATION_FAILED) {
+			os << indent(2) << "<state: -NEGOTIATION-FAILED- >" << std::endl;
+		}
+		else if (conn.state == STATE_CLOSING) {
+			os << indent(2) << "<state: -CLOSING- >" << std::endl;
+		}
+		else if (conn.state == STATE_DISCONNECTED) {
 			os << indent(2) << "<state: -DISCONNECTED- >" << std::endl;
 		}
 		else if (conn.state == STATE_CONNECT_PENDING) {
@@ -829,121 +823,134 @@ public:
 		else if (conn.state == STATE_ACCEPT_PENDING) {
 			os << indent(2) << "<state: -ACCEPT-PENDING- >" << std::endl;
 		}
-		else if (conn.state == STATE_WAIT_FOR_HELLO) {
-			os << indent(2) << "<state: -WAIT-FOR-HELLO- >" << std::endl;
+		else if (conn.state == STATE_NEGOTIATING) {
+			os << indent(2) << "<state: -NEGOTIATING- >" << std::endl;
 		}
-		else if (conn.state == STATE_WAIT_FOR_FEATURES) {
-			os << indent(2) << "<state: -WAIT-FOR-FEATURES- >" << std::endl;
+		else if (conn.state == STATE_NEGOTIATING2) {
+			os << indent(2) << "<state: -NEGOTIATING2- >" << std::endl;
 		}
-		else if (conn.state == STATE_CONNECTED) {
+		else if (conn.state == STATE_ESTABLISHED) {
 			os << indent(2) << "<state: -ESTABLISHED- >" << std::endl;
 		}
-		{ os << rofl::indent(2) << "<current-backoff: >" << std::endl; rofl::indent i(4); os << conn.reconnect_timespec; };
-		{ os << rofl::indent(2) << "<max-backoff: >" << std::endl; rofl::indent i(4); os << conn.max_backoff; };
-#if 0
-		os << indent(2) << "<versionbitmap-local: >" << std::endl;
-		{ indent i(4); os << conn.versionbitmap; }
-		os << indent(2) << "<versionbitmap-remote: >" << std::endl;
-		{ indent i(4); os << conn.versionbitmap_peer; }
-#endif
 		return os;
 	};
 
 	std::string
 	str() const {
 		std::stringstream ss;
+		ss << "<crofconn ofp-version:" << (int)ofp_version << " "
+				<< "connection-established: " << is_established() << " "
+				<< "transport-connection-established: " << is_transport_established() << " ";
+		if (state == STATE_NEGOTIATION_FAILED) {
+			ss << "state: -NEGOTIATION-FAILED- ";
+		} else
+		if (state == STATE_CLOSING) {
+			ss << "state: -CLOSING- ";
+		} else
 		if (state == STATE_DISCONNECTED) {
 			ss << "state: -DISCONNECTED- ";
-		}
-		else if (state == STATE_CONNECT_PENDING) {
+		} else
+		if (state == STATE_CONNECT_PENDING) {
 			ss << "state: -CONNECT-PENDING- ";
-			ss << "backoff: " << reconnect_timespec.str();
-		}
-		else if (state == STATE_ACCEPT_PENDING) {
+		} else
+		if (state == STATE_ACCEPT_PENDING) {
 			ss << "state: -ACCEPT-PENDING- ";
-		}
-		else if (state == STATE_WAIT_FOR_HELLO) {
-			ss << "state: -WAIT-FOR-HELLO- ";
-		}
-		else if (state == STATE_WAIT_FOR_FEATURES) {
-			ss << "state: -WAIT-FOR-FEATURES- ";
-		}
-		else if (state == STATE_CONNECTED) {
+		} else
+		if (state == STATE_NEGOTIATING) {
+			ss << "state: -NEGOTIATING- ";
+		} else
+		if (state == STATE_NEGOTIATING2) {
+			ss << "state: -NEGOTIATING2- ";
+		} else
+		if (state == STATE_ESTABLISHED) {
 			ss << "state: -ESTABLISHED- ";
 		}
+		<< ">";
 		return ss.str();
 	};
 
 private:
 
-	crofconn_env* 		env;
-	uint64_t			dpid;
-	cauxid				auxiliary_id;
-	pthread_t			rofsocktid;				// IO thread identifier
-	crofsock*			rofsock;
-	rofl::openflow::cofhello_elem_versionbitmap
-						versionbitmap; 			// supported OFP versions by this entity
-	rofl::openflow::cofhello_elem_versionbitmap
-						versionbitmap_peer;		// supported OFP versions by peer entity
-	uint8_t				ofp_version;			// negotiated OFP version
-	std::bitset<32>		flags;
-	csegmentation		sar;					// segmentation and reassembly for multipart messages
-	size_t				fragmentation_threshold;// maximum number of bytes for a multipart message before being fragmented
+	// environment for this instance
+	crofconn_env* 		        env;
 
-	static unsigned int const
-						DEFAULT_FRAGMENTATION_THRESHOLD = 65535;
-	static unsigned int const
-						DEFAULT_ETHERNET_MTU_SIZE = 1500;
-	ctimespec			max_backoff;
-	ctimespec			reconnect_start_timeout;
-	ctimespec			reconnect_timespec; 	// reconnect in x seconds
-	ctimespec			reconnect_variance;
-	int 				reconnect_counter;
+	// internal thread for urgent data
+	cthread                     thread_int;
 
-	static const int 	CROFCONN_RECONNECT_START_TIMEOUT_IN_NSECS 	= 10000000;	// start reconnect timeout (default 10ms)
-	static const int 	CROFCONN_RECONNECT_VARIANCE_IN_NSECS 		= 10000000; // reconnect variance (default 10ms)
+	// external thread for application data
+	cthread                     thread_ext;
 
-	enum crofconn_flavour_t
-						flavour;
-	enum rofl::csocket::socket_type_t
-						socket_type;
-	rofl::cparams
-						socket_params;
-	int					newsd;
-	std::deque<enum crofconn_event_t>
-						events;
-	enum crofconn_state_t
-						state;
-	std::map<crofconn_timer_t, ctimerid>
-						timer_ids;				// timer-ids obtained from ciosrv
+	// crofsock instance
+	crofsock                    rofsock;
 
-	std::vector<crofqueue>
-						rxqueues;				// queues for receiving messages from crofsock instance => // QUEUE_MAX txqueues
+	// OpenFlow datapath id
+	uint64_t			        dpid;
 
-	bool                rx_pending_messages;
+	// connection identifier
+	cauxid				        auxid;
+
+	// bitmap of acceptable OpenFlow versions
+	rofl::openflow::cofhello_elem_versionbitmap versionbitmap;
+
+	// bitmap of offered OpenFlow versions by peer
+	rofl::openflow::cofhello_elem_versionbitmap versionbitmap_peer;
+
+	// OpenFlow version negotiated
+	uint8_t				        ofp_version;
+
+	// internal flags
+	std::bitset<32>		        flags;
+
+	// acts in controller or datapath mode (orthogonal to TCP client/server mode)
+	enum crofconn_mode_t        mode;
+
+	// internal state of finite state machine
+	enum crofconn_state_t       state;
+
+	// relative scheduling weights for rxqueues
+	std::vector<unsigned int>   rxweights;
+
+	std::vector<crofqueue>      rxqueues;
+
+	// internal thread is working on pending messages
+	bool                        rx_internal_working;
+
+	// external thread is working on pending messages
+	bool                        rx_external_working;
 
 	// maximum number of messages inside a rofqueue, before blocking the socket
-	unsigned int        rx_max_queue_size;
+	unsigned int                rx_max_queue_size;
+
 	// default value for rx_max_queue_size (128)
-	static const int    DEFAULT_RX_MAX_QUEUE_SIZE = 128;
+	static const int            DEFAULT_RX_MAX_QUEUE_SIZE = 128;
 
-	bool                rx_need_lifecheck;
 
-	std::vector<unsigned int>
-						rxweights;				// relative scheduling weights for txqueues
 
-	rofl::crofqueue		dlqueue;				// delay queue, used for storing asynchronous messages during connection setup
 
-	static const int 	DEFAULT_HELLO_TIMEOUT = 5;
-	static const int 	DEFAULT_ECHO_TIMEOUT = 60;
-	static const int 	DEFAULT_ECHO_INTERVAL = 60;
+
+
+
+	csegmentation		    sar;					// segmentation and reassembly for multipart messages
+	size_t				    fragmentation_threshold;// maximum number of bytes for a multipart message before being fragmented
+
+	static unsigned int const DEFAULT_FRAGMENTATION_THRESHOLD = 65535;
+	static unsigned int const DEFAULT_ETHERNET_MTU_SIZE = 1500;
+
+
+	bool                    rx_need_lifecheck;
+
+	rofl::crofqueue		    dlqueue;				// delay queue, used for storing asynchronous messages during connection setup
+
+	static const int 	    DEFAULT_HELLO_TIMEOUT = 5;
+	static const int 	    DEFAULT_ECHO_TIMEOUT = 60;
+	static const int 	    DEFAULT_ECHO_INTERVAL = 60;
 
 public:
 
-	unsigned int		hello_timeout;
-	unsigned int		echo_timeout;
-	unsigned int		echo_interval;
-
+	unsigned int		    timeout_hello;
+	unsigned int		    timeout_features;
+	unsigned int		    timeout_echo;
+	unsigned int		    timeout_lifecheck;
 };
 
 }; /* namespace rofl */

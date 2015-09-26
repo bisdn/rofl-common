@@ -226,7 +226,7 @@ protected:
 			crofsock& socket) = 0;
 
 	virtual void
-	handle_write(
+	handle_send(
 			crofsock& socket) = 0;
 
 	virtual void
@@ -304,40 +304,40 @@ public:
 	/**
 	 *
 	 */
-	void
+	virtual void
 	close();
 
 	/**
 	 *
 	 */
-	void
+	virtual void
 	listen();
 
 	/**
 	 *
 	 */
-	void
+	virtual void
 	tcp_accept(
 			int sd);
 
 	/**
 	 *
 	 */
-	void
+	virtual void
 	tcp_connect(
 			bool reconnect = true);
 
 	/**
 	 *
 	 */
-	void
+	virtual void
 	tls_accept(
 			int sd);
 
 	/**
 	 *
 	 */
-	void
+	virtual void
 	tls_connect(
 			bool reconnect = true);
 
@@ -355,6 +355,18 @@ public:
 	 */
 	bool
 	is_established() const;
+
+	/**
+	 *
+	 */
+	bool
+	is_tls_encrypted() const;
+
+	/**
+	 *
+	 */
+	bool
+	is_passive() const;
 
 	/**
 	 * @brief	Disable reception of messages on this socket.
@@ -388,25 +400,9 @@ public:
 	/**
 	 *
 	 */
-	crofsock&
-	set_laddr(
-			const csockaddr& laddr)
-	{ this->laddr = laddr; return *this; };
-
-	/**
-	 *
-	 */
 	const csockaddr&
 	get_laddr() const
 	{ return laddr; };
-
-	/**
-	 *
-	 */
-	crofsock&
-	set_raddr(
-			const csockaddr& raddr)
-	{ this->raddr = raddr; return *this; };
 
 	/**
 	 *

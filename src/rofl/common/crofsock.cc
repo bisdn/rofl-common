@@ -1045,6 +1045,22 @@ crofsock::is_established() const
 
 
 
+bool
+crofsock::is_tls_encrypted() const
+{
+	return flags.test(FLAG_TLS_IN_USE);
+}
+
+
+
+bool
+crofsock::is_passive() const
+{
+	return (MODE_SERVER == mode);
+}
+
+
+
 void
 crofsock::rx_disable()
 {
@@ -1268,7 +1284,7 @@ crofsock::send_from_queue()
 					case EAGAIN: /* socket would block */ {
 						flags.set(FLAG_CONGESTED);
 						txthread.add_write_fd(sd);
-						env->handle_write(*this);
+						crofsock_env::call_env(env).handle_send(*this);
 					} return;
 					case SIGPIPE:
 					default: {

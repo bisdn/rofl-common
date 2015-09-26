@@ -321,9 +321,9 @@ private:
 	virtual void
 	handle_connect_refused(crofconn& conn) {
 		LOGGING_DEBUG2 << "[rofl-common][crofchan] "
-				<< "connection refused, auxid: " << conn.get_aux_id().str() << std::endl;
+				<< "connection refused, auxid: " << conn.get_auxid().str() << std::endl;
 		rofl::RwLock(conns_rwlock, rofl::RwLock::RWLOCK_WRITE);
-		conns_refused.push_back(conn.get_aux_id());
+		conns_refused.push_back(conn.get_auxid());
 		rofl::ciosrv::notify(rofl::cevent(EVENT_CONN_REFUSED));
 	};
 
@@ -333,9 +333,9 @@ private:
 	virtual void
 	handle_connect_failed(crofconn& conn) {
 		LOGGING_DEBUG2 << "[rofl-common][crofchan] "
-				<< "connection failed, auxid: " << conn.get_aux_id().str() << std::endl;
+				<< "connection failed, auxid: " << conn.get_auxid().str() << std::endl;
 		rofl::RwLock(conns_rwlock, rofl::RwLock::RWLOCK_WRITE);
-		conns_failed.push_back(conn.get_aux_id());
+		conns_failed.push_back(conn.get_auxid());
 		rofl::ciosrv::notify(rofl::cevent(EVENT_CONN_FAILED));
 	};
 
@@ -345,9 +345,9 @@ private:
 	virtual void
 	handle_connected(crofconn& conn, uint8_t ofp_version) {
 		LOGGING_DEBUG2 << "[rofl-common][crofchan] "
-				<< "connection established, auxid: " << conn.get_aux_id().str() << std::endl;
+				<< "connection established, auxid: " << conn.get_auxid().str() << std::endl;
 		rofl::RwLock(conns_rwlock, rofl::RwLock::RWLOCK_WRITE);
-		conns_established.push_back(conn.get_aux_id());
+		conns_established.push_back(conn.get_auxid());
 		rofl::ciosrv::notify(rofl::cevent(EVENT_CONN_ESTABLISHED));
 	};
 
@@ -357,9 +357,9 @@ private:
 	virtual void
 	handle_closed(crofconn& conn) {
 		LOGGING_DEBUG2 << "[rofl-common][crofchan] "
-				<< "connection terminated, auxid: " << conn.get_aux_id().str() << std::endl;
+				<< "connection terminated, auxid: " << conn.get_auxid().str() << std::endl;
 		rofl::RwLock(conns_rwlock, rofl::RwLock::RWLOCK_WRITE);
-		conns_terminated.push_back(conn.get_aux_id());
+		conns_terminated.push_back(conn.get_auxid());
 		rofl::ciosrv::notify(rofl::cevent(EVENT_CONN_TERMINATED));
 	};
 
@@ -368,17 +368,17 @@ private:
 	 */
 	virtual void
 	handle_write(crofconn& conn) {
-		env->handle_write(*this, conn.get_aux_id());
+		env->handle_write(*this, conn.get_auxid());
 	};
 
 	virtual void
 	recv_message(crofconn& conn, rofl::openflow::cofmsg *msg) {
 		if ((this->ofp_version == rofl::openflow::OFP_VERSION_UNKNOWN) &&
-				(conn.get_aux_id() == rofl::cauxid(0)) &&
+				(conn.get_auxid() == rofl::cauxid(0)) &&
 				(conn.get_version() == msg->get_version())) {
 			this->ofp_version = conn.get_version();
 		}
-		env->recv_message(*this, conn.get_aux_id(), msg);
+		env->recv_message(*this, conn.get_auxid(), msg);
 	};
 
 	/**

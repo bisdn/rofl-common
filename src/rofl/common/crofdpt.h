@@ -1192,10 +1192,10 @@ public:
 		if (NULL == conn) {
 			return;
 		}
-		if (rofl::cauxid(0) == conn->get_aux_id()) {
+		if (rofl::cauxid(0) == conn->get_auxid()) {
 			dpid = rofl::cdpid(conn->get_dpid());
 		}
-		rofchan.add_conn(conn->get_aux_id(), conn);
+		rofchan.add_conn(conn->get_auxid(), conn);
 	};
 
 	/**@}*/

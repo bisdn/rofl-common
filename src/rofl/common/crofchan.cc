@@ -210,7 +210,7 @@ crofchan::add_conn(
 		if (conns.find(cauxid(0)) == conns.end()) {
 			auxid = cauxid(0);
 			this->ofp_version = conn->get_version();
-			conn->set_aux_id(cauxid(0));
+			conn->set_auxid(cauxid(0));
 		}
 
 		// remove existing auxiliary connection

@@ -879,7 +879,7 @@ public:
 		if (NULL == conn) {
 			return;
 		}
-		rofchan.add_conn(conn->get_aux_id(), conn);
+		rofchan.add_conn(conn->get_auxid(), conn);
 	};
 
 	/**@}*/
