@@ -88,17 +88,19 @@ crofsock::close()
 		/* TLS down, TCP down => set rx_disabled flag back to false */
 		rx_disabled = false;
 
-	} break;
-	case STATE_CLOSED: {
-
 		/* remove all pending messages from tx queues */
 		for (auto queue : txqueues) {
 			queue.clear();
 		}
 
+	} break;
+	case STATE_CLOSED: {
+
 		/* stop threads */
 		rxthread.stop();
 		txthread.stop();
+
+		sleep(1);
 
 		state = STATE_IDLE;
 

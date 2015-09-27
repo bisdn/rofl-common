@@ -152,6 +152,14 @@ private:
 
 private:
 
+	void
+	send_packet_in();
+
+	void
+	send_packet_out();
+
+private:
+
 	enum crofconn_test_mode_t {
 		TEST_MODE_TCP = 1,
 		TEST_MODE_TLS = 2,

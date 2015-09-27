@@ -32,37 +32,41 @@ void
 crofconntest::test()
 {
 	try {
-		test_mode = TEST_MODE_TCP;
-		keep_running = true;
-		msg_counter = 0;
-		xid = 0xa1a2a3a4;
-		server_established = false;
-		client_established = false;
+		for (unsigned int i = 0; i < 10; i++) {
+			test_mode = TEST_MODE_TCP;
+			keep_running = true;
+			msg_counter = 0;
+			xid = 0xa1a2a3a4;
+			server_established = false;
+			client_established = false;
 
-		slisten = new rofl::crofsock(this);
-		sclient = new rofl::crofconn(this);
+			slisten = new rofl::crofsock(this);
+			sclient = new rofl::crofconn(this);
 
-		/* open listening socket in crofsock instance */
-		rofl::csockaddr baddr(rofl::caddress_in4("127.0.0.1"), 4999);
-		slisten->set_baddr(baddr).listen();
+			/* open listening socket in crofsock instance */
+			rofl::csockaddr baddr(rofl::caddress_in4("127.0.0.1"), 4999);
+			slisten->set_baddr(baddr).listen();
 
-		/* create new crofconn instance and connect to peer */
-		versionbitmap_dpt.add_ofp_version(rofl::openflow10::OFP_VERSION);
-		versionbitmap_dpt.add_ofp_version(rofl::openflow12::OFP_VERSION);
-		versionbitmap_dpt.add_ofp_version(rofl::openflow13::OFP_VERSION);
-		sclient->set_raddr(baddr).tcp_connect(rofl::cauxid(0), versionbitmap_dpt, rofl::crofconn::MODE_DATAPATH, /*reconnect=*/false);
+			/* create new crofconn instance and connect to peer */
+			versionbitmap_dpt.add_ofp_version(rofl::openflow10::OFP_VERSION);
+			versionbitmap_dpt.add_ofp_version(rofl::openflow12::OFP_VERSION);
+			versionbitmap_dpt.add_ofp_version(rofl::openflow13::OFP_VERSION);
+			sclient->set_raddr(baddr).tcp_connect(rofl::cauxid(0), versionbitmap_dpt, rofl::crofconn::MODE_DATAPATH, /*reconnect=*/false);
 
 
-		while (keep_running) {
-			struct timespec ts;
-			ts.tv_sec = 1;
-			ts.tv_nsec = 0;
-			pselect(0, NULL, NULL, NULL, &ts, NULL);
+			while (keep_running) {
+				struct timespec ts;
+				ts.tv_sec = 1;
+				ts.tv_nsec = 0;
+				pselect(0, NULL, NULL, NULL, &ts, NULL);
+			}
+
+			sleep(2);
+
+			delete slisten;
+			delete sclient;
+			delete sserver;
 		}
-
-		delete slisten;
-		delete sclient;
-		delete sserver;
 
 	} catch (rofl::eSysCall& e) {
 		std::cerr << "crofconntest::test() exception, what: " << e.what() << std::endl;
@@ -163,9 +167,11 @@ crofconntest::handle_established(
 
 	if (&conn == sserver) {
 		server_established = true;
+		send_packet_out();
 	} else
 	if (&conn == sclient) {
 		client_established = true;
+		send_packet_in();
 	}
 
 	if (client_established && server_established) {
@@ -233,7 +239,7 @@ void
 crofconntest::handle_recv(
 		rofl::crofconn& conn, rofl::openflow::cofmsg* pmsg)
 {
-	std::cerr << "crofconntest::handle_recv()" << std::endl << conn;
+	std::cerr << "crofconntest::handle_recv() " << conn.str() << std::endl;
 
 	dpid = 0xc1c2c3c4c5c6c7c8;
 	auxid = 0xd1;
@@ -281,6 +287,34 @@ crofconntest::release_sync_xid(
 		rofl::crofconn& conn, uint32_t xid)
 {
 
+}
+
+
+
+void
+crofconntest::send_packet_in()
+{
+	for (int i = 0; i < 100; i++) {
+		rofl::openflow::cofmsg_packet_in* msg =
+				new rofl::openflow::cofmsg_packet_in(
+						rofl::openflow13::OFP_VERSION,
+						get_sync_xid(*sclient));
+		sclient->send_message(msg);
+	}
+}
+
+
+
+void
+crofconntest::send_packet_out()
+{
+	for (int i = 0; i < 100; i++) {
+		rofl::openflow::cofmsg_packet_out* msg =
+				new rofl::openflow::cofmsg_packet_out(
+						rofl::openflow13::OFP_VERSION,
+						get_sync_xid(*sserver));
+		sserver->send_message(msg);
+	}
 }
 
 
