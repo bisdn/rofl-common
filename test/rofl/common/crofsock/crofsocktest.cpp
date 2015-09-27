@@ -32,31 +32,39 @@ void
 crofsocktest::test()
 {
 	try {
-		test_mode = TEST_MODE_TCP;
-		keep_running = true;
-		msg_counter = 0;
+		for (unsigned int i = 0; i < 2; i++) {
+			test_mode = TEST_MODE_TCP;
+			keep_running = true;
+			msg_counter = 0;
 
-		slisten = new rofl::crofsock(this);
-		sclient = new rofl::crofsock(this);
+			slisten = new rofl::crofsock(this);
+			sclient = new rofl::crofsock(this);
 
-		rofl::csockaddr baddr(rofl::caddress_in4("127.0.0.1"), 4999);
+			rofl::csockaddr baddr(rofl::caddress_in4("127.0.0.1"), 4999);
 
-		sclient->set_raddr(baddr).tcp_connect(true);
+			sclient->set_raddr(baddr).tcp_connect(true);
 
-		sleep(5);
+			sleep(5);
 
-		slisten->set_baddr(baddr).listen();
+			slisten->set_baddr(baddr).listen();
 
-		while (keep_running) {
-			struct timespec ts;
-			ts.tv_sec = 0;
-			ts.tv_nsec = 1000;
-			pselect(0, NULL, NULL, NULL, &ts, NULL);
+			while (keep_running) {
+				struct timespec ts;
+				ts.tv_sec = 0;
+				ts.tv_nsec = 1000;
+				pselect(0, NULL, NULL, NULL, &ts, NULL);
+			}
+
+			slisten->close();
+			sclient->close();
+			sserver->close();
+
+			sleep(5);
+
+			delete slisten;
+			delete sclient;
+			delete sserver;
 		}
-
-		delete slisten;
-		delete sclient;
-		delete sserver;
 
 	} catch (rofl::eSysCall& e) {
 		std::cerr << "crofsocktest::test() exception, what: " << e.what() << std::endl;

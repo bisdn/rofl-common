@@ -75,10 +75,6 @@ crofsock::crofsock(
 	txweights[QUEUE_MGMT] = 32;
 	txweights[QUEUE_FLOW] = 16;
 	txweights[QUEUE_PKT ] =  8;
-
-	/* start thread */
-	rxthread.start();
-	txthread.start();
 }
 
 
@@ -99,6 +95,10 @@ crofsock::close()
 		for (auto queue : txqueues) {
 			queue.clear();
 		}
+
+		/* stop threads */
+		rxthread.stop();
+		txthread.stop();
 
 		state = STATE_IDLE;
 
@@ -127,7 +127,19 @@ crofsock::close()
 		crofsock::close();
 
 	} break;
-	case STATE_TCP_ACCEPTING:
+	case STATE_TCP_ACCEPTING: {
+
+		rxthread.drop_read_fd(sd, false);
+		if (flags.test(FLAG_CONGESTED)) {
+			txthread.drop_write_fd(sd);
+		}
+		::close(sd); sd = -1;
+
+		state = STATE_CLOSED;
+
+		crofsock::close();
+
+	} break;
 	case STATE_TCP_ESTABLISHED: {
 
 		/* block reception of any further data from remote side */
@@ -137,6 +149,8 @@ crofsock::close()
 		if (flags.test(FLAG_CONGESTED)) {
 			txthread.drop_write_fd(sd);
 		}
+		shutdown(sd, O_RDWR);
+		sleep(1);
 		::close(sd); sd = -1;
 
 		state = STATE_CLOSED;
@@ -161,7 +175,7 @@ crofsock::close()
 	case STATE_TLS_ESTABLISHED: {
 
 		/* block reception of any further data from remote side */
-		rx_disable();
+		rx_disabled = true;
 
 		if (ssl) {
 			SSL_shutdown(ssl);
@@ -191,6 +205,9 @@ crofsock::listen()
 	if (sd >= 0) {
 		close();
 	}
+
+	/* start thread */
+	rxthread.start();
 
 	/* cancel potentially pending reconnect timer */
 	rxthread.drop_timer(TIMER_ID_RECONNECT);
@@ -276,6 +293,10 @@ crofsock::tcp_accept(
 			close();
 		}
 
+		/* start thread */
+		rxthread.start();
+		txthread.start();
+
 		/* cancel potentially pending reconnect timer */
 		rxthread.drop_timer(TIMER_ID_RECONNECT);
 
@@ -358,6 +379,10 @@ crofsock::tcp_connect(
 		if (sd > 0) {
 			close();
 		}
+
+		/* start thread */
+		rxthread.start();
+		txthread.start();
 
 		/* cancel potentially pending reconnect timer */
 		rxthread.drop_timer(TIMER_ID_RECONNECT);

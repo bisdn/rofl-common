@@ -23,6 +23,8 @@ cthread::initialize()
 {
 	int pipe_flags = O_NONBLOCK;
 
+	tid = 0;
+
 	wakeup_pending = false;
 
 	// worker thread
