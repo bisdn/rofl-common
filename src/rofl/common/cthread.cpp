@@ -407,7 +407,7 @@ cthread::run_loop()
 #endif
 				}
 			}
-#if 1
+#if 0
 			std::cerr << ">>> P0.0 (final) timeout: " << timeout << std::endl;
 #endif
 

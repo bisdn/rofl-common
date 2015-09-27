@@ -1137,12 +1137,8 @@ crofconn::handle_rx_messages()
 
 	thread.add_timer(TIMER_ID_NEED_LIFE_CHECK, ctimespec().expire_in(timeout_lifecheck));
 
-	try {
-		/* reenable reception of messages on socket */
-		//rofsock.rx_enable();
-	} catch (std::runtime_error& e) {
-		std::cerr << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> AHA, what: " << e.what() << std::endl;
-	}
+	/* reenable reception of messages on socket */
+	rofsock.rx_enable();
 }
 
 

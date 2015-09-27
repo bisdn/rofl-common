@@ -1093,7 +1093,7 @@ crofsock::rx_enable()
 	case STATE_TCP_ESTABLISHED:
 	case STATE_TLS_ESTABLISHED: {
 		rx_disabled = false;
-		rxthread.add_read_fd(sd);
+		rxthread.add_read_fd(sd, false);
 	} break;
 	default: {
 
