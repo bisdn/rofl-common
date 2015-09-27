@@ -310,12 +310,12 @@ public:
 	str() const {
 		std::stringstream ss;
 		ss << cofmsg::str() << "-Features-Reply- " << " ";
-		ss << "dpid: " << cdpid(get_dpid()).str() << ", ";
+		ss << "dpid: 0x" << std::hex << cdpid(get_dpid()).str() << std::dec << ", ";
 		if (get_version() >= rofl::openflow13::OFP_VERSION) {
-			ss << "auxid: " << cauxid(get_auxid()).str() << ", ";
+			ss << "auxid: 0x" << cauxid(get_auxid()).str() << ", ";
 		}
-		ss << "#buffers: " << (unsigned int)get_n_buffers() << ", ";
-		ss << "#tables: " << (int)get_n_tables() << " ";
+		ss << "#buffers: 0x" << std::hex << (unsigned int)get_n_buffers() << std::dec << ", ";
+		ss << "#tables: 0x"  << std::hex << (int)get_n_tables() << std::dec << " ";
 		return ss.str();
 	};
 

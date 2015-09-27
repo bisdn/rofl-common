@@ -19,8 +19,8 @@ class crofsocktest :
 		public rofl::crofsock_env
 {
 	CPPUNIT_TEST_SUITE( crofsocktest );
-	CPPUNIT_TEST( test_tls );
-	//CPPUNIT_TEST( test );
+	CPPUNIT_TEST( test );
+	//CPPUNIT_TEST( test_tls );
 	CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -82,7 +82,7 @@ private:
 			rofl::crofsock& socket);
 
 	virtual void
-	handle_write(
+	handle_send(
 			rofl::crofsock& socket);
 
 	virtual void

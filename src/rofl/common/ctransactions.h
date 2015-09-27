@@ -12,7 +12,7 @@
 #include <map>
 
 #include "rofl/common/thread_helper.h"
-#include "rofl/common/ciosrv.h"
+#include "rofl/common/cthread.hpp"
 #include "rofl/common/ctransaction.h"
 #include "rofl/common/crandom.h"
 #include "rofl/common/ctimerid.h"
@@ -34,16 +34,9 @@ protected:
 
 class ctransactions :
 		public std::list<ctransaction>,
-		public rofl::ciosrv
+		public cthread_env
 {
 public:
-
-	/**
-	 *
-	 */
-	ctransactions(
-			ctransactions_env *env,
-			pthread_t tid = 0);
 
 	/**
 	 *
@@ -55,9 +48,15 @@ public:
 	 *
 	 */
 	ctransactions(
+			ctransactions_env *env);
+
+	/**
+	 *
+	 */
+	ctransactions(
 			const ctransactions& tas) :
-				env(0), nxid(0), work_interval(0)
-	{};
+				env(0), thread(this), nxid(0), work_interval(0)
+	{ *this = tas; };
 
 	/**
 	 *
@@ -71,7 +70,7 @@ public:
 		work_interval = tas.work_interval;
 		nxid = tas.nxid;
 		if (not empty())
-			ta_queue_timer_id = register_timer(TIMER_WORK_ON_TA_QUEUE, ctimespec(work_interval));
+			thread.add_timer(TIMER_ID_WORK_ON_TA_QUEUE, ctimespec().expire_in(work_interval));
 		return *this;
 	};
 
@@ -106,12 +105,26 @@ public:
 
 private:
 
-	/**
-	 *
-	 */
+	virtual void
+	handle_wakeup(
+			cthread& thread)
+	{};
+
 	virtual void
 	handle_timeout(
-			int opaque, void *data = (void*)0);
+			cthread& thread, uint32_t timer_id, const std::list<unsigned int>& ttypes);
+
+	virtual void
+	handle_read_event(
+			cthread& thread, int fd)
+	{};
+
+	virtual void
+	handle_write_event(
+			cthread& thread, int fd)
+	{};
+
+private:
 
 	/**
 	 *
@@ -141,13 +154,13 @@ public:
 private:
 
 	ctransactions_env			*env;
+	cthread                     thread;
 	uint32_t					nxid;			// next xid
 	unsigned int				work_interval; 	// time interval for checking work-queue
 	PthreadRwLock				queuelock;		// rwlock for work-queue
-	ctimerid					ta_queue_timer_id;
 
 	enum ctransactions_timer_t {
-		TIMER_WORK_ON_TA_QUEUE 	= 1,	// lookup all expired TAs in list
+		TIMER_ID_WORK_ON_TA_QUEUE 	= 1,	// lookup all expired TAs in list
 	};
 };
 

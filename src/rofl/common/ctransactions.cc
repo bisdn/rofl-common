@@ -9,33 +9,29 @@
 
 using namespace rofl;
 
-ctransactions::ctransactions(
-		ctransactions_env *env,
-		pthread_t tid) :
-				rofl::ciosrv(tid),
-				env(env),
-				nxid(crandom(sizeof(uint32_t)).uint32()),
-				work_interval(1),
-				ta_queue_timer_id()
-{
-	//std::cerr << "ctransactions CONSTRUCTOR: " << std::hex << (int*)this << std::dec << std::endl;
-}
-
-
 
 ctransactions::~ctransactions()
-{
-	//std::cerr << "ctransactions DESTRUCTOR: " << std::hex << (int*)this << std::dec << std::endl;
-}
+{}
 
+
+ctransactions::ctransactions(
+		ctransactions_env *env) :
+				env(env),
+				thread(this),
+				nxid(crandom(sizeof(uint32_t)).uint32()),
+				work_interval(1)
+{
+	/* start thread */
+	thread.start();
+}
 
 
 void
 ctransactions::handle_timeout(
-		int opaque, void *data)
+		cthread& thread, uint32_t timer_id, const std::list<unsigned int>& ttypes)
 {
-	switch (opaque) {
-	case TIMER_WORK_ON_TA_QUEUE: {
+	switch (timer_id) {
+	case TIMER_ID_WORK_ON_TA_QUEUE: {
 		work_on_ta_queue();
 	} break;
 	}
@@ -49,7 +45,7 @@ ctransactions::clear()
 	RwLock lock(queuelock, RwLock::RWLOCK_WRITE);
 	std::list<ctransaction>::clear();
 	//cancel_timer(ta_queue_timer_id);
-	cancel_all_timers();
+	thread.clear_timers();
 }
 
 
@@ -89,7 +85,7 @@ ctransactions::work_on_ta_queue()
 	RwLock lock(queuelock, RwLock::RWLOCK_READ);
 	if (not (*this).empty()) {
 		//std::cerr << "PUNKT 4" << std::endl;
-		ta_queue_timer_id = register_timer(TIMER_WORK_ON_TA_QUEUE, ctimespec(work_interval));
+		thread.add_timer(TIMER_ID_WORK_ON_TA_QUEUE, ctimespec().expire_in(work_interval));
 	}
 }
 
@@ -113,8 +109,8 @@ ctransactions::add_ta(
 	}
 	(*this).insert(it, ctransaction(nxid, delta, msg_type, msg_sub_type));
 
-	if (not pending_timer(ta_queue_timer_id)) {
-		ta_queue_timer_id = register_timer(TIMER_WORK_ON_TA_QUEUE, ctimespec(work_interval));
+	if (not thread.has_timer(TIMER_ID_WORK_ON_TA_QUEUE)) {
+		thread.add_timer(TIMER_ID_WORK_ON_TA_QUEUE, ctimespec().expire_in(work_interval));
 	}
 
 	return nxid;
@@ -136,8 +132,8 @@ ctransactions::drop_ta(
 		}
 	}
 
-	if ((*this).empty() && pending_timer(ta_queue_timer_id)) {
-		cancel_timer(ta_queue_timer_id);
+	if ((*this).empty() && thread.has_timer(TIMER_ID_WORK_ON_TA_QUEUE)) {
+		thread.drop_timer(TIMER_ID_WORK_ON_TA_QUEUE);
 	}
 }
 

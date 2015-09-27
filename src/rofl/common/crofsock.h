@@ -175,8 +175,6 @@ public:
 
 protected:
 
-	friend class crofsock;
-
 	virtual void
 	handle_listen(
 			crofsock& socket, int sd) = 0;
@@ -369,6 +367,12 @@ public:
 	is_passive() const;
 
 	/**
+	 *
+	 */
+	bool
+	is_congested() const;
+
+	/**
 	 * @brief	Disable reception of messages on this socket.
 	 */
 	void
@@ -400,9 +404,25 @@ public:
 	/**
 	 *
 	 */
+	crofsock&
+	set_laddr(
+			const csockaddr& laddr)
+	{ this->laddr = laddr; return *this; };
+
+	/**
+	 *
+	 */
 	const csockaddr&
 	get_laddr() const
 	{ return laddr; };
+
+	/**
+	 *
+	 */
+	crofsock&
+	set_raddr(
+			const csockaddr& raddr)
+	{ this->raddr = raddr; return *this; };
 
 	/**
 	 *

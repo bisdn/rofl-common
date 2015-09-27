@@ -142,7 +142,7 @@ public:
 	 */
 	void
 	add_read_fd(
-			int fd);
+			int fd, bool exception = true);
 
 	/**
 	 * @brief	Drop file descriptor from set of observed fds

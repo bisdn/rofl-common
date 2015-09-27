@@ -1,7 +1,12 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 /*
  * crofchan.h
  *
  *  Created on: 31.12.2013
+ *  Revised on: 27.09.2015
  *      Author: andreas
  */
 
@@ -191,16 +196,6 @@ class crofconn :
 		TIMER_ID_NEED_LIFE_CHECK   = 4,
 	};
 
-	enum crofconn_flags_t {
-		FLAG_CONNECT_REFUSED	   = 1,
-		FLAG_CONNECT_FAILED	       = 2,
-		FLAG_LOCAL_DISCONNECT	   = 3,
-		FLAG_RECONNECTING		   = 4,
-		FLAG_RXQUEUE_CONSUMING     = 5,
-		FLAG_CONGESTED			   = 6,
-		FLAG_PEER_DISCONNECTED	   = 7,
-	};
-
 public:
 
 	enum crofconn_mode_t {
@@ -297,7 +292,7 @@ public:
 	 */
 	bool
 	is_congested() const
-	{ return flags.test(FLAG_CONGESTED); };
+	{ return rofsock.is_congested(); };
 
 	/**
 	 *
@@ -391,9 +386,93 @@ public:
 	/**
 	 *
 	 */
+	crofconn&
+	set_laddr(
+			const csockaddr& laddr)
+	{ rofsock.set_laddr(laddr); return *this; };
+
+	/**
+	 *
+	 */
 	const csockaddr&
 	get_raddr() const
 	{ return rofsock.get_raddr(); };
+
+	/**
+	 *
+	 */
+	crofconn&
+	set_raddr(
+			const csockaddr& raddr)
+	{ rofsock.set_raddr(raddr); return *this; };
+
+public:
+
+	/**
+	 *
+	 */
+	unsigned int
+	get_timeout_hello() const
+	{ return timeout_hello; };
+
+	/**
+	 *
+	 */
+	crofconn&
+	set_timeout_hello(
+			unsigned int timeout_hello)
+	{ this->timeout_hello = timeout_hello; return *this; };
+
+public:
+
+	/**
+	 *
+	 */
+	unsigned int
+	get_timeout_features() const
+	{ return timeout_features; };
+
+	/**
+	 *
+	 */
+	crofconn&
+	set_timeout_features(
+			unsigned int timeout_features)
+	{ this->timeout_features = timeout_features; return *this; };
+
+public:
+
+	/**
+	 *
+	 */
+	unsigned int
+	get_timeout_echo() const
+	{ return timeout_echo; };
+
+	/**
+	 *
+	 */
+	crofconn&
+	set_timeout_echo(
+			unsigned int timeout_echo)
+	{ this->timeout_echo = timeout_echo; return *this; };
+
+public:
+
+	/**
+	 *
+	 */
+	unsigned int
+	get_timeout_lifecheck() const
+	{ return timeout_lifecheck; };
+
+	/**
+	 *
+	 */
+	crofconn&
+	set_timeout_lifecheck(
+			unsigned int timeout_lifecheck)
+	{ this->timeout_lifecheck = timeout_lifecheck; return *this; };
 
 public:
 
@@ -643,19 +722,32 @@ private:
 
 	virtual void
 	handle_read_event(
-			cthread& thread, int fd);
+			cthread& thread, int fd)
+	{};
 
 	virtual void
 	handle_write_event(
-			cthread& thread, int fd);
+			cthread& thread, int fd)
+	{};
 
 private:
 
 	void
-	handle_rx_internal();
+	handle_rx_messages();
 
 	void
-	handle_rx_external();
+	handle_rx_multipart_message(
+			rofl::openflow::cofmsg* msg);
+
+private:
+
+	void
+	error_rcvd(
+			rofl::openflow::cofmsg *msg);
+
+	void
+	echo_request_rcvd(
+			rofl::openflow::cofmsg *msg);
 
 private:
 
@@ -694,26 +786,6 @@ private:
 	echo_request_expired();
 
 private:
-
-
-
-	void
-	echo_request_rcvd(
-			rofl::openflow::cofmsg *msg);
-
-	/**
-	 *
-	 */
-	void
-	error_rcvd(
-			rofl::openflow::cofmsg *msg);
-
-	/**
-	 *
-	 */
-	void
-	features_reply_rcvd(
-			rofl::openflow::cofmsg *msg);
 
 	/**
 	 *
@@ -804,7 +876,7 @@ public:
 	friend std::ostream&
 	operator<< (std::ostream& os, const crofconn& conn) {
 		os << indent(0) << "<crofconn ofp-version:" << (int)conn.ofp_version << " "
-				<< "connection-established: " << conn.is_established() << " "
+				<< "openflow-connection-established: " << conn.is_established() << " "
 				<< "transport-connection-established: " << conn.is_transport_established() << " "
 				<< ">" << std::endl;
 		{ rofl::indent i(2); os << conn.get_auxid(); }
@@ -839,7 +911,7 @@ public:
 	str() const {
 		std::stringstream ss;
 		ss << "<crofconn ofp-version:" << (int)ofp_version << " "
-				<< "connection-established: " << is_established() << " "
+				<< "openflow-connection-established: " << is_established() << " "
 				<< "transport-connection-established: " << is_transport_established() << " ";
 		if (state == STATE_NEGOTIATION_FAILED) {
 			ss << "state: -NEGOTIATION-FAILED- ";
@@ -865,7 +937,7 @@ public:
 		if (state == STATE_ESTABLISHED) {
 			ss << "state: -ESTABLISHED- ";
 		}
-		<< ">";
+		ss << ">";
 		return ss.str();
 	};
 
@@ -874,11 +946,8 @@ private:
 	// environment for this instance
 	crofconn_env* 		        env;
 
-	// internal thread for urgent data
-	cthread                     thread_int;
-
-	// external thread for application data
-	cthread                     thread_ext;
+	// internal thread for application specific context
+	cthread                     thread;
 
 	// crofsock instance
 	crofsock                    rofsock;
@@ -910,47 +979,42 @@ private:
 	// relative scheduling weights for rxqueues
 	std::vector<unsigned int>   rxweights;
 
+	// queues for storing received messages
 	std::vector<crofqueue>      rxqueues;
 
 	// internal thread is working on pending messages
-	bool                        rx_internal_working;
-
-	// external thread is working on pending messages
-	bool                        rx_external_working;
+	bool                        rx_thread_working;
 
 	// maximum number of messages inside a rofqueue, before blocking the socket
 	unsigned int                rx_max_queue_size;
 
 	// default value for rx_max_queue_size (128)
-	static const int            DEFAULT_RX_MAX_QUEUE_SIZE = 128;
+	static const int            DEFAULT_RX_MAX_QUEUE_SIZE;
 
+	// segmentation and reassembly for multipart messages
+	csegmentation		        sar;
 
+	// maximum number of bytes for a multipart message before being fragmented
+	size_t				        fragmentation_threshold;
 
+	// default fragmentation threshold: 65535 bytes
+	static const unsigned int   DEFAULT_FRAGMENTATION_THRESHOLD;
 
+	// timeout value for HELLO messages
+	unsigned int		        timeout_hello;
+	static const unsigned int   DEFAULT_HELLO_TIMEOUT;
 
+	// timeout value for FEATURES.request messages
+	unsigned int		        timeout_features;
+	static const unsigned int   DEFAULT_FEATURES_TIMEOUT;
 
+	// timeout value for ECHO.request messages
+	unsigned int		        timeout_echo;
+	static const unsigned int   DEFAULT_ECHO_TIMEOUT;
 
-	csegmentation		    sar;					// segmentation and reassembly for multipart messages
-	size_t				    fragmentation_threshold;// maximum number of bytes for a multipart message before being fragmented
-
-	static unsigned int const DEFAULT_FRAGMENTATION_THRESHOLD = 65535;
-	static unsigned int const DEFAULT_ETHERNET_MTU_SIZE = 1500;
-
-
-	bool                    rx_need_lifecheck;
-
-	rofl::crofqueue		    dlqueue;				// delay queue, used for storing asynchronous messages during connection setup
-
-	static const int 	    DEFAULT_HELLO_TIMEOUT = 5;
-	static const int 	    DEFAULT_ECHO_TIMEOUT = 60;
-	static const int 	    DEFAULT_ECHO_INTERVAL = 60;
-
-public:
-
-	unsigned int		    timeout_hello;
-	unsigned int		    timeout_features;
-	unsigned int		    timeout_echo;
-	unsigned int		    timeout_lifecheck;
+	// timeout value for lifecheck
+	unsigned int		        timeout_lifecheck;
+	static const unsigned int   DEFAULT_LIFECHECK_TIMEOUT;
 };
 
 }; /* namespace rofl */

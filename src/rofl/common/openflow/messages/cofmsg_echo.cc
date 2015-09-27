@@ -45,7 +45,7 @@ cofmsg_echo_request::unpack(
 	switch (get_version()) {
 	default: {
 		if (get_type() != rofl::openflow13::OFPT_ECHO_REQUEST)
-			throw eMsgInval("cofmsg_echo_request::unpack() invalid message type");
+			throw eMsgInval("cofmsg_echo_request::unpack() invalid message type [1]");
 
 		if (buflen > sizeof(struct rofl::openflow::ofp_header)) {
 			body.unpack(buf + sizeof(struct rofl::openflow::ofp_header),
@@ -55,7 +55,7 @@ cofmsg_echo_request::unpack(
 	}
 
 	if (get_length() < cofmsg_echo_request::length())
-		throw eBadRequestBadLen("cofmsg_echo_request::unpack() buf too short");
+		throw eBadRequestBadLen("cofmsg_echo_request::unpack() buf too short [2]");
 }
 
 

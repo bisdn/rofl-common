@@ -237,10 +237,10 @@ crofsocktest::handle_closed(
 
 
 void
-crofsocktest::handle_write(
+crofsocktest::handle_send(
 		rofl::crofsock& socket)
 {
-	std::cerr << "handle write" << std::endl;
+	std::cerr << "handle send" << std::endl;
 }
 
 

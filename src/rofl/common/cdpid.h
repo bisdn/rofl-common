@@ -31,7 +31,7 @@ public:
 	 */
 	explicit cdpid(uint64_t dpid) :
 			dpid(dpid) {
-		std::stringstream sstr; sstr << dpid;
+		std::stringstream sstr; sstr << std::hex << dpid << std::dec;
 		s_dpid = sstr.str();
 	};
 

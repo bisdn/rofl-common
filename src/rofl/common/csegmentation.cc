@@ -11,12 +11,14 @@ using namespace rofl;
 
 
 csegmentation::csegmentation(
-		time_t check_expiration_interval,
-		pthread_t tid) :
-				rofl::ciosrv(tid),
+		time_t check_expiration_interval) :
+				thread(this),
 				check_expiration_interval(check_expiration_interval)
 {
-	check_expiration_id = register_timer(TIMER_CHECK_EXPIRATION, ctimespec(check_expiration_interval));
+	/* start thread */
+	thread.start();
+
+	thread.add_timer(TIMER_ID_CHECK_EXPIRATION, ctimespec().expire_in(check_expiration_interval));
 }
 
 
@@ -27,7 +29,8 @@ csegmentation::~csegmentation()
 
 
 csegmentation::csegmentation(
-		csegmentation const& seg)
+		csegmentation const& seg) :
+				thread(this)
 {
 	*this = seg;
 }
@@ -100,10 +103,11 @@ csegmentation::has_transaction(uint32_t xid)
 
 
 void
-csegmentation::handle_timeout(int opaque, void *data)
+csegmentation::handle_timeout(
+		cthread& thread, uint32_t timer_id, const std::list<unsigned int>& ttypes)
 {
-	switch (opaque) {
-	case TIMER_CHECK_EXPIRATION: {
+	switch (timer_id) {
+	case TIMER_ID_CHECK_EXPIRATION: {
 		drop_expired_sessions();
 	} break;
 	default: {
@@ -123,14 +127,14 @@ restart:
 		csegmsg& segmsg = it->second;
 
 		if (segmsg.has_expired()) {
-			LOGGING_DEBUG << "[rofl][csegmentation] dropping multipart segment:" << std::endl << segmsg;
+			std::cerr << "[rofl][csegmentation] dropping multipart segment:" << std::endl << segmsg;
 			segmsgs.erase(it);
 			goto restart;
 		}
 	}
 
 	// re-add timer
-	check_expiration_id = register_timer(TIMER_CHECK_EXPIRATION, ctimespec(check_expiration_interval));
+	thread.add_timer(TIMER_ID_CHECK_EXPIRATION, ctimespec().expire_in(check_expiration_interval));
 }
 
 

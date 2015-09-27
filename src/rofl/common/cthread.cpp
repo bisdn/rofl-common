@@ -65,7 +65,7 @@ cthread::release()
 
 void
 cthread::add_read_fd(
-		int fd)
+		int fd, bool exception)
 {
 	AcquireReadWriteLock lock(tlock);
 	rfds.insert(fd);
@@ -77,7 +77,8 @@ cthread::add_read_fd(
 	if (epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &epev) < 0) {
 		log << logging::error << "cthread::add_read_fd() failed to add fd to epoll set: "
 				<< "errno: " << errno << " (" << strerror(errno) << ")" << std::flush;
-		throw eSysCall("cthread::add_read_fd() syscall epoll_ctl() failed");
+		if (exception)
+			throw eSysCall("cthread::add_read_fd() syscall epoll_ctl() failed");
 	}
 
 	wakeup();
@@ -196,6 +197,20 @@ cthread::add_timer(
 			wakeup();
 	}
 
+#if 0
+	if (not ordered_timers.empty()) {
+		for (auto tspec : ordered_timers) {
+			std::cerr << "cthread::add_timer() element: " << tspec << std::endl;
+		}
+	} else {
+		std::cerr << "cthread::add_timer() ordered_timers list is EMPTY" << std::endl;
+	}
+	std::cerr << "cthread::add_timer() now: " << ctimespec::now() << std::endl;
+	if (not ordered_timers.empty()) {
+		std::cerr << "cthread::add_timer() timeout: " << ordered_timers.begin()->get_relative_timeout() << std::endl;
+	}
+#endif
+
 	return *(timers[timer_id]);
 };
 
@@ -244,6 +259,20 @@ cthread::drop_timer(
 	timers.erase(timer_id);
 
 	wakeup();
+
+#if 0
+	if (not ordered_timers.empty()) {
+		for (auto tspec : ordered_timers) {
+			std::cerr << "cthread::drop_timer() element: " << tspec << std::endl;
+		}
+	} else {
+		std::cerr << "cthread::drop_timer() ordered_timers list is EMPTY" << std::endl;
+	}
+	std::cerr << "cthread::drop_timer() now: " << ctimespec::now() << std::endl;
+	if (not ordered_timers.empty()) {
+		std::cerr << "cthread::drop_timer() timeout: " << ordered_timers.begin()->get_relative_timeout() << std::endl;
+	}
+#endif
 
 	return true;
 };
@@ -319,7 +348,8 @@ cthread::stop()
 void
 cthread::wakeup()
 {
-	if (wakeup_pending)
+	//std::cerr << "TRIGGER WAKEUP" << std::endl;
+	if (wakeup_pending || (tid == pthread_self()))
 		return;
 	char c = 1;
 	if (write(pipefd[PIPE_WRITE_FD], &c, sizeof(c)) < 0) {
@@ -364,17 +394,20 @@ cthread::run_loop()
 				if (not ordered_timers.empty()) {
 					timeout = ordered_timers.begin()->get_relative_timeout();
 #if 0
-					std::cerr << "spring::netlink::cthread::run_loop() ordered_timers list: " << std::endl;
-					for (auto tspec : ordered_timers) {
-						std::cerr << "spring::netlink::cthread::run_loop() element: " << tspec << std::endl;
+					if (not ordered_timers.empty()) {
+						for (auto tspec : ordered_timers) {
+							std::cerr << "cthread::run_loop() element: " << tspec << std::endl;
+						}
+					} else {
+						std::cerr << "cthread::run_loop() ordered_timers list is EMPTY" << std::endl;
 					}
-					std::cerr << "spring::netlink::cthread::run_loop() now: " << ctimespec::now() << std::endl;
+					std::cerr << "cthread::run_loop() now: " << ctimespec::now() << std::endl;
 
 					std::cerr << ">>> P0.0 (AAA) timeout: " << timeout << std::endl;
 #endif
 				}
 			}
-#if 0
+#if 1
 			std::cerr << ">>> P0.0 (final) timeout: " << timeout << std::endl;
 #endif
 
@@ -426,9 +459,9 @@ cthread::run_loop()
 			if (rc > 0) {
 				for (int i = 0; i < rc; i++) {
 					if (events[i].data.fd == pipefd[PIPE_READ_FD]) {
-
-						//std::cerr << "WAKEUP" << std::endl;
-
+#if 0
+						std::cerr << "WAKEUP" << std::endl;
+#endif
 						wakeup_pending = false;
 
 						if (not run_thread) {

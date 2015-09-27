@@ -1,7 +1,12 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 /*
  * crofconn.cc
  *
  *  Created on: 31.12.2013
+ *  Revised on: 27.09.2015
  *      Author: andreas
  */
 
@@ -11,6 +16,12 @@ using namespace rofl;
 
 /*static*/std::set<crofconn_env*> crofconn_env::connection_envs;
 /*static*/crwlock                 crofconn_env::connection_envs_lock;
+/*static*/const int               crofconn::DEFAULT_RX_MAX_QUEUE_SIZE = 128;
+/*static*/const unsigned int      crofconn::DEFAULT_FRAGMENTATION_THRESHOLD = 65535;
+/*static*/const unsigned int      crofconn::DEFAULT_HELLO_TIMEOUT = 5;
+/*static*/const unsigned int      crofconn::DEFAULT_FEATURES_TIMEOUT = 5;
+/*static*/const unsigned int      crofconn::DEFAULT_ECHO_TIMEOUT = 10;
+/*static*/const unsigned int      crofconn::DEFAULT_LIFECHECK_TIMEOUT = 60;
 
 
 crofconn::~crofconn()
@@ -20,21 +31,22 @@ crofconn::~crofconn()
 crofconn::crofconn(
 		crofconn_env* env) :
 				env(env),
-				thread_int(this),
-				thread_ext(this),
+				thread(this),
 				rofsock(this),
 				dpid(0),
 				auxid(0),
 				ofp_version(rofl::openflow::OFP_VERSION_UNKNOWN),
 				mode(MODE_UNKNOWN),
 				state(STATE_DISCONNECTED),
-				rx_internal_working(false),
-				rx_external_working(false),
+				rxweights(QUEUE_MAX),
+				rxqueues(QUEUE_MAX),
+				rx_thread_working(false),
 				rx_max_queue_size(DEFAULT_RX_MAX_QUEUE_SIZE),
-				timeout_hello(5),
-				timeout_features(5),
-				timeout_echo(5),
-				timeout_lifecheck(30)
+				fragmentation_threshold(DEFAULT_FRAGMENTATION_THRESHOLD),
+				timeout_hello(DEFAULT_HELLO_TIMEOUT),
+				timeout_features(DEFAULT_FEATURES_TIMEOUT),
+				timeout_echo(DEFAULT_ECHO_TIMEOUT),
+				timeout_lifecheck(DEFAULT_LIFECHECK_TIMEOUT)
 {
 	// scheduler weights for transmission
 	rxweights[QUEUE_OAM ] = 16;
@@ -117,33 +129,22 @@ void
 crofconn::handle_timeout(
 		cthread& thread, uint32_t timer_id, const std::list<unsigned int>& ttypes)
 {
-	if (&thread == &thread_int) {
-
-		switch (timer_id) {
-		case TIMER_ID_NEED_LIFE_CHECK: {
-			send_echo_request();
-		} break;
-		case TIMER_ID_WAIT_FOR_HELLO: {
-			hello_expired();
-		} break;
-		case TIMER_ID_WAIT_FOR_ECHO: {
-			echo_request_expired();
-		} break;
-		case TIMER_ID_WAIT_FOR_FEATURES: {
-			features_request_expired();
-		} break;
-		default: {
-			std::cerr << "[rofl-common][crofconn][thread_int] unknown timer type:" << (unsigned int)timer_id << " rcvd" << str() << std::endl;
-		};
-		}
-	} else
-	if (&thread == &thread_ext) {
-
-		switch (timer_id) {
-		default: {
-			std::cerr << "[rofl-common][crofconn][thread_ext] unknown timer type:" << (unsigned int)timer_id << " rcvd" << str() << std::endl;
-		};
-		}
+	switch (timer_id) {
+	case TIMER_ID_NEED_LIFE_CHECK: {
+		send_echo_request();
+	} break;
+	case TIMER_ID_WAIT_FOR_HELLO: {
+		hello_expired();
+	} break;
+	case TIMER_ID_WAIT_FOR_ECHO: {
+		echo_request_expired();
+	} break;
+	case TIMER_ID_WAIT_FOR_FEATURES: {
+		features_request_expired();
+	} break;
+	default: {
+		std::cerr << "[rofl-common][crofconn][thread_int] unknown timer type:" << (unsigned int)timer_id << " rcvd" << str() << std::endl;
+	};
 	}
 }
 
@@ -156,11 +157,13 @@ crofconn::set_state(
 	try {
 		switch (state = new_state) {
 		case STATE_NEGOTIATION_FAILED: {
+			std::cerr << ">>> STATE_NEGOTIATION_FAILED <<<" << std::endl;
 			set_state(STATE_CLOSING);
 			crofconn_env::call_env(env).handle_negotiation_failed(*this);
 
 		} break;
 		case STATE_CLOSING: {
+			std::cerr << ">>> STATE_CLOSING <<<" << std::endl;
 			versionbitmap.clear();
 			versionbitmap_peer.clear();
 			set_version(rofl::openflow::OFP_VERSION_UNKNOWN);
@@ -170,29 +173,45 @@ crofconn::set_state(
 
 		} break;
 		case STATE_DISCONNECTED: {
+			std::cerr << ">>> STATE_DISCONNECTED <<<" << std::endl;
+
+			for (auto rxqueue : rxqueues) {
+				rxqueue.clear();
+			}
+
+			/* stop working thread */
+			thread.stop();
 
 		} break;
 		case STATE_CONNECT_PENDING: {
+			std::cerr << ">>> STATE_CONNECT_PENDING <<<" << std::endl;
 			versionbitmap_peer.clear();
 			set_version(rofl::openflow::OFP_VERSION_UNKNOWN);
 
 		} break;
 		case STATE_ACCEPT_PENDING: {
+			std::cerr << ">>> STATE_ACCEPT_PENDING <<<" << std::endl;
 			versionbitmap_peer.clear();
 			set_version(rofl::openflow::OFP_VERSION_UNKNOWN);
 
 		} break;
 		case STATE_NEGOTIATING: {
+			std::cerr << ">>> STATE_NEGOTIATING <<<" << std::endl;
 			send_hello_message();
+
+			/* start working thread */
+			thread.start();
 
 		} break;
 		case STATE_NEGOTIATING2: {
+			std::cerr << ">>> STATE_NEGOTIATING2 <<<" << std::endl;
 			send_features_request();
 
 		} break;
 		case STATE_ESTABLISHED: {
+			std::cerr << ">>> STATE_ESTABLISHED <<<" << std::endl;
 			/* start periodic checks for connection state (OAM) */
-			thread_int.add_timer(TIMER_ID_NEED_LIFE_CHECK, ctimespec().expire_in(timeout_lifecheck));
+			thread.add_timer(TIMER_ID_NEED_LIFE_CHECK, ctimespec().expire_in(timeout_lifecheck));
 			crofconn_env::call_env(env).handle_established(*this, ofp_version);
 
 		} break;
@@ -207,11 +226,81 @@ crofconn::set_state(
 
 
 void
+crofconn::error_rcvd(
+		rofl::openflow::cofmsg* pmsg)
+{
+	rofl::openflow::cofmsg_error* msg = dynamic_cast<rofl::openflow::cofmsg_error*>( pmsg );
+
+	assert(nullptr != msg);
+
+	thread.drop_timer(TIMER_ID_WAIT_FOR_HELLO);
+
+	try {
+
+		switch (get_state()) {
+		case STATE_NEGOTIATING: {
+
+			switch (msg->get_err_type()) {
+			case openflow13::OFPET_HELLO_FAILED: {
+
+				switch (msg->get_err_code()) {
+				case openflow13::OFPHFC_INCOMPATIBLE: {
+					std::cerr << "[rofl-common][crofconn] HELLO-INCOMPATIBLE.error rcvd in state NEGOTIATING, closing connection." << str() << std::endl;
+				} break;
+				case openflow13::OFPHFC_EPERM: {
+					std::cerr << "[rofl-common][crofconn] HELLO-EPERM.error rcvd in state NEGOTIATING, closing connection." << str() << std::endl;
+				} break;
+				default: {
+					std::cerr << "[rofl-common][crofconn] HELLO.error rcvd in state NEGOTIATING, closing connection." << str() << std::endl;
+				};
+				}
+
+				set_state(STATE_NEGOTIATION_FAILED);
+
+			} break;
+			default: {
+
+			};
+			}
+
+		} break;
+		case STATE_NEGOTIATING2: {
+
+			switch (msg->get_err_type()) {
+			case openflow13::OFPET_BAD_REQUEST: {
+
+				std::cerr << "[rofl-common][crofconn] BAD-REQUEST.error rcvd in state NEGOTIATING2, closing connection." << str() << std::endl;
+
+				set_state(STATE_NEGOTIATION_FAILED);
+
+			} break;
+			default: {
+
+			};
+			}
+
+		} break;
+		default: {
+
+		};
+		}
+
+	} catch (std::runtime_error& e) {
+
+		std::cerr << "[rofl-common][crofconn][error_rcvd] exception, what: " << e.what() << std::endl;
+	}
+
+	delete msg;
+}
+
+
+
+void
 crofconn::send_hello_message()
 {
 	try {
 
-		thread_int.add_timer(TIMER_ID_WAIT_FOR_HELLO, ctimespec().expire_in(timeout_hello));
+		thread.add_timer(TIMER_ID_WAIT_FOR_HELLO, ctimespec().expire_in(timeout_hello));
 
 		rofl::openflow::cofhelloelems helloIEs;
 		helloIEs.add_hello_elem_versionbitmap() = versionbitmap;
@@ -249,7 +338,7 @@ crofconn::hello_rcvd(
 
 	assert(nullptr != msg);
 
-	thread_int.drop_timer(TIMER_ID_WAIT_FOR_HELLO);
+	thread.drop_timer(TIMER_ID_WAIT_FOR_HELLO);
 
 	try {
 
@@ -317,7 +406,7 @@ crofconn::hello_rcvd(
 			case MODE_CONTROLLER: {
 				/* get auxid via FEATURES.request for OFP1.3 and above */
 				if (ofp_version >= rofl::openflow13::OFP_VERSION) {
-					set_state(STATE_FEATURES);
+					set_state(STATE_NEGOTIATING2);
 				/* otherwise: connection establishment succeeded */
 				} else {
 					set_state(STATE_ESTABLISHED);
@@ -404,14 +493,14 @@ void
 crofconn::send_features_request()
 {
 	try {
+		thread.add_timer(TIMER_ID_WAIT_FOR_FEATURES, ctimespec().expire_in(timeout_features));
+
 		rofl::openflow::cofmsg_features_request* msg =
 				new rofl::openflow::cofmsg_features_request(
 						ofp_version,
 						crofconn_env::call_env(env).get_async_xid(*this));
 
 		rofsock.send_message(msg);
-
-		thread_int.add_timer(TIMER_ID_WAIT_FOR_FEATURES, ctimespec().expire_in(timeout_features));
 
 	} catch (eRofConnXidSpaceExhausted& e) {
 
@@ -438,7 +527,7 @@ crofconn::features_reply_rcvd(
 
 	assert(nullptr != msg);
 
-	thread_int.drop_timer(TIMER_ID_WAIT_FOR_FEATURES);
+	thread.drop_timer(TIMER_ID_WAIT_FOR_FEATURES);
 
 	try {
 		std::cerr << "[rofl-common][crofconn] rcvd FEATURES.reply: " << std::endl << msg->str();
@@ -477,14 +566,16 @@ void
 crofconn::send_echo_request()
 {
 	try {
+		std::cerr << "[rofl-common][crofconn][send_echo_request]" << *this << std::endl;
+
+		thread.add_timer(TIMER_ID_WAIT_FOR_ECHO, ctimespec().expire_in(timeout_echo));
+
 		rofl::openflow::cofmsg_echo_request* msg =
 				new rofl::openflow::cofmsg_echo_request(
 						ofp_version,
 						crofconn_env::call_env(env).get_async_xid(*this));
 
 		rofsock.send_message(msg);
-
-		thread_int.add_timer(TIMER_ID_WAIT_FOR_ECHO, ctimespec().expire_in(timeout_echo));
 
 	} catch (eRofConnXidSpaceExhausted& e) {
 
@@ -510,14 +601,14 @@ crofconn::echo_reply_rcvd(
 
 	assert(nullptr != msg);
 
-	thread_int.drop_timer(TIMER_ID_WAIT_FOR_ECHO);
+	thread.drop_timer(TIMER_ID_WAIT_FOR_ECHO);
 
 	try {
 		std::cerr << "[rofl-common][crofconn] received Echo.reply: " << std::endl << *msg;
 
 		delete msg;
 
-		thread_int.add_timer(TIMER_ID_NEED_LIFE_CHECK, ctimespec().expire_in(timeout_lifecheck));
+		thread.add_timer(TIMER_ID_NEED_LIFE_CHECK, ctimespec().expire_in(timeout_lifecheck));
 
 	} catch (std::runtime_error& e) {
 
@@ -546,19 +637,21 @@ crofconn::echo_request_rcvd(
 	assert(nullptr != msg);
 
 	try {
+		std::cerr << "[rofl-common][crofconn] received Echo.request: " << std::endl << *msg;
+
 		rofl::openflow::cofmsg_echo_reply* reply =
 				new rofl::openflow::cofmsg_echo_reply(
 						msg->get_version(), msg->get_xid(),
 						msg->get_body().somem(), msg->get_body().memlen());
 
-		delete msg;
-
 		rofsock.send_message(reply);
 
 	} catch (std::runtime_error& e) {
 
-		std::cerr << "[rofl-common][crofconn] exception, what: " << e.what() << std::endl << *msg;
+		std::cerr << "[rofl-common][crofconn][echo_request_rcvd] exception, what: " << e.what() << std::endl << *msg;
 	}
+
+	delete msg;
 }
 
 
@@ -737,189 +830,217 @@ void
 crofconn::handle_recv(
 		crofsock& socket, rofl::openflow::cofmsg* msg)
 {
-	std::cerr << "[rofl-common][crofconn][recv_message] received message" << std::endl << *msg;
+	/* This method is executed in crofsock's (not crofconn's!) rxthread context.
+	 * It deals with messages during connection establishment and negotiation
+	 * and handles incoming Echo-Requests directly. All other messages
+	 * are stored in the appropriate rxqueue and crofconn's internal
+	 * thread is called for handling these messages. */
+	std::cerr << "[rofl-common][crofconn][handle_recv] received message" << std::endl << *msg;
 
 	switch (get_state()) {
-	case STATE_NEGOTIATING:
+	case STATE_NEGOTIATING: {
+
+		if (msg->get_version() == rofl::openflow::OFP_VERSION_UNKNOWN) {
+			throw eBadRequestBadVersion("crofconn::handle_recv() unknown version in state NEGOTIATING");
+		}
+
+		if (rofl::openflow::OFPT_HELLO == msg->get_type()) {
+			hello_rcvd(msg);
+		} else
+		if (rofl::openflow::OFPT_ERROR == msg->get_type()) {
+			error_rcvd(msg);
+		} else {
+			/* drop all non-HELLO messages in this state */
+			delete msg;
+		}
+
+	} return; // immediate return
 	case STATE_NEGOTIATING2: {
 
-		rxqueues[QUEUE_OAM].store(msg);
-
-		/* wakeup internal thread */
-		if (not rx_internal_working) {
-			thread_int.wakeup();
+		if (msg->get_version() != ofp_version) {
+			throw eBadRequestBadVersion("crofconn::handle_recv() version mismatch in state NEGOTIATING2");
 		}
+
+		if (rofl::openflow::OFPT_FEATURES_REPLY == msg->get_type()) {
+			features_reply_rcvd(msg);
+			return; // immediate return
+		} else
+		if (rofl::openflow::OFPT_ERROR == msg->get_type()) {
+			error_rcvd(msg);
+			return; // immediate return
+		} else
+		if (rofl::openflow::OFPT_ECHO_REQUEST == msg->get_type()) {
+			echo_request_rcvd(msg);
+			return; // immediate return
+		}
+
+		/* store all other messages for later handling, see below */
 
 	} break;
 	case STATE_ESTABLISHED: {
 
-		thread_int.add_timer(TIMER_ID_NEED_LIFE_CHECK, ctimespec().expire_in(timeout_lifecheck));
-
-		bool schedule_internal_thread = false;
-
 		/* sanity check: message version must match negotiated version */
 		if (msg->get_version() != ofp_version) {
-			throw eBadRequestBadVersion("crofconn::handle_recv() version mismatch");
+			throw eBadRequestBadVersion("crofconn::handle_recv() version mismatch in state ESTABLISHED");
 		}
 
-		switch (ofp_version) {
-		case rofl::openflow10::OFP_VERSION: {
-			switch (msg->get_type()) {
-			case rofl::openflow10::OFPT_PACKET_IN:
-			case rofl::openflow10::OFPT_PACKET_OUT: {
-				rxqueues[QUEUE_PKT].store(msg);
-				std::cerr << "[rofl-common][crofconn][recv_message] rxqueues[QUEUE_PKT]:" << std::endl << rxqueues[QUEUE_PKT];
-
-				/* throttle reception of further messages */
-				if (rxqueues[QUEUE_PKT].size() >= rx_max_queue_size) {
-					rofsock.rx_disable();
-				}
-
-			} break;
-			case rofl::openflow10::OFPT_FLOW_MOD:
-			case rofl::openflow10::OFPT_FLOW_REMOVED:
-			case rofl::openflow10::OFPT_STATS_REQUEST:
-			case rofl::openflow10::OFPT_STATS_REPLY:
-			case rofl::openflow10::OFPT_BARRIER_REQUEST:
-			case rofl::openflow10::OFPT_BARRIER_REPLY: {
-				rxqueues[QUEUE_FLOW].store(msg);
-				std::cerr << "[rofl-common][crofconn][recv_message] rxqueues[QUEUE_FLOW]:" << std::endl << rxqueues[QUEUE_FLOW];
-
-				/* throttle reception of further messages */
-				if (rxqueues[QUEUE_FLOW].size() >= rx_max_queue_size) {
-					rofsock.rx_disable();
-				}
-
-			} break;
-			case rofl::openflow10::OFPT_HELLO:
-			case rofl::openflow10::OFPT_ECHO_REQUEST:
-			case rofl::openflow10::OFPT_ECHO_REPLY: {
-				rxqueues[QUEUE_OAM].store(msg);
-				std::cerr << "[rofl-common][crofconn][recv_message] rxqueues[QUEUE_OAM]:" << std::endl << rxqueues[QUEUE_OAM];
-
-				schedule_internal_thread = true;
-
-			} break;
-			default: {
-				rxqueues[QUEUE_MGMT].store(msg);
-				std::cerr << "[rofl-common][crofconn][recv_message] rxqueues[QUEUE_MGMT]:" << std::endl << rxqueues[QUEUE_MGMT];
-			};
-			}
-		} break;
-		case rofl::openflow12::OFP_VERSION: {
-			switch (msg->get_type()) {
-			case rofl::openflow12::OFPT_PACKET_IN:
-			case rofl::openflow12::OFPT_PACKET_OUT: {
-				rxqueues[QUEUE_PKT].store(msg);
-				std::cerr << "[rofl-common][crofconn][recv_message] rxqueues[QUEUE_PKT]:" << std::endl << rxqueues[QUEUE_PKT];
-
-				/* throttle reception of further messages */
-				if (rxqueues[QUEUE_PKT].size() >= rx_max_queue_size) {
-					rofsock.rx_disable();
-				}
-
-			} break;
-			case rofl::openflow12::OFPT_FLOW_MOD:
-			case rofl::openflow12::OFPT_FLOW_REMOVED:
-			case rofl::openflow12::OFPT_GROUP_MOD:
-			case rofl::openflow12::OFPT_PORT_MOD:
-			case rofl::openflow12::OFPT_TABLE_MOD:
-			case rofl::openflow12::OFPT_STATS_REQUEST:
-			case rofl::openflow12::OFPT_STATS_REPLY:
-			case rofl::openflow12::OFPT_BARRIER_REQUEST:
-			case rofl::openflow12::OFPT_BARRIER_REPLY: {
-				rxqueues[QUEUE_FLOW].store(msg);
-				std::cerr << "[rofl-common][crofconn][recv_message] rxqueues[QUEUE_FLOW]:" << std::endl << rxqueues[QUEUE_FLOW];
-
-				/* throttle reception of further messages */
-				if (rxqueues[QUEUE_FLOW].size() >= rx_max_queue_size) {
-					rofsock.rx_disable();
-				}
-
-			} break;
-			case rofl::openflow12::OFPT_HELLO:
-			case rofl::openflow12::OFPT_ECHO_REQUEST:
-			case rofl::openflow12::OFPT_ECHO_REPLY: {
-				rxqueues[QUEUE_OAM].store(msg);
-				std::cerr << "[rofl-common][crofconn][recv_message] rxqueues[QUEUE_OAM]:" << std::endl << rxqueues[QUEUE_OAM];
-
-				schedule_internal_thread = true;
-
-			} break;
-			default: {
-				rxqueues[QUEUE_MGMT].store(msg);
-				std::cerr << "[rofl-common][crofconn][recv_message] rxqueues[QUEUE_MGMT]:" << std::endl << rxqueues[QUEUE_MGMT];
-			};
-			}
-		} break;
-		case rofl::openflow13::OFP_VERSION: {
-			switch (msg->get_type()) {
-			case rofl::openflow13::OFPT_PACKET_IN:
-			case rofl::openflow13::OFPT_PACKET_OUT: {
-				rxqueues[QUEUE_PKT].store(msg);
-				std::cerr << "[rofl-common][crofconn][recv_message] rxqueues[QUEUE_PKT]:" << std::endl << rxqueues[QUEUE_PKT];
-
-				/* throttle reception of further messages */
-				if (rxqueues[QUEUE_PKT].size() >= rx_max_queue_size) {
-					rofsock.rx_disable();
-				}
-
-			} break;
-			case rofl::openflow13::OFPT_FLOW_MOD:
-			case rofl::openflow13::OFPT_FLOW_REMOVED:
-			case rofl::openflow13::OFPT_GROUP_MOD:
-			case rofl::openflow13::OFPT_PORT_MOD:
-			case rofl::openflow13::OFPT_TABLE_MOD:
-			case rofl::openflow13::OFPT_MULTIPART_REQUEST:
-			case rofl::openflow13::OFPT_MULTIPART_REPLY:
-			case rofl::openflow13::OFPT_BARRIER_REQUEST:
-			case rofl::openflow13::OFPT_BARRIER_REPLY: {
-				rxqueues[QUEUE_FLOW].store(msg);
-				std::cerr << "[rofl-common][crofconn][recv_message] rxqueues[QUEUE_FLOW]:" << std::endl << rxqueues[QUEUE_FLOW];
-
-				/* throttle reception of further messages */
-				if (rxqueues[QUEUE_FLOW].size() >= rx_max_queue_size) {
-					rofsock.rx_disable();
-				}
-
-			} break;
-			case rofl::openflow13::OFPT_HELLO:
-			case rofl::openflow13::OFPT_ECHO_REQUEST:
-			case rofl::openflow13::OFPT_ECHO_REPLY: {
-				rxqueues[QUEUE_OAM].store(msg);
-				std::cerr << "[rofl-common][crofconn][recv_message] rxqueues[QUEUE_OAM]:" << std::endl << rxqueues[QUEUE_OAM];
-
-				schedule_internal_thread = true;
-
-			} break;
-			default: {
-				rxqueues[QUEUE_MGMT].store(msg);
-				std::cerr << "[rofl-common][crofconn][recv_message] rxqueues[QUEUE_MGMT]:" << std::endl << rxqueues[QUEUE_MGMT];
-			};
-			}
-		} break;
-		default: {
-			delete msg; return;
-		};
+		if (rofl::openflow::OFPT_ECHO_REQUEST == msg->get_type()) {
+			echo_request_rcvd(msg);
+			return; // immediate return
+		} else
+		if (rofl::openflow::OFPT_ECHO_REPLY == msg->get_type()) {
+			echo_reply_rcvd(msg);
+			return; // immediate return
 		}
-
-		/* wakeup external thread */
-		if (not rx_external_working) {
-			thread_ext.wakeup();
-		}
-
-		/* wakeup internal thread */
-		if (not rx_internal_working && schedule_internal_thread) {
-			thread_int.wakeup();
-		}
-
 
 	} break;
 	default: {
 
+		/* drop messages in any other state */
 		delete msg; return;
 
 	};
+	}
+
+
+
+	/* store message in appropriate rxqueue */
+	switch (ofp_version) {
+	case rofl::openflow10::OFP_VERSION: {
+		switch (msg->get_type()) {
+		case rofl::openflow10::OFPT_PACKET_IN:
+		case rofl::openflow10::OFPT_PACKET_OUT: {
+			rxqueues[QUEUE_PKT].store(msg);
+			std::cerr << "[rofl-common][crofconn][handle_recv] rxqueues[QUEUE_PKT]:" << std::endl << rxqueues[QUEUE_PKT];
+
+			/* throttle reception of further messages */
+			if (rxqueues[QUEUE_PKT].size() >= rx_max_queue_size) {
+				rofsock.rx_disable();
+			}
+
+		} break;
+		case rofl::openflow10::OFPT_FLOW_MOD:
+		case rofl::openflow10::OFPT_FLOW_REMOVED:
+		case rofl::openflow10::OFPT_STATS_REQUEST:
+		case rofl::openflow10::OFPT_STATS_REPLY:
+		case rofl::openflow10::OFPT_BARRIER_REQUEST:
+		case rofl::openflow10::OFPT_BARRIER_REPLY: {
+			rxqueues[QUEUE_FLOW].store(msg);
+			std::cerr << "[rofl-common][crofconn][handle_recv] rxqueues[QUEUE_FLOW]:" << std::endl << rxqueues[QUEUE_FLOW];
+
+			/* throttle reception of further messages */
+			if (rxqueues[QUEUE_FLOW].size() >= rx_max_queue_size) {
+				rofsock.rx_disable();
+			}
+
+		} break;
+		case rofl::openflow10::OFPT_HELLO:
+		case rofl::openflow10::OFPT_ECHO_REQUEST:
+		case rofl::openflow10::OFPT_ECHO_REPLY: {
+			rxqueues[QUEUE_OAM].store(msg);
+			std::cerr << "[rofl-common][crofconn][handle_recv] rxqueues[QUEUE_OAM]:" << std::endl << rxqueues[QUEUE_OAM];
+		} break;
+		default: {
+			rxqueues[QUEUE_MGMT].store(msg);
+			std::cerr << "[rofl-common][crofconn][handle_recv] rxqueues[QUEUE_MGMT]:" << std::endl << rxqueues[QUEUE_MGMT];
+		};
+		}
+	} break;
+	case rofl::openflow12::OFP_VERSION: {
+		switch (msg->get_type()) {
+		case rofl::openflow12::OFPT_PACKET_IN:
+		case rofl::openflow12::OFPT_PACKET_OUT: {
+			rxqueues[QUEUE_PKT].store(msg);
+			std::cerr << "[rofl-common][crofconn][handle_recv] rxqueues[QUEUE_PKT]:" << std::endl << rxqueues[QUEUE_PKT];
+
+			/* throttle reception of further messages */
+			if (rxqueues[QUEUE_PKT].size() >= rx_max_queue_size) {
+				rofsock.rx_disable();
+			}
+
+		} break;
+		case rofl::openflow12::OFPT_FLOW_MOD:
+		case rofl::openflow12::OFPT_FLOW_REMOVED:
+		case rofl::openflow12::OFPT_GROUP_MOD:
+		case rofl::openflow12::OFPT_PORT_MOD:
+		case rofl::openflow12::OFPT_TABLE_MOD:
+		case rofl::openflow12::OFPT_STATS_REQUEST:
+		case rofl::openflow12::OFPT_STATS_REPLY:
+		case rofl::openflow12::OFPT_BARRIER_REQUEST:
+		case rofl::openflow12::OFPT_BARRIER_REPLY: {
+			rxqueues[QUEUE_FLOW].store(msg);
+			std::cerr << "[rofl-common][crofconn][handle_recv] rxqueues[QUEUE_FLOW]:" << std::endl << rxqueues[QUEUE_FLOW];
+
+			/* throttle reception of further messages */
+			if (rxqueues[QUEUE_FLOW].size() >= rx_max_queue_size) {
+				rofsock.rx_disable();
+			}
+
+		} break;
+		case rofl::openflow12::OFPT_HELLO:
+		case rofl::openflow12::OFPT_ECHO_REQUEST:
+		case rofl::openflow12::OFPT_ECHO_REPLY: {
+			rxqueues[QUEUE_OAM].store(msg);
+			std::cerr << "[rofl-common][crofconn][handle_recv] rxqueues[QUEUE_OAM]:" << std::endl << rxqueues[QUEUE_OAM];
+		} break;
+		default: {
+			rxqueues[QUEUE_MGMT].store(msg);
+			std::cerr << "[rofl-common][crofconn][handle_recv] rxqueues[QUEUE_MGMT]:" << std::endl << rxqueues[QUEUE_MGMT];
+		};
+		}
+	} break;
+	case rofl::openflow13::OFP_VERSION: {
+		switch (msg->get_type()) {
+		case rofl::openflow13::OFPT_PACKET_IN:
+		case rofl::openflow13::OFPT_PACKET_OUT: {
+			rxqueues[QUEUE_PKT].store(msg);
+			std::cerr << "[rofl-common][crofconn][handle_recv] rxqueues[QUEUE_PKT]:" << std::endl << rxqueues[QUEUE_PKT];
+
+			/* throttle reception of further messages */
+			if (rxqueues[QUEUE_PKT].size() >= rx_max_queue_size) {
+				rofsock.rx_disable();
+			}
+
+		} break;
+		case rofl::openflow13::OFPT_FLOW_MOD:
+		case rofl::openflow13::OFPT_FLOW_REMOVED:
+		case rofl::openflow13::OFPT_GROUP_MOD:
+		case rofl::openflow13::OFPT_PORT_MOD:
+		case rofl::openflow13::OFPT_TABLE_MOD:
+		case rofl::openflow13::OFPT_MULTIPART_REQUEST:
+		case rofl::openflow13::OFPT_MULTIPART_REPLY:
+		case rofl::openflow13::OFPT_BARRIER_REQUEST:
+		case rofl::openflow13::OFPT_BARRIER_REPLY: {
+			rxqueues[QUEUE_FLOW].store(msg);
+			std::cerr << "[rofl-common][crofconn][handle_recv] rxqueues[QUEUE_FLOW]:" << std::endl << rxqueues[QUEUE_FLOW];
+
+			/* throttle reception of further messages */
+			if (rxqueues[QUEUE_FLOW].size() >= rx_max_queue_size) {
+				rofsock.rx_disable();
+			}
+
+		} break;
+		case rofl::openflow13::OFPT_HELLO:
+		case rofl::openflow13::OFPT_ECHO_REQUEST:
+		case rofl::openflow13::OFPT_ECHO_REPLY: {
+			rxqueues[QUEUE_OAM].store(msg);
+			std::cerr << "[rofl-common][crofconn][handle_recv] rxqueues[QUEUE_OAM]:" << std::endl << rxqueues[QUEUE_OAM];
+		} break;
+		default: {
+			rxqueues[QUEUE_MGMT].store(msg);
+			std::cerr << "[rofl-common][crofconn][handle_recv] rxqueues[QUEUE_MGMT]:" << std::endl << rxqueues[QUEUE_MGMT];
+		};
+		}
+	} break;
+	default: {
+		delete msg; return;
+	};
+	}
+
+	/* wakeup working thread in state ESTABLISHED; otherwise keep sleeping
+	 * and enqueue message until state ESTABLISHED is reached */
+	if ((STATE_ESTABLISHED == state) && (not rx_thread_working)) {
+		thread.wakeup();
 	}
 }
 
@@ -929,287 +1050,98 @@ void
 crofconn::handle_wakeup(
 		cthread& thread)
 {
-	if (&thread == &thread_int) {
-		handle_rx_internal();
-	} else
-	if (&thread == &thread_ext) {
-		handle_rx_external();
-	}
+	handle_rx_messages();
 }
 
 
 
 void
-crofconn::handle_rx_internal()
+crofconn::handle_rx_messages()
 {
-	// reenable reception of messages
-	rofsock.rx_enable();
-
-	/* we start to handle incoming messages */
-	rx_internal_working = true;
-
-	try {
-
-		switch (get_state()) {
-		case STATE_NEGOTIATING: {
-			while (not rxqueues[QUEUE_OAM].empty()) {
-				rofl::openflow::cofmsg* msg = (rofl::openflow::cofmsg*)0;
-
-				if ((msg = rxqueues[QUEUE_OAM].retrieve()) == NULL) {
-					rx_internal_working = false;
-					return; // no further messages in this queue
-				}
-
-				switch (msg->get_type()) {
-				case OFPT_HELLO: {
-					hello_rcvd(msg);
-				} return;
-				default: {
-					delete msg;
-				};
-				}
-			}
-		} break;
-		case STATE_NEGOTIATING2: {
-			while (not rxqueues[QUEUE_OAM].empty()) {
-				rofl::openflow::cofmsg* msg = (rofl::openflow::cofmsg*)0;
-
-				if ((msg = rxqueues[QUEUE_OAM].retrieve()) == NULL) {
-					rx_internal_working = false;
-					return; // no further messages in this queue
-				}
-
-				switch (msg->get_type()) {
-				case OFPT_FEATURES_REPLY: {
-					features_reply_rcvd(msg);
-				} return;
-				default: {
-					delete msg;
-				};
-				}
-			}
-		} break;
-		case STATE_ESTABLISHED: {
-			while (not rxqueues[QUEUE_OAM].empty()) {
-				rofl::openflow::cofmsg* msg = (rofl::openflow::cofmsg*)0;
-
-				if ((msg = rxqueues[QUEUE_OAM].retrieve()) == NULL) {
-					rx_internal_working = false;
-					return; // no further messages in this queue
-				}
-
-				switch (msg->get_type()) {
-				case OFPT_ECHO_REQUEST: {
-					echo_request_rcvd(msg);
-				} break;
-				case OFPT_ECHO_REPLY: {
-					echo_reply_rcvd(msg);
-				} break;
-				default: {
-					delete msg;
-				};
-				}
-			}
-		} break;
-		default: {
-
-		};
-		}
-
-	} catch (std::runtime_error& e) {
-		assert(false);
-	}
-
-	/* we stop to handle incoming messages */
-	rx_internal_working = false;
-}
-
-
-
-void
-crofconn::handle_rx_external()
-{
-	// reenable socket
-	rofsock->rx_enable();
-
 	/* we start with handling incoming messages */
-	rx_int_working = false;
+	rx_thread_working = true;
 
-	rx_need_lifecheck = false;
+	thread.drop_timer(TIMER_ID_NEED_LIFE_CHECK);
 
-	timer_stop_life_check();
+	bool keep_running = false;
 
-	bool reschedule = false;
+	do {
+		try {
+			/* iterate over all rxqueues */
+			for (unsigned int queue_id = 0; queue_id < QUEUE_MAX; ++queue_id) {
 
-	flags.set(FLAG_RXQUEUE_CONSUMING);
-
-	try {
-
-		for (unsigned int queue_id = 0; queue_id < QUEUE_MAX; ++queue_id) {
-
-			if (rxqueues[queue_id].empty()) {
-				continue; // no messages at all in this queue
-			}
-
-			std::cerr << "[rofl-common][crofconn][handle_messages] "
-					<< "rxqueue[" << queue_id << "]:" << std::endl << rxqueues[queue_id];
-
-			for (unsigned int num = 0; num < rxweights[queue_id]; ++num) {
-
-				rofl::openflow::cofmsg* msg = (rofl::openflow::cofmsg*)0;
-
-				if ((msg = rxqueues[queue_id].retrieve()) == NULL) {
-					continue; // no further messages in this queue
+				if (rxqueues[queue_id].empty()) {
+					continue; // no messages at all in this queue
 				}
 
 				std::cerr << "[rofl-common][crofconn][handle_messages] "
-						<< "reading message from rxqueue:" << std::endl << *msg;
+						<< "rxqueue[" << queue_id << "]:" << std::endl << rxqueues[queue_id];
 
-				if (rofl::openflow::OFP_VERSION_UNKNOWN == msg->get_version()) {
+				/* get not more than rxweights[queue_id] messages from rxqueue[queue_id] */
+				for (unsigned int num = 0; num < rxweights[queue_id]; ++num) {
+
+					rofl::openflow::cofmsg* msg = (rofl::openflow::cofmsg*)0;
+
+					if ((msg = rxqueues[queue_id].retrieve()) == NULL) {
+						continue; // no further messages in this queue
+					}
+
 					std::cerr << "[rofl-common][crofconn][handle_messages] "
-							<< "received message with unknown version, dropping." << std::endl;
+							<< "reading message from rxqueue:" << std::endl << *msg;
 
-					rofl::cmemory mem(msg->length());
-					msg->pack(mem.somem(), mem.length());
-					size_t len = (mem.length() < 64) ? mem.length() : 64;
-					send_message(new rofl::openflow::cofmsg_error_bad_request_bad_version(
-									get_version(), msg->get_xid(), mem.somem(), len));
-
-					delete msg; continue;
+					/* segmentation and reassembly */
+					switch (ofp_version) {
+					case rofl::openflow10::OFP_VERSION:
+					case rofl::openflow12::OFP_VERSION: {
+						// no segmentation and reassembly below OFP1.3, so hand over message directly to higher layers
+						crofconn_env::call_env(env).handle_recv(*this, msg);
+					} break;
+					default: {
+						switch (msg->get_type()) {
+						case rofl::openflow13::OFPT_MULTIPART_REQUEST:
+						case rofl::openflow13::OFPT_MULTIPART_REPLY: {
+							handle_rx_multipart_message(msg);
+						} break;
+						default: {
+							crofconn_env::call_env(env).handle_recv(*this, msg);
+						};
+						}
+					};
+					}
 				}
 
-				switch (msg->get_type()) {
-				case OFPT_MULTIPART_REQUEST: {
-					/*
-					 * add multipart support here for receiving messages
-					 */
-					switch (msg->get_version()) {
-					case rofl::openflow13::OFP_VERSION: {
-						rofl::openflow::cofmsg_stats_request *stats = dynamic_cast<rofl::openflow::cofmsg_stats_request*>( msg );
-
-						if (NULL == stats) {
-							std::cerr << "[rofl-common][crofconn] dropping multipart message, invalid message type." << str() << std::endl;
-							delete msg; continue;
-						}
-
-						// start new or continue pending transaction
-						if (stats->get_stats_flags() & rofl::openflow13::OFPMPF_REQ_MORE) {
-
-							sar.set_transaction(msg->get_xid()).store_and_merge_msg(*msg);
-							delete msg; // delete msg here, we store a copy in the transaction
-
-						// end pending transaction or multipart message with single message only
-						} else {
-
-							if (sar.has_transaction(msg->get_xid())) {
-
-								sar.set_transaction(msg->get_xid()).store_and_merge_msg(*msg);
-
-								rofl::openflow::cofmsg* reassembled_msg = sar.set_transaction(msg->get_xid()).retrieve_and_detach_msg();
-
-								sar.drop_transaction(msg->get_xid());
-
-								delete msg; // delete msg here, we may get an exception from the next line
-
-								send_message_to_env(reassembled_msg);
-							} else {
-								// do not delete msg here, will be done by higher layers
-								send_message_to_env(msg);
-							}
-						}
-					} break;
-					default: {
-						// no segmentation and reassembly below OF13, so send message directly to our environment
-						send_message_to_env(msg);
-					};
-					}
-				} break;
-				case OFPT_MULTIPART_REPLY: {
-					/*
-					 * add multipart support here for receiving messages
-					 */
-					switch (msg->get_version()) {
-					case rofl::openflow13::OFP_VERSION: {
-						rofl::openflow::cofmsg_stats_reply *stats = dynamic_cast<rofl::openflow::cofmsg_stats_reply*>( msg );
-
-						if (NULL == stats) {
-							std::cerr << "[rofl-common][crofconn] dropping multipart message, invalid message type." << str() << std::endl;
-							delete msg; continue;
-						}
-
-						// start new or continue pending transaction
-						if (stats->get_stats_flags() & rofl::openflow13::OFPMPF_REQ_MORE) {
-
-							sar.set_transaction(msg->get_xid()).store_and_merge_msg(*msg);
-							delete msg; // delete msg here, we store a copy in the transaction
-
-						// end pending transaction or multipart message with single message only
-						} else {
-
-							if (sar.has_transaction(msg->get_xid())) {
-
-								sar.set_transaction(msg->get_xid()).store_and_merge_msg(*msg);
-
-								rofl::openflow::cofmsg* reassembled_msg = sar.set_transaction(msg->get_xid()).retrieve_and_detach_msg();
-
-								sar.drop_transaction(msg->get_xid());
-
-								delete msg; // delete msg here, we may get an exception from the next line
-
-								send_message_to_env(reassembled_msg);
-							} else {
-								// do not delete msg here, will be done by higher layers
-								send_message_to_env(msg);
-							}
-						}
-					} break;
-					default: {
-						// no segmentation and reassembly below OF13, so send message directly to our environment
-						send_message_to_env(msg);
-					};
-					}
-				} break;
-				default: {
-					switch (state) {
-					case STATE_CONNECTED: {
-						send_message_to_env(msg);
-					} break;
-					default: {
-						std::cerr << "[rofl-common][crofconn][handle_messages] "
-								<< "delaying message, connection not fully established."
-								<< str() << std::endl;
-
-						dlqueue.store(msg); continue;
-					};
-					}
-				} break;
+				if (not rxqueues[queue_id].empty()) {
+					//keep_running = true; // return control to thread once in a round for timers
+					thread.wakeup();
 				}
 			}
 
-			if (not rxqueues[queue_id].empty()) {
-				reschedule = true;
+			/* not connected any more, stop running working thread */
+			if (STATE_ESTABLISHED != state) {
+				keep_running = false;
 			}
+
+		} catch (eRofConnNotFound& e) {
+			/* environment not found */
+			std::cerr << "[rofl-common][crofconn][handle_rx_messages] exception, what: " << e.what() << std::endl;
+			keep_running = false;
+
+		} catch (std::runtime_error& e) {
+			std::cerr << "[rofl-common][crofconn][handle_rx_messages] exception, what: " << e.what() << std::endl;
+
 		}
 
-	} catch (...) {
-		std::cerr << "aha" << std::endl;
-	}
+	} while (keep_running);
 
-	flags.reset(FLAG_RXQUEUE_CONSUMING);
+	rx_thread_working = false;
 
-	if (reschedule) {
-		std::cerr << "[rofl-common][crofconn][handle_messages] "
-				<< "rescheduling -EVENT-RXQUEUE-" << std::endl;
-		if (not rx_int_working) {
-			rofl::ciosrv::notify(rofl::cevent(EVENT_RXQUEUE));
-			rx_int_working = true;
-		}
-	} else {
+	thread.add_timer(TIMER_ID_NEED_LIFE_CHECK, ctimespec().expire_in(timeout_lifecheck));
 
-		rx_need_lifecheck = true;
-
-		// reset timer for transmitting next Echo.request, if we have seen a life signal from our peer
-		timer_start_life_check();
+	try {
+		/* reenable reception of messages on socket */
+		//rofsock.rx_enable();
+	} catch (std::runtime_error& e) {
+		std::cerr << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> AHA, what: " << e.what() << std::endl;
 	}
 }
 
@@ -1217,47 +1149,89 @@ crofconn::handle_rx_external()
 
 
 void
-crofconn::error_rcvd(
-		rofl::openflow::cofmsg *msg)
+crofconn::handle_rx_multipart_message(
+		rofl::openflow::cofmsg* msg)
 {
-	rofl::openflow::cofmsg_error *error = dynamic_cast<rofl::openflow::cofmsg_error*>( msg );
+	switch (msg->get_type()) {
+	case OFPT_MULTIPART_REQUEST: {
+		/*
+		 * add multipart support here for receiving messages
+		 */
+		rofl::openflow::cofmsg_stats_request *stats = dynamic_cast<rofl::openflow::cofmsg_stats_request*>( msg );
 
-	try {
-		if (NULL == error) {
-			std::cerr << "[rofl-common][crofconn] invalid message rcvd in method error_rcvd()" << std::endl << *msg;
+		if (NULL == stats) {
+			std::cerr << "[rofl-common][crofconn] dropping multipart message, invalid message type." << str() << std::endl;
 			delete msg; return;
 		}
 
-		switch (error->get_err_type()) {
-		case openflow13::OFPET_HELLO_FAILED: {
+		// start new or continue pending transaction
+		if (stats->get_stats_flags() & rofl::openflow13::OFPMPF_REQ_MORE) {
 
-			switch (error->get_err_code()) {
-			case openflow13::OFPHFC_INCOMPATIBLE: {
-				std::cerr << "[rofl-common][crofconn] HELLO-INCOMPATIBLE.error rcvd, closing connection." << str() << std::endl;
-			} break;
-			case openflow13::OFPHFC_EPERM: {
-				std::cerr << "[rofl-common][crofconn] HELLO-EPERM.error rcvd, closing connection." << str() << std::endl;
-			} break;
-			default: {
-				std::cerr << "[rofl-common][crofconn] HELLO.error rcvd, closing connection." << str() << std::endl;
-			};
+			sar.set_transaction(msg->get_xid()).store_and_merge_msg(*msg);
+			delete msg; // delete msg here, we store a copy in the transaction
+
+		// end pending transaction or multipart message with single message only
+		} else {
+
+			if (sar.has_transaction(msg->get_xid())) {
+
+				sar.set_transaction(msg->get_xid()).store_and_merge_msg(*msg);
+
+				rofl::openflow::cofmsg* reassembled_msg = sar.set_transaction(msg->get_xid()).retrieve_and_detach_msg();
+
+				sar.drop_transaction(msg->get_xid());
+
+				delete msg; // delete msg here, we may get an exception from the next line
+
+				crofconn_env::call_env(env).handle_recv(*this, reassembled_msg);
+			} else {
+				// do not delete msg here, will be done by higher layers
+				crofconn_env::call_env(env).handle_recv(*this, msg);
 			}
+		}
+	} break;
+	case OFPT_MULTIPART_REPLY: {
+		/*
+		 * add multipart support here for receiving messages
+		 */
+		rofl::openflow::cofmsg_stats_reply *stats = dynamic_cast<rofl::openflow::cofmsg_stats_reply*>( msg );
 
-			delete error;
-
-			run_engine(EVENT_DISCONNECTED);
-		} break;
-		default: {
-			send_message_to_env(error);
-		};
+		if (NULL == stats) {
+			std::cerr << "[rofl-common][crofconn] dropping multipart message, invalid message type." << str() << std::endl;
+			delete msg; return;
 		}
 
-	} catch (RoflException& e) {
+		// start new or continue pending transaction
+		if (stats->get_stats_flags() & rofl::openflow13::OFPMPF_REQ_MORE) {
 
-		std::cerr << "[rofl-common][crofconn] RoflException in error_rcvd() " << std::endl;
+			sar.set_transaction(msg->get_xid()).store_and_merge_msg(*msg);
+			delete msg; // delete msg here, we store a copy in the transaction
+
+		// end pending transaction or multipart message with single message only
+		} else {
+
+			if (sar.has_transaction(msg->get_xid())) {
+
+				sar.set_transaction(msg->get_xid()).store_and_merge_msg(*msg);
+
+				rofl::openflow::cofmsg* reassembled_msg = sar.set_transaction(msg->get_xid()).retrieve_and_detach_msg();
+
+				sar.drop_transaction(msg->get_xid());
+
+				delete msg; // delete msg here, we may get an exception from the next line
+
+				crofconn_env::call_env(env).handle_recv(*this, reassembled_msg);
+			} else {
+				// do not delete msg here, will be done by higher layers
+				crofconn_env::call_env(env).handle_recv(*this, msg);
+			}
+		}
+	} break;
+	default: {
+
+	};
 	}
 }
-
 
 
 
@@ -1269,7 +1243,7 @@ crofconn::fragment_and_send_message(
 	unsigned int cwnd_size = 0;
 
 	if (msg->length() <= fragmentation_threshold) {
-		cwnd_size = rofsock->send_message(msg); // default behaviour for now: send message directly to rofsock
+		rofsock.send_message(msg); // default behaviour for now: send message directly to rofsock
 
 	} else {
 
@@ -1348,9 +1322,7 @@ crofconn::fragment_and_send_message(
 				} break;
 				case rofl::openflow13::OFPMP_METER_FEATURES: {
 					// no array in meter-features, so no need to fragment
-					if (rofsock) {
-						cwnd_size = rofsock->send_message(msg); // default behaviour for now: send message directly to rofsock
-					}
+					rofsock.send_message(msg); // default behaviour for now: send message directly to rofsock
 				} break;
 				}
 
@@ -1358,12 +1330,6 @@ crofconn::fragment_and_send_message(
 			}
 		} break;
 		}
-	}
-
-	if (0 == cwnd_size) {
-		flags.set(FLAG_CONGESTED);
-	} else {
-		flags.reset(FLAG_CONGESTED);
 	}
 
 	return cwnd_size;
@@ -1406,9 +1372,7 @@ crofconn::fragment_table_features_stats_request(
 
 	for (std::vector<rofl::openflow::cofmsg_table_features_stats_request*>::iterator
 			it = fragments.begin(); it != fragments.end(); ++it) {
-		 if (rofsock) {
-			 cwnd_size = rofsock->send_message(*it);
-		 }
+		 rofsock.send_message(*it);
 	}
 
 	delete msg;
@@ -1453,9 +1417,7 @@ crofconn::fragment_flow_stats_reply(
 
 	for (std::vector<rofl::openflow::cofmsg_flow_stats_reply*>::iterator
 			it = fragments.begin(); it != fragments.end(); ++it) {
-		 if (rofsock) {
-			 cwnd_size = rofsock->send_message(*it);
-		 }
+		 rofsock.send_message(*it);
 	}
 
 	delete msg;
@@ -1500,9 +1462,7 @@ crofconn::fragment_table_stats_reply(
 
 	for (std::vector<rofl::openflow::cofmsg_table_stats_reply*>::iterator
 			it = fragments.begin(); it != fragments.end(); ++it) {
-		 if (rofsock) {
-			 cwnd_size = rofsock->send_message(*it);
-		 }
+		 rofsock.send_message(*it);
 	}
 
 	delete msg;
@@ -1547,9 +1507,7 @@ crofconn::fragment_port_stats_reply(
 
 	for (std::vector<rofl::openflow::cofmsg_port_stats_reply*>::iterator
 			it = fragments.begin(); it != fragments.end(); ++it) {
-		 if (rofsock) {
-			 cwnd_size = rofsock->send_message(*it);
-		 }
+		 rofsock.send_message(*it);
 	}
 
 	delete msg;
@@ -1597,9 +1555,7 @@ crofconn::fragment_queue_stats_reply(
 
 	for (std::vector<rofl::openflow::cofmsg_queue_stats_reply*>::iterator
 			it = fragments.begin(); it != fragments.end(); ++it) {
-		 if (rofsock) {
-			 cwnd_size = rofsock->send_message(*it);
-		 }
+		 rofsock.send_message(*it);
 	}
 
 	delete msg;
@@ -1644,9 +1600,7 @@ crofconn::fragment_group_stats_reply(
 
 	for (std::vector<rofl::openflow::cofmsg_group_stats_reply*>::iterator
 			it = fragments.begin(); it != fragments.end(); ++it) {
-		 if (rofsock) {
-			 cwnd_size = rofsock->send_message(*it);
-		 }
+		 rofsock.send_message(*it);
 	}
 
 	delete msg;
@@ -1691,9 +1645,7 @@ crofconn::fragment_group_desc_stats_reply(
 
 	for (std::vector<rofl::openflow::cofmsg_group_desc_stats_reply*>::iterator
 			it = fragments.begin(); it != fragments.end(); ++it) {
-		 if (rofsock) {
-			 cwnd_size = rofsock->send_message(*it);
-		 }
+		 rofsock.send_message(*it);
 	}
 
 	delete msg;
@@ -1738,9 +1690,7 @@ crofconn::fragment_table_features_stats_reply(
 
 	for (std::vector<rofl::openflow::cofmsg_table_features_stats_reply*>::iterator
 			it = fragments.begin(); it != fragments.end(); ++it) {
-		 if (rofsock) {
-			 cwnd_size = rofsock->send_message(*it);
-		 }
+		 rofsock.send_message(*it);
 	}
 
 	delete msg;
@@ -1785,9 +1735,7 @@ crofconn::fragment_port_desc_stats_reply(
 
 	for (std::vector<rofl::openflow::cofmsg_port_desc_stats_reply*>::iterator
 			it = fragments.begin(); it != fragments.end(); ++it) {
-		 if (rofsock) {
-			 cwnd_size = rofsock->send_message(*it);
-		 }
+		 rofsock.send_message(*it);
 	}
 
 	delete msg;
@@ -1834,9 +1782,7 @@ crofconn::fragment_meter_stats_reply(
 
 	for (std::vector<rofl::openflow::cofmsg_meter_stats_reply*>::iterator
 			it = fragments.begin(); it != fragments.end(); ++it) {
-		 if (rofsock) {
-			 cwnd_size = rofsock->send_message(*it);
-		 }
+		 rofsock.send_message(*it);
 	}
 
 	delete msg;
@@ -1883,9 +1829,7 @@ crofconn::fragment_meter_config_stats_reply(
 
 	for (std::vector<rofl::openflow::cofmsg_meter_config_stats_reply*>::iterator
 			it = fragments.begin(); it != fragments.end(); ++it) {
-		 if (rofsock) {
-			 cwnd_size = rofsock->send_message(*it);
-		 }
+		 rofsock.send_message(*it);
 	}
 
 	delete msg;
@@ -1894,82 +1838,5 @@ crofconn::fragment_meter_config_stats_reply(
 }
 
 
-
-void
-crofconn::timer_start(
-		crofconn_timer_t type, const ctimespec& timespec)
-{
-	timer_stop(type);
-	ctimerid const& tid = register_timer(type, timespec);
-	timer_ids[type] = tid;
-#if 0
-	std::cerr << "[rofl-common][crofconn] timer-start, registered timer-id: " << std::endl << tid;
-	std::cerr << "[rofl-common][crofconn] timer-start, registered timer-id: " << std::endl << timer_ids[type];
-
-	std::cerr << "[rofl-common][crofconn] timer-start: " << timer_ids.size() << " <=======================>" << std::endl;
-	rofl::indent i(2);
-	for (std::map<crofconn_timer_t, ctimerid>::iterator
-			it = timer_ids.begin(); it != timer_ids.end(); ++it) {
-		std::cerr << "[rofl-common][crofconn] timer-type: " << it->first << std::endl << it->second;
-	}
-#endif
-}
-
-
-
-void
-crofconn::timer_stop(
-		crofconn_timer_t type)
-{
-	if (timer_ids.find(type) == timer_ids.end()) {
-		return;
-	}
-#if 0
-	std::cerr << "[rofl-common][crofconn] timer-stop, cancel timer-id: " << std::endl << timer_ids[type];
-#endif
-	cancel_timer(timer_ids[type]);
-	timer_ids.erase(type);
-#if 0
-	std::cerr << "[rofl-common][crofconn] timer-stop: " << timer_ids.size() << " <========================>" << std::endl;
-	rofl::indent i(2);
-	for (std::map<crofconn_timer_t, ctimerid>::iterator
-			it = timer_ids.begin(); it != timer_ids.end(); ++it) {
-		std::cerr << "[rofl-common][crofconn] timer-type: " << it->first << std::endl << it->second;
-	}
-#endif
-}
-
-
-
-void
-crofconn::backoff_reconnect(bool reset_timeout)
-{
-	timer_stop_next_reconnect();
-
-	//if ((not flags.test(FLAGS_RECONNECTING)) || (reset_timeout)) {
-	if (reset_timeout) {
-
-		reconnect_variance.set_timespec().tv_sec *= crandom::draw_random_number();
-		reconnect_variance.set_timespec().tv_nsec *= crandom::draw_random_number();
-		reconnect_timespec = reconnect_start_timeout + reconnect_variance;
-		reconnect_counter = 0;
-
-	} else {
-		reconnect_timespec += reconnect_timespec;
-
-		if (reconnect_timespec > max_backoff) {
-			reconnect_timespec = max_backoff;
-		}
-	}
-
-	std::cerr << "[rofl-common][crofconn][backoff] "
-			<< " scheduled reconnect in: " << reconnect_timespec.str() << std::endl;
-
-	timer_start_next_reconnect();
-
-	++reconnect_counter;
-
-	//flags.set(FLAGS_RECONNECTING);
-}
 
 

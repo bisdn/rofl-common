@@ -73,6 +73,7 @@ AC_CONFIG_FILES([
 	test/Makefile
 	test/rofl/Makefile
 	test/rofl/common/Makefile
+	test/rofl/common/crofconn/Makefile
 	test/rofl/common/crofsock/Makefile
 	test/rofl/common/openflow/Makefile
 	test/rofl/common/openflow/coxmatch/Makefile

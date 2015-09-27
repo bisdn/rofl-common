@@ -1061,6 +1061,14 @@ crofsock::is_passive() const
 
 
 
+bool
+crofsock::is_congested() const
+{
+	return flags.test(FLAG_CONGESTED);
+}
+
+
+
 void
 crofsock::rx_disable()
 {
@@ -1509,8 +1517,8 @@ crofsock::recv_message()
 			/* ok, message was received completely */
 			if (msg_len == msg_bytes_read) {
 				rx_fragment_pending = false;
-				msg_bytes_read = 0;
 				parse_message();
+				msg_bytes_read = 0;
 			} else {
 				rx_fragment_pending = true;
 			}
@@ -1566,32 +1574,42 @@ crofsock::parse_message()
 
 	} catch (eBadRequestBadType& e) {
 
+		std::cerr << "crofsock::parse_message() eBadRequestBadType, what: " << e.what() << std::endl;
+
 		send_message(
 				new rofl::openflow::cofmsg_error_bad_request_bad_type(
 						hdr->version,
 						be32toh(hdr->xid),
 						rxbuffer.somem(),
-						(rxbuffer.length() > 64) ? 64 : rxbuffer.length()));
+						(rxbuffer.length() > 64) ? 64 : msg_bytes_read));
 
 	} catch (eBadRequestBadStat& e) {
+
+		std::cerr << "crofsock::parse_message() eBadRequestBadStat, what: " << e.what() << std::endl;
 
 		send_message(
 				new rofl::openflow::cofmsg_error_bad_request_bad_stat(
 						hdr->version,
 						be32toh(hdr->xid),
 						rxbuffer.somem(),
-						(rxbuffer.length() > 64) ? 64 : rxbuffer.length()));
+						(rxbuffer.length() > 64) ? 64 : msg_bytes_read));
 
 	} catch (eBadRequestBadVersion& e) {
+
+		std::cerr << "crofsock::parse_message() eBadRequestBadVersion, what: " << e.what() << std::endl;
+
+		if (msg) delete msg;
 
 		send_message(
 				new rofl::openflow::cofmsg_error_bad_request_bad_version(
 						hdr->version,
 						be32toh(hdr->xid),
 						rxbuffer.somem(),
-						(rxbuffer.length() > 64) ? 64 : rxbuffer.length()));
+						(rxbuffer.length() > 64) ? 64 : msg_bytes_read));
 
 	} catch (eBadRequestBadLen& e) {
+
+		std::cerr << "crofsock::parse_message() eBadRequestBadLen, what: " << e.what() << std::endl;
 
 		if (msg) delete msg;
 
@@ -1600,9 +1618,11 @@ crofsock::parse_message()
 						hdr->version,
 						be32toh(hdr->xid),
 						rxbuffer.somem(),
-						(rxbuffer.length() > 64) ? 64 : rxbuffer.length()));
+						(rxbuffer.length() > 64) ? 64 : msg_bytes_read));
 
 	} catch (std::runtime_error& e) {
+
+		std::cerr << "crofsock::parse_message() std::runtime_error, what: " << e.what() << std::endl;
 
 		//if (msg) delete msg;
 
@@ -1747,7 +1767,7 @@ crofsock::parse_of10_message(
 	};
 	}
 
-	(*(*pmsg)).unpack(rxbuffer.somem(), rxbuffer.length());
+	(*(*pmsg)).unpack(rxbuffer.somem(), msg_bytes_read);
 }
 
 
@@ -1927,7 +1947,7 @@ crofsock::parse_of12_message(
 	};
 	}
 
-	(*(*pmsg)).unpack(rxbuffer.somem(), rxbuffer.length());
+	(*(*pmsg)).unpack(rxbuffer.somem(), msg_bytes_read);
 }
 
 
@@ -2140,7 +2160,7 @@ crofsock::parse_of13_message(
 	};
 	}
 
-	(*(*pmsg)).unpack(rxbuffer.somem(), rxbuffer.length());
+	(*(*pmsg)).unpack(rxbuffer.somem(), msg_bytes_read);
 }
 
 

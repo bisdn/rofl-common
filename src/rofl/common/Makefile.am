@@ -9,6 +9,8 @@ librofl_common_base_la_SOURCES = \
 		logging.cc \
 		logging.h \
 		locking.hpp \
+		crofconn.cc \
+		crofconn.h \
 		crofsock.cc \
 		crofsock.h \
 		ctimespec.cpp \
@@ -27,8 +29,6 @@ librofl_common_base_la_SOURCES = \
 		cpacket.cc \
 		crandom.h \
 		crandom.cc \
-		cpipe.h \
-		cpipe.cc \
 		cclock.h \
 		cclock.cc \
 		cmemory.h \
@@ -46,7 +46,15 @@ librofl_common_base_la_SOURCES = \
 		caddrinfos.cc \
 		cindex.h \
 		cdpid.h \
-		crofqueue.h
+		crofqueue.h \
+		ctransaction.h \
+		ctransaction.cc \
+		ctransactions.h \
+		ctransactions.cc \
+		csegmentation.h \
+		csegmentation.cc \
+		csegmsg.h \
+		csegmsg.cc
 
 		
 
@@ -57,7 +65,6 @@ library_include_HEADERS= \
 		caddress.h \
 		cpacket.h \
 		crandom.h \
-		cpipe.h \
 		endian_conversion.h \
 		rofcommon.h \
 		crofcore.h \
@@ -66,12 +73,9 @@ library_include_HEADERS= \
 		crofdpt.h \
 		crofconn.h \
 		crofchan.h \
-		crofshim.h \
 		cclock.h \
 		croflexception.h \
 		cmemory.h \
-		csocket.h \
-		csocket_plain.h \
 		thread_helper.h \
 		ctransaction.h \
 		ctransactions.h \
@@ -90,11 +94,6 @@ library_include_HEADERS= \
 		cdpid.h \
 		crofqueue.h \
 		ctspaddress.h
-
-if ROFL_HAVE_OPENSSL
-library_include_HEADERS += \
-		csocket_openssl.h
-endif
 
 
 AM_CPPFLAGS=-fPIC

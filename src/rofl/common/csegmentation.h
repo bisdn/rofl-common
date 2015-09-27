@@ -16,7 +16,7 @@
 #include "rofl/common/logging.h"
 #include "rofl/common/croflexception.h"
 #include "rofl/common/csegmsg.h"
-#include "rofl/common/ciosrv.h"
+#include "rofl/common/cthread.hpp"
 #include "rofl/common/ctimerid.h"
 
 namespace rofl {
@@ -26,28 +26,15 @@ class eSegmentationInval		: public eSegmentationBase {};
 class eSegmentationNotFound		: public eSegmentationBase {};
 
 class csegmentation :
-		public ciosrv
+		public cthread_env
 {
-
-	std::map<uint32_t, csegmsg> 		segmsgs;		// all current pending transactions with fragments
-
-	enum csegmentation_timer_t {
-		TIMER_CHECK_EXPIRATION = 1,
-	};
-
-	ctimerid							check_expiration_id;	// timer-id
-	time_t								check_expiration_interval;
-
-	static time_t const DEFAULT_CHECK_EXPIRATION_INTERVAL = 8; 	// seconds
-
 public:
 
 	/**
 	 *
 	 */
 	csegmentation(
-			time_t check_expiration_interval = DEFAULT_CHECK_EXPIRATION_INTERVAL,
-			pthread_t tid = 0);
+			time_t check_expiration_interval = DEFAULT_CHECK_EXPIRATION_INTERVAL);
 
 	/**
 	 *
@@ -99,13 +86,29 @@ public:
 	bool
 	has_transaction(uint32_t xid);
 
+
 private:
 
-	/**
-	 *
-	 */
 	virtual void
-	handle_timeout(int opaque, void *data = (void*)0);
+	handle_wakeup(
+			cthread& thread)
+	{};
+
+	virtual void
+	handle_timeout(
+			cthread& thread, uint32_t timer_id, const std::list<unsigned int>& ttypes);
+
+	virtual void
+	handle_read_event(
+			cthread& thread, int fd)
+	{};
+
+	virtual void
+	handle_write_event(
+			cthread& thread, int fd)
+	{};
+
+private:
 
 	/**
 	 *
@@ -125,6 +128,26 @@ public:
 		}
 		return os;
 	};
+
+private:
+
+	enum csegmentation_timer_t {
+		TIMER_ID_CHECK_EXPIRATION = 1,
+	};
+
+	// working thread
+	cthread			                    thread;
+
+	// all current pending transactions with fragments
+	std::map<uint32_t, csegmsg> 		segmsgs;
+
+	// timer-id
+	ctimerid							check_expiration_id;
+
+	time_t								check_expiration_interval;
+
+	static const time_t                 DEFAULT_CHECK_EXPIRATION_INTERVAL = 8; 	// seconds
+
 };
 
 }; // end of namespace rofl
