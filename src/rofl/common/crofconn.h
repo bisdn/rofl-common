@@ -404,6 +404,16 @@ public:
 public:
 
 	/**
+	 *
+	 */
+	crofconn&
+	set_env(
+			crofconn_env* env)
+	{ this->env = env; return *this; };
+
+public:
+
+	/**
 	 * @brief	Returns capacity of transmission queues in messages
 	 */
 	size_t
