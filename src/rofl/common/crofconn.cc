@@ -83,12 +83,10 @@ crofconn::tcp_accept(
 
 void
 crofconn::tcp_connect(
-		const cauxid& auxid,
 		const rofl::openflow::cofhello_elem_versionbitmap& versionbitmap,
 		enum crofconn_mode_t mode,
 		bool reconnect)
 {
-	set_auxid(auxid);
 	set_versionbitmap(versionbitmap);
 	set_mode(mode);
 	set_state(STATE_CONNECT_PENDING);
@@ -113,7 +111,6 @@ crofconn::tls_accept(
 
 void
 crofconn::tls_connect(
-		const cauxid& auxid,
 		const rofl::openflow::cofhello_elem_versionbitmap& versionbitmap,
 		enum crofconn_mode_t mode,
 		bool reconnect)

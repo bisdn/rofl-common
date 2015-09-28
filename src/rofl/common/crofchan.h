@@ -137,7 +137,7 @@ protected:
 
 	virtual void
 	handle_recv(
-			crofchan& chan, crofconn& conn, rofl::openflow::cofmsg *msg) = 0;
+			crofchan& chan, crofconn& conn, rofl::openflow::cofmsg* msg) = 0;
 
 	virtual uint32_t
 	get_async_xid(
@@ -253,7 +253,7 @@ public:
 		if (cnt == 0) {
 			throw eRofChanExhausted("crofchan::add_conn() cauxid namespace exhausted");
 		}
-		conns[last_auxid] = new crofconn(this);
+		(conns[last_auxid] = new crofconn(this))->set_auxid(cauxid(last_auxid));
 		return *(conns[last_auxid]);
 	};
 
@@ -267,7 +267,7 @@ public:
 		if (conns.find(auxid) != conns.end()) {
 			delete conns[auxid];
 		}
-		conns[auxid] = new crofconn(this);
+		(conns[auxid] = new crofconn(this))->set_auxid(auxid);
 		return *(conns[auxid]);
 	};
 
@@ -297,7 +297,7 @@ public:
 			const cauxid& auxid) {
 		AcquireReadWriteLock rwlock(conns_rwlock);
 		if (conns.find(auxid) == conns.end()) {
-			conns[auxid] = new crofconn(this);
+			(conns[auxid] = new crofconn(this))->set_auxid(auxid);
 		}
 		return *(conns[auxid]);
 	};

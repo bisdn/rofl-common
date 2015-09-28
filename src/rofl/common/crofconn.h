@@ -244,7 +244,6 @@ public:
 	 */
 	virtual void
 	tcp_connect(
-			const cauxid& auxid,
 			const rofl::openflow::cofhello_elem_versionbitmap& versionbitmap,
 			enum crofconn_mode_t mode,
 			bool reconnect = true);
@@ -263,7 +262,6 @@ public:
 	 */
 	virtual void
 	tls_connect(
-			const cauxid& auxid,
 			const rofl::openflow::cofhello_elem_versionbitmap& versionbitmap,
 			enum crofconn_mode_t mode,
 			bool reconnect = true);
@@ -371,12 +369,22 @@ public:
 	get_dpid() const
 	{ return dpid; };
 
+public:
+
 	/**
 	 * @brief	Return auxiliary_id
 	 */
 	cauxid const&
 	get_auxid() const
 	{ return auxid; };
+
+	/**
+	 *
+	 */
+	void
+	set_auxid(
+			const cauxid& auxid)
+	{ this->auxid = auxid; };
 
 public:
 
@@ -701,11 +709,6 @@ private:
 	set_dpid(
 			uint64_t dpid)
 	{ this->dpid = dpid; };
-
-	void
-	set_auxid(
-			const cauxid& auxid)
-	{ this->auxid = auxid; };
 
 private:
 
