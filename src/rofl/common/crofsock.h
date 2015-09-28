@@ -45,6 +45,7 @@
 #include "rofl/common/cthread.hpp"
 #include "rofl/common/csockaddr.h"
 #include "rofl/common/crandom.h"
+#include "rofl/common/croflexception.h"
 
 #include "rofl/common/openflow/messages/cofmsg.h"
 #include "rofl/common/openflow/messages/cofmsg_hello.h"
@@ -94,20 +95,6 @@ public:
 	eRofSockBase(
 			const std::string& __arg) :
 				RoflException(__arg)
-	{};
-};
-class eRofSockTxAgain : public eRofSockBase {
-public:
-	eRofSockTxAgain(
-			const std::string& __arg) :
-				eRofSockBase(__arg)
-	{};
-};
-class eRofSockMsgTooLarge : public eRofSockBase {
-public:
-	eRofSockMsgTooLarge(
-			const std::string& __arg) :
-				eRofSockBase(__arg)
 	{};
 };
 class eRofSockInvalid : public eRofSockBase {
@@ -230,6 +217,10 @@ protected:
 	virtual void
 	handle_recv(
 			crofsock& socket, rofl::openflow::cofmsg *msg) = 0;
+
+	virtual void
+	congestion_indication(
+			crofsock& socket) = 0;
 
 private:
 	static std::set<crofsock_env*>  socket_envs;

@@ -16,7 +16,7 @@ using namespace rofl;
 
 /*static*/std::set<crofconn_env*> crofconn_env::connection_envs;
 /*static*/crwlock                 crofconn_env::connection_envs_lock;
-/*static*/const int               crofconn::DEFAULT_RX_MAX_QUEUE_SIZE = 128;
+/*static*/const int               crofconn::RX_MAX_QUEUE_SIZE_DEFAULT = 128;
 /*static*/const unsigned int      crofconn::DEFAULT_FRAGMENTATION_THRESHOLD = 65535;
 /*static*/const unsigned int      crofconn::DEFAULT_HELLO_TIMEOUT = 5;
 /*static*/const unsigned int      crofconn::DEFAULT_FEATURES_TIMEOUT = 5;
@@ -41,7 +41,6 @@ crofconn::crofconn(
 				rxweights(QUEUE_MAX),
 				rxqueues(QUEUE_MAX),
 				rx_thread_working(false),
-				rx_max_queue_size(DEFAULT_RX_MAX_QUEUE_SIZE),
 				fragmentation_threshold(DEFAULT_FRAGMENTATION_THRESHOLD),
 				timeout_hello(DEFAULT_HELLO_TIMEOUT),
 				timeout_features(DEFAULT_FEATURES_TIMEOUT),
@@ -821,7 +820,16 @@ void
 crofconn::handle_send(
 		crofsock& rofsock)
 {
-	// TODO: continue sending data
+	crofconn_env::call_env(env).handle_send(*this);
+};
+
+
+
+void
+crofconn::congestion_indication(
+		crofsock& rofsock)
+{
+	crofconn_env::call_env(env).congestion_indication(*this);
 };
 
 
@@ -902,139 +910,114 @@ crofconn::handle_recv(
 	};
 	}
 
+	try {
 
+		/* store message in appropriate rxqueue */
+		switch (ofp_version) {
+		case rofl::openflow10::OFP_VERSION: {
+			switch (msg->get_type()) {
+			case rofl::openflow10::OFPT_PACKET_IN:
+			case rofl::openflow10::OFPT_PACKET_OUT: {
+				rxqueues[QUEUE_PKT].store(msg);
+				std::cerr << "[rofl-common][crofconn][handle_recv] rxqueues[QUEUE_PKT]:" << std::endl << rxqueues[QUEUE_PKT];
 
-	/* store message in appropriate rxqueue */
-	switch (ofp_version) {
-	case rofl::openflow10::OFP_VERSION: {
-		switch (msg->get_type()) {
-		case rofl::openflow10::OFPT_PACKET_IN:
-		case rofl::openflow10::OFPT_PACKET_OUT: {
-			rxqueues[QUEUE_PKT].store(msg);
-			std::cerr << "[rofl-common][crofconn][handle_recv] rxqueues[QUEUE_PKT]:" << std::endl << rxqueues[QUEUE_PKT];
+			} break;
+			case rofl::openflow10::OFPT_FLOW_MOD:
+			case rofl::openflow10::OFPT_FLOW_REMOVED:
+			case rofl::openflow10::OFPT_STATS_REQUEST:
+			case rofl::openflow10::OFPT_STATS_REPLY:
+			case rofl::openflow10::OFPT_BARRIER_REQUEST:
+			case rofl::openflow10::OFPT_BARRIER_REPLY: {
+				rxqueues[QUEUE_FLOW].store(msg);
+				std::cerr << "[rofl-common][crofconn][handle_recv] rxqueues[QUEUE_FLOW]:" << std::endl << rxqueues[QUEUE_FLOW];
 
-			/* throttle reception of further messages */
-			if (rxqueues[QUEUE_PKT].size() >= rx_max_queue_size) {
-				rofsock.rx_disable();
+			} break;
+			case rofl::openflow10::OFPT_HELLO:
+			case rofl::openflow10::OFPT_ECHO_REQUEST:
+			case rofl::openflow10::OFPT_ECHO_REPLY: {
+				rxqueues[QUEUE_OAM].store(msg, true);
+				std::cerr << "[rofl-common][crofconn][handle_recv] rxqueues[QUEUE_OAM]:" << std::endl << rxqueues[QUEUE_OAM];
+			} break;
+			default: {
+				rxqueues[QUEUE_MGMT].store(msg, true);
+				std::cerr << "[rofl-common][crofconn][handle_recv] rxqueues[QUEUE_MGMT]:" << std::endl << rxqueues[QUEUE_MGMT];
+			};
 			}
-
 		} break;
-		case rofl::openflow10::OFPT_FLOW_MOD:
-		case rofl::openflow10::OFPT_FLOW_REMOVED:
-		case rofl::openflow10::OFPT_STATS_REQUEST:
-		case rofl::openflow10::OFPT_STATS_REPLY:
-		case rofl::openflow10::OFPT_BARRIER_REQUEST:
-		case rofl::openflow10::OFPT_BARRIER_REPLY: {
-			rxqueues[QUEUE_FLOW].store(msg);
-			std::cerr << "[rofl-common][crofconn][handle_recv] rxqueues[QUEUE_FLOW]:" << std::endl << rxqueues[QUEUE_FLOW];
+		case rofl::openflow12::OFP_VERSION: {
+			switch (msg->get_type()) {
+			case rofl::openflow12::OFPT_PACKET_IN:
+			case rofl::openflow12::OFPT_PACKET_OUT: {
+				rxqueues[QUEUE_PKT].store(msg);
+				std::cerr << "[rofl-common][crofconn][handle_recv] rxqueues[QUEUE_PKT]:" << std::endl << rxqueues[QUEUE_PKT];
 
-			/* throttle reception of further messages */
-			if (rxqueues[QUEUE_FLOW].size() >= rx_max_queue_size) {
-				rofsock.rx_disable();
+			} break;
+			case rofl::openflow12::OFPT_FLOW_MOD:
+			case rofl::openflow12::OFPT_FLOW_REMOVED:
+			case rofl::openflow12::OFPT_GROUP_MOD:
+			case rofl::openflow12::OFPT_PORT_MOD:
+			case rofl::openflow12::OFPT_TABLE_MOD:
+			case rofl::openflow12::OFPT_STATS_REQUEST:
+			case rofl::openflow12::OFPT_STATS_REPLY:
+			case rofl::openflow12::OFPT_BARRIER_REQUEST:
+			case rofl::openflow12::OFPT_BARRIER_REPLY: {
+				rxqueues[QUEUE_FLOW].store(msg);
+				std::cerr << "[rofl-common][crofconn][handle_recv] rxqueues[QUEUE_FLOW]:" << std::endl << rxqueues[QUEUE_FLOW];
+
+			} break;
+			case rofl::openflow12::OFPT_HELLO:
+			case rofl::openflow12::OFPT_ECHO_REQUEST:
+			case rofl::openflow12::OFPT_ECHO_REPLY: {
+				rxqueues[QUEUE_OAM].store(msg, true);
+				std::cerr << "[rofl-common][crofconn][handle_recv] rxqueues[QUEUE_OAM]:" << std::endl << rxqueues[QUEUE_OAM];
+			} break;
+			default: {
+				rxqueues[QUEUE_MGMT].store(msg, true);
+				std::cerr << "[rofl-common][crofconn][handle_recv] rxqueues[QUEUE_MGMT]:" << std::endl << rxqueues[QUEUE_MGMT];
+			};
 			}
-
 		} break;
-		case rofl::openflow10::OFPT_HELLO:
-		case rofl::openflow10::OFPT_ECHO_REQUEST:
-		case rofl::openflow10::OFPT_ECHO_REPLY: {
-			rxqueues[QUEUE_OAM].store(msg);
-			std::cerr << "[rofl-common][crofconn][handle_recv] rxqueues[QUEUE_OAM]:" << std::endl << rxqueues[QUEUE_OAM];
+		case rofl::openflow13::OFP_VERSION: {
+			switch (msg->get_type()) {
+			case rofl::openflow13::OFPT_PACKET_IN:
+			case rofl::openflow13::OFPT_PACKET_OUT: {
+				rxqueues[QUEUE_PKT].store(msg);
+				std::cerr << "[rofl-common][crofconn][handle_recv] rxqueues[QUEUE_PKT]:" << std::endl << rxqueues[QUEUE_PKT];
+
+			} break;
+			case rofl::openflow13::OFPT_FLOW_MOD:
+			case rofl::openflow13::OFPT_FLOW_REMOVED:
+			case rofl::openflow13::OFPT_GROUP_MOD:
+			case rofl::openflow13::OFPT_PORT_MOD:
+			case rofl::openflow13::OFPT_TABLE_MOD:
+			case rofl::openflow13::OFPT_MULTIPART_REQUEST:
+			case rofl::openflow13::OFPT_MULTIPART_REPLY:
+			case rofl::openflow13::OFPT_BARRIER_REQUEST:
+			case rofl::openflow13::OFPT_BARRIER_REPLY: {
+				rxqueues[QUEUE_FLOW].store(msg);
+				std::cerr << "[rofl-common][crofconn][handle_recv] rxqueues[QUEUE_FLOW]:" << std::endl << rxqueues[QUEUE_FLOW];
+
+			} break;
+			case rofl::openflow13::OFPT_HELLO:
+			case rofl::openflow13::OFPT_ECHO_REQUEST:
+			case rofl::openflow13::OFPT_ECHO_REPLY: {
+				rxqueues[QUEUE_OAM].store(msg, true);
+				std::cerr << "[rofl-common][crofconn][handle_recv] rxqueues[QUEUE_OAM]:" << std::endl << rxqueues[QUEUE_OAM];
+			} break;
+			default: {
+				rxqueues[QUEUE_MGMT].store(msg, true);
+				std::cerr << "[rofl-common][crofconn][handle_recv] rxqueues[QUEUE_MGMT]:" << std::endl << rxqueues[QUEUE_MGMT];
+			};
+			}
 		} break;
 		default: {
-			rxqueues[QUEUE_MGMT].store(msg);
-			std::cerr << "[rofl-common][crofconn][handle_recv] rxqueues[QUEUE_MGMT]:" << std::endl << rxqueues[QUEUE_MGMT];
+			delete msg; return;
 		};
 		}
-	} break;
-	case rofl::openflow12::OFP_VERSION: {
-		switch (msg->get_type()) {
-		case rofl::openflow12::OFPT_PACKET_IN:
-		case rofl::openflow12::OFPT_PACKET_OUT: {
-			rxqueues[QUEUE_PKT].store(msg);
-			std::cerr << "[rofl-common][crofconn][handle_recv] rxqueues[QUEUE_PKT]:" << std::endl << rxqueues[QUEUE_PKT];
 
-			/* throttle reception of further messages */
-			if (rxqueues[QUEUE_PKT].size() >= rx_max_queue_size) {
-				rofsock.rx_disable();
-			}
-
-		} break;
-		case rofl::openflow12::OFPT_FLOW_MOD:
-		case rofl::openflow12::OFPT_FLOW_REMOVED:
-		case rofl::openflow12::OFPT_GROUP_MOD:
-		case rofl::openflow12::OFPT_PORT_MOD:
-		case rofl::openflow12::OFPT_TABLE_MOD:
-		case rofl::openflow12::OFPT_STATS_REQUEST:
-		case rofl::openflow12::OFPT_STATS_REPLY:
-		case rofl::openflow12::OFPT_BARRIER_REQUEST:
-		case rofl::openflow12::OFPT_BARRIER_REPLY: {
-			rxqueues[QUEUE_FLOW].store(msg);
-			std::cerr << "[rofl-common][crofconn][handle_recv] rxqueues[QUEUE_FLOW]:" << std::endl << rxqueues[QUEUE_FLOW];
-
-			/* throttle reception of further messages */
-			if (rxqueues[QUEUE_FLOW].size() >= rx_max_queue_size) {
-				rofsock.rx_disable();
-			}
-
-		} break;
-		case rofl::openflow12::OFPT_HELLO:
-		case rofl::openflow12::OFPT_ECHO_REQUEST:
-		case rofl::openflow12::OFPT_ECHO_REPLY: {
-			rxqueues[QUEUE_OAM].store(msg);
-			std::cerr << "[rofl-common][crofconn][handle_recv] rxqueues[QUEUE_OAM]:" << std::endl << rxqueues[QUEUE_OAM];
-		} break;
-		default: {
-			rxqueues[QUEUE_MGMT].store(msg);
-			std::cerr << "[rofl-common][crofconn][handle_recv] rxqueues[QUEUE_MGMT]:" << std::endl << rxqueues[QUEUE_MGMT];
-		};
-		}
-	} break;
-	case rofl::openflow13::OFP_VERSION: {
-		switch (msg->get_type()) {
-		case rofl::openflow13::OFPT_PACKET_IN:
-		case rofl::openflow13::OFPT_PACKET_OUT: {
-			rxqueues[QUEUE_PKT].store(msg);
-			std::cerr << "[rofl-common][crofconn][handle_recv] rxqueues[QUEUE_PKT]:" << std::endl << rxqueues[QUEUE_PKT];
-
-			/* throttle reception of further messages */
-			if (rxqueues[QUEUE_PKT].size() >= rx_max_queue_size) {
-				rofsock.rx_disable();
-			}
-
-		} break;
-		case rofl::openflow13::OFPT_FLOW_MOD:
-		case rofl::openflow13::OFPT_FLOW_REMOVED:
-		case rofl::openflow13::OFPT_GROUP_MOD:
-		case rofl::openflow13::OFPT_PORT_MOD:
-		case rofl::openflow13::OFPT_TABLE_MOD:
-		case rofl::openflow13::OFPT_MULTIPART_REQUEST:
-		case rofl::openflow13::OFPT_MULTIPART_REPLY:
-		case rofl::openflow13::OFPT_BARRIER_REQUEST:
-		case rofl::openflow13::OFPT_BARRIER_REPLY: {
-			rxqueues[QUEUE_FLOW].store(msg);
-			std::cerr << "[rofl-common][crofconn][handle_recv] rxqueues[QUEUE_FLOW]:" << std::endl << rxqueues[QUEUE_FLOW];
-
-			/* throttle reception of further messages */
-			if (rxqueues[QUEUE_FLOW].size() >= rx_max_queue_size) {
-				rofsock.rx_disable();
-			}
-
-		} break;
-		case rofl::openflow13::OFPT_HELLO:
-		case rofl::openflow13::OFPT_ECHO_REQUEST:
-		case rofl::openflow13::OFPT_ECHO_REPLY: {
-			rxqueues[QUEUE_OAM].store(msg);
-			std::cerr << "[rofl-common][crofconn][handle_recv] rxqueues[QUEUE_OAM]:" << std::endl << rxqueues[QUEUE_OAM];
-		} break;
-		default: {
-			rxqueues[QUEUE_MGMT].store(msg);
-			std::cerr << "[rofl-common][crofconn][handle_recv] rxqueues[QUEUE_MGMT]:" << std::endl << rxqueues[QUEUE_MGMT];
-		};
-		}
-	} break;
-	default: {
-		delete msg; return;
-	};
+	} catch (eRofQueueFull& e) {
+		/* throttle reception of further messages */
+		rofsock.rx_disable();
 	}
 
 	/* wakeup working thread in state ESTABLISHED; otherwise keep sleeping

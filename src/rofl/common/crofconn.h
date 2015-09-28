@@ -143,6 +143,10 @@ protected:
 	release_sync_xid(
 			crofconn& conn, uint32_t xid) = 0;
 
+	virtual void
+	congestion_indication(
+			crofconn& socket) = 0;
+
 private:
 	static std::set<crofconn_env*>  connection_envs;
 	static crwlock                  connection_envs_lock;
@@ -710,6 +714,10 @@ private:
 	handle_recv(
 			crofsock& socket, rofl::openflow::cofmsg *msg);
 
+	virtual void
+	congestion_indication(
+			crofsock& socket);
+
 private:
 
 	virtual void
@@ -985,11 +993,8 @@ private:
 	// internal thread is working on pending messages
 	bool                        rx_thread_working;
 
-	// maximum number of messages inside a rofqueue, before blocking the socket
-	unsigned int                rx_max_queue_size;
-
 	// default value for rx_max_queue_size (128)
-	static const int            DEFAULT_RX_MAX_QUEUE_SIZE;
+	static const int            RX_MAX_QUEUE_SIZE_DEFAULT;
 
 	// segmentation and reassembly for multipart messages
 	csegmentation		        sar;

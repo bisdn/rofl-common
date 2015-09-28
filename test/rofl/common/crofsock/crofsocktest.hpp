@@ -89,6 +89,10 @@ private:
 	handle_recv(
 			rofl::crofsock& socket, rofl::openflow::cofmsg *msg);
 
+	virtual void
+	congestion_indication(
+			rofl::crofsock& socket);
+
 private:
 
 	enum crofsock_test_mode_t {

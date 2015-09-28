@@ -40,7 +40,7 @@ crofsocktest::test()
 			slisten = new rofl::crofsock(this);
 			sclient = new rofl::crofsock(this);
 
-			rofl::csockaddr baddr(rofl::caddress_in4("127.0.0.1"), 4999);
+			rofl::csockaddr baddr(rofl::caddress_in4("127.0.0.1"), 33998);
 
 			sclient->set_raddr(baddr).tcp_connect(true);
 
@@ -87,7 +87,7 @@ crofsocktest::test_tls()
 		slisten = new rofl::crofsock(this);
 		sclient = new rofl::crofsock(this);
 
-		rofl::csockaddr baddr(rofl::caddress_in4("127.0.0.1"), 4999);
+		rofl::csockaddr baddr(rofl::caddress_in4("127.0.0.1"), 33999);
 
 		sclient->set_raddr(baddr).
 					set_tls_cafile("../../../../../tools/xca/ca.rofl-core.crt.pem").
@@ -249,6 +249,15 @@ crofsocktest::handle_send(
 		rofl::crofsock& socket)
 {
 	std::cerr << "handle send" << std::endl;
+}
+
+
+
+void
+crofsocktest::congestion_indication(
+		rofl::crofsock& socket)
+{
+	std::cerr << "congestion indication" << std::endl;
 }
 
 

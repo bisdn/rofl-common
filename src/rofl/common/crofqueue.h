@@ -14,8 +14,40 @@
 #include "rofl/common/thread_helper.h"
 #include "rofl/common/openflow/messages/cofmsg.h"
 #include "rofl/common/logging.h"
+#include "rofl/common/croflexception.h"
 
 namespace rofl {
+
+
+class eRofQueueBase : public RoflException {
+public:
+	eRofQueueBase(
+			const std::string& __arg) :
+				RoflException(__arg)
+	{};
+};
+class eRofQueueInvalid : public eRofQueueBase {
+public:
+	eRofQueueInvalid(
+			const std::string& __arg) :
+				eRofQueueBase(__arg)
+	{};
+};
+class eRofQueueNotFound : public eRofQueueBase {
+public:
+	eRofQueueNotFound(
+			const std::string& __arg) :
+				eRofQueueBase(__arg)
+	{};
+};
+class eRofQueueFull : public eRofQueueBase {
+public:
+	eRofQueueFull(
+			const std::string& __arg) :
+				eRofQueueBase(__arg)
+	{};
+};
+
 
 class crofqueue {
 public:
@@ -23,15 +55,15 @@ public:
 	/**
 	 *
 	 */
-	crofqueue()
+	crofqueue() :
+		queue_max_size(QUEUE_MAX_SIZE_DEFAULT)
 	{};
 
 	/**
 	 *
 	 */
-	~crofqueue() {
-		clear();
-	};
+	~crofqueue()
+	{ clear(); };
 
 public:
 
@@ -69,9 +101,12 @@ public:
 	 *
 	 */
 	size_t
-	store(rofl::openflow::cofmsg* msg) {
+	store(rofl::openflow::cofmsg* msg, bool enforce = false) {
 		RwLock rwlock(queuelock, RwLock::RWLOCK_WRITE);
 		//std::cerr << "[rofl-common][crofqueue][store] msg: " << std::endl << *msg;
+		if ((not enforce) && (queue.size() >= queue_max_size)) {
+			throw eRofQueueFull("crofqueue::store() queue max size exceeded");
+		}
 		queue.push_back(msg);
 		return queue.size();
 	};
@@ -121,6 +156,23 @@ public:
 
 public:
 
+	/**
+	 *
+	 */
+	size_t
+	get_queue_max_size() const
+	{ return queue_max_size; };
+
+	/**
+	 *
+	 */
+	crofqueue&
+	set_queue_max_size(
+			size_t queue_max_size)
+	{ this->queue_max_size = queue_max_size; return *this; };
+
+public:
+
 	friend std::ostream&
 	operator<< (std::ostream& os, const crofqueue& queue) {
 		RwLock rwlock(queue.queuelock, RwLock::RWLOCK_READ);
@@ -137,6 +189,8 @@ private:
 
 	std::list<rofl::openflow::cofmsg*> 	queue;
 	mutable PthreadRwLock				queuelock;
+	size_t                              queue_max_size;
+	static const size_t                 QUEUE_MAX_SIZE_DEFAULT = 32768;
 };
 
 }; // end of namespace rofl

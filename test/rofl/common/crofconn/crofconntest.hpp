@@ -104,6 +104,11 @@ private:
 			rofl::crofsock& socket, rofl::openflow::cofmsg *msg)
 	{};
 
+	virtual void
+	congestion_indication(
+			rofl::crofsock& socket)
+	{};
+
 private:
 
 	virtual void
@@ -137,6 +142,10 @@ private:
 	virtual void
 	handle_recv(
 			rofl::crofconn& conn, rofl::openflow::cofmsg *msg);
+
+	virtual void
+	congestion_indication(
+			rofl::crofconn& conn);
 
 	virtual uint32_t
 	get_async_xid(

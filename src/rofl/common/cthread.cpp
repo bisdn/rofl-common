@@ -77,10 +77,17 @@ cthread::add_read_fd(
 	epev.events = EPOLLIN;
 	epev.data.fd = fd;
 	if (epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &epev) < 0) {
-		log << logging::error << "cthread::add_read_fd() failed to add fd to epoll set: "
-				<< "errno: " << errno << " (" << strerror(errno) << ")" << std::flush;
-		if (exception)
-			throw eSysCall("cthread::add_read_fd() syscall epoll_ctl() failed");
+		switch (errno) {
+		case EEXIST: {
+			/* fd already registered */
+		} break;
+		default: {
+			log << logging::error << "cthread::add_read_fd() failed to add fd to epoll set: "
+					<< "errno: " << errno << " (" << strerror(errno) << ")" << std::flush;
+			if (exception)
+				throw eSysCall("cthread::add_read_fd() syscall epoll_ctl() failed");
+		};
+		}
 	}
 
 	wakeup();
@@ -100,12 +107,17 @@ cthread::drop_read_fd(
 	epev.events = EPOLLIN;
 	epev.data.fd = fd;
 	if (epoll_ctl(epfd, EPOLL_CTL_DEL, fd, &epev) < 0) {
-		log << logging::error << "cthread::drop_read_fd() failed to add fd to epoll set: "
-				<< "errno: " << errno << " (" << strerror(errno) << ")" << std::flush;
-		if (exception)
-			throw eSysCall("cthread::drop_read_fd() syscall epoll_ctl() failed");
-		else
-			return;
+		switch (errno) {
+		case ENOENT: {
+			/* fd not registered */
+		} break;
+		default: {
+			log << logging::error << "cthread::drop_read_fd() failed to add fd to epoll set: "
+					<< "errno: " << errno << " (" << strerror(errno) << ")" << std::flush;
+			if (exception)
+				throw eSysCall("cthread::drop_read_fd() syscall epoll_ctl() failed");
+		};
+		}
 	}
 
 	wakeup();

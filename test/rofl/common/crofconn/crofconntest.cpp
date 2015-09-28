@@ -32,7 +32,7 @@ void
 crofconntest::test()
 {
 	try {
-		for (unsigned int i = 0; i < 10; i++) {
+		for (unsigned int i = 0; i < 2; i++) {
 			test_mode = TEST_MODE_TCP;
 			keep_running = true;
 			msg_counter = 0;
@@ -44,7 +44,7 @@ crofconntest::test()
 			sclient = new rofl::crofconn(this);
 
 			/* open listening socket in crofsock instance */
-			rofl::csockaddr baddr(rofl::caddress_in4("127.0.0.1"), 4999);
+			rofl::csockaddr baddr(rofl::caddress_in4("127.0.0.1"), 33996);
 			slisten->set_baddr(baddr).listen();
 
 			/* create new crofconn instance and connect to peer */
@@ -94,7 +94,7 @@ crofconntest::test_tls()
 		slisten = new rofl::crofsock(this);
 		sclient = new rofl::crofconn(this);
 
-		rofl::csockaddr baddr(rofl::caddress_in4("127.0.0.1"), 4999);
+		rofl::csockaddr baddr(rofl::caddress_in4("127.0.0.1"), 33997);
 #if 0
 		sclient->set_raddr(baddr).
 					set_tls_cafile("../../../../../tools/xca/ca.rofl-core.crt.pem").
@@ -231,6 +231,15 @@ crofconntest::handle_send(
 		rofl::crofconn& conn)
 {
 	std::cerr << "crofconntest::handle_send()" << std::endl << conn;
+}
+
+
+
+void
+crofconntest::congestion_indication(
+		rofl::crofconn& conn)
+{
+	std::cerr << "crofconntest::congestion_indication()" << std::endl << conn;
 }
 
 

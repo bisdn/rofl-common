@@ -429,8 +429,10 @@ crofsock::tcp_connect(
 		}
 
 		/* bind to local address */
-		if ((rc = ::bind(sd, baddr.ca_saddr, (socklen_t)(baddr.salen))) < 0) {
-			throw eSysCall("bind()");
+		if (laddr.get_family() != AF_UNSPEC) {
+			if ((rc = ::bind(sd, laddr.ca_saddr, (socklen_t)(laddr.salen))) < 0) {
+				throw eSysCall("bind()");
+			}
 		}
 
 		/* connect to remote address */
@@ -1171,10 +1173,10 @@ crofsock::send_message(
 			} break;
 			case rofl::openflow10::OFPT_ECHO_REQUEST:
 			case rofl::openflow10::OFPT_ECHO_REPLY: {
-				txqueues[QUEUE_OAM].store(msg);
+				txqueues[QUEUE_OAM].store(msg, true);
 			} break;
 			default: {
-				txqueues[QUEUE_MGMT].store(msg);
+				txqueues[QUEUE_MGMT].store(msg, true);
 			};
 			}
 		} break;
@@ -1193,10 +1195,10 @@ crofsock::send_message(
 			} break;
 			case rofl::openflow12::OFPT_ECHO_REQUEST:
 			case rofl::openflow12::OFPT_ECHO_REPLY: {
-				txqueues[QUEUE_OAM].store(msg);
+				txqueues[QUEUE_OAM].store(msg, true);
 			} break;
 			default: {
-				txqueues[QUEUE_MGMT].store(msg);
+				txqueues[QUEUE_MGMT].store(msg, true);
 			};
 			}
 		} break;
@@ -1216,10 +1218,10 @@ crofsock::send_message(
 			} break;
 			case rofl::openflow13::OFPT_ECHO_REQUEST:
 			case rofl::openflow13::OFPT_ECHO_REPLY: {
-				txqueues[QUEUE_OAM].store(msg);
+				txqueues[QUEUE_OAM].store(msg, true);
 			} break;
 			default: {
-				txqueues[QUEUE_MGMT].store(msg);
+				txqueues[QUEUE_MGMT].store(msg, true);
 			};
 			}
 		};
@@ -1256,7 +1258,10 @@ crofsock::handle_write_event(
 {
 	if (&thread == &txthread) {
 		assert(fd == sd);
-		flags.reset(FLAG_CONGESTED);
+		if (flags.test(FLAG_CONGESTED)) {
+			flags.reset(FLAG_CONGESTED);
+			crofsock_env::call_env(env).handle_send(*this);
+		}
 		txthread.drop_write_fd(sd);
 		send_from_queue();
 	} else
@@ -1319,7 +1324,7 @@ crofsock::send_from_queue()
 					case EAGAIN: /* socket would block */ {
 						flags.set(FLAG_CONGESTED);
 						txthread.add_write_fd(sd);
-						crofsock_env::call_env(env).handle_send(*this);
+						crofsock_env::call_env(env).congestion_indication(*this);
 					} return;
 					case SIGPIPE:
 					default: {
