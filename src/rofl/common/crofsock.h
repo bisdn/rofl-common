@@ -375,6 +375,41 @@ public:
 	void
 	rx_enable();
 
+	/**
+	 * @brief	Disable transmission of messages on this socket.
+	 */
+	void
+	tx_disable();
+
+	/**
+	 * @brief	Reenable transmission of messages on this socket.
+	 */
+	void
+	tx_enable();
+
+public:
+
+	/**
+	 * @brief	Returns capacity of transmission queues in messages
+	 */
+	size_t
+	get_txqueue_max_size() const
+	{ return txqueue_max_size; };
+
+	/**
+	 * @brief	Sets capacity of transmission queues in messages
+	 */
+	crofsock&
+	set_txqueue_max_size(
+			size_t txqueue_max_size)
+	{
+		this->txqueue_max_size = txqueue_max_size;
+		for (unsigned int queue_id = 0; queue_id < QUEUE_MAX; queue_id++) {
+			txqueues[queue_id].set_queue_max_size(txqueue_max_size);
+		}
+		return *this;
+	};
+
 public:
 
 	/**
@@ -800,9 +835,16 @@ private:
     // flag for RX reception on socket
     bool                        rx_disabled;
 
+    // flag for TX reception on socket
+    bool                        tx_disabled;
+
 	/*
 	 * scheduler and txqueues
 	 */
+
+    // max size of tx queue
+    size_t                      txqueue_max_size;
+    static const size_t         TXQUEUE_MAX_SIZE_DEFAULT;
 
 	// QUEUE_MAX txqueues
 	std::vector<crofqueue>		txqueues;

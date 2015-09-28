@@ -18,6 +18,7 @@ using namespace rofl;
 /*static*/crwlock                  crofsock_env::socket_envs_lock;
 /*static*/crwlock                  crofsock::rwlock;
 /*static*/bool                     crofsock::tls_initialized = false;
+/*static*/const size_t             crofsock::TXQUEUE_MAX_SIZE_DEFAULT = 128;
 
 crofsock::~crofsock()
 {
@@ -62,6 +63,8 @@ crofsock::crofsock(
 				msg_bytes_read(0),
 				max_pkts_rcvd_per_round(0),
 				rx_disabled(false),
+				tx_disabled(false),
+				txqueue_max_size(TXQUEUE_MAX_SIZE_DEFAULT),
 				txqueues(QUEUE_MAX),
 				txweights(QUEUE_MAX),
 				tx_is_running(false),
@@ -70,11 +73,13 @@ crofsock::crofsock(
 				msg_bytes_sent(0),
 				txlen(0)
 {
-	// scheduler weights for transmission
+	/* scheduler weights for transmission */
 	txweights[QUEUE_OAM ] = 16;
 	txweights[QUEUE_MGMT] = 32;
 	txweights[QUEUE_FLOW] = 16;
 	txweights[QUEUE_PKT ] =  8;
+	/* set maximum queue size */
+	set_txqueue_max_size(txqueue_max_size);
 }
 
 
@@ -86,7 +91,8 @@ crofsock::close()
 	case STATE_IDLE: {
 
 		/* TLS down, TCP down => set rx_disabled flag back to false */
-		rx_disabled = false;
+		rx_disable();
+		tx_disable();
 
 		/* remove all pending messages from tx queues */
 		for (auto queue : txqueues) {
@@ -145,7 +151,8 @@ crofsock::close()
 	case STATE_TCP_ESTABLISHED: {
 
 		/* block reception of any further data from remote side */
-		rx_disabled = true;
+		rx_disable();
+		tx_disable();
 
 		rxthread.drop_read_fd(sd, false);
 		if (flags.test(FLAG_CONGESTED)) {
@@ -177,7 +184,8 @@ crofsock::close()
 	case STATE_TLS_ESTABLISHED: {
 
 		/* block reception of any further data from remote side */
-		rx_disabled = true;
+		rx_disable();
+		tx_disable();
 
 		if (ssl) {
 			SSL_shutdown(ssl);
@@ -364,7 +372,7 @@ crofsock::tcp_accept(
 			crofsock_env::call_env(env).handle_tcp_accepted(*this);
 		}
 
-	} catch (...) {
+	} catch (RoflException& e) {
 
 	}
 }
@@ -485,7 +493,7 @@ crofsock::tcp_connect(
 			}
 		}
 
-	} catch(...) {
+	} catch(RoflException& e) {
 
 	}
 }
@@ -1101,10 +1109,10 @@ crofsock::is_congested() const
 void
 crofsock::rx_disable()
 {
+	rx_disabled = true;
 	switch (state) {
 	case STATE_TCP_ESTABLISHED:
 	case STATE_TLS_ESTABLISHED:{
-		rx_disabled = true;
 		rxthread.drop_read_fd(sd, false);
 	} break;
 	default: {
@@ -1118,16 +1126,32 @@ crofsock::rx_disable()
 void
 crofsock::rx_enable()
 {
+	rx_disabled = false;
 	switch (state) {
 	case STATE_TCP_ESTABLISHED:
 	case STATE_TLS_ESTABLISHED: {
-		rx_disabled = false;
 		rxthread.add_read_fd(sd, false);
 	} break;
 	default: {
 
 	};
 	}
+}
+
+
+
+void
+crofsock::tx_disable()
+{
+	tx_disabled = true;
+}
+
+
+
+void
+crofsock::tx_enable()
+{
+	tx_disabled = false;
 }
 
 
@@ -1156,6 +1180,10 @@ void
 crofsock::send_message(
 		rofl::openflow::cofmsg *msg)
 {
+	if (tx_disabled) {
+		delete msg; return;
+	}
+
 	switch (state) {
 	case STATE_TCP_ESTABLISHED:
 	case STATE_TLS_ESTABLISHED: {
@@ -1288,7 +1316,7 @@ crofsock::send_from_queue()
 
 			for (unsigned int num = 0; num < txweights[queue_id]; ++num) {
 
-				if (state < STATE_TCP_ESTABLISHED) {
+				if ((tx_disabled) || (state < STATE_TCP_ESTABLISHED)) {
 					tx_is_running= false;
 					return;
 				}

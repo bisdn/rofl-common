@@ -333,6 +333,14 @@ public:
 	rx_enable()
 	{ rofsock.rx_enable(); };
 
+	/**
+	 * @brief	Send OFP message via socket
+	 */
+	unsigned int
+	send_message(
+			rofl::openflow::cofmsg *msg)
+	{ return fragment_and_send_message(msg); };
+
 public:
 
 	/**
@@ -370,13 +378,45 @@ public:
 	get_auxid() const
 	{ return auxid; };
 
+public:
+
 	/**
-	 * @brief	Send OFP message via socket
+	 * @brief	Returns capacity of reception queues in messages
 	 */
-	unsigned int
-	send_message(
-			rofl::openflow::cofmsg *msg)
-	{ return fragment_and_send_message(msg); };
+	size_t
+	get_rxqueue_max_size() const
+	{ return rxqueue_max_size; };
+
+	/**
+	 * @brief	Sets capacity of reception queues in messages
+	 */
+	crofconn&
+	set_rxqueue_max_size(
+			size_t rxqueue_max_size)
+	{
+		this->rxqueue_max_size = rxqueue_max_size;
+		for (unsigned int queue_id = 0; queue_id < QUEUE_MAX; queue_id++) {
+			rxqueues[queue_id].set_queue_max_size(rxqueue_max_size);
+		}
+		return *this;
+	};
+
+public:
+
+	/**
+	 * @brief	Returns capacity of transmission queues in messages
+	 */
+	size_t
+	get_txqueue_max_size() const
+	{ return rofsock.get_txqueue_max_size(); };
+
+	/**
+	 * @brief	Sets capacity of transmission queues in messages
+	 */
+	crofconn&
+	set_txqueue_max_size(
+			size_t txqueue_max_size)
+	{ rofsock.set_txqueue_max_size(txqueue_max_size); return *this; };
 
 public:
 
@@ -394,6 +434,8 @@ public:
 	set_laddr(
 			const csockaddr& laddr)
 	{ rofsock.set_laddr(laddr); return *this; };
+
+public:
 
 	/**
 	 *
@@ -993,8 +1035,9 @@ private:
 	// internal thread is working on pending messages
 	bool                        rx_thread_working;
 
-	// default value for rx_max_queue_size (128)
-	static const int            RX_MAX_QUEUE_SIZE_DEFAULT;
+    // max size of rx queue
+    size_t                      rxqueue_max_size;
+	static const int            RXQUEUE_MAX_SIZE_DEFAULT;
 
 	// segmentation and reassembly for multipart messages
 	csegmentation		        sar;

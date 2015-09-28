@@ -154,6 +154,13 @@ public:
 		//std::cerr << "[rofl-common][crofqueue][pop] " << std::endl;
 	};
 
+	/**
+	 *
+	 */
+	size_t
+	capacity() const
+	{ return (queue.size() < queue_max_size) ? (queue_max_size - queue.size()) : 0; };
+
 public:
 
 	/**

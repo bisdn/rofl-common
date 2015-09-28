@@ -16,7 +16,7 @@ using namespace rofl;
 
 /*static*/std::set<crofconn_env*> crofconn_env::connection_envs;
 /*static*/crwlock                 crofconn_env::connection_envs_lock;
-/*static*/const int               crofconn::RX_MAX_QUEUE_SIZE_DEFAULT = 128;
+/*static*/const int               crofconn::RXQUEUE_MAX_SIZE_DEFAULT = 128;
 /*static*/const unsigned int      crofconn::DEFAULT_FRAGMENTATION_THRESHOLD = 65535;
 /*static*/const unsigned int      crofconn::DEFAULT_HELLO_TIMEOUT = 5;
 /*static*/const unsigned int      crofconn::DEFAULT_FEATURES_TIMEOUT = 5;
@@ -41,17 +41,20 @@ crofconn::crofconn(
 				rxweights(QUEUE_MAX),
 				rxqueues(QUEUE_MAX),
 				rx_thread_working(false),
+				rxqueue_max_size(RXQUEUE_MAX_SIZE_DEFAULT),
 				fragmentation_threshold(DEFAULT_FRAGMENTATION_THRESHOLD),
 				timeout_hello(DEFAULT_HELLO_TIMEOUT),
 				timeout_features(DEFAULT_FEATURES_TIMEOUT),
 				timeout_echo(DEFAULT_ECHO_TIMEOUT),
 				timeout_lifecheck(DEFAULT_LIFECHECK_TIMEOUT)
 {
-	// scheduler weights for transmission
+	/* scheduler weights for transmission */
 	rxweights[QUEUE_OAM ] = 16;
 	rxweights[QUEUE_MGMT] = 32;
 	rxweights[QUEUE_FLOW] = 16;
 	rxweights[QUEUE_PKT ] =  8;
+	/* set maximum queue size */
+	set_rxqueue_max_size(rxqueue_max_size);
 }
 
 
@@ -918,9 +921,11 @@ crofconn::handle_recv(
 			switch (msg->get_type()) {
 			case rofl::openflow10::OFPT_PACKET_IN:
 			case rofl::openflow10::OFPT_PACKET_OUT: {
-				rxqueues[QUEUE_PKT].store(msg);
+				rxqueues[QUEUE_PKT].store(msg, true);
 				std::cerr << "[rofl-common][crofconn][handle_recv] rxqueues[QUEUE_PKT]:" << std::endl << rxqueues[QUEUE_PKT];
-
+				if (rxqueues[QUEUE_PKT].capacity() == 0) {
+					rofsock.rx_disable();
+				}
 			} break;
 			case rofl::openflow10::OFPT_FLOW_MOD:
 			case rofl::openflow10::OFPT_FLOW_REMOVED:
@@ -928,19 +933,27 @@ crofconn::handle_recv(
 			case rofl::openflow10::OFPT_STATS_REPLY:
 			case rofl::openflow10::OFPT_BARRIER_REQUEST:
 			case rofl::openflow10::OFPT_BARRIER_REPLY: {
-				rxqueues[QUEUE_FLOW].store(msg);
+				rxqueues[QUEUE_FLOW].store(msg, true);
 				std::cerr << "[rofl-common][crofconn][handle_recv] rxqueues[QUEUE_FLOW]:" << std::endl << rxqueues[QUEUE_FLOW];
-
+				if (rxqueues[QUEUE_FLOW].capacity() == 0) {
+					rofsock.rx_disable();
+				}
 			} break;
 			case rofl::openflow10::OFPT_HELLO:
 			case rofl::openflow10::OFPT_ECHO_REQUEST:
 			case rofl::openflow10::OFPT_ECHO_REPLY: {
 				rxqueues[QUEUE_OAM].store(msg, true);
 				std::cerr << "[rofl-common][crofconn][handle_recv] rxqueues[QUEUE_OAM]:" << std::endl << rxqueues[QUEUE_OAM];
+				if (rxqueues[QUEUE_OAM].capacity() == 0) {
+					rofsock.rx_disable();
+				}
 			} break;
 			default: {
 				rxqueues[QUEUE_MGMT].store(msg, true);
 				std::cerr << "[rofl-common][crofconn][handle_recv] rxqueues[QUEUE_MGMT]:" << std::endl << rxqueues[QUEUE_MGMT];
+				if (rxqueues[QUEUE_MGMT].capacity() == 0) {
+					rofsock.rx_disable();
+				}
 			};
 			}
 		} break;
@@ -948,9 +961,11 @@ crofconn::handle_recv(
 			switch (msg->get_type()) {
 			case rofl::openflow12::OFPT_PACKET_IN:
 			case rofl::openflow12::OFPT_PACKET_OUT: {
-				rxqueues[QUEUE_PKT].store(msg);
+				rxqueues[QUEUE_PKT].store(msg, true);
 				std::cerr << "[rofl-common][crofconn][handle_recv] rxqueues[QUEUE_PKT]:" << std::endl << rxqueues[QUEUE_PKT];
-
+				if (rxqueues[QUEUE_PKT].capacity() == 0) {
+					rofsock.rx_disable();
+				}
 			} break;
 			case rofl::openflow12::OFPT_FLOW_MOD:
 			case rofl::openflow12::OFPT_FLOW_REMOVED:
@@ -961,19 +976,27 @@ crofconn::handle_recv(
 			case rofl::openflow12::OFPT_STATS_REPLY:
 			case rofl::openflow12::OFPT_BARRIER_REQUEST:
 			case rofl::openflow12::OFPT_BARRIER_REPLY: {
-				rxqueues[QUEUE_FLOW].store(msg);
+				rxqueues[QUEUE_FLOW].store(msg, true);
 				std::cerr << "[rofl-common][crofconn][handle_recv] rxqueues[QUEUE_FLOW]:" << std::endl << rxqueues[QUEUE_FLOW];
-
+				if (rxqueues[QUEUE_FLOW].capacity() == 0) {
+					rofsock.rx_disable();
+				}
 			} break;
 			case rofl::openflow12::OFPT_HELLO:
 			case rofl::openflow12::OFPT_ECHO_REQUEST:
 			case rofl::openflow12::OFPT_ECHO_REPLY: {
 				rxqueues[QUEUE_OAM].store(msg, true);
 				std::cerr << "[rofl-common][crofconn][handle_recv] rxqueues[QUEUE_OAM]:" << std::endl << rxqueues[QUEUE_OAM];
+				if (rxqueues[QUEUE_OAM].capacity() == 0) {
+					rofsock.rx_disable();
+				}
 			} break;
 			default: {
 				rxqueues[QUEUE_MGMT].store(msg, true);
 				std::cerr << "[rofl-common][crofconn][handle_recv] rxqueues[QUEUE_MGMT]:" << std::endl << rxqueues[QUEUE_MGMT];
+				if (rxqueues[QUEUE_MGMT].capacity() == 0) {
+					rofsock.rx_disable();
+				}
 			};
 			}
 		} break;
@@ -981,9 +1004,11 @@ crofconn::handle_recv(
 			switch (msg->get_type()) {
 			case rofl::openflow13::OFPT_PACKET_IN:
 			case rofl::openflow13::OFPT_PACKET_OUT: {
-				rxqueues[QUEUE_PKT].store(msg);
+				rxqueues[QUEUE_PKT].store(msg, true);
 				std::cerr << "[rofl-common][crofconn][handle_recv] rxqueues[QUEUE_PKT]:" << std::endl << rxqueues[QUEUE_PKT];
-
+				if (rxqueues[QUEUE_PKT].capacity() == 0) {
+					rofsock.rx_disable();
+				}
 			} break;
 			case rofl::openflow13::OFPT_FLOW_MOD:
 			case rofl::openflow13::OFPT_FLOW_REMOVED:
@@ -994,19 +1019,27 @@ crofconn::handle_recv(
 			case rofl::openflow13::OFPT_MULTIPART_REPLY:
 			case rofl::openflow13::OFPT_BARRIER_REQUEST:
 			case rofl::openflow13::OFPT_BARRIER_REPLY: {
-				rxqueues[QUEUE_FLOW].store(msg);
+				rxqueues[QUEUE_FLOW].store(msg, true);
 				std::cerr << "[rofl-common][crofconn][handle_recv] rxqueues[QUEUE_FLOW]:" << std::endl << rxqueues[QUEUE_FLOW];
-
+				if (rxqueues[QUEUE_FLOW].capacity() == 0) {
+					rofsock.rx_disable();
+				}
 			} break;
 			case rofl::openflow13::OFPT_HELLO:
 			case rofl::openflow13::OFPT_ECHO_REQUEST:
 			case rofl::openflow13::OFPT_ECHO_REPLY: {
 				rxqueues[QUEUE_OAM].store(msg, true);
 				std::cerr << "[rofl-common][crofconn][handle_recv] rxqueues[QUEUE_OAM]:" << std::endl << rxqueues[QUEUE_OAM];
+				if (rxqueues[QUEUE_OAM].capacity() == 0) {
+					rofsock.rx_disable();
+				}
 			} break;
 			default: {
 				rxqueues[QUEUE_MGMT].store(msg, true);
 				std::cerr << "[rofl-common][crofconn][handle_recv] rxqueues[QUEUE_MGMT]:" << std::endl << rxqueues[QUEUE_MGMT];
+				if (rxqueues[QUEUE_MGMT].capacity() == 0) {
+					rofsock.rx_disable();
+				}
 			};
 			}
 		} break;
