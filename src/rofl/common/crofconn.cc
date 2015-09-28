@@ -915,7 +915,13 @@ crofconn::handle_recv(
 
 	try {
 
-		/* store message in appropriate rxqueue */
+		/* Store message in appropriate rxqueue:
+		 * Strategy: we enforce queueing of successful received messages
+		 * in rxqueues in any case and never drop messages. However, we
+		 * disable reception of further messages from our peer, if we
+		 * exceed the rxqueues capacity threshold. Once, the application
+		 * starts reading message from the rxqueues, we reenable the
+		 * socket. See method crofconn::handle_rx_messages() for details. */
 		switch (ofp_version) {
 		case rofl::openflow10::OFP_VERSION: {
 			switch (msg->get_type()) {
