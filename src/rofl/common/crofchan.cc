@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 /*
  * crofchan.cc
  *
@@ -10,7 +14,8 @@
 
 using namespace rofl;
 
-/*static*/std::set<crofchan_env*> crofchan_env::rofchan_envs;
+/*static*/std::set<crofchan_env*> crofchan_env::channel_envs;
+/*static*/crwlock                 crofchan_env::channel_envs_lock;
 
 
 

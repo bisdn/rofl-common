@@ -145,7 +145,7 @@ protected:
 
 	virtual void
 	congestion_indication(
-			crofconn& socket) = 0;
+			crofconn& conn) = 0;
 
 private:
 	static std::set<crofconn_env*>  connection_envs;
