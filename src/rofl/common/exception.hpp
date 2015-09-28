@@ -61,7 +61,7 @@ public:
 	{};
     virtual
 	const char*
-    what() const _GLIBCXX_USE_NOEXCEPT {
+    what() const noexcept {
     	std::stringstream ss;
     	ss << exception::what() <<  " errno: " << __errno << " (" << strerror(__errno) << ")";
     	return ss.str().c_str();
