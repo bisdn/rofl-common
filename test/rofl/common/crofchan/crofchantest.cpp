@@ -46,20 +46,31 @@ crofchantest::tearDown()
 void
 crofchantest::test1()
 {
-	keep_running = true;
-	channel1->add_conn(rofl::cauxid(0)).
-			  set_raddr(baddr).
-			  tcp_connect(versionbitmap, rofl::crofconn::MODE_CONTROLLER);
 
-	while (keep_running) {
+	keep_running = true;
+	num_of_conns = 32;
+	int seconds = 10 * num_of_conns;
+
+	for (int i = 0; i < num_of_conns; i++) {
+		channel1->add_conn(rofl::cauxid(i)).
+				  set_raddr(baddr).
+				  tcp_connect(versionbitmap, rofl::crofconn::MODE_CONTROLLER, 0);
+		sleep(1);
+	}
+
+	while (keep_running && (seconds-- > 0)) {
 		struct timespec ts;
 		ts.tv_sec = 1;
 		ts.tv_nsec = 0;
 		pselect(0, NULL, NULL, NULL, &ts, NULL);
+		std::cerr << ".";
 	}
 
-	channel1->drop_conn(rofl::cauxid(0));
-	channel2->drop_conn(rofl::cauxid(0));
+	for (int i = 0; i < num_of_conns; i++) {
+		std::cerr << ">>> drop_conn() i=" << i << " <<<" << std::endl;
+		channel1->drop_conn(rofl::cauxid(i));
+		channel2->drop_conn(rofl::cauxid(i));
+	}
 }
 
 
@@ -76,12 +87,29 @@ void
 crofchantest::handle_listen(
 		rofl::crofsock& socket, int sd)
 {
-	channel2->add_conn(rofl::cauxid(0)).
-			  tcp_accept(sd, versionbitmap, rofl::crofconn::MODE_DATAPATH);
+	rofl::crofconn& conn = channel2->add_conn();
+	conn.tcp_accept(sd, versionbitmap, rofl::crofconn::MODE_DATAPATH);
 
-	sleep(5);
+	std::cerr << std::endl;
+	std::cerr << ">>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<" << std::endl;
+	std::cerr << ">>> crofchantest::handle_listen() <<<" << std::endl;
+	std::cerr << "channel2.size() = " << channel2->size() << std::endl;
+	std::cerr << "conn.get_auxid() = " << conn.get_auxid() << std::endl;
+	std::cerr << ">>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<" << std::endl;
+	std::cerr << std::endl;
 
-	keep_running = false;
+	if (channel2->size() == num_of_conns) {
+
+		std::cerr << ">>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<" << std::endl;
+		std::cerr << ">>>          TERMINATING          <<<" << std::endl;
+		std::cerr << ">>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<" << std::endl;
+
+		sleep(5);
+
+		keep_running = false;
+	}
+
+	CPPUNIT_ASSERT(conn.is_established());
 }
 
 
@@ -98,6 +126,7 @@ crofchantest::handle_recv(
 						rofl::openflow13::OFP_VERSION,
 						pmsg->get_xid(),
 						dpid);
+		msg->set_auxid(conn.get_auxid().get_id());
 
 		conn.send_message(msg);
 

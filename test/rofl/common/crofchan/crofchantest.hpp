@@ -39,6 +39,8 @@ private:
 	uint64_t            dpid;
 	uint32_t            xid;
 
+	unsigned int        num_of_conns;
+
 	rofl::csockaddr     baddr;
 	rofl::crofsock*		rofsock;
 	rofl::crofchan*     channel1;

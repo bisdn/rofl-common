@@ -11,7 +11,7 @@
 #include <list>
 #include <ostream>
 
-#include "rofl/common/thread_helper.h"
+#include "rofl/common/locking.hpp"
 #include "rofl/common/openflow/messages/cofmsg.h"
 #include "rofl/common/logging.h"
 #include "rofl/common/croflexception.h"
@@ -71,8 +71,8 @@ public:
 	 *
 	 */
 	bool
-	empty() {
-		RwLock rwlock(queuelock, RwLock::RWLOCK_READ);
+	empty() const {
+		AcquireReadLock rwlock(queue_lock);
 		return queue.empty();
 	};
 
@@ -81,7 +81,7 @@ public:
 	 */
 	size_t
 	size() const {
-		RwLock rwlock(queuelock, RwLock::RWLOCK_READ);
+		AcquireReadLock rwlock(queue_lock);
 		return queue.size();
 	};
 
@@ -90,7 +90,7 @@ public:
 	 */
 	void
 	clear() {
-		RwLock rwlock(queuelock, RwLock::RWLOCK_WRITE);
+		AcquireReadWriteLock rwlock(queue_lock);
 		for (auto msg : queue) {
 			delete msg;
 		}
@@ -102,7 +102,7 @@ public:
 	 */
 	size_t
 	store(rofl::openflow::cofmsg* msg, bool enforce = false) {
-		RwLock rwlock(queuelock, RwLock::RWLOCK_WRITE);
+		AcquireReadWriteLock rwlock(queue_lock);
 		//std::cerr << "[rofl-common][crofqueue][store] msg: " << std::endl << *msg;
 		if ((not enforce) && (queue.size() >= queue_max_size)) {
 			throw eRofQueueFull("crofqueue::store() queue max size exceeded");
@@ -117,7 +117,7 @@ public:
 	rofl::openflow::cofmsg*
 	retrieve() {
 		rofl::openflow::cofmsg* msg = (rofl::openflow::cofmsg*)0;
-		RwLock rwlock(queuelock, RwLock::RWLOCK_WRITE);
+		AcquireReadWriteLock rwlock(queue_lock);
 		if (queue.empty()) {
 			return msg;
 		}
@@ -132,7 +132,7 @@ public:
 	rofl::openflow::cofmsg*
 	front() {
 		rofl::openflow::cofmsg* msg = (rofl::openflow::cofmsg*)0;
-		RwLock rwlock(queuelock, RwLock::RWLOCK_READ);
+		AcquireReadWriteLock rwlock(queue_lock);
 		if (queue.empty()) {
 			return msg;
 		}
@@ -146,7 +146,7 @@ public:
 	 */
 	void
 	pop() {
-		RwLock rwlock(queuelock, RwLock::RWLOCK_WRITE);
+		AcquireReadWriteLock rwlock(queue_lock);
 		if (queue.empty()) {
 			return;
 		}
@@ -159,7 +159,10 @@ public:
 	 */
 	size_t
 	capacity() const
-	{ return (queue.size() < queue_max_size) ? (queue_max_size - queue.size()) : 0; };
+	{
+		AcquireReadLock rwlock(queue_lock);
+		return (queue.size() < queue_max_size) ? (queue_max_size - queue.size()) : 0;
+	};
 
 public:
 
@@ -182,7 +185,7 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, const crofqueue& queue) {
-		RwLock rwlock(queue.queuelock, RwLock::RWLOCK_READ);
+		AcquireReadLock rwlock(queue.queue_lock);
 		os << rofl::indent(0) << "<crofqueue size #" << queue.queue.size() << " >" << std::endl;
 		rofl::indent i(2);
 		for (std::list<rofl::openflow::cofmsg*>::const_iterator
@@ -195,7 +198,7 @@ public:
 private:
 
 	std::list<rofl::openflow::cofmsg*> 	queue;
-	mutable PthreadRwLock				queuelock;
+	mutable crwlock                     queue_lock;
 	size_t                              queue_max_size;
 	static const size_t                 QUEUE_MAX_SIZE_DEFAULT = 32768;
 };

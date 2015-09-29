@@ -218,6 +218,15 @@ public:
 	/**
 	 *
 	 */
+	size_t
+	size() const {
+		AcquireReadLock rwlock(conns_rwlock);
+		return conns.size();
+	};
+
+	/**
+	 *
+	 */
 	std::list<cauxid>
 	get_conn_ids() const {
 		AcquireReadLock rwlock(conns_rwlock);
@@ -362,7 +371,15 @@ private:
 	virtual void
 	handle_closed(
 			crofconn& conn)
-	{ crofchan_env::call_env(env).handle_closed(*this, conn); };
+	{
+		AcquireReadLock rwlock(conns_rwlock);
+		if (conn.get_auxid().get_id() == 0) {
+			for (auto it : conns) {
+				it.second->close();
+			}
+		}
+		crofchan_env::call_env(env).handle_closed(*this, conn);
+	};
 
 	virtual void
 	handle_connect_refused(
@@ -418,6 +435,7 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, crofchan const& chan) {
+		AcquireReadLock rwlock(chan.conns_rwlock);
 		os << indent(0) << "<crofchan established:" << chan.is_established()
 				<< " ofp-version: " << (int)chan.ofp_version << " >" << std::endl;
 		indent i(2);
@@ -431,11 +449,12 @@ public:
 
 	std::string
 	str() const {
+		AcquireReadLock rwlock(conns_rwlock);
 		std::stringstream ss;
 		ss << "OFP version: " << (int)get_version() << " ";
 		if (conns.empty() ||
 				(conns.find(rofl::cauxid(0)) == conns.end()) ||
-				(not (conns.begin()->second)->is_established())) {
+					(not (conns.at(rofl::cauxid(0))->is_established()))) {
 			ss << " state: -disconnected- ";
 		} else {
 			ss << " state: -established- ";
@@ -452,10 +471,10 @@ public:
 private:
 
 	// owner of this crofchan instance
-	crofchan_env*						env;
+	crofchan_env*                       env;
 
 	// main and auxiliary connections
-	std::map<cauxid, crofconn*>			conns;
+	std::map<cauxid, crofconn*>         conns;
 
 	// connections set rwlock
 	mutable crwlock                     conns_rwlock;
@@ -464,10 +483,10 @@ private:
 	uint8_t                             last_auxid;
 
 	// OFP version negotiated
-	uint8_t								ofp_version;
+	uint8_t                             ofp_version;
 
 	// state related flags
-	std::bitset<32>						flags;
+	std::bitset<32>                     flags;
 };
 
 }; /* namespace rofl */
