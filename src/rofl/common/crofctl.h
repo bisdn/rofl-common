@@ -80,7 +80,7 @@ public:
 	call_env(crofctl_env* env) {
 		AcquireReadLock lock(crofctl_env::rofctl_envs_lock);
 		if (crofctl_env::rofctl_envs.find(env) == crofctl_env::rofctl_envs.end()) {
-			throw eRofSockNotFound("crofctl_env::call_env() crofctl_env instance not found");
+			throw eRofCtlNotFound("crofctl_env::call_env() crofctl_env instance not found");
 		}
 		return *(env);
 	};
@@ -770,6 +770,9 @@ class crofctl :
 		public rofl::crofchan_env,
 		public rofl::ctransactions_env
 {
+	static std::map<rofl::cctlid, rofl::crofctl*>   rofctls;
+	static crwlock                                  rofctls_lock;
+
 public:
 
 	/**
@@ -782,6 +785,8 @@ public:
 	static rofl::crofctl&
 	set_ctl(
 			const rofl::cctlid& ctlid);
+
+public:
 
 	/**
 	 * @brief	crofctl destructor
@@ -801,6 +806,14 @@ public:
 			crofctl_env* env,
 			const cctlid& ctlid);
 
+public:
+
+	/**
+	 * @name	Methods granting access to the controller entity's basic properties
+	 */
+
+	/**@{*/
+
 	/**
 	 * @brief	Returns rofl-common's internal rofl::cctlid identifier for this instance
 	 *
@@ -809,14 +822,6 @@ public:
 	const rofl::cctlid&
 	get_ctlid() const
 	{ return ctlid; };
-
-public:
-
-	/**
-	 * @name	Methods granting access to the controller entity's basic properties
-	 */
-
-	/**@{*/
 
 	/**
 	 * @brief	Returns a reference to the current role object of this controller entity.
@@ -1522,170 +1527,6 @@ private:
 	init_async_config_role_default_template();
 
 private:
-
-	void
-	experimenter_rcvd(
-			const rofl::cauxid& auxid,
-			rofl::openflow::cofmsg_experimenter* msg);
-
-	void
-	error_rcvd(
-			const rofl::cauxid& auxid,
-			rofl::openflow::cofmsg_error* msg);
-
-	void
-	features_request_rcvd(
-			const rofl::cauxid& auxid,
-			rofl::openflow::cofmsg_features_request* msg);
-
-	void
-	get_config_request_rcvd(
-			const rofl::cauxid& auxid,
-			rofl::openflow::cofmsg_get_config_request* msg);
-
-	void
-	set_config_rcvd(
-			const rofl::cauxid& auxid,
-			rofl::openflow::cofmsg_set_config* msg);
-
-	void
-	packet_out_rcvd(
-			const rofl::cauxid& auxid,
-			rofl::openflow::cofmsg_packet_out* msg);
-
-	void
-	flow_mod_rcvd(
-			const rofl::cauxid& auxid,
-			rofl::openflow::cofmsg_flow_mod* msg);
-
-	void
-	group_mod_rcvd(
-			const rofl::cauxid& auxid,
-			rofl::openflow::cofmsg_group_mod* msg);
-
-	void
-	port_mod_rcvd(
-			const rofl::cauxid& auxid,
-			rofl::openflow::cofmsg_port_mod* msg);
-
-	void
-	table_mod_rcvd(
-			const rofl::cauxid& auxid,
-			rofl::openflow::cofmsg_table_mod* msg);
-
-	void
-	meter_mod_rcvd(
-			const rofl::cauxid& auxid,
-			rofl::openflow::cofmsg_meter_mod* msg);
-
-	void
-	stats_request_rcvd(
-			const rofl::cauxid& auxid,
-			rofl::openflow::cofmsg_stats_request* msg);
-
-	void
-	desc_stats_request_rcvd(
-			const rofl::cauxid& auxid,
-			rofl::openflow::cofmsg_desc_stats_request* msg);
-
-	void
-	table_stats_request_rcvd(
-			const rofl::cauxid& auxid,
-			rofl::openflow::cofmsg_table_stats_request* msg);
-
-	void
-	port_stats_request_rcvd(
-			const rofl::cauxid& auxid,
-			rofl::openflow::cofmsg_port_stats_request* msg);
-
-	void
-	flow_stats_request_rcvd(
-			const rofl::cauxid& auxid,
-			rofl::openflow::cofmsg_flow_stats_request* msg);
-
-	void
-	aggregate_stats_request_rcvd(
-			const rofl::cauxid& auxid,
-			rofl::openflow::cofmsg_aggr_stats_request* msg);
-
-	void
-	queue_stats_request_rcvd(
-			const rofl::cauxid& auxid,
-			rofl::openflow::cofmsg_queue_stats_request* msg);
-
-	void
-	group_stats_request_rcvd(
-			const rofl::cauxid& auxid,
-			rofl::openflow::cofmsg_group_stats_request* msg);
-
-	void
-	group_desc_stats_request_rcvd(
-			const rofl::cauxid& auxid,
-			rofl::openflow::cofmsg_group_desc_stats_request* msg);
-
-	void
-	group_features_stats_request_rcvd(
-			const rofl::cauxid& auxid,
-			rofl::openflow::cofmsg_group_features_stats_request* msg);
-
-	void
-	meter_stats_request_rcvd(
-			const rofl::cauxid& auxid,
-			rofl::openflow::cofmsg_meter_stats_request* msg);
-
-	void
-	meter_config_stats_request_rcvd(
-			const rofl::cauxid& auxid,
-			rofl::openflow::cofmsg_meter_config_stats_request* msg);
-
-	void
-	meter_features_stats_request_rcvd(
-			const rofl::cauxid& auxid,
-			rofl::openflow::cofmsg_meter_features_stats_request* msg);
-
-	void
-	table_features_stats_request_rcvd(
-			const rofl::cauxid& auxid,
-			rofl::openflow::cofmsg_table_features_stats_request* msg);
-
-	void
-	port_desc_stats_request_rcvd(
-			const rofl::cauxid& auxid,
-			rofl::openflow::cofmsg_port_desc_stats_request* msg);
-
-	void
-	experimenter_stats_request_rcvd(
-			const rofl::cauxid& auxid,
-			rofl::openflow::cofmsg_experimenter_stats_request* msg);
-
-	void
-	role_request_rcvd(
-			const rofl::cauxid& auxid,
-			rofl::openflow::cofmsg_role_request* msg);
-
-	void
-	barrier_request_rcvd(
-			const rofl::cauxid& auxid,
-			rofl::openflow::cofmsg_barrier_request* msg);
-
-	void
-	queue_get_config_request_rcvd(
-			const rofl::cauxid& auxid,
-			rofl::openflow::cofmsg_queue_get_config_request* msg);
-
-	void
-	get_async_config_request_rcvd(
-			const rofl::cauxid& auxid,
-			rofl::openflow::cofmsg_get_async_config_request* msg);
-
-	void
-	set_async_config_rcvd(
-			const rofl::cauxid& auxid,
-			rofl::openflow::cofmsg_set_async_config* msg);
-
-private:
-
-	static std::map<rofl::cctlid, rofl::crofctl*> rofctls;
 
 	// environment
 	rofl::crofctl_env*               env;

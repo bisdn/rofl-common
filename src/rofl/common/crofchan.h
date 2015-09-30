@@ -90,7 +90,7 @@ public:
 	call_env(crofchan_env* env) {
 		AcquireReadLock lock(crofchan_env::channel_envs_lock);
 		if (crofchan_env::channel_envs.find(env) == crofchan_env::channel_envs.end()) {
-			throw eRofSockNotFound("crofchan_env::call_env() crofchan_env instance not found");
+			throw eRofChanNotFound("crofchan_env::call_env() crofchan_env instance not found");
 		}
 		return *(env);
 	};

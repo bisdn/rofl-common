@@ -129,4 +129,21 @@ cofrole::unpack(uint8_t *buf, size_t buflen)
 
 
 
+bool
+cofrole::is_valid_role() const
+{
+	switch (get_role()) {
+	// same for OF12 and OF13
+	case rofl::openflow13::OFPCR_ROLE_EQUAL:
+	case rofl::openflow13::OFPCR_ROLE_MASTER:
+	case rofl::openflow13::OFPCR_ROLE_SLAVE:
+	case rofl::openflow13::OFPCR_ROLE_NOCHANGE: {
+		return true;
+	} break;
+	default:
+		return false;
+	}
+}
+
+
 

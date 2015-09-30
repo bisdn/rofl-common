@@ -99,6 +99,12 @@ public:
 	/**
 	 *
 	 */
+	bool
+	is_valid_role() const;
+
+	/**
+	 *
+	 */
 	uint8_t
 	get_version() const { return ofp_version; };
 

@@ -36,11 +36,10 @@ crofchan::send_message(
 		const cauxid& auxid, rofl::openflow::cofmsg* msg)
 {
 	AcquireReadLock rwlock(conns_rwlock);
-	if (conns.find(auxid) == conns.end()) {
-		throw eRofChanNotFound("crofchan::send_message()"); // throw exception, when this connection does not exist
-	}
-	if (not conns[auxid]->is_established()) {
-		throw eRofChanNotConnected("crofchan::send_message()");
+	if ((not is_established()) ||
+			(conns.find(auxid) == conns.end()) ||
+				(not conns[auxid]->is_established())) {
+		throw eRofChanNotConnected("crofchan::send_message() connection not established");
 	}
 	conns[auxid]->send_message(msg);
 }

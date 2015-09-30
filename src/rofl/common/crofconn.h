@@ -82,7 +82,7 @@ public:
 	call_env(crofconn_env* env) {
 		AcquireReadLock lock(crofconn_env::connection_envs_lock);
 		if (crofconn_env::connection_envs.find(env) == crofconn_env::connection_envs.end()) {
-			throw eRofSockNotFound("crofconn_env::call_env() crofconn_env instance not found");
+			throw eRofConnNotFound("crofconn_env::call_env() crofconn_env instance not found");
 		}
 		return *(env);
 	};
