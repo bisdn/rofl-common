@@ -103,6 +103,11 @@ protected:
 	{};
 
 	virtual void
+	handle_established(
+			crofctl& ctl, crofconn& conn, uint8_t ofp_version)
+	{};
+
+	virtual void
 	handle_connect_refused(
 			crofctl& ctl, crofconn& conn)
 	{};
@@ -762,14 +767,9 @@ private:
  *
  */
 class crofctl :
-		public rofl::crofchan,
 		public rofl::crofchan_env,
 		public rofl::ctransactions_env
 {
-	enum crofctl_flag_t {
-		FLAG_ENGINE_IS_RUNNING = (1 << 0),
-	};
-
 public:
 
 	/**
@@ -780,34 +780,8 @@ public:
 	 * @return reference to rofl::crofctl instance for given identifier
 	 */
 	static rofl::crofctl&
-	get_ctl(
+	set_ctl(
 			const rofl::cctlid& ctlid);
-
-	/**
-	 * @brief 	crofctl constructor
-	 *
-	 * @param env pointer to rofl::crofctl_env instance defining the environment for this object
-	 * @param ctlid rofl-common's internal identifier for this instance
-	 * @param remove_on_channel_close when set to true, this indicates to remove this object after the control channel has been terminated
-	 * @param versionbitmap OpenFlow version bitmap
-	 */
-	crofctl(
-			crofctl_env* env,
-			const cctlid& ctlid,
-			const rofl::openflow::cofhello_elem_versionbitmap& versionbitmap) :
-				rofl::crofchan(this),
-				env(env),
-				ctlid(ctlid),
-				transactions(this),
-				async_config_role_default_template(rofl::openflow13::OFP_VERSION),
-				async_config(rofl::openflow13::OFP_VERSION)
-	{
-		std::cerr << "[rofl-common][crofctl] "
-				<< "instance created, ctlid: " << ctlid.str() << std::endl;
-		init_async_config_role_default_template();
-		async_config = get_async_config_role_default_template();
-		crofctl::rofctls[ctlid] = this;
-	};
 
 	/**
 	 * @brief	crofctl destructor
@@ -815,13 +789,17 @@ public:
 	 * Closes all control connections and does a general clean-up.
 	 */
 	virtual
-	~crofctl()
-	{
-		std::cerr << "[rofl-common][crofctl] "
-				<< "instance destroyed, ctlid: " << ctlid.str() << std::endl;
-		crofctl::rofctls.erase(ctlid);
-		transactions.clear();
-	};
+	~crofctl();
+
+	/**
+	 * @brief 	crofctl constructor
+	 *
+	 * @param env pointer to rofl::crofctl_env instance defining the environment for this object
+	 * @param ctlid rofl-common's internal identifier for this instance
+	 */
+	crofctl(
+			crofctl_env* env,
+			const cctlid& ctlid);
 
 	/**
 	 * @brief	Returns rofl-common's internal rofl::cctlid identifier for this instance
@@ -860,7 +838,7 @@ public:
 	bool
 	is_slave() const
 	{
-		switch (crofchan::get_version()) {
+		switch (rofchan.get_version()) {
 		case rofl::openflow12::OFP_VERSION:
 			return (rofl::openflow12::OFPCR_ROLE_SLAVE == role.get_role());
 		case rofl::openflow13::OFP_VERSION:
@@ -899,6 +877,100 @@ public:
 	{ return async_config_role_default_template; };
 
 	/**@}*/
+
+public:
+
+	/**
+	 *
+	 */
+	bool
+	is_established() const
+	{ return rofchan.is_established(); };
+
+	/**
+	 *
+	 */
+	uint8_t
+	get_version() const
+	{ return rofchan.get_version(); };
+
+public:
+
+	/**
+	 *
+	 */
+	size_t
+	size() const
+	{ return rofchan.size(); };
+
+	/**
+	 *
+	 */
+	std::list<cauxid>
+	get_conn_ids() const
+	{ return rofchan.get_conn_ids(); };
+
+	/**
+	 *
+	 */
+	void
+	clear()
+	{ rofchan.clear(); };
+
+	/**
+	 *
+	 */
+	crofconn&
+	add_conn()
+	{ return rofchan.add_conn(); };
+
+	/**
+	 *
+	 */
+	crofconn&
+	add_conn(
+			const cauxid& auxid)
+	{ return rofchan.add_conn(auxid); };
+
+	/**
+	 *
+	 */
+	crofconn&
+	add_conn(
+			crofconn* conn)
+	{ return rofchan.add_conn(conn); };
+
+	/**
+	 *
+	 */
+	crofconn&
+	set_conn(
+			const cauxid& auxid)
+	{ return rofchan.set_conn(auxid); };
+
+	/**
+	 *
+	 */
+	const crofconn&
+	get_conn(
+			const cauxid& auxid) const
+	{ return rofchan.get_conn(auxid); };
+
+	/**
+	 *
+	 */
+	bool
+	drop_conn(
+			const cauxid& auxid)
+	{ return rofchan.drop_conn(auxid); };
+
+	/**
+	 *
+	 */
+	bool
+	has_conn(
+			const cauxid& auxid) const
+	{ return rofchan.has_conn(auxid); };
 
 public:
 
@@ -1344,12 +1416,41 @@ public:
 		return ss.str();
 	};
 
+public:
+
+	/**
+	 *
+	 */
+	class crofctl_find_by_ctlid {
+		cctlid ctlid;
+	public:
+		crofctl_find_by_ctlid(const cctlid& ctlid) : ctlid(ctlid) {};
+		bool operator() (const crofctl* rofctl) {
+			return (rofctl->get_ctlid() == ctlid);
+		};
+	};
+
 private:
 
 	virtual void
 	handle_established(
 			crofchan& chan, uint8_t ofp_version)
-	{ crofctl_env::call_env(env).handle_established(*this, ofp_version); };
+	{
+		switch (ofp_version) {
+		case rofl::openflow12::OFP_VERSION: {
+			role.set_role(rofl::openflow12::OFPCR_ROLE_EQUAL);
+		} break;
+		case rofl::openflow13::OFP_VERSION: {
+			role.set_role(rofl::openflow13::OFPCR_ROLE_EQUAL);
+		} break;
+		}
+		crofctl_env::call_env(env).handle_established(*this, ofp_version);
+	};
+
+	virtual void
+	handle_established(
+			crofchan& chan, crofconn& conn, uint8_t ofp_version)
+	{ crofctl_env::call_env(env).handle_established(*this, conn, ofp_version); };
 
 	virtual void
 	handle_connect_refused(
@@ -1414,20 +1515,6 @@ private:
 			rofl::ctransactions& tas,
 			rofl::ctransaction& ta)
 	{};
-
-public:
-
-	/**
-	 *
-	 */
-	class crofctl_find_by_ctlid {
-		cctlid ctlid;
-	public:
-		crofctl_find_by_ctlid(const cctlid& ctlid) : ctlid(ctlid) {};
-		bool operator() (const crofctl* rofctl) {
-			return (rofctl->get_ctlid() == ctlid);
-		};
-	};
 
 private:
 
@@ -1605,6 +1692,9 @@ private:
 
 	// handle for this crofctl instance
 	rofl::cctlid                     ctlid;
+
+	// OpenFlow channel
+	rofl::crofchan                   rofchan;
 
 	// pending OFP transactions
 	rofl::ctransactions              transactions;

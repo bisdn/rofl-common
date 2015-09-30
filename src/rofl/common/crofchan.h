@@ -112,6 +112,10 @@ protected:
 			crofchan& chan, uint8_t ofp_version) = 0;
 
 	virtual void
+	handle_established(
+			crofchan& chan, crofconn& conn, uint8_t ofp_version) = 0;
+
+	virtual void
 	handle_connect_refused(
 			crofchan& chan, crofconn& conn) = 0;
 
@@ -235,7 +239,7 @@ public:
 			ids.push_back(it.first);
 		}
 		return ids;
-	}
+	};
 
 	/**
 	 *
@@ -362,6 +366,7 @@ private:
 	handle_established(
 			crofconn& conn, uint8_t ofp_version)
 	{
+		crofchan_env::call_env(env).handle_established(*this, conn, ofp_version);
 		if (conn.get_auxid().get_id() == 0) {
 			ofp_version = conn.get_version();
 			crofchan_env::call_env(env).handle_established(*this, ofp_version);

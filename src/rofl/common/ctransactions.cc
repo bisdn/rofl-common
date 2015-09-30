@@ -11,7 +11,9 @@ using namespace rofl;
 
 
 ctransactions::~ctransactions()
-{}
+{
+	clear();
+}
 
 
 ctransactions::ctransactions(
