@@ -51,7 +51,7 @@ crofconntest::test()
 			versionbitmap_dpt.add_ofp_version(rofl::openflow10::OFP_VERSION);
 			versionbitmap_dpt.add_ofp_version(rofl::openflow12::OFP_VERSION);
 			versionbitmap_dpt.add_ofp_version(rofl::openflow13::OFP_VERSION);
-			sclient->set_raddr(baddr).tcp_connect(rofl::cauxid(0), versionbitmap_dpt, rofl::crofconn::MODE_DATAPATH, /*reconnect=*/false);
+			sclient->set_raddr(baddr).tcp_connect(versionbitmap_dpt, rofl::crofconn::MODE_DATAPATH, /*reconnect=*/false);
 
 
 			while (keep_running) {
