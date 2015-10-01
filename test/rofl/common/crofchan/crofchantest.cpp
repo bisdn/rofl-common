@@ -51,7 +51,7 @@ crofchantest::test1()
 	num_of_conns = 8;
 	int seconds = 10 * num_of_conns;
 
-	for (int i = 0; i < num_of_conns; i++) {
+	for (unsigned int i = 0; i < num_of_conns; i++) {
 		channel1->add_conn(rofl::cauxid(i)).
 				  set_raddr(baddr).
 				  tcp_connect(versionbitmap, rofl::crofconn::MODE_CONTROLLER, 0);
@@ -66,7 +66,7 @@ crofchantest::test1()
 		std::cerr << ".";
 	}
 
-	for (int i = 0; i < num_of_conns; i++) {
+	for (unsigned int i = 0; i < num_of_conns; i++) {
 		std::cerr << ">>> drop_conn() i=" << i << " <<<" << std::endl;
 		channel1->drop_conn(rofl::cauxid(i));
 		channel2->drop_conn(rofl::cauxid(i));
