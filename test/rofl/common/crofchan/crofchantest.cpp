@@ -48,7 +48,7 @@ crofchantest::test1()
 {
 
 	keep_running = true;
-	num_of_conns = 32;
+	num_of_conns = 8;
 	int seconds = 10 * num_of_conns;
 
 	for (int i = 0; i < num_of_conns; i++) {

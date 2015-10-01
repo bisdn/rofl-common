@@ -54,6 +54,11 @@ private:
 	{};
 
 	virtual void
+	handle_established(
+			rofl::crofchan& chan, rofl::crofconn& conn, uint8_t ofp_version)
+	{};
+
+	virtual void
 	handle_connect_refused(
 			rofl::crofchan& chan, rofl::crofconn& conn)
 	{};
@@ -89,7 +94,7 @@ private:
 
 	virtual uint32_t
 	get_async_xid(
-			rofl::crofchan& chan, rofl::crofconn& conn)
+			rofl::crofchan& chan)
 	{ return 0; };
 
 	virtual uint32_t
