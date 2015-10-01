@@ -12,12 +12,12 @@ before_install:
 install:
   - ./autogen.sh
 env:
-  - FLAGS=--enable-debug
+  - FLAGS="--enable-debug --disable-silent-rules"
   - FLAGS=
 script:
   - mkdir -p build
   - cd build
-  - ../configure $FLAGS --disable-silent-rules
+  - ../configure $FLAGS 
   - make -j 2
   - make -j 2 check
 notifications:
