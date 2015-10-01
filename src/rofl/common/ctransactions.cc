@@ -20,9 +20,10 @@ ctransactions::ctransactions(
 		ctransactions_env *env) :
 				env(env),
 				thread(this),
-				nxid(crandom(sizeof(uint32_t)).uint32()),
+				nxid(0),
 				work_interval(1)
 {
+	nxid = rand.uint32();
 	/* start thread */
 	thread.start();
 }

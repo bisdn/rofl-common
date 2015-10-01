@@ -6,92 +6,69 @@
 
 using namespace rofl;
 
-/*static*/
-double
-crandom::draw_random_number()
-{
-	return ((double)crandom(sizeof(uint32_t)).uint32() / std::numeric_limits<uint32_t>::max());
-}
+/*static*/const std::string crandom::DEV_URANDOM("/dev/urandom");
 
-
-
-crandom::crandom(size_t vallen)
-{
-	rand(vallen);
-}
 
 crandom::~crandom()
-{
+{}
 
-}
 
-crandom&
-crandom::rand(size_t length)
+crandom::crandom() :
+				seedp(1)
 {
+	/* open /dev/urandom and read souzef(unsigned int)
+	 * as seed to rand_r
+	 */
 	int fd = 0;
 	int rc = 0;
-	try {
-		resize(length);
 
-		if ((fd = open(DEV_URANDOM, O_RDONLY, "r")) < 0)
-			throw eRandomOpenFailed();
-
-		if ((rc = read(fd, somem(), memlen())) < 0)
-			throw eRandomReadFailed();
-
-		close(fd);
-
-	} catch (eRandomReadFailed& e) {
-		close(fd);
-		throw;
+	if ((fd = open(DEV_URANDOM.c_str(), O_RDONLY, "r")) < 0) {
+		throw eSysCall("crandom::crandom() open() for /dev/urandom failed");
 	}
 
-	return *this;
+	if ((rc = read(fd, &seedp, sizeof(seedp))) < 0) {
+		throw eSysCall("crandom::crandom() read() for /dev/urandom failed");
+	}
+
+	close(fd);
+
+	/* seed random number generator */
+	srand(seedp);
 }
 
 
-size_t
-crandom::randlen()
+double
+crandom::rand()
 {
-	return memlen();
+	return ((double)rand_r(&seedp) / RAND_MAX);
 }
-
 
 
 uint8_t
 crandom::uint8()
 {
-	if (memlen() < sizeof(uint8_t))
-		rand(sizeof(uint8_t));
-	uint8_t *n = (uint8_t*)somem();
-	return *n;
+	return (std::numeric_limits<uint8_t>::max() * rand());
 }
+
 
 uint16_t
 crandom::uint16()
 {
-	if (memlen() < sizeof(uint16_t))
-		rand(sizeof(uint16_t));
-	uint16_t *n = (uint16_t*)somem();
-	return *n;
+	return (std::numeric_limits<uint16_t>::max() * rand());
 }
+
 
 uint32_t
 crandom::uint32()
 {
-	if (memlen() < sizeof(uint32_t))
-		rand(sizeof(uint32_t));
-	uint32_t *n = (uint32_t*)somem();
-	return *n;
+	return (std::numeric_limits<uint32_t>::max() * rand());
 }
+
 
 uint64_t
 crandom::uint64()
 {
-	if (memlen() < sizeof(uint64_t))
-		rand(sizeof(uint64_t));
-	uint64_t *n = (uint64_t*)somem();
-	return *n;
+	return (std::numeric_limits<uint64_t>::max() * rand());
 }
 
 

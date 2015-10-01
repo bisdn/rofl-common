@@ -91,7 +91,8 @@ public:
 	 *
 	 */
 	csockaddr(
-			const csockaddr& sockaddr) { *this = sockaddr; };
+			const csockaddr& sockaddr)
+	{ *this = sockaddr; };
 
 	/**
 	 *

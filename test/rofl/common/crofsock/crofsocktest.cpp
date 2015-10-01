@@ -18,7 +18,9 @@ CPPUNIT_TEST_SUITE_REGISTRATION( crofsocktest );
 
 void
 crofsocktest::setUp()
-{}
+{
+	baddr = rofl::csockaddr(AF_INET, "0.0.0.0", 0);
+}
 
 
 
@@ -35,24 +37,44 @@ crofsocktest::test()
 		for (unsigned int i = 0; i < 2; i++) {
 			test_mode = TEST_MODE_TCP;
 			keep_running = true;
+			timeout = 60;
 			msg_counter = 0;
+			listening_port = 0;
 
 			slisten = new rofl::crofsock(this);
 			sclient = new rofl::crofsock(this);
 
-			rofl::csockaddr baddr(rofl::caddress_in4("127.0.0.1"), 33998);
+			/* try to find idle port for test */
+			bool lookup_idle_port = true;
+			while (lookup_idle_port) {
+				do {
+					listening_port = rand.uint16();
+					std::cerr << "trying listening port=" << (int)listening_port << std::endl;
+				} while ((listening_port < 10000) || (listening_port > 49000));
+				try {
+					baddr = rofl::csockaddr(rofl::caddress_in4("127.0.0.1"), listening_port);
+					/* try to bind address first */
+					slisten->set_baddr(baddr).listen();
+					std::cerr << "binding to " << baddr.str() << std::endl;
+					lookup_idle_port = false;
+				} catch (rofl::eSysCall& e) {
+					/* port in use, try another one */
+				}
+			}
 
 			sclient->set_raddr(baddr).tcp_connect(true);
 
 			sleep(5);
 
-			slisten->set_baddr(baddr).listen();
-
-			while (keep_running) {
+			while (keep_running && (timeout-- > 0)) {
 				struct timespec ts;
-				ts.tv_sec = 0;
-				ts.tv_nsec = 1000;
+				ts.tv_sec = 1;
+				ts.tv_nsec = 0;
 				pselect(0, NULL, NULL, NULL, &ts, NULL);
+			}
+
+			if (timeout == 0) {
+				CPPUNIT_ASSERT(false);
 			}
 
 			slisten->close();
@@ -82,12 +104,29 @@ crofsocktest::test_tls()
 	try {
 		test_mode = TEST_MODE_TLS;
 		keep_running = true;
+		timeout = 60;
 		msg_counter = 0;
 
 		slisten = new rofl::crofsock(this);
 		sclient = new rofl::crofsock(this);
 
-		rofl::csockaddr baddr(rofl::caddress_in4("127.0.0.1"), 33999);
+		/* try to find idle port for test */
+		bool lookup_idle_port = true;
+		while (lookup_idle_port) {
+			do {
+				listening_port = rand.uint16();
+				std::cerr << "trying listening port=" << (int)listening_port << std::endl;
+			} while ((listening_port < 10000) || (listening_port > 49000));
+			try {
+				baddr = rofl::csockaddr(rofl::caddress_in4("127.0.0.1"), listening_port);
+				/* try to bind address first */
+				slisten->set_baddr(baddr).listen();
+				std::cerr << "binding to " << baddr.str() << std::endl;
+				lookup_idle_port = false;
+			} catch (rofl::eSysCall& e) {
+				/* port in use, try another one */
+			}
+		}
 
 		sclient->set_raddr(baddr).
 					set_tls_cafile("../../../../../tools/xca/ca.rofl-core.crt.pem").
@@ -95,15 +134,15 @@ crofsocktest::test_tls()
 					set_tls_keyfile("../../../../../tools/xca/client.key.pem").
 						tls_connect(true);
 
-		sleep(5);
-
-		slisten->set_baddr(baddr).listen();
-
-		while (keep_running) {
+		while (keep_running && (timeout-- > 0)) {
 			struct timespec ts;
-			ts.tv_sec = 0;
-			ts.tv_nsec = 1000;
+			ts.tv_sec = 1;
+			ts.tv_nsec = 0;
 			pselect(0, NULL, NULL, NULL, &ts, NULL);
+		}
+
+		if (timeout == 0) {
+			CPPUNIT_ASSERT(false);
 		}
 
 		delete slisten;
@@ -182,6 +221,11 @@ crofsocktest::handle_tcp_connected(
 	} break;
 	case TEST_MODE_TLS: {
 
+		rofl::openflow::cofmsg_hello* hello =
+				new cofmsg_hello(rofl::openflow13::OFP_VERSION, 0xa1a2a3a4);
+
+		sclient->send_message(hello);
+
 	} break;
 	default: {
 
@@ -225,6 +269,11 @@ crofsocktest::handle_tcp_accepted(
 
 	} break;
 	case TEST_MODE_TLS: {
+
+		rofl::openflow::cofmsg_features_request* features =
+				new cofmsg_features_request(rofl::openflow13::OFP_VERSION, 0xb1b2b3b4);
+
+		sserver->send_message(features);
 
 	} break;
 	default: {
@@ -280,7 +329,7 @@ crofsocktest::handle_recv(
 		}
 
 		if ((server_msg_counter >= 10) && (client_msg_counter >= 10)) {
-			std::cerr << "AAAAAAAAAAAAAA [sserver]" << std::endl;
+			std::cerr << "[sserver] test done" << std::endl;
 			keep_running = false;
 		}
 
@@ -299,7 +348,7 @@ crofsocktest::handle_recv(
 		}
 
 		if ((server_msg_counter >= 10) && (client_msg_counter >= 10)) {
-			std::cerr << "AAAAAAAAAAAAAA [sclient]" << std::endl;
+			std::cerr << "[sclient] test done" << std::endl;
 			keep_running = false;
 		}
 

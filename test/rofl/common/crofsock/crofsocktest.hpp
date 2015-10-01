@@ -13,6 +13,7 @@
 
 #include "rofl/common/crofsock.h"
 #include "rofl/common/cmemory.h"
+#include "rofl/common/crandom.h"
 
 class crofsocktest :
 		public CppUnit::TestFixture,
@@ -20,7 +21,7 @@ class crofsocktest :
 {
 	CPPUNIT_TEST_SUITE( crofsocktest );
 	CPPUNIT_TEST( test );
-	//CPPUNIT_TEST( test_tls );
+	CPPUNIT_TEST( test_tls );
 	CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -101,10 +102,14 @@ private:
 	};
 
 	enum crofsock_test_mode_t test_mode;
-	bool                keep_running = true;
+	bool                keep_running;
+	int                 timeout;
 	int                 msg_counter;
 	int                 server_msg_counter;
 	int                 client_msg_counter;
+	rofl::crandom       rand;
+	uint16_t            listening_port;
+	rofl::csockaddr     baddr;
 	rofl::crofsock*		slisten;
 	rofl::crofsock*     sclient;
 	rofl::crofsock*     sserver;

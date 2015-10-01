@@ -16,75 +16,88 @@
 
 #include <limits>
 
-#include "rofl/common/croflexception.h"
-#include "rofl/common/cmemory.h"
+#include "rofl/common/exception.hpp"
 
 namespace rofl
 {
 
-class eRandomBase : public eMemBase {}; // error base class crandom
-class eRandomOpenFailed : public eRandomBase {}; // open system-call failed
-class eRandomReadFailed : public eRandomBase {}; // read system-call failed
+class crandom {
+static const std::string DEV_URANDOM;
+public:
 
-class crandom : public cmemory {
-#define DEV_URANDOM "/dev/urandom"
+	/**
+	 *
+	 */
+	virtual
+	~crandom();
+
+	/**
+	 *
+	 */
+	crandom();
+
+	/**
+	 *
+	 */
+	crandom(
+			const crandom& r)
+	{ *this = r; };
+
+	/**
+	 *
+	 */
+	crandom&
+	operator=(
+			const crandom& r) {
+		if (this == &r)
+			return *this;
+		seedp = r.seedp;
+		return *this;
+	};
+
 public:
 
 	/**
 	 * @brief	returns a random number between 0 and 1
 	 */
-	static double
-	draw_random_number();
+	double
+	rand();
 
-	// constructor with default random number length of 4 bytes
-	crandom(size_t vallen = sizeof(uint32_t));
-	// destructor
-	virtual
-	~crandom();
-	// copy constructor
-	crandom(crandom &r)
-	{
-		*this = r;
-	};
-	// assignment operator
-	crandom&
-	operator=(const crandom &r)
-	{
-		if (this == &r)
-			return *this;
-		cmemory::operator= (r);
-		return *this;
-	};
+	/**
+	 * @brief	convenience method: return uint8_t
+	 */
+	uint8_t
+	uint8();
 
-	/** return random number of length "length"
+	/**
+	 * @brief	convenience method: return uint16_t
 	 */
-	crandom& rand(size_t length);
-	/** return length of random number
+	uint16_t
+	uint16();
+
+	/**
+	 * @brief	convenience method: return uint32_t
 	 */
-	size_t randlen();
-	/** convenience method: return uint8_t
+	uint32_t
+	uint32();
+
+	/**
+	 * @brief	convenience method: return uint64_t
 	 */
-	uint8_t uint8();
-	/** convenience method: return uint16_t
-	 */
-	uint16_t uint16();
-	/** convenience method: return uint32_t
-	 */
-	uint32_t uint32();
-	/** convenience method: return uint64_t
-	 */
-	uint64_t uint64();
+	uint64_t
+	uint64();
 
 public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, crandom const& rand) {
-		os << "<crandom ";
-			os << dynamic_cast<cmemory const&>( rand );
-		os << ">";
+		os << "<crandom seed=" << rand.seedp << " >";
 		return os;
 	};
 
+private:
+
+	unsigned int        seedp;
 };
 
 }; // end of namespace

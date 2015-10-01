@@ -16,6 +16,7 @@
 #include "rofl/common/ctransaction.h"
 #include "rofl/common/crandom.h"
 #include "rofl/common/ctimerid.h"
+#include "rofl/common/croflexception.h"
 
 namespace rofl {
 
@@ -156,6 +157,7 @@ private:
 	ctransactions_env			*env;
 	cthread                     thread;
 	uint32_t					nxid;			// next xid
+	crandom						rand;
 	unsigned int				work_interval; 	// time interval for checking work-queue
 	PthreadRwLock				queuelock;		// rwlock for work-queue
 
