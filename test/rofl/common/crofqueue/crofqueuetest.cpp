@@ -38,7 +38,7 @@ crofqueuetest::test1()
 	CPPUNIT_ASSERT(queue.get_queue_max_size() == 128);
 	CPPUNIT_ASSERT(queue.capacity() == 128);
 
-	for (int i = 0; i < 256; i++) {
+	for (unsigned int i = 0; i < 256; i++) {
 		rofl::openflow::cofmsg* msg =
 				new rofl::openflow::cofmsg(
 						rofl::openflow13::OFP_VERSION,
@@ -84,7 +84,7 @@ crofqueuetest::test2()
 	CPPUNIT_ASSERT(queue.get_queue_max_size() == 128);
 	CPPUNIT_ASSERT(queue.capacity() == 128);
 
-	for (int i = 0; i < 256; i++) {
+	for (unsigned int i = 0; i < 256; i++) {
 		rofl::openflow::cofmsg* msg =
 				new rofl::openflow::cofmsg(
 						rofl::openflow13::OFP_VERSION,
