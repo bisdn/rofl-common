@@ -54,8 +54,18 @@ private:
 	{};
 
 	virtual void
+	handle_closed(
+			rofl::crofchan& chan)
+	{};
+
+	virtual void
 	handle_established(
 			rofl::crofchan& chan, rofl::crofconn& conn, uint8_t ofp_version)
+	{};
+
+	virtual void
+	handle_closed(
+			rofl::crofchan& chan, rofl::crofconn& conn)
 	{};
 
 	virtual void
@@ -75,11 +85,6 @@ private:
 
 	virtual void
 	handle_negotiation_failed(
-			rofl::crofchan& chan, rofl::crofconn& conn)
-	{};
-
-	virtual void
-	handle_closed(
 			rofl::crofchan& chan, rofl::crofconn& conn)
 	{};
 

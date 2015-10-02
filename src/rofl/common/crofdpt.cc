@@ -47,7 +47,7 @@ crofdpt::handle_timeout(int opaque, void *data)
 		work_on_eventqueue();
 	} break;
 	default: {
-		LOGGING_ERROR << "[rofl-common][crofdpt] dpid:"
+		std::cerr << "[rofl-common][crofdpt] dpid:"
 				<< std::hex << get_dpid().str() << std::dec
 				<< " unknown timer event:" << opaque << std::endl;
 	};
@@ -142,7 +142,7 @@ crofdpt::work_on_eventqueue(
 			event_port_desc_request_expired();
 		} break;
 		default: {
-			LOGGING_ERROR << "[rofl-common][crofdpt] unknown event seen, internal error" << std::endl << *this;
+			std::cerr << "[rofl-common][crofdpt] unknown event seen, internal error" << std::endl << *this;
 		};
 		}
 	}
@@ -154,7 +154,7 @@ crofdpt::work_on_eventqueue(
 void
 crofdpt::event_connected()
 {
-	LOGGING_DEBUG << "[rofl-common][crofdpt] entering state -ofp-connected-" << std::endl;
+	std::cerr << "[rofl-common][crofdpt] entering state -ofp-connected-" << std::endl;
 	switch (state) {
 	case STATE_INIT:
 	case STATE_DISCONNECTED: {
@@ -172,7 +172,7 @@ crofdpt::event_connected()
 #endif
 	} break;
 	default: {
-		LOGGING_ERROR << "[rofl-common][crofdpt] event -CONNECTED- in invalid state rcvd, internal error" << std::endl << *this;
+		std::cerr << "[rofl-common][crofdpt] event -CONNECTED- in invalid state rcvd, internal error" << std::endl << *this;
 	};
 	}
 }
@@ -182,7 +182,7 @@ crofdpt::event_connected()
 void
 crofdpt::event_disconnected()
 {
-	LOGGING_DEBUG << "[rofl-common][crofdpt] entering state -ofp-disconnected-" << std::endl;
+	std::cerr << "[rofl-common][crofdpt] entering state -ofp-disconnected-" << std::endl;
 	events.clear();
 	rofchan.close();
 	transactions.clear();
@@ -198,7 +198,7 @@ crofdpt::event_disconnected()
 void
 crofdpt::event_conn_terminated()
 {
-	LOGGING_DEBUG << "[rofl-common][crofdpt] rcvd event -conn-terminated-" << std::endl;
+	std::cerr << "[rofl-common][crofdpt] rcvd event -conn-terminated-" << std::endl;
 	rofl::RwLock(conns_rwlock, rofl::RwLock::RWLOCK_WRITE);
 	for (std::list<rofl::cauxid>::iterator
 			it = conns_terminated.begin(); it != conns_terminated.end(); ++it) {
@@ -212,7 +212,7 @@ crofdpt::event_conn_terminated()
 void
 crofdpt::event_conn_refused()
 {
-	LOGGING_DEBUG << "[rofl-common][crofdpt] rcvd event -conn-refused-" << std::endl;
+	std::cerr << "[rofl-common][crofdpt] rcvd event -conn-refused-" << std::endl;
 	rofl::RwLock(conns_rwlock, rofl::RwLock::RWLOCK_WRITE);
 	for (std::list<rofl::cauxid>::iterator
 			it = conns_refused.begin(); it != conns_refused.end(); ++it) {
@@ -226,7 +226,7 @@ crofdpt::event_conn_refused()
 void
 crofdpt::event_conn_failed()
 {
-	LOGGING_DEBUG << "[rofl-common][crofdpt] rcvd event -conn-failed-" << std::endl;
+	std::cerr << "[rofl-common][crofdpt] rcvd event -conn-failed-" << std::endl;
 	rofl::RwLock(conns_rwlock, rofl::RwLock::RWLOCK_WRITE);
 	for (std::list<rofl::cauxid>::iterator
 			it = conns_failed.begin(); it != conns_failed.end(); ++it) {
@@ -240,10 +240,10 @@ crofdpt::event_conn_failed()
 void
 crofdpt::event_features_reply_rcvd()
 {
-	LOGGING_DEBUG << "[rofl-common][crofdpt] rcvd event -features-reply-rcvd-" << std::endl;
+	std::cerr << "[rofl-common][crofdpt] rcvd event -features-reply-rcvd-" << std::endl;
 	switch (state) {
 	case STATE_WAIT_FOR_FEATURES: {
-		LOGGING_DEBUG << "[rofl-common][crofdpt] entering state -wait-for-get-config-" << std::endl;
+		std::cerr << "[rofl-common][crofdpt] entering state -wait-for-get-config-" << std::endl;
 		state = STATE_WAIT_FOR_GET_CONFIG;
 		send_get_config_request(rofl::cauxid(0));
 	} break;
@@ -261,7 +261,7 @@ void
 crofdpt::event_features_request_expired(
 		uint32_t xid)
 {
-	LOGGING_DEBUG << "[rofl-common][crofdpt] rcvd event -features-request-expired-" << std::endl;
+	std::cerr << "[rofl-common][crofdpt] rcvd event -features-request-expired-" << std::endl;
 	switch (state) {
 	case STATE_WAIT_FOR_FEATURES: {
 		//state = STATE_DISCONNECTED;
@@ -280,12 +280,12 @@ crofdpt::event_features_request_expired(
 void
 crofdpt::event_get_config_reply_rcvd()
 {
-	LOGGING_DEBUG << "[rofl-common][crofdpt] rcvd event -get-config-reply-rcvd-" << std::endl;
+	std::cerr << "[rofl-common][crofdpt] rcvd event -get-config-reply-rcvd-" << std::endl;
 	switch (state) {
 	case STATE_WAIT_FOR_GET_CONFIG: {
 		switch (rofchan.get_version()) {
 		case rofl::openflow10::OFP_VERSION: {
-			LOGGING_DEBUG << "[rofl-common][crofdpt] entering state -established-" << std::endl;
+			std::cerr << "[rofl-common][crofdpt] entering state -established-" << std::endl;
 			state = STATE_ESTABLISHED;
 			call_env().handle_chan_established(*this);
 			// send all postponed messages to higher layers
@@ -295,13 +295,13 @@ crofdpt::event_get_config_reply_rcvd()
 
 		} break;
 		case rofl::openflow12::OFP_VERSION: {
-			LOGGING_DEBUG << "[rofl-common][crofdpt] entering state -wait-for-table-stats-" << std::endl;
+			std::cerr << "[rofl-common][crofdpt] entering state -wait-for-table-stats-" << std::endl;
 			state = STATE_WAIT_FOR_TABLE_STATS;
 			send_table_stats_request(rofl::cauxid(0));
 		} break;
 		case rofl::openflow13::OFP_VERSION:
 		default: {
-			LOGGING_DEBUG << "[rofl-common][crofdpt] entering state -established-" << std::endl;
+			std::cerr << "[rofl-common][crofdpt] entering state -established-" << std::endl;
 			state = STATE_ESTABLISHED;
 			call_env().handle_chan_established(*this);
 			// send all postponed messages to higher layers
@@ -325,7 +325,7 @@ void
 crofdpt::event_get_config_request_expired(
 		uint32_t xid)
 {
-	LOGGING_DEBUG << "[rofl-common][crofdpt] rcvd event -get-config-request-expired-" << std::endl;
+	std::cerr << "[rofl-common][crofdpt] rcvd event -get-config-request-expired-" << std::endl;
 	switch (state) {
 	case STATE_WAIT_FOR_GET_CONFIG: {
 		transactions.clear();
@@ -344,12 +344,12 @@ crofdpt::event_get_config_request_expired(
 void
 crofdpt::event_table_stats_reply_rcvd()
 {
-	LOGGING_DEBUG << "[rofl-common][crofdpt] rcvd event -get-table-stats-reply-rcvd-" << std::endl;
+	std::cerr << "[rofl-common][crofdpt] rcvd event -get-table-stats-reply-rcvd-" << std::endl;
 	switch (state) {
 	case STATE_WAIT_FOR_TABLE_STATS: {
 		switch (rofchan.get_version()) {
 		case rofl::openflow12::OFP_VERSION: {
-			LOGGING_DEBUG << "[rofl-common][crofdpt] entering state -established-" << std::endl;
+			std::cerr << "[rofl-common][crofdpt] entering state -established-" << std::endl;
 			state = STATE_ESTABLISHED;
 			call_env().handle_chan_established(*this);
 			// send all postponed messages to higher layers
@@ -377,7 +377,7 @@ void
 crofdpt::event_table_stats_request_expired(
 		uint32_t xid)
 {
-	LOGGING_DEBUG << "[rofl-common][crofdpt] rcvd event -table-stats-request-expired-" << std::endl;
+	std::cerr << "[rofl-common][crofdpt] rcvd event -table-stats-request-expired-" << std::endl;
 	switch (state) {
 	case STATE_WAIT_FOR_TABLE_STATS: {
 		transactions.clear();
@@ -397,12 +397,12 @@ crofdpt::event_table_stats_request_expired(
 void
 crofdpt::event_table_features_stats_reply_rcvd()
 {
-	LOGGING_DEBUG << "[rofl-common][crofdpt] rcvd event -get-table-features-stats-reply-rcvd-" << std::endl;
+	std::cerr << "[rofl-common][crofdpt] rcvd event -get-table-features-stats-reply-rcvd-" << std::endl;
 	switch (state) {
 	case STATE_WAIT_FOR_TABLE_FEATURES_STATS: {
 		switch (rofchan.get_version()) {
 		case rofl::openflow13::OFP_VERSION: {
-			LOGGING_DEBUG << "[rofl-common][crofdpt] entering state -wait-for-port-desc-stats-" << std::endl;
+			std::cerr << "[rofl-common][crofdpt] entering state -wait-for-port-desc-stats-" << std::endl;
 			state = STATE_WAIT_FOR_PORT_DESC_STATS;
 			send_port_desc_stats_request(rofl::cauxid(0), 0);
 		} break;
@@ -425,7 +425,7 @@ void
 crofdpt::event_table_features_stats_request_expired(
 		uint32_t xid)
 {
-	LOGGING_DEBUG << "[rofl-common][crofdpt] rcvd event -table-features-stats-request-expired-" << std::endl;
+	std::cerr << "[rofl-common][crofdpt] rcvd event -table-features-stats-request-expired-" << std::endl;
 	switch (state) {
 	case STATE_WAIT_FOR_TABLE_FEATURES_STATS: {
 		transactions.clear();
@@ -445,13 +445,13 @@ crofdpt::event_table_features_stats_request_expired(
 void
 crofdpt::event_port_desc_reply_rcvd()
 {
-	LOGGING_DEBUG << "[rofl-common][crofdpt] rcvd event -get-port-desc-stats-reply-rcvd-" << std::endl;
+	std::cerr << "[rofl-common][crofdpt] rcvd event -get-port-desc-stats-reply-rcvd-" << std::endl;
 	switch (state) {
 	case STATE_WAIT_FOR_PORT_DESC_STATS: {
 		switch (rofchan.get_version()) {
 		case rofl::openflow13::OFP_VERSION:
 		default: {
-			LOGGING_DEBUG << "[rofl-common][crofdpt] entering state -established-" << std::endl;
+			std::cerr << "[rofl-common][crofdpt] entering state -established-" << std::endl;
 			state = STATE_ESTABLISHED;
 			call_env().handle_chan_established(*this);
 			// send all postponed messages to higher layers
@@ -476,7 +476,7 @@ void
 crofdpt::event_port_desc_request_expired(
 		uint32_t xid)
 {
-	LOGGING_DEBUG << "[rofl-common][crofdpt] rcvd event -port-desc-request-expired-" << std::endl;
+	std::cerr << "[rofl-common][crofdpt] rcvd event -port-desc-request-expired-" << std::endl;
 	switch (state) {
 	case STATE_WAIT_FOR_PORT_DESC_STATS: {
 		transactions.clear();
@@ -638,7 +638,7 @@ crofdpt::ta_expired(
 		ctransactions& tas,
 		ctransaction& ta)
 {
-	LOGGING_WARN << "[rofl-common][crofdpt] transaction expired, xid:" << std::endl << ta;
+	std::cerr << "[rofl-common][crofdpt] transaction expired, xid:" << std::endl << ta;
 
 	switch (ta.get_msg_type()) {
 	case rofl::openflow::OFPT_FEATURES_REQUEST: {
@@ -779,7 +779,7 @@ crofdpt::send_features_request(
 
 	try {
 		if (not is_established()) {
-			LOGGING_WARN << "[rofl-common][crofdpt] "
+			std::cerr << "[rofl-common][crofdpt] "
 					<< "control channel not connected" << std::endl;
 			throw eRofBaseNotConnected("");
 		}
@@ -794,7 +794,7 @@ crofdpt::send_features_request(
 		return xid;
 
 	} catch (eRofBaseCongested& e) {
-		LOGGING_WARN << "[rofl-common][crofdpt] "
+		std::cerr << "[rofl-common][crofdpt] "
 				<< "control channel congested" << std::endl;
 		transactions.drop_ta(xid);
 		throw;
@@ -812,7 +812,7 @@ crofdpt::send_get_config_request(
 
 	try {
 		if (not is_established()) {
-			LOGGING_WARN << "[rofl-common][crofdpt] "
+			std::cerr << "[rofl-common][crofdpt] "
 					<< "control channel not connected" << std::endl;
 			throw eRofBaseNotConnected("");
 		}
@@ -827,7 +827,7 @@ crofdpt::send_get_config_request(
 		return xid;
 
 	} catch (eRofBaseCongested& e) {
-		LOGGING_WARN << "[rofl-common][crofdpt] "
+		std::cerr << "[rofl-common][crofdpt] "
 				<< "control channel congested" << std::endl;
 		transactions.drop_ta(xid);
 		throw;
@@ -846,7 +846,7 @@ crofdpt::send_desc_stats_request(
 
 	try {
 		if (not is_established()) {
-			LOGGING_WARN << "[rofl-common][crofdpt] "
+			std::cerr << "[rofl-common][crofdpt] "
 					<< "control channel not connected" << std::endl;
 			throw eRofBaseNotConnected("");
 		}
@@ -864,7 +864,7 @@ crofdpt::send_desc_stats_request(
 		return xid;
 
 	} catch (eRofBaseCongested& e) {
-		LOGGING_WARN << "[rofl-common][crofdpt] "
+		std::cerr << "[rofl-common][crofdpt] "
 				<< "control channel congested" << std::endl;
 		transactions.drop_ta(xid);
 		throw;
@@ -884,7 +884,7 @@ crofdpt::send_flow_stats_request(
 
 	try {
 		if (not is_established()) {
-			LOGGING_WARN << "[rofl-common][crofdpt] "
+			std::cerr << "[rofl-common][crofdpt] "
 					<< "control channel not connected" << std::endl;
 			throw eRofBaseNotConnected("");
 		}
@@ -903,7 +903,7 @@ crofdpt::send_flow_stats_request(
 		return xid;
 
 	} catch (eRofBaseCongested& e) {
-		LOGGING_WARN << "[rofl-common][crofdpt] "
+		std::cerr << "[rofl-common][crofdpt] "
 				<< "control channel congested" << std::endl;
 		transactions.drop_ta(xid);
 		throw;
@@ -923,7 +923,7 @@ crofdpt::send_aggr_stats_request(
 
 	try {
 		if (not is_established()) {
-			LOGGING_WARN << "[rofl-common][crofdpt] "
+			std::cerr << "[rofl-common][crofdpt] "
 					<< "control channel not connected" << std::endl;
 			throw eRofBaseNotConnected("");
 		}
@@ -942,7 +942,7 @@ crofdpt::send_aggr_stats_request(
 		return xid;
 
 	} catch (eRofBaseCongested& e) {
-		LOGGING_WARN << "[rofl-common][crofdpt] "
+		std::cerr << "[rofl-common][crofdpt] "
 				<< "control channel congested" << std::endl;
 		transactions.drop_ta(xid);
 		throw;
@@ -961,7 +961,7 @@ crofdpt::send_table_stats_request(
 
 	try {
 		if (not is_established()) {
-			LOGGING_WARN << "[rofl-common][crofdpt] "
+			std::cerr << "[rofl-common][crofdpt] "
 					<< "control channel not connected" << std::endl;
 			throw eRofBaseNotConnected("");
 		}
@@ -979,7 +979,7 @@ crofdpt::send_table_stats_request(
 		return xid;
 
 	} catch (eRofBaseCongested& e) {
-		LOGGING_WARN << "[rofl-common][crofdpt] "
+		std::cerr << "[rofl-common][crofdpt] "
 				<< "control channel congested" << std::endl;
 		transactions.drop_ta(xid);
 		throw;
@@ -999,7 +999,7 @@ crofdpt::send_port_stats_request(
 
 	try {
 		if (not is_established()) {
-			LOGGING_WARN << "[rofl-common][crofdpt] "
+			std::cerr << "[rofl-common][crofdpt] "
 					<< "control channel not connected" << std::endl;
 			throw eRofBaseNotConnected("");
 		}
@@ -1018,7 +1018,7 @@ crofdpt::send_port_stats_request(
 		return xid;
 
 	} catch (eRofBaseCongested& e) {
-		LOGGING_WARN << "[rofl-common][crofdpt] "
+		std::cerr << "[rofl-common][crofdpt] "
 				<< "control channel congested" << std::endl;
 		transactions.drop_ta(xid);
 		throw;
@@ -1038,7 +1038,7 @@ crofdpt::send_queue_stats_request(
 
 	try {
 		if (not is_established()) {
-			LOGGING_WARN << "[rofl-common][crofdpt] "
+			std::cerr << "[rofl-common][crofdpt] "
 					<< "control channel not connected" << std::endl;
 			throw eRofBaseNotConnected("");
 		}
@@ -1057,7 +1057,7 @@ crofdpt::send_queue_stats_request(
 		return xid;
 
 	} catch (eRofBaseCongested& e) {
-		LOGGING_WARN << "[rofl-common][crofdpt] "
+		std::cerr << "[rofl-common][crofdpt] "
 				<< "control channel congested" << std::endl;
 		transactions.drop_ta(xid);
 		throw;
@@ -1077,7 +1077,7 @@ crofdpt::send_group_stats_request(
 
 	try {
 		if (not is_established()) {
-			LOGGING_WARN << "[rofl-common][crofdpt] "
+			std::cerr << "[rofl-common][crofdpt] "
 					<< "control channel not connected" << std::endl;
 			throw eRofBaseNotConnected("");
 		}
@@ -1096,7 +1096,7 @@ crofdpt::send_group_stats_request(
 		return xid;
 
 	} catch (eRofBaseCongested& e) {
-		LOGGING_WARN << "[rofl-common][crofdpt] "
+		std::cerr << "[rofl-common][crofdpt] "
 				<< "control channel congested" << std::endl;
 		transactions.drop_ta(xid);
 		throw;
@@ -1115,7 +1115,7 @@ crofdpt::send_group_desc_stats_request(
 
 	try {
 		if (not is_established()) {
-			LOGGING_WARN << "[rofl-common][crofdpt] "
+			std::cerr << "[rofl-common][crofdpt] "
 					<< "control channel not connected" << std::endl;
 			throw eRofBaseNotConnected("");
 		}
@@ -1134,7 +1134,7 @@ crofdpt::send_group_desc_stats_request(
 		return xid;
 
 	} catch (eRofBaseCongested& e) {
-		LOGGING_WARN << "[rofl-common][crofdpt] "
+		std::cerr << "[rofl-common][crofdpt] "
 				<< "control channel congested" << std::endl;
 		transactions.drop_ta(xid);
 		throw;
@@ -1153,7 +1153,7 @@ crofdpt::send_group_features_stats_request(
 
 	try {
 		if (not is_established()) {
-			LOGGING_WARN << "[rofl-common][crofdpt] "
+			std::cerr << "[rofl-common][crofdpt] "
 					<< "control channel not connected" << std::endl;
 			throw eRofBaseNotConnected("");
 		}
@@ -1171,7 +1171,7 @@ crofdpt::send_group_features_stats_request(
 		return xid;
 
 	} catch (eRofBaseCongested& e) {
-		LOGGING_WARN << "[rofl-common][crofdpt] "
+		std::cerr << "[rofl-common][crofdpt] "
 				<< "control channel congested" << std::endl;
 		transactions.drop_ta(xid);
 		throw;
@@ -1190,7 +1190,7 @@ crofdpt::send_table_features_stats_request(
 
 	try {
 		if (not is_established()) {
-			LOGGING_WARN << "[rofl-common][crofdpt] "
+			std::cerr << "[rofl-common][crofdpt] "
 					<< "control channel not connected" << std::endl;
 			throw eRofBaseNotConnected("");
 		}
@@ -1208,7 +1208,7 @@ crofdpt::send_table_features_stats_request(
 		return xid;
 
 	} catch (eRofBaseCongested& e) {
-		LOGGING_WARN << "[rofl-common][crofdpt] "
+		std::cerr << "[rofl-common][crofdpt] "
 				<< "control channel congested" << std::endl;
 		transactions.drop_ta(xid);
 		throw;
@@ -1227,7 +1227,7 @@ crofdpt::send_port_desc_stats_request(
 
 	try {
 		if (not is_established()) {
-			LOGGING_WARN << "[rofl-common][crofdpt] "
+			std::cerr << "[rofl-common][crofdpt] "
 					<< "control channel not connected" << std::endl;
 			throw eRofBaseNotConnected("");
 		}
@@ -1245,7 +1245,7 @@ crofdpt::send_port_desc_stats_request(
 		return xid;
 
 	} catch (eRofBaseCongested& e) {
-		LOGGING_WARN << "[rofl-common][crofdpt] "
+		std::cerr << "[rofl-common][crofdpt] "
 				<< "control channel congested" << std::endl;
 		transactions.drop_ta(xid);
 		throw;
@@ -1267,7 +1267,7 @@ crofdpt::send_experimenter_stats_request(
 
 	try {
 		if (not is_established()) {
-			LOGGING_WARN << "[rofl-common][crofdpt] "
+			std::cerr << "[rofl-common][crofdpt] "
 					<< "control channel not connected" << std::endl;
 			throw eRofBaseNotConnected("");
 		}
@@ -1288,7 +1288,7 @@ crofdpt::send_experimenter_stats_request(
 		return xid;
 
 	} catch (eRofBaseCongested& e) {
-		LOGGING_WARN << "[rofl-common][crofdpt] "
+		std::cerr << "[rofl-common][crofdpt] "
 				<< "control channel congested" << std::endl;
 		transactions.drop_ta(xid);
 		throw;
@@ -1308,7 +1308,7 @@ crofdpt::send_meter_stats_request(
 
 	try {
 		if (not is_established()) {
-			LOGGING_WARN << "[rofl-common][crofdpt] "
+			std::cerr << "[rofl-common][crofdpt] "
 					<< "control channel not connected" << std::endl;
 			throw eRofBaseNotConnected("");
 		}
@@ -1327,7 +1327,7 @@ crofdpt::send_meter_stats_request(
 		return xid;
 
 	} catch (eRofBaseCongested& e) {
-		LOGGING_WARN << "[rofl-common][crofdpt] "
+		std::cerr << "[rofl-common][crofdpt] "
 				<< "control channel congested" << std::endl;
 		transactions.drop_ta(xid);
 		throw;
@@ -1347,7 +1347,7 @@ crofdpt::send_meter_config_stats_request(
 
 	try {
 		if (not is_established()) {
-			LOGGING_WARN << "[rofl-common][crofdpt] "
+			std::cerr << "[rofl-common][crofdpt] "
 					<< "control channel not connected" << std::endl;
 			throw eRofBaseNotConnected("");
 		}
@@ -1366,7 +1366,7 @@ crofdpt::send_meter_config_stats_request(
 		return xid;
 
 	} catch (eRofBaseCongested& e) {
-		LOGGING_WARN << "[rofl-common][crofdpt] "
+		std::cerr << "[rofl-common][crofdpt] "
 				<< "control channel congested" << std::endl;
 		transactions.drop_ta(xid);
 		throw;
@@ -1385,7 +1385,7 @@ crofdpt::send_meter_features_stats_request(
 
 	try {
 		if (not is_established()) {
-			LOGGING_WARN << "[rofl-common][crofdpt] "
+			std::cerr << "[rofl-common][crofdpt] "
 					<< "control channel not connected" << std::endl;
 			throw eRofBaseNotConnected("");
 		}
@@ -1403,7 +1403,7 @@ crofdpt::send_meter_features_stats_request(
 		return xid;
 
 	} catch (eRofBaseCongested& e) {
-		LOGGING_WARN << "[rofl-common][crofdpt] "
+		std::cerr << "[rofl-common][crofdpt] "
 				<< "control channel congested" << std::endl;
 		transactions.drop_ta(xid);
 		throw;
@@ -1425,7 +1425,7 @@ crofdpt::send_packet_out_message(
 
 	try {
 		if (not is_established()) {
-			LOGGING_WARN << "[rofl-common][crofdpt] "
+			std::cerr << "[rofl-common][crofdpt] "
 					<< "control channel not connected" << std::endl;
 			throw eRofBaseNotConnected("");
 		}
@@ -1447,7 +1447,7 @@ crofdpt::send_packet_out_message(
 		return xid;
 
 	} catch (eRofBaseCongested& e) {
-		LOGGING_WARN << "[rofl-common][crofdpt] "
+		std::cerr << "[rofl-common][crofdpt] "
 				<< "control channel congested" << std::endl;
 		transactions.drop_ta(xid);
 		throw;
@@ -1465,7 +1465,7 @@ crofdpt::send_barrier_request(
 
 	try {
 		if (not is_established()) {
-			LOGGING_WARN << "[rofl-common][crofdpt] "
+			std::cerr << "[rofl-common][crofdpt] "
 					<< "control channel not connected" << std::endl;
 			throw eRofBaseNotConnected("");
 		}
@@ -1482,7 +1482,7 @@ crofdpt::send_barrier_request(
 		return xid;
 
 	} catch (eRofBaseCongested& e) {
-		LOGGING_WARN << "[rofl-common][crofdpt] "
+		std::cerr << "[rofl-common][crofdpt] "
 				<< "control channel congested" << std::endl;
 		transactions.drop_ta(xid);
 		throw;
@@ -1501,7 +1501,7 @@ crofdpt::send_role_request(
 
 	try {
 		if (not is_established()) {
-			LOGGING_WARN << "[rofl-common][crofdpt] "
+			std::cerr << "[rofl-common][crofdpt] "
 					<< "control channel not connected" << std::endl;
 			throw eRofBaseNotConnected("");
 		}
@@ -1519,7 +1519,7 @@ crofdpt::send_role_request(
 		return xid;
 
 	} catch (eRofBaseCongested& e) {
-		LOGGING_WARN << "[rofl-common][crofdpt] "
+		std::cerr << "[rofl-common][crofdpt] "
 				<< "control channel congested" << std::endl;
 		transactions.drop_ta(xid);
 		throw;
@@ -1537,7 +1537,7 @@ crofdpt::send_flow_mod_message(
 
 	try {
 		if (not is_established()) {
-			LOGGING_WARN << "[rofl-common][crofdpt] "
+			std::cerr << "[rofl-common][crofdpt] "
 					<< "control channel not connected" << std::endl;
 			throw eRofBaseNotConnected("");
 		}
@@ -1555,7 +1555,7 @@ crofdpt::send_flow_mod_message(
 		return xid;
 
 	} catch (eRofBaseCongested& e) {
-		LOGGING_WARN << "[rofl-common][crofdpt] "
+		std::cerr << "[rofl-common][crofdpt] "
 				<< "control channel congested" << std::endl;
 		throw;
 	}
@@ -1572,7 +1572,7 @@ crofdpt::send_group_mod_message(
 
 	try {
 		if (not is_established()) {
-			LOGGING_WARN << "[rofl-common][crofdpt] "
+			std::cerr << "[rofl-common][crofdpt] "
 					<< "control channel not connected" << std::endl;
 			throw eRofBaseNotConnected("");
 		}
@@ -1590,7 +1590,7 @@ crofdpt::send_group_mod_message(
 		return xid;
 
 	} catch (eRofBaseCongested& e) {
-		LOGGING_WARN << "[rofl-common][crofdpt] "
+		std::cerr << "[rofl-common][crofdpt] "
 				<< "control channel congested" << std::endl;
 		throw;
 	}
@@ -1608,7 +1608,7 @@ crofdpt::send_table_mod_message(
 
 	try {
 		if (not is_established()) {
-			LOGGING_WARN << "[rofl-common][crofdpt] "
+			std::cerr << "[rofl-common][crofdpt] "
 					<< "control channel not connected" << std::endl;
 			throw eRofBaseNotConnected("");
 		}
@@ -1627,7 +1627,7 @@ crofdpt::send_table_mod_message(
 		return xid;
 
 	} catch (eRofBaseCongested& e) {
-		LOGGING_WARN << "[rofl-common][crofdpt] "
+		std::cerr << "[rofl-common][crofdpt] "
 				<< "control channel congested" << std::endl;
 		throw;
 	}
@@ -1648,7 +1648,7 @@ crofdpt::send_port_mod_message(
 
 	try {
 		if (not is_established()) {
-			LOGGING_WARN << "[rofl-common][crofdpt] "
+			std::cerr << "[rofl-common][crofdpt] "
 					<< "control channel not connected" << std::endl;
 			throw eRofBaseNotConnected("");
 		}
@@ -1672,7 +1672,7 @@ crofdpt::send_port_mod_message(
 		return xid;
 
 	} catch (eRofBaseCongested& e) {
-		LOGGING_WARN << "[rofl-common][crofdpt] "
+		std::cerr << "[rofl-common][crofdpt] "
 				<< "control channel congested" << std::endl;
 		throw;
 	}
@@ -1690,7 +1690,7 @@ crofdpt::send_set_config_message(
 
 	try {
 		if (not is_established()) {
-			LOGGING_WARN << "[rofl-common][crofdpt] "
+			std::cerr << "[rofl-common][crofdpt] "
 					<< "control channel not connected" << std::endl;
 			throw eRofBaseNotConnected("");
 		}
@@ -1709,7 +1709,7 @@ crofdpt::send_set_config_message(
 		return xid;
 
 	} catch (eRofBaseCongested& e) {
-		LOGGING_WARN << "[rofl-common][crofdpt] "
+		std::cerr << "[rofl-common][crofdpt] "
 				<< "control channel congested" << std::endl;
 		throw;
 	}
@@ -1727,7 +1727,7 @@ crofdpt::send_queue_get_config_request(
 
 	try {
 		if (not is_established()) {
-			LOGGING_WARN << "[rofl-common][crofdpt] "
+			std::cerr << "[rofl-common][crofdpt] "
 					<< "control channel not connected" << std::endl;
 			throw eRofBaseNotConnected("");
 		}
@@ -1745,7 +1745,7 @@ crofdpt::send_queue_get_config_request(
 		return xid;
 
 	} catch (eRofBaseCongested& e) {
-		LOGGING_WARN << "[rofl-common][crofdpt] "
+		std::cerr << "[rofl-common][crofdpt] "
 				<< "control channel congested" << std::endl;
 		transactions.drop_ta(xid);
 		throw;
@@ -1763,7 +1763,7 @@ crofdpt::send_get_async_config_request(
 
 	try {
 		if (not is_established()) {
-			LOGGING_WARN << "[rofl-common][crofdpt] "
+			std::cerr << "[rofl-common][crofdpt] "
 					<< "control channel not connected" << std::endl;
 			throw eRofBaseNotConnected("");
 		}
@@ -1780,7 +1780,7 @@ crofdpt::send_get_async_config_request(
 		return xid;
 
 	} catch (eRofBaseCongested& e) {
-		LOGGING_WARN << "[rofl-common][crofdpt] "
+		std::cerr << "[rofl-common][crofdpt] "
 				<< "control channel congested" << std::endl;
 		transactions.drop_ta(xid);
 		throw;
@@ -1798,7 +1798,7 @@ crofdpt::send_set_async_config_message(
 
 	try {
 		if (not is_established()) {
-			LOGGING_WARN << "[rofl-common][crofdpt] "
+			std::cerr << "[rofl-common][crofdpt] "
 					<< "control channel not connected" << std::endl;
 			throw eRofBaseNotConnected("");
 		}
@@ -1816,7 +1816,7 @@ crofdpt::send_set_async_config_message(
 		return xid;
 
 	} catch (eRofBaseCongested& e) {
-		LOGGING_WARN << "[rofl-common][crofdpt] "
+		std::cerr << "[rofl-common][crofdpt] "
 				<< "control channel congested" << std::endl;
 		throw;
 	}
@@ -1836,7 +1836,7 @@ crofdpt::send_meter_mod_message(
 
 	try {
 		if (not is_established()) {
-			LOGGING_WARN << "[rofl-common][crofdpt] "
+			std::cerr << "[rofl-common][crofdpt] "
 					<< "control channel not connected" << std::endl;
 			throw eRofBaseNotConnected("");
 		}
@@ -1857,7 +1857,7 @@ crofdpt::send_meter_mod_message(
 		return xid;
 
 	} catch (eRofBaseCongested& e) {
-		LOGGING_WARN << "[rofl-common][crofdpt] "
+		std::cerr << "[rofl-common][crofdpt] "
 				<< "control channel congested" << std::endl;
 		throw;
 	}
@@ -1876,7 +1876,7 @@ crofdpt::send_error_message(
 {
 	try {
 		if (not is_established()) {
-			LOGGING_WARN << "[rofl-common][crofdpt] "
+			std::cerr << "[rofl-common][crofdpt] "
 					<< "control channel not connected" << std::endl;
 			throw eRofBaseNotConnected("");
 		}
@@ -1893,7 +1893,7 @@ crofdpt::send_error_message(
 		rofchan.send_message(auxid, msg);
 
 	} catch (eRofBaseCongested& e) {
-		LOGGING_WARN << "[rofl-common][crofdpt] "
+		std::cerr << "[rofl-common][crofdpt] "
 				<< "control channel congested" << std::endl;
 		transactions.drop_ta(xid);
 		throw;
@@ -1915,7 +1915,7 @@ crofdpt::send_experimenter_message(
 
 	try {
 		if (not is_established()) {
-			LOGGING_WARN << "[rofl-common][crofdpt] "
+			std::cerr << "[rofl-common][crofdpt] "
 					<< "control channel not connected" << std::endl;
 			throw eRofBaseNotConnected("");
 		}
@@ -1936,7 +1936,7 @@ crofdpt::send_experimenter_message(
 		return xid;
 
 	} catch (eRofBaseCongested& e) {
-		LOGGING_WARN << "[rofl-common][crofdpt] "
+		std::cerr << "[rofl-common][crofdpt] "
 				<< "control channel congested" << std::endl;
 		transactions.drop_ta(xid);
 		throw;
@@ -1952,7 +1952,7 @@ crofdpt::features_reply_rcvd(
 {
 	rofl::openflow::cofmsg_features_reply& reply = dynamic_cast<rofl::openflow::cofmsg_features_reply&>( *msg );
 
-	LOGGING_DEBUG2 << "[rofl-common][crofdpt] dpid:" << get_dpid().str()
+	std::cerr << "[rofl-common][crofdpt] dpid:" << get_dpid().str()
 				<< " rcvd Features-Reply: " << reply.str() << std::endl;
 
 	try {
@@ -1990,7 +1990,7 @@ crofdpt::features_reply_rcvd(
 
 	} catch (RoflException& e) {
 
-		LOGGING_ERROR << "[rofl-common][crofdpt] eRoflException in Features.reply rcvd" << *msg << std::endl;
+		std::cerr << "[rofl-common][crofdpt] eRoflException in Features.reply rcvd" << *msg << std::endl;
 		work_on_eventqueue(EVENT_DISCONNECTED);
 	}
 
@@ -2006,7 +2006,7 @@ crofdpt::get_config_reply_rcvd(
 {
 	rofl::openflow::cofmsg_get_config_reply& reply = dynamic_cast<rofl::openflow::cofmsg_get_config_reply&>( *msg );
 
-	LOGGING_DEBUG2 << "[rofl-common][crofdpt] dpid: " << get_dpid().str()
+	std::cerr << "[rofl-common][crofdpt] dpid: " << get_dpid().str()
 			<< " rcvd Get-Config-Reply: " << reply.str() << std::endl;
 
 	transactions.drop_ta(msg->get_xid());
@@ -2028,7 +2028,7 @@ crofdpt::multipart_reply_rcvd(
 		const rofl::cauxid& auxid,
 		rofl::openflow::cofmsg *msg)
 {
-	LOGGING_DEBUG2 << "[rofl-common][crofdpt] dpid:" << std::hex << get_dpid().str() << std::dec
+	std::cerr << "[rofl-common][crofdpt] dpid:" << std::hex << get_dpid().str() << std::dec
 			<< " Multipart-Reply message received" << std::endl << *msg;
 
 	transactions.drop_ta(msg->get_xid());
@@ -2084,7 +2084,7 @@ crofdpt::multipart_reply_rcvd(
 	} break;
 	default: {
 		if (STATE_ESTABLISHED != state) {
-			LOGGING_WARN << "[rofl-common][crofdpt] rcvd Multipart-Reply without being "
+			std::cerr << "[rofl-common][crofdpt] rcvd Multipart-Reply without being "
 					"established, dropping message:" << std::endl << *reply;
 			return;
 		}
@@ -2102,7 +2102,7 @@ crofdpt::desc_stats_reply_rcvd(
 {
 	rofl::openflow::cofmsg_desc_stats_reply& reply = dynamic_cast<rofl::openflow::cofmsg_desc_stats_reply&>( *msg );
 
-	LOGGING_DEBUG2 << "[rofl-common][crofdpt] dpid:" << std::hex << get_dpid().str() << std::dec
+	std::cerr << "[rofl-common][crofdpt] dpid:" << std::hex << get_dpid().str() << std::dec
 			<< " rcvd Desc-Stats-Reply: " << std::endl;
 
 	if (STATE_ESTABLISHED == state) {
@@ -2120,7 +2120,7 @@ crofdpt::table_stats_reply_rcvd(
 {
 	rofl::openflow::cofmsg_table_stats_reply& reply = dynamic_cast<rofl::openflow::cofmsg_table_stats_reply&>( *msg );
 
-	LOGGING_DEBUG2 << "[rofl-common][crofdpt] dpid:" << get_dpid().str()
+	std::cerr << "[rofl-common][crofdpt] dpid:" << get_dpid().str()
 			<< " rcvd Table-Stats-Reply: " << reply.str() << std::endl;
 
 	if (STATE_ESTABLISHED == state) {
@@ -2140,7 +2140,7 @@ crofdpt::port_stats_reply_rcvd(
 {
 	rofl::openflow::cofmsg_port_stats_reply& reply = dynamic_cast<rofl::openflow::cofmsg_port_stats_reply&>( *msg );
 
-	LOGGING_DEBUG2 << "[rofl-common][crofdpt] dpid:" << std::hex << get_dpid().str() << std::dec
+	std::cerr << "[rofl-common][crofdpt] dpid:" << std::hex << get_dpid().str() << std::dec
 			<< " Port-Stats-Reply message received" << std::endl;
 
 	if (STATE_ESTABLISHED == state) {
@@ -2158,7 +2158,7 @@ crofdpt::flow_stats_reply_rcvd(
 {
 	rofl::openflow::cofmsg_flow_stats_reply& reply = dynamic_cast<rofl::openflow::cofmsg_flow_stats_reply&>( *msg );
 
-	LOGGING_DEBUG2 << "[rofl-common][crofdpt] dpid:" << std::hex << get_dpid().str() << std::dec
+	std::cerr << "[rofl-common][crofdpt] dpid:" << std::hex << get_dpid().str() << std::dec
 			<< " Flow-Stats-Reply message received" << std::endl;
 
 	if (STATE_ESTABLISHED == state) {
@@ -2176,7 +2176,7 @@ crofdpt::aggregate_stats_reply_rcvd(
 {
 	rofl::openflow::cofmsg_aggr_stats_reply& reply = dynamic_cast<rofl::openflow::cofmsg_aggr_stats_reply&>( *msg );
 
-	LOGGING_DEBUG2 << "[rofl-common][crofdpt] dpid:" << std::hex << get_dpid().str() << std::dec
+	std::cerr << "[rofl-common][crofdpt] dpid:" << std::hex << get_dpid().str() << std::dec
 			<< " Aggregate-Stats-Reply message received" << std::endl;
 
 	if (STATE_ESTABLISHED == state) {
@@ -2194,7 +2194,7 @@ crofdpt::queue_stats_reply_rcvd(
 {
 	rofl::openflow::cofmsg_queue_stats_reply& reply = dynamic_cast<rofl::openflow::cofmsg_queue_stats_reply&>( *msg );
 
-	LOGGING_DEBUG2 << "[rofl-common][crofdpt] dpid:" << std::hex << get_dpid().str() << std::dec
+	std::cerr << "[rofl-common][crofdpt] dpid:" << std::hex << get_dpid().str() << std::dec
 			<< " Queue-Stats-Reply message received" << std::endl;
 
 	if (STATE_ESTABLISHED == state) {
@@ -2212,7 +2212,7 @@ crofdpt::group_stats_reply_rcvd(
 {
 	rofl::openflow::cofmsg_group_stats_reply& reply = dynamic_cast<rofl::openflow::cofmsg_group_stats_reply&>( *msg );
 
-	LOGGING_DEBUG2 << "[rofl-common][crofdpt] dpid:" << std::hex << get_dpid().str() << std::dec
+	std::cerr << "[rofl-common][crofdpt] dpid:" << std::hex << get_dpid().str() << std::dec
 			<< " Group-Stats-Reply message received" << std::endl;
 
 	if (STATE_ESTABLISHED == state) {
@@ -2230,7 +2230,7 @@ crofdpt::group_desc_stats_reply_rcvd(
 {
 	rofl::openflow::cofmsg_group_desc_stats_reply& reply = dynamic_cast<rofl::openflow::cofmsg_group_desc_stats_reply&>( *msg );
 
-	LOGGING_DEBUG2 << "[rofl-common][crofdpt] dpid:" << std::hex << get_dpid().str() << std::dec
+	std::cerr << "[rofl-common][crofdpt] dpid:" << std::hex << get_dpid().str() << std::dec
 			<< " Group-Desc-Stats-Reply message received" << std::endl;
 
 	if (STATE_ESTABLISHED == state) {
@@ -2248,7 +2248,7 @@ crofdpt::group_features_stats_reply_rcvd(
 {
 	rofl::openflow::cofmsg_group_features_stats_reply& reply = dynamic_cast<rofl::openflow::cofmsg_group_features_stats_reply&>( *msg );
 
-	LOGGING_DEBUG2 << "[rofl-common][crofdpt] dpid:" << std::hex << get_dpid().str() << std::dec
+	std::cerr << "[rofl-common][crofdpt] dpid:" << std::hex << get_dpid().str() << std::dec
 			<< " Group-Features-Stats-Reply message received" << std::endl;
 
 	if (STATE_ESTABLISHED == state) {
@@ -2266,7 +2266,7 @@ crofdpt::meter_stats_reply_rcvd(
 {
 	rofl::openflow::cofmsg_meter_stats_reply& reply = dynamic_cast<rofl::openflow::cofmsg_meter_stats_reply&>( *msg );
 
-	LOGGING_DEBUG2 << "[rofl-common][crofdpt] dpid:" << std::hex << get_dpid().str() << std::dec
+	std::cerr << "[rofl-common][crofdpt] dpid:" << std::hex << get_dpid().str() << std::dec
 			<< " Meter-Stats-Reply message received" << std::endl;
 
 	if (STATE_ESTABLISHED == state) {
@@ -2284,7 +2284,7 @@ crofdpt::meter_config_stats_reply_rcvd(
 {
 	rofl::openflow::cofmsg_meter_config_stats_reply& reply = dynamic_cast<rofl::openflow::cofmsg_meter_config_stats_reply&>( *msg );
 
-	LOGGING_DEBUG2 << "[rofl-common][crofdpt] dpid:" << std::hex << get_dpid().str() << std::dec
+	std::cerr << "[rofl-common][crofdpt] dpid:" << std::hex << get_dpid().str() << std::dec
 			<< " Meter-Config-Stats-Reply message received" << std::endl;
 
 	if (STATE_ESTABLISHED == state) {
@@ -2302,7 +2302,7 @@ crofdpt::meter_features_stats_reply_rcvd(
 {
 	rofl::openflow::cofmsg_meter_features_stats_reply& reply = dynamic_cast<rofl::openflow::cofmsg_meter_features_stats_reply&>( *msg );
 
-	LOGGING_DEBUG2 << "[rofl-common][crofdpt] dpid:" << std::hex << get_dpid().str() << std::dec
+	std::cerr << "[rofl-common][crofdpt] dpid:" << std::hex << get_dpid().str() << std::dec
 			<< " Meter-Features-Stats-Reply message received" << std::endl;
 
 	if (STATE_ESTABLISHED == state) {
@@ -2320,7 +2320,7 @@ crofdpt::table_features_stats_reply_rcvd(
 {
 	rofl::openflow::cofmsg_table_features_stats_reply& reply = dynamic_cast<rofl::openflow::cofmsg_table_features_stats_reply&>( *msg );
 
-	LOGGING_DEBUG2 << "[rofl-common][crofdpt] dpid:" << get_dpid().str()
+	std::cerr << "[rofl-common][crofdpt] dpid:" << get_dpid().str()
 			<< " rcvd Table-Features-Stats-Reply: " << reply.str() << std::endl;
 
 	tables = reply.get_tables();
@@ -2342,7 +2342,7 @@ crofdpt::port_desc_stats_reply_rcvd(
 {
 	rofl::openflow::cofmsg_port_desc_stats_reply& reply = dynamic_cast<rofl::openflow::cofmsg_port_desc_stats_reply&>( *msg );
 
-	LOGGING_DEBUG2 << "[rofl-common][crofdpt] dpid:" << std::hex << get_dpid().str() << std::dec
+	std::cerr << "[rofl-common][crofdpt] dpid:" << std::hex << get_dpid().str() << std::dec
 			<< " rcvd Port-Desc-Stats-Reply: " << reply.str() << std::endl;
 
 	ports = reply.get_ports();
@@ -2364,7 +2364,7 @@ crofdpt::experimenter_stats_reply_rcvd(
 {
 	rofl::openflow::cofmsg_experimenter_stats_reply& reply = dynamic_cast<rofl::openflow::cofmsg_experimenter_stats_reply&>( *msg );
 
-	LOGGING_DEBUG2 << "[rofl-common][crofdpt] dpid:" << std::hex << get_dpid().str() << std::dec
+	std::cerr << "[rofl-common][crofdpt] dpid:" << std::hex << get_dpid().str() << std::dec
 			<< " Experimenter-Stats-Reply message received" << std::endl;
 
 	if (STATE_ESTABLISHED == state) {
@@ -2384,7 +2384,7 @@ crofdpt::barrier_reply_rcvd(
 
 	transactions.drop_ta(msg->get_xid());
 
-	LOGGING_DEBUG2 << "[rofl-common][crofdpt] dpid:" << std::hex << get_dpid().str() << std::dec
+	std::cerr << "[rofl-common][crofdpt] dpid:" << std::hex << get_dpid().str() << std::dec
 			<< " Barrier-Reply message received" << std::endl;
 
 	if (STATE_ESTABLISHED == state) {
@@ -2403,7 +2403,7 @@ crofdpt::flow_removed_rcvd(
 {
 	rofl::openflow::cofmsg_flow_removed& flow_removed = dynamic_cast<rofl::openflow::cofmsg_flow_removed&>( *msg );
 
-	LOGGING_DEBUG2 << "[rofl-common][crofdpt] dpid:" << std::hex << get_dpid().str() << std::dec
+	std::cerr << "[rofl-common][crofdpt] dpid:" << std::hex << get_dpid().str() << std::dec
 			<< " Flow-Removed message received" << std::endl;
 
 	if (STATE_ESTABLISHED == state) {
@@ -2423,7 +2423,7 @@ crofdpt::packet_in_rcvd(
 {
 	rofl::openflow::cofmsg_packet_in& packet_in = dynamic_cast<rofl::openflow::cofmsg_packet_in&>( *msg );
 
-	LOGGING_DEBUG2 << "[rofl-common][crofdpt] dpid:" << std::hex << get_dpid().str() << std::dec
+	std::cerr << "[rofl-common][crofdpt] dpid:" << std::hex << get_dpid().str() << std::dec
 			<< " Packet-In message received" << std::endl;
 
 	if (STATE_ESTABLISHED == state) {
@@ -2443,7 +2443,7 @@ crofdpt::port_status_rcvd(
 {
 	rofl::openflow::cofmsg_port_status& port_status = dynamic_cast<rofl::openflow::cofmsg_port_status&>( *msg );
 
-	LOGGING_DEBUG2 << "[rofl-common][crofdpt] dpid:" << std::hex << get_dpid().str() << std::dec
+	std::cerr << "[rofl-common][crofdpt] dpid:" << std::hex << get_dpid().str() << std::dec
 			<< " Port-Status message received" << std::endl;
 
 	ports.set_version(rofchan.get_version());
@@ -2481,7 +2481,7 @@ crofdpt::experimenter_rcvd(
 
 	transactions.drop_ta(msg->get_xid());
 
-	LOGGING_DEBUG2 << "[rofl-common][crofdpt] dpid:" << std::hex << get_dpid().str() << std::dec
+	std::cerr << "[rofl-common][crofdpt] dpid:" << std::hex << get_dpid().str() << std::dec
 			<< " Experimenter message received" << std::endl << exp;
 
 	if (STATE_ESTABLISHED == state) {
@@ -2499,7 +2499,7 @@ crofdpt::error_rcvd(
 {
 	rofl::openflow::cofmsg_error& error = dynamic_cast<rofl::openflow::cofmsg_error&>( *msg );
 
-	LOGGING_DEBUG2 << "[rofl-common][crofdpt] dpid:" << std::hex << get_dpid().str() << std::dec
+	std::cerr << "[rofl-common][crofdpt] dpid:" << std::hex << get_dpid().str() << std::dec
 			<< " Error message received" << std::endl << error;
 
 	if (STATE_ESTABLISHED == state) {
@@ -2519,7 +2519,7 @@ crofdpt::role_reply_rcvd(
 
 	transactions.drop_ta(msg->get_xid());
 
-	LOGGING_DEBUG2 << "[rofl-common][crofdpt] dpid:" << std::hex << get_dpid().str() << std::dec
+	std::cerr << "[rofl-common][crofdpt] dpid:" << std::hex << get_dpid().str() << std::dec
 			<< " Role-Reply message received" << std::endl << reply;
 
 	if (STATE_ESTABLISHED == state) {
@@ -2539,7 +2539,7 @@ crofdpt::queue_get_config_reply_rcvd(
 
 	transactions.drop_ta(msg->get_xid());
 
-	LOGGING_DEBUG2 << "[rofl-common][crofdpt] dpid:" << std::hex << get_dpid().str() << std::dec
+	std::cerr << "[rofl-common][crofdpt] dpid:" << std::hex << get_dpid().str() << std::dec
 			<< " Queue-Get-Config-Reply message received" << std::endl << reply;
 
 	if (STATE_ESTABLISHED == state) {
@@ -2559,7 +2559,7 @@ crofdpt::get_async_config_reply_rcvd(
 
 	transactions.drop_ta(msg->get_xid());
 
-	LOGGING_DEBUG2 << "[rofl-common][crofdpt] dpid:" << std::hex << get_dpid().str() << std::dec
+	std::cerr << "[rofl-common][crofdpt] dpid:" << std::hex << get_dpid().str() << std::dec
 			<< "Get-Async-Config-Reply message received" << std::endl << reply;
 
 	if (STATE_ESTABLISHED == state) {

@@ -44,13 +44,19 @@
 
 namespace rofl {
 
-class eRofCtlBase 		: public RoflException {
+class eRofCtlBase : public RoflException {
 public:
-	eRofCtlBase(const std::string& __arg) : RoflException(__arg) {};
+	eRofCtlBase(
+			const std::string& __arg) :
+				RoflException(__arg)
+	{};
 };
-class eRofCtlNotFound 	: public eRofCtlBase {
+class eRofCtlNotFound : public eRofCtlBase {
 public:
-	eRofCtlNotFound(const std::string& __arg) : eRofCtlBase(__arg) {};
+	eRofCtlNotFound(
+			const std::string& __arg) :
+				eRofCtlBase(__arg)
+	{};
 };
 
 class crofctl;
@@ -97,53 +103,6 @@ public:
 
 protected:
 
-	virtual void
-	handle_established(
-			crofctl& ctl, uint8_t ofp_version)
-	{};
-
-	virtual void
-	handle_established(
-			crofctl& ctl, crofconn& conn, uint8_t ofp_version)
-	{};
-
-	virtual void
-	handle_connect_refused(
-			crofctl& ctl, crofconn& conn)
-	{};
-
-	virtual void
-	handle_connect_failed(
-			crofctl& ctl, crofconn& conn)
-	{};
-
-	virtual void
-	handle_accept_failed(
-			crofctl& ctl, crofconn& conn)
-	{};
-
-	virtual void
-	handle_negotiation_failed(
-			crofctl& ctl, crofconn& conn)
-	{};
-
-	virtual void
-	handle_closed(
-			crofctl& ctl, crofconn& conn)
-	{};
-
-	virtual void
-	handle_send(
-			crofctl& ctl, crofconn& conn)
-	{};
-
-	virtual void
-	congestion_indication(
-			crofctl& ctl, crofconn& conn)
-	{};
-
-protected:
-
 	/**
 	 * @name 	Event handlers for management notifications for controller entities
 	 *
@@ -159,50 +118,44 @@ protected:
 	 * been established, i.e., its main connection has been accepted by the remote site.
 	 *
 	 * @param ctl controller instance
+	 * @param ofp_version openflow version negotiated for control channel
 	 */
 	virtual void
-	handle_chan_established(
-			rofl::crofctl& ctl)
+	handle_established(
+			crofctl& ctl, uint8_t ofp_version)
 	{};
 
 	/**
-	 * @brief	Called after termination of associated OpenFlow control channel.
-	 *
-	 * This method is called once the associated OpenFlow control channel has
-	 * been terminated, i.e., its main connection has been closed from the
-	 * remote site. The rofl::crofctl instance itself is not destroyed, unless
-	 * its 'remove_on_channel_close' flag has been set to true during its
-	 * construction.
+	 * @brief 	Called when the control channel has been closed by the peer entity.
 	 *
 	 * @param ctl controller instance
 	 */
 	virtual void
-	handle_chan_terminated(
-			rofl::crofctl& ctl)
+	handle_closed(
+			crofctl& ctl)
 	{};
 
 	/**
 	 * @brief 	Called when a control connection (main or auxiliary) has been established.
 	 *
 	 * @param ctl controller instance
-	 * @param auxid connection identifier (main: 0)
+	 * @param conn control connection instance
+	 * @param ofp_version openflow version negotiated for control connection
 	 */
 	virtual void
-	handle_conn_established(
-			rofl::crofctl& ctl,
-			const rofl::cauxid& auxid)
+	handle_established(
+			crofctl& ctl, crofconn& conn, uint8_t ofp_version)
 	{};
 
 	/**
-	 * @brief 	Called when a control connection (main or auxiliary) has been terminated by the peer entity.
+	 * @brief 	Called when a control connection (main or auxiliary) has been closed by the peer entity.
 	 *
 	 * @param ctl controller instance
-	 * @param auxid connection identifier (main: 0)
+	 * @param conn control connection instance
 	 */
 	virtual void
-	handle_conn_terminated(
-			rofl::crofctl& ctl,
-			const rofl::cauxid& auxid)
+	handle_closed(
+			crofctl& ctl, crofconn& conn)
 	{};
 
 	/**
@@ -213,28 +166,54 @@ protected:
 	 * the remote site.
 	 *
 	 * @param ctl controller instance
-	 * @param auxid connection identifier (main: 0)
+	 * @param conn control connection instance
 	 */
 	virtual void
-	handle_conn_refused(
-			rofl::crofctl& ctl,
-			const rofl::cauxid& auxid)
+	handle_connect_refused(
+			crofctl& ctl, crofconn& conn)
 	{};
 
 	/**
-	 * @brief 	Called when an attempt to establish a control connection has been failed.
+	 * @brief 	Called when an attempt to establish a control connection has failed.
 	 *
-	 * This event occurs when some failure occures while calling the underlying
+	 * This event occurs when some failure occurs while calling the underlying
 	 * C-library connect() system call, e.g., no route to destination, etc. This may
 	 * indicate a local configuration problem inside or outside of the application.
 	 *
 	 * @param ctl controller instance
-	 * @param auxid connection identifier (main: 0)
+	 * @param conn control connection instance
 	 */
 	virtual void
-	handle_conn_failed(
-			rofl::crofctl& ctl,
-			const rofl::cauxid& auxid)
+	handle_connect_failed(
+			crofctl& ctl, crofconn& conn)
+	{};
+
+	/**
+	 * @brief 	Called when an attempt to establish a control connection has failed.
+	 *
+	 * This event occurs when some failure occurs while negotiating the underlying
+	 * transport (e.g., TLS).
+	 *
+	 * @param ctl controller instance
+	 * @param conn control connection instance
+	 */
+	virtual void
+	handle_accept_failed(
+			crofctl& ctl, crofconn& conn)
+	{};
+
+	/**
+	 * @brief 	Called when an attempt to establish a control connection has failed.
+	 *
+	 * This event occurs when the openflow negotiation failed, e.g., no acceptable
+	 * protocol version was presented by the peer.
+	 *
+	 * @param ctl controller instance
+	 * @param conn control connection instance
+	 */
+	virtual void
+	handle_negotiation_failed(
+			crofctl& ctl, crofconn& conn)
 	{};
 
 	/**
@@ -244,19 +223,25 @@ protected:
 	 * on the underlying IP path or some backpressuring by the remote site requires
 	 * to throttle the overall message transmission rate on a control connection.
 	 * A congestion situation is indicated by the return values obtained from the various
-	 * send-methods defined within rofl::crofctl. A solved congestion situation is
-	 * indicated by calling this method. Note that ROFL will store OpenFlow messages
-	 * even under congestion, thus filling up its internal buffers until no further
-	 * memory is available for doing so. It is up to the application designer to
-	 * throttle transmission of further messages according to the channel capacity.
+	 * send-methods defined within rofl::crofctl.
 	 *
 	 * @param ctl controller instance
-	 * @param auxid control connection identifier (main: 0)
+	 * @param conn control connection instance
 	 */
 	virtual void
-	handle_conn_writable(
-			rofl::crofctl& ctl,
-			const rofl::cauxid& auxid)
+	handle_send(
+			crofctl& ctl, crofconn& conn)
+	{};
+
+	/**
+	 * @brief	Called when a congestion situation on the control connection is occurring
+	 *
+	 * @param ctl controller instance
+	 * @param conn control connection instance
+	 */
+	virtual void
+	congestion_indication(
+			crofctl& ctl, crofconn& conn)
 	{};
 
 	/**@}*/
@@ -1453,9 +1438,29 @@ private:
 	};
 
 	virtual void
+	handle_closed(
+			crofchan& chan)
+	{
+		switch (chan.get_version()) {
+		case rofl::openflow12::OFP_VERSION: {
+			role.set_role(rofl::openflow12::OFPCR_ROLE_EQUAL);
+		} break;
+		case rofl::openflow13::OFP_VERSION: {
+			role.set_role(rofl::openflow13::OFPCR_ROLE_EQUAL);
+		} break;
+		}
+		crofctl_env::call_env(env).handle_closed(*this);
+	};
+
+	virtual void
 	handle_established(
 			crofchan& chan, crofconn& conn, uint8_t ofp_version)
 	{ crofctl_env::call_env(env).handle_established(*this, conn, ofp_version); };
+
+	virtual void
+	handle_closed(
+			crofchan& chan, crofconn& conn)
+	{ crofctl_env::call_env(env).handle_closed(*this, conn); };
 
 	virtual void
 	handle_connect_refused(
@@ -1476,11 +1481,6 @@ private:
 	handle_negotiation_failed(
 			crofchan& chan, crofconn& conn)
 	{ crofctl_env::call_env(env).handle_negotiation_failed(*this, conn); };
-
-	virtual void
-	handle_closed(
-			crofchan& chan, crofconn& conn)
-	{ crofctl_env::call_env(env).handle_closed(*this, conn); };
 
 	virtual void
 	handle_send(

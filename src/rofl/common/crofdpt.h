@@ -13,14 +13,11 @@
 #include <strings.h>
 #include <bitset>
 
-#include "rofl/common/ciosrv.h"
 #include "rofl/common/cmemory.h"
 #include "rofl/common/logging.h"
 #include "rofl/common/crofchan.h"
 #include "rofl/common/ctransactions.h"
 #include "rofl/common/croflexception.h"
-#include "rofl/common/csocket.h"
-#include "rofl/common/cmemory.h"
 #include "rofl/common/cdptid.h"
 #include "rofl/common/cauxid.h"
 #include "rofl/common/cdpid.h"
@@ -44,13 +41,19 @@
 namespace rofl {
 
 /* error classes */
-class eRofDptBase      : public RoflException {
+class eRofDptBase : public RoflException {
 public:
-	eRofDptBase(const std::string& __arg) : RoflException(__arg) {};
+	eRofDptBase(
+			const std::string& __arg) :
+				RoflException(__arg)
+	{};
 };
-class eRofDptNotFound  : public eRofDptBase {
+class eRofDptNotFound : public eRofDptBase {
 public:
-	eRofDptNotFound(const std::string& __arg) : eRofDptBase(__arg) {};
+	eRofDptNotFound(
+			const std::string& __arg) :
+				eRofDptBase(__arg)
+	{};
 };
 
 class crofdpt;
@@ -1068,7 +1071,7 @@ public:
 				miss_send_len(0),
 				state(STATE_INIT) {
 		crofdpt::rofdpts[dptid] = this;
-		LOGGING_DEBUG << "[rofl-common][crofdpt] "
+		std::cerr << "[rofl-common][crofdpt] "
 				<< "instance created, dptid: " << dptid.str() << std::endl;
 	};
 
@@ -1079,7 +1082,7 @@ public:
 	 */
 	virtual
 	~crofdpt() {
-		LOGGING_DEBUG << "[rofl-common][crofdpt] "
+		std::cerr << "[rofl-common][crofdpt] "
 				<< "instance destroyed, dptid: " << dptid.str() << std::endl;
 		crofdpt::rofdpts.erase(dptid);
 		events.clear();
@@ -2119,7 +2122,7 @@ private:
 	handle_conn_established(
 			crofchan& chan,
 			const rofl::cauxid& auxid) {
-		LOGGING_INFO << "[rofl-common][crofdpt] dptid: " << dptid.str()
+		std::cerr << "[rofl-common][crofdpt] dptid: " << dptid.str()
 						<< " control connection established, auxid: " << auxid.str() << std::endl;
 		rofl::RwLock(conns_rwlock, rofl::RwLock::RWLOCK_WRITE);
 		conns_established.push_back(auxid);
@@ -2130,7 +2133,7 @@ private:
 	handle_conn_terminated(
 			crofchan& chan,
 			const rofl::cauxid& auxid) {
-		LOGGING_INFO << "[rofl-common][crofdpt] dptid: " << dptid.str()
+		std::cerr << "[rofl-common][crofdpt] dptid: " << dptid.str()
 						<< " control connection terminated, auxid: " << auxid.str() << std::endl;
 		rofl::RwLock(conns_rwlock, rofl::RwLock::RWLOCK_WRITE);
 		conns_terminated.push_back(auxid);
@@ -2160,13 +2163,13 @@ private:
 	handle_conn_established(
 			crofchan& chan,
 			const rofl::cauxid& auxid) {
-		LOGGING_INFO << "[rofl-common][crofdpt] dptid: " << dptid.str()
+		std::cerr << "[rofl-common][crofdpt] dptid: " << dptid.str()
 						<< " control connection established, auxid: " << auxid.str() << std::endl;
 
 		call_env().handle_conn_established(*this, auxid);
 
 		if (auxid == rofl::cauxid(0)) {
-			LOGGING_INFO << "[rofl-common][crofdpt] dpid: " << std::hex << get_dpid().str() << std::dec
+			std::cerr << "[rofl-common][crofdpt] dpid: " << std::hex << get_dpid().str() << std::dec
 					<< " OFP control channel established, " << chan.str() << std::endl;
 			push_on_eventqueue(EVENT_CONN_ESTABLISHED);
 		}
@@ -2176,7 +2179,7 @@ private:
 	handle_conn_terminated(
 			crofchan& chan,
 			const rofl::cauxid& auxid) {
-		LOGGING_INFO << "[rofl-common][crofdpt] dptid: " << dptid.str()
+		std::cerr << "[rofl-common][crofdpt] dptid: " << dptid.str()
 						<< " control connection terminated, auxid: " << auxid.str() << std::endl;
 
 		rofl::RwLock rwlock(conns_terminated_rwlock, rofl::RwLock::RWLOCK_WRITE);
@@ -2185,7 +2188,7 @@ private:
 
 		if (auxid == rofl::cauxid(0)) {
 		//if (0 == auxid.get_id()) {
-			LOGGING_INFO << "[rofl-common][crofdpt] dptid: " << dptid.str()
+			std::cerr << "[rofl-common][crofdpt] dptid: " << dptid.str()
 					<< " OFP control channel terminated, " << chan.str() << std::endl;
 			transactions.clear();
 			push_on_eventqueue(EVENT_DISCONNECTED);

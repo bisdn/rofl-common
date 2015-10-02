@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 /*
  * cindex.h
  *
@@ -9,6 +13,7 @@
 #define CINDEX_H_
 
 #include <iostream>
+#include <sstream>
 
 #include "rofl/common/logging.h"
 
@@ -20,29 +25,38 @@ public:
 	/**
 	 *
 	 */
-	cindex() : index(0) {};
+	~cindex()
+	{};
+
+	/**
+	 *
+	 */
+	cindex() :
+		index(0)
+	{};
 
 	/**
 	 *
 	 */
 	explicit
-	cindex(unsigned int index) : index(index) {};
+	cindex(
+			unsigned int index) :
+				index(index)
+	{};
 
 	/**
 	 *
 	 */
-	~cindex() {};
-
-	/**
-	 *
-	 */
-	cindex(const cindex& idx) { *this = idx; };
+	cindex(
+			const cindex& idx)
+	{ *this = idx; };
 
 	/**
 	 *
 	 */
 	cindex&
-	operator= (const cindex& idx) {
+	operator= (
+			const cindex& idx) {
 		if (this == &idx)
 			return *this;
 		index = idx.index;
@@ -53,7 +67,8 @@ public:
 	 *
 	 */
 	bool
-	operator< (const cindex& idx) const {
+	operator< (
+			const cindex& idx) const {
 		return (index < idx.index);
 	};
 
@@ -61,7 +76,8 @@ public:
 	 *
 	 */
 	bool
-	operator== (const cindex& idx) const {
+	operator== (
+			const cindex& idx) const {
 		return (index == idx.index);
 	};
 
@@ -69,7 +85,8 @@ public:
 	 *
 	 */
 	bool
-	operator!= (const cindex& idx) const {
+	operator!= (
+			const cindex& idx) const {
 		return (index != idx.index);
 	};
 
@@ -86,7 +103,8 @@ public:
 	 *
 	 */
 	cindex
-	operator++ (int unused) { // postfix
+	operator++ (
+			int unused) { // postfix
 		cindex result = *this;
 		++index;
 		return result;
@@ -98,20 +116,31 @@ public:
 	 *
 	 */
 	void
-	set_index(unsigned int index) { this->index = index; };
+	set_index(
+			unsigned int index)
+	{ this->index = index; };
 
 	/**
 	 *
 	 */
 	unsigned int
-	get_index() const { return index; };
+	get_index() const
+	{ return index; };
 
 public:
 
 	friend std::ostream&
-	operator<< (std::ostream& os, const cindex& index) {
+	operator<< (
+			std::ostream& os, const cindex& index) {
 		os << rofl::indent(0) << "<cindex idx:" << index.get_index() << " >";
 		return os;
+	};
+
+	std::string
+	str() const {
+		std::stringstream ss;
+		ss << "index: " << index << " ";
+		return ss.str();
 	};
 
 private:
