@@ -1059,9 +1059,6 @@ public:
 	 *
 	 * @param env pointer to rofl::crofdpt_env instance defining the environment for this object
 	 * @param dptid rofl-common's internal identifier for this instance
-	 * @param remove_on_channel_close when set to true, this indicates to remove this object after the control channel has been terminated
-	 * @param versionbitmap OpenFlow version bitmap
-	 * @param dpid OpenFlow datapath element identifier (optional)
 	 */
 	crofdpt(
 			rofl::crofdpt_env* env,
@@ -1087,6 +1084,21 @@ public:
 	/**@{*/
 
 	/**
+	 * @brief	Returns true when snooping is enabled
+	 */
+	bool
+	get_snooping() const
+	{ return snoop; };
+
+	/**
+	 * @brief	Enables/disables snooping
+	 */
+	crofdpt&
+	set_snooping(
+			bool snoop)
+	{ this->snoop = snoop; return *this; };
+
+	/**
 	 * @brief	Returns OpenFlow datapath identifier for this instance
 	 *
 	 * @return OpenFlow datapath identifier
@@ -1094,6 +1106,69 @@ public:
 	const rofl::cdpid&
 	get_dpid() const
 	{ return dpid; };
+
+	/**
+	 *
+	 */
+	uint32_t
+	get_n_buffers() const
+	{ return n_buffers; };
+
+	/**
+	 *
+	 */
+	uint8_t
+	get_n_tables() const
+	{ return n_tables; };
+
+	/**
+	 *
+	 */
+	uint32_t
+	get_capabilities() const
+	{ return capabilities; };
+
+	/**
+	 *
+	 */
+	const caddress_ll&
+	get_hwaddr() const
+	{ return hwaddr; };
+
+	/**
+	 *
+	 */
+	uint16_t
+	get_miss_send_len() const
+	{ return miss_send_len; };
+
+	/**
+	 *
+	 */
+	uint16_t
+	get_flags() const
+	{ return flags; };
+
+	/**
+	 *
+	 */
+	const rofl::openflow::cofports&
+	get_ports() const
+	{ return ports; };
+
+	/**
+	 *
+	 */
+	const rofl::openflow::coftables&
+	get_tables() const
+	{ return tables; };
+
+	/**
+	 *
+	 */
+	const rofl::openflow::cofgroup_features_stats_reply&
+	get_groups() const
+	{ return groups; };
 
 	/**@}*/
 
@@ -2038,18 +2113,46 @@ private:
 	// handle for this crofdpt instance
 	rofl::cdptid                     dptid;
 
+	// enable snooping of ports, tables, ...
+	bool                             snoop;
+
 	// OFP control channel
 	rofl::crofchan                   rofchan;
 
 	// pending OFP transactions
 	rofl::ctransactions              transactions;
 
+	static const time_t              DEFAULT_REQUEST_TIMEOUT = 5; // seconds
+
 	// datapath identifier
 	rofl::cdpid                      dpid;
 
-	std::bitset<32>                  flags;
+	// num of buffers
+	uint32_t                         n_buffers;
 
-	static const time_t              DEFAULT_REQUEST_TIMEOUT = 5; // seconds
+	// num of tables
+	uint8_t                          n_tables;
+
+	// capabilities
+	uint32_t                         capabilities;
+
+	// link layer address
+	rofl::caddress_ll                hwaddr;
+
+	// config miss_send_len
+	uint16_t                         miss_send_len;
+
+	// config flags
+	uint16_t                         flags;
+
+	// ports
+	rofl::openflow::cofports         ports;
+
+	// tables
+	rofl::openflow::coftables        tables;
+
+	// groups
+	rofl::openflow::cofgroup_features_stats_reply groups;
 };
 
 }; // end of namespace

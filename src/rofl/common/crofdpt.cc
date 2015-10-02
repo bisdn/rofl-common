@@ -55,8 +55,14 @@ crofdpt::crofdpt(
 		const rofl::cdptid& dptid) :
 			env(env),
 			dptid(dptid),
+			snoop(true),
 			rofchan(this),
-			transactions(this)
+			transactions(this),
+			n_buffers(0),
+			n_tables(0),
+			capabilities(0),
+			miss_send_len(0),
+			flags(0)
 {
 	AcquireReadWriteLock rwlock(crofdpt::rofdpts_lock);
 	crofdpt::rofdpts[dptid] = this;
@@ -1522,12 +1528,9 @@ crofdpt::features_reply_rcvd(
 {
 	rofl::openflow::cofmsg_features_reply& reply = dynamic_cast<rofl::openflow::cofmsg_features_reply&>( *msg );
 
-	std::cerr << "[rofl-common][crofdpt] dpid:" << get_dpid().str()
-				<< " rcvd Features-Reply: " << reply.str() << std::endl;
+	transactions.drop_ta(msg->get_xid());
 
-	try {
-		transactions.drop_ta(msg->get_xid());
-
+	if (snoop) {
 		dpid			= rofl::cdpid(reply.get_dpid());
 		n_buffers 		= reply.get_n_buffers();
 		n_tables 		= reply.get_n_tables();
@@ -1551,20 +1554,10 @@ crofdpt::features_reply_rcvd(
 		hwaddr[4] = (get_dpid().get_uint64_t() & 0x000000000000ff00ULL) >>  8;
 		hwaddr[5] = (get_dpid().get_uint64_t() & 0x00000000000000ffULL) >>  0;
 		hwaddr[0] &= 0xfc;
-
-		if (STATE_ESTABLISHED == state) {
-			crofdpt_env::call_env(env).handle_features_reply(*this, auxid, reply);
-		}
-
-		work_on_eventqueue(EVENT_FEATURES_REPLY_RCVD);
-
-	} catch (RoflException& e) {
-
-		std::cerr << "[rofl-common][crofdpt] eRoflException in Features.reply rcvd" << *msg << std::endl;
-		work_on_eventqueue(EVENT_DISCONNECTED);
 	}
 
-	delete msg;
+
+	crofdpt_env::call_env(env).handle_features_reply(*this, auxid, reply);
 }
 
 
@@ -1576,20 +1569,14 @@ crofdpt::get_config_reply_rcvd(
 {
 	rofl::openflow::cofmsg_get_config_reply& reply = dynamic_cast<rofl::openflow::cofmsg_get_config_reply&>( *msg );
 
-	std::cerr << "[rofl-common][crofdpt] dpid: " << get_dpid().str()
-			<< " rcvd Get-Config-Reply: " << reply.str() << std::endl;
-
 	transactions.drop_ta(msg->get_xid());
 
-	config 			= reply.get_flags();
-	miss_send_len 	= reply.get_miss_send_len();
-
-	if (STATE_ESTABLISHED == state) {
-		crofdpt_env::call_env(env).handle_get_config_reply(*this, auxid, reply);
+	if (snoop) {
+		flags 			= reply.get_flags();
+		miss_send_len 	= reply.get_miss_send_len();
 	}
-	delete msg;
 
-	work_on_eventqueue(EVENT_GET_CONFIG_REPLY_RCVD);
+	crofdpt_env::call_env(env).handle_get_config_reply(*this, auxid, reply);
 }
 
 
@@ -1818,13 +1805,18 @@ crofdpt::group_features_stats_reply_rcvd(
 {
 	rofl::openflow::cofmsg_group_features_stats_reply& reply = dynamic_cast<rofl::openflow::cofmsg_group_features_stats_reply&>( *msg );
 
-	std::cerr << "[rofl-common][crofdpt] dpid:" << std::hex << get_dpid().str() << std::dec
-			<< " Group-Features-Stats-Reply message received" << std::endl;
-
-	if (STATE_ESTABLISHED == state) {
-		crofdpt_env::call_env(env).handle_group_features_stats_reply(*this, auxid, reply);
+	if (snoop) {
+		switch (get_version()) {
+		case rofl::openflow10::OFP_VERSION: {
+			/* do nothing, no groups in OFP1.0 */
+		} break;
+		default: {
+			groups = reply.get_group_features_stats();
+		};
+		}
 	}
-	delete msg;
+
+	crofdpt_env::call_env(env).handle_group_features_stats_reply(*this, auxid, reply);
 }
 
 
@@ -1890,17 +1882,19 @@ crofdpt::table_features_stats_reply_rcvd(
 {
 	rofl::openflow::cofmsg_table_features_stats_reply& reply = dynamic_cast<rofl::openflow::cofmsg_table_features_stats_reply&>( *msg );
 
-	std::cerr << "[rofl-common][crofdpt] dpid:" << get_dpid().str()
-			<< " rcvd Table-Features-Stats-Reply: " << reply.str() << std::endl;
-
-	tables = reply.get_tables();
-
-	if (STATE_ESTABLISHED == state) {
-		crofdpt_env::call_env(env).handle_table_features_stats_reply(*this, auxid, reply);
+	if (snoop) {
+		switch (get_version()) {
+		case rofl::openflow10::OFP_VERSION:
+		case rofl::openflow12::OFP_VERSION: {
+			/* do nothing, not used in OFP1.0 and OFP1.2 */
+		} break;
+		default: {
+			tables = reply.get_tables();
+		};
+		}
 	}
-	delete msg;
 
-	work_on_eventqueue(EVENT_TABLE_FEATURES_STATS_REPLY_RCVD);
+	crofdpt_env::call_env(env).handle_table_features_stats_reply(*this, auxid, reply);
 }
 
 
@@ -1912,17 +1906,19 @@ crofdpt::port_desc_stats_reply_rcvd(
 {
 	rofl::openflow::cofmsg_port_desc_stats_reply& reply = dynamic_cast<rofl::openflow::cofmsg_port_desc_stats_reply&>( *msg );
 
-	std::cerr << "[rofl-common][crofdpt] dpid:" << std::hex << get_dpid().str() << std::dec
-			<< " rcvd Port-Desc-Stats-Reply: " << reply.str() << std::endl;
-
-	ports = reply.get_ports();
-
-	if (STATE_ESTABLISHED == state) {
-		crofdpt_env::call_env(env).handle_port_desc_stats_reply(*this, auxid, reply);
+	if (snoop) {
+		switch (get_version()) {
+		case rofl::openflow10::OFP_VERSION:
+		case rofl::openflow12::OFP_VERSION: {
+			/* do nothing, handled in Features.Request */
+		} break;
+		default: {
+			ports = reply.get_ports();
+		};
+		}
 	}
-	delete msg;
 
-	work_on_eventqueue(EVENT_PORT_DESC_STATS_REPLY_RCVD);
+	crofdpt_env::call_env(env).handle_port_desc_stats_reply(*this, auxid, reply);
 }
 
 
@@ -2013,32 +2009,25 @@ crofdpt::port_status_rcvd(
 {
 	rofl::openflow::cofmsg_port_status& port_status = dynamic_cast<rofl::openflow::cofmsg_port_status&>( *msg );
 
-	std::cerr << "[rofl-common][crofdpt] dpid:" << std::hex << get_dpid().str() << std::dec
-			<< " Port-Status message received" << std::endl;
+	if (snoop) {
+		ports.set_version(rofchan.get_version());
+		switch (port_status.get_reason()) {
+		case rofl::openflow::OFPPR_ADD: {
+			ports.add_port(port_status.get_port().get_port_no()) = port_status.get_port();
+		} break;
+		case rofl::openflow::OFPPR_DELETE: {
+			ports.drop_port(port_status.get_port().get_port_no());
+		} break;
+		case rofl::openflow::OFPPR_MODIFY: {
+			ports.set_port(port_status.get_port().get_port_no()) = port_status.get_port();
+		} break;
+		default: {
 
-	ports.set_version(rofchan.get_version());
-
-	switch (port_status.get_reason()) {
-	case openflow::OFPPR_ADD: {
-		ports.add_port(port_status.get_port().get_port_no()) = port_status.get_port();
-	} break;
-	case openflow::OFPPR_DELETE: {
-		ports.drop_port(port_status.get_port().get_port_no());
-	} break;
-	case openflow::OFPPR_MODIFY: {
-		ports.set_port(port_status.get_port().get_port_no()) = port_status.get_port();
-	} break;
-	default: {
-		delete msg; return;
-	} break;
+		};
+		}
 	}
 
-	if (STATE_ESTABLISHED == state) {
-		crofdpt_env::call_env(env).handle_port_status(*this, auxid, port_status);
-		delete msg;
-	} else {
-		dlqueue.store(msg);
-	}
+	crofdpt_env::call_env(env).handle_port_status(*this, auxid, port_status);
 }
 
 
