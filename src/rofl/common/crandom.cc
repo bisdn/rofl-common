@@ -16,7 +16,7 @@ crandom::~crandom()
 crandom::crandom() :
 				seedp(1)
 {
-	/* open /dev/urandom and read souzef(unsigned int)
+	/* open /dev/urandom and read sizeof(unsigned int)
 	 * as seed to rand_r
 	 */
 	int fd = 0;

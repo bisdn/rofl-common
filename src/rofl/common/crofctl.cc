@@ -1,7 +1,12 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 /*
  * crofctl.cc
  *
  *  Created on: 07.01.2014
+ *  Revised on: 30.09.2015
  *      Author: andreas
  */
 
@@ -14,7 +19,8 @@ using namespace rofl;
 /*static*/std::map<cctlid, crofctl*> crofctl::rofctls;
 /*static*/crwlock                    crofctl::rofctls_lock;
 
-/*static*/crofctl&
+/*static*/
+crofctl&
 crofctl::set_ctl(
 		const cctlid& ctlid)
 {

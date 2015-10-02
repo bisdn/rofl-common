@@ -2,6 +2,14 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+/*
+ * crofctl.h
+ *
+ *  Created on: 07.01.2014
+ *  Revised on: 30.09.2015
+ *      Author: andreas
+ */
+
 #ifndef CROFCTL_H
 #define CROFCTL_H 1
 
@@ -9,12 +17,14 @@
 #include <string>
 #include <bitset>
 
-#include "openflow/openflow.h"
-#include "croflexception.h"
-#include "cmemory.h"
+
+#include "rofl/common/cauxid.h"
 #include "rofl/common/cctlid.h"
+#include "rofl/common/cmemory.h"
 #include "rofl/common/crofchan.h"
-#include "openflow/messages/cofmsg.h"
+#include "rofl/common/croflexception.h"
+#include "rofl/common/openflow/openflow.h"
+#include "rofl/common/openflow/messages/cofmsg.h"
 #include "rofl/common/openflow/cofport.h"
 #include "rofl/common/openflow/cofports.h"
 #include "rofl/common/openflow/coftables.h"
@@ -33,7 +43,6 @@
 #include "rofl/common/openflow/cofmeterstatsarray.h"
 #include "rofl/common/openflow/cofmeterconfigarray.h"
 #include "rofl/common/openflow/cofmeterfeatures.h"
-#include "rofl/common/cauxid.h"
 
 #include "rofl/common/locking.hpp"
 #include "rofl/common/logging.h"
@@ -80,6 +89,8 @@ class crofctl;
  */
 class crofctl_env {
 	friend class crofctl;
+	static std::set<crofctl_env*>   rofctl_envs;
+	static crwlock                  rofctl_envs_lock;
 public:
 	static
 	crofctl_env&
@@ -725,10 +736,6 @@ protected:
 	{};
 
 	/**@}*/
-
-private:
-	static std::set<crofctl_env*>   rofctl_envs;
-	static crwlock                  rofctl_envs_lock;
 };
 
 
@@ -1388,6 +1395,23 @@ public:
 
 	/**@}*/
 
+public:
+
+	/**
+	 *
+	 */
+	class crofctl_find_by_ctlid {
+		cctlid ctlid;
+	public:
+		crofctl_find_by_ctlid(
+				const cctlid& ctlid) :
+					ctlid(ctlid)
+		{};
+		bool
+		operator() (
+				const crofctl* rofctl)
+		{ return (rofctl->get_ctlid() == ctlid); };
+	};
 
 public:
 
@@ -1404,20 +1428,6 @@ public:
 		std::stringstream ss;
 		ss << "ctlid: " << get_ctlid().get_ctlid_s() << " ";
 		return ss.str();
-	};
-
-public:
-
-	/**
-	 *
-	 */
-	class crofctl_find_by_ctlid {
-		cctlid ctlid;
-	public:
-		crofctl_find_by_ctlid(const cctlid& ctlid) : ctlid(ctlid) {};
-		bool operator() (const crofctl* rofctl) {
-			return (rofctl->get_ctlid() == ctlid);
-		};
 	};
 
 private:
@@ -1540,13 +1550,14 @@ private:
 	// pending OFP transactions
 	rofl::ctransactions              transactions;
 
+	// default async config template
 	rofl::openflow::cofasync_config  async_config_role_default_template;
 
+	// current async config
 	rofl::openflow::cofasync_config  async_config;
 
+	// role of associated remote controller
 	rofl::openflow::cofrole          role;
-
-	std::bitset<32>                  flags;
 };
 
 }; // end of namespace
