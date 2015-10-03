@@ -19,6 +19,7 @@ crofdpt&
 crofdpt::set_dpt(
 		const cdptid& dptid)
 {
+	AcquireReadLock rwlock(crofdpt::rofdpts_lock);
 	if (crofdpt::rofdpts.find(dptid) == crofdpt::rofdpts.end()) {
 		throw eRofDptNotFound("rofl::crofdpt::get_dpt() dptid not found");
 	}
@@ -32,9 +33,10 @@ crofdpt&
 crofdpt::set_dpt(
 		const cdpid& dpid)
 {
+	AcquireReadLock rwlock(crofdpt::rofdpts_lock);
 	std::map<cdptid, crofdpt*>::iterator it;
 	if ((it = find_if(crofdpt::rofdpts.begin(), crofdpt::rofdpts.end(),
-			crofdpt::crofdpt_find_by_dpid(dpid.get_uint64_t()))) == crofdpt::rofdpts.end()) {
+			crofdpt::crofdpt_find_by_dpid(dpid))) == crofdpt::rofdpts.end()) {
 		throw eRofDptNotFound("rofl::crofdpt::get_dpt() dpid not found");
 	}
 	return *(it->second);
@@ -71,41 +73,42 @@ crofdpt::crofdpt(
 
 
 void
-crofdpt::recv_message(crofchan& chan, const rofl::cauxid& auxid, rofl::openflow::cofmsg *msg)
+crofdpt::handle_recv(
+		rofl::crofchan& chan, rofl::crofconn& conn, rofl::openflow::cofmsg* msg)
 {
 	try {
 		switch (msg->get_version()) {
 		case rofl::openflow10::OFP_VERSION: {
 			switch (msg->get_type()) {
 			case rofl::openflow10::OFPT_VENDOR: {
-				experimenter_rcvd(auxid, msg);
+				experimenter_rcvd(conn.get_auxid(), msg);
 			} break;
 			case rofl::openflow10::OFPT_ERROR: {
-				error_rcvd(auxid, msg);
+				error_rcvd(conn.get_auxid(), msg);
 			} break;
 			case rofl::openflow10::OFPT_FEATURES_REPLY: {
-				features_reply_rcvd(auxid, msg);
+				features_reply_rcvd(conn.get_auxid(), msg);
 			} break;
 			case rofl::openflow10::OFPT_GET_CONFIG_REPLY: {
-				get_config_reply_rcvd(auxid, msg);
+				get_config_reply_rcvd(conn.get_auxid(), msg);
 			} break;
 			case rofl::openflow10::OFPT_PACKET_IN: {
-				packet_in_rcvd(auxid, msg);
+				packet_in_rcvd(conn.get_auxid(), msg);
 			} break;
 			case rofl::openflow10::OFPT_FLOW_REMOVED: {
-				flow_removed_rcvd(auxid, msg);
+				flow_removed_rcvd(conn.get_auxid(), msg);
 			} break;
 			case rofl::openflow10::OFPT_PORT_STATUS: {
-				port_status_rcvd(auxid, msg);
+				port_status_rcvd(conn.get_auxid(), msg);
 			} break;
 			case rofl::openflow10::OFPT_STATS_REPLY: {
-				multipart_reply_rcvd(auxid, msg);
+				multipart_reply_rcvd(conn.get_auxid(), msg);
 			} break;
 			case rofl::openflow10::OFPT_BARRIER_REPLY: {
-				barrier_reply_rcvd(auxid, msg);
+				barrier_reply_rcvd(conn.get_auxid(), msg);
 			} break;
 			case rofl::openflow10::OFPT_QUEUE_GET_CONFIG_REPLY: {
-				queue_get_config_reply_rcvd(auxid, msg);
+				queue_get_config_reply_rcvd(conn.get_auxid(), msg);
 			} break;
 			default: {
 			};
@@ -115,37 +118,37 @@ crofdpt::recv_message(crofchan& chan, const rofl::cauxid& auxid, rofl::openflow:
 		case rofl::openflow12::OFP_VERSION: {
 			switch (msg->get_type()) {
 			case rofl::openflow12::OFPT_EXPERIMENTER: {
-				experimenter_rcvd(auxid, msg);
+				experimenter_rcvd(conn.get_auxid(), msg);
 			} break;
 			case rofl::openflow12::OFPT_ERROR: {
-				error_rcvd(auxid, msg);
+				error_rcvd(conn.get_auxid(), msg);
 			} break;
 			case rofl::openflow12::OFPT_FEATURES_REPLY: {
-				features_reply_rcvd(auxid, msg);
+				features_reply_rcvd(conn.get_auxid(), msg);
 			} break;
 			case rofl::openflow12::OFPT_GET_CONFIG_REPLY: {
-				get_config_reply_rcvd(auxid, msg);
+				get_config_reply_rcvd(conn.get_auxid(), msg);
 			} break;
 			case rofl::openflow12::OFPT_PACKET_IN: {
-				packet_in_rcvd(auxid, msg);
+				packet_in_rcvd(conn.get_auxid(), msg);
 			} break;
 			case rofl::openflow12::OFPT_FLOW_REMOVED: {
-				flow_removed_rcvd(auxid, msg);
+				flow_removed_rcvd(conn.get_auxid(), msg);
 			} break;
 			case rofl::openflow12::OFPT_PORT_STATUS: {
-				port_status_rcvd(auxid, msg);
+				port_status_rcvd(conn.get_auxid(), msg);
 			} break;
 			case rofl::openflow12::OFPT_STATS_REPLY: {
-				multipart_reply_rcvd(auxid, msg);
+				multipart_reply_rcvd(conn.get_auxid(), msg);
 			} break;
 			case rofl::openflow12::OFPT_BARRIER_REPLY: {
-				barrier_reply_rcvd(auxid, msg);
+				barrier_reply_rcvd(conn.get_auxid(), msg);
 			} break;
 			case rofl::openflow12::OFPT_QUEUE_GET_CONFIG_REPLY: {
-				queue_get_config_reply_rcvd(auxid, msg);
+				queue_get_config_reply_rcvd(conn.get_auxid(), msg);
 			} break;
 			case rofl::openflow12::OFPT_ROLE_REPLY: {
-				role_reply_rcvd(auxid, msg);
+				role_reply_rcvd(conn.get_auxid(), msg);
 			} break;
 			default: {
 			};
@@ -154,40 +157,40 @@ crofdpt::recv_message(crofchan& chan, const rofl::cauxid& auxid, rofl::openflow:
 		case rofl::openflow13::OFP_VERSION: {
 			switch (msg->get_type()) {
 			case rofl::openflow13::OFPT_EXPERIMENTER: {
-				experimenter_rcvd(auxid, msg);
+				experimenter_rcvd(conn.get_auxid(), msg);
 			} break;
 			case rofl::openflow13::OFPT_ERROR: {
-				error_rcvd(auxid, msg);
+				error_rcvd(conn.get_auxid(), msg);
 			} break;
 			case rofl::openflow13::OFPT_FEATURES_REPLY: {
-				features_reply_rcvd(auxid, msg);
+				features_reply_rcvd(conn.get_auxid(), msg);
 			} break;
 			case rofl::openflow13::OFPT_GET_CONFIG_REPLY: {
-				get_config_reply_rcvd(auxid, msg);
+				get_config_reply_rcvd(conn.get_auxid(), msg);
 			} break;
 			case rofl::openflow13::OFPT_PACKET_IN: {
-				packet_in_rcvd(auxid, msg);
+				packet_in_rcvd(conn.get_auxid(), msg);
 			} break;
 			case rofl::openflow13::OFPT_FLOW_REMOVED: {
-				flow_removed_rcvd(auxid, msg);
+				flow_removed_rcvd(conn.get_auxid(), msg);
 			} break;
 			case rofl::openflow13::OFPT_PORT_STATUS: {
-				port_status_rcvd(auxid, msg);
+				port_status_rcvd(conn.get_auxid(), msg);
 			} break;
 			case rofl::openflow13::OFPT_MULTIPART_REPLY: {
-				multipart_reply_rcvd(auxid, msg);
+				multipart_reply_rcvd(conn.get_auxid(), msg);
 			} break;
 			case rofl::openflow13::OFPT_BARRIER_REPLY: {
-				barrier_reply_rcvd(auxid, msg);
+				barrier_reply_rcvd(conn.get_auxid(), msg);
 			} break;
 			case rofl::openflow13::OFPT_QUEUE_GET_CONFIG_REPLY: {
-				queue_get_config_reply_rcvd(auxid, msg);
+				queue_get_config_reply_rcvd(conn.get_auxid(), msg);
 			} break;
 			case rofl::openflow13::OFPT_ROLE_REPLY: {
-				role_reply_rcvd(auxid, msg);
+				role_reply_rcvd(conn.get_auxid(), msg);
 			} break;
 			case rofl::openflow13::OFPT_GET_ASYNC_REPLY: {
-				get_async_config_reply_rcvd(auxid, msg);
+				get_async_config_reply_rcvd(conn.get_auxid(), msg);
 			} break;
 			default: {
 			};
@@ -218,84 +221,112 @@ crofdpt::ta_expired(
 {
 	std::cerr << "[rofl-common][crofdpt] transaction expired, xid:" << std::endl << ta;
 
-	switch (ta.get_msg_type()) {
-	case rofl::openflow::OFPT_FEATURES_REQUEST: {
-		event_features_request_expired(ta.get_xid());
-	} break;
-	case rofl::openflow::OFPT_GET_CONFIG_REQUEST: {
-		event_get_config_request_expired(ta.get_xid());
-	} break;
-	case rofl::openflow::OFPT_MULTIPART_REQUEST: {
-		switch (ta.get_msg_sub_type()) {
-		case rofl::openflow::OFPMP_DESC: {
-			crofdpt_env::call_env(env).handle_desc_stats_reply_timeout(*this, ta.get_xid());
+	try {
+		switch (ta.get_msg_type()) {
+		case rofl::openflow::OFPT_FEATURES_REQUEST: {
+			crofdpt_env::call_env(env).
+					handle_features_reply_timeout(*this, ta.get_xid());
 		} break;
-		case rofl::openflow::OFPMP_FLOW: {
-			crofdpt_env::call_env(env).handle_flow_stats_reply_timeout(*this, ta.get_xid());
+		case rofl::openflow::OFPT_GET_CONFIG_REQUEST: {
+			crofdpt_env::call_env(env).
+					handle_get_config_reply_timeout(*this, ta.get_xid());
 		} break;
-		case rofl::openflow::OFPMP_AGGREGATE: {
-			crofdpt_env::call_env(env).handle_aggregate_stats_reply_timeout(*this, ta.get_xid());
+		case rofl::openflow::OFPT_MULTIPART_REQUEST: {
+			switch (ta.get_msg_sub_type()) {
+			case rofl::openflow::OFPMP_DESC: {
+				crofdpt_env::call_env(env).
+						handle_desc_stats_reply_timeout(*this, ta.get_xid());
+			} break;
+			case rofl::openflow::OFPMP_FLOW: {
+				crofdpt_env::call_env(env).
+						handle_flow_stats_reply_timeout(*this, ta.get_xid());
+			} break;
+			case rofl::openflow::OFPMP_AGGREGATE: {
+				crofdpt_env::call_env(env).
+						handle_aggregate_stats_reply_timeout(*this, ta.get_xid());
+			} break;
+			case rofl::openflow::OFPMP_TABLE: {
+				crofdpt_env::call_env(env).
+						handle_table_stats_reply_timeout(*this, ta.get_xid());
+			} break;
+			case rofl::openflow::OFPMP_PORT_STATS: {
+				crofdpt_env::call_env(env).
+						handle_port_stats_reply_timeout(*this, ta.get_xid());
+			} break;
+			case rofl::openflow::OFPMP_QUEUE: {
+				crofdpt_env::call_env(env).
+						handle_queue_stats_reply_timeout(*this, ta.get_xid());
+			} break;
+			case rofl::openflow::OFPMP_GROUP: {
+				crofdpt_env::call_env(env).
+						handle_group_stats_reply_timeout(*this, ta.get_xid());
+			} break;
+			case rofl::openflow::OFPMP_GROUP_DESC: {
+				crofdpt_env::call_env(env).
+						handle_group_desc_stats_reply_timeout(*this, ta.get_xid());
+			} break;
+			case rofl::openflow::OFPMP_GROUP_FEATURES: {
+				crofdpt_env::call_env(env).
+						handle_group_features_stats_reply_timeout(*this, ta.get_xid());
+			} break;
+			case rofl::openflow::OFPMP_METER: {
+				crofdpt_env::call_env(env).
+						handle_meter_stats_reply_timeout(*this, ta.get_xid());
+			} break;
+			case rofl::openflow::OFPMP_METER_CONFIG: {
+				crofdpt_env::call_env(env).
+						handle_meter_config_stats_reply_timeout(*this, ta.get_xid());
+			} break;
+			case rofl::openflow::OFPMP_METER_FEATURES: {
+				crofdpt_env::call_env(env).
+						handle_meter_features_stats_reply_timeout(*this, ta.get_xid());
+			} break;
+			case rofl::openflow::OFPMP_TABLE_FEATURES: {
+				crofdpt_env::call_env(env).
+						handle_table_features_stats_reply_timeout(*this, ta.get_xid());
+			} break;
+			case rofl::openflow::OFPMP_PORT_DESC: {
+				crofdpt_env::call_env(env).
+						handle_port_desc_stats_reply_timeout(*this, ta.get_xid());
+			} break;
+			case rofl::openflow::OFPMP_EXPERIMENTER: {
+				crofdpt_env::call_env(env).
+						handle_experimenter_stats_reply_timeout(*this, ta.get_xid());
+			} break;
+			default: {
+				crofdpt_env::call_env(env).
+						handle_stats_reply_timeout(*this, ta.get_xid(), ta.get_msg_sub_type());
+			};
+			}
+
 		} break;
-		case rofl::openflow::OFPMP_TABLE: {
-			event_table_stats_request_expired(ta.get_xid());
+		case rofl::openflow::OFPT_BARRIER_REQUEST: {
+			crofdpt_env::call_env(env).
+					handle_barrier_reply_timeout(*this, ta.get_xid());
 		} break;
-		case rofl::openflow::OFPMP_PORT_STATS: {
-			crofdpt_env::call_env(env).handle_port_stats_reply_timeout(*this, ta.get_xid());
+		case rofl::openflow::OFPT_QUEUE_GET_CONFIG_REQUEST: {
+			crofdpt_env::call_env(env).
+					handle_queue_get_config_reply_timeout(*this, ta.get_xid());
 		} break;
-		case rofl::openflow::OFPMP_QUEUE: {
-			crofdpt_env::call_env(env).handle_queue_stats_reply_timeout(*this, ta.get_xid());
+		case rofl::openflow::OFPT_ROLE_REQUEST: {
+			crofdpt_env::call_env(env).
+					handle_role_reply_timeout(*this, ta.get_xid());
 		} break;
-		case rofl::openflow::OFPMP_GROUP: {
-			crofdpt_env::call_env(env).handle_group_stats_reply_timeout(*this, ta.get_xid());
+		case rofl::openflow::OFPT_GET_ASYNC_REQUEST: {
+			crofdpt_env::call_env(env).
+					handle_get_async_config_reply_timeout(*this, ta.get_xid());
 		} break;
-		case rofl::openflow::OFPMP_GROUP_DESC: {
-			crofdpt_env::call_env(env).handle_group_desc_stats_reply_timeout(*this, ta.get_xid());
-		} break;
-		case rofl::openflow::OFPMP_GROUP_FEATURES: {
-			crofdpt_env::call_env(env).handle_group_features_stats_reply_timeout(*this, ta.get_xid());
-		} break;
-		case rofl::openflow::OFPMP_METER: {
-			crofdpt_env::call_env(env).handle_meter_stats_reply_timeout(*this, ta.get_xid());
-		} break;
-		case rofl::openflow::OFPMP_METER_CONFIG: {
-			crofdpt_env::call_env(env).handle_meter_config_stats_reply_timeout(*this, ta.get_xid());
-		} break;
-		case rofl::openflow::OFPMP_METER_FEATURES: {
-			crofdpt_env::call_env(env).handle_meter_features_stats_reply_timeout(*this, ta.get_xid());
-		} break;
-		case rofl::openflow::OFPMP_TABLE_FEATURES: {
-			event_table_features_stats_request_expired(ta.get_xid());
-		} break;
-		case rofl::openflow::OFPMP_PORT_DESC: {
-			event_port_desc_request_expired(ta.get_xid());
-		} break;
-		case rofl::openflow::OFPMP_EXPERIMENTER: {
-			crofdpt_env::call_env(env).handle_experimenter_stats_reply_timeout(*this, ta.get_xid());
+		case rofl::openflow::OFPT_EXPERIMENTER: {
+			crofdpt_env::call_env(env).
+					handle_experimenter_timeout(*this, ta.get_xid());
 		} break;
 		default: {
-			crofdpt_env::call_env(env).handle_stats_reply_timeout(*this, ta.get_xid(), ta.get_msg_sub_type());
+
 		};
 		}
 
-	} break;
-	case rofl::openflow::OFPT_BARRIER_REQUEST: {
-		crofdpt_env::call_env(env).handle_barrier_reply_timeout(*this, ta.get_xid());
-	} break;
-	case rofl::openflow::OFPT_QUEUE_GET_CONFIG_REQUEST: {
-		crofdpt_env::call_env(env).handle_queue_get_config_reply_timeout(*this, ta.get_xid());
-	} break;
-	case rofl::openflow::OFPT_ROLE_REQUEST: {
-		crofdpt_env::call_env(env).handle_role_reply_timeout(*this, ta.get_xid());
-	} break;
-	case rofl::openflow::OFPT_GET_ASYNC_REQUEST: {
-		crofdpt_env::call_env(env).handle_get_async_config_reply_timeout(*this, ta.get_xid());
-	} break;
-	case rofl::openflow::OFPT_EXPERIMENTER: {
-		crofdpt_env::call_env(env).handle_experimenter_timeout(*this, ta.get_xid());
-	} break;
-	default: {
-
-	};
+	} catch (eRofDptNotFound& e) {
+		/* do nothing */
 	}
 }
 
@@ -305,6 +336,7 @@ void
 crofdpt::flow_mod_reset()
 {
 	rofl::openflow::cofflowmod fe(rofchan.get_version());
+
 	switch (rofchan.get_version()) {
 	case openflow10::OFP_VERSION: {
 		fe.set_command(rofl::openflow10::OFPFC_DELETE);
@@ -317,7 +349,9 @@ crofdpt::flow_mod_reset()
 		fe.set_command(rofl::openflow13::OFPFC_DELETE);
 		fe.set_table_id(rofl::openflow13::OFPTT_ALL /*all tables*/);
 	} break;
-	default: throw eBadVersion();
+	default: {
+		/* do nothing */
+	} return;
 	}
 
 	send_flow_mod_message(cauxid(0), fe);
@@ -328,8 +362,8 @@ crofdpt::flow_mod_reset()
 void
 crofdpt::group_mod_reset()
 {
-	crofdpt::clear_group_ids();
 	rofl::openflow::cofgroupmod ge(rofchan.get_version());
+
 	switch (rofchan.get_version()) {
 	case openflow12::OFP_VERSION: {
 		ge.set_command(openflow12::OFPGC_DELETE);
@@ -339,8 +373,9 @@ crofdpt::group_mod_reset()
 		ge.set_command(openflow13::OFPGC_DELETE);
 		ge.set_group_id(openflow13::OFPG_ALL);
 	} break;
-	default:
-		throw eBadVersion();
+	default: {
+		/* do nothing */
+	} return;
 	}
 
 	send_group_mod_message(cauxid(0), ge);
@@ -355,28 +390,27 @@ crofdpt::send_features_request(
 {
 	uint32_t xid = 0;
 
+	rofl::openflow::cofmsg* msg = nullptr;
 	try {
-		if (not is_established()) {
-			std::cerr << "[rofl-common][crofdpt] "
-					<< "control channel not connected" << std::endl;
-			throw eRofBaseNotConnected("");
-		}
-
 		xid = transactions.add_ta(timeout, rofl::openflow::OFPT_FEATURES_REQUEST);
 
-		rofl::openflow::cofmsg_features_request *msg =
-				new rofl::openflow::cofmsg_features_request(rofchan.get_version(), xid);
+		msg = new rofl::openflow::cofmsg_features_request(
+				rofchan.get_version(),
+				xid);
 
 		rofchan.send_message(auxid, msg);
 
-		return xid;
-
-	} catch (eRofBaseCongested& e) {
-		std::cerr << "[rofl-common][crofdpt] "
-				<< "control channel congested" << std::endl;
+	} catch (eRofChanNotConnected& e) {
+		std::cerr << "[rofl-common][crofctl][send_features_request] channel not established, dropping message" << std::endl;
 		transactions.drop_ta(xid);
-		throw;
+		delete msg; throw;
+	} catch (eRofQueueFull& e) {
+		std::cerr << "[rofl-common][crofctl][send_features_request] connection congested, dropping message" << std::endl;
+		transactions.drop_ta(xid);
+		delete msg; throw;
 	}
+
+	return xid;
 }
 
 
@@ -388,28 +422,27 @@ crofdpt::send_get_config_request(
 {
 	uint32_t xid = 0;
 
+	rofl::openflow::cofmsg* msg = nullptr;
 	try {
-		if (not is_established()) {
-			std::cerr << "[rofl-common][crofdpt] "
-					<< "control channel not connected" << std::endl;
-			throw eRofBaseNotConnected("");
-		}
-
 		xid = transactions.add_ta(timeout, rofl::openflow::OFPT_GET_CONFIG_REQUEST);
 
-		rofl::openflow::cofmsg_get_config_request *msg =
-				new rofl::openflow::cofmsg_get_config_request(rofchan.get_version(), xid);
+		msg = new rofl::openflow::cofmsg_get_config_request(
+				rofchan.get_version(),
+				xid);
 
 		rofchan.send_message(auxid, msg);
 
-		return xid;
-
-	} catch (eRofBaseCongested& e) {
-		std::cerr << "[rofl-common][crofdpt] "
-				<< "control channel congested" << std::endl;
+	} catch (eRofChanNotConnected& e) {
+		std::cerr << "[rofl-common][crofctl][send_get_config_request] channel not established, dropping message" << std::endl;
 		transactions.drop_ta(xid);
-		throw;
+		delete msg; throw;
+	} catch (eRofQueueFull& e) {
+		std::cerr << "[rofl-common][crofctl][send_get_config_request] connection congested, dropping message" << std::endl;
+		transactions.drop_ta(xid);
+		delete msg; throw;
 	}
+
+	return xid;
 }
 
 

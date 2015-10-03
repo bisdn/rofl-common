@@ -88,7 +88,7 @@ public:
 	call_env(crofdpt_env* env) {
 		AcquireReadLock lock(crofdpt_env::rofdpt_envs_lock);
 		if (crofdpt_env::rofdpt_envs.find(env) == crofdpt_env::rofdpt_envs.end()) {
-			throw eRofCtlNotFound("crofdpt_env::call_env() crofdpt_env instance not found");
+			throw eRofDptNotFound("crofdpt_env::call_env() crofdpt_env instance not found");
 		}
 		return *(env);
 	};
@@ -1877,16 +1877,16 @@ public:
 	 * @brief 	Predicate for finding a rofl::crofdpt instance by its rofl::cdpid.
 	 */
 	class crofdpt_find_by_dpid {
-		uint64_t dpid;
+		cdpid dpid;
 	public:
 		crofdpt_find_by_dpid(
-				uint64_t dpid) :
+				const cdpid& dpid) :
 					dpid(dpid)
 		{};
 		bool
 		operator() (
 				const std::pair<cdptid, crofdpt*>& p)
-		{ return (p.second->get_dpid().get_uint64_t() == dpid); };
+		{ return (p.second->get_dpid() == dpid); };
 	};
 
 public:
