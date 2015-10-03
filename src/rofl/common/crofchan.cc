@@ -39,7 +39,7 @@ crofchan::send_message(
 	if ((not is_established()) ||
 			(conns.find(auxid) == conns.end()) ||
 				(not conns[auxid]->is_established())) {
-		throw eRofChanNotConnected("crofchan::send_message() connection not established");
+		throw eRofConnNotConnected("crofchan::send_message() connection not established");
 	}
 	conns[auxid]->send_message(msg);
 }

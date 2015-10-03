@@ -64,6 +64,13 @@ public:
 				eRofConnBase(__arg)
 	{};
 };
+class eRofConnNotConnected : public eRofConnBase {
+public:
+	eRofConnNotConnected(
+			const std::string& __arg) :
+				eRofConnBase(__arg)
+	{};
+};
 
 
 
