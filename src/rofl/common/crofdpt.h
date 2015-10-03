@@ -2,6 +2,14 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+/*
+ * crofdpt.h
+ *
+ *  Created on: 07.01.2014
+ *  Revised on: 03.10.2015
+ *      Author: andreas
+ */
+
 #ifndef CROFDPT_H
 #define CROFDPT_H 1
 
