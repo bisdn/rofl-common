@@ -83,7 +83,7 @@ private:
 			rofl::crofsock& socket);
 
 	virtual void
-	handle_send(
+	congestion_solved_indication(
 			rofl::crofsock& socket);
 
 	virtual void
@@ -91,7 +91,7 @@ private:
 			rofl::crofsock& socket, rofl::openflow::cofmsg *msg);
 
 	virtual void
-	congestion_indication(
+	congestion_occured_indication(
 			rofl::crofsock& socket);
 
 private:

@@ -228,6 +228,17 @@ protected:
 	{};
 
 	/**
+	 * @brief	Called when a congestion situation on the control connection is occurring
+	 *
+	 * @param ctl controller instance
+	 * @param conn control connection instance
+	 */
+	virtual void
+	congestion_occured_indication(
+			crofctl& ctl, crofconn& conn)
+	{};
+
+	/**
 	 * @brief	Called when a congestion situation on the control connection has been solved.
 	 *
 	 * A control channel may face congestion situations when insufficient bandwidth
@@ -240,18 +251,7 @@ protected:
 	 * @param conn control connection instance
 	 */
 	virtual void
-	handle_send(
-			crofctl& ctl, crofconn& conn)
-	{};
-
-	/**
-	 * @brief	Called when a congestion situation on the control connection is occurring
-	 *
-	 * @param ctl controller instance
-	 * @param conn control connection instance
-	 */
-	virtual void
-	congestion_indication(
+	congestion_solved_indication(
 			crofctl& ctl, crofconn& conn)
 	{};
 
@@ -1493,14 +1493,14 @@ private:
 	{ crofctl_env::call_env(env).handle_negotiation_failed(*this, conn); };
 
 	virtual void
-	handle_send(
+	congestion_occured_indication(
 			crofchan& chan, crofconn& conn)
-	{ crofctl_env::call_env(env).handle_send(*this, conn); };
+	{ crofctl_env::call_env(env).congestion_occured_indication(*this, conn); };
 
 	virtual void
-	congestion_indication(
+	congestion_solved_indication(
 			crofchan& chan, crofconn& conn)
-	{ crofctl_env::call_env(env).congestion_indication(*this, conn); };
+	{ crofctl_env::call_env(env).congestion_solved_indication(*this, conn); };
 
 private:
 

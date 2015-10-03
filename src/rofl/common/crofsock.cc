@@ -1288,7 +1288,7 @@ crofsock::handle_write_event(
 		assert(fd == sd);
 		if (flags.test(FLAG_CONGESTED)) {
 			flags.reset(FLAG_CONGESTED);
-			crofsock_env::call_env(env).handle_send(*this);
+			crofsock_env::call_env(env).congestion_solved_indication(*this);
 		}
 		txthread.drop_write_fd(sd);
 		send_from_queue();
@@ -1352,7 +1352,7 @@ crofsock::send_from_queue()
 					case EAGAIN: /* socket would block */ {
 						flags.set(FLAG_CONGESTED);
 						txthread.add_write_fd(sd);
-						crofsock_env::call_env(env).congestion_indication(*this);
+						crofsock_env::call_env(env).congestion_occured_indication(*this);
 					} return;
 					case SIGPIPE:
 					default: {

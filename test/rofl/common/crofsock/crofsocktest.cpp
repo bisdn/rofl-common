@@ -294,7 +294,7 @@ crofsocktest::handle_closed(
 
 
 void
-crofsocktest::handle_send(
+crofsocktest::congestion_solved_indication(
 		rofl::crofsock& socket)
 {
 	std::cerr << "handle send" << std::endl;
@@ -303,7 +303,7 @@ crofsocktest::handle_send(
 
 
 void
-crofsocktest::congestion_indication(
+crofsocktest::congestion_occured_indication(
 		rofl::crofsock& socket)
 {
 	std::cerr << "congestion indication" << std::endl;

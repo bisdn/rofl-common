@@ -817,19 +817,19 @@ crofconn::handle_closed(
 
 
 void
-crofconn::handle_send(
+crofconn::congestion_solved_indication(
 		crofsock& rofsock)
 {
-	crofconn_env::call_env(env).handle_send(*this);
+	crofconn_env::call_env(env).congestion_solved_indication(*this);
 };
 
 
 
 void
-crofconn::congestion_indication(
+crofconn::congestion_occured_indication(
 		crofsock& rofsock)
 {
-	crofconn_env::call_env(env).congestion_indication(*this);
+	crofconn_env::call_env(env).congestion_occured_indication(*this);
 };
 
 

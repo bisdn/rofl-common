@@ -227,7 +227,7 @@ crofconntest::handle_closed(
 
 
 void
-crofconntest::handle_send(
+crofconntest::congestion_solved_indication(
 		rofl::crofconn& conn)
 {
 	std::cerr << "crofconntest::handle_send()" << std::endl << conn;
@@ -236,7 +236,7 @@ crofconntest::handle_send(
 
 
 void
-crofconntest::congestion_indication(
+crofconntest::congestion_occured_indication(
 		rofl::crofconn& conn)
 {
 	std::cerr << "crofconntest::congestion_indication()" << std::endl << conn;

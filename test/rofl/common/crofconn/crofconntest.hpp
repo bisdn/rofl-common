@@ -95,7 +95,7 @@ private:
 	{};
 
 	virtual void
-	handle_send(
+	congestion_solved_indication(
 			rofl::crofsock& socket)
 	{};
 
@@ -105,7 +105,7 @@ private:
 	{};
 
 	virtual void
-	congestion_indication(
+	congestion_occured_indication(
 			rofl::crofsock& socket)
 	{};
 
@@ -136,7 +136,7 @@ private:
 			rofl::crofconn& conn);
 
 	virtual void
-	handle_send(
+	congestion_solved_indication(
 			rofl::crofconn& conn);
 
 	virtual void
@@ -144,7 +144,7 @@ private:
 			rofl::crofconn& conn, rofl::openflow::cofmsg *msg);
 
 	virtual void
-	congestion_indication(
+	congestion_occured_indication(
 			rofl::crofconn& conn);
 
 	virtual uint32_t

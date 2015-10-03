@@ -140,15 +140,15 @@ protected:
 			crofchan& chan, crofconn& conn) = 0;
 
 	virtual void
-	handle_send(
-			crofchan& chan, crofconn& conn) = 0;
-
-	virtual void
 	handle_recv(
 			crofchan& chan, crofconn& conn, rofl::openflow::cofmsg* msg) = 0;
 
 	virtual void
-	congestion_indication(
+	congestion_occured_indication(
+			crofchan& chan, crofconn& conn) = 0;
+
+	virtual void
+	congestion_solved_indication(
 			crofchan& chan, crofconn& conn) = 0;
 
 	virtual uint32_t
@@ -418,11 +418,6 @@ private:
 	{ crofchan_env::call_env(env).handle_negotiation_failed(*this, conn); };
 
 	virtual void
-	handle_send(
-			crofconn& conn)
-	{ crofchan_env::call_env(env).handle_send(*this, conn); };
-
-	virtual void
 	handle_recv(
 			crofconn& conn, rofl::openflow::cofmsg *msg)
 	{ crofchan_env::call_env(env).handle_recv(*this, conn, msg); };
@@ -443,9 +438,14 @@ private:
 	{ crofchan_env::call_env(env).release_sync_xid(*this, xid); };
 
 	virtual void
-	congestion_indication(
+	congestion_occured_indication(
 			crofconn& conn)
-	{ crofchan_env::call_env(env).congestion_indication(*this, conn); };
+	{ crofchan_env::call_env(env).congestion_occured_indication(*this, conn); };
+
+	virtual void
+	congestion_solved_indication(
+			crofconn& conn)
+	{ crofchan_env::call_env(env).congestion_solved_indication(*this, conn); };
 
 public:
 
