@@ -23,7 +23,6 @@
 #include "rofl/common/openflow/cofhelloelemversionbitmap.h"
 #include "rofl/common/crandom.h"
 #include "rofl/common/csegmentation.h"
-#include "rofl/common/ctimerid.h"
 #include "rofl/common/cauxid.h"
 #include "rofl/common/crofqueue.h"
 

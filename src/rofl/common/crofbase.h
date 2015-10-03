@@ -1717,8 +1717,7 @@ public:
 	handle_features_request(
 			rofl::crofctl& ctl,
 			const rofl::cauxid& auxid,
-			rofl::openflow::cofmsg_features_request& msg)
-	{};
+			rofl::openflow::cofmsg_features_request& msg) = 0;
 
 	/**
 	 * @brief	OpenFlow Get-Config-Request message received.

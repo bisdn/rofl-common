@@ -87,8 +87,6 @@ library_include_HEADERS= \
 		ctransactions.h \
 		csegmentation.h \
 		csegmsg.h \
-		cparam.h \
-		cparams.h \
 		ctimerid.h \
 		cauxid.h \
 		cctlid.h \

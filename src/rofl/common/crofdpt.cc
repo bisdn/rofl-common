@@ -1746,6 +1746,15 @@ crofdpt::send_port_mod_message(
 
 		rofchan.send_message(auxid, msg);
 
+		if (snoop) {
+			if (ports.has_port(port_no)) {
+				ports.set_port(port_no).set_hwaddr(hwaddr);
+				ports.set_port(port_no).set_config(config);
+				ports.set_port(port_no).set_ethernet().set_advertised(advertise);
+				// TODO: mask
+			}
+		}
+
 	} catch (eRofConnNotConnected& e) {
 		std::cerr << "[rofl-common][crofdpt][send_port_mod_message] channel not established, dropping message" << std::endl;
 		transactions.drop_ta(xid);
@@ -1780,6 +1789,11 @@ crofdpt::send_set_config_message(
 				miss_send_len);
 
 		rofchan.send_message(auxid, msg);
+
+		if (snoop) {
+			this->flags = flags;
+			this->miss_send_len = miss_send_len;
+		}
 
 	} catch (eRofConnNotConnected& e) {
 		std::cerr << "[rofl-common][crofdpt][send_set_config_message] channel not established, dropping message" << std::endl;
