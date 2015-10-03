@@ -125,7 +125,13 @@ public:
 				eRofSockBase(__arg)
 	{};
 };
-
+class eRofSockCongested : public eRofSockBase {
+public:
+	eRofSockCongested(
+			const std::string& __arg) :
+				eRofSockBase(__arg)
+	{};
+};
 
 
 
@@ -246,8 +252,9 @@ class crofsock :
 
 	enum crofsock_flag_t {
 		FLAG_CONGESTED 		    = 1,
-		FLAG_RECONNECT_ON_FAILURE = 2,
-		FLAG_TLS_IN_USE         = 3,
+		FLAG_TX_BLOCK_QUEUEING  = 2,
+		FLAG_RECONNECT_ON_FAILURE = 3,
+		FLAG_TLS_IN_USE         = 4,
 	};
 
 	enum socket_mode_t {
@@ -394,7 +401,7 @@ public:
 	 */
 	size_t
 	get_txqueue_max_size() const
-	{ return txqueue_max_size; };
+	{ return txqueue_size_congestion_occured; };
 
 	/**
 	 * @brief	Sets capacity of transmission queues in messages
@@ -403,7 +410,7 @@ public:
 	set_txqueue_max_size(
 			size_t txqueue_max_size)
 	{
-		this->txqueue_max_size = txqueue_max_size;
+		this->txqueue_size_congestion_occured = txqueue_max_size;
 		for (unsigned int queue_id = 0; queue_id < QUEUE_MAX; queue_id++) {
 			txqueues[queue_id].set_queue_max_size(txqueue_max_size);
 		}
@@ -842,9 +849,14 @@ private:
 	 * scheduler and txqueues
 	 */
 
-    // max size of tx queue
-    size_t                      txqueue_max_size;
-    static const size_t         TXQUEUE_MAX_SIZE_DEFAULT;
+    // number of packets waiting for transmission
+    unsigned int                txqueue_pending_pkts;
+
+    // size of tx queue when congestion occured
+    unsigned int                txqueue_size_congestion_occured;
+
+    // size of tx queue for reallowing transmissions
+    unsigned int                txqueue_size_tx_threshold;
 
 	// QUEUE_MAX txqueues
 	std::vector<crofqueue>		txqueues;
@@ -862,7 +874,7 @@ private:
 	// fragment pending
 	bool                        tx_fragment_pending;
 
-	// transmission buffer fir packing cofmsg instances
+	// transmission buffer for packing cofmsg instances
 	cmemory                     txbuffer;
 
 	// number of bytes already sent for current message fragment

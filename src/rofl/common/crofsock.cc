@@ -18,7 +18,6 @@ using namespace rofl;
 /*static*/crwlock                  crofsock_env::socket_envs_lock;
 /*static*/crwlock                  crofsock::rwlock;
 /*static*/bool                     crofsock::tls_initialized = false;
-/*static*/const size_t             crofsock::TXQUEUE_MAX_SIZE_DEFAULT = 128;
 
 crofsock::~crofsock()
 {
@@ -64,7 +63,9 @@ crofsock::crofsock(
 				max_pkts_rcvd_per_round(0),
 				rx_disabled(false),
 				tx_disabled(false),
-				txqueue_max_size(TXQUEUE_MAX_SIZE_DEFAULT),
+				txqueue_pending_pkts(0),
+				txqueue_size_congestion_occured(0),
+				txqueue_size_tx_threshold(0),
 				txqueues(QUEUE_MAX),
 				txweights(QUEUE_MAX),
 				tx_is_running(false),
@@ -78,8 +79,6 @@ crofsock::crofsock(
 	txweights[QUEUE_MGMT] = 32;
 	txweights[QUEUE_FLOW] = 16;
 	txweights[QUEUE_PKT ] =  8;
-	/* set maximum queue size */
-	set_txqueue_max_size(txqueue_max_size);
 }
 
 
@@ -1184,6 +1183,12 @@ crofsock::send_message(
 		delete msg; return;
 	}
 
+	if (flags.test(FLAG_TX_BLOCK_QUEUEING)) {
+		throw eRofSockCongested("crofsock::send_message() transmission blocked, congestion");
+	}
+
+	txqueue_pending_pkts++;
+
 	switch (state) {
 	case STATE_TCP_ESTABLISHED:
 	case STATE_TLS_ESTABLISHED: {
@@ -1193,11 +1198,11 @@ crofsock::send_message(
 			switch (msg->get_type()) {
 			case rofl::openflow10::OFPT_PACKET_IN:
 			case rofl::openflow10::OFPT_PACKET_OUT: {
-				txqueues[QUEUE_PKT].store(msg);
+				txqueues[QUEUE_PKT].store(msg, true);
 			} break;
 			case rofl::openflow10::OFPT_FLOW_MOD:
 			case rofl::openflow10::OFPT_FLOW_REMOVED: {
-				txqueues[QUEUE_FLOW].store(msg);
+				txqueues[QUEUE_FLOW].store(msg, true);
 			} break;
 			case rofl::openflow10::OFPT_ECHO_REQUEST:
 			case rofl::openflow10::OFPT_ECHO_REPLY: {
@@ -1212,14 +1217,14 @@ crofsock::send_message(
 			switch (msg->get_type()) {
 			case rofl::openflow12::OFPT_PACKET_IN:
 			case rofl::openflow12::OFPT_PACKET_OUT: {
-				txqueues[QUEUE_PKT].store(msg);
+				txqueues[QUEUE_PKT].store(msg, true);
 			} break;
 			case rofl::openflow12::OFPT_FLOW_MOD:
 			case rofl::openflow12::OFPT_FLOW_REMOVED:
 			case rofl::openflow12::OFPT_GROUP_MOD:
 			case rofl::openflow12::OFPT_PORT_MOD:
 			case rofl::openflow12::OFPT_TABLE_MOD: {
-				txqueues[QUEUE_FLOW].store(msg);
+				txqueues[QUEUE_FLOW].store(msg, true);
 			} break;
 			case rofl::openflow12::OFPT_ECHO_REQUEST:
 			case rofl::openflow12::OFPT_ECHO_REPLY: {
@@ -1235,14 +1240,14 @@ crofsock::send_message(
 			switch (msg->get_type()) {
 			case rofl::openflow13::OFPT_PACKET_IN:
 			case rofl::openflow13::OFPT_PACKET_OUT: {
-				txqueues[QUEUE_PKT].store(msg);
+				txqueues[QUEUE_PKT].store(msg, true);
 			} break;
 			case rofl::openflow13::OFPT_FLOW_MOD:
 			case rofl::openflow13::OFPT_FLOW_REMOVED:
 			case rofl::openflow13::OFPT_GROUP_MOD:
 			case rofl::openflow13::OFPT_PORT_MOD:
 			case rofl::openflow13::OFPT_TABLE_MOD: {
-				txqueues[QUEUE_FLOW].store(msg);
+				txqueues[QUEUE_FLOW].store(msg, true);
 			} break;
 			case rofl::openflow13::OFPT_ECHO_REQUEST:
 			case rofl::openflow13::OFPT_ECHO_REPLY: {
@@ -1286,10 +1291,7 @@ crofsock::handle_write_event(
 {
 	if (&thread == &txthread) {
 		assert(fd == sd);
-		if (flags.test(FLAG_CONGESTED)) {
-			flags.reset(FLAG_CONGESTED);
-			crofsock_env::call_env(env).congestion_solved_indication(*this);
-		}
+		flags.reset(FLAG_CONGESTED);
 		txthread.drop_write_fd(sd);
 		send_from_queue();
 	} else
@@ -1350,15 +1352,25 @@ crofsock::send_from_queue()
 				if (nbytes < 0) {
 					switch (errno) {
 					case EAGAIN: /* socket would block */ {
+						tx_is_running = false;
 						flags.set(FLAG_CONGESTED);
 						txthread.add_write_fd(sd);
-						crofsock_env::call_env(env).congestion_occured_indication(*this);
+
+						if (not flags.test(FLAG_TX_BLOCK_QUEUEING)) {
+							/* block transmission of further packets */
+							flags.set(FLAG_TX_BLOCK_QUEUEING);
+							/* remember queue size, when congestion occured */
+							txqueue_size_congestion_occured = txqueue_pending_pkts;
+							/* threshold for re-enabling acceptance of packets */
+							txqueue_size_tx_threshold = txqueue_pending_pkts / 2;
+
+							crofsock_env::call_env(env).congestion_occured_indication(*this);
+						}
 					} return;
 					case SIGPIPE:
 					default: {
-						tx_is_running= false;
-						return;
-					};
+						tx_is_running = false;
+					} return;
 					}
 
 				/* at least some bytes were sent successfully */
@@ -1368,8 +1380,11 @@ crofsock::send_from_queue()
 					/* short write */
 					if (msg_bytes_sent < txlen) {
 						tx_fragment_pending = true;
+
+					/* packet successfully sent */
 					} else {
 						tx_fragment_pending = false;
+						txqueue_pending_pkts--;
 					}
 				}
 
@@ -1379,6 +1394,14 @@ crofsock::send_from_queue()
 				reschedule = true;
 			}
 		}
+
+		if ((not flags.test(FLAG_CONGESTED)) && flags.test(FLAG_TX_BLOCK_QUEUEING)) {
+			if (txqueue_pending_pkts < txqueue_size_tx_threshold) {
+				flags.reset(FLAG_TX_BLOCK_QUEUEING);
+				crofsock_env::call_env(env).congestion_solved_indication(*this);
+			}
+		}
+
 	} while (reschedule);
 
 	tx_is_running = false;
