@@ -77,9 +77,8 @@ public:
 	 */
 	csockaddr() :
 			rofl::cmemory(sizeof(struct sockaddr_un)),
-			salen(sizeof(struct sockaddr_un)) {
-		ca_mem = cmemory::somem();
-	};
+			salen(sizeof(struct sockaddr_un))
+	{ ca_mem = cmemory::somem(); };
 
 	/**
 	 *

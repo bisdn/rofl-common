@@ -9,6 +9,8 @@ librofl_common_base_la_SOURCES = \
 		logging.cc \
 		logging.h \
 		locking.hpp \
+		crofcore.cc \
+		crofcore.h \
 		crofdpt.cc \
 		crofdpt.h \
 		crofctl.cc \

@@ -16,27 +16,10 @@ using namespace rofl;
 
 /*static*/std::set<crofctl_env*>     crofctl_env::rofctl_envs;
 /*static*/crwlock                    crofctl_env::rofctl_envs_lock;
-/*static*/std::map<cctlid, crofctl*> crofctl::rofctls;
-/*static*/crwlock                    crofctl::rofctls_lock;
-
-/*static*/
-crofctl&
-crofctl::set_ctl(
-		const cctlid& ctlid)
-{
-	AcquireReadLock rlock(crofctl::rofctls_lock);
-	if (crofctl::rofctls.find(ctlid) == crofctl::rofctls.end()) {
-		throw eRofCtlNotFound("crofctl::get_ctl() ctlid not found");
-	}
-	return *(crofctl::rofctls[ctlid]);
-}
 
 
 crofctl::~crofctl()
-{
-	AcquireReadWriteLock rwlock(crofctl::rofctls_lock);
-	crofctl::rofctls.erase(ctlid);
-};
+{};
 
 
 
@@ -50,9 +33,6 @@ crofctl::crofctl(
 			async_config_role_default_template(rofl::openflow13::OFP_VERSION),
 			async_config(rofl::openflow13::OFP_VERSION)
 {
-	AcquireReadWriteLock rwlock(crofctl::rofctls_lock);
-	crofctl::rofctls[ctlid] = this;
-
 	init_async_config_role_default_template();
 	async_config = get_async_config_role_default_template();
 };

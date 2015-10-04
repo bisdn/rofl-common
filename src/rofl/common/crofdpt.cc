@@ -16,44 +16,12 @@ using namespace rofl;
 
 /*static*/std::set<crofdpt_env*>     crofdpt_env::rofdpt_envs;
 /*static*/crwlock                    crofdpt_env::rofdpt_envs_lock;
-/*static*/std::map<cdptid, crofdpt*> crofdpt::rofdpts;
-/*static*/crwlock                    crofdpt::rofdpts_lock;
 
-/*static*/
-crofdpt&
-crofdpt::set_dpt(
-		const cdptid& dptid)
-{
-	AcquireReadLock rwlock(crofdpt::rofdpts_lock);
-	if (crofdpt::rofdpts.find(dptid) == crofdpt::rofdpts.end()) {
-		throw eRofDptNotFound("rofl::crofdpt::get_dpt() dptid not found");
-	}
-	return *(crofdpt::rofdpts[dptid]);
-}
-
-
-
-/*static*/
-crofdpt&
-crofdpt::set_dpt(
-		const cdpid& dpid)
-{
-	AcquireReadLock rwlock(crofdpt::rofdpts_lock);
-	std::map<cdptid, crofdpt*>::iterator it;
-	if ((it = find_if(crofdpt::rofdpts.begin(), crofdpt::rofdpts.end(),
-			crofdpt::crofdpt_find_by_dpid(dpid))) == crofdpt::rofdpts.end()) {
-		throw eRofDptNotFound("rofl::crofdpt::get_dpt() dpid not found");
-	}
-	return *(it->second);
-}
 
 
 
 crofdpt::~crofdpt()
-{
-	AcquireReadWriteLock rwlock(crofdpt::rofdpts_lock);
-	crofdpt::rofdpts.erase(dptid);
-};
+{};
 
 
 
@@ -70,10 +38,7 @@ crofdpt::crofdpt(
 			capabilities(0),
 			miss_send_len(0),
 			flags(0)
-{
-	AcquireReadWriteLock rwlock(crofdpt::rofdpts_lock);
-	crofdpt::rofdpts[dptid] = this;
-};
+{};
 
 
 

@@ -155,14 +155,6 @@ protected:
 	get_async_xid(
 			crofchan& chan) = 0;
 
-	virtual uint32_t
-	get_sync_xid(
-			crofchan& chan, uint8_t msg_type = 0, uint16_t msg_sub_type = 0) = 0;
-
-	virtual void
-	release_sync_xid(
-			crofchan& chan, uint32_t xid) = 0;
-
 private:
 	static std::set<crofchan_env*>  channel_envs;
 	static crwlock                  channel_envs_lock;
@@ -426,16 +418,6 @@ private:
 	get_async_xid(
 			crofconn& conn)
 	{ return crofchan_env::call_env(env).get_async_xid(*this); };
-
-	virtual uint32_t
-	get_sync_xid(
-			crofconn& conn, uint8_t msg_type = 0, uint16_t msg_sub_type = 0)
-	{ return crofchan_env::call_env(env).get_sync_xid(*this, msg_type, msg_sub_type); };
-
-	virtual void
-	release_sync_xid(
-			crofconn& conn, uint32_t xid)
-	{ crofchan_env::call_env(env).release_sync_xid(*this, xid); };
 
 	virtual void
 	congestion_occured_indication(

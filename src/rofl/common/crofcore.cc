@@ -2,341 +2,69 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+/*
+ * crofcore.cc
+ *
+ *  Created on: 11.04.2015
+ *  Revised on: 04.10.2015
+ *      Author: andreas
+ */
+
 #include "crofcore.h"
 
 using namespace rofl;
 
-/*static*/std::map<crofbase*, crofcore*>		crofcore::rofcores;
-/*static*/PthreadRwLock          				crofcore::rofcores_rwlock;
-/*static*/std::set<crofcore*>					crofcore::rofcores_term;
-/*static*/bool                   				crofcore::initialized = false;
-/*static*/unsigned int           				crofcore::next_worker_id = 0;
-/*static*/std::vector<pthread_t> 				crofcore::workers;
-/*static*/PthreadRwLock          				crofcore::workers_rwlock;
+/*static*/std::set<crofcore*>   crofcore::rofcores;
+/*static*/crwlock               crofcore::rofcores_rwlock;
 
-/*static*/
-pthread_t
-crofcore::get_next_worker_tid()
+
+crofcore::~crofcore()
 {
-	RwLock(workers_rwlock, RwLock::RWLOCK_READ);
-	next_worker_id =
-			(next_worker_id == (workers.size() - 1)) ?
-					0 : next_worker_id + 1;
-	return workers[next_worker_id];
+	/* close listening sockets */
+	close_dpt_socks();
+	close_ctl_socks();
+
+	/* close all crofdpt instances */
+	drop_dpts();
+
+	/* close all crofctl instances */
+	drop_ctls();
+
+	AcquireReadWriteLock rwlock(rofcores_rwlock);
+	crofcore::rofcores.erase(this);
+	if (crofcore::rofcores.empty()) {
+		crofcore::initialize();
+	}
 }
+
+
+
+crofcore::crofcore() :
+	thread(this),
+	transactions(this),
+	generation_is_defined(false),
+	cached_generation_id((uint64_t)((int64_t)-1))
+{
+	AcquireReadWriteLock rwlock(rofcores_rwlock);
+	if (crofcore::rofcores.empty()) {
+		crofcore::initialize();
+	}
+	crofcore::rofcores.insert(this);
+}
+
 
 
 /*static*/
 void
-crofcore::initialize(
-		unsigned int workers_num)
-{
-#ifndef NDEBUG
-	LOGGING_TRACE << "[rofl-common][crofcore][initialize] starting "
-			<< workers_num << " worker threads" << std::endl;
-#endif
-
-	workers_num = (0 == workers_num) ? 1 : workers_num;
-
-	RwLock(workers_rwlock, RwLock::RWLOCK_WRITE);
-
-	if (crofcore::initialized && (workers_num < workers.size())) {
-		return;
-	}
-
-	unsigned int old_workers_num = workers.size();
-	for (unsigned int i = old_workers_num; i < workers_num; i++) {
-		workers.push_back(cioloop::add_thread());
-	}
-	next_worker_id = old_workers_num;
-	crofcore::initialized = true;
-
-#ifndef NDEBUG
-	LOGGING_TRACE << "[rofl-common][crofcore][initialize] running" << std::endl;
-#endif
-}
+crofcore::initialize()
+{}
 
 
 
 /*static*/
 void
 crofcore::terminate()
-{
-#ifndef NDEBUG
-	LOGGING_TRACE << "[rofl-common][crofcore][terminate] removing worker threads" << std::endl;
-#endif
-
-	RwLock(workers_rwlock, RwLock::RWLOCK_WRITE);
-
-	if (not crofcore::initialized) {
-		return;
-	}
-
-	for (std::map<crofbase*, crofcore*>::iterator
-			it = crofcore::rofcores.begin(); it != crofcore::rofcores.end(); ++it) {
-		it->second->close_ctl_listening();
-		it->second->close_dpt_listening();
-	}
-
-	sleep(1);
-
-	for (std::vector<pthread_t>::iterator
-			it = workers.begin(); it != workers.end(); ++it) {
-		cioloop::drop_thread(*it);
-	}
-	workers.clear();
-	crofcore::initialized = false;
-
-	for (std::map<crofbase*, crofcore*>::iterator
-			it = crofcore::rofcores.begin(); it != crofcore::rofcores.end(); ++it) {
-		delete it->second;
-	}
-	crofcore::rofcores.clear();
-
-	for (std::set<crofcore*>::iterator
-			it = crofcore::rofcores_term.begin(); it != crofcore::rofcores_term.end(); ++it) {
-		delete *it;
-	}
-	crofcore::rofcores_term.clear();
-
-	crofcore::next_worker_id = 0;
-
-#ifndef NDEBUG
-	LOGGING_TRACE << "[rofl-common][crofcore][terminate] done" << std::endl;
-#endif
-}
-
-
-
-void
-crofcore::handle_timeout(
-		int opaque, void* data)
-{
-	switch (opaque) {
-	case TIMER_SHUTDOWN: {
-		RwLock(crofcore::rofcores_rwlock, RwLock::RWLOCK_WRITE);
-		crofcore::rofcores_term.erase(this);
-		delete this;
-	} return;
-	}
-}
-
-
-
-void
-crofcore::handle_event(
-		const cevent& event)
-{
-	switch (event.get_cmd()) {
-	case EVENT_CHAN_ESTABLISHED: {
-		work_on_eventqueue(EVENT_CHAN_ESTABLISHED);
-	} break;
-	case EVENT_CHAN_TERMINATED: {
-		work_on_eventqueue(EVENT_CHAN_TERMINATED);
-	} break;
-	case EVENT_DO_SHUTDOWN: {
-		work_on_eventqueue(EVENT_DO_SHUTDOWN);
-	} break;
-	default: {
-
-	};
-	}
-}
-
-
-
-void
-crofcore::work_on_eventqueue(
-		enum crofcore_event_t event)
-{
-	if (EVENT_NONE != event) {
-		events.push_back(event);
-	}
-
-	while (not events.empty()) {
-		enum crofcore_event_t event = events.front();
-		events.pop_front();
-
-		switch (event) {
-		case EVENT_CHAN_ESTABLISHED: {
-			event_chan_established();
-		} break;
-		case EVENT_CHAN_TERMINATED: {
-			event_chan_terminated();
-		} break;
-		case EVENT_DO_SHUTDOWN: {
-			event_do_shutdown();
-		} break;
-		default: {
-			// ignore yet unknown events
-		};
-		}
-	}
-}
-
-
-
-void
-crofcore::event_do_shutdown()
-{
-	close_ctl_listening();
-	close_dpt_listening();
-
-	for (std::map<cctlid, crofctl*>::iterator
-			it = rofctls.begin(); it != rofctls.end(); ++it) {
-		it->second->shutdown();
-	}
-
-	for (std::map<cdptid, crofdpt*>::iterator
-			it = rofdpts.begin(); it != rofdpts.end(); ++it) {
-		it->second->shutdown();
-	}
-
-	events.clear();
-
-	register_timer(TIMER_SHUTDOWN, ctimespec(2));
-}
-
-
-
-void
-crofcore::event_chan_established()
-{
-	RwLock(chans_rwlock, RwLock::RWLOCK_WRITE);
-
-	for (std::deque<cctlid>::iterator
-			it = ctls_chan_established.begin(); it != ctls_chan_established.end(); ++it) {
-		handle_ctl_open(rofl::crofctl::get_ctl(*it));
-	}
-	ctls_chan_established.clear();
-
-	for (std::deque<cdptid>::iterator
-			it = dpts_chan_established.begin(); it != dpts_chan_established.end(); ++it) {
-		handle_dpt_open(rofl::crofdpt::get_dpt(*it));
-	}
-	dpts_chan_established.clear();
-}
-
-
-
-void
-crofcore::event_chan_terminated()
-{
-	RwLock(chans_rwlock, RwLock::RWLOCK_WRITE);
-
-	for (std::deque<cctlid>::iterator
-			it = ctls_chan_terminated.begin(); it != ctls_chan_terminated.end(); ++it) {
-		if (rofl::crofctl::get_ctl(*it).remove_on_channel_termination()) {
-			drop_ctl(*it);
-		}
-		handle_ctl_close(*it);
-	}
-	ctls_chan_terminated.clear();
-
-	for (std::deque<cdptid>::iterator
-			it = dpts_chan_terminated.begin(); it != dpts_chan_terminated.end(); ++it) {
-		if (rofl::crofdpt::get_dpt(*it).remove_on_channel_termination()) {
-			drop_dpt(*it);
-		}
-		handle_dpt_close(*it);
-	}
-	dpts_chan_terminated.clear();
-}
-
-
-
-void
-crofcore::handle_connect_refused(
-		crofconn& conn)
-{
-	LOGGING_INFO << "[rofl-common][crofbase] connection refused: " << conn.str() << std::endl;
-}
-
-
-
-void
-crofcore::handle_connect_failed(
-		crofconn& conn)
-{
-	LOGGING_INFO << "[rofl-common][crofbase] connection failed: " << conn.str() << std::endl;
-}
-
-
-
-void
-crofcore::handle_connected(
-		crofconn& conn,
-		uint8_t ofp_version)
-{
-	/*
-	 * situation:
-	 * 1. csocket accepted new connection
-	 * 2. crofconn was created and socket descriptor handed over
-	 * 3. crofconn conducts HELLO exchange and FEATURES.request/reply => learn dpid and aux-id
-	 * 4. this method is called
-	 *
-	 * next step: check for existing crofdpt instance for dpid seen by crofconn
-	 * if none exists, create new one, otherwise, add connection to existing crofdpt
-	 */
-
-	RwLock(rofconns_accepting_rwlock, RwLock::RWLOCK_WRITE);
-	rofconns_accepting.erase(&conn);
-
-	switch (conn.get_flavour()) {
-	case rofl::crofconn::FLAVOUR_CTL: {
-		LOGGING_INFO << "[rofl-common][crofbase] "
-				<< "creating new crofctl instance for ctl peer" << std::endl;
-		add_ctl(get_idle_ctlid(), conn.get_versionbitmap(), /*remove_upon_channel_termination=*/true).add_connection(&conn);
-	} break;
-	case rofl::crofconn::FLAVOUR_DPT: try {
-		crofdpt::get_dpt(conn.get_dpid()).add_connection(&conn);
-	} catch (eRofDptNotFound& e) {
-		LOGGING_INFO << "[rofl-common][crofbase] "
-				<< "creating new crofdpt instance for dpt peer, dpid:" << conn.get_dpid() << std::endl;
-		add_dpt(get_idle_dptid(), conn.get_versionbitmap(), /*remove_upon_channel_termination=*/true).add_connection(&conn);
-	} break;
-	default: {
-
-	};
-	}
-}
-
-
-
-void
-crofcore::handle_listen(
-		csocket& socket, int newsd)
-{
-	RwLock(rofconns_accepting_rwlock, RwLock::RWLOCK_WRITE);
-	crofconn* conn = (crofconn*)NULL;
-	if (is_ctl_listening(socket)) {
-		LOGGING_DEBUG << "[rofl-common][crofbase] "
-				<< "accept => creating new crofconn for ctl peer on sd: " << newsd << std::endl;
-		(conn = new rofl::crofconn(this, versionbitmap))->accept(
-				socket.get_socket_type(), socket.get_socket_params(), newsd, rofl::crofconn::FLAVOUR_CTL);
-	}
-	if (is_dpt_listening(socket)) {
-		LOGGING_DEBUG << "[rofl-common][crofbase] "
-						<< "accept => creating new crofconn for dpt peer on sd: " << newsd << std::endl;
-		(conn = new rofl::crofconn(this, versionbitmap))->accept(
-				socket.get_socket_type(), socket.get_socket_params(), newsd, rofl::crofconn::FLAVOUR_DPT);
-	}
-	rofconns_accepting.insert(conn);
-}
-
-
-
-void
-crofcore::handle_closed(
-		csocket& socket)
-{
-	if (is_ctl_listening(socket)) {
-		drop_ctl_listening(socket);
-	} else
-	if (is_dpt_listening(socket)) {
-		drop_dpt_listening(socket);
-	}
-}
+{}
 
 
 
@@ -444,7 +172,7 @@ crofcore::send_packet_in_message(
 	}
 
 	if (not sent_out) {
-		throw eRofBaseNotConnected("rofl::crofcore::send_packet_in_message() not connected");
+		throw eRofCoreNotConnected("rofl::crofcore::send_packet_in_message() not connected");
 	}
 }
 
@@ -494,7 +222,7 @@ crofcore::send_flow_removed_message(
 	}
 
 	if (not sent_out) {
-		throw eRofBaseNotConnected("rofl::crofcore::send_flow_removed_message() not connected");
+		throw eRofCoreNotConnected("rofl::crofcore::send_flow_removed_message() not connected");
 	}
 }
 
@@ -526,7 +254,185 @@ crofcore::send_port_status_message(
 	}
 
 	if (not sent_out) {
-		throw eRofBaseNotConnected("rofl::crofcore::send_port_status_message() not connected");
+		throw eRofCoreNotConnected("rofl::crofcore::send_port_status_message() not connected");
 	}
 }
+
+
+
+
+int
+crofcore::listen(
+		const csockaddr& baddr)
+{
+	int sd;
+	int rc;
+	int type = SOCK_STREAM;
+	int protocol = IPPROTO_TCP;
+	int backlog = 10;
+
+	/* open socket */
+	if ((sd = ::socket(baddr.get_family(), type, protocol)) < 0) {
+		throw eSysCall("socket()");
+	}
+
+	/* make socket non-blocking */
+	long flags;
+	if ((flags = ::fcntl(sd, F_GETFL)) < 0) {
+		throw eSysCall("fnctl() F_GETFL");
+	}
+	flags |= O_NONBLOCK;
+	if ((rc = ::fcntl(sd, F_SETFL, flags)) < 0) {
+		throw eSysCall("fcntl() F_SETGL");
+	}
+
+	if ((SOCK_STREAM == type) && (IPPROTO_TCP == protocol)) {
+		int optval = 1;
+
+		// set SO_REUSEADDR option on TCP sockets
+		if ((rc = ::setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, (int*)&optval, sizeof(optval))) < 0) {
+			throw eSysCall("setsockopt() SOL_SOCKET, SO_REUSEADDR");
+		}
+
+#if 0
+		int on = 1;
+		if ((rc = ::setsockopt(sd, SOL_SOCKET, SO_REUSEPORT, &on, sizeof(on))) < 0) {
+			throw eSysCall("setsockopt(SOL_SOCKET, SO_REUSEPORT)");
+		}
+#endif
+
+		// set TCP_NODELAY option on TCP sockets
+		if ((rc = ::setsockopt(sd, IPPROTO_TCP, TCP_NODELAY, (int*)&optval, sizeof(optval))) < 0) {
+			throw eSysCall("setsockopt() IPPROTO_TCP, TCP_NODELAY");
+		}
+
+		// set SO_RCVLOWAT
+		if ((rc = ::setsockopt(sd, SOL_SOCKET, SO_RCVLOWAT, (int*)&optval, sizeof(optval))) < 0) {
+			throw eSysCall("setsockopt() SOL_SOCKET, SO_RCVLOWAT");
+		}
+
+		// read TCP_NODELAY option for debugging purposes
+		socklen_t optlen = sizeof(int);
+		int optvalc;
+		if ((rc = ::getsockopt(sd, IPPROTO_TCP, TCP_NODELAY, (int*)&optvalc, &optlen)) < 0) {
+			throw eSysCall("getsockopt() IPPROTO_TCP, TCP_NODELAY");
+		}
+	}
+
+	/* bind to local address */
+	if ((rc = ::bind(sd, baddr.ca_saddr, (socklen_t)(baddr.salen))) < 0) {
+		throw eSysCall("bind");
+	}
+
+	/* listen on socket */
+	if ((rc = ::listen(sd, backlog)) < 0) {
+		throw eSysCall("listen");
+	}
+
+	return sd;
+}
+
+
+
+void
+crofcore::handle_wakeup(
+		cthread& thread)
+{
+
+}
+
+
+
+void
+crofcore::handle_timeout(
+		cthread& thread, uint32_t timer_id, const std::list<unsigned int>& ttypes)
+{
+
+}
+
+
+
+void
+crofcore::handle_read_event(
+		cthread& thread, int fd)
+{
+	std::map<csockaddr, int>::iterator it;
+
+	{
+		/* incoming datapath connection */
+		AcquireReadLock rlock(dpt_sockets_rwlock);
+		if ((it = find_if(dpt_sockets.begin(), dpt_sockets.end(),
+				csocket_find_by_sock_descriptor(fd))) != dpt_sockets.end()) {
+			(new crofconn(this))->tcp_accept(fd, versionbitmap, crofconn::MODE_DATAPATH);
+		}
+	}
+
+	{
+		/* incoming controller connection */
+		AcquireReadLock rlock(ctl_sockets_rwlock);
+		if ((it = find_if(ctl_sockets.begin(), ctl_sockets.end(),
+				csocket_find_by_sock_descriptor(fd))) != ctl_sockets.end()) {
+			(new crofconn(this))->tcp_accept(fd, versionbitmap, crofconn::MODE_CONTROLLER);
+		}
+	}
+}
+
+
+
+void
+crofcore::handle_established(
+		crofconn& conn, uint8_t ofp_version)
+{
+	/* openflow connection has been established */
+
+	switch (conn.get_mode()) {
+	case crofconn::MODE_CONTROLLER: {
+		/* if datapath for dpid already exists add connection there
+		 * or create new crofdpt instance */
+		if (not has_dpt(cdpid(conn.get_dpid()))) {
+			add_dpt().add_conn(&conn);
+		} else {
+			set_dpt(cdpid(conn.get_dpid())).add_conn(&conn);
+		}
+	} break;
+	case crofconn::MODE_DATAPATH: {
+		/* add a new controller instance and add connection there
+		 * we cannot identify a replaced controller connection */
+		add_ctl().add_conn(&conn);
+	} break;
+	default: {
+		delete &conn;
+	};
+	}
+}
+
+
+
+void
+crofcore::handle_accept_failed(
+		crofconn& conn)
+{
+	delete &conn;
+}
+
+
+
+void
+crofcore::handle_negotiation_failed(
+		crofconn& conn)
+{
+	delete &conn;
+}
+
+
+
+void
+crofcore::handle_closed(
+		crofconn& conn)
+{
+	delete &conn;
+}
+
+
+
 

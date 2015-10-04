@@ -1025,33 +1025,6 @@ class crofdpt :
 		public rofl::crofchan_env,
 		public rofl::ctransactions_env
 {
-	static std::map<rofl::cdptid, rofl::crofdpt*>   rofdpts;
-	static crwlock                                  rofdpts_lock;
-
-public:
-
-	/**
-	 * @brief	Returns reference to rofl::crofdpt instance identified by rofl-common's internal identifier.
-	 *
-	 * @param dptid rofl-common's internal datapath identifier
-	 * @throw eRofDptNotFound when no object matches the datapath identifier
-	 * @return reference to rofl::crofdpt instance for given identifier
-	 */
-	static rofl::crofdpt&
-	set_dpt(
-			const rofl::cdptid& dptid);
-
-	/**
-	 * @brief	Returns reference to rofl::crofdpt instance identified by OpenFlow's datapath identifier.
-	 *
-	 * @param dpid OpenFlow datapath identifier
-	 * @throw eRofDptNotFound when no object matches the datapath identifier
-	 * @return reference to rofl::crofdpt instance for given identifier
-	 */
-	static rofl::crofdpt&
-	set_dpt(
-			const rofl::cdpid& dpid);
-
 public:
 
 	/**
@@ -1287,7 +1260,12 @@ public:
 	crofconn&
 	add_conn(
 			crofconn* conn)
-	{ return rofchan.add_conn(conn); };
+	{
+		if (nullptr != conn) {
+			dpid = cdpid(conn->get_dpid());
+		}
+		return rofchan.add_conn(conn);
+	};
 
 	/**
 	 *

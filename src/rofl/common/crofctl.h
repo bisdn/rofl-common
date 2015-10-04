@@ -762,22 +762,6 @@ class crofctl :
 		public rofl::crofchan_env,
 		public rofl::ctransactions_env
 {
-	static std::map<rofl::cctlid, rofl::crofctl*>   rofctls;
-	static crwlock                                  rofctls_lock;
-
-public:
-
-	/**
-	 * @brief	Returns reference to rofl::crofctl instance identified by rofl-common's internal identifier.
-	 *
-	 * @param ctlid rofl-common's internal datapath identifier
-	 * @throw eRofCtlNotFound when no object matches the controller identifier
-	 * @return reference to rofl::crofctl instance for given identifier
-	 */
-	static rofl::crofctl&
-	set_ctl(
-			const rofl::cctlid& ctlid);
-
 public:
 
 	/**
