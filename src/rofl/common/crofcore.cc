@@ -33,7 +33,7 @@ crofcore::~crofcore()
 	AcquireReadWriteLock rwlock(rofcores_rwlock);
 	crofcore::rofcores.erase(this);
 	if (crofcore::rofcores.empty()) {
-		crofcore::initialize();
+		crofcore::terminate();
 	}
 }
 
@@ -335,6 +335,28 @@ crofcore::listen(
 
 
 void
+crofcore::rofctl_schedule_for_delete(
+		const cctlid& ctlid)
+{
+	AcquireReadWriteLock rwlock(rofctls_deletion_rwlock);
+	rofctls_deletion.insert(ctlid);
+	thread.add_timer(TIMER_ID_ROFCTL_DESTROY, ctimespec().expire_in(1));
+}
+
+
+
+void
+crofcore::rofdpt_schedule_for_delete(
+		const cdptid& dptid)
+{
+	AcquireReadWriteLock rwlock(rofdpts_deletion_rwlock);
+	rofdpts_deletion.insert(dptid);
+	thread.add_timer(TIMER_ID_ROFDPT_DESTROY, ctimespec().expire_in(1));
+}
+
+
+
+void
 crofcore::handle_wakeup(
 		cthread& thread)
 {
@@ -347,7 +369,25 @@ void
 crofcore::handle_timeout(
 		cthread& thread, uint32_t timer_id, const std::list<unsigned int>& ttypes)
 {
+	switch (timer_id) {
+	case TIMER_ID_ROFCTL_DESTROY: {
+		AcquireReadWriteLock rwlock(rofctls_deletion_rwlock);
+		for (auto ctlid : rofctls_deletion) {
+			__drop_ctl(ctlid);
+		}
+		rofctls_deletion.clear();
+	} break;
+	case TIMER_ID_ROFDPT_DESTROY: {
+		AcquireReadWriteLock rwlock(rofdpts_deletion_rwlock);
+		for (auto dptid : rofdpts_deletion) {
+			__drop_dpt(dptid);
+		}
+		rofdpts_deletion.clear();
+	} break;
+	default: {
 
+	};
+	}
 }
 
 
@@ -433,6 +473,51 @@ crofcore::handle_closed(
 	delete &conn;
 }
 
+
+
+void
+crofcore::handle_established(
+		crofctl& ctl, uint8_t ofp_version)
+{
+	handle_ctl_open(ctl);
+}
+
+
+
+void
+crofcore::handle_closed(
+		crofctl& ctl)
+{
+	/* if main connection is passive, delete crofctl instance */
+	if (ctl.get_conn(rofl::cauxid(0)).is_passive()) {
+		handle_ctl_close(ctl.get_ctlid());
+		/* mark dpt for deletion */
+		rofctl_schedule_for_delete(ctl.get_ctlid());
+	}
+}
+
+
+
+void
+crofcore::handle_established(
+		crofdpt& dpt, uint8_t ofp_version)
+{
+	handle_dpt_open(dpt);
+}
+
+
+
+void
+crofcore::handle_closed(
+		crofdpt& dpt)
+{
+	/* if main connection is passive, delete crofdpt instance */
+	if (dpt.get_conn(rofl::cauxid(0)).is_passive()) {
+		handle_dpt_close(dpt.get_dptid());
+		/* mark dpt for deletion */
+		rofdpt_schedule_for_delete(dpt.get_dptid());
+	}
+}
 
 
 

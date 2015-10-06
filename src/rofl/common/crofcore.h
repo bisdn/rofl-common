@@ -52,7 +52,7 @@ public:
 
 
 class crofcore :
-		public cthread_env,
+		public rofl::cthread_env,
 		public rofl::crofconn_env,
 		public rofl::ctransactions_env,
 		public rofl::crofctl_env,
@@ -383,12 +383,7 @@ public:
 	void
 	drop_dpt(
 		rofl::cdptid dptid) { // make a copy here, do not use a const reference
-		AcquireReadWriteLock rwlock(rofdpts_rwlock);
-		if (rofdpts.find(dptid) == rofdpts.end()) {
-			return;
-		}
-		delete rofdpts[dptid];
-		rofdpts.erase(dptid);
+		rofdpt_schedule_for_delete(dptid);
 	};
 
 	/**
@@ -556,12 +551,7 @@ public:
 	void
 	drop_ctl(
 		rofl::cctlid ctlid) { // make a copy here, do not use a const reference
-		AcquireReadWriteLock rwlock(rofctls_rwlock);
-		if (rofctls.find(ctlid) == rofctls.end()) {
-			return;
-		}
-		delete rofctls[ctlid];
-		rofctls.erase(ctlid);
+		rofctl_schedule_for_delete(ctlid);
 	};
 
 	/**
@@ -2224,13 +2214,11 @@ private:
 
 	virtual void
 	handle_established(
-			crofdpt& dpt, uint8_t ofp_version)
-	{};
+			crofdpt& dpt, uint8_t ofp_version);
 
 	virtual void
 	handle_closed(
-			crofdpt& dpt)
-	{};
+			crofdpt& dpt);
 
 	virtual void
 	handle_established(
@@ -2276,13 +2264,11 @@ private:
 
 	virtual void
 	handle_established(
-			crofctl& ctl, uint8_t ofp_version)
-	{};
+			crofctl& ctl, uint8_t ofp_version);
 
 	virtual void
 	handle_closed(
-			crofctl& ctl)
-	{};
+			crofctl& ctl);
 
 	virtual void
 	handle_established(
@@ -2390,22 +2376,91 @@ private:
 	ta_expired(ctransactions& tas, ctransaction& ta)
 	{};
 
+	/**
+	 *
+	 */
+	void
+	rofctl_schedule_for_delete(
+			const cctlid& ctlid);
+
+	/**
+	 *
+	 */
+	void
+	rofdpt_schedule_for_delete(
+			const cdptid& dptid);
+
 private:
+
+	/**
+	 * @brief	Deletes a rofl::crofdpt instance given by identifier.
+	 *
+	 * If the identifier is non-existing, the method does nothing and returns.
+	 */
+	void
+	__drop_dpt(
+		rofl::cdptid dptid) { // make a copy here, do not use a const reference
+		AcquireReadWriteLock rwlock(rofdpts_rwlock);
+		if (rofdpts.find(dptid) == rofdpts.end()) {
+			return;
+		}
+		delete rofdpts[dptid];
+		rofdpts.erase(dptid);
+	};
+
+	/**
+	 * @brief	Deletes a rofl::crofctl instance given by identifier.
+	 *
+	 * If the identifier is non-existing, the method does nothing and returns.
+	 */
+	void
+	__drop_ctl(
+		rofl::cctlid ctlid) { // make a copy here, do not use a const reference
+		AcquireReadWriteLock rwlock(rofctls_rwlock);
+		if (rofctls.find(ctlid) == rofctls.end()) {
+			return;
+		}
+		delete rofctls[ctlid];
+		rofctls.erase(ctlid);
+	};
+
+private:
+
+	enum crofcore_timer_t {
+		TIMER_ID_ROFCTL_DESTROY = 1,
+		TIMER_ID_ROFDPT_DESTROY = 2,
+	};
 
 	// management thread
 	cthread                         thread;
 
-	// connections to peer controllers
+	// peer controllers
 	std::map<cctlid, crofctl*>		rofctls;
 
 	// lock for peer controllers
 	mutable crwlock                 rofctls_rwlock;
 
-	// connections to peer datapath elements
+	// peer datapath elements
 	std::map<cdptid, crofdpt*>		rofdpts;
 
 	// lock for peer datapath elements
 	mutable crwlock                 rofdpts_rwlock;
+
+	/*
+	 *
+	 */
+
+	// set of crofctl ids scheduled for deletion
+	std::set<cctlid>                rofctls_deletion;
+
+	// ... and associated rwlock
+	mutable crwlock                 rofctls_deletion_rwlock;
+
+	// set of crofdpt ids scheduled for deletion
+	std::set<cdptid>                rofdpts_deletion;
+
+	// ... and associated rwlock
+	mutable crwlock                 rofdpts_deletion_rwlock;
 
 	/*
 	 *
