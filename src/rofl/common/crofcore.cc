@@ -488,9 +488,9 @@ void
 crofcore::handle_closed(
 		crofctl& ctl)
 {
+	handle_ctl_close(ctl.get_ctlid());
 	/* if main connection is passive, delete crofctl instance */
 	if (ctl.get_conn(rofl::cauxid(0)).is_passive()) {
-		handle_ctl_close(ctl.get_ctlid());
 		/* mark dpt for deletion */
 		rofctl_schedule_for_delete(ctl.get_ctlid());
 	}
@@ -511,9 +511,9 @@ void
 crofcore::handle_closed(
 		crofdpt& dpt)
 {
+	handle_dpt_close(dpt.get_dptid());
 	/* if main connection is passive, delete crofdpt instance */
 	if (dpt.get_conn(rofl::cauxid(0)).is_passive()) {
-		handle_dpt_close(dpt.get_dptid());
 		/* mark dpt for deletion */
 		rofdpt_schedule_for_delete(dpt.get_dptid());
 	}
