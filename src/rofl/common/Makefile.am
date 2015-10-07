@@ -9,8 +9,8 @@ librofl_common_base_la_SOURCES = \
 		logging.cc \
 		logging.h \
 		locking.hpp \
-		crofcore.cc \
-		crofcore.h \
+		crofbase.cc \
+		crofbase.h \
 		crofdpt.cc \
 		crofdpt.h \
 		crofctl.cc \
@@ -75,7 +75,6 @@ library_include_HEADERS= \
 		crandom.h \
 		endian_conversion.h \
 		rofcommon.h \
-		crofcore.h \
 		crofbase.h \
 		crofdpt.h \
 		crofctl.h \
