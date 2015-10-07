@@ -318,7 +318,10 @@ crofsock::tcp_accept(
 		/* new state */
 		state = STATE_TCP_ACCEPTING;
 
-		sd = sockfd;
+		/* extract new connection from listening queue */
+		if ((sd = ::accept(sockfd, laddr.ca_saddr, &(laddr.salen))) < 0) {
+			throw eSysCall("accept()");
+		}
 
 		/* make socket non-blocking, as this status is not inherited */
 		long sockflags = 0;
@@ -336,6 +339,7 @@ crofsock::tcp_accept(
 		}
 
 		if ((::getpeername(sd, raddr.ca_saddr, &(raddr.salen))) < 0) {
+			std::cerr << "crofsock::tcp_accept() errno: " << errno << " (" << strerror(errno) << ")" << std::endl;
 			throw eSysCall("getpeername()");
 		}
 
@@ -371,8 +375,8 @@ crofsock::tcp_accept(
 			crofsock_env::call_env(env).handle_tcp_accepted(*this);
 		}
 
-	} catch (RoflException& e) {
-
+	} catch (std::runtime_error& e) {
+		std::cerr << "crofsock::tcp_accept() exception, what: " << e.what() << std::endl;
 	}
 }
 
@@ -1427,6 +1431,7 @@ crofsock::handle_read_event_rxthread(
 	try {
 		switch (state) {
 		case STATE_LISTENING: {
+#if 0
 			int new_sd = -1;
 			csockaddr ra;
 
@@ -1439,8 +1444,9 @@ crofsock::handle_read_event_rxthread(
 					throw eSysCall("accept");
 				}
 			}
-
 			crofsock_env::call_env(env).handle_listen(*this, new_sd);
+#endif
+			crofsock_env::call_env(env).handle_listen(*this, sd);
 		} break;
 		case STATE_TCP_CONNECTING: {
 

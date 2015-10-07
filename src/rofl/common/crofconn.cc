@@ -54,7 +54,9 @@ crofconn::crofconn(
 	rxweights[QUEUE_FLOW] = 16;
 	rxweights[QUEUE_PKT ] =  8;
 	/* set maximum queue size */
-	set_rxqueue_max_size(rxqueue_max_size);
+	for (unsigned int queue_id = 0; queue_id < QUEUE_MAX; queue_id++) {
+		rxqueues[queue_id].set_queue_max_size(rxqueue_max_size);
+	}
 }
 
 

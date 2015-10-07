@@ -295,6 +295,9 @@ public:
 			delete conns[auxid];
 		}
 		(conns[auxid] = conn)->set_env(this);
+		if (auxid == cauxid(0)) {
+			ofp_version = conn->get_version();
+		}
 		return *(conns[auxid]);
 	};
 
@@ -362,7 +365,7 @@ private:
 	handle_established(
 			crofconn& conn, uint8_t ofp_version)
 	{
-		if (conn.get_auxid().get_id() == 0) {
+		if (conn.get_auxid() == cauxid(0)) {
 			this->ofp_version = ofp_version;
 			crofchan_env::call_env(env).handle_established(*this, ofp_version);
 		} else {

@@ -390,20 +390,26 @@ public:
 	 * @brief	Returns capacity of reception queues in messages
 	 */
 	size_t
-	get_rxqueue_max_size() const
-	{ return rxqueue_max_size; };
+	get_rxqueue_max_size(
+			unsigned int queue_id) const
+	{
+		if (rxqueues.size() <= queue_id) {
+			throw eRofConnInvalid("crofconn::get_rxqueue_max_size() invalid queue_id");
+		}
+		return rxqueues[queue_id].get_queue_max_size();
+	};
 
 	/**
 	 * @brief	Sets capacity of reception queues in messages
 	 */
 	crofconn&
 	set_rxqueue_max_size(
-			size_t rxqueue_max_size)
+			unsigned int queue_id, size_t rxqueue_max_size)
 	{
-		this->rxqueue_max_size = rxqueue_max_size;
-		for (unsigned int queue_id = 0; queue_id < QUEUE_MAX; queue_id++) {
-			rxqueues[queue_id].set_queue_max_size(rxqueue_max_size);
+		if (rxqueues.size() <= queue_id) {
+			throw eRofConnInvalid("crofconn::set_rxqueue_max_size() invalid queue_id");
 		}
+		rxqueues[queue_id].set_queue_max_size(rxqueue_max_size);
 		return *this;
 	};
 

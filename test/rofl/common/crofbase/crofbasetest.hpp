@@ -30,6 +30,15 @@ public:
 	 */
 	ccontroller();
 
+public:
+
+	/**
+	 *
+	 */
+	bool
+	keep_running() const
+	{ return __keep_running; };
+
 private:
 
 	virtual void
@@ -66,6 +75,9 @@ private:
 
 	// bind address
 	rofl::csockaddr         baddr;
+
+	// keep test running
+	bool                    __keep_running;
 };
 
 
@@ -187,10 +199,6 @@ private:
 
 	// test datapath
 	cdatapath               datapath;
-
-	// boolean
-	bool                    keep_running;
-
 
 private:
 

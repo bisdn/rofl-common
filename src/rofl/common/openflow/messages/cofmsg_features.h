@@ -297,6 +297,7 @@ public:
 			os << "#buffers:" 		<< (unsigned int)msg.get_n_buffers() 	<< " ";
 			os << "#tables:" 		<< (int)msg.get_n_tables() 		<< " ";
 			os << "capabilities:0x"	<< std::hex << (int)msg.get_capabilities() << std::dec << " ";
+			os << "auxid:"          << (int)msg.get_auxid() << " ";
 			os << " >" << std::endl;
 		} break;
 		default: {

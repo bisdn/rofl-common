@@ -34,11 +34,9 @@ crofbasetest::tearDown()
 void
 crofbasetest::test()
 {
-	keep_running = true;
-
 	datapath.test_start();
 
-	while (keep_running) {
+	while (controller.keep_running()) {
 		struct timespec ts;
 		ts.tv_sec = 1;
 		ts.tv_nsec = 0;
@@ -75,7 +73,8 @@ ccontroller::~ccontroller()
 
 
 ccontroller::ccontroller() :
-			baddr(rofl::csockaddr(AF_INET, "127.0.0.1", 6653))
+			baddr(rofl::csockaddr(AF_INET, "127.0.0.1", 6653)),
+			__keep_running(true)
 {
 	vbitmap.add_ofp_version(rofl::openflow13::OFP_VERSION);
 
@@ -136,6 +135,8 @@ ccontroller::handle_dpt_open(
 		rofl::crofdpt& dpt)
 {
 	std::cerr << ">>> XXX dpt connected: " << std::endl;
+
+	dpt.send_get_config_request(rofl::cauxid(0));
 }
 
 
@@ -155,7 +156,7 @@ cdatapath::handle_features_request(
 		const rofl::cauxid& auxid,
 		rofl::openflow::cofmsg_features_request& msg)
 {
-	std::cerr << ">>> XXX -Features-Request- rcvd" << std::endl;
+	std::cerr << ">>> XXX -Features-Request- rcvd" << std::endl << auxid;
 
 	ctl.send_features_reply(
 			auxid,
@@ -164,7 +165,7 @@ cdatapath::handle_features_request(
 			n_buffers,
 			n_tables,
 			capabilities,
-			auxid.get_id());
+			/*auxid=*/0);
 }
 
 
@@ -256,6 +257,8 @@ ccontroller::handle_port_desc_stats_reply(
 		rofl::openflow::cofmsg_port_desc_stats_reply& msg)
 {
 	std::cerr << ">>> XXX -Port-Desc-Stats-Reply- rcvd" << std::endl;
+
+	__keep_running = false;
 }
 
 

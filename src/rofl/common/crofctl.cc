@@ -1753,9 +1753,9 @@ crofctl::send_features_reply(
 				dpid,
 				n_buffers,
 				n_tables,
+				of13_auxiliary_id,
 				capabilities,
 				of10_actions_bitmap,
-				of13_auxiliary_id,
 				ports);
 
 		rofchan.send_message(auxid, msg);

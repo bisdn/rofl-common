@@ -50,6 +50,8 @@ crofbase::crofbase() :
 		crofbase::initialize();
 	}
 	crofbase::rofbases.insert(this);
+	/* start background management thread */
+	thread.start();
 }
 
 
@@ -147,10 +149,9 @@ crofbase::send_packet_in_message(
 {
 	bool sent_out = false;
 
-	for (std::map<cctlid, crofctl*>::iterator
-			it = rofctls.begin(); it != rofctls.end(); ++it) {
+	for (auto it : rofctls) {
 
-		crofctl& ctl = *(it->second);
+		crofctl& ctl = *(it.second);
 
 		if (not ctl.is_established()) {
 			continue;
@@ -195,10 +196,9 @@ crofbase::send_flow_removed_message(
 {
 	bool sent_out = false;
 
-	for (std::map<cctlid, crofctl*>::iterator
-			it = rofctls.begin(); it != rofctls.end(); ++it) {
+	for (auto it : rofctls) {
 
-		crofctl& ctl = *(it->second);
+		crofctl& ctl = *(it.second);
 
 		if (not ctl.is_established()) {
 			continue;
@@ -236,10 +236,9 @@ crofbase::send_port_status_message(
 {
 	bool sent_out = false;
 
-	for (std::map<cctlid, crofctl*>::iterator
-			it = rofctls.begin(); it != rofctls.end(); ++it) {
+	for (auto it : rofctls) {
 
-		crofctl& ctl = *(it->second);
+		crofctl& ctl = *(it.second);
 
 		if (not ctl.is_established()) {
 			continue;
@@ -403,7 +402,7 @@ crofbase::handle_read_event(
 		AcquireReadLock rlock(dpt_sockets_rwlock);
 		if ((it = find_if(dpt_sockets.begin(), dpt_sockets.end(),
 				csocket_find_by_sock_descriptor(fd))) != dpt_sockets.end()) {
-			(new crofconn(this))->tcp_accept(fd, versionbitmap, crofconn::MODE_DATAPATH);
+			(new crofconn(this))->tcp_accept(fd, versionbitmap, crofconn::MODE_CONTROLLER);
 		}
 	}
 
@@ -412,7 +411,7 @@ crofbase::handle_read_event(
 		AcquireReadLock rlock(ctl_sockets_rwlock);
 		if ((it = find_if(ctl_sockets.begin(), ctl_sockets.end(),
 				csocket_find_by_sock_descriptor(fd))) != ctl_sockets.end()) {
-			(new crofconn(this))->tcp_accept(fd, versionbitmap, crofconn::MODE_CONTROLLER);
+			(new crofconn(this))->tcp_accept(fd, versionbitmap, crofconn::MODE_DATAPATH);
 		}
 	}
 }
@@ -427,18 +426,35 @@ crofbase::handle_established(
 
 	switch (conn.get_mode()) {
 	case crofconn::MODE_CONTROLLER: {
+		rofl::cdptid dptid;
 		/* if datapath for dpid already exists add connection there
 		 * or create new crofdpt instance */
 		if (not has_dpt(cdpid(conn.get_dpid()))) {
-			add_dpt().add_conn(&conn);
+			dptid = add_dpt().get_dptid();
 		} else {
-			set_dpt(cdpid(conn.get_dpid())).add_conn(&conn);
+			dptid = set_dpt(cdpid(conn.get_dpid())).get_dptid();
+		}
+
+		/* add new connection to crofdpt instance */
+		set_dpt(dptid).add_conn(&conn);
+
+		/* indicate channel up to higher layers */
+		if (conn.get_auxid() == rofl::cauxid(0)) {
+			handle_dpt_open(set_dpt(dptid));
 		}
 	} break;
 	case crofconn::MODE_DATAPATH: {
 		/* add a new controller instance and add connection there
 		 * we cannot identify a replaced controller connection */
-		add_ctl().add_conn(&conn);
+		rofl::cctlid ctlid = add_ctl().get_ctlid();
+
+		/* add new connection to crofctl instance */
+		set_ctl(ctlid).add_conn(&conn);
+
+		/* indicate channel up to higher layers */
+		if (conn.get_auxid() == rofl::cauxid(0)) {
+			handle_ctl_open(set_ctl(ctlid));
+		}
 	} break;
 	default: {
 		delete &conn;
