@@ -92,7 +92,8 @@ public:
 	close_dpt_socks() {
 		AcquireReadWriteLock rwlock(dpt_sockets_rwlock);
 		for (auto it : dpt_sockets) {
-			thread.drop_read_fd(it.second);
+			::close(it.second);
+			thread.drop_read_fd(it.second, false);
 		}
 		dpt_sockets.clear();
 	};
@@ -121,15 +122,17 @@ public:
 	 *
 	 * @param sockid socket identifier
 	 */
-	void
+	bool
 	dpt_sock_close(
 			const csockaddr& baddr) {
 		AcquireReadWriteLock rwlock(dpt_sockets_rwlock);
 		if (dpt_sockets.find(baddr) == dpt_sockets.end()) {
-			return;
+			return false;
 		}
+		::close(dpt_sockets[baddr]);
 		thread.drop_read_fd(dpt_sockets[baddr], false);
 		dpt_sockets.erase(baddr);
+		return true;
 	};
 
 	/**
@@ -161,7 +164,8 @@ public:
 	close_ctl_socks() {
 		AcquireReadWriteLock rwlock(ctl_sockets_rwlock);
 		for (auto it : ctl_sockets) {
-			thread.drop_read_fd(it.second);
+			::close(it.second);
+			thread.drop_read_fd(it.second, false);
 		}
 		ctl_sockets.clear();
 	};
@@ -190,15 +194,17 @@ public:
 	 *
 	 * @param sockid socket identifier
 	 */
-	void
+	bool
 	ctl_sock_close(
 			const csockaddr& baddr) {
 		AcquireReadWriteLock rwlock(ctl_sockets_rwlock);
 		if (ctl_sockets.find(baddr) == ctl_sockets.end()) {
-			return;
+			return false;
 		}
+		::close(dpt_sockets[baddr]);
 		thread.drop_read_fd(ctl_sockets[baddr], false);
 		ctl_sockets.erase(baddr);
+		return true;
 	};
 
 	/**
