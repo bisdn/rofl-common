@@ -1431,22 +1431,9 @@ crofsock::handle_read_event_rxthread(
 	try {
 		switch (state) {
 		case STATE_LISTENING: {
-#if 0
-			int new_sd = -1;
-			csockaddr ra;
 
-			if ((new_sd = ::accept(sd, (struct sockaddr*)(ra.somem()), &(ra.salen))) < 0) {
-				switch (errno) {
-				case EAGAIN:
-					// do nothing, just wait for the next event
-					return;
-				default:
-					throw eSysCall("accept");
-				}
-			}
-			crofsock_env::call_env(env).handle_listen(*this, new_sd);
-#endif
 			crofsock_env::call_env(env).handle_listen(*this, sd);
+
 		} break;
 		case STATE_TCP_CONNECTING: {
 
