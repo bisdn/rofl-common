@@ -41,8 +41,6 @@ librofl_common_base_la_SOURCES = \
 		cclock.cc \
 		cmemory.h \
 		cmemory.cc \
-		ctimerid.h \
-		ctimerid.cc \
 		cauxid.h \
 		cctlid.h \
 		cdptid.h \
@@ -88,7 +86,6 @@ library_include_HEADERS= \
 		ctransactions.h \
 		csegmentation.h \
 		csegmsg.h \
-		ctimerid.h \
 		cauxid.h \
 		cctlid.h \
 		cdptid.h \

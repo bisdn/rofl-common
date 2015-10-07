@@ -17,7 +17,6 @@
 #include "rofl/common/croflexception.h"
 #include "rofl/common/csegmsg.h"
 #include "rofl/common/cthread.hpp"
-#include "rofl/common/ctimerid.h"
 
 namespace rofl {
 
@@ -140,9 +139,6 @@ private:
 
 	// all current pending transactions with fragments
 	std::map<uint32_t, csegmsg> 		segmsgs;
-
-	// timer-id
-	ctimerid							check_expiration_id;
 
 	time_t								check_expiration_interval;
 
