@@ -669,6 +669,14 @@ public:
 	/**
 	 * @brief	Returns reference to OpenFlow version bitmap used for incoming connections.
 	 */
+	rofl::crofbase&
+	set_versionbitmap(
+			const rofl::openflow::cofhello_elem_versionbitmap& versionbitmap)
+	{ this->versionbitmap = versionbitmap; return *this; };
+
+	/**
+	 * @brief	Returns reference to OpenFlow version bitmap used for incoming connections.
+	 */
 	rofl::openflow::cofhello_elem_versionbitmap&
 	set_versionbitmap()
 	{ return versionbitmap; };
