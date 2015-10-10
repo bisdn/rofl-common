@@ -54,7 +54,6 @@ public:
 class crofbase :
 		public rofl::cthread_env,
 		public rofl::crofconn_env,
-		public rofl::ctransactions_env,
 		public rofl::crofctl_env,
 		public rofl::crofdpt_env
 {
@@ -2357,11 +2356,6 @@ private:
 			crofconn& conn, rofl::openflow::cofmsg* msg)
 	{ delete msg; };
 
-	virtual uint32_t
-	get_async_xid(
-			crofconn& conn)
-	{ return transactions.get_async_xid(); };
-
 	virtual void
 	congestion_occured_indication(
 			crofconn& conn)
@@ -2370,6 +2364,11 @@ private:
 	virtual void
 	congestion_solved_indication(
 			crofconn& conn)
+	{};
+
+	virtual void
+	handle_transaction_timeout(
+			crofconn& conn, uint32_t xid, uint8_t type, uint16_t sub_type = 0)
 	{};
 
 private:
@@ -2382,13 +2381,6 @@ private:
 	int
 	listen(
 			const csockaddr& baddr);
-
-	/**
-	 *
-	 */
-	virtual void
-	ta_expired(ctransactions& tas, ctransaction& ta)
-	{};
 
 	/**
 	 *
@@ -2496,8 +2488,6 @@ private:
 	// supported OpenFlow versions
 	rofl::openflow::cofhello_elem_versionbitmap
 									versionbitmap;
-	// pending OpenFlow transactions
-	ctransactions					transactions;
 
 	// generation_id used for roles initially defined?
 	bool							generation_is_defined;

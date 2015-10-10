@@ -133,10 +133,6 @@ protected:
 	handle_recv(
 			crofconn& conn, rofl::openflow::cofmsg *msg) = 0;
 
-	virtual uint32_t
-	get_async_xid(
-			crofconn& conn) = 0;
-
 	virtual void
 	congestion_occured_indication(
 			crofconn& conn) = 0;
@@ -1220,6 +1216,9 @@ private:
 	// OpenFlow version negotiated
 	uint8_t				        ofp_version;
 
+	// random number generator
+	crandom                     random;
+
 	// internal flags
 	std::bitset<32>		        flags;
 
@@ -1272,6 +1271,15 @@ private:
 
 	// .. and associated rwlock
 	crwlock                     xids_rwlock;
+
+	// hello xid
+	uint32_t                    xid_hello_last;
+
+	// features request xid
+	uint32_t                    xid_features_request_last;
+
+	// echo request xid
+	uint32_t                    xid_echo_request_last;
 };
 
 }; /* namespace rofl */

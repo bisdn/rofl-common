@@ -29,7 +29,7 @@ crofctl::crofctl(
 			env(env),
 			ctlid(ctlid),
 			rofchan(this),
-			transactions(this),
+			xid_last(random.uint32()),
 			async_config_role_default_template(rofl::openflow13::OFP_VERSION),
 			async_config(rofl::openflow13::OFP_VERSION)
 {
@@ -2253,7 +2253,7 @@ crofctl::send_packet_in_message(
 
 		msg = new rofl::openflow::cofmsg_packet_in(
 				rofchan.get_version(),
-				transactions.get_async_xid(),
+				++xid_last,
 				buffer_id,
 				total_len,
 				reason,
@@ -2434,7 +2434,7 @@ crofctl::send_flow_removed_message(
 
 		msg = new rofl::openflow::cofmsg_flow_removed(
 				rofchan.get_version(),
-				transactions.get_async_xid(),
+				++xid_last,
 				cookie,
 				priority,
 				reason,
@@ -2496,7 +2496,7 @@ crofctl::send_port_status_message(
 
 		msg = new rofl::openflow::cofmsg_port_status(
 				rofchan.get_version(),
-				transactions.get_async_xid(),
+				++xid_last,
 				reason,
 				port);
 

@@ -272,34 +272,6 @@ crofconntest::handle_recv(
 
 
 
-uint32_t
-crofconntest::get_async_xid(
-		rofl::crofconn& conn)
-{
-	return xid++;
-}
-
-
-
-uint32_t
-crofconntest::get_sync_xid(
-		rofl::crofconn& conn, uint8_t msg_type, uint16_t msg_sub_type)
-{
-	uint32_t xid = 0xb1b2b3b4;
-	return xid;
-}
-
-
-
-void
-crofconntest::release_sync_xid(
-		rofl::crofconn& conn, uint32_t xid)
-{
-
-}
-
-
-
 void
 crofconntest::send_packet_in()
 {
@@ -307,7 +279,7 @@ crofconntest::send_packet_in()
 		rofl::openflow::cofmsg_packet_in* msg =
 				new rofl::openflow::cofmsg_packet_in(
 						rofl::openflow13::OFP_VERSION,
-						get_sync_xid(*sclient));
+						++xid_client);
 		sclient->send_message(msg);
 	}
 }
@@ -321,7 +293,7 @@ crofconntest::send_packet_out()
 		rofl::openflow::cofmsg_packet_out* msg =
 				new rofl::openflow::cofmsg_packet_out(
 						rofl::openflow13::OFP_VERSION,
-						get_sync_xid(*sserver));
+						++xid_server);
 		sserver->send_message(msg);
 	}
 }

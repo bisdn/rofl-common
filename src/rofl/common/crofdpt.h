@@ -1956,11 +1956,6 @@ private:
 	handle_recv(
 			rofl::crofchan& chan, rofl::crofconn& conn, rofl::openflow::cofmsg* msg);
 
-	virtual uint32_t
-	get_async_xid(
-			rofl::crofchan& chan)
-	{ return ++xid_last; };
-
 private:
 
 	void

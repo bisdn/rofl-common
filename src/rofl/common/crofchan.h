@@ -151,10 +151,6 @@ protected:
 	congestion_solved_indication(
 			crofchan& chan, crofconn& conn) = 0;
 
-	virtual uint32_t
-	get_async_xid(
-			crofchan& chan) = 0;
-
 	virtual void
 	handle_transaction_timeout(
 			crofchan& chan, crofconn& conn, uint32_t xid, uint8_t type, uint16_t sub_type = 0)
@@ -428,11 +424,6 @@ private:
 	handle_recv(
 			crofconn& conn, rofl::openflow::cofmsg *msg)
 	{ crofchan_env::call_env(env).handle_recv(*this, conn, msg); };
-
-	virtual uint32_t
-	get_async_xid(
-			crofconn& conn)
-	{ return crofchan_env::call_env(env).get_async_xid(*this); };
 
 	virtual void
 	congestion_occured_indication(

@@ -46,7 +46,10 @@ crofconn::crofconn(
 				timeout_hello(DEFAULT_HELLO_TIMEOUT),
 				timeout_features(DEFAULT_FEATURES_TIMEOUT),
 				timeout_echo(DEFAULT_ECHO_TIMEOUT),
-				timeout_lifecheck(DEFAULT_LIFECHECK_TIMEOUT)
+				timeout_lifecheck(DEFAULT_LIFECHECK_TIMEOUT),
+				xid_hello_last(random.uint32()),
+				xid_features_request_last(random.uint32()),
+				xid_echo_request_last(random.uint32())
 {
 	/* scheduler weights for transmission */
 	rxweights[QUEUE_OAM ] = 16;
@@ -312,7 +315,7 @@ crofconn::send_hello_message()
 		rofl::openflow::cofmsg_hello* msg =
 				new rofl::openflow::cofmsg_hello(
 						versionbitmap.get_highest_ofp_version(),
-						crofconn_env::call_env(env).get_async_xid(*this),
+						++xid_hello_last,
 						helloIEs);
 
 		rofsock.send_message(msg);
@@ -502,7 +505,7 @@ crofconn::send_features_request()
 		rofl::openflow::cofmsg_features_request* msg =
 				new rofl::openflow::cofmsg_features_request(
 						ofp_version,
-						crofconn_env::call_env(env).get_async_xid(*this));
+						++xid_features_request_last);
 
 		rofsock.send_message(msg);
 
@@ -577,7 +580,7 @@ crofconn::send_echo_request()
 		rofl::openflow::cofmsg_echo_request* msg =
 				new rofl::openflow::cofmsg_echo_request(
 						ofp_version,
-						crofconn_env::call_env(env).get_async_xid(*this));
+						++xid_echo_request_last);
 
 		rofsock.send_message(msg);
 

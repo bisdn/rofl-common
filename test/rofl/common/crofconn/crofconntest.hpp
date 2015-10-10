@@ -147,17 +147,10 @@ private:
 	congestion_occured_indication(
 			rofl::crofconn& conn);
 
-	virtual uint32_t
-	get_async_xid(
-			rofl::crofconn& conn);
-
-	virtual uint32_t
-	get_sync_xid(
-			rofl::crofconn& conn, uint8_t msg_type = 0, uint16_t msg_sub_type = 0);
-
 	virtual void
-	release_sync_xid(
-			rofl::crofconn& conn, uint32_t xid);
+	handle_transaction_timeout(
+			rofl::crofconn& conn, uint32_t xid, uint8_t type, uint16_t sub_type = 0)
+	{};
 
 private:
 
@@ -182,6 +175,8 @@ private:
 	rofl::crofsock*		slisten;
 	rofl::crofconn*     sclient;
 	rofl::crofconn*     sserver;
+	uint32_t            xid_server;
+	uint32_t            xid_client;
 
 	uint32_t            xid;
 	uint64_t            dpid;

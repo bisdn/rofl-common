@@ -41,7 +41,6 @@ crofbase::~crofbase()
 
 crofbase::crofbase() :
 	thread(this),
-	transactions(this),
 	generation_is_defined(false),
 	cached_generation_id((uint64_t)((int64_t)-1))
 {

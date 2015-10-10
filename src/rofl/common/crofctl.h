@@ -23,10 +23,15 @@
 #include "rofl/common/cmemory.h"
 #include "rofl/common/crofchan.h"
 #include "rofl/common/croflexception.h"
+#include "rofl/common/locking.hpp"
+#include "rofl/common/logging.h"
+#include "rofl/common/crandom.h"
+
 #include "rofl/common/openflow/openflow.h"
 #include "rofl/common/openflow/messages/cofmsg.h"
 #include "rofl/common/openflow/cofport.h"
 #include "rofl/common/openflow/cofports.h"
+#include "rofl/common/openflow/cofmatch.h"
 #include "rofl/common/openflow/coftables.h"
 #include "rofl/common/openflow/cofasyncconfig.h"
 #include "rofl/common/openflow/cofrole.h"
@@ -43,12 +48,7 @@
 #include "rofl/common/openflow/cofmeterstatsarray.h"
 #include "rofl/common/openflow/cofmeterconfigarray.h"
 #include "rofl/common/openflow/cofmeterfeatures.h"
-
-#include "rofl/common/locking.hpp"
-#include "rofl/common/logging.h"
-#include "rofl/common/openflow/cofmatch.h"
 #include "rofl/common/openflow/cofhelloelemversionbitmap.h"
-#include "rofl/common/ctransactions.h"
 
 
 namespace rofl {
@@ -759,8 +759,7 @@ protected:
  *
  */
 class crofctl :
-		public rofl::crofchan_env,
-		public rofl::ctransactions_env
+		public rofl::crofchan_env
 {
 public:
 
@@ -1497,29 +1496,6 @@ private:
 	handle_recv(
 			rofl::crofchan& chan, rofl::crofconn& conn, rofl::openflow::cofmsg* msg);
 
-	virtual uint32_t
-	get_async_xid(
-			rofl::crofchan& chan)
-	{ return transactions.get_async_xid(); };
-
-	virtual uint32_t
-	get_sync_xid(
-			rofl::crofchan& chan,
-			uint8_t msg_type = 0,
-			uint16_t msg_sub_type = 0)
-	{ return transactions.add_ta(cclock(/*secs=*/5), msg_type, msg_sub_type); };
-
-	virtual void
-	release_sync_xid(
-			rofl::crofchan& chan, uint32_t xid)
-	{ transactions.drop_ta(xid); };
-
-	virtual void
-	ta_expired(
-			rofl::ctransactions& tas,
-			rofl::ctransaction& ta)
-	{};
-
 private:
 
 	void
@@ -1536,8 +1512,11 @@ private:
 	// OpenFlow channel
 	rofl::crofchan                   rofchan;
 
-	// pending OFP transactions
-	rofl::ctransactions              transactions;
+	// random numbers generator
+	rofl::crandom                    random;
+
+	// last xid sent
+	uint32_t                         xid_last;
 
 	// default async config template
 	rofl::openflow::cofasync_config  async_config_role_default_template;
