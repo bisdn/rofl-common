@@ -24,12 +24,12 @@
 #include "rofl/common/cmemory.h"
 #include "rofl/common/logging.h"
 #include "rofl/common/crofchan.h"
-#include "rofl/common/ctransactions.h"
 #include "rofl/common/croflexception.h"
 #include "rofl/common/cdptid.h"
 #include "rofl/common/cauxid.h"
 #include "rofl/common/cdpid.h"
 #include "rofl/common/crofqueue.h"
+#include "rofl/common/crandom.h"
 
 #include "rofl/common/openflow/cofports.h"
 #include "rofl/common/openflow/coftables.h"
@@ -1022,8 +1022,7 @@ protected:
  *
  */
 class crofdpt :
-		public rofl::crofchan_env,
-		public rofl::ctransactions_env
+		public rofl::crofchan_env
 {
 public:
 
@@ -1322,7 +1321,7 @@ public:
 	uint32_t
 	send_features_request(
 			const rofl::cauxid& auxid,
-			const rofl::cclock& timeout = rofl::cclock(/*seconds=*/DEFAULT_REQUEST_TIMEOUT));
+			int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT);
 
 	/**
 	 * @brief	Sends OpenFlow Get-Config-Request message to attached datapath element.
@@ -1336,7 +1335,7 @@ public:
 	uint32_t
 	send_get_config_request(
 			const rofl::cauxid& auxid,
-			const rofl::cclock& timeout = rofl::cclock(/*seconds=*/DEFAULT_REQUEST_TIMEOUT));
+			int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT);
 
 	/**
 	 * @brief	Sends OpenFlow Table-Features-Stats-Request message to attached datapath element.
@@ -1352,7 +1351,7 @@ public:
 	send_table_features_stats_request(
 			const rofl::cauxid& auxid,
 			uint16_t stats_flags,
-			const rofl::cclock& timeout = rofl::cclock(/*seconds=*/DEFAULT_REQUEST_TIMEOUT));
+			int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT);
 
 	/**
 	 * @brief	Sends OpenFlow Desc-Stats-Request message to attached datapath element.
@@ -1368,7 +1367,7 @@ public:
 	send_desc_stats_request(
 			const rofl::cauxid& auxid,
 			uint16_t stats_flags,
-			const rofl::cclock& timeout = rofl::cclock(/*seconds=*/DEFAULT_REQUEST_TIMEOUT));
+			int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT);
 
 	/**
 	 * @brief	Sends OpenFlow Flow-Stats-Request message to attached datapath element.
@@ -1385,7 +1384,7 @@ public:
 			const rofl::cauxid& auxid,
 			uint16_t stats_flags,
 			const rofl::openflow::cofflow_stats_request& flow_stats_request,
-			const rofl::cclock& timeout = rofl::cclock(/*seconds=*/DEFAULT_REQUEST_TIMEOUT));
+			int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT);
 
 	/**
 	 * @brief	Sends OpenFlow Aggregate-Stats-Request message to attached datapath element.
@@ -1403,7 +1402,7 @@ public:
 			const rofl::cauxid& auxid,
 			uint16_t flags,
 			const rofl::openflow::cofaggr_stats_request& aggr_stats_request,
-			const rofl::cclock& timeout = rofl::cclock(/*seconds=*/DEFAULT_REQUEST_TIMEOUT));
+			int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT);
 
 
 	/**
@@ -1420,7 +1419,7 @@ public:
 	send_table_stats_request(
 			const rofl::cauxid& auxid,
 			uint16_t stats_flags = 0,
-			const rofl::cclock& timeout = rofl::cclock(/*seconds=*/DEFAULT_REQUEST_TIMEOUT));
+			int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT);
 
 	/**
 	 * @brief	Sends OpenFlow Port-Stats-Request message to attached datapath element.
@@ -1438,7 +1437,7 @@ public:
 			const rofl::cauxid& auxid,
 			uint16_t stats_flags,
 			const rofl::openflow::cofport_stats_request& port_stats_request,
-			const rofl::cclock& timeout = rofl::cclock(/*seconds=*/DEFAULT_REQUEST_TIMEOUT));
+			int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT);
 
 	/**
 	 * @brief	Sends OpenFlow Queue-Stats-Request message to attached datapath element.
@@ -1456,7 +1455,7 @@ public:
 			const rofl::cauxid& auxid,
 			uint16_t stats_flags,
 			const rofl::openflow::cofqueue_stats_request& queue_stats_request,
-			const rofl::cclock& timeout = rofl::cclock(/*seconds=*/DEFAULT_REQUEST_TIMEOUT));
+			int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT);
 
 	/**
 	 * @brief	Sends OpenFlow Group-Stats-Request message to attached datapath element.
@@ -1474,7 +1473,7 @@ public:
 			const rofl::cauxid& auxid,
 			uint16_t stats_flags,
 			const rofl::openflow::cofgroup_stats_request& group_stats_request,
-			const rofl::cclock& timeout = rofl::cclock(/*seconds=*/DEFAULT_REQUEST_TIMEOUT));
+			int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT);
 
 	/**
 	 * @brief	Sends OpenFlow Group-Desc-Stats-Request message to attached datapath element.
@@ -1490,7 +1489,7 @@ public:
 	send_group_desc_stats_request(
 			const rofl::cauxid& auxid,
 			uint16_t stats_flags = 0,
-			const rofl::cclock& timeout = rofl::cclock(/*seconds=*/DEFAULT_REQUEST_TIMEOUT));
+			int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT);
 
 	/**
 	 * @brief	Sends OpenFlow Group-Features-Stats-Request message to attached datapath element.
@@ -1506,7 +1505,7 @@ public:
 	send_group_features_stats_request(
 			const rofl::cauxid& auxid,
 			uint16_t stats_flags,
-			const rofl::cclock& timeout = rofl::cclock(/*seconds=*/DEFAULT_REQUEST_TIMEOUT));
+			int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT);
 
 	/**
 	 * @brief	Sends OpenFlow Port-Desc-Stats-Request message to attached datapath element.
@@ -1522,7 +1521,7 @@ public:
 	send_port_desc_stats_request(
 			const rofl::cauxid& auxid,
 			uint16_t stats_flags,
-			const rofl::cclock& timeout = rofl::cclock(/*seconds=*/DEFAULT_REQUEST_TIMEOUT));
+			int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT);
 
 	/**
 	 * @brief	Sends OpenFlow Experimenter-Stats-Request message to attached datapath element.
@@ -1544,7 +1543,7 @@ public:
 			uint32_t exp_id,
 			uint32_t exp_type,
 			const cmemory& body,
-			const rofl::cclock& timeout = rofl::cclock(/*seconds=*/DEFAULT_REQUEST_TIMEOUT));
+			int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT);
 
 	/**
 	 * @brief	Sends OpenFlow Meter-Stats-Request message to attached datapath element.
@@ -1562,7 +1561,7 @@ public:
 			const rofl::cauxid& auxid,
 			uint16_t stats_flags,
 			const rofl::openflow::cofmeter_stats_request& meter_stats_request,
-			const rofl::cclock& timeout = rofl::cclock(/*seconds=*/DEFAULT_REQUEST_TIMEOUT));
+			int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT);
 
 	/**
 	 * @brief	Sends OpenFlow Meter-Config-Stats-Request message to attached datapath element.
@@ -1580,7 +1579,7 @@ public:
 			const rofl::cauxid& auxid,
 			uint16_t stats_flags,
 			const rofl::openflow::cofmeter_config_request& meter_config_stats_request,
-			const rofl::cclock& timeout = rofl::cclock(/*seconds=*/DEFAULT_REQUEST_TIMEOUT));
+			int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT);
 
 	/**
 	 * @brief	Sends OpenFlow Meter-Features-Stats-Request message to attached datapath element.
@@ -1596,7 +1595,7 @@ public:
 	send_meter_features_stats_request(
 			const rofl::cauxid& auxid,
 			uint16_t stats_flags,
-			const rofl::cclock& timeout = rofl::cclock(/*seconds=*/DEFAULT_REQUEST_TIMEOUT));
+			int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT);
 
 	/**
 	 * @brief	Sends OpenFlow Packet-Out message to attached datapath element.
@@ -1632,7 +1631,7 @@ public:
 	uint32_t
 	send_barrier_request(
 			const rofl::cauxid& auxid,
-			const rofl::cclock& timeout = rofl::cclock(/*seconds=*/DEFAULT_REQUEST_TIMEOUT));
+			int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT);
 
 	/**
 	 * @brief	Sends OpenFlow Role-Request message to attached datapath element.
@@ -1648,7 +1647,7 @@ public:
 	send_role_request(
 			const rofl::cauxid& auxid,
 			const rofl::openflow::cofrole& role,
-			const rofl::cclock& timeout = rofl::cclock(/*seconds=*/DEFAULT_REQUEST_TIMEOUT));
+			int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT);
 
 	/**
 	 * @brief	Sends OpenFlow Flow-Mod message to attached datapath element.
@@ -1746,7 +1745,7 @@ public:
 	send_queue_get_config_request(
 			const rofl::cauxid& auxid,
 			uint32_t port,
-			const rofl::cclock& timeout = rofl::cclock(/*seconds=*/DEFAULT_REQUEST_TIMEOUT));
+			int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT);
 
 	/**
 	 * @brief	Sends OpenFlow Get-Async-Config-Request message to attached datapath element.
@@ -1760,7 +1759,7 @@ public:
 	uint32_t
 	send_get_async_config_request(
 			const rofl::cauxid& auxid,
-			const rofl::cclock& timeout = rofl::cclock(/*seconds=*/DEFAULT_REQUEST_TIMEOUT));
+			int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT);
 
 	/**
 	 * @brief	Sends OpenFlow Set-Async-Config message to attached datapath element.
@@ -1837,7 +1836,7 @@ public:
 			uint32_t exp_type,
 			uint8_t *body = NULL,
 			size_t bodylen = 0,
-			const rofl::cclock& timeout = rofl::cclock(/*seconds=*/DEFAULT_REQUEST_TIMEOUT));
+			int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT);
 
 	/**@}*/
 
@@ -1882,8 +1881,6 @@ public:
 		os << indent(0) << "<crofdpt >";
 		{ rofl::indent i(2); os << dpt.get_dptid(); }
 		{ rofl::indent i(2); os << dpt.rofchan; }
-		rofl::indent j(2);
-		os << dpt.transactions;
 		return os;
 	};
 
@@ -1949,6 +1946,10 @@ private:
 			crofchan& chan, crofconn& conn)
 	{ crofdpt_env::call_env(env).congestion_solved_indication(*this, conn); };
 
+	virtual void
+	handle_transaction_timeout(
+			crofchan& chan, crofconn& conn, uint32_t xid, uint8_t type, uint16_t sub_type);
+
 private:
 
 	virtual void
@@ -1958,24 +1959,7 @@ private:
 	virtual uint32_t
 	get_async_xid(
 			rofl::crofchan& chan)
-	{ return transactions.get_async_xid(); };
-
-	virtual uint32_t
-	get_sync_xid(
-			rofl::crofchan& chan,
-			uint8_t msg_type = 0,
-			uint16_t msg_sub_type = 0)
-	{ return transactions.add_ta(cclock(/*secs=*/5), msg_type, msg_sub_type); };
-
-	virtual void
-	release_sync_xid(
-			rofl::crofchan& chan, uint32_t xid)
-	{ transactions.drop_ta(xid); };
-
-private:
-
-	virtual void
-	ta_expired(rofl::ctransactions& tas, rofl::ctransaction& ta);
+	{ return ++xid_last; };
 
 private:
 
@@ -2105,9 +2089,13 @@ private:
 	// OFP control channel
 	rofl::crofchan                   rofchan;
 
-	// pending OFP transactions
-	rofl::ctransactions              transactions;
+	// random numbers generator
+	rofl::crandom                    random;
 
+	// last xid sent
+	uint32_t                         xid_last;
+
+	// default request timeout
 	static const time_t              DEFAULT_REQUEST_TIMEOUT = 5; // seconds
 
 	// datapath identifier

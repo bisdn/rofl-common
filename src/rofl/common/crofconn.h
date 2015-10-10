@@ -145,6 +145,10 @@ protected:
 	congestion_solved_indication(
 			crofconn& conn) = 0;
 
+	virtual void
+	handle_transaction_timeout(
+			crofconn& conn, uint32_t xid, uint8_t type, uint16_t sub_type = 0) = 0;
+
 private:
 	static std::set<crofconn_env*>  connection_envs;
 	static crwlock                  connection_envs_lock;
@@ -196,6 +200,7 @@ class crofconn :
 		TIMER_ID_WAIT_FOR_FEATURES = 2,
 		TIMER_ID_WAIT_FOR_ECHO	   = 3,
 		TIMER_ID_NEED_LIFE_CHECK   = 4,
+		TIMER_ID_TRANSACTIONS      = 5,
 	};
 
 public:
@@ -336,6 +341,13 @@ public:
 	send_message(
 			rofl::openflow::cofmsg *msg)
 	{ return fragment_and_send_message(msg); };
+
+	/**
+	 * @brief	Send OFP message via socket with expiration timer
+	 */
+	unsigned int
+	send_message(
+			rofl::openflow::cofmsg *msg, const ctimespec& ts);
 
 public:
 
@@ -678,6 +690,76 @@ public:
 			const std::string& ciphers)
 	{ rofsock.set_tls_ciphers(ciphers); return *this; };
 
+public:
+
+	friend std::ostream&
+	operator<< (std::ostream& os, const crofconn& conn) {
+		os << indent(0) << "<crofconn ofp-version:" << (int)conn.ofp_version << " "
+				<< "openflow-connection-established: " << conn.is_established() << " "
+				<< "transport-connection-established: " << conn.is_transport_established() << " "
+				<< ">" << std::endl;
+		{ rofl::indent i(2); os << conn.get_auxid(); }
+		if (conn.state == STATE_NEGOTIATION_FAILED) {
+			os << indent(2) << "<state: -NEGOTIATION-FAILED- >" << std::endl;
+		}
+		else if (conn.state == STATE_CLOSING) {
+			os << indent(2) << "<state: -CLOSING- >" << std::endl;
+		}
+		else if (conn.state == STATE_DISCONNECTED) {
+			os << indent(2) << "<state: -DISCONNECTED- >" << std::endl;
+		}
+		else if (conn.state == STATE_CONNECT_PENDING) {
+			os << indent(2) << "<state: -CONNECT-PENDING- >" << std::endl;
+		}
+		else if (conn.state == STATE_ACCEPT_PENDING) {
+			os << indent(2) << "<state: -ACCEPT-PENDING- >" << std::endl;
+		}
+		else if (conn.state == STATE_NEGOTIATING) {
+			os << indent(2) << "<state: -NEGOTIATING- >" << std::endl;
+		}
+		else if (conn.state == STATE_NEGOTIATING2) {
+			os << indent(2) << "<state: -NEGOTIATING2- >" << std::endl;
+		}
+		else if (conn.state == STATE_ESTABLISHED) {
+			os << indent(2) << "<state: -ESTABLISHED- >" << std::endl;
+		}
+		return os;
+	};
+
+	std::string
+	str() const {
+		std::stringstream ss;
+		ss << "<crofconn ofp-version:" << (int)ofp_version << " "
+				<< "openflow-connection-established: " << is_established() << " "
+				<< "transport-connection-established: " << is_transport_established() << " ";
+		if (state == STATE_NEGOTIATION_FAILED) {
+			ss << "state: -NEGOTIATION-FAILED- ";
+		} else
+		if (state == STATE_CLOSING) {
+			ss << "state: -CLOSING- ";
+		} else
+		if (state == STATE_DISCONNECTED) {
+			ss << "state: -DISCONNECTED- ";
+		} else
+		if (state == STATE_CONNECT_PENDING) {
+			ss << "state: -CONNECT-PENDING- ";
+		} else
+		if (state == STATE_ACCEPT_PENDING) {
+			ss << "state: -ACCEPT-PENDING- ";
+		} else
+		if (state == STATE_NEGOTIATING) {
+			ss << "state: -NEGOTIATING- ";
+		} else
+		if (state == STATE_NEGOTIATING2) {
+			ss << "state: -NEGOTIATING2- ";
+		} else
+		if (state == STATE_ESTABLISHED) {
+			ss << "state: -ESTABLISHED- ";
+		}
+		ss << ">";
+		return ss.str();
+	};
+
 private:
 
 	void
@@ -938,74 +1020,178 @@ private:
 	fragment_meter_config_stats_reply(
 			rofl::openflow::cofmsg_meter_config_stats_reply *msg);
 
-public:
+private:
 
-	friend std::ostream&
-	operator<< (std::ostream& os, const crofconn& conn) {
-		os << indent(0) << "<crofconn ofp-version:" << (int)conn.ofp_version << " "
-				<< "openflow-connection-established: " << conn.is_established() << " "
-				<< "transport-connection-established: " << conn.is_transport_established() << " "
-				<< ">" << std::endl;
-		{ rofl::indent i(2); os << conn.get_auxid(); }
-		if (conn.state == STATE_NEGOTIATION_FAILED) {
-			os << indent(2) << "<state: -NEGOTIATION-FAILED- >" << std::endl;
-		}
-		else if (conn.state == STATE_CLOSING) {
-			os << indent(2) << "<state: -CLOSING- >" << std::endl;
-		}
-		else if (conn.state == STATE_DISCONNECTED) {
-			os << indent(2) << "<state: -DISCONNECTED- >" << std::endl;
-		}
-		else if (conn.state == STATE_CONNECT_PENDING) {
-			os << indent(2) << "<state: -CONNECT-PENDING- >" << std::endl;
-		}
-		else if (conn.state == STATE_ACCEPT_PENDING) {
-			os << indent(2) << "<state: -ACCEPT-PENDING- >" << std::endl;
-		}
-		else if (conn.state == STATE_NEGOTIATING) {
-			os << indent(2) << "<state: -NEGOTIATING- >" << std::endl;
-		}
-		else if (conn.state == STATE_NEGOTIATING2) {
-			os << indent(2) << "<state: -NEGOTIATING2- >" << std::endl;
-		}
-		else if (conn.state == STATE_ESTABLISHED) {
-			os << indent(2) << "<state: -ESTABLISHED- >" << std::endl;
-		}
-		return os;
+	/**
+	 *
+	 */
+	class ctransaction {
+	public:
+		uint32_t    xid;
+		ctimespec   tspec;
+		uint8_t     type;
+		uint16_t    subtype;
+	public:
+
+		/**
+		 *
+		 */
+		ctransaction() :
+			xid(0),
+			type(0),
+			subtype(0)
+		{};
+
+		/**
+		 *
+		 */
+		ctransaction(
+				uint32_t xid, const ctimespec tspec, uint8_t type, uint16_t subtype = 0) :
+					xid(xid),
+					tspec(tspec),
+					type(type),
+					subtype(subtype)
+		{};
+
+		/**
+		 *
+		 */
+		ctransaction(
+				const ctransaction& ta)
+		{ *this = ta; };
+
+		/**
+		 *
+		 */
+		ctransaction&
+		operator= (
+				const ctransaction& ta) {
+			if (this == &ta)
+				return *this;
+			xid     = ta.xid;
+			tspec   = ta.tspec;
+			type    = ta.type;
+			subtype = ta.subtype;
+			return *this;
+		};
+
+		/**
+		 *
+		 */
+		bool
+		operator< (
+				const ctransaction& ta) const
+		{ return (tspec < ta.tspec); };
+
+	public:
+
+		uint32_t
+		get_xid() const
+		{ return xid; };
+
+		uint8_t
+		get_type() const
+		{ return type; };
+
+		uint16_t
+		get_subtype() const
+		{ return subtype; };
+
+		const ctimespec&
+		get_tspec() const
+		{ return tspec; };
+
+	public:
+
+		class ctransaction_find_by_xid {
+			uint32_t xid;
+		public:
+			ctransaction_find_by_xid(
+					uint32_t xid) :
+						xid(xid)
+			{};
+			bool
+			operator() (
+					const ctransaction& ta) const
+			{ return (ta.get_xid() == xid); };
+		};
 	};
 
-	std::string
-	str() const {
-		std::stringstream ss;
-		ss << "<crofconn ofp-version:" << (int)ofp_version << " "
-				<< "openflow-connection-established: " << is_established() << " "
-				<< "transport-connection-established: " << is_transport_established() << " ";
-		if (state == STATE_NEGOTIATION_FAILED) {
-			ss << "state: -NEGOTIATION-FAILED- ";
-		} else
-		if (state == STATE_CLOSING) {
-			ss << "state: -CLOSING- ";
-		} else
-		if (state == STATE_DISCONNECTED) {
-			ss << "state: -DISCONNECTED- ";
-		} else
-		if (state == STATE_CONNECT_PENDING) {
-			ss << "state: -CONNECT-PENDING- ";
-		} else
-		if (state == STATE_ACCEPT_PENDING) {
-			ss << "state: -ACCEPT-PENDING- ";
-		} else
-		if (state == STATE_NEGOTIATING) {
-			ss << "state: -NEGOTIATING- ";
-		} else
-		if (state == STATE_NEGOTIATING2) {
-			ss << "state: -NEGOTIATING2- ";
-		} else
-		if (state == STATE_ESTABLISHED) {
-			ss << "state: -ESTABLISHED- ";
+	/**
+	 *
+	 */
+	void
+	add_xid(
+			uint32_t xid, const ctimespec& ts, uint8_t type, uint16_t sub_type = 0) {
+		AcquireReadWriteLock rwlock(xids_rwlock);
+		if (not xids.empty()) {
+			uint32_t xid_first = xids.begin()->get_xid();
+			xids.insert(ctransaction(xid, ts, type, sub_type));
+			const ctransaction& ta_first = *(xids.begin());
+			if (xid_first != ta_first.get_xid()) {
+				thread.add_timer(TIMER_ID_TRANSACTIONS, ta_first.tspec);
+			}
+		} else {
+			xids.insert(ctransaction(xid, ts, type, sub_type));
+			thread.add_timer(TIMER_ID_TRANSACTIONS, xids.begin()->tspec);
 		}
-		ss << ">";
-		return ss.str();
+	};
+
+	/**
+	 *
+	 */
+	void
+	drop_xid(
+			uint32_t xid) {
+		AcquireReadWriteLock rwlock(xids_rwlock);
+		std::set<ctransaction>::iterator it;
+		while ((it = find_if(xids.begin(), xids.end(),
+				ctransaction::ctransaction_find_by_xid(xid))) != xids.end()) {
+			xids.erase(it);
+		}
+	};
+
+	/**
+	 *
+	 */
+	bool
+	has_xid(
+			uint32_t xid) const {
+		AcquireReadLock rlock(xids_rwlock);
+		std::set<ctransaction>::iterator it;
+		if ((it = find_if(xids.begin(), xids.end(),
+				ctransaction::ctransaction_find_by_xid(xid))) != xids.end()) {
+			return true;
+		}
+		return false;
+	};
+
+	/**
+	 *
+	 */
+	void
+	handle_xids() {
+		while (true) {
+			ctransaction ta;
+			{
+				AcquireReadWriteLock rwlock(xids_rwlock);
+				if (xids.empty()) {
+					return;
+				}
+				ta = *(xids.begin());
+				if (not ta.get_tspec().is_expired()) {
+					thread.add_timer(TIMER_ID_TRANSACTIONS, ta.get_tspec());
+					return;
+				}
+				xids.erase(xids.begin());
+			} // release rwlock
+			try {
+				crofconn_env::call_env(env).
+						handle_transaction_timeout(*this, ta.get_xid(), ta.get_type(), ta.get_subtype());
+			} catch (eRofConnNotFound& e) {
+				return;
+			}
+		};
 	};
 
 private:
@@ -1080,6 +1266,12 @@ private:
 	// timeout value for lifecheck
 	unsigned int		        timeout_lifecheck;
 	static const unsigned int   DEFAULT_LIFECHECK_TIMEOUT;
+
+	// set of pending transactions
+	std::set<ctransaction>      xids;
+
+	// .. and associated rwlock
+	crwlock                     xids_rwlock;
 };
 
 }; /* namespace rofl */

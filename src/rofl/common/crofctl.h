@@ -1486,6 +1486,11 @@ private:
 			crofchan& chan, crofconn& conn)
 	{ crofctl_env::call_env(env).congestion_solved_indication(*this, conn); };
 
+	virtual void
+	handle_transaction_timeout(
+			crofchan& chan, crofconn& conn, uint32_t xid, uint8_t type, uint16_t sub_type)
+	{};
+
 private:
 
 	virtual void

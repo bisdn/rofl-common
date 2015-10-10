@@ -143,6 +143,9 @@ crofconn::handle_timeout(
 	case TIMER_ID_WAIT_FOR_FEATURES: {
 		features_request_expired();
 	} break;
+	case TIMER_ID_TRANSACTIONS: {
+		handle_xids();
+	} break;
 	default: {
 		std::cerr << "[rofl-common][crofconn][thread_int] unknown timer type:" << (unsigned int)timer_id << " rcvd" << str() << std::endl;
 	};
@@ -914,6 +917,11 @@ crofconn::handle_recv(
 
 	try {
 
+		/* check pending xids */
+		if (has_xid(msg->get_xid())) {
+			drop_xid(msg->get_xid());
+		}
+
 		/* Store message in appropriate rxqueue:
 		 * Strategy: we enforce queueing of successful received messages
 		 * in rxqueues in any case and never drop messages. However, we
@@ -1249,6 +1257,61 @@ crofconn::handle_rx_multipart_message(
 	};
 	}
 }
+
+
+
+unsigned int
+crofconn::send_message(
+		rofl::openflow::cofmsg *msg, const ctimespec& ts)
+{
+
+	switch (msg->get_version()) {
+	case rofl::openflow10::OFP_VERSION: {
+
+		switch (msg->get_type()) {
+		case rofl::openflow10::OFPT_STATS_REQUEST: {
+			add_xid(msg->get_xid(), ts, msg->get_type(),
+					dynamic_cast<rofl::openflow::cofmsg_stats_request*>(msg)->get_stats_type());
+		} break;
+		default: {
+			add_xid(msg->get_xid(), ts, msg->get_type());
+		};
+		}
+
+	} break;
+	case rofl::openflow12::OFP_VERSION: {
+
+		switch (msg->get_type()) {
+		case rofl::openflow12::OFPT_STATS_REQUEST: {
+			add_xid(msg->get_xid(), ts, msg->get_type(),
+					dynamic_cast<rofl::openflow::cofmsg_stats_request*>(msg)->get_stats_type());
+		} break;
+		default: {
+			add_xid(msg->get_xid(), ts, msg->get_type());
+		};
+		}
+
+	} break;
+	case rofl::openflow13::OFP_VERSION: {
+
+		switch (msg->get_type()) {
+		case rofl::openflow13::OFPT_MULTIPART_REQUEST: {
+			add_xid(msg->get_xid(), ts, msg->get_type(),
+					dynamic_cast<rofl::openflow::cofmsg_stats_request*>(msg)->get_stats_type());
+		} break;
+		default: {
+			add_xid(msg->get_xid(), ts, msg->get_type());
+		};
+		}
+
+	} break;
+	default: {
+
+	};
+	}
+
+	return fragment_and_send_message(msg);
+};
 
 
 

@@ -155,6 +155,11 @@ protected:
 	get_async_xid(
 			crofchan& chan) = 0;
 
+	virtual void
+	handle_transaction_timeout(
+			crofchan& chan, crofconn& conn, uint32_t xid, uint8_t type, uint16_t sub_type = 0)
+	{};
+
 private:
 	static std::set<crofchan_env*>  channel_envs;
 	static crwlock                  channel_envs_lock;
@@ -197,6 +202,13 @@ public:
 	void
 	send_message(
 			const cauxid& auxid, rofl::openflow::cofmsg* msg);
+
+	/**
+	 *
+	 */
+	void
+	send_message(
+			const cauxid& auxid, rofl::openflow::cofmsg* msg, const ctimespec& ts);
 
 public:
 
@@ -431,6 +443,11 @@ private:
 	congestion_solved_indication(
 			crofconn& conn)
 	{ crofchan_env::call_env(env).congestion_solved_indication(*this, conn); };
+
+	virtual void
+	handle_transaction_timeout(
+			crofconn& conn, uint32_t xid, uint8_t type, uint16_t sub_type = 0)
+	{ crofchan_env::call_env(env).handle_transaction_timeout(*this, conn, xid, type, sub_type); };
 
 public:
 
