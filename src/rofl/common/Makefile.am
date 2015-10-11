@@ -37,8 +37,6 @@ librofl_common_base_la_SOURCES = \
 		cpacket.cc \
 		crandom.h \
 		crandom.cc \
-		cclock.h \
-		cclock.cc \
 		cmemory.h \
 		cmemory.cc \
 		cauxid.h \
@@ -72,7 +70,6 @@ library_include_HEADERS= \
 		crofctl.h \
 		crofconn.h \
 		crofchan.h \
-		cclock.h \
 		croflexception.h \
 		cmemory.h \
 		thread_helper.h \
