@@ -196,7 +196,7 @@ class crofconn :
 		TIMER_ID_WAIT_FOR_FEATURES = 2,
 		TIMER_ID_WAIT_FOR_ECHO	   = 3,
 		TIMER_ID_NEED_LIFE_CHECK   = 4,
-		TIMER_ID_TRANSACTIONS      = 5,
+		TIMER_ID_PENDING_REQUESTS      = 5,
 	};
 
 public:
@@ -1117,19 +1117,19 @@ private:
 	 *
 	 */
 	void
-	add_xid(
+	add_pending_request(
 			uint32_t xid, const ctimespec& ts, uint8_t type, uint16_t sub_type = 0) {
-		AcquireReadWriteLock rwlock(xids_rwlock);
-		if (not xids.empty()) {
-			uint32_t xid_first = xids.begin()->get_xid();
-			xids.insert(ctransaction(xid, ts, type, sub_type));
-			const ctransaction& ta_first = *(xids.begin());
+		AcquireReadWriteLock rwlock(pending_requests_rwlock);
+		if (not pending_requests.empty()) {
+			uint32_t xid_first = pending_requests.begin()->get_xid();
+			pending_requests.insert(ctransaction(xid, ts, type, sub_type));
+			const ctransaction& ta_first = *(pending_requests.begin());
 			if (xid_first != ta_first.get_xid()) {
-				thread.add_timer(TIMER_ID_TRANSACTIONS, ta_first.tspec);
+				thread.add_timer(TIMER_ID_PENDING_REQUESTS, ta_first.tspec);
 			}
 		} else {
-			xids.insert(ctransaction(xid, ts, type, sub_type));
-			thread.add_timer(TIMER_ID_TRANSACTIONS, xids.begin()->tspec);
+			pending_requests.insert(ctransaction(xid, ts, type, sub_type));
+			thread.add_timer(TIMER_ID_PENDING_REQUESTS, pending_requests.begin()->tspec);
 		}
 	};
 
@@ -1137,13 +1137,13 @@ private:
 	 *
 	 */
 	void
-	drop_xid(
+	drop_pending_request(
 			uint32_t xid) {
-		AcquireReadWriteLock rwlock(xids_rwlock);
+		AcquireReadWriteLock rwlock(pending_requests_rwlock);
 		std::set<ctransaction>::iterator it;
-		while ((it = find_if(xids.begin(), xids.end(),
-				ctransaction::ctransaction_find_by_xid(xid))) != xids.end()) {
-			xids.erase(it);
+		while ((it = find_if(pending_requests.begin(), pending_requests.end(),
+				ctransaction::ctransaction_find_by_xid(xid))) != pending_requests.end()) {
+			pending_requests.erase(it);
 		}
 	};
 
@@ -1151,12 +1151,12 @@ private:
 	 *
 	 */
 	bool
-	has_xid(
+	has_pending_request(
 			uint32_t xid) const {
-		AcquireReadLock rlock(xids_rwlock);
+		AcquireReadLock rlock(pending_requests_rwlock);
 		std::set<ctransaction>::iterator it;
-		if ((it = find_if(xids.begin(), xids.end(),
-				ctransaction::ctransaction_find_by_xid(xid))) != xids.end()) {
+		if ((it = find_if(pending_requests.begin(), pending_requests.end(),
+				ctransaction::ctransaction_find_by_xid(xid))) != pending_requests.end()) {
 			return true;
 		}
 		return false;
@@ -1166,20 +1166,20 @@ private:
 	 *
 	 */
 	void
-	handle_xids() {
+	check_pending_requests() {
 		while (true) {
 			ctransaction ta;
 			{
-				AcquireReadWriteLock rwlock(xids_rwlock);
-				if (xids.empty()) {
+				AcquireReadWriteLock rwlock(pending_requests_rwlock);
+				if (pending_requests.empty()) {
 					return;
 				}
-				ta = *(xids.begin());
+				ta = *(pending_requests.begin());
 				if (not ta.get_tspec().is_expired()) {
-					thread.add_timer(TIMER_ID_TRANSACTIONS, ta.get_tspec());
+					thread.add_timer(TIMER_ID_PENDING_REQUESTS, ta.get_tspec());
 					return;
 				}
-				xids.erase(xids.begin());
+				pending_requests.erase(pending_requests.begin());
 			} // release rwlock
 			try {
 				crofconn_env::call_env(env).
@@ -1267,10 +1267,10 @@ private:
 	static const unsigned int   DEFAULT_LIFECHECK_TIMEOUT;
 
 	// set of pending transactions
-	std::set<ctransaction>      xids;
+	std::set<ctransaction>      pending_requests;
 
 	// .. and associated rwlock
-	crwlock                     xids_rwlock;
+	crwlock                     pending_requests_rwlock;
 
 	// hello xid
 	uint32_t                    xid_hello_last;

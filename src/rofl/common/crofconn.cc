@@ -146,8 +146,8 @@ crofconn::handle_timeout(
 	case TIMER_ID_WAIT_FOR_FEATURES: {
 		features_request_expired();
 	} break;
-	case TIMER_ID_TRANSACTIONS: {
-		handle_xids();
+	case TIMER_ID_PENDING_REQUESTS: {
+		check_pending_requests();
 	} break;
 	default: {
 		std::cerr << "[rofl-common][crofconn][thread_int] unknown timer type:" << (unsigned int)timer_id << " rcvd" << str() << std::endl;
@@ -921,8 +921,8 @@ crofconn::handle_recv(
 	try {
 
 		/* check pending xids */
-		if (has_xid(msg->get_xid())) {
-			drop_xid(msg->get_xid());
+		if (has_pending_request(msg->get_xid())) {
+			drop_pending_request(msg->get_xid());
 		}
 
 		/* Store message in appropriate rxqueue:
@@ -1273,11 +1273,11 @@ crofconn::send_message(
 
 		switch (msg->get_type()) {
 		case rofl::openflow10::OFPT_STATS_REQUEST: {
-			add_xid(msg->get_xid(), ts, msg->get_type(),
+			add_pending_request(msg->get_xid(), ts, msg->get_type(),
 					dynamic_cast<rofl::openflow::cofmsg_stats_request*>(msg)->get_stats_type());
 		} break;
 		default: {
-			add_xid(msg->get_xid(), ts, msg->get_type());
+			add_pending_request(msg->get_xid(), ts, msg->get_type());
 		};
 		}
 
@@ -1286,11 +1286,11 @@ crofconn::send_message(
 
 		switch (msg->get_type()) {
 		case rofl::openflow12::OFPT_STATS_REQUEST: {
-			add_xid(msg->get_xid(), ts, msg->get_type(),
+			add_pending_request(msg->get_xid(), ts, msg->get_type(),
 					dynamic_cast<rofl::openflow::cofmsg_stats_request*>(msg)->get_stats_type());
 		} break;
 		default: {
-			add_xid(msg->get_xid(), ts, msg->get_type());
+			add_pending_request(msg->get_xid(), ts, msg->get_type());
 		};
 		}
 
@@ -1299,11 +1299,11 @@ crofconn::send_message(
 
 		switch (msg->get_type()) {
 		case rofl::openflow13::OFPT_MULTIPART_REQUEST: {
-			add_xid(msg->get_xid(), ts, msg->get_type(),
+			add_pending_request(msg->get_xid(), ts, msg->get_type(),
 					dynamic_cast<rofl::openflow::cofmsg_stats_request*>(msg)->get_stats_type());
 		} break;
 		default: {
-			add_xid(msg->get_xid(), ts, msg->get_type());
+			add_pending_request(msg->get_xid(), ts, msg->get_type());
 		};
 		}
 
