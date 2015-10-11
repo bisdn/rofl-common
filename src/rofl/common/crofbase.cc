@@ -42,7 +42,8 @@ crofbase::~crofbase()
 crofbase::crofbase() :
 	thread(this),
 	generation_is_defined(false),
-	cached_generation_id((uint64_t)((int64_t)-1))
+	cached_generation_id((uint64_t)((int64_t)-1)),
+	enforce_tls(false)
 {
 	AcquireReadWriteLock rwlock(rofbases_rwlock);
 	if (crofbase::rofbases.empty()) {
@@ -401,7 +402,21 @@ crofbase::handle_read_event(
 		AcquireReadLock rlock(dpt_sockets_rwlock);
 		if ((it = find_if(dpt_sockets.begin(), dpt_sockets.end(),
 				csocket_find_by_sock_descriptor(fd))) != dpt_sockets.end()) {
-			(new crofconn(this))->tcp_accept(fd, versionbitmap, crofconn::MODE_CONTROLLER);
+			if (enforce_tls) {
+				(new crofconn(this))->
+						set_tls_capath(capath).
+						set_tls_cafile(cafile).
+						set_tls_certfile(certfile).
+						set_tls_keyfile(keyfile).
+						set_tls_pswd(password).
+						set_tls_verify_mode(verify_mode).
+						set_tls_verify_depth(verify_depth).
+						set_tls_ciphers(ciphers).
+							tls_accept(fd, versionbitmap, crofconn::MODE_CONTROLLER);
+			} else {
+				(new crofconn(this))->
+							tcp_accept(fd, versionbitmap, crofconn::MODE_CONTROLLER);
+			}
 		}
 	}
 
@@ -410,7 +425,21 @@ crofbase::handle_read_event(
 		AcquireReadLock rlock(ctl_sockets_rwlock);
 		if ((it = find_if(ctl_sockets.begin(), ctl_sockets.end(),
 				csocket_find_by_sock_descriptor(fd))) != ctl_sockets.end()) {
-			(new crofconn(this))->tcp_accept(fd, versionbitmap, crofconn::MODE_DATAPATH);
+			if (enforce_tls) {
+				(new crofconn(this))->
+						set_tls_capath(capath).
+						set_tls_cafile(cafile).
+						set_tls_certfile(certfile).
+						set_tls_keyfile(keyfile).
+						set_tls_pswd(password).
+						set_tls_verify_mode(verify_mode).
+						set_tls_verify_depth(verify_depth).
+						set_tls_ciphers(ciphers).
+							tls_accept(fd, versionbitmap, crofconn::MODE_DATAPATH);
+			} else {
+				(new crofconn(this))->
+							tcp_accept(fd, versionbitmap, crofconn::MODE_DATAPATH);
+			}
 		}
 	}
 }

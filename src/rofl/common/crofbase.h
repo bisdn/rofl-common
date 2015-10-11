@@ -79,6 +79,152 @@ public:
 public:
 
 	/**
+	 *
+	 */
+	crofbase&
+	use_tls(
+			bool enforce_tls)
+	{ this->enforce_tls = enforce_tls; return *this; };
+
+public:
+
+	/**
+	 *
+	 */
+	const std::string&
+	get_tls_capath() const
+	{ return capath; };
+
+	/**
+	 *
+	 */
+	crofbase&
+	set_tls_capath(
+			const std::string& capath)
+	{ this->capath = capath; return *this; };
+
+public:
+
+	/**
+	 *
+	 */
+	const std::string&
+	get_tls_cafile() const
+	{ return cafile; };
+
+	/**
+	 *
+	 */
+	crofbase&
+	set_tls_cafile(
+			const std::string& cafile)
+	{ this->cafile = cafile; return *this; };
+
+public:
+
+	/**
+	 *
+	 */
+	const std::string&
+	get_tls_certfile() const
+	{ return certfile; };
+
+	/**
+	 *
+	 */
+	crofbase&
+	set_tls_certfile(
+			const std::string& certfile)
+	{ this->certfile = certfile; return *this; };
+
+public:
+
+	/**
+	 *
+	 */
+	const std::string&
+	get_tls_keyfile() const
+	{ return keyfile; };
+
+	/**
+	 *
+	 */
+	crofbase&
+	set_tls_keyfile(
+			const std::string& keyfile)
+	{ this->keyfile = keyfile; return *this; };
+
+public:
+
+	/**
+	 *
+	 */
+	const std::string&
+	get_tls_pswd() const
+	{ return password; };
+
+	/**
+	 *
+	 */
+	crofbase&
+	set_tls_pswd(
+			const std::string& password)
+	{ this->password = password; return *this; };
+
+public:
+
+	/**
+	 *
+	 */
+	const std::string&
+	get_tls_verify_mode() const
+	{ return verify_mode; };
+
+	/**
+	 *
+	 */
+	crofbase&
+	set_tls_verify_mode(
+			const std::string& verify_mode)
+	{ this->verify_mode = verify_mode; return *this; };
+
+public:
+
+	/**
+	 *
+	 */
+	const std::string&
+	get_tls_verify_depth() const
+	{ return verify_depth; };
+
+	/**
+	 *
+	 */
+	crofbase&
+	set_tls_verify_depth(
+			const std::string& verify_depth)
+	{ this->verify_depth = verify_depth; return *this; };
+
+public:
+
+	/**
+	 *
+	 */
+	const std::string&
+	get_tls_ciphers() const
+	{ return ciphers; };
+
+	/**
+	 *
+	 */
+	crofbase&
+	set_tls_ciphers(
+			const std::string& ciphers)
+	{ this->ciphers = ciphers; return *this; };
+
+public:
+
+	/**
 	 * @name	Methods for listening sockets accepting connections from datapath elements
 	 */
 
@@ -2494,6 +2640,18 @@ private:
 
 	// cached generation_id as defined by OpenFlow
 	uint64_t						cached_generation_id;
+
+	// enforce use of tls for accepted connections
+	bool                            enforce_tls;
+
+	std::string                     capath;
+	std::string                     cafile;
+	std::string                     certfile;
+	std::string                     keyfile;
+	std::string                     password;
+	std::string                     verify_mode;
+	std::string                     verify_depth;
+	std::string                     ciphers;
 };
 
 }; // end of namespace
