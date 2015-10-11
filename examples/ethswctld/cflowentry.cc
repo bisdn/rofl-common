@@ -21,26 +21,28 @@ cflowentry::cflowentry(
 		src(src),
 		dst(dst),
 		entry_timeout(CFLOWENTRY_DEFAULT_TIMEOUT),
-		expiration_timer_id()
+		thread(this)
 {
 	flow_mod_add();
-	expiration_timer_id = register_timer(CFLOWENTRY_ENTRY_EXPIRED, entry_timeout);
-	LOGGING_NOTICE << "[cflowentry] created" << std::endl << *this;
+	thread.add_timer(CFLOWENTRY_ENTRY_EXPIRED, rofl::ctimespec().expire_in(entry_timeout));
+	std::cerr << "[cflowentry] created" << std::endl << *this;
+	thread.start();
 }
 
 
 cflowentry::~cflowentry()
 {
-	LOGGING_NOTICE << "[cflowentry] deleted" << std::endl << *this;
+	std::cerr << "[cflowentry] deleted" << std::endl << *this;
 	flow_mod_delete();
 }
 
 
 
 void
-cflowentry::handle_timeout(int opaque, void* data)
+cflowentry::handle_timeout(
+		cthread& thread, uint32_t timer_id, const std::list<unsigned int>& ttypes)
 {
-	switch (opaque) {
+	switch (timer_id) {
 	case CFLOWENTRY_ENTRY_EXPIRED: {
 		env->flow_timer_expired(*this);
 	} break;
@@ -57,11 +59,7 @@ cflowentry::set_out_port_no(uint32_t port_no)
 		flow_mod_modify();
 	}
 
-	try {
-		reset_timer(expiration_timer_id, entry_timeout);
-	} catch (rofl::eTimersBase& e) {
-		expiration_timer_id = register_timer(CFLOWENTRY_ENTRY_EXPIRED, entry_timeout);
-	}
+	thread.add_timer(CFLOWENTRY_ENTRY_EXPIRED, rofl::ctimespec().expire_in(entry_timeout));
 }
 
 
@@ -70,9 +68,9 @@ void
 cflowentry::flow_mod_add()
 {
 	try {
-		rofl::crofdpt& dpt = rofl::crofdpt::get_dpt(dptid);
+		rofl::crofdpt& dpt = env->set_dpt(dptid);
 
-		rofl::openflow::cofflowmod fe(dpt.get_version_negotiated());
+		rofl::openflow::cofflowmod fe(dpt.get_version());
 		rofl::cindex index(0);
 
 		fe.set_command(rofl::openflow::OFPFC_ADD);
@@ -81,7 +79,7 @@ cflowentry::flow_mod_add()
 		fe.set_match().set_eth_src(src);
 		fe.set_match().set_eth_dst(dst);
 
-		switch (dpt.get_version_negotiated()) {
+		switch (dpt.get_version()) {
 		case rofl::openflow10::OFP_VERSION: {
 			fe.set_actions().
 					add_action_output(index++).set_port_no(port_no);
@@ -94,9 +92,9 @@ cflowentry::flow_mod_add()
 
 		dpt.send_flow_mod_message(rofl::cauxid(0), fe);
 
-	} catch (rofl::eRofDptNotFound& e) {
-		// datapath with handle dptid not found
-	} catch (rofl::eRofSockTxAgain& e) {
+	} catch (rofl::eRofConnNotConnected& e) {
+		// control connection not connected
+	} catch (rofl::eRofQueueFull& e) {
 		// control channel congested
 	}
 }
@@ -107,9 +105,9 @@ void
 cflowentry::flow_mod_modify()
 {
 	try {
-		rofl::crofdpt& dpt = rofl::crofdpt::get_dpt(dptid);
+		rofl::crofdpt& dpt = env->set_dpt(dptid);
 
-		rofl::openflow::cofflowmod fe(dpt.get_version_negotiated());
+		rofl::openflow::cofflowmod fe(dpt.get_version());
 		rofl::cindex index(0);
 
 		fe.set_command(rofl::openflow::OFPFC_MODIFY_STRICT);
@@ -118,7 +116,7 @@ cflowentry::flow_mod_modify()
 		fe.set_match().set_eth_src(src);
 		fe.set_match().set_eth_dst(dst);
 
-		switch (dpt.get_version_negotiated()) {
+		switch (dpt.get_version()) {
 		case rofl::openflow10::OFP_VERSION: {
 			fe.set_actions().
 					add_action_output(index++).set_port_no(port_no);
@@ -131,12 +129,10 @@ cflowentry::flow_mod_modify()
 
 		dpt.send_flow_mod_message(rofl::cauxid(0), fe);
 
-	} catch (rofl::eRofDptNotFound& e) {
-		// datapath with handle dptid not found
-	} catch (rofl::eRofSockTxAgain& e) {
+	} catch (rofl::eRofConnNotConnected& e) {
+		// control connection not connected
+	} catch (rofl::eRofQueueFull& e) {
 		// control channel congested
-	} catch (rofl::eRofBaseNotConnected& e) {
-		// when xdpd has already died ...
 	} catch (...) {
 		// ...
 	}
@@ -148,9 +144,9 @@ void
 cflowentry::flow_mod_delete()
 {
 	try {
-		rofl::crofdpt& dpt = rofl::crofdpt::get_dpt(dptid);
+		rofl::crofdpt& dpt = env->set_dpt(dptid);
 
-		rofl::openflow::cofflowmod fe(dpt.get_version_negotiated());
+		rofl::openflow::cofflowmod fe(dpt.get_version());
 		rofl::cindex index(0);
 
 		fe.set_command(rofl::openflow::OFPFC_DELETE_STRICT);
@@ -161,9 +157,9 @@ cflowentry::flow_mod_delete()
 
 		dpt.send_flow_mod_message(rofl::cauxid(0), fe);
 
-	} catch (rofl::eRofDptNotFound& e) {
-		// datapath with handle dptid not found
-	} catch (rofl::eRofSockTxAgain& e) {
+	} catch (rofl::eRofConnNotConnected& e) {
+		// control connection not connected
+	} catch (rofl::eRofQueueFull& e) {
 		// control channel congested
 	}
 }

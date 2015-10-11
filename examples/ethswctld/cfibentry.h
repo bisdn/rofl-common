@@ -11,12 +11,11 @@
 #include <ostream>
 #include <inttypes.h>
 
-#include <rofl/common/ciosrv.h>
+#include <rofl/common/cthread.hpp>
 #include <rofl/common/caddress.h>
 #include <rofl/common/crofbase.h>
 #include <rofl/common/crofdpt.h>
 #include <rofl/common/logging.h>
-#include <rofl/common/ctimerid.h>
 
 namespace rofl {
 namespace examples {
@@ -110,7 +109,7 @@ protected:
  * has become stale. For timer support, cfibentry derives from class
  * rofl::ciosrv.
  */
-class cfibentry : public rofl::ciosrv {
+class cfibentry : public rofl::cthread_env {
 public:
 
 	/**
@@ -186,8 +185,7 @@ private:
 	 */
 	virtual void
 	handle_timeout(
-			int opaque,
-			void* data = (void*)NULL);
+			cthread& thread, uint32_t timer_id, const std::list<unsigned int>& ttypes);
 
 public:
 
@@ -205,10 +203,8 @@ public:
 
 private:
 
-#define CFIBENTRY_DEFAULT_TIMEOUT		60
-
 	enum cfibentry_timer_t {
-		CFIBENTRY_ENTRY_EXPIRED = 1,
+		TIMER_ID_ENTRY_EXPIRED = 1,
 	};
 
 	// pointer to class defining the environment for this cfibentry
@@ -222,9 +218,10 @@ private:
 	rofl::caddress_ll           hwaddr;
 
 	// timeout value in seconds for this FIB entry
-	int                         entry_timeout;
-	// timer handle obtained from rofl::ciosrv when registering this timer
-	rofl::ctimerid              expiration_timer_id;
+	time_t                      entry_timeout;
+	static const time_t         CFIBENTRY_DEFAULT_TIMEOUT;
+
+	rofl::cthread               thread;
 };
 
 }; // namespace ethswctld

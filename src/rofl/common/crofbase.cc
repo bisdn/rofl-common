@@ -172,7 +172,7 @@ crofbase::send_packet_in_message(
 	}
 
 	if (not sent_out) {
-		throw eRofCoreNotConnected("rofl::crofbase::send_packet_in_message() not connected");
+		throw eRofBaseNotConnected("rofl::crofbase::send_packet_in_message() not connected");
 	}
 }
 
@@ -221,7 +221,7 @@ crofbase::send_flow_removed_message(
 	}
 
 	if (not sent_out) {
-		throw eRofCoreNotConnected("rofl::crofbase::send_flow_removed_message() not connected");
+		throw eRofBaseNotConnected("rofl::crofbase::send_flow_removed_message() not connected");
 	}
 }
 
@@ -252,7 +252,7 @@ crofbase::send_port_status_message(
 	}
 
 	if (not sent_out) {
-		throw eRofCoreNotConnected("rofl::crofbase::send_port_status_message() not connected");
+		throw eRofBaseNotConnected("rofl::crofbase::send_port_status_message() not connected");
 	}
 }
 

@@ -5,10 +5,8 @@
 #include <signal.h>
 #include <map>
 
-#include <rofl/common/caddress.h>
 #include <rofl/common/crofbase.h>
-#include <rofl/common/crofdpt.h>
-#include <rofl/common/cparams.h>
+#include <rofl/common/cthread.hpp>
 
 #include "cfibtable.h"
 #include "cflowtable.h"
@@ -29,7 +27,11 @@ namespace ethswctld {
  * A simple controller application capable of switching Ethernet
  * frames in a flow-based manner.
  */
-class cetherswitch : public rofl::crofbase, public rofl::ciosrv {
+class cetherswitch :
+		public cflowtable_env,
+		public rofl::crofbase,
+		public virtual rofl::cthread_env
+{
 public:
 
 	/**
@@ -153,8 +155,7 @@ private:
 	 */
 	virtual void
 	handle_timeout(
-			int opaque,
-			void* data = (void*)NULL);
+			cthread& thread, uint32_t timer_id, const std::list<unsigned int>& ttypes);
 
 	/**
 	 * @brief	Dump an Ethernet frame received via an OpenFlow Packet-In message.
@@ -164,13 +165,21 @@ private:
 		rofl::crofdpt& dpt,
 		rofl::openflow::cofmsg_packet_in& msg);
 
+	/**
+	 *
+	 */
+	virtual rofl::crofdpt&
+	set_dpt(
+			const rofl::cdptid& dptid)
+	{ return rofl::crofbase::set_dpt(dptid); };
+
 public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, const cetherswitch& sw) {
 		try {
 			os << rofl::indent(0) << "<ethswitch dpid: "
-					<< rofl::crofdpt::get_dpt(sw.dptid).get_dpid().str() << " >" << std::endl;
+					<< sw.get_dpt(sw.dptid).get_dpid().str() << " >" << std::endl;
 		} catch (rofl::eRofDptNotFound& e) {
 			os << rofl::indent(0) << "<ethswitch dptid: " << sw.dptid << " >" << std::endl;
 		}
@@ -185,18 +194,19 @@ public:
 private:
 
 	enum cetherswitch_timer_t {
-		TIMER_DUMP_FIB          = 1,
-		TIMER_GET_FLOW_STATS    = 2,
+		TIMER_ID_DUMP_FIB          = 1,
+		TIMER_ID_GET_FLOW_STATS    = 2,
 	};
 
 	static bool					keep_on_running;
+
+	rofl::cthread               thread;
+
 	rofl::cdptid                dptid;
 
-	rofl::ctimerid              timer_id_dump_fib;
 	unsigned int                dump_fib_interval;
 	static const unsigned int   DUMP_FIB_DEFAULT_INTERVAL = 60; // seconds
 
-	rofl::ctimerid              timer_id_get_flow_stats;
 	unsigned int                get_flow_stats_interval;
 	static const unsigned int   GET_FLOW_STATS_DEFAULT_INTERVAL = 30; // seconds
 };

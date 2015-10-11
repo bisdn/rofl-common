@@ -24,7 +24,7 @@ cdaemon::daemonize(
 		 */
 		struct rlimit rlim;
 		if (getrlimit(RLIMIT_NOFILE, &rlim) < 0) {
-			throw eSysCall("getrlimit()");
+			throw rofl::eSysCall("getrlimit()");
 		}
 		for (unsigned int i = 3; i < rlim.rlim_cur; i++) {
 			close(i);
@@ -34,7 +34,7 @@ cdaemon::daemonize(
 		 * create a pipe for signaling successful initialization back from child-2 to parent process
 		 */
 		if (pipe2(pipefd, 0) < 0) {
-			throw eSysCall("pipe2()");
+			throw rofl::eSysCall("pipe2()");
 		}
 
 		/*
@@ -47,7 +47,7 @@ cdaemon::daemonize(
 				continue;
 			if (signal(i, SIG_DFL) == SIG_ERR) {
 				std::cerr << "i:" << i << std::endl;
-				throw eSysCall("signal()");
+				throw rofl::eSysCall("signal()");
 			}
 		}
 
@@ -56,10 +56,10 @@ cdaemon::daemonize(
 		 */
 		sigset_t sigset;
 		if (sigfillset(&sigset) < 0) {
-			throw eSysCall("sigfillset()");
+			throw rofl::eSysCall("sigfillset()");
 		}
 		if (sigprocmask(SIG_UNBLOCK, &sigset, NULL) < 0) {
-			throw eSysCall("sigprocmask()");
+			throw rofl::eSysCall("sigprocmask()");
 		}
 
 		/*
@@ -72,7 +72,7 @@ cdaemon::daemonize(
 		 */
 		pid_t pid1 = fork();
 		if (pid1 < 0) {
-			throw eSysCall("fork()");
+			throw rofl::eSysCall("fork()");
 		}
 		else if (pid1 > 0) { // parent exit
 			uint8_t a;
@@ -80,10 +80,10 @@ cdaemon::daemonize(
 			(void) tmp;
 			switch (a) {
 			case 0: // success
-				LOGGING_ERROR << "[rofl][cdaemon] daemonizing successful. PID: "<<pid1<< std::endl;
+				std::cerr << "[rofl][cdaemon] daemonizing successful. PID: "<<pid1<< std::endl;
 				exit(EXIT_SUCCESS);
 			case 1: // failure
-				LOGGING_ERROR << "[rofl][cdaemon] daemonizing failed" << std::endl;
+				std::cerr << "[rofl][cdaemon] daemonizing failed" << std::endl;
 				throw std::runtime_error("Unable to daemonize");
 			}
 		}
@@ -93,7 +93,7 @@ cdaemon::daemonize(
 		 */
 		pid_t sid;
 		if ((sid = setsid()) < 0) { // detach from controlling terminal
-			throw eSysCall("setsid()");
+			throw rofl::eSysCall("setsid()");
 		}
 
 		/*
@@ -101,7 +101,7 @@ cdaemon::daemonize(
 		 */
 		pid_t pid2 = fork();
 		if (pid2 < 0) {
-			throw eSysCall("fork()");
+			throw rofl::eSysCall("fork()");
 		}
 		else if (pid2 > 0) { // first child exit
 			exit(0);
@@ -117,23 +117,23 @@ cdaemon::daemonize(
 		 */
 		int fd = open(logfile.c_str(), O_RDWR | O_CREAT | O_APPEND, S_IRUSR | S_IWUSR);
 		if (fd < 0) {
-			throw eSysCall("open()");
+			throw rofl::eSysCall("open()");
 		}
 		if (dup2(fd, STDIN_FILENO) < 0) {
-			throw eSysCall("dup2(): STDIN");
+			throw rofl::eSysCall("dup2(): STDIN");
 		}
 		if (dup2(fd, STDOUT_FILENO) < 0) {
-			throw eSysCall("dup2(): STDOUT");
+			throw rofl::eSysCall("dup2(): STDOUT");
 		}
 		if (dup2(fd, STDERR_FILENO) < 0) {
-			throw eSysCall("dup2(): STDERR");
+			throw rofl::eSysCall("dup2(): STDERR");
 		}
 
 		/*
 		 * change current working directory
 		 */
 		if (chdir("/") < 0) {
-			throw eSysCall("chdir()");
+			throw rofl::eSysCall("chdir()");
 		}
 
 		/*
@@ -141,13 +141,13 @@ cdaemon::daemonize(
 		 */
 		int pidfd = open(pidfile.c_str(), O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 		if (pidfd < 0) {
-			throw eSysCall("open(): pidfile");
+			throw rofl::eSysCall("open(): pidfile");
 		}
 		char s_pidno[32];
 		memset(s_pidno, 0, sizeof(s_pidno));
 		snprintf(s_pidno, sizeof(s_pidno)-1, "%d", (int)getpid());
 		if (write(pidfd, s_pidno, strnlen(s_pidno, sizeof(s_pidno))) < 0) {
-			throw eSysCall("write(): pidfile");
+			throw rofl::eSysCall("write(): pidfile");
 		}
 		close(pidfd);
 
@@ -156,14 +156,14 @@ cdaemon::daemonize(
 		 */
 		uint8_t a = 0;
 		if (write(pipefd[1], &a, sizeof(a)) < 0) {
-			throw eSysCall("write(): pipe");
+			throw rofl::eSysCall("write(): pipe");
 		}
 
 	} catch (eSysCall& e) {
 		uint8_t a = 1;
 		if (write(pipefd[1], &a, sizeof(a)) < 0) {
-			std::cerr << e << std::endl;
-			throw eSysCall("write(): pipe");
+			std::cerr << e.what() << std::endl;
+			throw rofl::eSysCall("write(): pipe");
 		}
 	}
 }

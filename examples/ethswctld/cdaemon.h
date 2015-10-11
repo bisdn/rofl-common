@@ -19,10 +19,11 @@
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <sys/stat.h>
+#include <fcntl.h>
 
 #include "rofl/common/logging.h"
 #include "rofl/common/croflexception.h"
-#include "rofl/common/cpipe.h"
+#include "rofl/common/exception.hpp"
 
 namespace rofl {
 

@@ -8,36 +8,39 @@
 #include "cfibentry.h"
 
 using namespace rofl::examples::ethswctld;
+/*static*/const time_t         cfibentry::CFIBENTRY_DEFAULT_TIMEOUT = 60;
 
 cfibentry::cfibentry(
 		cfibentry_env *fibenv,
 		const rofl::cdptid& dptid,
 		const rofl::caddress_ll& hwaddr,
 		uint32_t port_no) :
-		env(fibenv),
-		dptid(dptid),
-		port_no(port_no),
-		hwaddr(hwaddr),
-		entry_timeout(CFIBENTRY_DEFAULT_TIMEOUT),
-		expiration_timer_id()
+				env(fibenv),
+				dptid(dptid),
+				port_no(port_no),
+				hwaddr(hwaddr),
+				entry_timeout(CFIBENTRY_DEFAULT_TIMEOUT),
+				thread(this)
 {
-	expiration_timer_id = register_timer(CFIBENTRY_ENTRY_EXPIRED, entry_timeout);
-	LOGGING_NOTICE << "[cfibentry] created" << std::endl << *this;
+	thread.add_timer(TIMER_ID_ENTRY_EXPIRED, rofl::ctimespec().expire_in(entry_timeout));
+	std::cerr << "[cfibentry] created" << std::endl << *this;
+	thread.start();
 }
 
 
 cfibentry::~cfibentry()
 {
-	LOGGING_NOTICE << "[cfibentry] deleted" << std::endl << *this;
+	std::cerr << "[cfibentry] deleted" << std::endl << *this;
 }
 
 
 
 void
-cfibentry::handle_timeout(int opaque, void* data)
+cfibentry::handle_timeout(
+		cthread& thread, uint32_t timer_id, const std::list<unsigned int>& ttypes)
 {
-	switch (opaque) {
-	case CFIBENTRY_ENTRY_EXPIRED: {
+	switch (timer_id) {
+	case TIMER_ID_ENTRY_EXPIRED: {
 		env->fib_timer_expired(hwaddr);
 	} return;
 	}
@@ -53,11 +56,7 @@ cfibentry::set_port_no(uint32_t port_no)
 		env->fib_port_update(*this);
 	}
 
-	try {
-		reset_timer(expiration_timer_id, entry_timeout);
-	} catch (rofl::eTimersBase& e) {
-		expiration_timer_id = register_timer(CFIBENTRY_ENTRY_EXPIRED, entry_timeout);
-	}
+	thread.add_timer(TIMER_ID_ENTRY_EXPIRED, rofl::ctimespec().expire_in(entry_timeout));
 }
 
 
