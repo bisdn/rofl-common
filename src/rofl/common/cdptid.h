@@ -32,6 +32,7 @@ public:
 	/**
 	 *
 	 */
+	explicit
 	cdptid(
 			uint64_t dptid = 0) :
 				id(dptid) {

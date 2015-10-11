@@ -11,12 +11,11 @@
 #include <ostream>
 #include <inttypes.h>
 
-#include <rofl/common/ciosrv.h>
 #include <rofl/common/caddress.h>
 #include <rofl/common/crofbase.h>
 #include <rofl/common/crofdpt.h>
 #include <rofl/common/logging.h>
-#include <rofl/common/ctimerid.h>
+#include <rofl/common/cthread.hpp>
 
 namespace rofl {
 namespace examples {
@@ -79,7 +78,7 @@ public:
 	~cflowentry_env()
 	{};
 
-protected:
+public:
 
 	/**
 	 * @brief	Called once the timer for this flow entry has expired.
@@ -87,6 +86,13 @@ protected:
 	virtual void
 	flow_timer_expired(
 			const cflowentry& entry) = 0;
+
+	/**
+	 *
+	 */
+	virtual rofl::crofdpt&
+	set_dpt(
+			const rofl::cdptid& dptid) = 0;
 };
 
 
@@ -106,7 +112,7 @@ protected:
  *
  * @see cflowentry_env
  */
-class cflowentry : public rofl::ciosrv {
+class cflowentry : public rofl::cthread_env {
 public:
 
 	/**
@@ -192,8 +198,7 @@ private:
 
 	virtual void
 	handle_timeout(
-			int opaque,
-			void* data = (void*)NULL);
+			cthread& thread, uint32_t timer_id, const std::list<unsigned int>& ttypes);
 
 public:
 
@@ -223,7 +228,7 @@ private:
 	rofl::caddress_ll   src;
 	rofl::caddress_ll   dst;
 	int                 entry_timeout;
-	rofl::ctimerid      expiration_timer_id;
+	rofl::cthread       thread;
 };
 
 }; // namespace ethswctld

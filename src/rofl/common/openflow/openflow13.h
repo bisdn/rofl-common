@@ -179,12 +179,16 @@ namespace openflow13 {
 
 	// 7.2.2
 
-	/* All ones is used to indicate all queues in a port (for stats retrieval). */
-	#define OFPQ_ALL      			0xffffffff
+	enum ofp_queue_id_t {
+		/* All ones is used to indicate all queues in a port (for stats retrieval). */
+		OFPQ_ALL = 0xffffffff,
+	};
 
-	/* Min rate > 1000 means not configured. */
-	#define OFPQ_MIN_RATE_UNCFG     0xffff
-	#define OFPQ_MAX_RATE_UNCFG		0xffff
+	enum ofp_queue_rate_value_t {
+		/* Min rate > 1000 means not configured. */
+		OFPQ_MIN_RATE_UNCFG = 0xffff,
+		OFPQ_MAX_RATE_UNCFG = 0xffff,
+	};
 
 	enum ofp_queue_properties {
 		OFPQT_MIN_RATE 	= 1,  /* Minimum datarate guaranteed. */
@@ -1158,9 +1162,6 @@ namespace openflow13 {
 	 * 7.3.5.1 Description
 	 */
 
-	#define DESC_STR_LEN   256
-	#define SERIAL_NUM_LEN 32
-
 	/* Body of reply to OFPMP_DESC request. Each entry is a NULL-terminated
 	* ASCII string. */
 	struct ofp_desc {
@@ -1266,8 +1267,6 @@ namespace openflow13 {
 		uint16_t length; 			/* Length in bytes of this property. */
 	};
 	OFP_ASSERT(sizeof(struct ofp_table_feature_prop_header) == 4);
-
-	#define OFP_MAX_TABLE_NAME_LEN 32
 
 	/* Body for ofp_multipart_request of type OFPMP_TABLE_FEATURES./
 	 * Body of reply to OFPMP_TABLE_FEATURES request. */
@@ -2070,8 +2069,6 @@ namespace openflow13 {
 		uint8_t body[0];
 	};
 	OFP_ASSERT(sizeof(struct ofp_experimenter_header) == 16);
-
-
 
 }; // end of namespace openflow13
 }; // end of namespace rofl

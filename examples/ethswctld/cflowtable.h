@@ -27,6 +27,36 @@ namespace rofl {
 namespace examples {
 namespace ethswctld {
 
+class cflowtable;
+
+/**
+ * @ingroup common_howto_ethswctld
+ * @interface cflowtable_env
+ *
+ * @brief	Defines the environment expected by an instance of class cflowtable.
+ */
+class cflowtable_env {
+	friend class cflowtable;
+public:
+
+	/**
+	 * @brief	cflowtable_env destructor
+	 */
+	virtual
+	~cflowtable_env()
+	{};
+
+public:
+
+	/**
+	 *
+	 */
+	virtual rofl::crofdpt&
+	set_dpt(
+			const rofl::cdptid& dptid) = 0;
+};
+
+
 /**
  * @ingroup common_howto_ethswctld
  *
@@ -63,12 +93,13 @@ public:
 	static
 	cflowtable&
 	add_flowtable(
+			cflowtable_env* env,
 			const rofl::cdptid& dptid) {
 		if (cflowtable::flowtables.find(dptid) != cflowtable::flowtables.end()) {
 			delete cflowtable::flowtables[dptid];
 			cflowtable::flowtables.erase(dptid);
 		}
-		new cflowtable(dptid);
+		new cflowtable(env, dptid);
 		return *(cflowtable::flowtables[dptid]);
 	};
 
@@ -84,9 +115,10 @@ public:
 	static
 	cflowtable&
 	set_flowtable(
+			cflowtable_env* env,
 			const rofl::cdptid& dptid) {
 		if (cflowtable::flowtables.find(dptid) == cflowtable::flowtables.end()) {
-			new cflowtable(dptid);
+			new cflowtable(env, dptid);
 		}
 		return *(cflowtable::flowtables[dptid]);
 	};
@@ -300,7 +332,9 @@ private:
 	 * @brief	cflowtable constructor for given datapath handle
 	 */
 	cflowtable(
+			cflowtable_env* env,
 			const rofl::cdptid& dptid) :
+				env(env),
 				dptid(dptid) {
 		cflowtable::flowtables[dptid] = this;
 	};
@@ -325,6 +359,14 @@ private:
 		drop_flow_entry(entry.get_src(), entry.get_dst());
 	};
 
+	/**
+	 *
+	 */
+	virtual rofl::crofdpt&
+	set_dpt(
+			const rofl::cdptid& dptid)
+	{ return env->set_dpt(dptid); };
+
 public:
 
 	/**
@@ -334,7 +376,7 @@ public:
 	operator<< (std::ostream& os, cflowtable const& flowtable) {
 		try {
 			os << rofl::indent(0) << "<cflowtable dpid:"
-					<< rofl::crofdpt::get_dpt(flowtable.dptid).get_dpid().str() << " >" << std::endl;
+					<< flowtable.env->set_dpt(flowtable.dptid).get_dpid().str() << " >" << std::endl;
 		} catch (rofl::eRofDptNotFound& e) {
 			os << rofl::indent(0) << "<cflowtable dptid:" << flowtable.dptid << " >" << std::endl;
 		}
@@ -351,7 +393,8 @@ public:
 
 private:
 
-	rofl::cdptid dptid;
+	cflowtable_env* env;
+	rofl::cdptid    dptid;
 	std::map<rofl::caddress_ll, std::map<rofl::caddress_ll, cflowentry*> > ftable;
 	static std::map<rofl::cdptid, cflowtable*> flowtables;
 };

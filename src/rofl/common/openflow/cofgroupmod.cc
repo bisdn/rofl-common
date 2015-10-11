@@ -7,51 +7,6 @@
 using namespace rofl::openflow;
 
 
-cofgroupmod::cofgroupmod(
-		uint8_t ofp_version,
-		uint16_t command,
-		uint8_t type,
-		uint32_t group_id) :
-		ofp_version(ofp_version),
-		command(command),
-		type(type),
-		group_id(group_id),
-		buckets(ofp_version)
-{}
-
-
-cofgroupmod::~cofgroupmod()
-{}
-
-
-cofgroupmod&
-cofgroupmod::operator= (const cofgroupmod& ge)
-{
-	if (this == &ge)
-		return *this;
-
-	this->ofp_version 		= ge.ofp_version;
-	this->command           = ge.command;
-	this->type              = ge.type;
-	this->group_id          = ge.group_id;
-	this->buckets 			= ge.buckets;
-
-	return *this;
-}
-
-
-void
-cofgroupmod::clear()
-{
-	command = htobe16(openflow13::OFPGC_ADD);  // = 0
-	type = openflow13::OFPGT_ALL; // = 0
-	group_id = 0;
-
-	buckets.clear();
-}
-
-
-
 size_t
 cofgroupmod::length() const
 {
@@ -74,7 +29,7 @@ cofgroupmod::pack(
 	if ((0 == buf) || (0 == buflen))
 		return;
 
-	if (buflen < length())
+	if (buflen < cofgroupmod::length())
 		throw eInval("cofgroupmod::pack() buflen too short");
 
 	switch (get_version()) {
@@ -101,17 +56,18 @@ void
 cofgroupmod::unpack(
 		uint8_t *buf, size_t buflen)
 {
+	buckets.set_version(get_version());
+	buckets.clear();
+
 	if ((0 == buf) || (0 == buflen))
 		return;
 
-	buckets.clear();
+	if (buflen < cofgroupmod::length())
+		throw eInval("cofgroupmod::unpack() buflen too short");
 
 	switch (get_version()) {
 	case rofl::openflow12::OFP_VERSION:
 	case rofl::openflow13::OFP_VERSION: {
-
-		if (buflen < sizeof(struct ofp_group_mod))
-			throw eInval("cofgroupmod::unpack() buflen too short");
 
 		struct ofp_group_mod* hdr = (struct ofp_group_mod*)buf;
 
@@ -119,10 +75,9 @@ cofgroupmod::unpack(
 		type     = hdr->type;
 		group_id = be32toh(hdr->group_id);
 
-		size_t buckets_len = buflen - sizeof(struct ofp_group_mod);
-
-		if (buckets_len > 0)
-			buckets.unpack((uint8_t*)hdr->buckets, buckets_len);
+		if (buflen > sizeof(struct ofp_group_mod)) {
+			buckets.unpack((uint8_t*)hdr->buckets, buflen - sizeof(struct ofp_group_mod));
+		}
 
 	} break;
 	default:

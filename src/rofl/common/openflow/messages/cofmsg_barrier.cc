@@ -2,229 +2,70 @@
 
 using namespace rofl::openflow;
 
-cofmsg_barrier_request::cofmsg_barrier_request(
-		uint8_t of_version,
-		uint32_t xid,
-		uint8_t* data,
-		size_t datalen) :
-	cofmsg(sizeof(struct openflow::ofp_header)),
-	body((size_t)0)
-{
-	body.assign(data, datalen);
-
-	set_version(of_version);
-	set_length(sizeof(struct openflow::ofp_header));
-	set_xid(xid);
-
-	switch (of_version) {
-	case openflow10::OFP_VERSION:
-		set_type(openflow10::OFPT_BARRIER_REQUEST);
-	break;
-	case openflow12::OFP_VERSION:
-		set_type(openflow12::OFPT_BARRIER_REQUEST);
-	break;
-	case openflow13::OFP_VERSION:
-		set_type(openflow13::OFPT_BARRIER_REQUEST);
-	break;
-	default:
-		throw eBadVersion();
-	}
-}
-
-
-
-cofmsg_barrier_request::cofmsg_barrier_request(
-		cmemory *memarea) :
-	cofmsg(memarea),
-	body((size_t)0)
-{
-
-}
-
-
-
-cofmsg_barrier_request::cofmsg_barrier_request(
-		cofmsg_barrier_request const& barrier)
-{
-	*this = barrier;
-}
-
-
-
-cofmsg_barrier_request&
-cofmsg_barrier_request::operator= (
-		cofmsg_barrier_request const& barrier)
-{
-	if (this == &barrier)
-		return *this;
-
-	cofmsg::operator =(barrier);
-
-	body = barrier.body;
-
-	return *this;
-}
-
-
-
-cofmsg_barrier_request::~cofmsg_barrier_request()
-{
-
-}
-
-
-
-void
-cofmsg_barrier_request::reset()
-{
-	cofmsg::reset();
-	body.clear();
-}
-
-
-
 size_t
 cofmsg_barrier_request::length() const
 {
-	return (sizeof(struct openflow::ofp_header) + body.memlen());
+	return (cofmsg::length() + body.memlen());
 }
 
 
 
 void
-cofmsg_barrier_request::pack(uint8_t *buf, size_t buflen)
+cofmsg_barrier_request::pack(
+		uint8_t *buf, size_t buflen)
 {
-	set_length(length());
-
-	if ((0 == buf) || (buflen == 0))
-		return;
-
-	if (buflen < length())
-		throw eInval();
-
 	cofmsg::pack(buf, buflen);
 
-	memcpy(buf + sizeof(struct openflow::ofp_header), body.somem(), body.memlen());
+	if ((0 == buf) || (0 == buflen))
+		return;
+
+	if (buflen < get_length())
+		throw eMsgInval("cofmsg_barrier_request::pack()");
+
+	body.pack(buf + sizeof(struct rofl::openflow::ofp_header),
+			buflen - sizeof(struct rofl::openflow::ofp_header));
 }
 
 
 
 void
-cofmsg_barrier_request::unpack(uint8_t *buf, size_t buflen)
+cofmsg_barrier_request::unpack(
+		uint8_t *buf, size_t buflen)
 {
 	cofmsg::unpack(buf, buflen);
 
-	validate();
-}
+	body.resize(0);
 
+	if ((0 == buf) || (0 == buflen))
+		return;
 
-
-void
-cofmsg_barrier_request::validate()
-{
-	cofmsg::validate(); // check generic OpenFlow header
+	if (buflen < cofmsg_barrier_request::length())
+		throw eBadRequestBadLen("cofmsg_barrier_request::unpack() buf too short");
 
 	switch (get_version()) {
-	case openflow10::OFP_VERSION:
-	case openflow12::OFP_VERSION:
-	case openflow13::OFP_VERSION: {
-		if (get_length() > sizeof(struct openflow::ofp_header)) {
-			body.assign(sobody(), bodylen());
+	case rofl::openflow10::OFP_VERSION: {
+		if (get_type() != rofl::openflow10::OFPT_BARRIER_REQUEST)
+			throw eMsgInval("cofmsg_barrier_request::unpack() invalid message type");
+
+		if (buflen > sizeof(struct rofl::openflow::ofp_header)) {
+			body.unpack(buf + sizeof(struct rofl::openflow::ofp_header),
+					buflen - sizeof(struct rofl::openflow::ofp_header));
 		}
+
 	} break;
-	default:
-		throw eBadRequestBadVersion();
+	default: {
+		if (get_type() != rofl::openflow13::OFPT_BARRIER_REQUEST)
+			throw eMsgInval("cofmsg_barrier_request::unpack() invalid message type");
+
+		if (buflen > sizeof(struct rofl::openflow::ofp_header)) {
+			body.unpack(buf + sizeof(struct rofl::openflow::ofp_header),
+					buflen - sizeof(struct rofl::openflow::ofp_header));
+		}
+	};
 	}
-}
 
-
-
-rofl::cmemory&
-cofmsg_barrier_request::get_body()
-{
-	return body;
-}
-
-
-
-
-cofmsg_barrier_reply::cofmsg_barrier_reply(
-		uint8_t of_version,
-		uint32_t xid,
-		uint8_t* data,
-		size_t datalen) :
-	cofmsg(sizeof(struct openflow::ofp_header)),
-	body((size_t)0)
-{
-	body.assign(data, datalen);
-
-	set_version(of_version);
-	set_length(sizeof(struct openflow::ofp_header));
-	set_xid(xid);
-
-	switch (of_version) {
-	case openflow10::OFP_VERSION:
-		set_type(openflow10::OFPT_BARRIER_REPLY);
-	break;
-	case openflow12::OFP_VERSION:
-		set_type(openflow12::OFPT_BARRIER_REPLY);
-	break;
-	case openflow13::OFP_VERSION:
-		set_type(openflow13::OFPT_BARRIER_REPLY);
-	break;
-	default:
-		throw eBadVersion();
-	}
-}
-
-
-
-cofmsg_barrier_reply::cofmsg_barrier_reply(
-		cmemory *memarea) :
-	cofmsg(memarea),
-	body((size_t)0)
-{
-
-}
-
-
-
-cofmsg_barrier_reply::cofmsg_barrier_reply(
-		cofmsg_barrier_reply const& barrier)
-{
-	*this = barrier;
-}
-
-
-
-cofmsg_barrier_reply&
-cofmsg_barrier_reply::operator= (
-		cofmsg_barrier_reply const& barrier)
-{
-	if (this == &barrier)
-		return *this;
-
-	cofmsg::operator =(barrier);
-
-	body = barrier.body;
-
-	return *this;
-}
-
-
-
-cofmsg_barrier_reply::~cofmsg_barrier_reply()
-{
-
-}
-
-
-
-void
-cofmsg_barrier_reply::reset()
-{
-	cofmsg::reset();
-	body.clear();
+	if (get_length() < cofmsg_barrier_request::length())
+		throw eBadRequestBadLen("cofmsg_barrier_request::unpack() buf too short");
 }
 
 
@@ -232,62 +73,67 @@ cofmsg_barrier_reply::reset()
 size_t
 cofmsg_barrier_reply::length() const
 {
-	return (sizeof(struct openflow::ofp_header) + body.memlen());
+	return (cofmsg::length() + body.memlen());
 }
 
 
 
 void
-cofmsg_barrier_reply::pack(uint8_t *buf, size_t buflen)
+cofmsg_barrier_reply::pack(
+		uint8_t *buf, size_t buflen)
 {
-	set_length(length());
-
-	if ((0 == buf) || (buflen == 0))
-		return;
-
-	if (buflen < length())
-		throw eInval();
-
 	cofmsg::pack(buf, buflen);
 
-	memcpy(buf + sizeof(struct openflow::ofp_header), body.somem(), body.memlen());
+	body.resize(0);
+
+	if ((0 == buf) || (0 == buflen))
+		return;
+
+	if (buflen < get_length())
+		throw eMsgInval("cofmsg_barrier_reply::pack() buf too short");
+
+	body.pack(buf + sizeof(struct rofl::openflow::ofp_header),
+			buflen - sizeof(struct rofl::openflow::ofp_header));
 }
 
 
 
 void
-cofmsg_barrier_reply::unpack(uint8_t *buf, size_t buflen)
+cofmsg_barrier_reply::unpack(
+		uint8_t *buf, size_t buflen)
 {
 	cofmsg::unpack(buf, buflen);
 
-	validate();
-}
+	if ((0 == buf) || (0 == buflen))
+		return;
 
-
-
-void
-cofmsg_barrier_reply::validate()
-{
-	cofmsg::validate(); // check generic OpenFlow header
+	if (buflen < cofmsg_barrier_reply::length())
+		throw eBadRequestBadLen("cofmsg_barrier_reply::unpack() buf too short");
 
 	switch (get_version()) {
-	case openflow10::OFP_VERSION:
-	case openflow12::OFP_VERSION:
-	case openflow13::OFP_VERSION: {
-		if (get_length() > sizeof(struct openflow::ofp_header)) {
-			body.assign(sobody(), bodylen());
+	case rofl::openflow10::OFP_VERSION: {
+		if (get_type() != rofl::openflow10::OFPT_BARRIER_REPLY)
+			throw eMsgInval("cofmsg_barrier_reply::unpack() invalid message type");
+
+		if (buflen > sizeof(struct rofl::openflow::ofp_header)) {
+			body.unpack(buf + sizeof(struct rofl::openflow::ofp_header),
+					buflen - sizeof(struct rofl::openflow::ofp_header));
 		}
+
 	} break;
-	default:
-		throw eBadRequestBadVersion();
+	default: {
+		if (get_type() != rofl::openflow13::OFPT_BARRIER_REPLY)
+			throw eMsgInval("cofmsg_barrier_reply::unpack() invalid message type");
+
+		if (buflen > sizeof(struct rofl::openflow::ofp_header)) {
+			body.unpack(buf + sizeof(struct rofl::openflow::ofp_header),
+					buflen - sizeof(struct rofl::openflow::ofp_header));
+		}
+	};
 	}
+
+	if (get_length() < cofmsg_barrier_reply::length())
+		throw eBadRequestBadLen("cofmsg_barrier_reply::unpack() buf too short");
 }
 
-
-
-rofl::cmemory&
-cofmsg_barrier_reply::get_body()
-{
-	return body;
-}
 

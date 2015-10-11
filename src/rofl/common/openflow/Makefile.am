@@ -1,6 +1,6 @@
 MAINTAINERCLEANFILES = Makefile.in
 
-SUBDIRS = extensions messages experimental
+SUBDIRS = messages experimental
 
 noinst_LTLIBRARIES = libopenflow.la
 
@@ -10,6 +10,7 @@ libopenflow_la_SOURCES= \
 	openflow10.h  \
 	openflow12.h \
 	openflow13.h \
+	openflow14.h \
 	openflow_common.h \
 	openflow_experimental.h \
 	openflow_rofl_exceptions.h \
@@ -42,6 +43,10 @@ libopenflow_la_SOURCES= \
 	cofport.cc \
 	cofports.h \
 	cofports.cc \
+	cofportdescprop.h \
+	cofportdescprop.cc \
+	cofportdescprops.h \
+	cofportdescprops.cc \
 	cofstats.h \
 	cofstats.cc \
 	cofdescstats.h \
@@ -104,6 +109,10 @@ libopenflow_la_SOURCES= \
 	coftablefeatures.cc \
 	coftables.h \
 	coftables.cc \
+	coftablemodprop.h \
+	coftablemodprop.cc \
+	coftablemodprops.h \
+	coftablemodprops.cc \
 	cofasyncconfig.h \
 	cofasyncconfig.cc \
 	cofrole.h \
@@ -123,7 +132,7 @@ libopenflow_la_SOURCES= \
 	cofmeterfeatures.h \
 	cofmeterfeatures.cc 
 
-libopenflow_la_LIBADD= extensions/libopenflow_extensions.la messages/libopenflow_messages.la experimental/libopenflow_experimental.la
+libopenflow_la_LIBADD=messages/libopenflow_messages.la experimental/libopenflow_experimental.la
 
 library_includedir=$(includedir)/rofl/common/openflow
 library_include_HEADERS = \
@@ -131,6 +140,7 @@ library_include_HEADERS = \
 	openflow10.h  \
 	openflow12.h \
 	openflow13.h \
+	openflow14.h \
 	openflow_common.h \
 	openflow_experimental.h \
 	openflow_rofl_exceptions.h \
@@ -149,6 +159,8 @@ library_include_HEADERS = \
 	coxmatches.h \
 	cofport.h \
 	cofports.h \
+	cofportdescprop.h \
+	cofportdescprops.h \
 	cofstats.h \
 	cofdescstats.h \
 	cofflowstatsarray.h \
@@ -180,6 +192,8 @@ library_include_HEADERS = \
 	coftablefeatureprops.h \
 	coftablefeatures.h \
 	coftables.h \
+	coftablemodprop.h \
+	coftablemodprops.h \
 	cofasyncconfig.h \
 	cofrole.h \
 	cofmeterbandstats.h \

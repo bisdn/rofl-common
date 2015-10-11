@@ -1,93 +1,46 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 #include "rofl/common/openflow/messages/cofmsg_table_mod.h"
 
 using namespace rofl::openflow;
 
+cofmsg_table_mod::~cofmsg_table_mod()
+{}
+
+
+
 cofmsg_table_mod::cofmsg_table_mod(
-		uint8_t of_version,
+		uint8_t version,
 		uint32_t xid,
 		uint8_t  table_id,
 		uint32_t config) :
-	cofmsg(sizeof(struct openflow::ofp_header))
-{
-	ofh_table_mod = soframe();
-
-	set_version(of_version);
-	set_xid(xid);
-
-	switch (of_version) {
-	case openflow12::OFP_VERSION: {
-		set_type(openflow12::OFPT_TABLE_MOD);
-		resize(sizeof(struct openflow12::ofp_table_mod));
-
-		ofh12_table_mod->table_id		= table_id;
-		ofh12_table_mod->config			= htobe32(config);
-	} break;
-	case openflow13::OFP_VERSION: {
-		set_type(openflow13::OFPT_TABLE_MOD);
-		resize(sizeof(struct openflow13::ofp_table_mod));
-
-		ofh13_table_mod->table_id		= table_id;
-		ofh13_table_mod->config			= htobe32(config);
-	} break;
-	default:
-		throw eBadVersion();
-	}
-}
+				cofmsg(version, rofl::openflow::OFPT_TABLE_MOD, xid),
+				table_id(table_id),
+				config(config)
+{}
 
 
 
 cofmsg_table_mod::cofmsg_table_mod(
-		cmemory *memarea) :
-	cofmsg(memarea)
+		const cofmsg_table_mod& msg)
 {
-	ofh_table_mod = soframe();
-}
-
-
-
-cofmsg_table_mod::cofmsg_table_mod(
-		cofmsg_table_mod const& table_mod)
-{
-	*this = table_mod;
+	*this = msg;
 }
 
 
 
 cofmsg_table_mod&
 cofmsg_table_mod::operator= (
-		cofmsg_table_mod const& table_mod)
+		const cofmsg_table_mod& msg)
 {
-	if (this == &table_mod)
+	if (this == &msg)
 		return *this;
-
-	cofmsg::operator =(table_mod);
-
-	ofh_table_mod = soframe();
-
+	cofmsg::operator= (msg);
+	table_id = msg.table_id;
+	config = msg.config;
 	return *this;
-}
-
-
-
-cofmsg_table_mod::~cofmsg_table_mod()
-{
-
-}
-
-
-
-void
-cofmsg_table_mod::reset()
-{
-	cofmsg::reset();
-}
-
-
-
-uint8_t*
-cofmsg_table_mod::resize(size_t len)
-{
-	return (ofh_table_mod = cofmsg::resize(len));
 }
 
 
@@ -96,11 +49,9 @@ size_t
 cofmsg_table_mod::length() const
 {
 	switch (get_version()) {
-	case openflow12::OFP_VERSION: {
-		return (sizeof(struct openflow12::ofp_table_mod));
-	} break;
-	case openflow13::OFP_VERSION: {
-		return (sizeof(struct openflow13::ofp_table_mod));
+	case rofl::openflow12::OFP_VERSION:
+	case rofl::openflow13::OFP_VERSION: {
+		return (sizeof(struct rofl::openflow13::ofp_table_mod));
 	} break;
 	default:
 		throw eBadVersion();
@@ -111,136 +62,57 @@ cofmsg_table_mod::length() const
 
 
 void
-cofmsg_table_mod::pack(uint8_t *buf, size_t buflen)
+cofmsg_table_mod::pack(
+		uint8_t *buf, size_t buflen)
 {
-	set_length(length());
+	cofmsg::pack(buf, buflen);
 
 	if ((0 == buf) || (0 == buflen))
 		return;
 
-	if (buflen < length())
-		throw eInval();
+	if (buflen < cofmsg_table_mod::length())
+		throw eMsgInval("cofmsg_table_mod::pack() buf too short");
 
 	switch (get_version()) {
-	case openflow12::OFP_VERSION: {
-		if (buflen < sizeof(struct openflow12::ofp_table_mod))
-			throw eInval();
-		memcpy(buf, soframe(), sizeof(struct openflow12::ofp_table_mod));
-	} break;
-	case openflow13::OFP_VERSION: {
-		if (buflen < sizeof(struct openflow13::ofp_table_mod))
-			throw eInval();
-		memcpy(buf, soframe(), sizeof(struct openflow13::ofp_table_mod));
-	} break;
-	default:
-		throw eBadVersion();
+	default: {
+		struct rofl::openflow13::ofp_table_mod* hdr =
+				(struct rofl::openflow13::ofp_table_mod*)buf;
+		hdr->table_id = table_id;
+		hdr->config = htobe32(config);
+	};
 	}
 }
 
 
 
 void
-cofmsg_table_mod::unpack(uint8_t *buf, size_t buflen)
+cofmsg_table_mod::unpack(
+		uint8_t *buf, size_t buflen)
 {
 	cofmsg::unpack(buf, buflen);
 
-	validate();
-}
+	if ((0 == buf) || (0 == buflen))
+		return;
 
-
-
-void
-cofmsg_table_mod::validate()
-{
-	cofmsg::validate(); // check generic OpenFlow header
-
-	ofh_table_mod = soframe();
+	if (buflen < cofmsg_table_mod::length())
+		throw eBadRequestBadLen("cofmsg_table_mod::unpack() buf too short");
 
 	switch (get_version()) {
-	case openflow12::OFP_VERSION: {
-		if (get_length() < sizeof(struct openflow12::ofp_table_mod))
-			throw eBadSyntaxTooShort();
-	} break;
-	case openflow13::OFP_VERSION: {
-		if (get_length() < sizeof(struct openflow13::ofp_table_mod))
-			throw eBadSyntaxTooShort();
-	} break;
-	default:
-		throw eBadRequestBadVersion();
+	default: {
+
+		if (get_type() != rofl::openflow13::OFPT_TABLE_MOD)
+			throw eMsgInval("cofmsg_table_mod::unpack() invalid message type");
+
+		struct rofl::openflow13::ofp_table_mod* hdr =
+				(struct rofl::openflow13::ofp_table_mod*)buf;
+		table_id = hdr->table_id;
+		config = be32toh(hdr->config);
+	};
 	}
+
+	if (get_length() < cofmsg_table_mod::length())
+		throw eBadRequestBadLen("cofmsg_table_mod::unpack() buf too short");
 }
-
-
-
-
-uint8_t
-cofmsg_table_mod::get_table_id() const
-{
-	switch (get_version()) {
-	case openflow12::OFP_VERSION: {
-		return (ofh12_table_mod->table_id);
-	} break;
-	case openflow13::OFP_VERSION: {
-		return (ofh13_table_mod->table_id);
-	} break;
-	default:
-		throw eBadVersion();
-	}
-	return 0;
-}
-
-
-
-void
-cofmsg_table_mod::set_table_id(uint8_t table_id)
-{
-	switch (get_version()) {
-	case openflow12::OFP_VERSION: {
-		ofh12_table_mod->table_id = (table_id);
-	} break;
-	case openflow13::OFP_VERSION: {
-		ofh13_table_mod->table_id = (table_id);
-	} break;
-	default:
-		throw eBadVersion();
-	}
-}
-
-
-
-uint32_t
-cofmsg_table_mod::get_config() const
-{
-	switch (get_version()) {
-	case openflow12::OFP_VERSION: {
-		return be32toh(ofh12_table_mod->config);
-	} break;
-	case openflow13::OFP_VERSION: {
-		return be32toh(ofh13_table_mod->config);
-	} break;
-	default:
-		throw eBadVersion();
-	}
-	return 0;
-}
-
-
-
-void
-cofmsg_table_mod::set_config(uint32_t config)
-{
-	switch (get_version()) {
-	case openflow12::OFP_VERSION: {
-		ofh12_table_mod->config = htobe32(config);
-	} break;
-	case openflow13::OFP_VERSION: {
-		ofh13_table_mod->config = htobe32(config);
-	} break;
-	default:
-		throw eBadVersion();
-	}
-}
-
 
 
 

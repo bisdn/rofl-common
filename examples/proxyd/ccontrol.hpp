@@ -10,7 +10,6 @@
 
 #include <set>
 #include <rofl/common/crofshim.h>
-#include <rofl/common/protocols/fvlanframe.h>
 
 namespace rofl {
 namespace examples {

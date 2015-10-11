@@ -63,19 +63,27 @@ void
 cofactionset::actionset_clear(const cofinstruction_actions& inst)
 {
 	//WRITELOG(COFACTION, DBG, "cofactionset(%p)::actionset_clear()", this);
-	LOGGING_DEBUG << "[rofl]"<<this<<" actionset_clear()"<< std::endl;
+	std::cerr << "[rofl]"<<this<<" actionset_clear()"<< std::endl;
 	acset.clear();
 
 	for (std::map<cindex, unsigned int>::const_iterator
 			it = inst.get_actions().get_actions_index().begin();
 					it != inst.get_actions().get_actions_index().end(); ++it) {
+#if 0
+		// FIXME
 		const cindex& index 		= it->first;
+#endif
 		const unsigned int& type	= it->second;
 
 		switch (type) {
 		case rofl::openflow13::OFPAT_SET_FIELD: {
+#if 0
+			// FIXME
 			const coxmatch& oxm = inst.get_actions().get_action_set_field(index).get_oxm();
 			acfields[oxm.get_oxm_class()].erase(oxm.get_oxm_field());
+#else
+			throw eNotImplemented("cofactionset::actionset_clear()");
+#endif
 		} break;
 		default:
 			continue;
@@ -96,7 +104,7 @@ void
 cofactionset::actionset_write_actions(const cofinstruction_actions& inst)
 {
 	//WRITELOG(COFACTION, DBG, "cofactionset(%p)::actionset_write_actions() inst->actions.elems.size()=%u", this, inst.actions.size());
-	LOGGING_DEBUG << "[rofl]"<<this<<" actionset_write_actions() inst->actions.elems.size()="<< inst.get_actions().get_actions_index().size() << std::endl;
+	std::cerr << "[rofl]"<<this<<" actionset_write_actions() inst->actions.elems.size()="<< inst.get_actions().get_actions_index().size() << std::endl;
 
 
 	for (std::map<cindex, unsigned int>::const_iterator

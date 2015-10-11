@@ -380,7 +380,7 @@ cofmeter_bands::unpack(
 
 			if (((buflen - offset) < sizeof(struct rofl::openflow13::ofp_meter_band_header)) ||
 					(be16toh(mbh->len) < sizeof(struct rofl::openflow13::ofp_meter_band_header)))
-				throw eMeterModBadBand();
+				return;
 
 			uint16_t type 	= be16toh(mbh->type);
 			uint16_t len 	= be16toh(mbh->len);
@@ -402,7 +402,7 @@ cofmeter_bands::unpack(
 				index_experimenter++;
 			} break;
 			default:
-				LOGGING_WARN << "[rofl][cofmeterbands][unpack] unknown meter band type:" << (int)type << std::endl;
+				std::cerr << "[rofl][cofmeterbands][unpack] unknown meter band type:" << (int)type << std::endl;
 				offset += len;
 			}
 		}

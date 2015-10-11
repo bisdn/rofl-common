@@ -19,19 +19,90 @@ CPPUNIT_TEST_SUITE_REGISTRATION( crofbasetest );
 void
 crofbasetest::setUp()
 {
-	run_test = true;
+
+}
+
+
+void
+crofbasetest::tearDown()
+{
+
+}
+
+
+
+void
+crofbasetest::test()
+{
+	datapath.test_start();
+
+	while (controller.keep_running()) {
+		struct timespec ts;
+		ts.tv_sec = 1;
+		ts.tv_nsec = 0;
+		pselect(0, NULL, NULL, NULL, &ts, NULL);
+		std::cerr << "#";
+	}
+}
+
+
+
+void
+crofbasetest::handle_wakeup(
+		rofl::cthread& thread)
+{
+
+}
+
+
+
+void
+crofbasetest::handle_timeout(
+		rofl::cthread& thread, uint32_t timer_id, const std::list<unsigned int>& ttypes)
+{
+
+}
+
+
+
+ccontroller::~ccontroller()
+{
+
+}
+
+
+
+ccontroller::ccontroller() :
+			baddr(rofl::csockaddr(AF_INET, "127.0.0.1", 6653)),
+			__keep_running(true)
+{
 	vbitmap.add_ofp_version(rofl::openflow13::OFP_VERSION);
-	ctlsockid = 17;
-	ctlid = rofl::cctlid(get_idle_ctlid());
 
-	dpid = 0xa0a1a2a3a4a5a6a7;
-	n_buffers = 0xb0b1b2b3;
-	n_tables = 0xc0c1c2c3;
-	capabilities = 0xd0d1d2d3;
-	tauxid = 0xe1;
+	crofbase::set_versionbitmap(vbitmap);
+	crofbase::dpt_sock_listen(baddr);
+}
 
-	flags = 0xf0f1;
-	miss_send_len = 0xa0a1;
+
+
+cdatapath::~cdatapath()
+{
+
+}
+
+
+
+cdatapath::cdatapath() :
+		raddr(rofl::csockaddr(AF_INET, "127.0.0.1", 6653)),
+		dpid(0xa0a1a2a3a4a5a6a7),
+		n_buffers(0xb0b1b2b3),
+		n_tables(0xc1),
+		capabilities(0xd0d1d2d3),
+		flags(0xf0f1),
+		miss_send_len(0xa0a1)
+{
+	vbitmap.add_ofp_version(rofl::openflow13::OFP_VERSION);
+
+	ctlid = add_ctl().get_ctlid();
 
 	tables.set_version(rofl::openflow13::OFP_VERSION);
 	tables.set_table(0);
@@ -47,94 +118,45 @@ crofbasetest::setUp()
 }
 
 
-void
-crofbasetest::tearDown()
-{
 
+void
+cdatapath::test_start()
+{
+	crofbase::set_ctl(ctlid).
+			add_conn(rofl::cauxid(0)).
+				set_raddr(raddr).
+					tcp_connect(vbitmap, rofl::crofconn::MODE_DATAPATH);
 }
 
 
 
 void
-crofbasetest::test()
+ccontroller::handle_dpt_open(
+		rofl::crofdpt& dpt)
 {
-	/*
-	 * set log level
-	 */
-	set_log_level(0);
+	std::cerr << ">>> XXX dpt connected: " << std::endl;
 
-	/*
-	 * set number of worker threads in rofl-common, here: 4
-	 */
-	set_num_of_workers(4);
-
-
-	/*
-	 * set version bitmap for OpenFlow versions to accept
-	 */
-	set_versionbitmap(vbitmap);
-
-
-	/*
-	 * prepare listening socket for incoming OpenFlow connections
-	 */
-	rofl::cparams sockparams =
-			rofl::csocket::get_default_params(
-					rofl::csocket::SOCKET_TYPE_PLAIN);
-
-	sockparams.set_param(
-			csocket::PARAM_KEY_DOMAIN).set_string("inet");
-	sockparams.set_param(
-			csocket::PARAM_KEY_LOCAL_HOSTNAME).set_string("127.0.0.1");
-	sockparams.set_param(
-			csocket::PARAM_KEY_LOCAL_PORT).set_string("6653");
-
-	add_dpt_listening(
-			ctlsockid, rofl::csocket::SOCKET_TYPE_PLAIN, sockparams);
-
-
-
-	/*
-	 * connect to listening socket in data path role
-	 */
-	rofl::cparams sockparams2 =
-			rofl::csocket::get_default_params(
-					rofl::csocket::SOCKET_TYPE_PLAIN);
-
-	sockparams2.set_param(
-			csocket::PARAM_KEY_DOMAIN).set_string("inet");
-	sockparams2.set_param(
-			csocket::PARAM_KEY_REMOTE_HOSTNAME).set_string("127.0.0.1");
-	sockparams2.set_param(
-			csocket::PARAM_KEY_REMOTE_PORT).set_string("6653");
-
-	add_ctl(ctlid, vbitmap, true).connect(
-			rofl::cauxid(0), rofl::csocket::SOCKET_TYPE_PLAIN, sockparams2);
-
-
-
-	/*
-	 * wait until test is done
-	 */
-	while (run_test) {
-		struct timespec ts;
-		ts.tv_sec = 0;
-		ts.tv_nsec = 5000000;
-		pselect(0, NULL, NULL, NULL, &ts, NULL);
-	}
-
-	//sleep(1);
+	dpt.send_get_config_request(rofl::cauxid(0));
 }
 
 
 
 void
-crofbasetest::handle_features_request(
+cdatapath::handle_ctl_open(
+		rofl::crofctl& ctl)
+{
+	std::cerr << ">>> XXX ctl connected: " << std::endl;
+}
+
+
+
+void
+cdatapath::handle_features_request(
 		rofl::crofctl& ctl,
 		const rofl::cauxid& auxid,
 		rofl::openflow::cofmsg_features_request& msg)
 {
-	std::cerr << ">>> XXX -Features-Request- rcvd" << std::endl;
+	std::cerr << ">>> XXX -Features-Request- rcvd" << std::endl << auxid;
 
 	ctl.send_features_reply(
 			auxid,
@@ -143,31 +165,26 @@ crofbasetest::handle_features_request(
 			n_buffers,
 			n_tables,
 			capabilities,
-			tauxid);
+			/*auxid=*/0);
 }
 
 
 
 void
-crofbasetest::handle_features_reply(
+ccontroller::handle_features_reply(
 		rofl::crofdpt& dpt,
 		const rofl::cauxid& auxid,
 		rofl::openflow::cofmsg_features_reply& msg)
 {
 	std::cerr << ">>> XXX -Features-Reply- rcvd" << std::endl;
 
-	CPPUNIT_ASSERT(auxid == rofl::cauxid(0));
-	CPPUNIT_ASSERT(msg.get_dpid() == dpid);
-	CPPUNIT_ASSERT(msg.get_n_buffers() == n_buffers);
-	CPPUNIT_ASSERT(msg.get_n_tables() == n_tables);
-	CPPUNIT_ASSERT(msg.get_capabilities() == capabilities);
-	CPPUNIT_ASSERT(msg.get_auxiliary_id() == tauxid);
+	dpt.send_get_config_request(auxid);
 }
 
 
 
 void
-crofbasetest::handle_get_config_request(
+cdatapath::handle_get_config_request(
 		rofl::crofctl& ctl,
 		const rofl::cauxid& auxid,
 		rofl::openflow::cofmsg_get_config_request& msg)
@@ -180,7 +197,34 @@ crofbasetest::handle_get_config_request(
 
 
 void
-crofbasetest::handle_table_features_stats_request(
+cdatapath::handle_barrier_request(
+		rofl::crofctl& ctl,
+		const rofl::cauxid& auxid,
+		rofl::openflow::cofmsg_barrier_request& msg)
+{
+	std::cerr << ">>> XXX -Barrier-Request- rcvd" << std::endl;
+
+	/* do not send barrier-reply back => wait for request timeout at controller */
+}
+
+
+
+void
+ccontroller::handle_get_config_reply(
+		rofl::crofdpt& dpt,
+		const rofl::cauxid& auxid,
+		rofl::openflow::cofmsg_get_config_reply& msg)
+{
+	std::cerr << ">>> XXX -Get-Config-Reply- rcvd" << std::endl;
+
+	uint16_t flags = 0;
+	dpt.send_table_features_stats_request(auxid, flags);
+}
+
+
+
+void
+cdatapath::handle_table_features_stats_request(
 		rofl::crofctl& ctl,
 		const rofl::cauxid& auxid,
 		rofl::openflow::cofmsg_table_features_stats_request& msg)
@@ -193,7 +237,21 @@ crofbasetest::handle_table_features_stats_request(
 
 
 void
-crofbasetest::handle_port_desc_stats_request(
+ccontroller::handle_table_features_stats_reply(
+		rofl::crofdpt& dpt,
+		const rofl::cauxid& auxid,
+		rofl::openflow::cofmsg_table_features_stats_reply& msg)
+{
+	std::cerr << ">>> XXX -Table-Features-Stats-Reply- rcvd" << std::endl;
+
+	uint16_t flags = 0;
+	dpt.send_port_desc_stats_request(auxid, flags);
+}
+
+
+
+void
+cdatapath::handle_port_desc_stats_request(
 		rofl::crofctl& ctl,
 		const rofl::cauxid& auxid,
 		rofl::openflow::cofmsg_port_desc_stats_request& msg)
@@ -206,12 +264,41 @@ crofbasetest::handle_port_desc_stats_request(
 
 
 void
-crofbasetest::handle_dpt_open(
-		rofl::crofdpt& dpt)
+ccontroller::handle_port_desc_stats_reply(
+		rofl::crofdpt& dpt,
+		const rofl::cauxid& auxid,
+		rofl::openflow::cofmsg_port_desc_stats_reply& msg)
 {
-	std::cerr << ">>> XXX dpt connected: " << std::endl;
+	std::cerr << ">>> XXX -Port-Desc-Stats-Reply- rcvd" << std::endl;
 
-	run_test = false;
+	for (int i = 0; i < 4; i++) {
+		dpt.send_barrier_request(auxid);
+	}
+}
+
+
+
+void
+ccontroller::handle_barrier_reply(
+		rofl::crofdpt& dpt,
+		const rofl::cauxid& auxid,
+		rofl::openflow::cofmsg_barrier_reply& msg)
+{
+	std::cerr << ">>> XXX -Barrier-Reply- rcvd" << std::endl;
+
+	CPPUNIT_ASSERT(false);
+}
+
+
+
+void
+ccontroller::handle_barrier_reply_timeout(
+		rofl::crofdpt& dpt,
+		uint32_t xid)
+{
+	std::cerr << ">>> XXX -Barrier-Reply-Timeout rcvd" << std::endl;
+
+	__keep_running = false;
 }
 
 

@@ -22,6 +22,7 @@
 #include "rofl/common/caddress.h"
 #include "rofl/common/openflow/openflow_rofl_exceptions.h"
 #include "rofl/common/openflow/cofportstats.h"
+#include "rofl/common/openflow/cofportdescprops.h"
 
 
 
@@ -49,70 +50,79 @@ public:
 
 
 
-class cofport : public cmemory
-{
-private: // data structures
-
-	uint8_t								 ofp_version;	// OpenFlow version of port stored (openflow10::OFP_VERSION, openflow12::OFP_VERSION, ...)
-	rofl::openflow::cofport_stats_reply	 port_stats;
-
-public: // data structures
-
-	union {
-		uint8_t							*ofpu_port;
-		struct openflow10::ofp_port		*ofpu10_port;
-		struct openflow12::ofp_port		*ofpu12_port;
-		struct openflow13::ofp_port		*ofpu13_port;
-	} ofp_ofpu;
-
-#define ofh_port   ofp_ofpu.ofpu_port
-#define ofh10_port ofp_ofpu.ofpu10_port
-#define ofh12_port ofp_ofpu.ofpu12_port
-#define ofh13_port ofp_ofpu.ofpu13_port
-
-
-/*
- * methods
- */
+class cofport {
 public:
 
+	/**
+	 *
+	 */
+	~cofport()
+	{};
 
 	/**
 	 *
 	 */
 	cofport(
-			uint8_t of_version = openflow::OFP_VERSION_UNKNOWN);
-
+			uint8_t ofp_version = openflow::OFP_VERSION_UNKNOWN) :
+				ofp_version(ofp_version),
+				portno(0),
+				config(0),
+				state(0),
+				properties(ofp_version),
+				port_stats(ofp_version)
+	{
+		if (rofl::openflow14::OFP_VERSION > ofp_version)
+			add_ethernet();
+	};
 
 	/**
 	 *
 	 */
 	cofport(
-			uint8_t ofp_version, uint8_t *buf, size_t buflen);
-
+			uint8_t ofp_version,
+			uint8_t *buf,
+			size_t buflen) :
+					ofp_version(ofp_version),
+					portno(0),
+					config(0),
+					state(0),
+					properties(ofp_version),
+					port_stats(ofp_version)
+	{ unpack(buf, buflen); };
 
 	/**
 	 *
 	 */
 	cofport(
-			cofport const& port);
-
+			const cofport& port)
+	{ *this = port; };
 
 	/**
 	 *
 	 */
 	cofport&
 	operator= (
-			cofport const& port);
+			const cofport& port) {
+		if (this == &port)
+			return *this;
+		ofp_version	= port.ofp_version;
+		portno		= port.portno;
+		hwaddr		= port.hwaddr;
+		name		= port.name;
+		config		= port.config;
+		state		= port.state;
+		properties  = port.properties;
+		port_stats 	= port.port_stats;
+		return *this;
+	};
 
+public:
 
 	/**
 	 *
 	 */
-	virtual
-	~cofport();
-
-public:
+	size_t
+	length() const;
 
 	/**
 	 *
@@ -120,8 +130,6 @@ public:
 	void
 	pack(
 			uint8_t *buf, size_t buflen);
-
-
 
 	/**
 	 *
@@ -133,16 +141,14 @@ public:
 	/**
 	 *
 	 */
-	size_t
-	length() const;
-
-
-	/**
-	 *
-	 */
-	rofl::openflow::cofport_stats_reply&
-	get_port_stats();
-
+	void
+	set_version(
+			uint8_t version)
+	{
+		this->ofp_version = version;
+		properties.set_version(version);
+		port_stats.set_version(version);
+	};
 
 	/**
 	 *
@@ -150,216 +156,223 @@ public:
 	uint8_t
 	get_version() const;
 
+public:
+
+	/**
+	 *
+	 */
+	void
+	clear()
+	{ properties.clear(); };
+
+	/**
+	 *
+	 */
+	const rofl::openflow::cofport_stats_reply&
+	get_port_stats() const
+	{ return port_stats; };
+
+	/**
+	 *
+	 */
+	rofl::openflow::cofport_stats_reply&
+	set_port_stats()
+	{ return port_stats; };
+
+	/**
+	 *
+	 */
+	const rofl::openflow::cofportdesc_props&
+	get_properties() const
+	{ return properties; };
+
+	/**
+	 *
+	 */
+	rofl::openflow::cofportdesc_props&
+	set_properties()
+	{ return properties; };
 
 public:
 
-
-	/**
-	 */
 	uint32_t
-	get_port_no() const;
+	get_port_no() const
+	{ return portno; };
 
-
-	/**
-	 */
 	void
-	set_port_no(uint32_t port_no);
+	set_port_no(
+			uint32_t portno)
+	{ this->portno = portno; };
 
+	const rofl::caddress_ll&
+	get_hwaddr() const
+	{ return hwaddr; };
 
-	/**
-	 */
-	cmacaddr
-	get_hwaddr() const;
-
-
-	/**
-	 */
 	void
-	set_hwaddr(cmacaddr const& maddr);
+	set_hwaddr(
+			const rofl::caddress_ll& hwaddr)
+	{ this->hwaddr = hwaddr; };
 
+	const std::string&
+	get_name() const
+	{ return name; };
 
-	/**
-	 */
-	std::string
-	get_name() const;
-
-
-	/**
-	 */
 	void
-	set_name(std::string name);
+	set_name(
+			const std::string& name)
+	{ this->name = name; };
 
-	/**
-	 */
 	uint32_t
-	get_config() const;
+	get_config() const
+	{ return config; };
 
-
-	/**
-	 */
 	void
-	set_config(uint32_t config);
+	set_config(
+			uint32_t config)
+	{ this->config = config; };
 
-	/**
-	 */
 	uint32_t
-	get_state() const;
+	get_state() const
+	{ return state; };
 
-
-	/**
-	 */
 	void
-	set_state(uint32_t state);
+	set_state(
+			uint32_t state)
+	{ this->state = state; };
 
+public:
 
-	/**
-	 */
-	uint32_t
-	get_curr() const;
+	cofportdesc_prop_ethernet&
+	add_ethernet()
+	{ return properties.add_port_desc_ethernet(); };
 
+	cofportdesc_prop_ethernet&
+	set_ethernet()
+	{ return properties.set_port_desc_ethernet(); };
 
-	/**
-	 */
+	const cofportdesc_prop_ethernet&
+	get_ethernet() const
+	{ return properties.get_port_desc_ethernet(); };
+
 	void
-	set_curr(uint32_t curr);
+	drop_ethernet()
+	{ properties.drop_port_desc_ethernet(); };
 
+	bool
+	has_ethernet() const
+	{ return properties.has_port_desc_ethernet(); };
 
-	/**
-	 */
-	uint32_t
-	get_advertised() const;
+public:
 
+	cofportdesc_prop_optical&
+	add_optical()
+	{ return properties.add_port_desc_optical(); };
 
-	/**
-	 */
+	cofportdesc_prop_optical&
+	set_optical()
+	{ return properties.set_port_desc_optical(); };
+
+	const cofportdesc_prop_optical&
+	get_optical() const
+	{ return properties.get_port_desc_optical(); };
+
 	void
-	set_advertised(uint32_t advertised);
+	drop_optical()
+	{ properties.drop_port_desc_optical(); };
 
+	bool
+	has_optical() const
+	{ return properties.has_port_desc_optical(); };
 
-	/**
-	 */
-	uint32_t
-	get_supported() const;
+public:
 
+	cofportdesc_prop_experimenter&
+	add_experimenter()
+	{ return properties.add_port_desc_experimenter(); };
 
-	/**
-	 */
+	cofportdesc_prop_experimenter&
+	set_experimenter()
+	{ return properties.set_port_desc_experimenter(); };
+
+	const cofportdesc_prop_experimenter&
+	get_experimenter() const
+	{ return properties.get_port_desc_experimenter(); };
+
 	void
-	set_supported(uint32_t supported);
+	drop_experimenter()
+	{ properties.drop_port_desc_experimenter(); };
 
+	bool
+	has_experimenter() const
+	{ return properties.has_port_desc_experimenter(); };
 
-	/**
-	 */
-	uint32_t
-	get_peer() const;
-
-
-	/**
-	 */
-	void
-	set_peer(uint32_t peer);
-
-
-	/**
-	 */
-	uint32_t
-	get_curr_speed() const;
-
-
-	/**
-	 */
-	void
-	set_curr_speed(uint32_t curr_speed);
-
-
-	/**
-	 */
-	uint32_t
-	get_max_speed() const;
-
-
-	/**
-	 */
-	void
-	set_max_speed(uint32_t max_speed);
-
+public:
 
 	/**
 	 *
 	 */
-	virtual void
+	void
 	link_state_set_blocked();
 
-
 	/**
 	 *
 	 */
-	virtual void
+	void
 	link_state_clr_blocked();
 
-
 	/**
 	 *
 	 */
-	virtual bool
+	bool
 	link_state_is_blocked() const;
 
-
 	/**
 	 *
 	 */
-	virtual void
+	void
 	link_state_set_live();
 
-
 	/**
 	 *
 	 */
-	virtual void
+	void
 	link_state_clr_live();
 
-
 	/**
 	 *
 	 */
-	virtual bool
+	bool
 	link_state_is_live() const;
 
-
 	/**
 	 *
 	 */
-	virtual void
+	void
 	link_state_set_link_down();
 
-
 	/**
 	 *
 	 */
-	virtual void
+	void
 	link_state_clr_link_down();
 
-
 	/**
 	 *
 	 */
-	virtual bool
+	bool
 	link_state_is_link_down() const;
 
-
 	/**
 	 *
 	 */
-	virtual void
+	void
 	link_state_phy_down();
 
-
 	/**
 	 *
 	 */
-	virtual void
+	void
 	link_state_phy_up();
-
 
 	/**
 	 *
@@ -367,18 +380,16 @@ public:
 	bool
 	link_state_phy_is_up() const;
 
-
 	/**
 	 *
 	 */
 	bool
 	config_is_port_down() const;
 
-
 	/**
 	 *
 	 */
-	virtual void
+	void
 	recv_port_mod(
 			uint32_t config,
 			uint32_t mask,
@@ -389,105 +400,54 @@ private:
 	/**
 	 *
 	 */
-	virtual uint8_t*
-	resize(size_t len);
-
-
-	/**
-	 *
-	 */
-	virtual void
+	void
 	recv_port_mod_of10(
 			uint32_t config,
 			uint32_t mask,
 			uint32_t advertise);
 
-
 	/**
 	 *
 	 */
-	virtual void
+	void
 	recv_port_mod_of12(
 			uint32_t config,
 			uint32_t mask,
 			uint32_t advertise);
-
-
-	/**
-	 *
-	 */
-	virtual void
-	recv_port_mod_of13(
-			uint32_t config,
-			uint32_t mask,
-			uint32_t advertise);
-
-
-
 
 public:
 
 
 	friend std::ostream&
 	operator<< (std::ostream& os, cofport const& port) {
-		switch (port.ofp_version) {
-		case openflow10::OFP_VERSION: {
-			os << indent(0) << "<cofport >" << std::endl;
-			os << indent(2) << "<portno:"		 	<< (int)port.get_port_no() 				<< " >" << std::endl;
-			os << indent(2) << "<hwaddr: >"		 	<< std::endl;
-				{ rofl::indent i(4); os << port.get_hwaddr(); }
-			os << indent(2) << "<name:" 			<< port.get_name() 						<< " >" << std::endl;
-			os << indent(2) << "<config:"		 	<< (int)port.get_config() 				<< " >" << std::endl;
-			os << indent(2) << "<state:"		 	<< (int)port.get_state() 				<< " >" << std::endl;
-			os << indent(2) << "<curr:" 			<< (int)port.get_curr() 				<< " >" << std::endl;
-			os << indent(2) << "<advertised:"	 	<< (int)port.get_advertised() 			<< " >" << std::endl;
-			os << indent(2) << "<supported:" 		<< (int)port.get_supported() 			<< " >" << std::endl;
-			os << indent(2) << "<peer:" 			<< (int)port.get_peer() 				<< " >" << std::endl;
-		} break;
-		case openflow12::OFP_VERSION: {
-			os << indent(0) << "<cofport >" << std::endl;
-			os << indent(2) << "<portno:"		 	<< (int)port.get_port_no() 				<< " >" << std::endl;
-			os << indent(2) << "<hwaddr: >"		 	<< std::endl;
-				{ rofl::indent i(4); os << port.get_hwaddr(); }
-			os << indent(2) << "<name:" 			<< port.get_name() 						<< " >" << std::endl;
-			os << indent(2) << "<config:"		 	<< (int)port.get_config() 				<< " >" << std::endl;
-			os << indent(2) << "<state:"		 	<< (int)port.get_state() 				<< " >" << std::endl;
-			os << indent(2) << "<curr:" 			<< (int)port.get_curr() 				<< " >" << std::endl;
-			os << indent(2) << "<advertised:"	 	<< (int)port.get_advertised() 			<< " >" << std::endl;
-			os << indent(2) << "<supported:" 		<< (int)port.get_supported() 			<< " >" << std::endl;
-			os << indent(2) << "<peer:" 			<< (int)port.get_peer() 				<< " >" << std::endl;
-			os << indent(2) << "<curr-speed:" 		<< (int)port.get_curr_speed() 			<< " >" << std::endl;
-			os << indent(2) << "<max-speed:" 		<< (int)port.get_max_speed() 			<< " >" << std::endl;
-			os << indent(2) << "<state-blocked:" 	<< (int)port.link_state_is_blocked() 	<< " >" << std::endl;
-			os << indent(2) << "<state-live:" 		<< (int)port.link_state_is_live() 		<< " >" << std::endl;
-			os << indent(2) << "<state-link-down:" 	<< (int)port.link_state_is_link_down() 	<< " >" << std::endl;
-			os << indent(2) << "<config-port-down:" << (int)port.config_is_port_down() 		<< " >" << std::endl;
-		} break;
-		case openflow13::OFP_VERSION: {
-			os << indent(0) << "<cofport >" << std::endl;
-			os << indent(2) << "<portno:"		 	<< (int)port.get_port_no() 				<< " >" << std::endl;
-			os << indent(2) << "<hwaddr: >"		 	<< std::endl;
-				{ rofl::indent i(4); os << port.get_hwaddr(); }
-			os << indent(2) << "<name:" 			<< port.get_name() 						<< " >" << std::endl;
-			os << indent(2) << "<config:"		 	<< (int)port.get_config() 				<< " >" << std::endl;
-			os << indent(2) << "<state:"		 	<< (int)port.get_state() 				<< " >" << std::endl;
-			os << indent(2) << "<curr:" 			<< (int)port.get_curr() 				<< " >" << std::endl;
-			os << indent(2) << "<advertised:"	 	<< (int)port.get_advertised() 			<< " >" << std::endl;
-			os << indent(2) << "<supported:" 		<< (int)port.get_supported() 			<< " >" << std::endl;
-			os << indent(2) << "<peer:" 			<< (int)port.get_peer() 				<< " >" << std::endl;
-			os << indent(2) << "<curr-speed:" 		<< (int)port.get_curr_speed() 			<< " >" << std::endl;
-			os << indent(2) << "<max-speed:" 		<< (int)port.get_max_speed() 			<< " >" << std::endl;
-			os << indent(2) << "<state-blocked:" 	<< (int)port.link_state_is_blocked() 	<< " >" << std::endl;
-			os << indent(2) << "<state-live:" 		<< (int)port.link_state_is_live() 		<< " >" << std::endl;
-			os << indent(2) << "<state-link-down:" 	<< (int)port.link_state_is_link_down() 	<< " >" << std::endl;
-			os << indent(2) << "<config-port-down:" << (int)port.config_is_port_down() 		<< " >" << std::endl;
-		} break;
-		default: {
-			os << "<cofport unknown OFP version>" << std::endl;
-		};
+		os << indent(0) << "<cofport >" << std::endl;
+		os << indent(2) << "<portno: " << (int)port.get_port_no() << " >" << std::endl;
+		os << indent(2) << "<hwaddr: " << port.get_hwaddr().str() << " >"	<< std::endl;
+		os << indent(2) << "<name: " << port.get_name() << " >" << std::endl;
+		os << indent(2) << "<config: " << (int)port.get_config()	<< " >" << std::endl;
+		os << indent(2) << "<state: " << (int)port.get_state() << " >" << std::endl;
+		if (port.has_ethernet()) {
+			rofl::indent i(2); os << port.get_ethernet();
+		}
+		if (port.has_optical()) {
+			rofl::indent i(2); os << port.get_optical();
+		}
+		if (port.has_experimenter()) {
+			rofl::indent i(2); os << port.get_experimenter();
 		}
 		return os;
 	};
+
+private:
+
+	uint8_t			    ofp_version;
+	uint32_t			portno;
+	rofl::caddress_ll	hwaddr;
+	std::string			name;
+	uint32_t			config;
+	uint32_t			state;
+	cofportdesc_props	properties;
+	cofport_stats_reply	port_stats;
 };
 
 

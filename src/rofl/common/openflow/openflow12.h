@@ -119,37 +119,37 @@ namespace openflow12 {
 		OFPT_ERROR 					= 1,	/* Symmetric message */
 		OFPT_ECHO_REQUEST 			= 2,	/* Symmetric message */
 		OFPT_ECHO_REPLY				= 3,    /* Symmetric message */
-		OFPT_EXPERIMENTER				= 4,    /* Symmetric message */
+		OFPT_EXPERIMENTER			= 4,    /* Symmetric message */
 
 		/* Switch configuration messages. */
-		OFPT_FEATURES_REQUEST			= 5,    /* Controller/switch message */
+		OFPT_FEATURES_REQUEST		= 5,    /* Controller/switch message */
 		OFPT_FEATURES_REPLY			= 6,    /* Controller/switch message */
 		OFPT_GET_CONFIG_REQUEST		= 7,    /* Controller/switch message */
-		OFPT_GET_CONFIG_REPLY			= 8,    /* Controller/switch message */
+		OFPT_GET_CONFIG_REPLY		= 8,    /* Controller/switch message */
 		OFPT_SET_CONFIG				= 9,    /* Controller/switch message */
 
 		/* Asynchronous messages. */
 		OFPT_PACKET_IN				= 10,   /* Async message */
-		OFPT_FLOW_REMOVED				= 11,   /* Async message */
-		OFPT_PORT_STATUS				= 12,   /* Async message */
+		OFPT_FLOW_REMOVED			= 11,   /* Async message */
+		OFPT_PORT_STATUS			= 12,   /* Async message */
 
 		/* Controller command messages. */
 		OFPT_PACKET_OUT				= 13,   /* Controller/switch message */
-		OFPT_FLOW_MOD					= 14,   /* Controller/switch message */
+		OFPT_FLOW_MOD				= 14,   /* Controller/switch message */
 		OFPT_GROUP_MOD				= 15,   /* Controller/switch message */
-		OFPT_PORT_MOD					= 16,   /* Controller/switch message */
+		OFPT_PORT_MOD				= 16,   /* Controller/switch message */
 		OFPT_TABLE_MOD				= 17,   /* Controller/switch message */
 
 		/* Multipart messages. */
 		OFPT_MULTIPART_REQUEST		= 18,   /* Controller/switch message */
-		OFPT_MULTIPART_REPLY			= 19,   /* Controller/switch message */
+		OFPT_MULTIPART_REPLY		= 19,   /* Controller/switch message */
 
 		/* Statistics messages (up to and including OF1.2) */
 		OFPT_STATS_REQUEST			= 18,	/* Controller/switch message */
-		OFPT_STATS_REPLY				= 19,	/* Controller/switch message */
+		OFPT_STATS_REPLY			= 19,	/* Controller/switch message */
 
 		/* Barrier messages. */
-		OFPT_BARRIER_REQUEST			= 20,   /* Controller/switch message */
+		OFPT_BARRIER_REQUEST		= 20,   /* Controller/switch message */
 		OFPT_BARRIER_REPLY			= 21,   /* Controller/switch message */
 
 		/* Queue Configuration messages. */
@@ -157,12 +157,12 @@ namespace openflow12 {
 		OFPT_QUEUE_GET_CONFIG_REPLY	= 23,  /* Controller/switch message */
 
 		/* Controller role change request messages. */
-		OFPT_ROLE_REQUEST    			= 24, /* Controller/switch message */
+		OFPT_ROLE_REQUEST    		= 24, /* Controller/switch message */
 		OFPT_ROLE_REPLY				= 25, /* Controller/switch message */
 
 		/* Asynchronous message configuration. */
 		OFPT_GET_ASYNC_REQUEST		= 26, /* Controller/switch message */
-		OFPT_GET_ASYNC_REPLY			= 27, /* Controller/switch message */
+		OFPT_GET_ASYNC_REPLY		= 27, /* Controller/switch message */
 		OFPT_SET_ASYNC				= 28, /* Controller/switch message */
 
 		/* Meters and rate limiters configuration messages. */
@@ -852,10 +852,14 @@ namespace openflow12 {
 
 	/* Value used in "idle_timeout" and "hard_timeout" to indicate that the entry
 	 * is permanent. */
-	#define OFP_FLOW_PERMANENT 0
+	enum ofp_flow_value_t {
+		OFP_FLOW_PERMANENT = 0,
+	};
 
 	/* By default, choose a priority in the middle. */
-	#define OFP_DEFAULT_PRIORITY 0x8000
+	enum ofp_priority_value_t {
+		OFP_DEFAULT_PRIORITY = 0x8000,
+	};
 
 	enum ofp_instruction_type {
 		OFPIT_GOTO_TABLE = 1,       /* Setup the next table in the lookup
@@ -1568,11 +1572,15 @@ namespace openflow12 {
 	};
 	OFP_ASSERT(sizeof(struct ofp_experimenter_header) == 16);
 
-	/* All ones is used to indicate all queues in a port (for stats retrieval). */
-	#define OFPQ_ALL      0xffffffff
+	enum ofp_queue_id_t {
+		/* All ones is used to indicate all queues in a port (for stats retrieval). */
+		OFPQ_ALL = 0xffffffff,
+	};
 
-	/* Min rate > 1000 means not configured. */
-	#define OFPQ_MIN_RATE_UNCFG      0xffff
+	enum ofp_queue_rate_value_t {
+		/* Min rate > 1000 means not configured. */
+		OFPQ_MIN_RATE_UNCFG = 0xffff,
+	};
 
 	enum ofp_queue_properties {
 		OFPQT_NONE = 0,       /* No property defined for queue (default). */

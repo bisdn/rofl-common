@@ -25,54 +25,73 @@ public:
 	/**
 	 *
 	 */
-	cofmsg_group_mod(
-			uint8_t ofp_version = rofl::openflow::OFP_VERSION_UNKNOWN,
-			uint32_t xid = 0,
-			const cofgroupmod& groupmod = cofgroupmod());
+	virtual
+	~cofmsg_group_mod()
+	{};
 
 	/**
 	 *
 	 */
 	cofmsg_group_mod(
-			const cofmsg_group_mod& msg);
+			uint8_t version = rofl::openflow::OFP_VERSION_UNKNOWN,
+			uint32_t xid = 0,
+			const rofl::openflow::cofgroupmod& groupmod = rofl::openflow::cofgroupmod()) :
+				cofmsg(version, rofl::openflow12::OFPT_GROUP_MOD, xid),
+				groupmod(groupmod)
+	{
+		this->groupmod.set_version(version);
+	};
+
+	/**
+	 *
+	 */
+	cofmsg_group_mod(
+			const cofmsg_group_mod& msg)
+	{ *this = msg; };
 
 	/**
 	 *
 	 */
 	cofmsg_group_mod&
 	operator= (
-			const cofmsg_group_mod& msg);
-
-	/**
-	 *
-	 */
-	virtual
-	~cofmsg_group_mod();
-
-	/**
-	 *
-	 */
-	cofmsg_group_mod(
-			cmemory *memarea);
+			const cofmsg_group_mod& msg) {
+		if (this == &msg)
+			return *this;
+		cofmsg::operator= (msg);
+		groupmod = msg.groupmod;
+		return *this;
+	};
 
 public:
-
-	/** reset packet content
-	 *
-	 */
-	virtual void
-	reset();
-
-	/** parse packet and validate it
-	 */
-	virtual void
-	validate();
 
 	/**
 	 *
 	 */
 	void
-	check_prerequisites() const;
+	check_prerequisites() const
+	{ groupmod.check_prerequisites(); };
+
+public:
+
+	/**
+	 *
+	 */
+	virtual size_t
+	length() const;
+
+	/**
+	 *
+	 */
+	virtual void
+	pack(
+			uint8_t *buf, size_t buflen);
+
+	/**
+	 *
+	 */
+	virtual void
+	unpack(
+			uint8_t *buf, size_t buflen);
 
 public:
 
@@ -102,28 +121,6 @@ public:
 
 public:
 
-	/** returns length of packet in packed state
-	 *
-	 */
-	virtual size_t
-	length() const;
-
-	/**
-	 *
-	 */
-	virtual void
-	pack(
-			uint8_t *buf = (uint8_t*)0, size_t buflen = 0);
-
-	/**
-	 *
-	 */
-	virtual void
-	unpack(
-			uint8_t *buf, size_t buflen);
-
-public:
-
 	friend std::ostream&
 	operator<< (std::ostream& os, const cofmsg_group_mod& msg) {
 		os << rofl::indent(0) << "<cofmsg_group_mod >" << std::endl;
@@ -132,9 +129,17 @@ public:
 		return os;
 	};
 
+	std::string
+	str() const {
+		std::stringstream ss;
+		ss << cofmsg::str() << "-Group-Mod- " << " ";
+		ss << "groupmod: " << groupmod.str() << " ";
+		return ss.str();
+	};
+
 private:
 
-	rofl::openflow::cofgroupmod	groupmod;
+	rofl::openflow::cofgroupmod groupmod;
 };
 
 }; // end of namespace openflow

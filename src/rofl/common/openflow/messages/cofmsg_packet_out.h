@@ -18,161 +18,138 @@ namespace openflow {
 /**
  *
  */
-class cofmsg_packet_out :
-	public cofmsg
-{
-private:
-
-	cofactions			actions;
-	cpacket				packet;
-
-	union {
-		uint8_t*						ofhu_packet_out;
-		struct openflow10::ofp_packet_out*		ofhu10_packet_out;
-		struct openflow12::ofp_packet_out*		ofhu12_packet_out;
-		struct openflow13::ofp_packet_out*		ofhu13_packet_out;
-	} ofhu;
-
-#define ofh_packet_out   ofhu.ofhu_packet_out
-#define ofh10_packet_out ofhu.ofhu10_packet_out
-#define ofh12_packet_out ofhu.ofhu12_packet_out
-#define ofh13_packet_out ofhu.ofhu13_packet_out
-
+class cofmsg_packet_out : public cofmsg {
 public:
 
-
-	/** constructor
+	/**
 	 *
 	 */
-	cofmsg_packet_out(
-			uint8_t of_version = 0,
-			uint32_t xid = 0,
-			uint32_t buffer_id = 0,
-			uint32_t in_port = 0,
-			cofactions const& actions = cofactions(),
-			uint8_t *data = (uint8_t*)0,
-			size_t datalen = 0);
-
+	virtual
+	~cofmsg_packet_out()
+	{};
 
 	/**
 	 *
 	 */
 	cofmsg_packet_out(
-			cofmsg_packet_out const& packet_out);
+			uint8_t version = 0,
+			uint32_t xid = 0,
+			uint32_t buffer_id = 0,
+			uint32_t in_port = 0,
+			const rofl::openflow::cofactions& actions = rofl::openflow::cofactions(),
+			uint8_t *data = (uint8_t*)0,
+			size_t datalen = 0) :
+				cofmsg(version, rofl::openflow::OFPT_PACKET_OUT, xid),
+				buffer_id(buffer_id),
+				in_port(in_port),
+				actions(actions),
+				packet(data, datalen)
+	{};
 
+	/**
+	 *
+	 */
+	cofmsg_packet_out(
+			const cofmsg_packet_out& msg)
+	{ *this = msg; };
 
 	/**
 	 *
 	 */
 	cofmsg_packet_out&
 	operator= (
-			cofmsg_packet_out const& packet_out);
+			const cofmsg_packet_out& msg) {
+		if (this == &msg)
+			return *this;
+		cofmsg::operator= (msg);
+		buffer_id = msg.buffer_id;
+		in_port   = msg.in_port;
+		actions   = msg.actions;
+		packet    = msg.packet;
+		return *this;
+	};
 
-
-	/** destructor
-	 *
-	 */
-	virtual
-	~cofmsg_packet_out();
-
-
-	/**
-	 *
-	 */
-	cofmsg_packet_out(cmemory *memarea);
-
-
-	/** reset packet content
-	 *
-	 */
-	virtual void
-	reset();
-
+public:
 
 	/**
-	 *
-	 */
-	virtual uint8_t*
-	resize(size_t len);
-
-
-	/** returns length of packet in packed state
 	 *
 	 */
 	virtual size_t
 	length() const;
 
+	/**
+	 *
+	 */
+	virtual void
+	pack(
+			uint8_t *buf = (uint8_t*)0, size_t buflen = 0);
 
 	/**
 	 *
 	 */
 	virtual void
-	pack(uint8_t *buf = (uint8_t*)0, size_t buflen = 0);
-
-
-	/**
-	 *
-	 */
-	virtual void
-	unpack(uint8_t *buf, size_t buflen);
-
-
-	/** parse packet and validate it
-	 */
-	virtual void
-	validate();
-
+	unpack(
+			uint8_t *buf, size_t buflen);
 
 public:
 
-
 	/**
 	 *
 	 */
 	uint32_t
-	get_buffer_id() const;
+	get_buffer_id() const
+	{ return buffer_id; };
 
 	/**
 	 *
 	 */
 	void
-	set_buffer_id(uint32_t buffer_id);
+	set_buffer_id(
+			uint32_t buffer_id)
+	{ this->buffer_id = buffer_id; };
 
 	/**
 	 *
 	 */
 	uint32_t
-	get_in_port() const;
+	get_in_port() const
+	{ return in_port; };
 
 	/**
 	 *
 	 */
 	void
-	set_in_port(uint32_t in_port);
+	set_in_port(
+			uint32_t in_port)
+	{ this->in_port = in_port; };
 
 	/**
 	 *
 	 */
-	cofactions&
-	set_actions();
+	const rofl::openflow::cofactions&
+	get_actions() const
+	{ return actions; };
 
 	/**
 	 *
 	 */
-	cofactions const&
-	get_actions() const;
+	rofl::openflow::cofactions&
+	set_actions()
+	{ return actions; };
 
 	/**
 	 *
 	 */
-	cpacket&
-	set_packet();
+	const rofl::cpacket&
+	get_packet() const
+	{ return packet; };
 
 	/**
 	 *
 	 */
-	cpacket const&
-	get_packet() const;
+	rofl::cpacket&
+	set_packet()
+	{ return packet; };
 
 public:
 
@@ -188,6 +165,23 @@ public:
 			os << indent(2) << msg.packet;
 		return os;
 	};
+
+	std::string
+	str() const {
+		std::stringstream ss;
+		ss << cofmsg::str() << "-Packet-Out- " << " ";
+		ss << "buffer_id: " << (unsigned int)get_buffer_id() << ", ";
+		ss << "in_port: " << (unsigned int)get_in_port() << " ";
+		//ss << "actions: " << get_actions().str() << " ";
+		return ss.str();
+	};
+
+private:
+
+	uint32_t                    buffer_id;
+	uint32_t                    in_port;
+	rofl::openflow::cofactions  actions;
+	rofl::cpacket               packet;
 };
 
 } // end of namespace openflow

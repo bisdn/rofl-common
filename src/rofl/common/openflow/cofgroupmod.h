@@ -8,73 +8,124 @@
 #include <string>
 #include <vector>
 
-#include "rofl/common/cmemory.h"
-#include "rofl/common/caddress.h"
 #include "rofl/common/croflexception.h"
-#include "rofl/common/openflow/cofmatch.h"
 #include "rofl/common/openflow/cofbuckets.h"
-#include "rofl/common/openflow/cofinstruction.h"
+#include "rofl/common/openflow/openflow.h"
 
 namespace rofl {
 namespace openflow {
 
-class eGroupEntryBase 		: public RoflException {};
-class eGroupEntryOutOfMem 	: public eGroupEntryBase {};
+class eGroupModBase 	: public RoflException {
+public:
+	eGroupModBase(
+			const std::string& __arg) :
+				RoflException(__arg)
+	{};
+};
+class eGroupModInval 	: public eGroupModBase {
+public:
+	eGroupModInval(
+			const std::string& __arg) :
+				eGroupModBase(__arg)
+	{};
+};
+class eGroupModOutOfMem : public eGroupModBase {
+public:
+	eGroupModOutOfMem(
+			const std::string& __arg) :
+				eGroupModBase(__arg)
+	{};
+};
+
 
 class cofgroupmod {
-public: // methods
+public:
 
 	/**
-	 * @brief	constructor
-	 */
-	cofgroupmod(
-			uint8_t ofp_version = rofl::openflow::OFP_VERSION_UNKNOWN,
-			uint16_t command = rofl::openflow13::OFPGC_ADD,
-			uint8_t type = rofl::openflow13::OFPGT_ALL,
-			uint32_t group_id = 0);
-
-
-	/**
-	 * @brief	destructor
+	 *
 	 */
 	virtual
-	~cofgroupmod();
-
+	~cofgroupmod()
+	{};
 
 	/**
-	 * @brief	assignment operator
+	 *
+	 */
+	cofgroupmod(
+			uint8_t version = rofl::openflow::OFP_VERSION_UNKNOWN,
+			uint16_t command = 0,
+			uint8_t type = 0,
+			uint32_t group_id = 0,
+			const rofl::openflow::cofbuckets& buckets = rofl::openflow::cofbuckets()) :
+				ofp_version(version),
+				command(command),
+				type(type),
+				group_id(group_id),
+				buckets(buckets)
+	{
+		this->buckets.set_version(version);
+	};
+
+	/**
+	 *
+	 */
+	cofgroupmod(
+			const cofgroupmod& groupmod)
+	{ *this = groupmod; };
+
+	/**
+	 *
 	 */
 	cofgroupmod&
 	operator= (
-			const cofgroupmod& fe);
+			const cofgroupmod& groupmod) {
+		if (this == &groupmod)
+			return *this;
+		ofp_version = groupmod.ofp_version;
+		command  	= groupmod.command;
+		type     	= groupmod.type;
+		group_id 	= groupmod.group_id;
+		buckets  	= groupmod.buckets;
+		return *this;
+	};
 
-
-	/**
-	 * @brief	reset instance
-	 */
-	void
-	clear();
-
+public:
 
 	/**
 	 *
 	 */
 	size_t
-	pack();
-
-
-
-public: // setter methods for ofp_group_mod structure
+	length() const;
 
 	/**
 	 *
 	 */
 	void
-	set_version(uint8_t ofp_version)
-	{
-		this->ofp_version = ofp_version;
-		buckets.set_version(ofp_version);
-	};
+	pack(
+			uint8_t* buf, size_t buflen);
+
+	/**
+	 *
+	 */
+	void
+	unpack(
+			uint8_t* buf, size_t buflen);
+
+	/**
+	 *
+	 */
+	void
+	clear()
+	{ buckets.clear(); };
+
+	/**
+	 *
+	 */
+	void
+	check_prerequisites() const
+	{ buckets.check_prerequisites(); };
+
+public:
 
 	/**
 	 *
@@ -82,6 +133,17 @@ public: // setter methods for ofp_group_mod structure
 	uint8_t
 	get_version() const
 	{ return ofp_version; };
+
+	/**
+	 *
+	 */
+	void
+	set_version(
+			uint8_t ofp_version)
+	{
+		this->ofp_version = ofp_version;
+		buckets.set_version(ofp_version);
+	};
 
 	/**
 	 *
@@ -128,7 +190,6 @@ public: // setter methods for ofp_group_mod structure
 			uint32_t group_id)
 	{ this->group_id = group_id; };
 
-
 	/**
 	 *
 	 */
@@ -145,31 +206,9 @@ public: // setter methods for ofp_group_mod structure
 
 public:
 
-	/**
-	 *
-	 */
-	virtual size_t
-	length() const;
-
-	/**
-	 *
-	 */
-	virtual void
-	pack(
-			uint8_t *buf, size_t buflen);
-
-	/**
-	 *
-	 */
-	virtual void
-	unpack(
-			uint8_t *buf, size_t buflen);
-
-public:
-
 	friend std::ostream&
 	operator<< (std::ostream& os, cofgroupmod const& groupmod) {
-		os << "<cgroupentry ";
+		os << rofl::indent(0) << "<cofgroupmod ";
 			os << "cmd:";
 			switch (groupmod.ofp_version) {
 			case openflow12::OFP_VERSION:
@@ -185,8 +224,8 @@ public:
 				case rofl::openflow13::OFPGT_ALL:		os << "ALL ";			break;
 				case rofl::openflow13::OFPGT_SELECT:	os << "SELECT "; 		break;
 				case rofl::openflow13::OFPGT_INDIRECT:  os << "INDIRECT ";		break;
-				case rofl::openflow13::OFPGT_FF:		os << "FAST-FAILOVER"; 	break;
-				default:						        os << "UNKNOWN";		break;
+				case rofl::openflow13::OFPGT_FF:		os << "FAST-FAILOVER "; break;
+				default:						        os << "UNKNOWN ";		break;
 				}
 			} break;
 			default:
@@ -197,6 +236,15 @@ public:
 			indent i(4);
 			os << groupmod.buckets;
 		return os;
+	};
+
+	std::string
+	str() const {
+		std::stringstream ss;
+		ss << "command: " << (int)get_command() << ", ";
+		ss << "type: " << (int)get_type() << ", ";
+		ss << "group_id: " << (unsigned int)get_group_id() << " ";
+		return ss.str();
 	};
 
 private:
@@ -214,7 +262,6 @@ private:
 		uint32_t group_id;
 		struct ofp_bucket buckets[0];
 	} __attribute__((packed));
-
 };
 
 }; // end of namespace openflow

@@ -37,12 +37,21 @@ namespace rofl {
 #define OFP_MAX_TABLE_NAME_LEN 32
 #define OFP_MAX_PORT_NAME_LEN  16
 
-#define OFP_TCP_PORT  6633
-#define OFP_SSL_PORT  6633
+#define OFP_TCP_PORT  6653
+#define OFP_SSL_PORT  6653
 
 //#define OFP_VERSION_UNKNOWN 0
 
 #define OFP_ETH_ALEN 6          /* Bytes in an Ethernet address. */
+
+#define OFP_DEFAULT_MISS_SEND_LEN   128
+
+
+#define DESC_STR_LEN   256
+#define SERIAL_NUM_LEN 32
+
+
+
 
 namespace openflow {
 
@@ -349,6 +358,7 @@ namespace openflow {
 		struct ofp_oxm_hdr oxm_header;	/* oxm_class = OFPXMC_EXPERIMENTER */
 		uint32_t experimenter;			/* Experimenter ID which takes the same
 										   form as in struct ofp_experimenter_header. */
+		uint8_t data[0];
 	} __attribute__((packed));
 
 	struct ofp_oxm_ofb_exp_uint8_t {
@@ -456,64 +466,75 @@ namespace openflow {
 
 #define HAS_MASK_FLAG (1 << 8)
 
+enum rofl_exp_id_t {
+	ROFL_EXP_ID = 0xa1a2a3a4, // TODO
+};
+
+#define OXM_ROFL_TYPE(x)  (x & 0x00000000fffffe00ULL)
+#define OXM_ROFL_CLASS(x) (x & 0x00000000ffff0000ULL)
+#define OXM_ROFL_FIELD(x) (x & 0x000000000000fe00ULL)
+#define OXM_ROFL_OFB_TYPE(x)    (((uint64_t)          0 << 32) | (OXM_ROFL_TYPE(x)))
+#define OXM_ROFL_OFX_TYPE(x)    (((uint64_t)ROFL_EXP_ID << 32) | (OXM_ROFL_TYPE(x)))
+#define OXM_EXPR_OFX_TYPE(w, x) (((uint64_t)          w << 32) | (OXM_ROFL_TYPE(x)))
+
 	/* OXM Flow match field types for OpenFlow basic class. */
 	enum oxm_tlv_match_fields {
-		OXM_TLV_BASIC_IN_PORT 		= (OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_IN_PORT << 9) 	|  4,	/* Switch input port. */				// required
-		OXM_TLV_BASIC_IN_PHY_PORT 	= (OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_IN_PHY_PORT << 9) |  4, 	/* Switch physical input port. */
-		OXM_TLV_BASIC_METADATA		= (OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_METADATA << 9) 	|  8,	/* Metadata passed between tables. */
-		OXM_TLV_BASIC_METADATA_MASK	= (OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_METADATA << 9) 	| 16 | HAS_MASK_FLAG,
-		OXM_TLV_BASIC_ETH_DST		= (OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_ETH_DST << 9) 	|  6,	/* Ethernet destination address. */		// required
-		OXM_TLV_BASIC_ETH_DST_MASK	= (OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_ETH_DST << 9) 	| 12 | HAS_MASK_FLAG,
-		OXM_TLV_BASIC_ETH_SRC		= (OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_ETH_SRC << 9) 	|  6,	/* Ethernet source address. */			// required
-		OXM_TLV_BASIC_ETH_SRC_MASK	= (OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_ETH_SRC << 9) 	| 12 | HAS_MASK_FLAG,
-		OXM_TLV_BASIC_ETH_TYPE		= (OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_ETH_TYPE << 9) 	|  2,	/* Ethernet frame type. */				// required
-		OXM_TLV_BASIC_VLAN_VID		= (OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_VLAN_VID << 9)	|  2,	/* VLAN id. */
-		OXM_TLV_BASIC_VLAN_VID_MASK	= (OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_VLAN_VID << 9)	|  4 | HAS_MASK_FLAG,
-		OXM_TLV_BASIC_VLAN_PCP		= (OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_VLAN_PCP << 9)	|  1,	/* VLAN priority. */
-		OXM_TLV_BASIC_IP_DSCP		= (OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_IP_DSCP << 9) 	|  1,	/* IP DSCP (6 bits in ToS field). */
-		OXM_TLV_BASIC_IP_ECN		= (OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_IP_ECN << 9)		|  1,	/* IP ECN (2 bits in ToS field). */
-		OXM_TLV_BASIC_IP_PROTO		= (OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_IP_PROTO << 9)	|  1,	/* IP protocol. */						// required
-		OXM_TLV_BASIC_IPV4_SRC		= (OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_IPV4_SRC << 9)	|  4,	/* IPv4 source address. */				// required
-		OXM_TLV_BASIC_IPV4_SRC_MASK	= (OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_IPV4_SRC << 9)	|  8 | HAS_MASK_FLAG,
-		OXM_TLV_BASIC_IPV4_DST		= (OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_IPV4_DST << 9)	|  4,	/* IPv4 destination address. */			// required
-		OXM_TLV_BASIC_IPV4_DST_MASK	= (OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_IPV4_DST << 9)	|  8 | HAS_MASK_FLAG,
-		OXM_TLV_BASIC_TCP_SRC		= (OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_TCP_SRC << 9)		|  2,	/* TCP source port. */					// required
-		OXM_TLV_BASIC_TCP_DST		= (OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_TCP_DST << 9)		|  2,	/* TCP destination port. */				// required
-		OXM_TLV_BASIC_UDP_SRC		= (OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_UDP_SRC << 9)		|  2,	/* UDP source port. */					// required
-		OXM_TLV_BASIC_UDP_DST		= (OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_UDP_DST << 9)		|  2,	/* UDP destination port. */				// required
-		OXM_TLV_BASIC_SCTP_SRC		= (OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_SCTP_SRC << 9)	|  2,	/* SCTP source port. */
-		OXM_TLV_BASIC_SCTP_DST		= (OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_SCTP_DST << 9)	|  2,	/* SCTP destination port. */
-		OXM_TLV_BASIC_ICMPV4_TYPE	= (OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_ICMPV4_TYPE << 9) |  1,	/* ICMP type. */
-		OXM_TLV_BASIC_ICMPV4_CODE	= (OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_ICMPV4_CODE << 9) |  1,	/* ICMP code. */
-		OXM_TLV_BASIC_ARP_OP		= (OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_ARP_OP << 9)		|  2,	/* ARP opcode. */
-		OXM_TLV_BASIC_ARP_SPA		= (OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_ARP_SPA << 9) 	|  4,	/* ARP source IPv4 address. */
-		OXM_TLV_BASIC_ARP_SPA_MASK	= (OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_ARP_SPA << 9) 	|  8 | HAS_MASK_FLAG,
-		OXM_TLV_BASIC_ARP_TPA		= (OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_ARP_TPA << 9)		|  4,	/* ARP target IPv4 address. */
-		OXM_TLV_BASIC_ARP_TPA_MASK	= (OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_ARP_TPA << 9)		|  8 | HAS_MASK_FLAG,
-		OXM_TLV_BASIC_ARP_SHA		= (OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_ARP_SHA << 9)		|  6,	/* ARP source hardware address. */
-		OXM_TLV_BASIC_ARP_SHA_MASK	= (OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_ARP_SHA << 9)		| 12 | HAS_MASK_FLAG,
-		OXM_TLV_BASIC_ARP_THA		= (OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_ARP_THA << 9) 	|  6,	/* ARP target hardware address. */
-		OXM_TLV_BASIC_ARP_THA_MASK	= (OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_ARP_THA << 9) 	| 12 | HAS_MASK_FLAG,
-		OXM_TLV_BASIC_IPV6_SRC		= (OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_IPV6_SRC << 9)	| 16,	/* IPv6 source address. */				// required
-		OXM_TLV_BASIC_IPV6_SRC_MASK	= (OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_IPV6_SRC << 9)	| 32 | HAS_MASK_FLAG,
-		OXM_TLV_BASIC_IPV6_DST		= (OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_IPV6_DST << 9)	| 16,	/* IPv6 destination address. */			// required
-		OXM_TLV_BASIC_IPV6_DST_MASK	= (OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_IPV6_DST << 9)	| 32 | HAS_MASK_FLAG,
-		OXM_TLV_BASIC_IPV6_FLABEL	= (OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_IPV6_FLABEL << 9) |  4,	/* IPv6 Flow Label */
-		OXM_TLV_BASIC_IPV6_FLABEL_MASK	= (OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_IPV6_FLABEL << 9) |  8| HAS_MASK_FLAG,	/* IPv6 Flow Label */
-		OXM_TLV_BASIC_ICMPV6_TYPE	= (OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_ICMPV6_TYPE << 9) |  1,	/* ICMPv6 type. */
-		OXM_TLV_BASIC_ICMPV6_CODE	= (OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_ICMPV6_CODE << 9) |  1,	/* ICMPv6 code. */
-		OXM_TLV_BASIC_IPV6_ND_TARGET= (OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_IPV6_ND_TARGET << 9) | 16,/* Target address for ND. */
-		OXM_TLV_BASIC_IPV6_ND_SLL	= (OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_IPV6_ND_SLL << 9) |  6,	/* Source link-layer for ND. */
-		OXM_TLV_BASIC_IPV6_ND_TLL	= (OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_IPV6_ND_TLL << 9) |  6,	/* Target link-layer for ND. */
-		OXM_TLV_BASIC_MPLS_LABEL	= (OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_MPLS_LABEL << 9)  |  4,	/* MPLS label. */
-		OXM_TLV_BASIC_MPLS_TC		= (OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_MPLS_TC << 9)		|  1,	/* MPLS TC. */
-		OXM_TLV_BASIC_MPLS_BOS		= (OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_MPLS_BOS << 9) 	|  1,	/* MPLS BoS bit. */
-		OXM_TLV_BASIC_PBB_ISID		= (OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_PBB_ISID << 9)	|  3,	/* PBB I-SID. */
-		OXM_TLV_BASIC_PBB_ISID_MASK	= (OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_PBB_ISID << 9)	|  6 | HAS_MASK_FLAG,
-		OXM_TLV_BASIC_TUNNEL_ID		= (OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_TUNNEL_ID << 9)	|  8,	/* Logical Port Metadata. */
-		OXM_TLV_BASIC_TUNNEL_ID_MASK= (OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_TUNNEL_ID << 9)	| 16 | HAS_MASK_FLAG,
-		OXM_TLV_BASIC_IPV6_EXTHDR	= (OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_IPV6_EXTHDR << 9)	|  4,	/* IPv6 Extension Header pseudo-field */
-		OXM_TLV_BASIC_IPV6_EXTHDR_MASK	= (OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_IPV6_EXTHDR << 9)	|  8 | HAS_MASK_FLAG,	/* IPv6 Extension Header pseudo-field */
+		OXM_TLV_BASIC_IN_PORT 		= (uint32_t)(OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_IN_PORT << 9) 	|  4,	/* Switch input port. */				// required
+		OXM_TLV_BASIC_IN_PHY_PORT 	= (uint32_t)(OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_IN_PHY_PORT << 9) |  4, 	/* Switch physical input port. */
+		OXM_TLV_BASIC_METADATA		= (uint32_t)(OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_METADATA << 9) 	|  8,	/* Metadata passed between tables. */
+		OXM_TLV_BASIC_METADATA_MASK	= (uint32_t)(OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_METADATA << 9) 	| 16 | HAS_MASK_FLAG,
+		OXM_TLV_BASIC_ETH_DST		= (uint32_t)(OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_ETH_DST << 9) 	|  6,	/* Ethernet destination address. */		// required
+		OXM_TLV_BASIC_ETH_DST_MASK	= (uint32_t)(OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_ETH_DST << 9) 	| 12 | HAS_MASK_FLAG,
+		OXM_TLV_BASIC_ETH_SRC		= (uint32_t)(OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_ETH_SRC << 9) 	|  6,	/* Ethernet source address. */			// required
+		OXM_TLV_BASIC_ETH_SRC_MASK	= (uint32_t)(OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_ETH_SRC << 9) 	| 12 | HAS_MASK_FLAG,
+		OXM_TLV_BASIC_ETH_TYPE		= (uint32_t)(OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_ETH_TYPE << 9) 	|  2,	/* Ethernet frame type. */				// required
+		OXM_TLV_BASIC_VLAN_VID		= (uint32_t)(OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_VLAN_VID << 9)	|  2,	/* VLAN id. */
+		OXM_TLV_BASIC_VLAN_VID_MASK	= (uint32_t)(OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_VLAN_VID << 9)	|  4 | HAS_MASK_FLAG,
+		OXM_TLV_BASIC_VLAN_PCP		= (uint32_t)(OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_VLAN_PCP << 9)	|  1,	/* VLAN priority. */
+		OXM_TLV_BASIC_IP_DSCP		= (uint32_t)(OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_IP_DSCP << 9) 	|  1,	/* IP DSCP (6 bits in ToS field). */
+		OXM_TLV_BASIC_IP_ECN		= (uint32_t)(OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_IP_ECN << 9)		|  1,	/* IP ECN (2 bits in ToS field). */
+		OXM_TLV_BASIC_IP_PROTO		= (uint32_t)(OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_IP_PROTO << 9)	|  1,	/* IP protocol. */						// required
+		OXM_TLV_BASIC_IPV4_SRC		= (uint32_t)(OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_IPV4_SRC << 9)	|  4,	/* IPv4 source address. */				// required
+		OXM_TLV_BASIC_IPV4_SRC_MASK	= (uint32_t)(OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_IPV4_SRC << 9)	|  8 | HAS_MASK_FLAG,
+		OXM_TLV_BASIC_IPV4_DST		= (uint32_t)(OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_IPV4_DST << 9)	|  4,	/* IPv4 destination address. */			// required
+		OXM_TLV_BASIC_IPV4_DST_MASK	= (uint32_t)(OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_IPV4_DST << 9)	|  8 | HAS_MASK_FLAG,
+		OXM_TLV_BASIC_TCP_SRC		= (uint32_t)(OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_TCP_SRC << 9)		|  2,	/* TCP source port. */					// required
+		OXM_TLV_BASIC_TCP_DST		= (uint32_t)(OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_TCP_DST << 9)		|  2,	/* TCP destination port. */				// required
+		OXM_TLV_BASIC_UDP_SRC		= (uint32_t)(OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_UDP_SRC << 9)		|  2,	/* UDP source port. */					// required
+		OXM_TLV_BASIC_UDP_DST		= (uint32_t)(OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_UDP_DST << 9)		|  2,	/* UDP destination port. */				// required
+		OXM_TLV_BASIC_SCTP_SRC		= (uint32_t)(OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_SCTP_SRC << 9)	|  2,	/* SCTP source port. */
+		OXM_TLV_BASIC_SCTP_DST		= (uint32_t)(OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_SCTP_DST << 9)	|  2,	/* SCTP destination port. */
+		OXM_TLV_BASIC_ICMPV4_TYPE	= (uint32_t)(OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_ICMPV4_TYPE << 9) |  1,	/* ICMP type. */
+		OXM_TLV_BASIC_ICMPV4_CODE	= (uint32_t)(OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_ICMPV4_CODE << 9) |  1,	/* ICMP code. */
+		OXM_TLV_BASIC_ARP_OP		= (uint32_t)(OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_ARP_OP << 9)		|  2,	/* ARP opcode. */
+		OXM_TLV_BASIC_ARP_SPA		= (uint32_t)(OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_ARP_SPA << 9) 	|  4,	/* ARP source IPv4 address. */
+		OXM_TLV_BASIC_ARP_SPA_MASK	= (uint32_t)(OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_ARP_SPA << 9) 	|  8 | HAS_MASK_FLAG,
+		OXM_TLV_BASIC_ARP_TPA		= (uint32_t)(OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_ARP_TPA << 9)		|  4,	/* ARP target IPv4 address. */
+		OXM_TLV_BASIC_ARP_TPA_MASK	= (uint32_t)(OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_ARP_TPA << 9)		|  8 | HAS_MASK_FLAG,
+		OXM_TLV_BASIC_ARP_SHA		= (uint32_t)(OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_ARP_SHA << 9)		|  6,	/* ARP source hardware address. */
+		OXM_TLV_BASIC_ARP_SHA_MASK	= (uint32_t)(OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_ARP_SHA << 9)		| 12 | HAS_MASK_FLAG,
+		OXM_TLV_BASIC_ARP_THA		= (uint32_t)(OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_ARP_THA << 9) 	|  6,	/* ARP target hardware address. */
+		OXM_TLV_BASIC_ARP_THA_MASK	= (uint32_t)(OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_ARP_THA << 9) 	| 12 | HAS_MASK_FLAG,
+		OXM_TLV_BASIC_IPV6_SRC		= (uint32_t)(OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_IPV6_SRC << 9)	| 16,	/* IPv6 source address. */				// required
+		OXM_TLV_BASIC_IPV6_SRC_MASK	= (uint32_t)(OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_IPV6_SRC << 9)	| 32 | HAS_MASK_FLAG,
+		OXM_TLV_BASIC_IPV6_DST		= (uint32_t)(OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_IPV6_DST << 9)	| 16,	/* IPv6 destination address. */			// required
+		OXM_TLV_BASIC_IPV6_DST_MASK	= (uint32_t)(OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_IPV6_DST << 9)	| 32 | HAS_MASK_FLAG,
+		OXM_TLV_BASIC_IPV6_FLABEL	= (uint32_t)(OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_IPV6_FLABEL << 9) |  4,	/* IPv6 Flow Label */
+		OXM_TLV_BASIC_IPV6_FLABEL_MASK	= (uint32_t)(OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_IPV6_FLABEL << 9) |  8| HAS_MASK_FLAG,	/* IPv6 Flow Label */
+		OXM_TLV_BASIC_ICMPV6_TYPE	= (uint32_t)(OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_ICMPV6_TYPE << 9) |  1,	/* ICMPv6 type. */
+		OXM_TLV_BASIC_ICMPV6_CODE	= (uint32_t)(OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_ICMPV6_CODE << 9) |  1,	/* ICMPv6 code. */
+		OXM_TLV_BASIC_IPV6_ND_TARGET= (uint32_t)(OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_IPV6_ND_TARGET << 9) | 16,/* Target address for ND. */
+		OXM_TLV_BASIC_IPV6_ND_SLL	= (uint32_t)(OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_IPV6_ND_SLL << 9) |  6,	/* Source link-layer for ND. */
+		OXM_TLV_BASIC_IPV6_ND_TLL	= (uint32_t)(OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_IPV6_ND_TLL << 9) |  6,	/* Target link-layer for ND. */
+		OXM_TLV_BASIC_MPLS_LABEL	= (uint32_t)(OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_MPLS_LABEL << 9)  |  4,	/* MPLS label. */
+		OXM_TLV_BASIC_MPLS_TC		= (uint32_t)(OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_MPLS_TC << 9)		|  1,	/* MPLS TC. */
+		OXM_TLV_BASIC_MPLS_BOS		= (uint32_t)(OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_MPLS_BOS << 9) 	|  1,	/* MPLS BoS bit. */
+		OXM_TLV_BASIC_PBB_ISID		= (uint32_t)(OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_PBB_ISID << 9)	|  3,	/* PBB I-SID. */
+		OXM_TLV_BASIC_PBB_ISID_MASK	= (uint32_t)(OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_PBB_ISID << 9)	|  6 | HAS_MASK_FLAG,
+		OXM_TLV_BASIC_TUNNEL_ID		= (uint32_t)(OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_TUNNEL_ID << 9)	|  8,	/* Logical Port Metadata. */
+		OXM_TLV_BASIC_TUNNEL_ID_MASK= (uint32_t)(OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_TUNNEL_ID << 9)	| 16 | HAS_MASK_FLAG,
+		OXM_TLV_BASIC_IPV6_EXTHDR	= (uint32_t)(OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_IPV6_EXTHDR << 9)	|  4,	/* IPv6 Extension Header pseudo-field */
+		OXM_TLV_BASIC_IPV6_EXTHDR_MASK	= (uint32_t)(OFPXMC_OPENFLOW_BASIC << 16) | (OFPXMT_OFB_IPV6_EXTHDR << 9)	|  8 | HAS_MASK_FLAG,	/* IPv6 Extension Header pseudo-field */
 	};
 
 
@@ -1131,6 +1152,17 @@ namespace openflow {
 		* struct ofp_experimenter_multipart_header.
 		* The request and reply bodies are otherwise experimenter-defined. */
 		OFPMP_EXPERIMENTER = 0xffff
+	};
+
+	enum ofp_queue_id_t {
+		/* All ones is used to indicate all queues in a port (for stats retrieval). */
+		OFPQ_ALL = 0xffffffff,
+	};
+
+	enum ofp_queue_rate_value_t {
+		/* Min rate > 1000 means not configured. */
+		OFPQ_MIN_RATE_UNCFG = 0xffff,
+		OFPQ_MAX_RATE_UNCFG = 0xffff,
 	};
 
 

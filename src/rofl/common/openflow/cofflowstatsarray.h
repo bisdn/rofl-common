@@ -101,7 +101,13 @@ public:
 	 *
 	 */
 	void
-	set_version(uint8_t ofp_version) { this->ofp_version = ofp_version; };
+	set_version(uint8_t ofp_version) {
+		this->ofp_version = ofp_version;
+		for (std::map<uint32_t, cofflow_stats_reply>::iterator
+					it = array.begin(); it != array.end(); ++it) {
+			it->second.set_version(ofp_version);
+		}
+	};
 
 	/**
 	 *

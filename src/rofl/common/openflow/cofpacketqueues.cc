@@ -187,7 +187,7 @@ cofpacket_queues::unpack(
 			uint16_t len = be16toh(hdr->len);
 
 			if ((buflen < len) || (len == 0))
-				throw eInval();
+				return;
 
 			// we use port_no 0 for all ofp_packet_queue structs received in OFP 1.0
 			add_pqueue(/*port-no*/0, be32toh(hdr->queue_id)).unpack(buf, len);
@@ -207,7 +207,7 @@ cofpacket_queues::unpack(
 			uint16_t len = be16toh(hdr->len);
 
 			if ((buflen < len) || (len == 0))
-				throw eInval();
+				return;
 
 			add_pqueue(be32toh(hdr->port), be32toh(hdr->queue_id)).unpack(buf, len);
 

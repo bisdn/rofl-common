@@ -77,6 +77,13 @@ public:
 	operator& (
 			cofhello_elem_versionbitmap const& versionbitmap) const;
 
+	/**
+	 *
+	 */
+	virtual cofhello_elem*
+	clone()
+	{ return new cofhello_elem_versionbitmap(*this); };
+
 public:
 
 	/**

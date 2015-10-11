@@ -17,37 +17,21 @@ namespace openflow {
 /**
  *
  */
-class cofmsg_flow_removed :
-	public cofmsg
-{
-private:
-
-	cofmatch			match;
-
-	union {
-		uint8_t*						ofhu_flow_removed;
-		struct openflow10::ofp_flow_removed*		ofhu10_flow_removed;
-		struct openflow12::ofp_flow_removed*		ofhu12_flow_removed;
-		struct openflow13::ofp_flow_removed*		ofhu13_flow_removed;
-	} ofhu;
-
-#define ofh_flow_removed   ofhu.ofhu_flow_removed
-#define ofh10_flow_removed ofhu.ofhu10_flow_removed
-#define ofh12_flow_removed ofhu.ofhu12_flow_removed
-#define ofh13_flow_removed ofhu.ofhu13_flow_removed
-
-#define OFP10_FLOW_REMOVED_STATIC_HDR_LEN	88
-#define OFP12_FLOW_REMOVED_STATIC_HDR_LEN	48	// length without struct openflow12::ofp_match
-#define OFP13_FLOW_REMOVED_STATIC_HDR_LEN	48	// length without struct openflow13::ofp_match
-
+class cofmsg_flow_removed : public cofmsg {
 public:
 
+	/**
+	 *
+	 */
+	virtual
+	~cofmsg_flow_removed()
+	{};
 
-	/** constructor
+	/**
 	 *
 	 */
 	cofmsg_flow_removed(
-			uint8_t of_version = 0,
+			uint8_t version = 0,
 			uint32_t xid = 0,
 			uint64_t cookie = 0,
 			uint16_t priority = 0,
@@ -59,207 +43,240 @@ public:
 			uint16_t hard_timeout = 0,
 			uint64_t packet_count = 0,
 			uint64_t byte_count = 0,
-			cofmatch const& match = cofmatch());
-
+			const rofl::openflow::cofmatch& match = rofl::openflow::cofmatch()) :
+				cofmsg(version, rofl::openflow::OFPT_FLOW_REMOVED, xid),
+				cookie(cookie),
+				priority(priority),
+				reason(reason),
+				table_id(table_id),
+				duration_sec(duration_sec),
+				duration_nsec(duration_nsec),
+				idle_timeout(idle_timeout),
+				hard_timeout(hard_timeout),
+				packet_count(packet_count),
+				byte_count(byte_count),
+				match(match)
+	{
+		this->match.set_version(version);
+	};
 
 	/**
 	 *
 	 */
 	cofmsg_flow_removed(
-			cofmsg_flow_removed const& flow_removed);
-
+			const cofmsg_flow_removed& msg)
+	{ *this = msg; };
 
 	/**
 	 *
 	 */
 	cofmsg_flow_removed&
 	operator= (
-			cofmsg_flow_removed const& flow_removed);
+			const cofmsg_flow_removed& msg) {
+		if (this == &msg)
+			return *this;
+		cofmsg::operator= (msg);
+		cookie        = msg.cookie;
+		priority      = msg.priority;
+		reason        = msg.reason;
+		table_id      = msg.table_id;
+		duration_sec  = msg.duration_sec;
+		duration_nsec = msg.duration_nsec;
+		idle_timeout  = msg.idle_timeout;
+		hard_timeout  = msg.hard_timeout;
+		packet_count  = msg.packet_count;
+		byte_count    = msg.byte_count;
+		match         = msg.match;
+		return *this;
+	};
 
-
-	/** destructor
-	 *
-	 */
-	virtual
-	~cofmsg_flow_removed();
-
-
-	/**
-	 *
-	 */
-	cofmsg_flow_removed(cmemory *memarea);
-
-
-	/** reset packet content
-	 *
-	 */
-	virtual void
-	reset();
-
+public:
 
 	/**
-	 *
-	 */
-	virtual uint8_t*
-	resize(size_t len);
-
-
-	/** returns length of packet in packed state
 	 *
 	 */
 	virtual size_t
 	length() const;
 
+	/**
+	 *
+	 */
+	virtual void
+	pack(
+			uint8_t *buf = (uint8_t*)0, size_t buflen = 0);
 
 	/**
 	 *
 	 */
 	virtual void
-	pack(uint8_t *buf = (uint8_t*)0, size_t buflen = 0);
-
-
-	/**
-	 *
-	 */
-	virtual void
-	unpack(uint8_t *buf, size_t buflen);
-
-
-	/** parse packet and validate it
-	 */
-	virtual void
-	validate();
-
+	unpack(
+			uint8_t *buf, size_t buflen);
 
 public:
 
-
 	/**
 	 *
 	 */
 	uint64_t
-	get_cookie() const;
+	get_cookie() const
+	{ return cookie; };
 
 	/**
 	 *
 	 */
 	void
-	set_cookie(uint64_t cookie);
+	set_cookie(
+			uint64_t cookie)
+	{ this->cookie = cookie; };
 
 	/**
 	 *
 	 */
 	uint16_t
-	get_priority() const;
+	get_priority() const
+	{ return priority; };
 
 	/**
 	 *
 	 */
 	void
-	set_priority(uint64_t priority);
+	set_priority(
+			uint16_t priority)
+	{ this->priority = priority; };
 
 	/**
 	 *
 	 */
 	uint8_t
-	get_reason() const;
+	get_reason() const
+	{ return reason; };
 
 	/**
 	 *
 	 */
 	void
-	set_reason(uint8_t reason);
+	set_reason(
+			uint8_t reason)
+	{ this->reason = reason; };
 
 	/**
 	 *
 	 */
 	uint8_t
-	get_table_id() const;
+	get_table_id() const
+	{ return table_id; };
 
 	/**
 	 *
 	 */
 	void
-	set_table_id(uint8_t table_id);
+	set_table_id(
+			uint8_t table_id)
+	{ this->table_id = table_id; };
 
 	/**
 	 *
 	 */
 	uint32_t
-	get_duration_sec() const;
+	get_duration_sec() const
+	{ return duration_sec; };
 
 	/**
 	 *
 	 */
 	void
-	set_duration_sec(uint32_t duration_sec);
+	set_duration_sec(
+			uint32_t duration_sec)
+	{ this->duration_sec = duration_sec; };
 
 	/**
 	 *
 	 */
 	uint32_t
-	get_duration_nsec() const;
+	get_duration_nsec() const
+	{ return duration_nsec; };
 
 	/**
 	 *
 	 */
 	void
-	set_duration_nsec(uint32_t duration_nsec);
+	set_duration_nsec(
+			uint32_t duration_nsec)
+	{ this->duration_nsec = duration_nsec; };
 
 	/**
 	 *
 	 */
 	uint16_t
-	get_idle_timeout() const;
+	get_idle_timeout() const
+	{ return idle_timeout; };
 
 	/**
 	 *
 	 */
 	void
-	set_idle_timeout(uint16_t idle_timeout);
+	set_idle_timeout(
+			uint16_t idle_timeout)
+	{ this->idle_timeout = idle_timeout; };
 
 	/**
 	 *
 	 */
 	uint16_t
-	get_hard_timeout() const;
+	get_hard_timeout() const
+	{ return hard_timeout; };
 
 	/**
 	 *
 	 */
 	void
-	set_hard_timeout(uint16_t hard_timeout);
+	set_hard_timeout(
+			uint16_t hard_timeout)
+	{ this->hard_timeout = hard_timeout; };
 
 	/**
 	 *
 	 */
 	uint64_t
-	get_packet_count() const;
+	get_packet_count() const
+	{ return packet_count; };
 
 	/**
 	 *
 	 */
 	void
-	set_packet_count(uint64_t packet_count);
+	set_packet_count(
+			uint64_t packet_count)
+	{ this->packet_count = packet_count; };
 
 	/**
 	 *
 	 */
 	uint64_t
-	get_byte_count() const;
+	get_byte_count() const
+	{ return byte_count; };
 
 	/**
 	 *
 	 */
 	void
-	set_byte_count(uint64_t byte_count);
+	set_byte_count(
+			uint64_t byte_count)
+	{ this->byte_count = byte_count; };
 
 	/**
 	 *
 	 */
-	cofmatch&
-	get_match();
+	const rofl::openflow::cofmatch&
+	get_match() const
+	{ return match; };
 
+	/**
+	 *
+	 */
+	rofl::openflow::cofmatch&
+	set_match()
+	{ return match; };
 
 public:
 
@@ -333,53 +350,41 @@ public:
 		}
 		return os;
 	};
+
+	std::string
+	str() const {
+		std::stringstream ss;
+		ss << cofmsg::str() << "-Flow-Removed- " << " ";
+		ss << "cookie: " << (unsigned long long)get_cookie() << ", ";
+		ss << "priority: " << (unsigned int)get_priority() << ", ";
+		ss << "reason: " << (unsigned int)get_reason() << ", ";
+		ss << "table_id: " << (unsigned int)get_table_id() << ", ";
+		ss << "dur_sec: " << (unsigned int)get_duration_sec() << ", ";
+		ss << "dur_nsec: " << (unsigned int)get_duration_nsec() << ", ";
+		ss << "idle: " << (unsigned int)get_idle_timeout() << ", ";
+		ss << "hard: " << (unsigned int)get_hard_timeout() << ", ";
+		ss << "#packets: " << (unsigned long long)get_packet_count() << ", ";
+		ss << "#bytes: " << (unsigned long long)get_byte_count() << " ";
+		return ss.str();
+	};
+
+private:
+
+	static const size_t OFP10_FLOW_REMOVED_STATIC_HDR_LEN;
+	static const size_t OFP13_FLOW_REMOVED_STATIC_HDR_LEN;
+
+	uint64_t cookie;
+	uint16_t priority;
+	uint8_t  reason;
+	uint8_t  table_id;
+	uint32_t duration_sec;
+	uint32_t duration_nsec;
+	uint16_t idle_timeout;
+	uint16_t hard_timeout;
+	uint64_t packet_count;
+	uint64_t byte_count;
+	rofl::openflow::cofmatch match;
 };
-
-
-#if 0
-OFPRR_IDLE_TIMEOUT,         /* Flow idle time exceeded idle_timeout. */
-OFPRR_HARD_TIMEOUT,         /* Time exceeded hard_timeout. */
-OFPRR_DELETE                /* Evicted by a DELETE flow mod. */
-
-struct ofp_header header;
-struct ofp_match match;   /* Description of fields. */
-uint64_t cookie;          /* Opaque controller-issued identifier. */
-
-uint16_t priority;        /* Priority level of flow entry. */
-uint8_t reason;           /* One of OFPRR_*. */
-uint8_t pad[1];           /* Align to 32-bits. */
-
-uint32_t duration_sec;    /* Time flow was alive in seconds. */
-uint32_t duration_nsec;   /* Time flow was alive in nanoseconds beyond
-							 duration_sec. */
-uint16_t idle_timeout;    /* Idle timeout from original flow mod. */
-uint8_t pad2[2];          /* Align to 64-bits. */
-uint64_t packet_count;
-uint64_t byte_count;
-#endif
-
-#if 0
-OFPRR_IDLE_TIMEOUT,         /* Flow idle time exceeded idle_timeout. */
-OFPRR_HARD_TIMEOUT,         /* Time exceeded hard_timeout. */
-OFPRR_DELETE,               /* Evicted by a DELETE flow mod. */
-OFPRR_GROUP_DELETE          /* Group was removed. */
-
-struct ofp_header header;
-uint64_t cookie;          /* Opaque controller-issued identifier. */
-
-uint16_t priority;        /* Priority level of flow entry. */
-uint8_t reason;           /* One of OFPRR_*. */
-uint8_t table_id;         /* ID of the table */
-
-uint32_t duration_sec;    /* Time flow was alive in seconds. */
-uint32_t duration_nsec;   /* Time flow was alive in nanoseconds beyond
-							 duration_sec. */
-uint16_t idle_timeout;    /* Idle timeout from original flow mod. */
-uint16_t hard_timeout;    /* Idle timeout from original flow mod. */
-uint64_t packet_count;
-uint64_t byte_count;
-struct ofp_match match; /* Description of fields. */
-#endif
 
 } // end of namespace openflow
 } // end of namespace rofl

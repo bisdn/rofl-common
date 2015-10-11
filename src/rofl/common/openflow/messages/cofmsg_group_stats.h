@@ -1,8 +1,13 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 /*
  * cofmsg_group_stats.h
  *
  *  Created on: 18.03.2013
- *      Author: andi
+ *  Revised on: 26.07.2015
+ *      Author: Andreas Koepsel
  */
 
 #ifndef COFMSG_GROUP_STATS_H_
@@ -19,128 +24,97 @@ namespace openflow {
  *
  */
 class cofmsg_group_stats_request :
-	public cofmsg_stats_request
+		public cofmsg_stats_request
 {
-private:
-
-	rofl::openflow::cofgroup_stats_request 	group_stats;
-
-	union {
-		uint8_t*											ofhu_group_stats;
-		struct rofl::openflow12::ofp_group_stats_request*	ofhu12_group_stats;
-		struct rofl::openflow13::ofp_group_stats_request*	ofhu13_group_stats;
-	} ofhu;
-
-#define ofh_group_stats   			ofhu.ofhu_group_stats
-#define ofh12_group_stats 			ofhu.ofhu12_group_stats
-#define ofh13_group_stats 			ofhu.ofhu13_group_stats
-
 public:
 
-
-	/** constructor
+	/**
 	 *
 	 */
-	cofmsg_group_stats_request(
-			uint8_t of_version = 0,
-			uint32_t xid = 0,
-			uint16_t flags = 0,
-			rofl::openflow::cofgroup_stats_request const& group_stats = rofl::openflow::cofgroup_stats_request());
-
+	virtual
+	~cofmsg_group_stats_request();
 
 	/**
 	 *
 	 */
 	cofmsg_group_stats_request(
-			cofmsg_group_stats_request const& stats);
+			uint8_t version = 0,
+			uint32_t xid = 0,
+			uint16_t stats_flags = 0,
+			const rofl::openflow::cofgroup_stats_request& group_stats = rofl::openflow::cofgroup_stats_request());
 
+	/**
+	 *
+	 */
+	cofmsg_group_stats_request(
+			const cofmsg_group_stats_request& msg);
 
 	/**
 	 *
 	 */
 	cofmsg_group_stats_request&
 	operator= (
-			cofmsg_group_stats_request const& stats);
+			const cofmsg_group_stats_request& msg);
 
-
-	/** destructor
-	 *
-	 */
-	virtual
-	~cofmsg_group_stats_request();
-
+public:
 
 	/**
-	 *
-	 */
-	cofmsg_group_stats_request(cmemory *memarea);
-
-
-	/** reset packet content
-	 *
-	 */
-	virtual void
-	reset();
-
-
-	/**
-	 *
-	 */
-	virtual uint8_t*
-	resize(size_t len);
-
-
-	/** returns length of packet in packed state
 	 *
 	 */
 	virtual size_t
 	length() const;
 
+	/**
+	 *
+	 */
+	virtual void
+	pack(
+			uint8_t *buf = (uint8_t*)0, size_t buflen = 0);
 
 	/**
 	 *
 	 */
 	virtual void
-	pack(uint8_t *buf = (uint8_t*)0, size_t buflen = 0);
-
-
-	/**
-	 *
-	 */
-	virtual void
-	unpack(uint8_t *buf, size_t buflen);
-
-
-	/** parse packet and validate it
-	 */
-	virtual void
-	validate();
-
+	unpack(
+			uint8_t *buf, size_t buflen);
 
 public:
+
+	/**
+	 *
+	 */
+	const rofl::openflow::cofgroup_stats_request&
+	get_group_stats() const
+	{ return group_stats; };
 
 	/**
 	 *
 	 */
 	rofl::openflow::cofgroup_stats_request&
-	set_group_stats();
-
-	/**
-	 *
-	 */
-	rofl::openflow::cofgroup_stats_request const&
-	get_group_stats() const;
+	set_group_stats()
+	{ return group_stats; };
 
 public:
 
 	friend std::ostream&
-	operator<< (std::ostream& os, cofmsg_group_stats_request const& msg) {
-		os << dynamic_cast<cofmsg const&>( msg );
+	operator<< (std::ostream& os, const cofmsg_group_stats_request& msg) {
+		os << dynamic_cast<const cofmsg_stats_request&>( msg );
 		os << indent(2) << "<cofmsg_group_stats_request >" << std::endl;
 		indent i(4);
 		os << msg.group_stats;
 		return os;
 	};
+
+	virtual std::string
+	str() const {
+		std::stringstream ss;
+		ss << cofmsg_stats_request::str() << "-Group-Stats-Request- " << " ";
+		return ss.str();
+	};
+
+private:
+
+	rofl::openflow::cofgroup_stats_request  group_stats;
 };
 
 
@@ -150,128 +124,97 @@ public:
  *
  */
 class cofmsg_group_stats_reply :
-	public cofmsg_stats_reply
+		public cofmsg_stats_reply
 {
-private:
-
-	rofl::openflow::cofgroupstatsarray					groupstatsarray;
-
-	union {
-		uint8_t*										ofhu_group_stats;
-		struct rofl::openflow12::ofp_group_stats*		ofhu12_group_stats;
-		struct rofl::openflow13::ofp_group_stats*		ofhu13_group_stats;
-	} ofhu;
-
-#define ofh_group_stats   			ofhu.ofhu_group_stats
-#define ofh12_group_stats 			ofhu.ofhu12_group_stats
-#define ofh13_group_stats 			ofhu.ofhu13_group_stats
-
 public:
 
+	/**
+	 *
+	 */
+	virtual
+	~cofmsg_group_stats_reply();
 
-	/** constructor
+	/**
 	 *
 	 */
 	cofmsg_group_stats_reply(
 			uint8_t of_version = 0,
 			uint32_t xid = 0,
 			uint16_t flags = 0,
-			rofl::openflow::cofgroupstatsarray const& groups = rofl::openflow::cofgroupstatsarray());
-
+			const rofl::openflow::cofgroupstatsarray& groups = rofl::openflow::cofgroupstatsarray());
 
 	/**
 	 *
 	 */
 	cofmsg_group_stats_reply(
-			cofmsg_group_stats_reply const& stats);
-
+			const cofmsg_group_stats_reply& msg);
 
 	/**
 	 *
 	 */
 	cofmsg_group_stats_reply&
 	operator= (
-			cofmsg_group_stats_reply const& stats);
+			const cofmsg_group_stats_reply& msg);
 
-
-	/** destructor
-	 *
-	 */
-	virtual
-	~cofmsg_group_stats_reply();
-
+public:
 
 	/**
-	 *
-	 */
-	cofmsg_group_stats_reply(cmemory *memarea);
-
-
-	/** reset packet content
-	 *
-	 */
-	virtual void
-	reset();
-
-
-	/**
-	 *
-	 */
-	virtual uint8_t*
-	resize(size_t len);
-
-
-	/** returns length of packet in packed state
 	 *
 	 */
 	virtual size_t
 	length() const;
 
+	/**
+	 *
+	 */
+	virtual void
+	pack(
+			uint8_t *buf = (uint8_t*)0, size_t buflen = 0);
 
 	/**
 	 *
 	 */
 	virtual void
-	pack(uint8_t *buf = (uint8_t*)0, size_t buflen = 0);
-
-
-	/**
-	 *
-	 */
-	virtual void
-	unpack(uint8_t *buf, size_t buflen);
-
-
-	/** parse packet and validate it
-	 */
-	virtual void
-	validate();
-
+	unpack(
+			uint8_t *buf, size_t buflen);
 
 public:
+
+	/**
+	 *
+	 */
+	const rofl::openflow::cofgroupstatsarray&
+	get_group_stats_array() const
+	{ return groupstatsarray; };
 
 	/**
 	 *
 	 */
 	rofl::openflow::cofgroupstatsarray&
-	set_group_stats_array() { return groupstatsarray; };
-
-	/**
-	 *
-	 */
-	rofl::openflow::cofgroupstatsarray const&
-	get_group_stats_array() const { return groupstatsarray; };
+	set_group_stats_array()
+	{ return groupstatsarray; };
 
 public:
 
 	friend std::ostream&
-	operator<< (std::ostream& os, cofmsg_group_stats_reply const& msg) {
-		os << dynamic_cast<cofmsg const&>( msg );
+	operator<< (std::ostream& os, const cofmsg_group_stats_reply& msg) {
+		os << dynamic_cast<const cofmsg_stats_reply&>( msg );
 		os << indent(2) << "<cofmsg_group_stats_reply >" << std::endl;
 		indent i(4);
 		os << msg.groupstatsarray;
 		return os;
 	};
+
+	virtual std::string
+	str() const {
+		std::stringstream ss;
+		ss << cofmsg_stats_reply::str() << "-Group-Stats-Reply- " << " ";
+		return ss.str();
+	};
+
+private:
+
+	rofl::openflow::cofgroupstatsarray  groupstatsarray;
 };
 
 } // end of namespace openflow

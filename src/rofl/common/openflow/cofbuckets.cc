@@ -159,7 +159,7 @@ cofbuckets::unpack_of13(
 	while (buflen > 0) {
 
 		if (be16toh(bchdr->len) < sizeof(struct openflow::ofp_bucket))
-			throw eBucketBadLen();
+			return;
 
 		add_bucket(bucket_id++).unpack((uint8_t*)bchdr, be16toh(bchdr->len));
 

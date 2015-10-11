@@ -105,7 +105,7 @@ public:
 	std::string
 	str() const {
 		std::stringstream ss;
-		ss << (int)get_id();
+		ss << std::hex << (int)get_id() << std::dec;
 		return ss.str();
 	};
 };

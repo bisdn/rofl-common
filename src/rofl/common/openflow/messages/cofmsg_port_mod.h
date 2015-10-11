@@ -1,8 +1,13 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 /*
  * cofmsg_port_mod.h
  *
  *  Created on: 18.03.2013
- *      Author: andi
+ *  Revised on: 02.08.2015
+ *      Author: Andreas Koepsel
  */
 
 #ifndef COFMSG_PORT_MOD_H_
@@ -18,169 +23,139 @@ namespace openflow {
  *
  */
 class cofmsg_port_mod :
-	public cofmsg
+		public cofmsg
 {
-private:
-
-	union {
-		uint8_t*					ofhu_port_mod;
-		struct openflow10::ofp_port_mod*		ofhu10_port_mod;
-		struct openflow12::ofp_port_mod*		ofhu12_port_mod;
-		struct openflow13::ofp_port_mod*		ofhu13_port_mod;
-	} ofhu;
-
-#define ofh_port_mod   ofhu.ofhu_port_mod
-#define ofh10_port_mod ofhu.ofhu10_port_mod
-#define ofh12_port_mod ofhu.ofhu12_port_mod
-#define ofh13_port_mod ofhu.ofhu13_port_mod
-
 public:
 
-
-	/** constructor
+	/**
 	 *
 	 */
-	cofmsg_port_mod(
-			uint8_t of_version = 0,
-			uint32_t xid = 0,
-			uint32_t port_no = 0,
-			cmacaddr const& hwaddr = cmacaddr("00:00:00:00:00:00"),
-			uint32_t config = 0,
-			uint32_t mask = 0,
-			uint32_t advertise = 0);
-
+	virtual
+	~cofmsg_port_mod();
 
 	/**
 	 *
 	 */
 	cofmsg_port_mod(
-			cofmsg_port_mod const& port_mod);
+			uint8_t version = rofl::openflow::OFP_VERSION_UNKNOWN,
+			uint32_t xid = 0,
+			uint32_t portno = 0,
+			const rofl::caddress_ll& hwaddr = rofl::caddress_ll("00:00:00:00:00:00"),
+			uint32_t config = 0,
+			uint32_t mask = 0,
+			uint32_t advertise = 0);
 
+	/**
+	 *
+	 */
+	cofmsg_port_mod(
+			const cofmsg_port_mod& msg);
 
 	/**
 	 *
 	 */
 	cofmsg_port_mod&
 	operator= (
-			cofmsg_port_mod const& port_mod);
+			const cofmsg_port_mod& msg);
 
-
-	/** destructor
-	 *
-	 */
-	virtual
-	~cofmsg_port_mod();
-
+public:
 
 	/**
-	 *
-	 */
-	cofmsg_port_mod(cmemory *memarea);
-
-
-	/** reset packet content
-	 *
-	 */
-	virtual void
-	reset();
-
-
-	/**
-	 *
-	 */
-	virtual uint8_t*
-	resize(size_t len);
-
-
-	/** returns length of packet in packed state
 	 *
 	 */
 	virtual size_t
 	length() const;
 
+	/**
+	 *
+	 */
+	virtual void
+	pack(
+			uint8_t *buf = (uint8_t*)0, size_t buflen = 0);
 
 	/**
 	 *
 	 */
 	virtual void
-	pack(uint8_t *buf = (uint8_t*)0, size_t buflen = 0);
-
-
-	/**
-	 *
-	 */
-	virtual void
-	unpack(uint8_t *buf, size_t buflen);
-
-
-	/** parse packet and validate it
-	 */
-	virtual void
-	validate();
-
+	unpack(
+			uint8_t *buf, size_t buflen);
 
 public:
 
+	/**
+	 *
+	 */
+	uint32_t
+	get_portno() const
+	{ return portno; };
+
+	/**
+	 *
+	 */
+	void
+	set_portno(
+			uint32_t portno)
+	{ this->portno = portno; };
+
+	/**
+	 *
+	 */
+	const rofl::caddress_ll&
+	get_lladdr() const
+	{ return lladdr; };
+
+	/**
+	 *
+	 */
+	void
+	set_lladdr(
+			const rofl::caddress_ll& lladdr)
+	{ this->lladdr = lladdr; };
 
 	/**
 	 *
 	 */
 	uint32_t
-	get_port_no() const;
+	get_config() const
+	{ return config; };
 
 	/**
 	 *
 	 */
 	void
-	set_port_no(uint32_t port_no);
-
-	/**
-	 *
-	 */
-	cmacaddr
-	get_hwaddr() const;
-
-	/**
-	 *
-	 */
-	void
-	set_hwaddr(cmacaddr const& hwaddr);
+	set_config(
+			uint32_t config)
+	{ this->config = config; };
 
 	/**
 	 *
 	 */
 	uint32_t
-	get_config() const;
+	get_mask() const
+	{ return mask; };
 
 	/**
 	 *
 	 */
 	void
-	set_config(uint32_t config);
+	set_mask(
+			uint32_t mask)
+	{ this->mask = mask; };
 
 	/**
 	 *
 	 */
 	uint32_t
-	get_mask() const;
+	get_advertise() const
+	{ return advertise; };
 
 	/**
 	 *
 	 */
 	void
-	set_mask(uint32_t mask);
-
-	/**
-	 *
-	 */
-	uint32_t
-	get_advertise() const;
-
-	/**
-	 *
-	 */
-	void
-	set_advertise(uint32_t advertise);
+	set_advertise(
+			uint32_t advertise)
+	{ this->advertise = advertise; };
 
 public:
 
@@ -188,13 +163,28 @@ public:
 	operator<< (std::ostream& os, cofmsg_port_mod const& msg) {
 		os << dynamic_cast<cofmsg const&>( msg );
 		os << indent(2) << "<cofmsg_port_mod >" << std::endl;
-		os << indent(2) << "<port-no:" 		<< (int)msg.get_port_no() 		<< " >" << std::endl;
-		os << indent(2) << "<hw-addr:" 		<< msg.get_hwaddr() 			<< " >" << std::endl;
-		os << indent(2) << "<config:" 		<< std::hex << (int)msg.get_config() 	<< std::dec << " >" << std::endl;
-		os << indent(2) << "<mask:" 		<< std::hex << (int)msg.get_mask() 		<< std::dec << " >" << std::endl;
-		os << indent(2) << "<advertise:" 	<< std::hex << (int)msg.get_advertise() << std::dec << " >" << std::endl;
+		os << indent(2) << "<port-no: 0x"	<< std::hex << (unsigned int)msg.get_portno() 	 << std::dec << " >" << std::endl;
+		os << indent(2) << "<lladdr: " 		<< msg.get_lladdr().str()    	                 << " >" << std::endl;
+		os << indent(2) << "<config: 0x"	<< std::hex << (unsigned int)msg.get_config() 	 << std::dec << " >" << std::endl;
+		os << indent(2) << "<mask: 0x"		<< std::hex << (unsigned int)msg.get_mask()      << std::dec << " >" << std::endl;
+		os << indent(2) << "<advertise: 0x"	<< std::hex << (unsigned int)msg.get_advertise() << std::dec << " >" << std::endl;
 		return os;
 	};
+
+	virtual std::string
+	str() const {
+		std::stringstream ss;
+		ss << cofmsg::str() << "-Port-Mod- " << " ";
+		return ss.str();
+	};
+
+private:
+
+	uint32_t    portno;
+	caddress_ll lladdr;
+	uint32_t    config;
+	uint32_t    mask;
+	uint32_t    advertise;
 };
 
 } // end of namespace openflow

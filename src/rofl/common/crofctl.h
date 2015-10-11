@@ -2,6 +2,14 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+/*
+ * crofctl.h
+ *
+ *  Created on: 07.01.2014
+ *  Revised on: 30.09.2015
+ *      Author: andreas
+ */
+
 #ifndef CROFCTL_H
 #define CROFCTL_H 1
 
@@ -9,15 +17,21 @@
 #include <string>
 #include <bitset>
 
-#include "openflow/openflow.h"
-#include "croflexception.h"
-#include "cmemory.h"
+
+#include "rofl/common/cauxid.h"
 #include "rofl/common/cctlid.h"
-#include "rofl/common/csocket.h"
+#include "rofl/common/cmemory.h"
 #include "rofl/common/crofchan.h"
-#include "openflow/messages/cofmsg.h"
+#include "rofl/common/croflexception.h"
+#include "rofl/common/locking.hpp"
+#include "rofl/common/logging.h"
+#include "rofl/common/crandom.h"
+
+#include "rofl/common/openflow/openflow.h"
+#include "rofl/common/openflow/messages/cofmsg.h"
 #include "rofl/common/openflow/cofport.h"
 #include "rofl/common/openflow/cofports.h"
+#include "rofl/common/openflow/cofmatch.h"
 #include "rofl/common/openflow/coftables.h"
 #include "rofl/common/openflow/cofasyncconfig.h"
 #include "rofl/common/openflow/cofrole.h"
@@ -34,25 +48,24 @@
 #include "rofl/common/openflow/cofmeterstatsarray.h"
 #include "rofl/common/openflow/cofmeterconfigarray.h"
 #include "rofl/common/openflow/cofmeterfeatures.h"
-#include "rofl/common/cauxid.h"
-
-#include "rofl/common/ciosrv.h"
-#include "rofl/common/thread_helper.h"
-#include "rofl/common/logging.h"
-#include "rofl/common/openflow/cofmatch.h"
 #include "rofl/common/openflow/cofhelloelemversionbitmap.h"
-#include "rofl/common/ctransactions.h"
 
 
 namespace rofl {
 
-class eRofCtlBase 		: public RoflException {
+class eRofCtlBase : public RoflException {
 public:
-	eRofCtlBase(const std::string& __arg) : RoflException(__arg) {};
+	eRofCtlBase(
+			const std::string& __arg) :
+				RoflException(__arg)
+	{};
 };
-class eRofCtlNotFound 	: public eRofCtlBase {
+class eRofCtlNotFound : public eRofCtlBase {
 public:
-	eRofCtlNotFound(const std::string& __arg) : eRofCtlBase(__arg) {};
+	eRofCtlNotFound(
+			const std::string& __arg) :
+				eRofCtlBase(__arg)
+	{};
 };
 
 class crofctl;
@@ -76,21 +89,28 @@ class crofctl;
  */
 class crofctl_env {
 	friend class crofctl;
-	static std::set<crofctl_env*> rofctl_envs;
+	static std::set<crofctl_env*>   rofctl_envs;
+	static crwlock                  rofctl_envs_lock;
 public:
-
-	/**
-	 * @brief	rofl::crofctl_env constructor
-	 */
-	crofctl_env()
-	{ crofctl_env::rofctl_envs.insert(this); };
-
-	/**
-	 * @brief	rofl::crofctl_env destructor
-	 */
+	static
+	crofctl_env&
+	call_env(crofctl_env* env) {
+		AcquireReadLock lock(crofctl_env::rofctl_envs_lock);
+		if (crofctl_env::rofctl_envs.find(env) == crofctl_env::rofctl_envs.end()) {
+			throw eRofCtlNotFound("crofctl_env::call_env() crofctl_env instance not found");
+		}
+		return *(env);
+	};
+public:
 	virtual
-	~crofctl_env()
-	{ crofctl_env::rofctl_envs.erase(this); };
+	~crofctl_env() {
+		AcquireReadWriteLock lock(crofctl_env::rofctl_envs_lock);
+		crofctl_env::rofctl_envs.erase(this);
+	};
+	crofctl_env() {
+		AcquireReadWriteLock lock(crofctl_env::rofctl_envs_lock);
+		crofctl_env::rofctl_envs.insert(this);
+	};
 
 protected:
 
@@ -109,50 +129,44 @@ protected:
 	 * been established, i.e., its main connection has been accepted by the remote site.
 	 *
 	 * @param ctl controller instance
+	 * @param ofp_version openflow version negotiated for control channel
 	 */
 	virtual void
-	handle_chan_established(
-			rofl::crofctl& ctl)
+	handle_established(
+			crofctl& ctl, uint8_t ofp_version)
 	{};
 
 	/**
-	 * @brief	Called after termination of associated OpenFlow control channel.
-	 *
-	 * This method is called once the associated OpenFlow control channel has
-	 * been terminated, i.e., its main connection has been closed from the
-	 * remote site. The rofl::crofctl instance itself is not destroyed, unless
-	 * its 'remove_on_channel_close' flag has been set to true during its
-	 * construction.
+	 * @brief 	Called when the control channel has been closed by the peer entity.
 	 *
 	 * @param ctl controller instance
 	 */
 	virtual void
-	handle_chan_terminated(
-			rofl::crofctl& ctl)
+	handle_closed(
+			crofctl& ctl)
 	{};
 
 	/**
 	 * @brief 	Called when a control connection (main or auxiliary) has been established.
 	 *
 	 * @param ctl controller instance
-	 * @param auxid connection identifier (main: 0)
+	 * @param conn control connection instance
+	 * @param ofp_version openflow version negotiated for control connection
 	 */
 	virtual void
-	handle_conn_established(
-			rofl::crofctl& ctl,
-			const rofl::cauxid& auxid)
+	handle_established(
+			crofctl& ctl, crofconn& conn, uint8_t ofp_version)
 	{};
 
 	/**
-	 * @brief 	Called when a control connection (main or auxiliary) has been terminated by the peer entity.
+	 * @brief 	Called when a control connection (main or auxiliary) has been closed by the peer entity.
 	 *
 	 * @param ctl controller instance
-	 * @param auxid connection identifier (main: 0)
+	 * @param conn control connection instance
 	 */
 	virtual void
-	handle_conn_terminated(
-			rofl::crofctl& ctl,
-			const rofl::cauxid& auxid)
+	handle_closed(
+			crofctl& ctl, crofconn& conn)
 	{};
 
 	/**
@@ -163,28 +177,65 @@ protected:
 	 * the remote site.
 	 *
 	 * @param ctl controller instance
-	 * @param auxid connection identifier (main: 0)
+	 * @param conn control connection instance
 	 */
 	virtual void
-	handle_conn_refused(
-			rofl::crofctl& ctl,
-			const rofl::cauxid& auxid)
+	handle_connect_refused(
+			crofctl& ctl, crofconn& conn)
 	{};
 
 	/**
-	 * @brief 	Called when an attempt to establish a control connection has been failed.
+	 * @brief 	Called when an attempt to establish a control connection has failed.
 	 *
-	 * This event occurs when some failure occures while calling the underlying
+	 * This event occurs when some failure occurs while calling the underlying
 	 * C-library connect() system call, e.g., no route to destination, etc. This may
 	 * indicate a local configuration problem inside or outside of the application.
 	 *
 	 * @param ctl controller instance
-	 * @param auxid connection identifier (main: 0)
+	 * @param conn control connection instance
 	 */
 	virtual void
-	handle_conn_failed(
-			rofl::crofctl& ctl,
-			const rofl::cauxid& auxid)
+	handle_connect_failed(
+			crofctl& ctl, crofconn& conn)
+	{};
+
+	/**
+	 * @brief 	Called when an attempt to establish a control connection has failed.
+	 *
+	 * This event occurs when some failure occurs while negotiating the underlying
+	 * transport (e.g., TLS).
+	 *
+	 * @param ctl controller instance
+	 * @param conn control connection instance
+	 */
+	virtual void
+	handle_accept_failed(
+			crofctl& ctl, crofconn& conn)
+	{};
+
+	/**
+	 * @brief 	Called when an attempt to establish a control connection has failed.
+	 *
+	 * This event occurs when the openflow negotiation failed, e.g., no acceptable
+	 * protocol version was presented by the peer.
+	 *
+	 * @param ctl controller instance
+	 * @param conn control connection instance
+	 */
+	virtual void
+	handle_negotiation_failed(
+			crofctl& ctl, crofconn& conn)
+	{};
+
+	/**
+	 * @brief	Called when a congestion situation on the control connection is occurring
+	 *
+	 * @param ctl controller instance
+	 * @param conn control connection instance
+	 */
+	virtual void
+	congestion_occured_indication(
+			crofctl& ctl, crofconn& conn)
 	{};
 
 	/**
@@ -194,19 +245,14 @@ protected:
 	 * on the underlying IP path or some backpressuring by the remote site requires
 	 * to throttle the overall message transmission rate on a control connection.
 	 * A congestion situation is indicated by the return values obtained from the various
-	 * send-methods defined within rofl::crofctl. A solved congestion situation is
-	 * indicated by calling this method. Note that ROFL will store OpenFlow messages
-	 * even under congestion, thus filling up its internal buffers until no further
-	 * memory is available for doing so. It is up to the application designer to
-	 * throttle transmission of further messages according to the channel capacity.
+	 * send-methods defined within rofl::crofctl.
 	 *
 	 * @param ctl controller instance
-	 * @param auxid control connection identifier (main: 0)
+	 * @param conn control connection instance
 	 */
 	virtual void
-	handle_conn_writable(
-			rofl::crofctl& ctl,
-			const rofl::cauxid& auxid)
+	congestion_solved_indication(
+			crofctl& ctl, crofconn& conn)
 	{};
 
 	/**@}*/
@@ -713,67 +759,9 @@ protected:
  *
  */
 class crofctl :
-		public rofl::crofchan_env,
-		public rofl::ctransactions_env,
-		public rofl::ciosrv
+		public rofl::crofchan_env
 {
-	enum crofctl_timer_t {
-		TIMER_RUN_ENGINE       = 0,
-	};
-
-	enum crofctl_event_t {
-		EVENT_NONE             = 0,
-		EVENT_CHAN_TERMINATED  = 1,
-		EVENT_CONN_TERMINATED  = 2,
-		EVENT_CONN_REFUSED     = 3,
-		EVENT_CONN_FAILED      = 4,
-	};
-
-	enum crofctl_flag_t {
-		FLAG_ENGINE_IS_RUNNING = (1 << 0),
-	};
-
 public:
-
-	/**
-	 * @brief	Returns reference to rofl::crofctl instance identified by rofl-common's internal identifier.
-	 *
-	 * @param ctlid rofl-common's internal datapath identifier
-	 * @throw eRofCtlNotFound when no object matches the controller identifier
-	 * @return reference to rofl::crofctl instance for given identifier
-	 */
-	static rofl::crofctl&
-	get_ctl(
-			const rofl::cctlid& ctlid);
-
-	/**
-	 * @brief 	crofctl constructor
-	 *
-	 * @param env pointer to rofl::crofctl_env instance defining the environment for this object
-	 * @param ctlid rofl-common's internal identifier for this instance
-	 * @param remove_on_channel_close when set to true, this indicates to remove this object after the control channel has been terminated
-	 * @param versionbitmap OpenFlow version bitmap
-	 */
-	crofctl(
-			crofctl_env* env,
-			const cctlid& ctlid,
-			bool remove_on_channel_close,
-			const rofl::openflow::cofhello_elem_versionbitmap& versionbitmap,
-			pthread_t tid = 0) :
-				rofl::ciosrv(tid),
-				env(env),
-				ctlid(ctlid),
-				rofchan(this, versionbitmap, tid),
-				transactions(this, tid),
-				remove_on_channel_close(remove_on_channel_close),
-				async_config_role_default_template(rofl::openflow13::OFP_VERSION),
-				async_config(rofl::openflow13::OFP_VERSION) {
-		LOGGING_DEBUG << "[rofl-common][crofctl] "
-				<< "instance created, ctlid: " << ctlid.str() << std::endl;
-		init_async_config_role_default_template();
-		async_config = get_async_config_role_default_template();
-		crofctl::rofctls[ctlid] = this;
-	};
 
 	/**
 	 * @brief	crofctl destructor
@@ -781,13 +769,25 @@ public:
 	 * Closes all control connections and does a general clean-up.
 	 */
 	virtual
-	~crofctl() {
-		LOGGING_DEBUG << "[rofl-common][crofctl] "
-				<< "instance destroyed, ctlid: " << ctlid.str() << std::endl;
-		crofctl::rofctls.erase(ctlid);
-		events.clear();
-		transactions.clear();
-	};
+	~crofctl();
+
+	/**
+	 * @brief 	crofctl constructor
+	 *
+	 * @param env pointer to rofl::crofctl_env instance defining the environment for this object
+	 * @param ctlid rofl-common's internal identifier for this instance
+	 */
+	crofctl(
+			crofctl_env* env,
+			const cctlid& ctlid);
+
+public:
+
+	/**
+	 * @name	Methods granting access to the controller entity's basic properties
+	 */
+
+	/**@{*/
 
 	/**
 	 * @brief	Returns rofl-common's internal rofl::cctlid identifier for this instance
@@ -797,150 +797,6 @@ public:
 	const rofl::cctlid&
 	get_ctlid() const
 	{ return ctlid; };
-
-	/**
-	 * @brief	Shutdown crofchan instance
-	 */
-	void
-	shutdown()
-	{ rofchan.close(); };
-
-public:
-
-	/**
-	 * @name	Methods for connection management
-	 *
-	 * This is a group of methods for typical CRUD like operations on control
-	 * connections for the OpenFlow control channel. You may create an arbitrary
-	 * number of control connections to a controller entity. Control connections
-	 * may be closed or reconnected.
-	 */
-
-	/**@{*/
-
-	/**
-	 * @brief	Returns a list of connection identifiers of all existing control connections
-	 *
-	 * The list contains all connections independent from their current status.
-	 *
-	 * @return list of connection identifiers
-	 */
-	std::list<rofl::cauxid>
-	get_conn_index() const
-	{ return rofchan.get_conn_index(); };
-
-	/**
-	 * @brief	Establishes a new control connection to a remote
-	 * controller entity with the given control connection identifier
-	 *
-	 * An already existing control connection with the specified control
-	 * connection identifier is replaced by this new control connection
-	 * instance. You may select any arbitrary control connection
-	 * identifier. However, care must be taken for the main connection (auxid: 0):
-	 * (Re-)Connecting the main connection leads to an implicit termination of
-	 * all existing control connections in OpenFlow.
-	 *
-	 * @param auxid control connection identifier
-	 * @param socket_type one of the socket types defined in rofl::csocket
-	 * @param socket_params a set of parameters for the selected socket type
-	 */
-	void
-	connect(
-			const rofl::cauxid& auxid,
-			enum rofl::csocket::socket_type_t socket_type,
-			const rofl::cparams& socket_params)
-	{ rofchan.add_conn(auxid, socket_type, socket_params); };
-
-	/**
-	 * @brief	Terminates an existing control connection with given identifier.
-	 *
-	 * When the main control connection (auxid: 0) is closed, this also terminates all
-	 * other existing control connections.
-	 *
-	 * @param auxid control connection identifier
-	 */
-	void
-	disconnect(
-			const rofl::cauxid& auxid)
-	{ rofchan.drop_conn(auxid); };
-
-	/**
-	 * @brief	Add an existing rofl::crofconn instance created on heap to this object.
-	 *
-	 * This method is used for attaching an already existing rofl::crofconn instance
-	 * to this rofl::crofctl instance. Do not call this method, unless you know what
-	 * you are doing.
-	 *
-	 * @param conn pointer to rofl::crofconn instance allocated on heap
-	 */
-	void
-	add_connection(
-			crofconn* conn) {
-		if (NULL == conn) {
-			return;
-		}
-		rofchan.add_conn(conn->get_aux_id(), conn);
-	};
-
-	/**@}*/
-
-public:
-
-	/**
-	 * @name	Methods related to control channel state
-	 */
-
-	/**@{*/
-
-	/**
-	 * @brief	Returns true, when the control handshake (HELLO) has been completed.
-	 */
-	bool
-	is_established() const
-	{ return rofchan.is_established(); };
-
-	/**
-	 * @brief 	Returns the OpenFlow protocol version used for this control connection.
-	 *
-	 * @return OpenFlow version used for this control connection
-	 */
-	uint8_t
-	get_version_negotiated() const
-	{ return rofchan.get_version(); };
-
-	/**
-	 * @brief	Returns the defined OpenFlow version bitmap for this instance.
-	 *
-	 * @return OpenFlow version bitmap
-	 */	const rofl::openflow::cofhello_elem_versionbitmap&
-	get_versions_available() const
-	{ return rofchan.get_versionbitmap(); };
-
-	/**
-	 * @brief	Returns true, when this instance should be destroyed when its crofchan has closed
-	 */
-	bool
-	remove_on_channel_termination() const
-	{ return remove_on_channel_close; };
-
-	/**
-	 * @brief	Returns caddress of connected remote entity for given connection identifier.
-	 *
-	 * @return caddress object obtained from this->socket
-	 */
-	rofl::caddress
-	get_peer_addr(const rofl::cauxid& auxid) const
-	{ return rofchan.get_conn(auxid).get_rofsocket().get_socket().get_raddr(); };
-
-	/**@}*/
-
-public:
-
-	/**
-	 * @name	Methods granting access to the controller entity's basic properties
-	 */
-
-	/**@{*/
 
 	/**
 	 * @brief	Returns a reference to the current role object of this controller entity.
@@ -1005,6 +861,100 @@ public:
 public:
 
 	/**
+	 *
+	 */
+	bool
+	is_established() const
+	{ return rofchan.is_established(); };
+
+	/**
+	 *
+	 */
+	uint8_t
+	get_version() const
+	{ return rofchan.get_version(); };
+
+public:
+
+	/**
+	 *
+	 */
+	size_t
+	size() const
+	{ return rofchan.size(); };
+
+	/**
+	 *
+	 */
+	std::list<cauxid>
+	get_conn_ids() const
+	{ return rofchan.get_conn_ids(); };
+
+	/**
+	 *
+	 */
+	void
+	clear()
+	{ rofchan.clear(); };
+
+	/**
+	 *
+	 */
+	crofconn&
+	add_conn()
+	{ return rofchan.add_conn(); };
+
+	/**
+	 *
+	 */
+	crofconn&
+	add_conn(
+			const cauxid& auxid)
+	{ return rofchan.add_conn(auxid); };
+
+	/**
+	 *
+	 */
+	crofconn&
+	add_conn(
+			crofconn* conn)
+	{ return rofchan.add_conn(conn); };
+
+	/**
+	 *
+	 */
+	crofconn&
+	set_conn(
+			const cauxid& auxid)
+	{ return rofchan.set_conn(auxid); };
+
+	/**
+	 *
+	 */
+	const crofconn&
+	get_conn(
+			const cauxid& auxid) const
+	{ return rofchan.get_conn(auxid); };
+
+	/**
+	 *
+	 */
+	bool
+	drop_conn(
+			const cauxid& auxid)
+	{ return rofchan.drop_conn(auxid); };
+
+	/**
+	 *
+	 */
+	bool
+	has_conn(
+			const cauxid& auxid) const
+	{ return rofchan.has_conn(auxid); };
+
+public:
+
+	/**
 	 * @name	Methods for sending OpenFlow messages
 	 *
 	 * These methods may be called by a derived class for sending
@@ -1053,24 +1003,6 @@ public:
 			uint32_t xid,
 			uint16_t flags,
 			uint16_t miss_send_len);
-
-	/**
-	 * @brief	Sends OpenFlow Stats-Reply message to attached controller entity.
-	 *
-	 * @param xid OpenFlow transaction identifier
-	 * @param stats_type one of the OFPST_* constants
-	 * @param body body of a STATS.reply
-	 * @param bodylen length of STATS.reply body
-	 * @param more flag if multiple STATS.reply messages will be sent
-	 */
-	void
-	send_stats_reply(
-			const rofl::cauxid& auxid,
-			uint32_t xid,
-			uint16_t stats_type,
-			uint16_t stats_flags,
-			uint8_t *body = NULL,
-			size_t bodylen = 0);
 
 	/**
 	 * @brief	Sends OpenFlow Desc-Stats-Reply message to attached controller entity.
@@ -1446,6 +1378,23 @@ public:
 
 	/**@}*/
 
+public:
+
+	/**
+	 *
+	 */
+	class crofctl_find_by_ctlid {
+		cctlid ctlid;
+	public:
+		crofctl_find_by_ctlid(
+				const cctlid& ctlid) :
+					ctlid(ctlid)
+		{};
+		bool
+		operator() (
+				const crofctl* rofctl)
+		{ return (rofctl->get_ctlid() == ctlid); };
+	};
 
 public:
 
@@ -1454,8 +1403,6 @@ public:
 		os << indent(0) << "<crofctl ";
 		os << "ctlid:0x" << ctl.ctlid.str() << " ";
 		os << ">" << std::endl;
-		rofl::indent i(2);
-		os << ctl.rofchan;
 		return os;
 	};
 
@@ -1469,352 +1416,116 @@ public:
 private:
 
 	virtual void
-	handle_conn_established(
-			crofchan& chan,
-			const rofl::cauxid& auxid) {
-		LOGGING_INFO << "[rofl-common][crofctl] ctlid:0x" << ctlid.str()
-						<< " control connection established, auxid: " << auxid.str() << std::endl;
-		call_env().handle_conn_established(*this, auxid);
-
-		if (auxid == rofl::cauxid(0)) {
-			LOGGING_INFO << "[rofl-common][crofctl] ctlid:0x" << ctlid.str()
-							<< " OFP control channel established, " << chan.str() << std::endl;
-
-			call_env().handle_chan_established(*this); // main connection
-
-			switch (chan.get_version()) {
-			case rofl::openflow12::OFP_VERSION: {
-				role.set_role(rofl::openflow12::OFPCR_ROLE_EQUAL);
-			} break;
-			case rofl::openflow13::OFP_VERSION: {
-				role.set_role(rofl::openflow13::OFPCR_ROLE_EQUAL);
-			} break;
-			default: {
-				// do nothing
-			};
-			}
-
+	handle_established(
+			crofchan& chan, uint8_t ofp_version)
+	{
+		switch (ofp_version) {
+		case rofl::openflow12::OFP_VERSION: {
+			role.set_role(rofl::openflow12::OFPCR_ROLE_EQUAL);
+		} break;
+		case rofl::openflow13::OFP_VERSION: {
+			role.set_role(rofl::openflow13::OFPCR_ROLE_EQUAL);
+		} break;
 		}
+		crofctl_env::call_env(env).handle_established(*this, ofp_version);
 	};
 
 	virtual void
-	handle_conn_terminated(
-			crofchan& chan,
-			const rofl::cauxid& auxid) {
-		LOGGING_INFO << "[rofl-common][crofctl] ctlid:0x" << ctlid.str()
-						<< " control connection terminated, auxid: " << auxid.str() << std::endl;
-		rofl::RwLock rwlock(conns_terminated_rwlock, rofl::RwLock::RWLOCK_WRITE);
-		conns_terminated.push_back(auxid);
-		push_on_eventqueue(EVENT_CONN_TERMINATED);
-
-		if (auxid == rofl::cauxid(0)) {
-			LOGGING_INFO << "[rofl-common][crofctl] ctlid:0x" << ctlid.str()
-					<< " OFP control channel terminated, " << chan.str() << std::endl;
-			transactions.clear();
-			push_on_eventqueue(EVENT_CHAN_TERMINATED);
+	handle_closed(
+			crofchan& chan)
+	{
+		switch (chan.get_version()) {
+		case rofl::openflow12::OFP_VERSION: {
+			role.set_role(rofl::openflow12::OFPCR_ROLE_EQUAL);
+		} break;
+		case rofl::openflow13::OFP_VERSION: {
+			role.set_role(rofl::openflow13::OFPCR_ROLE_EQUAL);
+		} break;
 		}
+		crofctl_env::call_env(env).handle_closed(*this);
 	};
 
 	virtual void
-	handle_conn_refused(
-			crofchan& chan,
-			const rofl::cauxid& auxid) {
-		rofl::RwLock rwlock(conns_refused_rwlock, rofl::RwLock::RWLOCK_WRITE);
-		conns_refused.push_back(auxid);
-		push_on_eventqueue(EVENT_CONN_REFUSED);
-	};
+	handle_established(
+			crofchan& chan, crofconn& conn, uint8_t ofp_version)
+	{ crofctl_env::call_env(env).handle_established(*this, conn, ofp_version); };
 
 	virtual void
-	handle_conn_failed(
-			crofchan& chan,
-			const rofl::cauxid& auxid) {
-		rofl::RwLock rwlock(conns_failed_rwlock, rofl::RwLock::RWLOCK_WRITE);
-		conns_failed.push_back(auxid);
-		push_on_eventqueue(EVENT_CONN_FAILED);
-	};
+	handle_closed(
+			crofchan& chan, crofconn& conn)
+	{ crofctl_env::call_env(env).handle_closed(*this, conn); };
 
 	virtual void
-	handle_write(
-			rofl::crofchan& chan,
-			const rofl::cauxid& auxid)
-	{ call_env().handle_conn_writable(*this, auxid); };
+	handle_connect_refused(
+			crofchan& chan, crofconn& conn)
+	{ crofctl_env::call_env(env).handle_connect_refused(*this, conn); };
 
 	virtual void
-	recv_message(
-			rofl::crofchan& chan,
-			const rofl::cauxid& aux_id,
-			rofl::openflow::cofmsg *msg);
-
-	virtual uint32_t
-	get_async_xid(
-			rofl::crofchan& chan)
-	{ return transactions.get_async_xid(); };
-
-	virtual uint32_t
-	get_sync_xid(
-			rofl::crofchan& chan,
-			uint8_t msg_type = 0,
-			uint16_t msg_sub_type = 0)
-	{ return transactions.add_ta(cclock(/*secs=*/5), msg_type, msg_sub_type); };
+	handle_connect_failed(
+			crofchan& chan, crofconn& conn)
+	{ crofctl_env::call_env(env).handle_connect_failed(*this, conn); };
 
 	virtual void
-	release_sync_xid(
-			rofl::crofchan& chan,
-			uint32_t xid)
-	{ transactions.drop_ta(xid); };
+	handle_accept_failed(
+			crofchan& chan, crofconn& conn)
+	{ crofctl_env::call_env(env).handle_accept_failed(*this, conn); };
 
 	virtual void
-	ta_expired(
-			rofl::ctransactions& tas,
-			rofl::ctransaction& ta)
+	handle_negotiation_failed(
+			crofchan& chan, crofconn& conn)
+	{ crofctl_env::call_env(env).handle_negotiation_failed(*this, conn); };
+
+	virtual void
+	congestion_occured_indication(
+			crofchan& chan, crofconn& conn)
+	{ crofctl_env::call_env(env).congestion_occured_indication(*this, conn); };
+
+	virtual void
+	congestion_solved_indication(
+			crofchan& chan, crofconn& conn)
+	{ crofctl_env::call_env(env).congestion_solved_indication(*this, conn); };
+
+	virtual void
+	handle_transaction_timeout(
+			crofchan& chan, crofconn& conn, uint32_t xid, uint8_t type, uint16_t sub_type)
 	{};
-
-public:
-
-	/**
-	 *
-	 */
-	class crofctl_find_by_ctlid {
-		cctlid ctlid;
-	public:
-		crofctl_find_by_ctlid(const cctlid& ctlid) : ctlid(ctlid) {};
-		bool operator() (const crofctl* rofctl) {
-			return (rofctl->get_ctlid() == ctlid);
-		};
-	};
 
 private:
 
 	virtual void
-	handle_timeout(
-			int opaque, void *data = (void*)0);
+	handle_recv(
+			rofl::crofchan& chan, rofl::crofconn& conn, rofl::openflow::cofmsg* msg);
 
-	crofctl_env&
-	call_env() {
-		if (crofctl_env::rofctl_envs.find(env) == crofctl_env::rofctl_envs.end()) {
-			throw eRofCtlNotFound("rofl::crofctl::call_env() environment not found");
-		}
-		return *env;
-	};
+private:
 
 	void
 	init_async_config_role_default_template();
 
-	void
-	push_on_eventqueue(
-			enum crofctl_event_t event = EVENT_NONE) {
-		if (EVENT_NONE != event) {
-			events.push_back(event);
-		}
-		if (not flags.test(FLAG_ENGINE_IS_RUNNING)) {
-			register_timer(TIMER_RUN_ENGINE, rofl::ctimespec(0));
-		}
-	};
-
-	void
-	work_on_eventqueue();
-
-	void
-	event_chan_terminated();
-
-	void
-	event_conn_established();
-
-	void
-	event_conn_terminated();
-
-	void
-	event_conn_refused();
-
-	void
-	event_conn_failed();
-
 private:
-
-	void
-	experimenter_rcvd(
-			const rofl::cauxid& auxid,
-			rofl::openflow::cofmsg_experimenter* msg);
-
-	void
-	error_rcvd(
-			const rofl::cauxid& auxid,
-			rofl::openflow::cofmsg_error* msg);
-
-	void
-	features_request_rcvd(
-			const rofl::cauxid& auxid,
-			rofl::openflow::cofmsg_features_request* msg);
-
-	void
-	get_config_request_rcvd(
-			const rofl::cauxid& auxid,
-			rofl::openflow::cofmsg_get_config_request* msg);
-
-	void
-	set_config_rcvd(
-			const rofl::cauxid& auxid,
-			rofl::openflow::cofmsg_set_config* msg);
-
-	void
-	packet_out_rcvd(
-			const rofl::cauxid& auxid,
-			rofl::openflow::cofmsg_packet_out* msg);
-
-	void
-	flow_mod_rcvd(
-			const rofl::cauxid& auxid,
-			rofl::openflow::cofmsg_flow_mod* msg);
-
-	void
-	group_mod_rcvd(
-			const rofl::cauxid& auxid,
-			rofl::openflow::cofmsg_group_mod* msg);
-
-	void
-	port_mod_rcvd(
-			const rofl::cauxid& auxid,
-			rofl::openflow::cofmsg_port_mod* msg);
-
-	void
-	table_mod_rcvd(
-			const rofl::cauxid& auxid,
-			rofl::openflow::cofmsg_table_mod* msg);
-
-	void
-	meter_mod_rcvd(
-			const rofl::cauxid& auxid,
-			rofl::openflow::cofmsg_meter_mod* msg);
-
-	void
-	stats_request_rcvd(
-			const rofl::cauxid& auxid,
-			rofl::openflow::cofmsg_stats* msg);
-
-	void
-	desc_stats_request_rcvd(
-			const rofl::cauxid& auxid,
-			rofl::openflow::cofmsg_desc_stats_request* msg);
-
-	void
-	table_stats_request_rcvd(
-			const rofl::cauxid& auxid,
-			rofl::openflow::cofmsg_table_stats_request* msg);
-
-	void
-	port_stats_request_rcvd(
-			const rofl::cauxid& auxid,
-			rofl::openflow::cofmsg_port_stats_request* msg);
-
-	void
-	flow_stats_request_rcvd(
-			const rofl::cauxid& auxid,
-			rofl::openflow::cofmsg_flow_stats_request* msg);
-
-	void
-	aggregate_stats_request_rcvd(
-			const rofl::cauxid& auxid,
-			rofl::openflow::cofmsg_aggr_stats_request* msg);
-
-	void
-	queue_stats_request_rcvd(
-			const rofl::cauxid& auxid,
-			rofl::openflow::cofmsg_queue_stats_request* msg);
-
-	void
-	group_stats_request_rcvd(
-			const rofl::cauxid& auxid,
-			rofl::openflow::cofmsg_group_stats_request* msg);
-
-	void
-	group_desc_stats_request_rcvd(
-			const rofl::cauxid& auxid,
-			rofl::openflow::cofmsg_group_desc_stats_request* msg);
-
-	void
-	group_features_stats_request_rcvd(
-			const rofl::cauxid& auxid,
-			rofl::openflow::cofmsg_group_features_stats_request* msg);
-
-	void
-	meter_stats_request_rcvd(
-			const rofl::cauxid& auxid,
-			rofl::openflow::cofmsg_meter_stats_request* msg);
-
-	void
-	meter_config_stats_request_rcvd(
-			const rofl::cauxid& auxid,
-			rofl::openflow::cofmsg_meter_config_stats_request* msg);
-
-	void
-	meter_features_stats_request_rcvd(
-			const rofl::cauxid& auxid,
-			rofl::openflow::cofmsg_meter_features_stats_request* msg);
-
-	void
-	table_features_stats_request_rcvd(
-			const rofl::cauxid& auxid,
-			rofl::openflow::cofmsg_table_features_stats_request* msg);
-
-	void
-	port_desc_stats_request_rcvd(
-			const rofl::cauxid& auxid,
-			rofl::openflow::cofmsg_port_desc_stats_request* msg);
-
-	void
-	experimenter_stats_request_rcvd(
-			const rofl::cauxid& auxid,
-			rofl::openflow::cofmsg_experimenter_stats_request* msg);
-
-	void
-	role_request_rcvd(
-			const rofl::cauxid& auxid,
-			rofl::openflow::cofmsg_role_request* msg);
-
-	void
-	barrier_request_rcvd(
-			const rofl::cauxid& auxid,
-			rofl::openflow::cofmsg_barrier_request* msg);
-
-	void
-	queue_get_config_request_rcvd(
-			const rofl::cauxid& auxid,
-			rofl::openflow::cofmsg_queue_get_config_request* msg);
-
-	void
-	get_async_config_request_rcvd(
-			const rofl::cauxid& auxid,
-			rofl::openflow::cofmsg_get_async_config_request* msg);
-
-	void
-	set_async_config_rcvd(
-			const rofl::cauxid& auxid,
-			rofl::openflow::cofmsg_set_async_config* msg);
-
-private:
-
-	static std::map<rofl::cctlid, rofl::crofctl*> rofctls;
 
 	// environment
 	rofl::crofctl_env*               env;
+
 	// handle for this crofctl instance
 	rofl::cctlid                     ctlid;
-	// OFP control channel
+
+	// OpenFlow channel
 	rofl::crofchan                   rofchan;
-	// pending OFP transactions
-	rofl::ctransactions              transactions;
-	bool                             remove_on_channel_close;
+
+	// random numbers generator
+	rofl::crandom                    random;
+
+	// last xid sent
+	uint32_t                         xid_last;
+
+	// default async config template
 	rofl::openflow::cofasync_config  async_config_role_default_template;
+
+	// current async config
 	rofl::openflow::cofasync_config  async_config;
+
+	// role of associated remote controller
 	rofl::openflow::cofrole          role;
-	std::deque<enum crofctl_event_t> events;
-	PthreadRwLock                    conns_terminated_rwlock;
-	std::list<rofl::cauxid>          conns_terminated;
-	PthreadRwLock                    conns_refused_rwlock;
-	std::list<rofl::cauxid>          conns_refused;
-	PthreadRwLock                    conns_failed_rwlock;
-	std::list<rofl::cauxid>          conns_failed;
-	std::bitset<32>                  flags;
 };
 
 }; // end of namespace

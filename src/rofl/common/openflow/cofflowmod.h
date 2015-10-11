@@ -329,6 +329,13 @@ public:
 		return os;
 	};
 
+	std::string
+	str() const {
+		std::stringstream ss;
+		ss << "command: " << " ";
+		return ss.str();
+	};
+
 private: // data structures
 
 	uint8_t 			ofp_version;

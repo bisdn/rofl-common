@@ -24,7 +24,7 @@ AC_ENABLE_STATIC
 
 # default flags
 CFLAGS="-std=gnu89 -Werror -Wall $CFLAGS"
-CXXFLAGS="-Werror -Wall $CXXFLAGS"
+CXXFLAGS="-std=c++11 -Werror -Wall $CXXFLAGS"
 AC_DEFINE([__STDC_FORMAT_MACROS], [], [Description])
 
 
@@ -54,38 +54,71 @@ AC_CONFIG_FILES([
 
 	Makefile
 	src/Makefile
-	src/rofl/common/protocols/Makefile
+	src/rofl/Makefile
+	src/rofl/common/Makefile
+	src/rofl/common/openflow/Makefile
 	src/rofl/common/openflow/messages/Makefile
-	src/rofl/common/openflow/extensions/Makefile
 	src/rofl/common/openflow/experimental/Makefile
 	src/rofl/common/openflow/experimental/actions/Makefile
 	src/rofl/common/openflow/experimental/matches/Makefile
-	src/rofl/common/openflow/Makefile
-	src/rofl/common/utils/Makefile
-	src/rofl/common/Makefile
 	
-	src/rofl/platform/Makefile
-	src/rofl/platform/unix/Makefile
-	
-	src/rofl/Makefile
 	src/rofl/rofl_common.pc
 
 	examples/Makefile
 	examples/ethswctld/Makefile
-	examples/testomat/Makefile
 	examples/proxyd/Makefile
 
 	tools/Makefile
-	tools/spray/Makefile
 
 	test/Makefile
-	test/unit/Makefile
 	test/rofl/Makefile
 	test/rofl/common/Makefile
-	test/rofl/common/crofbase/Makefile
+	test/rofl/common/crofqueue/Makefile
+	test/rofl/common/crofchan/Makefile
+	test/rofl/common/crofconn/Makefile
+	test/rofl/common/crofsock/Makefile
 	test/rofl/common/openflow/Makefile
+	test/rofl/common/openflow/coxmatch/Makefile
+	test/rofl/common/openflow/coxmatches/Makefile
 	test/rofl/common/openflow/messages/Makefile
-	test/rofl/common/protocols/Makefile
+	test/rofl/common/openflow/messages/cofmsgaggrstats/Makefile
+	test/rofl/common/openflow/messages/cofmsgdescstats/Makefile
+	test/rofl/common/openflow/messages/cofmsgexperimenterstats/Makefile
+	test/rofl/common/openflow/messages/cofmsgflowstats/Makefile
+	test/rofl/common/openflow/messages/cofmsggroupdescstats/Makefile
+	test/rofl/common/openflow/messages/cofmsggroupfeaturesstats/Makefile
+	test/rofl/common/openflow/messages/cofmsggroupstats/Makefile
+	test/rofl/common/openflow/messages/cofmsgmeterconfigstats/Makefile
+	test/rofl/common/openflow/messages/cofmsgmeterfeaturesstats/Makefile
+	test/rofl/common/openflow/messages/cofmsgmeterstats/Makefile
+	test/rofl/common/openflow/messages/cofmsgportdescstats/Makefile
+	test/rofl/common/openflow/messages/cofmsgportstats/Makefile
+	test/rofl/common/openflow/messages/cofmsgqueuestats/Makefile
+	test/rofl/common/openflow/messages/cofmsgtablefeaturesstats/Makefile
+	test/rofl/common/openflow/messages/cofmsgtablestats/Makefile
+	test/rofl/common/openflow/messages/cofmsgasyncconfig/Makefile
+	test/rofl/common/openflow/messages/cofmsgbarrier/Makefile
+	test/rofl/common/openflow/messages/cofmsgconfig/Makefile
+	test/rofl/common/openflow/messages/cofmsgecho/Makefile
+	test/rofl/common/openflow/messages/cofmsgerror/Makefile
+	test/rofl/common/openflow/messages/cofmsgexperimenter/Makefile
+	test/rofl/common/openflow/messages/cofmsgfeatures/Makefile
+	test/rofl/common/openflow/messages/cofmsgflowmod/Makefile
+	test/rofl/common/openflow/messages/cofmsgflowremoved/Makefile
+	test/rofl/common/openflow/messages/cofmsggroupmod/Makefile
+	test/rofl/common/openflow/messages/cofmsghello/Makefile
+	test/rofl/common/openflow/messages/cofmsgmetermod/Makefile
+	test/rofl/common/openflow/messages/cofmsgpacketin/Makefile
+	test/rofl/common/openflow/messages/cofmsgpacketout/Makefile
+	test/rofl/common/openflow/messages/cofmsgportmod/Makefile
+	test/rofl/common/openflow/messages/cofmsgportstatus/Makefile
+	test/rofl/common/openflow/messages/cofmsgqueueconfig/Makefile
+	test/rofl/common/openflow/messages/cofmsgrole/Makefile
+	test/rofl/common/openflow/messages/cofmsgtablemod/Makefile
+	test/rofl/common/crofbase/Makefile
+	test/rofl/common/all/Makefile
+	test/rofl/common/all/messages/Makefile
+	test/unit/Makefile
 	
 	src/rofl_common_conf.h])
 

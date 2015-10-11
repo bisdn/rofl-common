@@ -33,7 +33,9 @@ cofaggr_stats_request::cofaggr_stats_request(
 				out_group(0),
 				cookie(0),
 				cookie_mask(0)
-{}
+{
+	this->match.set_version(of_version);
+}
 
 
 
@@ -52,7 +54,9 @@ cofaggr_stats_request::cofaggr_stats_request(
 			out_group(out_group),
 			cookie(cookie),
 			cookie_mask(cookie_mask)
-{}
+{
+	this->match.set_version(of_version);
+}
 
 
 
@@ -239,7 +243,7 @@ cofaggr_stats_request::pack(uint8_t *buf, size_t buflen)
 {
 	switch (of_version) {
 	case rofl::openflow10::OFP_VERSION: {
-		if (buflen < (sizeof(struct openflow10::ofp_flow_stats_request) - 4 + match.length()))
+		if (buflen < (sizeof(struct openflow10::ofp_flow_stats_request)))
 			throw eInval();
 
 		struct openflow10::ofp_flow_stats_request *req = (struct openflow10::ofp_flow_stats_request*)buf;

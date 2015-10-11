@@ -31,6 +31,7 @@ public:
 	/**
 	 *
 	 */
+	explicit
 	cctlid(
 			uint64_t ctlid = 0) :
 				id(ctlid) {

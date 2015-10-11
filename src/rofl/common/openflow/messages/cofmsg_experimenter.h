@@ -9,6 +9,7 @@
 #define COFMSG_EXPERIMENTER_H_ 1
 
 #include "rofl/common/openflow/messages/cofmsg.h"
+#include "rofl/common/cmemory.h"
 
 namespace rofl {
 namespace openflow {
@@ -16,109 +17,74 @@ namespace openflow {
 /**
  *
  */
-class cofmsg_experimenter :
-	public cofmsg
-{
-private:
-
-	cmemory				body;	// for experimental statistics messages
-
-	union {
-		uint8_t*										ofhu_experimenter;
-		struct openflow10::ofp_vendor_header*			ofhu10_vendor;
-		struct openflow12::ofp_experimenter_header*		ofhu12_experimenter;
-		struct openflow13::ofp_experimenter_header*		ofhu13_experimenter;
-	} ofhu;
-
-#define ofh_experimenter   		ofhu.ofhu_experimenter
-#define ofh10_vendor			ofhu.ofhu10_vendor
-#define ofh12_experimenter 		ofhu.ofhu12_experimenter
-#define ofh13_experimenter 		ofhu.ofhu13_experimenter
-
-
+class cofmsg_experimenter : public cofmsg {
 public:
 
-
-	/** constructor
+	/**
 	 *
 	 */
-	cofmsg_experimenter(
-			uint8_t of_version = 0,
-			uint32_t xid = 0,
-			uint32_t experimenter_type = 0,
-			uint32_t experimenter_flags = 0,
-			uint8_t *data = (uint8_t*)0,
-			size_t datalen = 0);
-
+	virtual
+	~cofmsg_experimenter()
+	{};
 
 	/**
 	 *
 	 */
 	cofmsg_experimenter(
-			cofmsg_experimenter const& experimenter);
+			uint8_t version = 0,
+			uint32_t xid = 0,
+			uint32_t exp_id = 0,
+			uint32_t exp_type = 0,
+			uint8_t *data = (uint8_t*)0,
+			size_t datalen = 0) :
+				cofmsg(version, rofl::openflow::OFPT_EXPERIMENTER, xid),
+				exp_id(exp_id),
+				exp_type(exp_type),
+				body(data, datalen)
+	{};
 
+	/**
+	 *
+	 */
+	cofmsg_experimenter(
+			const cofmsg_experimenter& msg)
+	{ *this = msg; };
 
 	/**
 	 *
 	 */
 	cofmsg_experimenter&
 	operator= (
-			cofmsg_experimenter const& experimenter);
+			const cofmsg_experimenter& msg) {
+		if (this == &msg)
+			return *this;
+		exp_id   = msg.exp_id;
+		exp_type = msg.exp_type;
+		body     = msg.body;
+		return *this;
+	};
 
-
-	/** destructor
-	 *
-	 */
-	virtual
-	~cofmsg_experimenter();
-
-
-	/**
-	 *
-	 */
-	cofmsg_experimenter(cmemory *memarea);
-
-
-	/** reset packet content
-	 *
-	 */
-	virtual void
-	reset();
-
+public:
 
 	/**
-	 *
-	 */
-	virtual uint8_t*
-	resize(size_t len);
-
-
-	/** returns length of packet in packed state
 	 *
 	 */
 	virtual size_t
 	length() const;
 
+	/**
+	 *
+	 */
+	virtual void
+	pack(
+			uint8_t *buf = (uint8_t*)0, size_t buflen = 0);
 
 	/**
 	 *
 	 */
 	virtual void
-	pack(uint8_t *buf = (uint8_t*)0, size_t buflen = 0);
-
-
-	/**
-	 *
-	 */
-	virtual void
-	unpack(uint8_t *buf, size_t buflen);
-
-
-	/** parse packet and validate it
-	 */
-	virtual void
-	validate();
-
+	unpack(
+			uint8_t *buf, size_t buflen);
 
 public:
 
@@ -127,31 +93,45 @@ public:
 	 *
 	 */
 	uint32_t
-	get_experimenter_id() const;
+	get_exp_id() const
+	{ return exp_id; };
 
 	/**
 	 *
 	 */
 	void
-	set_experimenter_id(uint32_t exp_id);
+	set_exp_id(
+			uint32_t exp_id)
+	{ this->exp_id = exp_id; };
 
 	/**
 	 *
 	 */
 	uint32_t
-	get_experimenter_type() const;
+	get_exp_type() const
+	{ return exp_type; };
 
 	/**
 	 *
 	 */
 	void
-	set_experimenter_type(uint32_t exp_type);
+	set_exp_type(
+			uint32_t exp_type)
+	{ this->exp_type = exp_type; };
 
 	/**
 	 *
 	 */
-	cmemory&
-	get_body();
+	const rofl::cmemory&
+	get_body() const
+	{ return body; };
+
+	/**
+	 *
+	 */
+	rofl::cmemory&
+	set_body()
+	{ return body; };
 
 public:
 
@@ -159,20 +139,34 @@ public:
 	operator<< (std::ostream& os, cofmsg_experimenter const& msg) {
 		os << dynamic_cast<cofmsg const&>( msg );
 		os << indent(2) << "<cofmsg_experimenter >" << std::endl;
-		os << indent(4) << "<exp-id:" << (int)msg.get_experimenter_id() << " >" << std::endl;
+		os << indent(4) << "<exp-id:" << (int)msg.get_exp_id() << " >" << std::endl;
 		switch (msg.get_version()) {
-		case rofl::openflow12::OFP_VERSION:
-		case rofl::openflow13::OFP_VERSION: {
-			os << indent(4) << "<exp-type:" << (int)msg.get_experimenter_type() << " >" << std::endl;
+		case rofl::openflow10::OFP_VERSION: {
+			/* field does not exist in OFP 1.0 */
 		} break;
 		default: {
-			// do nothing
+			os << indent(4) << "<exp-type:" << (int)msg.get_exp_type() << " >" << std::endl;
 		};
 		}
 		indent i(4);
 		os << msg.body;
 		return os;
 	};
+
+	std::string
+	str() const {
+		std::stringstream ss;
+		ss << cofmsg::str() << "-Experimenter- ";
+		ss << "exp_id: " << (int)get_exp_id() << " ";
+		ss << "exp_type: " << (int)get_exp_type() << " ";
+		return ss.str();
+	};
+
+private:
+
+	uint32_t      exp_id;
+	uint32_t      exp_type;
+	rofl::cmemory body;
 };
 
 } // end of namespace openflow

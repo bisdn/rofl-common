@@ -643,7 +643,7 @@ cofinstructions::unpack(
 		uint16_t len = be16toh(hdr->len);
 
 		if (len < sizeof(struct rofl::openflow::ofp_instruction))
-			throw eInstructionBadLen();
+			return;
 
 		if (len > buflen)
 			throw eInstructionBadLen();
@@ -686,7 +686,7 @@ cofinstructions::unpack(
 			buf += get_inst_experimenter().length();
 		} break;
 		default:
-			LOGGING_WARN << "[rofl][instructions] unknown instruction type:" << type << std::endl;
+			std::cerr << "[rofl][instructions] unknown instruction type:" << type << std::endl;
 		}
 	}
 }

@@ -2,13 +2,12 @@ MAINTAINERCLEANFILES = Makefile.in
 
 export INCLUDES += -I$(abs_srcdir)/../ #-I$(abs_builddir)
 
-SUBDIRS = common platform
+SUBDIRS = common 
 
 lib_LTLIBRARIES = librofl_common.la
 librofl_common_la_SOURCES = ../rofl_common.c
 librofl_common_la_LIBADD = 			\
 			common/librofl_common_base.la 	\
-			platform/librofl_platform.la	\
 			-lpthread
 
 ROFL_LIBRARY_VERSION = 1:1:1

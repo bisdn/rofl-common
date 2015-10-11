@@ -1,48 +1,30 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 #include "rofl/common/openflow/messages/cofmsg_role.h"
 
 using namespace rofl::openflow;
 
+cofmsg_role_request::~cofmsg_role_request()
+{}
+
+
+
 cofmsg_role_request::cofmsg_role_request(
-		uint8_t of_version,
+		uint8_t version,
 		uint32_t xid,
-		rofl::openflow::cofrole const& role) :
-	cofmsg(sizeof(struct rofl::openflow::ofp_header)),
-	role(of_version)
+		const rofl::openflow::cofrole& role) :
+				cofmsg(version, rofl::openflow::OFPT_ROLE_REQUEST, xid),
+				role(role)
 {
-	this->role = role;
-	this->role.set_version(of_version);
-
-	set_version(of_version);
-	set_xid(xid);
-
-	switch (of_version) {
-	case rofl::openflow12::OFP_VERSION: {
-		set_type(rofl::openflow12::OFPT_ROLE_REQUEST);
-
-	} break;
-	case rofl::openflow13::OFP_VERSION: {
-		set_type(rofl::openflow13::OFPT_ROLE_REQUEST);
-
-	} break;
-	default:
-		throw eBadVersion();
-	}
+	this->role.set_version(version);
 }
 
 
 
 cofmsg_role_request::cofmsg_role_request(
-		cmemory *memarea) :
-	cofmsg(memarea),
-	role(get_version())
-{
-
-}
-
-
-
-cofmsg_role_request::cofmsg_role_request(
-		cofmsg_role_request const& msg)
+		const cofmsg_role_request& msg)
 {
 	*this = msg;
 }
@@ -51,32 +33,13 @@ cofmsg_role_request::cofmsg_role_request(
 
 cofmsg_role_request&
 cofmsg_role_request::operator= (
-		cofmsg_role_request const& msg)
+		const cofmsg_role_request& msg)
 {
 	if (this == &msg)
 		return *this;
-
 	cofmsg::operator= (msg);
-
 	role = msg.role;
-
 	return *this;
-}
-
-
-
-cofmsg_role_request::~cofmsg_role_request()
-{
-
-}
-
-
-
-void
-cofmsg_role_request::reset()
-{
-	role.clear();
-	cofmsg::reset();
 }
 
 
@@ -100,81 +63,54 @@ cofmsg_role_request::length() const
 
 
 void
-cofmsg_role_request::pack(uint8_t *buf, size_t buflen)
+cofmsg_role_request::pack(
+		uint8_t *buf, size_t buflen)
 {
-	set_length(length());
+	cofmsg::pack(buf, buflen);
 
 	if ((0 == buf) || (0 == buflen))
 		return;
 
-	if (buflen < length())
-		throw eInval();
+	if (buflen < cofmsg_role_request::length())
+		throw eMsgInval("cofmsg_role_request::pack() buf too short");
 
 	switch (get_version()) {
-	case rofl::openflow12::OFP_VERSION: {
-
-		memcpy(buf, soframe(), sizeof(struct rofl::openflow12::ofp_header));
-		role.pack(buf + sizeof(struct rofl::openflow12::ofp_header), role.length());
-
-	} break;
-	case rofl::openflow13::OFP_VERSION: {
-
-		memcpy(buf, soframe(), sizeof(struct rofl::openflow13::ofp_header));
+	default: {
 		role.pack(buf + sizeof(struct rofl::openflow13::ofp_header), role.length());
-
-	} break;
-	default:
-		throw eBadVersion();
+	};
 	}
 }
 
 
 
 void
-cofmsg_role_request::unpack(uint8_t *buf, size_t buflen)
+cofmsg_role_request::unpack(
+		uint8_t *buf, size_t buflen)
 {
 	cofmsg::unpack(buf, buflen);
 
-	validate();
-}
+	role.set_version(get_version());
 
+	if ((0 == buf) || (0 == buflen))
+		return;
 
-
-void
-cofmsg_role_request::validate()
-{
-	cofmsg::validate(); // check generic OpenFlow header
-
-	role.clear();
+	if (buflen < cofmsg_role_request::length())
+		throw eBadRequestBadLen("cofmsg_role_request::unpack() buf too short");
 
 	switch (get_version()) {
-	case rofl::openflow12::OFP_VERSION: {
+	default: {
 
-		if (get_length() < sizeof(struct rofl::openflow12::ofp_role_request))
-			throw eBadSyntaxTooShort();
+		if (get_type() != rofl::openflow13::OFPT_ROLE_REQUEST)
+			throw eMsgInval("cofmsg_role_reply::unpack() invalid message type");
 
-		if (framelen() < sizeof(struct rofl::openflow12::ofp_role_request))
-			throw eBadSyntaxTooShort();
-
-		role.unpack(soframe() + sizeof(struct rofl::openflow12::ofp_header),
-				sizeof(struct rofl::openflow::cofrole::role_t));
-
-	} break;
-	case rofl::openflow13::OFP_VERSION: {
-
-		if (get_length() < sizeof(struct rofl::openflow12::ofp_role_request))
-			throw eBadSyntaxTooShort();
-
-		if (framelen() < sizeof(struct rofl::openflow12::ofp_role_request))
-			throw eBadSyntaxTooShort();
-
-		role.unpack(soframe() + sizeof(struct rofl::openflow13::ofp_header),
-				sizeof(struct rofl::openflow::cofrole::role_t));
-
-	} break;
-	default:
-		throw eBadRequestBadVersion();
+		if (buflen > sizeof(struct rofl::openflow13::ofp_header)) {
+			role.unpack(buf + sizeof(struct rofl::openflow13::ofp_header), buflen - sizeof(struct rofl::openflow13::ofp_header));
+		}
+	};
 	}
+
+	if (get_length() < cofmsg_role_request::length())
+		throw eBadRequestBadLen("cofmsg_role_request::unpack() buf too short");
 }
 
 
@@ -185,52 +121,25 @@ cofmsg_role_request::validate()
 
 
 
-
-
+cofmsg_role_reply::~cofmsg_role_reply()
+{}
 
 
 
 cofmsg_role_reply::cofmsg_role_reply(
-		uint8_t of_version,
+		uint8_t version,
 		uint32_t xid,
-		rofl::openflow::cofrole const& role) :
-	cofmsg(sizeof(struct rofl::openflow::ofp_header)),
-	role(of_version)
+		const rofl::openflow::cofrole& role) :
+				cofmsg(version, rofl::openflow::OFPT_ROLE_REPLY, xid),
+				role(role)
 {
-	this->role = role;
-	this->role.set_version(of_version);
-
-	set_version(of_version);
-	set_xid(xid);
-
-	switch (of_version) {
-	case rofl::openflow12::OFP_VERSION: {
-		set_type(rofl::openflow12::OFPT_ROLE_REPLY);
-
-	} break;
-	case rofl::openflow13::OFP_VERSION: {
-		set_type(rofl::openflow13::OFPT_ROLE_REPLY);
-
-	} break;
-	default:
-		throw eBadVersion();
-	}
+	this->role.set_version(version);
 }
 
 
 
 cofmsg_role_reply::cofmsg_role_reply(
-		cmemory *memarea) :
-	cofmsg(memarea),
-	role(get_version())
-{
-
-}
-
-
-
-cofmsg_role_reply::cofmsg_role_reply(
-		cofmsg_role_reply const& msg)
+		const cofmsg_role_reply& msg)
 {
 	*this = msg;
 }
@@ -239,32 +148,13 @@ cofmsg_role_reply::cofmsg_role_reply(
 
 cofmsg_role_reply&
 cofmsg_role_reply::operator= (
-		cofmsg_role_reply const& msg)
+		const cofmsg_role_reply& msg)
 {
 	if (this == &msg)
 		return *this;
-
 	cofmsg::operator= (msg);
-
 	role = msg.role;
-
 	return *this;
-}
-
-
-
-cofmsg_role_reply::~cofmsg_role_reply()
-{
-
-}
-
-
-
-void
-cofmsg_role_reply::reset()
-{
-	role.clear();
-	cofmsg::reset();
 }
 
 
@@ -288,81 +178,54 @@ cofmsg_role_reply::length() const
 
 
 void
-cofmsg_role_reply::pack(uint8_t *buf, size_t buflen)
+cofmsg_role_reply::pack(
+		uint8_t *buf, size_t buflen)
 {
-	set_length(length());
+	cofmsg::pack(buf, buflen);
 
 	if ((0 == buf) || (0 == buflen))
 		return;
 
-	if (buflen < length())
-		throw eInval();
+	if (buflen < cofmsg_role_reply::length())
+		throw eMsgInval("cofmsg_role_reply::pack() buf too short");
 
 	switch (get_version()) {
-	case rofl::openflow12::OFP_VERSION: {
-
-		memcpy(buf, soframe(), sizeof(struct rofl::openflow12::ofp_header));
-		role.pack(buf + sizeof(struct rofl::openflow12::ofp_header), role.length());
-
-	} break;
-	case rofl::openflow13::OFP_VERSION: {
-
-		memcpy(buf, soframe(), sizeof(struct rofl::openflow13::ofp_header));
+	default: {
 		role.pack(buf + sizeof(struct rofl::openflow13::ofp_header), role.length());
-
-	} break;
-	default:
-		throw eBadVersion();
+	};
 	}
 }
 
 
 
 void
-cofmsg_role_reply::unpack(uint8_t *buf, size_t buflen)
+cofmsg_role_reply::unpack(
+		uint8_t *buf, size_t buflen)
 {
 	cofmsg::unpack(buf, buflen);
 
-	validate();
-}
+	role.set_version(get_version());
 
+	if ((0 == buf) || (0 == buflen))
+		return;
 
-
-void
-cofmsg_role_reply::validate()
-{
-	cofmsg::validate(); // check generic OpenFlow header
-
-	role.clear();
+	if (buflen < cofmsg_role_reply::length())
+		throw eBadRequestBadLen("cofmsg_role_reply::unpack() buf too short");
 
 	switch (get_version()) {
-	case rofl::openflow12::OFP_VERSION: {
+	default: {
 
-		if (get_length() < sizeof(struct rofl::openflow12::ofp_role_request))
-			throw eBadSyntaxTooShort();
+		if (get_type() != rofl::openflow13::OFPT_ROLE_REPLY)
+			throw eMsgInval("cofmsg_role_reply::unpack() invalid message type");
 
-		if (framelen() < sizeof(struct rofl::openflow12::ofp_role_request))
-			throw eBadSyntaxTooShort();
-
-		role.unpack(soframe() + sizeof(struct rofl::openflow12::ofp_header),
-				sizeof(struct rofl::openflow::cofrole::role_t));
-
-	} break;
-	case rofl::openflow13::OFP_VERSION: {
-
-		if (get_length() < sizeof(struct rofl::openflow12::ofp_role_request))
-			throw eBadSyntaxTooShort();
-
-		if (framelen() < sizeof(struct rofl::openflow12::ofp_role_request))
-			throw eBadSyntaxTooShort();
-
-		role.unpack(soframe() + sizeof(struct rofl::openflow13::ofp_header),
-				sizeof(struct rofl::openflow::cofrole::role_t));
-
-	} break;
-	default:
-		throw eBadRequestBadVersion();
+		if (buflen > sizeof(struct rofl::openflow13::ofp_header)) {
+			role.unpack(buf + sizeof(struct rofl::openflow13::ofp_header), buflen - sizeof(struct rofl::openflow13::ofp_header));
+		}
+	};
 	}
+
+	if (get_length() < cofmsg_role_reply::length())
+		throw eBadRequestBadLen("cofmsg_role_reply::unpack() buf too short");
 }
 
 

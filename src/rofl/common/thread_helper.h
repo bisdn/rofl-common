@@ -15,7 +15,7 @@
 #include <pthread.h>
 #include <inttypes.h>
 
-#include "croflexception.h"
+#include "rofl/common/exception.hpp"
 
 namespace rofl
 {
@@ -35,9 +35,9 @@ public:
 };
 
 
-class eLockBase : public RoflException {
+class eLockBase : public exception {
 public:
-	eLockBase(const std::string& __arg) : RoflException(__arg) {};
+	eLockBase(const std::string& __arg) : exception(__arg) {};
 };
 
 class eLockInval : public eLockBase {

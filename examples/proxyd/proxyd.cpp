@@ -1,9 +1,9 @@
 #include "rofl_common_conf.h"
-#include <rofl/platform/unix/cunixenv.h>
-#include <rofl/platform/unix/cdaemon.h>
 #include <rofl/common/cparams.h>
 
 #include "ccontrol.hpp"
+#include "cunixenv.h"
+#include "cdaemon.h"
 
 #define ETHSWCTLD_LOG_FILE "/var/log/proxyd.log"
 #define ETHSWCTLD_PID_FILE "/var/run/proxyd.pid"

@@ -1,7 +1,12 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 /*
  * crofchan.h
  *
  *  Created on: 31.12.2013
+ *  Revised on: 28.09.2015
  *      Author: andreas
  */
 
@@ -13,151 +18,147 @@
 #include <inttypes.h>
 
 #include "rofl/common/croflexception.h"
-#include "rofl/common/ciosrv.h"
 #include "rofl/common/crofconn.h"
 #include "rofl/common/openflow/messages/cofmsg.h"
 #include "rofl/common/openflow/cofhelloelemversionbitmap.h"
 #include "rofl/common/crandom.h"
-#include "rofl/common/ctimerid.h"
 #include "rofl/common/cauxid.h"
+#include "rofl/common/cthread.hpp"
 
 namespace rofl {
 
-class eRofChanBase			: public RoflException {
+class eRofChanBase : public RoflException {
 public:
-	eRofChanBase(const std::string& __arg) : RoflException(__arg) {};
+	eRofChanBase(
+			const std::string& __arg) :
+				RoflException(__arg)
+	{};
 };
-class eRofChanNotFound		: public eRofChanBase {
+class eRofChanNotFound : public eRofChanBase {
 public:
-	eRofChanNotFound(const std::string& __arg) : eRofChanBase(__arg) {};
+	eRofChanNotFound(
+			const std::string& __arg) :
+				eRofChanBase(__arg)
+	{};
 };
-class eRofChanExists		: public eRofChanBase {
+class eRofChanExists : public eRofChanBase {
 public:
-	eRofChanExists(const std::string& __arg) : eRofChanBase(__arg) {};
+	eRofChanExists(
+			const std::string& __arg) :
+				eRofChanBase(__arg)
+	{};
 };
-class eRofChanInval			: public eRofChanBase {
+class eRofChanInval : public eRofChanBase {
 public:
-	eRofChanInval(const std::string& __arg) : eRofChanBase(__arg) {};
+	eRofChanInval(
+			const std::string& __arg) :
+				eRofChanBase(__arg)
+	{};
 };
-class eRofChanNotConnected	: public eRofChanBase {
+class eRofChanNotConnected : public eRofChanBase {
 public:
-	eRofChanNotConnected(const std::string& __arg) : eRofChanBase(__arg) {};
+	eRofChanNotConnected(
+			const std::string& __arg) :
+				eRofChanBase(__arg)
+	{};
 };
+class eRofChanExhausted : public eRofChanBase {
+public:
+	eRofChanExhausted(
+			const std::string& __arg) :
+				eRofChanBase(__arg)
+	{};
+};
+
+
 
 class crofchan; // forward declaration
 
+
+
+
 /**
- * @interface crofchan_env
+ * @interface crofconn_env
  * @ingroup common_devel_workflow
- * @brief 	Environment expected by a rofl::crofchan instance
- *
+ * @brief Environment expected by a rofl::crofconn instance.
  */
 class crofchan_env {
-	static std::set<crofchan_env*> rofchan_envs;
-
+	friend class crofchan;
 public:
-
-	/**
-	 * @brief	crofchan_env constructor
-	 */
-	crofchan_env()
-	{ crofchan_env::rofchan_envs.insert(this); };
-
-	/**
-	 * @brief	crofchan_env destructor
-	 */
+	static
+	crofchan_env&
+	call_env(crofchan_env* env) {
+		AcquireReadLock lock(crofchan_env::channel_envs_lock);
+		if (crofchan_env::channel_envs.find(env) == crofchan_env::channel_envs.end()) {
+			throw eRofChanNotFound("crofchan_env::call_env() crofchan_env instance not found");
+		}
+		return *(env);
+	};
+public:
 	virtual
-	~crofchan_env()
-	{ crofchan_env::rofchan_envs.erase(this); };
+	~crofchan_env() {
+		AcquireReadWriteLock lock(crofchan_env::channel_envs_lock);
+		crofchan_env::channel_envs.erase(this);
+	};
+	crofchan_env() {
+		AcquireReadWriteLock lock(crofchan_env::channel_envs_lock);
+		crofchan_env::channel_envs.insert(this);
+	};
 
 protected:
 
-	friend class crofchan;
-
-	/**
-	 * @brief Called upon establishment of a control connection within the control channel
-	 */
 	virtual void
-	handle_conn_established(
-			crofchan& chan,
-			const rofl::cauxid& auxid)
+	handle_established(
+			crofchan& chan, uint8_t ofp_version) = 0;
+
+	virtual void
+	handle_closed(
+			crofchan& chan) = 0;
+
+	virtual void
+	handle_established(
+			crofchan& chan, crofconn& conn, uint8_t ofp_version) = 0;
+
+	virtual void
+	handle_connect_refused(
+			crofchan& chan, crofconn& conn) = 0;
+
+	virtual void
+	handle_connect_failed(
+			crofchan& chan, crofconn& conn) = 0;
+
+	virtual void
+	handle_accept_failed(
+			crofchan& chan, crofconn& conn) = 0;
+
+	virtual void
+	handle_negotiation_failed(
+			crofchan& chan, crofconn& conn) = 0;
+
+	virtual void
+	handle_closed(
+			crofchan& chan, crofconn& conn) = 0;
+
+	virtual void
+	handle_recv(
+			crofchan& chan, crofconn& conn, rofl::openflow::cofmsg* msg) = 0;
+
+	virtual void
+	congestion_occured_indication(
+			crofchan& chan, crofconn& conn) = 0;
+
+	virtual void
+	congestion_solved_indication(
+			crofchan& chan, crofconn& conn) = 0;
+
+	virtual void
+	handle_transaction_timeout(
+			crofchan& chan, crofconn& conn, uint32_t xid, uint8_t type, uint16_t sub_type = 0)
 	{};
 
-	/**
-	 * @brief Called upon a peer initiated termination of a control connection within the control channel
-	 */
-	virtual void
-	handle_conn_terminated(
-			crofchan& chan,
-			const rofl::cauxid& auxid)
-	{};
-
-	/**
-	 * @brief Called in the event of a connection refused
-	 */
-	virtual void
-	handle_conn_refused(
-			crofchan& chan,
-			const rofl::cauxid& auxid)
-	{};
-
-	/**
-	 * @brief Called in the event of a connection failed (except refused)
-	 */
-	virtual void
-	handle_conn_failed(
-			crofchan& chan,
-			const rofl::cauxid& auxid)
-	{};
-
-	/**
-	 * @brief	Called after a congestion situation has been resolved.
-	 *
-	 * Note: This method is executed in the thread context of the underlying
-	 * socket instance.
-	 *
-	 * @param chan crofchan instance
-	 * @param auxid auxiliary connection that is usable again
-	 */
-	virtual void
-	handle_write(crofchan& chan, const cauxid& auxid) = 0;
-
-	/**
-	 * @brief	Called upon reception of an OpenFlow message by the peer entity.
-	 *
-	 * Note: This method is executed in the thread context of the underlying
-	 * socket instance.
-	 *
-	 * @param chan crofchan instance
-	 * @param auxid auxiliary connection
-	 * @param msg pointer to cofmsg instance
-	 */
-	virtual void
-	recv_message(crofchan& chan, const cauxid& aux_id, rofl::openflow::cofmsg *msg) = 0;
-
-	/**
-	 * @brief	Acquires an OpenFlow transaction ID for an asynchronous message.
-	 *
-	 * @param chan crofchan instance
-	 */
-	virtual uint32_t
-	get_async_xid(crofchan& chan) = 0;
-
-	/**
-	 * @brief	Acquires an OpenFlow transaction ID for a synchronous message.
-	 *
-	 * @param chan crofchan instance
-	 */
-	virtual uint32_t
-	get_sync_xid(crofchan& chan, uint8_t msg_type = 0, uint16_t msg_sub_type = 0) = 0;
-
-	/**
-	 * @brief	Releases a synchronous transaction ID after reception of an OpenFlow reply.
-	 *
-	 * @param chan crofchan instance
-	 */
-	virtual void
-	release_sync_xid(crofchan& chan, uint32_t xid) = 0;
+private:
+	static std::set<crofchan_env*>  channel_envs;
+	static crwlock                  channel_envs_lock;
 };
 
 
@@ -167,57 +168,43 @@ protected:
  * @brief	An OpenFlow control channel grouping multiple control connections
  */
 class crofchan :
-		public rofl::ciosrv,
+		public cthread_env,
 		public rofl::crofconn_env
 {
-	enum crofchan_event_t {
-		EVENT_NONE				= 0,
-		EVENT_CONN_ESTABLISHED	= 1,
-		EVENT_CONN_TERMINATED	= 2, // by peer
-		EVENT_CONN_REFUSED		= 3,
-		EVENT_CONN_FAILED		= 4,
-	};
-
-	enum crofchan_timer_t {
-		TIMER_NONE				= 0,
-		TIMER_RUN_ENGINE		= 1,
-	};
-
-	enum crofchan_flag_t {
-		FLAG_ENGINE_IS_RUNNING	= 0,
-	};
-
 public:
-
-	/**
-	 *
-	 */
-	crofchan(
-			pthread_t tid = 0) :
-				rofl::ciosrv(tid),
-				env(NULL),
-				ofp_version(rofl::openflow::OFP_VERSION_UNKNOWN)
-	{};
-
-	/**
-	 *
-	 */
-	crofchan(
-			crofchan_env *env,
-			const rofl::openflow::cofhello_elem_versionbitmap& versionbitmap,
-			pthread_t tid = 0) :
-				rofl::ciosrv(tid),
-				env(env),
-				versionbitmap(versionbitmap),
-				ofp_version(rofl::openflow::OFP_VERSION_UNKNOWN)
-	{};
 
 	/**
 	 *
 	 */
 	virtual
 	~crofchan()
-	{ close(); };
+	{ clear(); };
+
+	/**
+	 *
+	 */
+	crofchan(
+			crofchan_env *env) :
+				env(env),
+				last_auxid(0),
+				ofp_version(rofl::openflow::OFP_VERSION_UNKNOWN)
+	{};
+
+public:
+
+	/**
+	 *
+	 */
+	void
+	send_message(
+			const cauxid& auxid, rofl::openflow::cofmsg* msg);
+
+	/**
+	 *
+	 */
+	void
+	send_message(
+			const cauxid& auxid, rofl::openflow::cofmsg* msg, const ctimespec& ts);
 
 public:
 
@@ -234,243 +221,233 @@ public:
 	get_version() const
 	{ return ofp_version; };
 
-	/**
-	 *
-	 */
-	const rofl::openflow::cofhello_elem_versionbitmap&
-	get_versionbitmap() const
-	{ return versionbitmap; };
-
-	/**
-	 *
-	 */
-	void
-	close();
-
-	/**
-	 *
-	 */
-	unsigned int
-	send_message(
-			const cauxid& aux_id, rofl::openflow::cofmsg *msg);
-
-
 public:
 
 	/**
 	 *
 	 */
-	cauxid
-	get_next_auxid();
+	size_t
+	size() const {
+		AcquireReadLock rwlock(conns_rwlock);
+		return conns.size();
+	};
 
 	/**
 	 *
 	 */
 	std::list<cauxid>
-	get_conn_index() const;
+	get_conn_ids() const {
+		AcquireReadLock rwlock(conns_rwlock);
+		std::list<cauxid> ids;
+		for (auto it : conns) {
+			ids.push_back(it.first);
+		}
+		return ids;
+	};
 
 	/**
-	 * @brief	Add a new connection while creating a new crofconn instance and do a socket connect.
+	 *
+	 */
+	void
+	clear() {
+		AcquireReadWriteLock rwlock(conns_rwlock);
+		for (auto it : conns) {
+			delete it.second;
+		}
+		conns.clear();
+	};
+
+	/**
+	 *
+	 */
+	crofconn&
+	add_conn() {
+		AcquireReadWriteLock rwlock(conns_rwlock);
+		unsigned int cnt = 256;
+		while ((cnt--) && (conns.find(last_auxid) != conns.end())) {
+			last_auxid = (last_auxid == 255) ? 0 : last_auxid + 1;
+		}
+		if (cnt == 0) {
+			throw eRofChanExhausted("crofchan::add_conn() cauxid namespace exhausted");
+		}
+		(conns[last_auxid] = new crofconn(this))->set_auxid(cauxid(last_auxid));
+		return *(conns[last_auxid]);
+	};
+
+	/**
+	 *
 	 */
 	crofconn&
 	add_conn(
-			const cauxid& aux_id,
-			enum rofl::csocket::socket_type_t socket_type,
-			cparams const& socket_params);
+			const cauxid& auxid) {
+		AcquireReadWriteLock rwlock(conns_rwlock);
+		if (conns.find(auxid) != conns.end()) {
+			delete conns[auxid];
+		}
+		(conns[auxid] = new crofconn(this))->set_auxid(auxid);
+		return *(conns[auxid]);
+	};
 
 	/**
-	 * @brief 	Add a new connection with an existing crofconn instance obtained from a listening socket.
+	 *
 	 */
 	crofconn&
 	add_conn(
-			const cauxid& aux_id, crofconn* conn);
+			crofconn* conn) {
+		if (nullptr == conn) {
+			throw eRofChanInval("crofchan::add_conn() null pointer");
+		}
+		AcquireReadWriteLock rwlock(conns_rwlock);
+		cauxid auxid(conn->get_auxid());
+		if (conns.find(auxid) != conns.end()) {
+			delete conns[auxid];
+		}
+		(conns[auxid] = conn)->set_env(this);
+		if (auxid == cauxid(0)) {
+			ofp_version = conn->get_version();
+		}
+		return *(conns[auxid]);
+	};
 
 	/**
 	 *
 	 */
 	crofconn&
 	set_conn(
-			const cauxid& aux_id);
+			const cauxid& auxid) {
+		AcquireReadWriteLock rwlock(conns_rwlock);
+		if (conns.find(auxid) == conns.end()) {
+			(conns[auxid] = new crofconn(this))->set_auxid(auxid);
+		}
+		return *(conns[auxid]);
+	};
 
 	/**
 	 *
 	 */
 	const crofconn&
 	get_conn(
-			const cauxid& aux_id) const;
+			const cauxid& auxid) const {
+		AcquireReadLock rwlock(conns_rwlock);
+		if (conns.find(auxid) == conns.end()) {
+			throw eRofChanNotFound("crofchan::get_conn() auxid not found");
+		}
+		return *(conns.at(auxid));
+	};
 
 	/**
 	 *
 	 */
-	void
+	bool
 	drop_conn(
-			const cauxid& aux_id);
+			const cauxid& auxid) {
+		AcquireReadWriteLock rwlock(conns_rwlock);
+		if (auxid.get_id() == 0) {
+			for (auto it : conns) {
+				delete it.second;
+			}
+			conns.clear();
+		} else {
+			if (conns.find(auxid) == conns.end()) {
+				return false;
+			}
+			delete conns[auxid];
+			conns.erase(auxid);
+		}
+		return true;
+	};
 
 	/**
 	 *
 	 */
 	bool
 	has_conn(
-			const cauxid& aux_id) const;
-
-private:
-
-	/**
-	 *
-	 */
-	virtual void
-	handle_connect_refused(crofconn& conn) {
-		LOGGING_DEBUG2 << "[rofl-common][crofchan] "
-				<< "connection refused, auxid: " << conn.get_aux_id().str() << std::endl;
-		rofl::RwLock(conns_rwlock, rofl::RwLock::RWLOCK_WRITE);
-		conns_refused.push_back(conn.get_aux_id());
-		rofl::ciosrv::notify(rofl::cevent(EVENT_CONN_REFUSED));
-	};
-
-	/**
-	 *
-	 */
-	virtual void
-	handle_connect_failed(crofconn& conn) {
-		LOGGING_DEBUG2 << "[rofl-common][crofchan] "
-				<< "connection failed, auxid: " << conn.get_aux_id().str() << std::endl;
-		rofl::RwLock(conns_rwlock, rofl::RwLock::RWLOCK_WRITE);
-		conns_failed.push_back(conn.get_aux_id());
-		rofl::ciosrv::notify(rofl::cevent(EVENT_CONN_FAILED));
-	};
-
-	/**
-	 *
-	 */
-	virtual void
-	handle_connected(crofconn& conn, uint8_t ofp_version) {
-		LOGGING_DEBUG2 << "[rofl-common][crofchan] "
-				<< "connection established, auxid: " << conn.get_aux_id().str() << std::endl;
-		rofl::RwLock(conns_rwlock, rofl::RwLock::RWLOCK_WRITE);
-		conns_established.push_back(conn.get_aux_id());
-		rofl::ciosrv::notify(rofl::cevent(EVENT_CONN_ESTABLISHED));
-	};
-
-	/**
-	 *
-	 */
-	virtual void
-	handle_closed(crofconn& conn) {
-		LOGGING_DEBUG2 << "[rofl-common][crofchan] "
-				<< "connection terminated, auxid: " << conn.get_aux_id().str() << std::endl;
-		rofl::RwLock(conns_rwlock, rofl::RwLock::RWLOCK_WRITE);
-		conns_terminated.push_back(conn.get_aux_id());
-		rofl::ciosrv::notify(rofl::cevent(EVENT_CONN_TERMINATED));
-	};
-
-	/**
-	 *
-	 */
-	virtual void
-	handle_write(crofconn& conn) {
-		env->handle_write(*this, conn.get_aux_id());
-	};
-
-	virtual void
-	recv_message(crofconn& conn, rofl::openflow::cofmsg *msg) {
-		if ((this->ofp_version == rofl::openflow::OFP_VERSION_UNKNOWN) &&
-				(conn.get_aux_id() == rofl::cauxid(0)) &&
-				(conn.get_version() == msg->get_version())) {
-			this->ofp_version = conn.get_version();
-		}
-		env->recv_message(*this, conn.get_aux_id(), msg);
-	};
-
-	/**
-	 *
-	 */
-	virtual uint32_t
-	get_async_xid(crofconn& conn) {
-		return env->get_async_xid(*this);
-	};
-
-	/**
-	 *
-	 */
-	virtual uint32_t
-	get_sync_xid(crofconn& conn, uint8_t msg_type = 0, uint16_t msg_sub_type = 0) {
-		return env->get_sync_xid(*this, msg_type, msg_sub_type);
-	};
-
-	/**
-	 *
-	 */
-	virtual void
-	release_sync_xid(crofconn& conn, uint32_t xid) {
-		env->release_sync_xid(*this, xid);
+			const cauxid& auxid) const {
+		AcquireReadLock rwlock(conns_rwlock);
+		return (not (conns.find(auxid) == conns.end()));
 	};
 
 private:
 
-	/**
-	 *
-	 */
 	virtual void
-	handle_timeout(
-			int opaque, void* data = (void*)0);
-
-	/**
-	 *
-	 */
-	virtual void
-	handle_event(
-			const cevent& event);
-
-	/**
-	 *
-	 */
-	void
-	work_on_eventqueue(
-			enum crofchan_event_t event = EVENT_NONE);
-
-	/**
-	 *
-	 */
-	void
-	event_conn_established();
-
-	/**
-	 *
-	 */
-	void
-	event_conn_terminated();
-
-	/**
-	 *
-	 */
-	void
-	event_conn_refused();
-
-	/**
-	 *
-	 */
-	void
-	event_conn_failed();
-
-	/**
-	 *
-	 */
-	crofchan_env&
-	call_env() {
-		if (crofchan_env::rofchan_envs.find(env) == crofchan_env::rofchan_envs.end()) {
-			throw eRofChanNotFound("crofchan::call_env() environment not found");
+	handle_established(
+			crofconn& conn, uint8_t ofp_version)
+	{
+		if (conn.get_auxid() == cauxid(0)) {
+			this->ofp_version = ofp_version;
+			crofchan_env::call_env(env).handle_established(*this, ofp_version);
+		} else {
+			crofchan_env::call_env(env).handle_established(*this, conn, ofp_version);
 		}
-		return *env;
 	};
+
+	virtual void
+	handle_closed(
+			crofconn& conn)
+	{
+		if (conn.get_auxid().get_id() == 0) {
+			{ /* acquire rwlock */
+				AcquireReadLock rwlock(conns_rwlock);
+				if (conn.get_auxid().get_id() == 0) {
+					for (auto it : conns) {
+						it.second->close();
+					}
+				}
+			} /* release rwlock */
+			crofchan_env::call_env(env).handle_closed(*this);
+		} else {
+			crofchan_env::call_env(env).handle_closed(*this, conn);
+		}
+	};
+
+	virtual void
+	handle_connect_refused(
+			crofconn& conn)
+	{ crofchan_env::call_env(env).handle_connect_refused(*this, conn); };
+
+	virtual void
+	handle_connect_failed(
+			crofconn& conn)
+	{ crofchan_env::call_env(env).handle_connect_failed(*this, conn); };
+
+	virtual void
+	handle_accept_failed(
+			crofconn& conn)
+	{ crofchan_env::call_env(env).handle_accept_failed(*this, conn); };
+
+	virtual void
+	handle_negotiation_failed(
+			crofconn& conn)
+	{ crofchan_env::call_env(env).handle_negotiation_failed(*this, conn); };
+
+	virtual void
+	handle_recv(
+			crofconn& conn, rofl::openflow::cofmsg *msg)
+	{ crofchan_env::call_env(env).handle_recv(*this, conn, msg); };
+
+	virtual void
+	congestion_occured_indication(
+			crofconn& conn)
+	{ crofchan_env::call_env(env).congestion_occured_indication(*this, conn); };
+
+	virtual void
+	congestion_solved_indication(
+			crofconn& conn)
+	{ crofchan_env::call_env(env).congestion_solved_indication(*this, conn); };
+
+	virtual void
+	handle_transaction_timeout(
+			crofconn& conn, uint32_t xid, uint8_t type, uint16_t sub_type = 0)
+	{ crofchan_env::call_env(env).handle_transaction_timeout(*this, conn, xid, type, sub_type); };
 
 public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, crofchan const& chan) {
+		AcquireReadLock rwlock(chan.conns_rwlock);
 		os << indent(0) << "<crofchan established:" << chan.is_established()
 				<< " ofp-version: " << (int)chan.ofp_version << " >" << std::endl;
 		indent i(2);
-		os << chan.versionbitmap;
 		for (std::map<cauxid, crofconn*>::const_iterator
 				it = chan.conns.begin(); it != chan.conns.end(); ++it) {
 			os << *(it->second);
@@ -481,11 +458,12 @@ public:
 
 	std::string
 	str() const {
+		AcquireReadLock rwlock(conns_rwlock);
 		std::stringstream ss;
 		ss << "OFP version: " << (int)get_version() << " ";
 		if (conns.empty() ||
 				(conns.find(rofl::cauxid(0)) == conns.end()) ||
-				(not (conns.begin()->second)->is_established())) {
+					(not (conns.at(rofl::cauxid(0))->is_established()))) {
 			ss << " state: -disconnected- ";
 		} else {
 			ss << " state: -established- ";
@@ -502,31 +480,22 @@ public:
 private:
 
 	// owner of this crofchan instance
-	crofchan_env*						env;
-	// main and auxiliary connections
-	std::map<cauxid, crofconn*>			conns;
-	// connections set rwlock
-	mutable PthreadRwLock				conns_rwlock;
-	// supported OFP versions
-	rofl::openflow::cofhello_elem_versionbitmap
-										versionbitmap;
-	// OFP version negotiated
-	uint8_t								ofp_version;
-	// state related flags
-	std::bitset<32>						flags;
-	// event queue
-	std::deque<enum crofchan_event_t> 	events;
+	crofchan_env*                       env;
 
-	// established connection ids
-	std::list<rofl::cauxid>				conns_established;
-	// terminated connection ids
-	std::list<rofl::cauxid>				conns_terminated;
-	// refused connection ids
-	std::list<rofl::cauxid>				conns_refused;
-	// failed connection ids
-	std::list<rofl::cauxid>				conns_failed;
-	// reset backoff timer for connections
-	std::map<rofl::cauxid, bool>		conns_backoff_reset;
+	// main and auxiliary connections
+	std::map<cauxid, crofconn*>         conns;
+
+	// connections set rwlock
+	mutable crwlock                     conns_rwlock;
+
+	// last auxid assigned
+	uint8_t                             last_auxid;
+
+	// OFP version negotiated
+	uint8_t                             ofp_version;
+
+	// state related flags
+	std::bitset<32>                     flags;
 };
 
 }; /* namespace rofl */

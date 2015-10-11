@@ -1,10 +1,32 @@
 MAINTAINERCLEANFILES = Makefile.in
 
-SUBDIRS = openflow protocols utils 
+SUBDIRS = openflow 
 
 noinst_LTLIBRARIES = librofl_common_base.la
 
 librofl_common_base_la_SOURCES = \
+		exception.hpp \
+		logging.cc \
+		logging.h \
+		locking.hpp \
+		crofbase.cc \
+		crofbase.h \
+		crofdpt.cc \
+		crofdpt.h \
+		crofctl.cc \
+		crofctl.h \
+		crofchan.cc \
+		crofchan.h \
+		crofconn.cc \
+		crofconn.h \
+		crofsock.cc \
+		crofsock.h \
+		ctimespec.cpp \
+		ctimespec.hpp \
+		ctimer.cpp \
+		ctimer.hpp \
+		cthread.cpp \
+		cthread.hpp \
 		endian_conversion.h \
 		rofcommon.h \
 		croflexception.h \
@@ -15,59 +37,8 @@ librofl_common_base_la_SOURCES = \
 		cpacket.cc \
 		crandom.h \
 		crandom.cc \
-		cpipe.h \
-		cpipe.cc \
-		cclock.h \
-		cclock.cc \
-		ctimespec.h \
-		ctimespec.cc \
-		ctimer.h \
-		ctimers.h \
-		cevent.h \
-		cevents.h \
-		cevents.cc \
-		ciosrv.h \
-		ciosrv.cc \
 		cmemory.h \
 		cmemory.cc \
-		csocket.h \
-		csocket.cc \
-		csocket_plain.h \
-		csocket_plain.cc \
-		fframe.h \
-		fframe.cc \
-		ctransaction.h \
-		ctransaction.cc \
-		ctransactions.h \
-		ctransactions.cc \
-		crofcore.h \
-		crofcore.cc \
-		crofbase.h \
-		crofbase.cc \
-		crofctl.h \
-		crofctl.cc \
-		crofdpt.h \
-		crofdpt.cc \
-		crofsock.h \
-		crofsock.cc \
-		crofconn.h \
-		crofconn.cc \
-		crofchan.h \
-		crofchan.cc \
-		crofshim.h \
-		crofshim.cc \
-		logging.h \
-		logging.cc \
-		csegmentation.h \
-		csegmentation.cc \
-		csegmsg.h \
-		csegmsg.cc \
-		cparam.h \
-		cparam.cc \
-		cparams.h \
-		cparams.cc \
-		ctimerid.h \
-		ctimerid.cc \
 		cauxid.h \
 		cctlid.h \
 		cdptid.h \
@@ -79,53 +50,30 @@ librofl_common_base_la_SOURCES = \
 		caddrinfos.cc \
 		cindex.h \
 		cdpid.h \
-		crofqueue.h
-		
-if ROFL_HAVE_OPENSSL
-librofl_common_base_la_SOURCES += \
-		csocket_openssl.h \
-		csocket_openssl.cc
-endif
+		crofqueue.h \
+		csegment.hpp \
+		csegment.cpp
 
-librofl_common_base_la_LIBADD=openflow/libopenflow.la protocols/libprotocols.la utils/librofl_common_utils.la -lrt
+		
+
+librofl_common_base_la_LIBADD=openflow/libopenflow.la -lrt
 
 library_includedir=$(includedir)/rofl/common
 library_include_HEADERS= \
 		caddress.h \
 		cpacket.h \
 		crandom.h \
-		cpipe.h \
 		endian_conversion.h \
 		rofcommon.h \
-		crofcore.h \
 		crofbase.h \
-		crofctl.h \
 		crofdpt.h \
-		crofsock.h \
+		crofctl.h \
 		crofconn.h \
 		crofchan.h \
-		crofshim.h \
-		cclock.h \
 		croflexception.h \
-		ctimespec.h \
-		ctimer.h \
-		ctimers.h \
-		cevent.h \
-		cevents.h \
-		ciosrv.h \
 		cmemory.h \
-		csocket.h \
-		csocket_plain.h \
-		fframe.h \
 		thread_helper.h \
-		ctransaction.h \
-		ctransactions.h \
-		logging.h \
-		csegmentation.h \
-		csegmsg.h \
-		cparam.h \
-		cparams.h \
-		ctimerid.h \
+		csegment.hpp \
 		cauxid.h \
 		cctlid.h \
 		cdptid.h \
@@ -134,13 +82,7 @@ library_include_HEADERS= \
 		caddrinfos.h \
 		cindex.h \
 		cdpid.h \
-		crofqueue.h \
-		ctspaddress.h
-
-if ROFL_HAVE_OPENSSL
-library_include_HEADERS += \
-		csocket_openssl.h
-endif
+		crofqueue.h
 
 
 AM_CPPFLAGS=-fPIC

@@ -1,43 +1,31 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 #include "rofl/common/openflow/messages/cofmsg_table_features_stats.h"
 
 using namespace rofl::openflow;
 
+cofmsg_table_features_stats_request::~cofmsg_table_features_stats_request()
+{}
+
+
+
 cofmsg_table_features_stats_request::cofmsg_table_features_stats_request(
-		uint8_t of_version,
+		uint8_t version,
 		uint32_t xid,
 		uint16_t stats_flags,
-		rofl::openflow::coftables const& tables) :
-	cofmsg_stats_request(of_version, xid, 0, stats_flags),
-	tables(tables)
+		const rofl::openflow::coftables& tables) :
+				cofmsg_stats_request(version, xid, rofl::openflow::OFPMP_TABLE_FEATURES, stats_flags),
+				tables(tables)
 {
-	switch (of_version) {
-	case rofl::openflow::OFP_VERSION_UNKNOWN: {
-
-	} break;
-	case rofl::openflow13::OFP_VERSION: {
-		this->tables.set_version(of_version);
-		set_type(rofl::openflow13::OFPT_MULTIPART_REQUEST);
-		set_stats_type(rofl::openflow13::OFPMP_TABLE_FEATURES);
-	} break;
-	default:
-		throw eBadVersion();
-	}
+	this->tables.set_version(version);
 }
 
 
 
 cofmsg_table_features_stats_request::cofmsg_table_features_stats_request(
-		cmemory *memarea) :
-	cofmsg_stats_request(memarea),
-	tables(get_version())
-{
-
-}
-
-
-
-cofmsg_table_features_stats_request::cofmsg_table_features_stats_request(
-		cofmsg_table_features_stats_request const& msg)
+		const cofmsg_table_features_stats_request& msg)
 {
 	*this = msg;
 }
@@ -46,47 +34,13 @@ cofmsg_table_features_stats_request::cofmsg_table_features_stats_request(
 
 cofmsg_table_features_stats_request&
 cofmsg_table_features_stats_request::operator= (
-		cofmsg_table_features_stats_request const& msg)
+		const cofmsg_table_features_stats_request& msg)
 {
 	if (this == &msg)
 		return *this;
-
-	cofmsg_stats::operator =(msg);
+	cofmsg_stats_request::operator= (msg);
 	tables = msg.tables;
-
 	return *this;
-}
-
-
-
-cofmsg_table_features_stats_request::~cofmsg_table_features_stats_request()
-{
-
-}
-
-
-
-void
-cofmsg_table_features_stats_request::reset()
-{
-	cofmsg_stats::reset();
-	tables.clear();
-}
-
-
-
-uint8_t*
-cofmsg_table_features_stats_request::resize(size_t len)
-{
-	cofmsg_stats::resize(len);
-	switch (get_version()) {
-	case openflow13::OFP_VERSION: {
-		ofh_ofhu.ofhu_generic = soframe() + sizeof(struct rofl::openflow13::ofp_table_features);
-	} break;
-	default:
-		throw eBadVersion();
-	}
-	return soframe();
 }
 
 
@@ -106,54 +60,58 @@ cofmsg_table_features_stats_request::length() const
 
 
 void
-cofmsg_table_features_stats_request::pack(uint8_t *buf, size_t buflen)
+cofmsg_table_features_stats_request::pack(
+		uint8_t *buf, size_t buflen)
 {
-	cofmsg_stats::pack(buf, buflen); // copies common statistics header
+	cofmsg_stats_request::pack(buf, buflen); // copies common statistics header
 
 	if ((0 == buf) || (0 == buflen))
 		return;
 
-	if (buflen < length()) {
-		throw eInval();
-	}
+	if (buflen < cofmsg_table_features_stats_request::length())
+		throw eMsgInval("cofmsg_table_features_stats_request::pack() buf too short");
 
 	switch (get_version()) {
-	case rofl::openflow13::OFP_VERSION: {
-		memcpy(buf, soframe(), sizeof(struct rofl::openflow13::ofp_multipart_request));
-		buf += sizeof(struct rofl::openflow13::ofp_multipart_request);
-		buflen -= sizeof(struct rofl::openflow13::ofp_multipart_request);
-		tables.pack(buf, buflen);
-	} break;
-	default:
-		throw eBadVersion();
+	default: {
+		struct rofl::openflow13::ofp_multipart_request* hdr =
+				(struct rofl::openflow13::ofp_multipart_request*)buf;
+		tables.pack(hdr->body, tables.length());
+	};
 	}
 }
 
 
 
 void
-cofmsg_table_features_stats_request::unpack(uint8_t *buf, size_t buflen)
+cofmsg_table_features_stats_request::unpack(
+		uint8_t *buf, size_t buflen)
 {
-	cofmsg_stats::unpack(buf, buflen);
+	cofmsg_stats_request::unpack(buf, buflen);
 
-	validate();
-}
+	tables.clear();
+	tables.set_version(get_version());
 
+	if ((0 == buf) || (0 == buflen))
+		return;
 
+	if (buflen < cofmsg_table_features_stats_request::length())
+		throw eBadRequestBadLen("cofmsg_table_features_stats_request::unpack() buf too short");
 
-void
-cofmsg_table_features_stats_request::validate()
-{
 	switch (get_version()) {
-	case rofl::openflow13::OFP_VERSION: {
-		if (cofmsg::get_length() < sizeof(struct rofl::openflow13::ofp_multipart_request)) {
-			return;
+	default: {
+		if (get_stats_type() != rofl::openflow13::OFPMP_TABLE_FEATURES)
+			throw eMsgInval("cofmsg_table_features_stats_request::unpack() invalid statistics type");
+
+		struct rofl::openflow13::ofp_multipart_request* hdr =
+				(struct rofl::openflow13::ofp_multipart_request*)buf;
+		if (buflen > sizeof(struct rofl::openflow13::ofp_multipart_request)) {
+			tables.unpack(hdr->body, buflen - sizeof(struct rofl::openflow13::ofp_multipart_request));
 		}
-		tables.unpack(body.somem(), body.memlen());
-	} break;
-	default:
-		throw eBadRequestBadVersion();
+	};
 	}
+
+	if (get_length() < cofmsg_table_features_stats_request::length())
+		throw eBadRequestBadLen("cofmsg_table_features_stats_request::unpack() buf too short");
 }
 
 
@@ -163,45 +121,31 @@ cofmsg_table_features_stats_request::validate()
 
 
 
+
+
+
+
+
+cofmsg_table_features_stats_reply::~cofmsg_table_features_stats_reply()
+{}
 
 
 
 cofmsg_table_features_stats_reply::cofmsg_table_features_stats_reply(
-		uint8_t of_version,
+		uint8_t version,
 		uint32_t xid,
 		uint16_t stats_flags,
-		rofl::openflow::coftables const tables) :
-	cofmsg_stats_reply(of_version, xid, 0, stats_flags),
-	tables(tables)
+		const rofl::openflow::coftables& tables) :
+				cofmsg_stats_reply(version, xid, rofl::openflow::OFPMP_TABLE_FEATURES, stats_flags),
+				tables(tables)
 {
-	switch (of_version) {
-	case rofl::openflow::OFP_VERSION_UNKNOWN: {
-
-	} break;
-	case rofl::openflow13::OFP_VERSION: {
-		this->tables.set_version(of_version);
-		set_type(rofl::openflow13::OFPT_MULTIPART_REPLY);
-		set_stats_type(rofl::openflow13::OFPMP_TABLE_FEATURES);
-	} break;
-	default:
-		throw eBadVersion();
-	}
+	this->tables.set_version(version);
 }
 
 
 
 cofmsg_table_features_stats_reply::cofmsg_table_features_stats_reply(
-		cmemory *memarea) :
-	cofmsg_stats_reply(memarea),
-	tables(get_version())
-{
-
-}
-
-
-
-cofmsg_table_features_stats_reply::cofmsg_table_features_stats_reply(
-		cofmsg_table_features_stats_reply const& msg)
+		const cofmsg_table_features_stats_reply& msg)
 {
 	*this = msg;
 }
@@ -210,47 +154,13 @@ cofmsg_table_features_stats_reply::cofmsg_table_features_stats_reply(
 
 cofmsg_table_features_stats_reply&
 cofmsg_table_features_stats_reply::operator= (
-		cofmsg_table_features_stats_reply const& msg)
+		const cofmsg_table_features_stats_reply& msg)
 {
 	if (this == &msg)
 		return *this;
-
-	cofmsg_stats::operator =(msg);
+	cofmsg_stats_reply::operator= (msg);
 	tables = msg.tables;
-
 	return *this;
-}
-
-
-
-cofmsg_table_features_stats_reply::~cofmsg_table_features_stats_reply()
-{
-
-}
-
-
-
-void
-cofmsg_table_features_stats_reply::reset()
-{
-	cofmsg_stats::reset();
-	tables.clear();
-}
-
-
-
-uint8_t*
-cofmsg_table_features_stats_reply::resize(size_t len)
-{
-	cofmsg_stats::resize(len);
-	switch (get_version()) {
-	case openflow13::OFP_VERSION: {
-		ofh_ofhu.ofhu_generic = soframe() + sizeof(struct rofl::openflow13::ofp_table_features);
-	} break;
-	default:
-		throw eBadVersion();
-	}
-	return soframe();
 }
 
 
@@ -259,7 +169,7 @@ size_t
 cofmsg_table_features_stats_reply::length() const
 {
 	switch (get_version()) {
-	case openflow13::OFP_VERSION: {
+	case rofl::openflow13::OFP_VERSION: {
 		return (sizeof(struct rofl::openflow13::ofp_multipart_request) + tables.length());
 	} break;
 	default:
@@ -270,59 +180,60 @@ cofmsg_table_features_stats_reply::length() const
 
 
 void
-cofmsg_table_features_stats_reply::pack(uint8_t *buf, size_t buflen)
+cofmsg_table_features_stats_reply::pack(
+		uint8_t *buf, size_t buflen)
 {
-	cofmsg_stats::pack(buf, buflen); // copies common statistics header
+	cofmsg_stats_reply::pack(buf, buflen); // copies common statistics header
 
 	if ((0 == buf) || (0 == buflen))
 		return;
 
-	if (buflen < length()) {
-		throw eInval();
-	}
-
-	set_length(length());
+	if (buflen < cofmsg_table_features_stats_reply::length())
+		throw eMsgInval("cofmsg_table_features_stats_reply::pack() buf too short");
 
 	switch (get_version()) {
-	case rofl::openflow13::OFP_VERSION: {
-		memcpy(buf, soframe(), sizeof(struct rofl::openflow13::ofp_multipart_request));
-		buf += sizeof(struct rofl::openflow13::ofp_multipart_request);
-		buflen -= sizeof(struct rofl::openflow13::ofp_multipart_request);
-		tables.pack(buf, buflen);
-	} break;
-	default:
-		throw eBadVersion();
+	default: {
+		struct rofl::openflow13::ofp_multipart_reply* hdr =
+				(struct rofl::openflow13::ofp_multipart_reply*)buf;
+		tables.pack(hdr->body, tables.length());
+	};
 	}
 }
 
 
 
 void
-cofmsg_table_features_stats_reply::unpack(uint8_t *buf, size_t buflen)
+cofmsg_table_features_stats_reply::unpack(
+		uint8_t *buf, size_t buflen)
 {
-	cofmsg_stats::unpack(buf, buflen);
+	cofmsg_stats_reply::unpack(buf, buflen);
 
-	validate();
-}
-
-
-
-void
-cofmsg_table_features_stats_reply::validate()
-{
 	tables.clear();
 	tables.set_version(get_version());
 
+	if ((0 == buf) || (0 == buflen))
+		return;
+
+	if (buflen < cofmsg_table_features_stats_reply::length())
+		throw eBadRequestBadLen("cofmsg_table_features_stats_reply::unpack() buf too short");
+
 	switch (get_version()) {
-	case rofl::openflow13::OFP_VERSION: {
-		if (cofmsg::get_length() < sizeof(struct rofl::openflow13::ofp_multipart_reply)) {
-			return;
+	default: {
+		if (get_stats_type() != rofl::openflow13::OFPMP_TABLE_FEATURES)
+			throw eMsgInval("cofmsg_table_features_stats_reply::unpack() invalid statistics type");
+
+		struct rofl::openflow13::ofp_multipart_reply* hdr =
+				(struct rofl::openflow13::ofp_multipart_reply*)buf;
+		if (buflen > sizeof(struct rofl::openflow13::ofp_multipart_reply)) {
+			tables.unpack(hdr->body, buflen - sizeof(struct rofl::openflow13::ofp_multipart_reply));
 		}
-		tables.unpack(body.somem(), body.memlen());
-	} break;
-	default:
-		throw eBadRequestBadVersion();
+	};
 	}
+
+	if (get_length() < cofmsg_table_features_stats_reply::length())
+		throw eBadRequestBadLen("cofmsg_table_features_stats_reply::unpack() buf too short");
 }
+
+
 
 

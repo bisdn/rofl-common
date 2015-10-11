@@ -5,194 +5,222 @@
 /*
  * crofbase.h
  *
- *  Created on: 25.10.2012
+ *  Created on: 11.04.2015
+ *  Revised on: 04.10.2015
  *      Author: andreas
  */
 
 #ifndef CROFBASE_H
 #define CROFBASE_H 1
 
-#include <map>
-#include <set>
-#include <list>
 #include <vector>
-#include <bitset>
-#include <algorithm>
-#include <endian.h>
-#include <string.h>
-#include <time.h>
-#ifndef htobe16
-	#include "endian_conversion.h"
-#endif
 
-#include "rofl/common/openflow/cofhelloelemversionbitmap.h"
+#include "rofl/common/locking.hpp"
 #include "rofl/common/croflexception.h"
-#include "rofl/common/cauxid.h"
+#include "rofl/common/logging.h"
 #include "rofl/common/crofdpt.h"
 #include "rofl/common/crofctl.h"
+#include "rofl/common/openflow/openflow.h"
+#include "rofl/common/openflow/cofhelloelemversionbitmap.h"
+#include "rofl/common/crandom.h"
+#include "rofl/common/cthread.hpp"
 
 namespace rofl {
 
-
 /* error classes */
-class eRofBase                      : public RoflException {
+class eRofBaseBase : public RoflException {
 public:
-	eRofBase(const std::string& __arg) : RoflException(__arg) {};
+	eRofBaseBase(
+			const std::string& __arg) :
+				RoflException(__arg)
+	{};
 };
-class eRofBaseNotFound              : public eRofBase {
+class eRofBaseNotFound : public eRofBaseBase {
 public:
-	eRofBaseNotFound(const std::string& __arg) : eRofBase(__arg) {};
+	eRofBaseNotFound(
+			const std::string& __arg) :
+				eRofBaseBase(__arg)
+	{};
 };
-class eRofBaseNotConnected          : public eRofBase {
+class eRofBaseNotConnected : public eRofBaseBase {
 public:
-	eRofBaseNotConnected(const std::string& __arg) : eRofBase(__arg) {};
-};
-class eRofBaseCongested             : public eRofBase {
-public:
-	eRofBaseCongested(const std::string& __arg) : eRofBase(__arg) {};
+	eRofBaseNotConnected(
+			const std::string& __arg) :
+				eRofBaseBase(__arg)
+	{};
 };
 
-#if 0
-class eRofBaseTableNotFound         : public eRofBase {}; // flow-table not found (e.g. unknown table_id in flow_mod)
-class eRofBaseGotoTableNotFound     : public eRofBase {}; // table-id specified in OFPIT_GOTO_TABLE invalid
-#endif
 
+class crofbase :
+		public virtual rofl::cthread_env,
+		public rofl::crofconn_env,
+		public rofl::crofctl_env,
+		public rofl::crofdpt_env
+{
+	// map of active crofbase instances
+	static std::set<crofbase*>      rofbases;
 
-/**
- * @ingroup common_devel_workflow
- * @brief 	Base class for revised OpenFlow library
- *
- * Derive from this class in order to use ROFL's functionality.
- * crofbase supports communication to peer entities acting in either
- * controller or datapath role using the OpenFlow protocol in various
- * versions. Each peer entity is represented by an instance of class
- * crofdpt (handle for a remote datapath) or an instance of class
- * crofctl (handle for a remote controller). These classes provide
- * a rich API for managing the OpenFlow control channel, e.g.,
- * establishing of main and auxiliary control connections. Furthermore,
- * they include a protocol parser mapping OpenFlow messages from their
- * wire (TCP) representation into a correspondent C++ representation.
- * crofbase provides three groups of functionality:
- *
- * 1. Management of an arbitrary number of listening sockets for accepting
- * incoming OpenFlow connections either in controller or datapath role.
- * 2. Management of an arbitrary number of peer controller entities
- * each encapsulated in a separate instance of class crofctl.
- * 3. Management of an arbitrary number of peer datapath entities
- * each encapsulated in a separate instance of class crofdpt.
- *
- * Furthermore, crofbase manages all active transactions when acting in
- * controller role. crofctl and crofdpt instances support an arbitrary
- * number of auxiliary connections as defined by OpenFlow 1.3. See
- * class descriptions for crofctl and crofdpt for details.
- *
- * crofbase acts as environment surrounding instances of crofctl and
- * crofdpt and receives information notifications and messages
- * generated during operation. A deriving class may overwrite any of
- * the handler methods defined within crofbase to receive a specific
- * event. Overwriting handler methods is optional and crofbase defines
- * a reasonable default handler for each event.
- *
- * @see crofctl
- * @see crofdpt
- */
-class crofbase {
+	// rwlock for rofbases
+	static crwlock                  rofbases_rwlock;
+
 public:
-
-	/**
-	 * @brief	crofbase constructor
-	 *
-	 * Constructor takes a single argument defining the OpenFlow versions
-	 * allowed for passively created OpenFlow sockets. You may specify
-	 * multiple OpenFlow versions as needed.
-	 *
-	 * @param versionbitmap OpenFlow version bitmap for incoming connections
-	 */
-	crofbase(const rofl::openflow::cofhello_elem_versionbitmap& versionbitmap
-			= rofl::openflow::cofhello_elem_versionbitmap());
 
 	/**
 	 * @brief	crofbase destructor
-	 *
-	 * Destructor shuts down all active connections and listening sockets
-	 * and deallocates all instance of classes crofctl and crofdpt.
 	 */
 	virtual
 	~crofbase();
 
 	/**
-	 * @brief	Set number of running running threads for revised openflow library
+	 * @brief	crofbase constructor
 	 */
-	void
-	set_num_of_workers(
-			unsigned int n);
-
-private:
-
-	/**
-	 * @brief	Copy constructor => marked as private and thus blocked
-	 */
-	crofbase(
-			const crofbase& base)
-	{ *this = base; };
-
-	/**
-	 * @brief 	Assignment operator => maked as private and thus blocked
-	 */
-	crofbase&
-	operator= (
-			const crofbase& base) {
-		if (this == &base)
-			return *this;
-		return *this;
-	};
+	crofbase();
 
 public:
 
 	/**
-	 * @name	Auxiliary methods
+	 *
 	 */
+	crofbase&
+	use_tls(
+			bool enforce_tls)
+	{ this->enforce_tls = enforce_tls; return *this; };
+
+public:
 
 	/**
-	 * @brief	Returns reference to OpenFlow version bitmap used for incoming connections.
+	 *
 	 */
-	rofl::openflow::cofhello_elem_versionbitmap&
-	set_versionbitmap();
+	const std::string&
+	get_tls_capath() const
+	{ return capath; };
 
 	/**
-	 * @brief	Set OpenFlow version bitmap used for incoming connections
+	 *
 	 */
-	void
-	set_versionbitmap(
-			const rofl::openflow::cofhello_elem_versionbitmap& versionbitmap);
+	crofbase&
+	set_tls_capath(
+			const std::string& capath)
+	{ this->capath = capath; return *this; };
+
+public:
 
 	/**
-	 * @brief 	Returns const reference to OpenFlow version bitmap used for incoming connections.
+	 *
 	 */
-	const rofl::openflow::cofhello_elem_versionbitmap&
-	get_versionbitmap() const;
+	const std::string&
+	get_tls_cafile() const
+	{ return cafile; };
 
 	/**
-	 * @brief 	Returns highest OpenFlow version supported for incoming connections.
+	 *
 	 */
-	uint8_t
-	get_highest_supported_ofp_version() const;
+	crofbase&
+	set_tls_cafile(
+			const std::string& cafile)
+	{ this->cafile = cafile; return *this; };
+
+public:
 
 	/**
-	 * @brief 	Returns true, when the given OpenFlow version is supported by this crofbase instance.
+	 *
 	 */
-	bool
-	is_ofp_version_supported(
-			uint8_t ofp_version) const;
+	const std::string&
+	get_tls_certfile() const
+	{ return certfile; };
 
 	/**
-	 * @brief	Set log level of rofl-common
+	 *
 	 */
-	void
-	set_log_level(
-			unsigned int level);
+	crofbase&
+	set_tls_certfile(
+			const std::string& certfile)
+	{ this->certfile = certfile; return *this; };
 
-	/**@}*/
+public:
+
+	/**
+	 *
+	 */
+	const std::string&
+	get_tls_keyfile() const
+	{ return keyfile; };
+
+	/**
+	 *
+	 */
+	crofbase&
+	set_tls_keyfile(
+			const std::string& keyfile)
+	{ this->keyfile = keyfile; return *this; };
+
+public:
+
+	/**
+	 *
+	 */
+	const std::string&
+	get_tls_pswd() const
+	{ return password; };
+
+	/**
+	 *
+	 */
+	crofbase&
+	set_tls_pswd(
+			const std::string& password)
+	{ this->password = password; return *this; };
+
+public:
+
+	/**
+	 *
+	 */
+	const std::string&
+	get_tls_verify_mode() const
+	{ return verify_mode; };
+
+	/**
+	 *
+	 */
+	crofbase&
+	set_tls_verify_mode(
+			const std::string& verify_mode)
+	{ this->verify_mode = verify_mode; return *this; };
+
+public:
+
+	/**
+	 *
+	 */
+	const std::string&
+	get_tls_verify_depth() const
+	{ return verify_depth; };
+
+	/**
+	 *
+	 */
+	crofbase&
+	set_tls_verify_depth(
+			const std::string& verify_depth)
+	{ this->verify_depth = verify_depth; return *this; };
+
+public:
+
+	/**
+	 *
+	 */
+	const std::string&
+	get_tls_ciphers() const
+	{ return ciphers; };
+
+	/**
+	 *
+	 */
+	crofbase&
+	set_tls_ciphers(
+			const std::string& ciphers)
+	{ this->ciphers = ciphers; return *this; };
 
 public:
 
@@ -203,56 +231,54 @@ public:
 	/**@{*/
 
 	/**
-	 * @brief	Closes all listening csocket instances.
+	 * @brief	Closes all listening csocket instances waiting for datapath elements to connect
 	 */
 	void
-	close_dpt_listening();
+	close_dpt_socks() {
+		AcquireReadWriteLock rwlock(dpt_sockets_rwlock);
+		for (auto it : dpt_sockets) {
+			::close(it.second);
+			thread.drop_read_fd(it.second, false);
+		}
+		dpt_sockets.clear();
+	};
 
 	/**
 	 * @brief	Creates a new listening rofl::csocket instance for accepting incoming OpenFlow connections.
 	 *
-	 * @param sockid socket identifier
-	 * @param socket_type one of the constants defined in csocket.h, e.g. SOCKET_TYPE_PLAIN
-	 * @param params set of parameters used for creating a listening socket
+	 * @param baddr binding address
 	 */
-	rofl::csocket&
-	add_dpt_listening(
-			unsigned int sockid,
-			enum rofl::csocket::socket_type_t socket_type,
-			const rofl::cparams& params);
+	void
+	dpt_sock_listen(
+			const csockaddr& baddr) {
+		AcquireReadWriteLock rwlock(dpt_sockets_rwlock);
+		if (dpt_sockets.find(baddr) != dpt_sockets.end()) {
+			return;
+		}
 
-	/**
-	 * @brief	Returns a reference to the listening csocket object
-	 * specified by identifier sockid.
-	 *
-	 * @param sockid socket identifier
-	 * @param socket_type one of the constants defined in csocket.h, e.g. SOCKET_TYPE_PLAIN
-	 * @param params set of parameters used for creating a listening socket
-	 */
-	rofl::csocket&
-	set_dpt_listening(
-			unsigned int sockid,
-			enum rofl::csocket::socket_type_t socket_type,
-			const rofl::cparams& params);
+		dpt_sockets[baddr] = listen(baddr);
 
-	/**
-	 * @brief	Returns a const reference to the listening csocket object
-	 * specified by identifier sockid.
-	 *
-	 * @param sockid socket identifier
-	 */
-	const rofl::csocket&
-	get_dpt_listening(
-			unsigned int sockid) const;
+		/* instruct thread to read from socket descriptor */
+		thread.add_read_fd(dpt_sockets[baddr], false);
+	};
 
 	/**
 	 * @brief	Removes a listening socket identified by sockid.
 	 *
 	 * @param sockid socket identifier
 	 */
-	void
-	drop_dpt_listening(
-			unsigned int sockid);
+	bool
+	dpt_sock_close(
+			const csockaddr& baddr) {
+		AcquireReadWriteLock rwlock(dpt_sockets_rwlock);
+		if (dpt_sockets.find(baddr) == dpt_sockets.end()) {
+			return false;
+		}
+		::close(dpt_sockets[baddr]);
+		thread.drop_read_fd(dpt_sockets[baddr], false);
+		dpt_sockets.erase(baddr);
+		return true;
+	};
 
 	/**
 	 * @brief	Checks for existence of a listening socket identified by sockid.
@@ -260,8 +286,11 @@ public:
 	 * @param sockid socket identifier
 	 */
 	bool
-	has_dpt_listening(
-			unsigned int sockid);
+	has_dpt_sock(
+			const csockaddr& baddr) {
+		AcquireReadLock rlock(dpt_sockets_rwlock);
+		return (not (dpt_sockets.find(baddr) == dpt_sockets.end()));
+	};
 
 	/**@}*/
 
@@ -274,65 +303,66 @@ public:
 	/**@{*/
 
 	/**
-	 * @brief	Closes all listening csocket instances.
+	 * @brief	Closes all listening csocket instances waiting for controllers to connect
 	 */
 	void
-	close_ctl_listening();
+	close_ctl_socks() {
+		AcquireReadWriteLock rwlock(ctl_sockets_rwlock);
+		for (auto it : ctl_sockets) {
+			::close(it.second);
+			thread.drop_read_fd(it.second, false);
+		}
+		ctl_sockets.clear();
+	};
 
 	/**
 	 * @brief	Creates a new listening rofl::csocket instance for accepting incoming OpenFlow connections.
 	 *
-	 * @param sockid socket identifier
-	 * @param socket_type one of the constants defined in csocket.h, e.g. SOCKET_TYPE_PLAIN
-	 * @param params set of parameters used for creating a listening socket
-	 */
-	rofl::csocket&
-	add_ctl_listening(
-			unsigned int sockid,
-			enum rofl::csocket::socket_type_t socket_type,
-			const rofl::cparams& params);
-
-	/**
-	 * @brief	Returns a reference to the listening csocket object
-	 * specified by identifier sockid.
-	 *
-	 * @param sockid socket identifier
-	 * @param socket_type one of the constants defined in csocket.h, e.g. SOCKET_TYPE_PLAIN
-	 * @param params set of parameters used for creating a listening socket
-	 */
-	rofl::csocket&
-	set_ctl_listening(
-			unsigned int sockid,
-			enum rofl::csocket::socket_type_t socket_type,
-			const rofl::cparams& params);
-
-	/**
-	 * @brief	Returns a const reference to the listening csocket object
-	 * specified by identifier sockid.
-	 *
-	 * @param sockid socket identifier
-	 */
-	const rofl::csocket&
-	get_ctl_listening(
-			unsigned int sockid) const;
-
-	/**
-	 * @brief	Removes a listening socket identified by sockid.
-	 *
-	 * @param sockid socket identifier
+	 * @param baddr binding address
 	 */
 	void
-	drop_ctl_listening(
-			unsigned int sockid);
+	ctl_sock_listen(
+			const csockaddr& baddr) {
+		AcquireReadWriteLock rwlock(ctl_sockets_rwlock);
+		if (ctl_sockets.find(baddr) != ctl_sockets.end()) {
+			return;
+		}
+
+		ctl_sockets[baddr] = listen(baddr);
+
+		/* instruct thread to read from socket descriptor */
+		thread.add_read_fd(ctl_sockets[baddr], false);
+	};
 
 	/**
-	 * @brief	Checks for existence of a listening socket identified by sockid.
+	 * @brief	Removes a listening socket identified by baddr.
 	 *
 	 * @param sockid socket identifier
 	 */
 	bool
-	has_ctl_listening(
-			unsigned int sockid);
+	ctl_sock_close(
+			const csockaddr& baddr) {
+		AcquireReadWriteLock rwlock(ctl_sockets_rwlock);
+		if (ctl_sockets.find(baddr) == ctl_sockets.end()) {
+			return false;
+		}
+		::close(dpt_sockets[baddr]);
+		thread.drop_read_fd(ctl_sockets[baddr], false);
+		ctl_sockets.erase(baddr);
+		return true;
+	};
+
+	/**
+	 * @brief	Checks for existence of a listening socket identified by baddr.
+	 *
+	 * @param sockid socket identifier
+	 */
+	bool
+	has_ctl_sock(
+			const csockaddr& baddr) {
+		AcquireReadLock rlock(ctl_sockets_rwlock);
+		return (not (ctl_sockets.find(baddr) == ctl_sockets.end()));
+	};
 
 	/**@}*/
 
@@ -345,20 +375,46 @@ public:
 	/**@{*/
 
 	/**
-	 * @brief Returns the next idle identifier for a new rofl::crofdpt instance
-	 *
-	 * @see rofl::crofdpt
-	 * @see rofl::cdptid
-	 * @return Next idle identifier for a rofl::crofdpt instance
-	 */
-	rofl::cdptid
-	get_idle_dptid() const;
-
-	/**
 	 * @brief	Deletes all existing rofl::crofdpt instances
 	 */
 	void
-	drop_dpts();
+	drop_dpts() {
+		AcquireReadWriteLock rwlock(rofdpts_rwlock);
+		for (auto it : rofdpts) {
+			delete it.second;
+		}
+		rofdpts.clear();
+	};
+
+	/**
+	 * @brief	Creates new rofl::crofdpt instance for given identifier
+	 *
+	 * Creates a new rofl::crofdpt instance identified by the identifier
+	 * specified in rofl::cdptid parameter. If an instance with this identifier
+	 * already exists, it is destroyed first (this includes termination of all
+	 * OpenFlow connections established in its associated OpenFlow control channel)
+	 * before a new, empty instance is created. You must add OpenFlow
+	 * connections to actually bind the rofl::crofdpt instance to a datapath
+	 * peer entity.
+	 *
+	 * @param dptid internal datapath handle (not DPID)
+	 * @param versionbitmap version bitmap defining all acceptable OpenFlow versions
+	 * @param remove_on_channel_close when true, automatically remove this
+	 * rofl::crofdpt instance, when all OpenFlow control channel connections
+	 * have been terminated
+	 * @param dpid OpenFlow datapath identifier (optional)
+	 * @result reference to new rofl::crofdpt instance
+	 */
+	rofl::crofdpt&
+	add_dpt() {
+		AcquireReadWriteLock rwlock(rofdpts_rwlock);
+		uint64_t id = 0;
+		while (rofdpts.find(cdptid(id)) != rofdpts.end()) {
+			id++;
+		}
+		rofdpts[cdptid(id)] = new crofdpt(this, cdptid(id));
+		return *(rofdpts[cdptid(id)]);
+	};
 
 	/**
 	 * @brief	Creates new rofl::crofdpt instance for given identifier
@@ -381,10 +437,15 @@ public:
 	 */
 	rofl::crofdpt&
 	add_dpt(
-		const rofl::cdptid& dptid,
-		const rofl::openflow::cofhello_elem_versionbitmap& versionbitmap,
-		bool remove_on_channel_close = false,
-		const rofl::cdpid& dpid = rofl::cdpid(0));
+		const rofl::cdptid& dptid) {
+		AcquireReadWriteLock rwlock(rofdpts_rwlock);
+		if (rofdpts.find(dptid) != rofdpts.end()) {
+			delete rofdpts[dptid];
+			rofdpts.erase(dptid);
+		}
+		rofdpts[dptid] = new crofdpt(this, dptid);
+		return *(rofdpts[dptid]);
+	};
 
 	/**
 	 * @brief	Returns existing or creates new rofl::crofdpt instance for given identifier
@@ -404,24 +465,46 @@ public:
 	 */
 	rofl::crofdpt&
 	set_dpt(
-		const rofl::cdptid& dptid,
-		const rofl::openflow::cofhello_elem_versionbitmap& versionbitmap,
-		bool remove_on_channel_close = false,
-		const rofl::cdpid& dpid = rofl::cdpid(0));
+		const rofl::cdptid& dptid) {
+		AcquireReadWriteLock rwlock(rofdpts_rwlock);
+		if (rofdpts.find(dptid) == rofdpts.end()) {
+			rofdpts[dptid] = new crofdpt(this, dptid);
+		}
+		return *(rofdpts[dptid]);
+	};
 
 	/**
-	 * @brief	Returns reference to existing rofl::crofdpt instance.
+	 * @brief	Returns existing or creates new rofl::crofdpt instance for given identifier
 	 *
-	 * Returns existing rofl::crofdpt instance specified by identifier dptid.
-	 * If the identifier does not exist, throws an exception eRofBaseNotFound.
+	 * Returns rofl::crofdpt instance specified by identifier dptid. If none exists,
+	 * a new empty instance is created. You must add OpenFlow
+	 * connections to actually bind the rofl::crofdpt instance to a datapath
+	 * peer entity.
 	 *
 	 * @param dptid internal datapath handle (not DPID)
-	 * @result reference to existing rofl::crofdpt instance
-	 * @throws eRofBaseNotFound
+	 * @param versionbitmap version bitmap defining all acceptable OpenFlow versions
+	 * @param remove_on_channel_close when true, automatically remove this
+	 * rofl::crofdpt instance, when all OpenFlow control channel connections
+	 * have been terminated
+	 * @param dpid OpenFlow datapath identifier (optional)
+	 * @result reference to existing or new rofl::crofdpt instance
 	 */
 	rofl::crofdpt&
 	set_dpt(
-			const rofl::cdptid& dptid);
+		const rofl::cdpid& dpid) {
+		AcquireReadWriteLock rwlock(rofdpts_rwlock);
+		std::map<cdptid, crofdpt*>::iterator it;
+		if ((it = find_if(rofdpts.begin(), rofdpts.end(),
+				crofdpt::crofdpt_find_by_dpid(dpid))) != rofdpts.end()) {
+			return *(it->second);
+		}
+		uint64_t id = 0;
+		while (rofdpts.find(cdptid(id)) != rofdpts.end()) {
+			id++;
+		}
+		rofdpts[cdptid(id)] = new crofdpt(this, cdptid(id));
+		return *(rofdpts[cdptid(id)]);
+	};
 
 	/**
 	 * @brief	Returns const reference to existing rofl::crofdpt instance.
@@ -435,7 +518,13 @@ public:
 	 */
 	const rofl::crofdpt&
 	get_dpt(
-			const rofl::cdptid& dptid) const;
+			const rofl::cdptid& dptid) const {
+		AcquireReadLock rlock(rofdpts_rwlock);
+		if (rofdpts.find(dptid) == rofdpts.end()) {
+			throw eRofBaseNotFound("rofl::crofbase::get_dpt() dptid not found");
+		}
+		return *(rofdpts.at(dptid));
+	};
 
 	/**
 	 * @brief	Deletes a rofl::crofdpt instance given by identifier.
@@ -444,7 +533,9 @@ public:
 	 */
 	void
 	drop_dpt(
-		rofl::cdptid dptid);
+		rofl::cdptid dptid) { // make a copy here, do not use a const reference
+		rofdpt_schedule_for_delete(dptid);
+	};
 
 	/**
 	 * @brief	Checks for existence of rofl::crofdpt instance with given identifier
@@ -454,7 +545,28 @@ public:
 	 */
 	bool
 	has_dpt(
-		const rofl::cdptid& dptid) const;
+		const rofl::cdptid& dptid) const {
+		AcquireReadLock rlock(rofdpts_rwlock);
+		return (not (rofdpts.find(dptid) == rofdpts.end()));
+	};
+
+	/**
+	 * @brief	Checks for existence of rofl::crofdpt instance with given identifier
+	 *
+	 * @param dptid internal datapath handle (not DPID)
+	 * @result bool value
+	 */
+	bool
+	has_dpt(
+		const rofl::cdpid& dpid) const {
+		AcquireReadLock rlock(rofdpts_rwlock);
+		std::map<rofl::cdptid, crofdpt*>::const_iterator it;
+		if ((it = find_if(rofdpts.begin(), rofdpts.end(),
+				crofdpt::crofdpt_find_by_dpid(dpid))) == rofdpts.end()) {
+			return false;
+		}
+		return true;
+	};
 
 	/**@}*/
 
@@ -467,20 +579,45 @@ public:
 	/**@{*/
 
 	/**
-	 * @brief Returns the next idle identifier for a new rofl::crofctl instance
-	 *
-	 * @see rofl::crofctl
-	 * @see rofl::cctlid
-	 * @return Next idle identifier for a rofl::crofctl instance
-	 */
-	rofl::cctlid
-	get_idle_ctlid() const;
-
-	/**
 	 * @brief	Deletes all existing rofl::crofctl instances
 	 */
 	void
-	drop_ctls();
+	drop_ctls() {
+		AcquireReadWriteLock rwlock(rofctls_rwlock);
+		for (auto it : rofctls) {
+			delete it.second;
+		}
+		rofctls.clear();
+	};
+
+	/**
+	 * @brief	Creates new rofl::crofctl instance for given identifier
+	 *
+	 * Creates a new rofl::crofctl instance identified by the identifier
+	 * specified in rofl::cctlid parameter. If an instance with this identifier
+	 * already exists, it is destroyed first (this includes termination of all
+	 * OpenFlow connections established in its associated OpenFlow control channel)
+	 * before a new, empty instance is created. You must add OpenFlow
+	 * connections to actually bind the rofl::crofctl instance to a controller
+	 * peer entity.
+	 *
+	 * @param ctlid internal controller handle
+	 * @param versionbitmap version bitmap defining all acceptable OpenFlow versions
+	 * @param remove_on_channel_close when true, automatically remove this
+	 * rofl::crofctl instance, when all OpenFlow control channel connections
+	 * have been terminated
+	 * @result reference to new rofl::crofctl instance
+	 */
+	rofl::crofctl&
+	add_ctl() {
+		AcquireReadWriteLock rwlock(rofctls_rwlock);
+		uint64_t id = 0;
+		while (rofctls.find(cctlid(id)) != rofctls.end()) {
+			id++;
+		}
+		rofctls[cctlid(id)] = new crofctl(this, cctlid(id));
+		return *(rofctls[cctlid(id)]);
+	};
 
 	/**
 	 * @brief	Creates new rofl::crofctl instance for given identifier
@@ -502,9 +639,15 @@ public:
 	 */
 	rofl::crofctl&
 	add_ctl(
-		const rofl::cctlid& ctlid,
-		const rofl::openflow::cofhello_elem_versionbitmap& versionbitmap,
-		bool remove_on_channel_close = false);
+		const rofl::cctlid& ctlid) {
+		AcquireReadWriteLock rwlock(rofctls_rwlock);;
+		if (rofctls.find(ctlid) != rofctls.end()) {
+			delete rofctls[ctlid];
+			rofctls.erase(ctlid);
+		}
+		rofctls[ctlid] = new crofctl(this, ctlid);
+		return *(rofctls[ctlid]);
+	};
 
 	/**
 	 * @brief	Returns existing or creates new rofl::crofctl instance for given identifier
@@ -523,23 +666,13 @@ public:
 	 */
 	rofl::crofctl&
 	set_ctl(
-		const rofl::cctlid& ctlid,
-		const rofl::openflow::cofhello_elem_versionbitmap& versionbitmap,
-		bool remove_on_channel_close = false);
-
-	/**
-	 * @brief	Returns reference to existing rofl::crofctl instance.
-	 *
-	 * Returns existing rofl::crofctl instance specified by identifier ctlid.
-	 * If the identifier does not exist, throws an exception eRofBaseNotFound.
-	 *
-	 * @param ctlid internal controller handle
-	 * @result reference to existing rofl::crofctl instance
-	 * @throws eRofBaseNotFound
-	 */
-	rofl::crofctl&
-	set_ctl(
-			const rofl::cctlid& ctlid);
+		const rofl::cctlid& ctlid) {
+		AcquireReadWriteLock rwlock(rofctls_rwlock);
+		if (rofctls.find(ctlid) == rofctls.end()) {
+			rofctls[ctlid] = new crofctl(this, ctlid);
+		}
+		return *(rofctls[ctlid]);
+	};
 
 	/**
 	 * @brief	Returns const reference to existing rofl::crofctl instance.
@@ -553,7 +686,13 @@ public:
 	 */
 	const rofl::crofctl&
 	get_ctl(
-			const rofl::cctlid& ctlid) const;
+			const rofl::cctlid& ctlid) const {
+		AcquireReadLock rlock(rofctls_rwlock);
+		if (rofctls.find(ctlid) == rofctls.end()) {
+			throw eRofBaseNotFound("rofl::crofbase::get_ctl() ctlid not found");
+		}
+		return *(rofctls.at(ctlid));
+	};
 
 	/**
 	 * @brief	Deletes a rofl::crofctl instance given by identifier.
@@ -562,7 +701,9 @@ public:
 	 */
 	void
 	drop_ctl(
-		rofl::cctlid ctlid);
+		rofl::cctlid ctlid) { // make a copy here, do not use a const reference
+		rofctl_schedule_for_delete(ctlid);
+	};
 
 	/**
 	 * @brief	Checks for existence of rofl::crofctl instance with given identifier
@@ -572,7 +713,10 @@ public:
 	 */
 	bool
 	has_ctl(
-		const rofl::cctlid& ctlid) const;
+		const rofl::cctlid& ctlid) const {
+		AcquireReadLock rlock(rofctls_rwlock);
+		return (not (rofctls.find(ctlid) == rofctls.end()));
+	};
 
 	/**@}*/
 
@@ -670,6 +814,59 @@ public:
 public:
 
 	/**
+	 * @name	Auxiliary methods
+	 */
+
+	/**
+	 * @brief	Returns reference to OpenFlow version bitmap used for incoming connections.
+	 */
+	rofl::crofbase&
+	set_versionbitmap(
+			const rofl::openflow::cofhello_elem_versionbitmap& versionbitmap)
+	{ this->versionbitmap = versionbitmap; return *this; };
+
+	/**
+	 * @brief	Returns reference to OpenFlow version bitmap used for incoming connections.
+	 */
+	rofl::openflow::cofhello_elem_versionbitmap&
+	set_versionbitmap()
+	{ return versionbitmap; };
+
+	/**
+	 * @brief 	Returns const reference to OpenFlow version bitmap used for incoming connections.
+	 */
+	const rofl::openflow::cofhello_elem_versionbitmap&
+	get_versionbitmap() const
+	{ return versionbitmap; };
+
+	/**
+	 * @brief 	Returns highest OpenFlow version supported for incoming connections.
+	 */
+	uint8_t
+	get_highest_supported_ofp_version() const
+	{ return versionbitmap.get_highest_ofp_version(); };
+
+	/**
+	 * @brief 	Returns true, when the given OpenFlow version is supported by this crofbase instance.
+	 */
+	bool
+	is_ofp_version_supported(
+			uint8_t ofp_version) const
+	{ return versionbitmap.has_ofp_version(ofp_version); };
+
+	/**@}*/
+
+private:
+
+	virtual void
+	role_request_rcvd(
+			rofl::crofctl& ctl,
+			uint32_t role,
+			uint64_t rcvd_generation_id);
+
+public:
+
+	/**
 	 * @name 	Event handlers for management notifications for datapath elements
 	 *
 	 * Overwrite any of these methods for receiving datapath related event notifications.
@@ -687,11 +884,8 @@ public:
 	 */
 	virtual void
 	handle_dpt_open(
-			rofl::crofdpt& dpt) {
-		LOGGING_INFO << "[rofl-common][crofbase] "
-				<< "dptid: " << dpt.get_dptid().str() << " "
-				<< "control channel established " << std::endl;
-	};
+			rofl::crofdpt& dpt)
+	{};
 
 	/**
 	 * @brief	Called after termination of associated OpenFlow control channel.
@@ -706,11 +900,8 @@ public:
 	 */
 	virtual void
 	handle_dpt_close(
-			const rofl::cdptid& dptid) {
-		LOGGING_INFO << "[rofl-common][crofbase] "
-				<< "dptid: " << dptid.str() << " "
-				<< "control channel terminated " << std::endl;
-	};
+			const rofl::cdptid& dptid)
+	{};
 
 	/**
 	 * @brief 	Called when a control connection (main or auxiliary) has been established.
@@ -721,12 +912,8 @@ public:
 	virtual void
 	handle_conn_established(
 			rofl::crofdpt& dpt,
-			const rofl::cauxid& auxid) {
-		LOGGING_INFO << "[rofl-common][crofbase] "
-				<< "dptid: " << dpt.get_dptid().str() << " "
-				<< "control connection established, "
-				<< "auxid: " << auxid.str() << std::endl;
-	};
+			const rofl::cauxid& auxid)
+	{};
 
 	/**
 	 * @brief 	Called when a control connection (main or auxiliary) has been terminated by the peer entity.
@@ -737,12 +924,8 @@ public:
 	virtual void
 	handle_conn_terminated(
 			rofl::crofdpt& dpt,
-			const rofl::cauxid& auxid) {
-		LOGGING_INFO << "[rofl-common][crofbase] "
-				<< "dptid: " << dpt.get_dptid().str() << " "
-				<< "control connection terminated, "
-				<< "auxid: " << auxid.str() << std::endl;
-	};
+			const rofl::cauxid& auxid)
+	{};
 
 	/**
 	 * @brief 	Called when an attempt to establish a control connection has been refused.
@@ -757,10 +940,8 @@ public:
 	virtual void
 	handle_conn_refused(
 			rofl::crofdpt& dpt,
-			const rofl::cauxid& auxid) {
-		LOGGING_INFO << "[rofl-common][crofbase] connection refused, "
-				<< "dptid: " << dpt.get_dptid().str()  << " auxid: " << auxid.str() << std::endl;
-	};
+			const rofl::cauxid& auxid)
+	{};
 
 	/**
 	 * @brief 	Called when an attempt to establish a control connection has been failed.
@@ -775,10 +956,8 @@ public:
 	virtual void
 	handle_conn_failed(
 			rofl::crofdpt& dpt,
-			const rofl::cauxid& auxid) {
-		LOGGING_INFO << "[rofl-common][crofbase] connection failed, "
-				<< "dptid: " << dpt.get_dptid().str()  << " auxid: " << auxid.str() << std::endl;
-	};
+			const rofl::cauxid& auxid)
+	{};
 
 	/**
 	 * @brief	Called when a congestion situation on the control connection has been solved.
@@ -799,10 +978,8 @@ public:
 	virtual void
 	handle_conn_writable(
 			rofl::crofdpt& dpt,
-			const rofl::cauxid& auxid) {
-		LOGGING_INFO << "[rofl-common][crofbase] connection is writable, "
-				<< "dptid: " << dpt.get_dptid().str()  << " auxid: " << auxid.str() << std::endl;
-	};
+			const rofl::cauxid& auxid)
+	{};
 
 	/**@}*/
 
@@ -826,11 +1003,8 @@ public:
 	 */
 	virtual void
 	handle_ctl_open(
-			rofl::crofctl& ctl) {
-		LOGGING_INFO << "[rofl-common][crofbase] "
-				<< "ctlid: " << ctl.get_ctlid().str() << " "
-				<< "control channel established " << std::endl;
-	};
+			rofl::crofctl& ctl)
+	{};
 
 	/**
 	 * @brief	Called after termination of associated OpenFlow control channel.
@@ -845,11 +1019,8 @@ public:
 	 */
 	virtual void
 	handle_ctl_close(
-			const rofl::cctlid& ctlid) {
-		LOGGING_INFO << "[rofl-common][crofbase] "
-				<< "ctlid: " << ctlid.str() << " "
-				<< "control channel terminated " << std::endl;
-	};
+			const rofl::cctlid& ctlid)
+	{};
 
 	/**
 	 * @brief 	Called when a control connection (main or auxiliary) has been established.
@@ -860,12 +1031,8 @@ public:
 	virtual void
 	handle_conn_established(
 			rofl::crofctl& ctl,
-			const rofl::cauxid& auxid) {
-		LOGGING_INFO << "[rofl-common][crofbase] "
-				<< "ctlid: " << ctl.get_ctlid().str() << " "
-				<< "control connection established, "
-				<< "auxid: " << auxid.str() << std::endl;
-	};
+			const rofl::cauxid& auxid)
+	{};
 
 	/**
 	 * @brief 	Called when a control connection (main or auxiliary) has been terminated by the peer entity.
@@ -876,12 +1043,8 @@ public:
 	virtual void
 	handle_conn_terminated(
 			rofl::crofctl& ctl,
-			const rofl::cauxid& auxid) {
-		LOGGING_INFO << "[rofl-common][crofbase] "
-				<< "ctlid: " << ctl.get_ctlid().str() << " "
-				<< "control connection terminated, "
-				<< "auxid: " << auxid.str() << std::endl;
-	};
+			const rofl::cauxid& auxid)
+	{};
 
 	/**
 	 * @brief 	Called when an attempt to establish a control connection has been refused.
@@ -896,10 +1059,8 @@ public:
 	virtual void
 	handle_conn_refused(
 			rofl::crofctl& ctl,
-			const rofl::cauxid& auxid) {
-		LOGGING_INFO << "[rofl-common][crofbase] connection refused, "
-				<< "ctlid: " << ctl.get_ctlid().str()  << " auxid: " << auxid.str() << std::endl;
-	};
+			const rofl::cauxid& auxid)
+	{};
 
 	/**
 	 * @brief 	Called when an attempt to establish a control connection has been failed.
@@ -914,10 +1075,8 @@ public:
 	virtual void
 	handle_conn_failed(
 			rofl::crofctl& ctl,
-			const rofl::cauxid& auxid) {
-		LOGGING_INFO << "[rofl-common][crofbase] connection failed, "
-				<< "ctlid: " << ctl.get_ctlid().str()  << " auxid: " << auxid.str() << std::endl;
-	};
+			const rofl::cauxid& auxid)
+	{};
 
 	/**
 	 * @brief	Called when a congestion situation on the control connection has been solved.
@@ -938,10 +1097,8 @@ public:
 	virtual void
 	handle_conn_writable(
 			rofl::crofctl& ctl,
-			const rofl::cauxid& auxid) {
-		LOGGING_INFO << "[rofl-common][crofbase] connection is writable, "
-				<< "ctlid: " << ctl.get_ctlid().str()  << " auxid: " << auxid.str() << std::endl;
-	};
+			const rofl::cauxid& auxid)
+	{};
 
 	/**@}*/
 
@@ -2158,18 +2315,346 @@ public:
 
 public:
 
-	friend std::ostream&
-	operator<< (std::ostream& os, crofbase const& rofbase) {
-		os << "<crofbase >" << std::endl;
+	class csocket_find_by_sock_descriptor {
+		int sd;
+	public:
+		csocket_find_by_sock_descriptor(
+				int sd) :
+					sd(sd)
+		{};
+		bool
+		operator() (const std::pair<csockaddr, int>& p)
+		{ return (p.second == sd); };
+	};
 
+public:
+
+	friend std::ostream&
+	operator<< (std::ostream& os, const crofbase& rofbase) {
+		for (auto it : rofbase.rofctls) {
+			rofl::indent i(2);
+			os << it.first;
+		}
+		for (auto it : rofbase.rofdpts) {
+			rofl::indent i(2);
+			os << it.first;
+		}
 		return os;
 	};
 
-};
+private:
 
+	static void
+	initialize();
+
+	static void
+	terminate();
+
+private:
+
+	virtual void
+	handle_wakeup(
+			cthread& thread);
+
+	virtual void
+	handle_timeout(
+			cthread& thread, uint32_t timer_id, const std::list<unsigned int>& ttypes);
+
+	virtual void
+	handle_read_event(
+			cthread& thread, int fd);
+
+	virtual void
+	handle_write_event(
+			cthread& thread, int fd)
+	{ /* not in use */ };
+
+private:
+
+	virtual void
+	handle_established(
+			crofdpt& dpt, uint8_t ofp_version);
+
+	virtual void
+	handle_closed(
+			crofdpt& dpt);
+
+	virtual void
+	handle_established(
+			crofdpt& dpt, crofconn& conn, uint8_t ofp_version)
+	{};
+
+	virtual void
+	handle_closed(
+			crofdpt& dpt, crofconn& conn)
+	{};
+
+	virtual void
+	handle_connect_refused(
+			crofdpt& dpt, crofconn& conn)
+	{};
+
+	virtual void
+	handle_connect_failed(
+			crofdpt& dpt, crofconn& conn)
+	{};
+
+	virtual void
+	handle_accept_failed(
+			crofdpt& dpt, crofconn& conn)
+	{};
+
+	virtual void
+	handle_negotiation_failed(
+			crofdpt& dpt, crofconn& conn)
+	{};
+
+	virtual void
+	congestion_occured_indication(
+			crofdpt& dpt, crofconn& conn)
+	{};
+
+	virtual void
+	congestion_solved_indication(
+			crofdpt& dpt, crofconn& conn)
+	{};
+
+private:
+
+	virtual void
+	handle_established(
+			crofctl& ctl, uint8_t ofp_version);
+
+	virtual void
+	handle_closed(
+			crofctl& ctl);
+
+	virtual void
+	handle_established(
+			crofctl& ctl, crofconn& conn, uint8_t ofp_version)
+	{};
+
+	virtual void
+	handle_closed(
+			crofctl& ctl, crofconn& conn)
+	{};
+
+	virtual void
+	handle_connect_refused(
+			crofctl& ctl, crofconn& conn)
+	{};
+
+	virtual void
+	handle_connect_failed(
+			crofctl& ctl, crofconn& conn)
+	{};
+
+	virtual void
+	handle_accept_failed(
+			crofctl& ctl, crofconn& conn)
+	{};
+
+	virtual void
+	handle_negotiation_failed(
+			crofctl& ctl, crofconn& conn)
+	{};
+
+	virtual void
+	congestion_occured_indication(
+			crofctl& ctl, crofconn& conn)
+	{};
+
+	virtual void
+	congestion_solved_indication(
+			crofctl& ctl, crofconn& conn)
+	{};
+
+private:
+
+	virtual void
+	handle_established(
+			crofconn& conn, uint8_t ofp_version);
+
+	virtual void
+	handle_connect_refused(
+			crofconn& conn)
+	{ /* not used */ };
+
+	virtual void
+	handle_connect_failed(
+			crofconn& conn)
+	{ /* not used */ };
+
+	virtual void
+	handle_accept_failed(
+			crofconn& conn);
+
+	virtual void
+	handle_negotiation_failed(
+			crofconn& conn);
+
+	virtual void
+	handle_closed(
+			crofconn& conn);
+
+	virtual void
+	handle_recv(
+			crofconn& conn, rofl::openflow::cofmsg* msg)
+	{ delete msg; };
+
+	virtual void
+	congestion_occured_indication(
+			crofconn& conn)
+	{};
+
+	virtual void
+	congestion_solved_indication(
+			crofconn& conn)
+	{};
+
+	virtual void
+	handle_transaction_timeout(
+			crofconn& conn, uint32_t xid, uint8_t type, uint16_t sub_type = 0)
+	{};
+
+private:
+
+	/**
+	 * @brief	open listening socket
+	 *
+	 * @return socket descriptor
+	 */
+	int
+	listen(
+			const csockaddr& baddr);
+
+	/**
+	 *
+	 */
+	void
+	rofctl_schedule_for_delete(
+			const cctlid& ctlid);
+
+	/**
+	 *
+	 */
+	void
+	rofdpt_schedule_for_delete(
+			const cdptid& dptid);
+
+private:
+
+	/**
+	 * @brief	Deletes a rofl::crofdpt instance given by identifier.
+	 *
+	 * If the identifier is non-existing, the method does nothing and returns.
+	 */
+	void
+	__drop_dpt(
+		rofl::cdptid dptid) { // make a copy here, do not use a const reference
+		AcquireReadWriteLock rwlock(rofdpts_rwlock);
+		if (rofdpts.find(dptid) == rofdpts.end()) {
+			return;
+		}
+		delete rofdpts[dptid];
+		rofdpts.erase(dptid);
+	};
+
+	/**
+	 * @brief	Deletes a rofl::crofctl instance given by identifier.
+	 *
+	 * If the identifier is non-existing, the method does nothing and returns.
+	 */
+	void
+	__drop_ctl(
+		rofl::cctlid ctlid) { // make a copy here, do not use a const reference
+		AcquireReadWriteLock rwlock(rofctls_rwlock);
+		if (rofctls.find(ctlid) == rofctls.end()) {
+			return;
+		}
+		delete rofctls[ctlid];
+		rofctls.erase(ctlid);
+	};
+
+private:
+
+	enum crofbase_timer_t {
+		TIMER_ID_ROFCTL_DESTROY = 1,
+		TIMER_ID_ROFDPT_DESTROY = 2,
+	};
+
+	// management thread
+	cthread                         thread;
+
+	// peer controllers
+	std::map<cctlid, crofctl*>		rofctls;
+
+	// lock for peer controllers
+	mutable crwlock                 rofctls_rwlock;
+
+	// peer datapath elements
+	std::map<cdptid, crofdpt*>		rofdpts;
+
+	// lock for peer datapath elements
+	mutable crwlock                 rofdpts_rwlock;
+
+	/*
+	 *
+	 */
+
+	// set of crofctl ids scheduled for deletion
+	std::set<cctlid>                rofctls_deletion;
+
+	// ... and associated rwlock
+	mutable crwlock                 rofctls_deletion_rwlock;
+
+	// set of crofdpt ids scheduled for deletion
+	std::set<cdptid>                rofdpts_deletion;
+
+	// ... and associated rwlock
+	mutable crwlock                 rofdpts_deletion_rwlock;
+
+	/*
+	 *
+	 */
+
+	// listening sockets for accepting connections from datapath elements
+	std::map<csockaddr, int>        dpt_sockets;
+
+	// associated rwlock
+	mutable crwlock                 dpt_sockets_rwlock;
+
+	// listening sockets for accepting connections from controller elements
+	std::map<csockaddr, int>        ctl_sockets;
+
+	mutable crwlock                 ctl_sockets_rwlock;
+
+
+
+	// supported OpenFlow versions
+	rofl::openflow::cofhello_elem_versionbitmap
+									versionbitmap;
+
+	// generation_id used for roles initially defined?
+	bool							generation_is_defined;
+
+	// cached generation_id as defined by OpenFlow
+	uint64_t						cached_generation_id;
+
+	// enforce use of tls for accepted connections
+	bool                            enforce_tls;
+
+	std::string                     capath;
+	std::string                     cafile;
+	std::string                     certfile;
+	std::string                     keyfile;
+	std::string                     password;
+	std::string                     verify_mode;
+	std::string                     verify_depth;
+	std::string                     ciphers;
+};
 
 }; // end of namespace
 
+
 #endif
-
-

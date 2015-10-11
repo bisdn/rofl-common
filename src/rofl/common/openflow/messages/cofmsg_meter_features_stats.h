@@ -1,8 +1,13 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 /*
  * cofmsg_meter_features_stats.h
  *
  *  Created on: 27.05.2014
- *      Author: andi
+ *  Revised on: 26.07.2015
+ *      Author: Andreas Koepsel
  */
 
 #ifndef COFMSG_METER_FEATURES_H_
@@ -21,12 +26,17 @@ namespace openflow {
  *
  */
 class cofmsg_meter_features_stats_request :
-	public cofmsg_stats_request
+		public cofmsg_stats_request
 {
 public:
 
+	/**
+	 *
+	 */
+	virtual
+	~cofmsg_meter_features_stats_request();
 
-	/** constructor
+	/**
 	 *
 	 */
 	cofmsg_meter_features_stats_request(
@@ -34,13 +44,11 @@ public:
 			uint32_t xid = 0,
 			uint16_t stats_flags = 0);
 
-
 	/**
 	 *
 	 */
 	cofmsg_meter_features_stats_request(
 			const cofmsg_meter_features_stats_request& msg);
-
 
 	/**
 	 *
@@ -49,29 +57,42 @@ public:
 	operator= (
 			const cofmsg_meter_features_stats_request& msg);
 
-
-	/** destructor
-	 *
-	 */
-	virtual
-	~cofmsg_meter_features_stats_request();
-
+public:
 
 	/**
 	 *
 	 */
-	cofmsg_meter_features_stats_request(
-			rofl::cmemory *memarea);
+	virtual size_t
+	length() const;
 
+	/**
+	 *
+	 */
+	virtual void
+	pack(
+			uint8_t *buf = (uint8_t*)0, size_t buflen = 0);
 
+	/**
+	 *
+	 */
+	virtual void
+	unpack(
+			uint8_t *buf, size_t buflen);
 
 public:
 
 	friend std::ostream&
-	operator<< (std::ostream& os, cofmsg_meter_features_stats_request const& msg) {
-		os << dynamic_cast<cofmsg_stats_request const&>( msg );
+	operator<< (std::ostream& os, const cofmsg_meter_features_stats_request& msg) {
+		os << dynamic_cast<const cofmsg_stats_request&>( msg );
 		os << indent(2) << "<cofmsg_meter_features_request >" << std::endl;
 		return os;
+	};
+
+	virtual std::string
+	str() const {
+		std::stringstream ss;
+		ss << cofmsg_stats_request::str() << "-Meter-Features-Stats-Request- " << " ";
+		return ss.str();
 	};
 };
 
@@ -86,88 +107,59 @@ public:
  *
  */
 class cofmsg_meter_features_stats_reply :
-	public cofmsg_stats_reply
+		public cofmsg_stats_reply
 {
 public:
 
-
-	/** constructor
+	/**
 	 *
 	 */
-	cofmsg_meter_features_stats_reply(
-			uint8_t of_version = rofl::openflow::OFP_VERSION_UNKNOWN,
-			uint32_t xid = 0,
-			uint16_t stats_flags = 0,
-			const rofl::openflow::cofmeter_features_reply& meter_features = rofl::openflow::cofmeter_features_reply());
-
+	virtual
+	~cofmsg_meter_features_stats_reply();
 
 	/**
 	 *
 	 */
 	cofmsg_meter_features_stats_reply(
-			cofmsg_meter_features_stats_reply const& msg);
+			uint8_t version = rofl::openflow::OFP_VERSION_UNKNOWN,
+			uint32_t xid = 0,
+			uint16_t stats_flags = 0,
+			const rofl::openflow::cofmeter_features_reply& meter_features = rofl::openflow::cofmeter_features_reply());
 
+	/**
+	 *
+	 */
+	cofmsg_meter_features_stats_reply(
+			const cofmsg_meter_features_stats_reply& msg);
 
 	/**
 	 *
 	 */
 	cofmsg_meter_features_stats_reply&
 	operator= (
-			cofmsg_meter_features_stats_reply const& msg);
+			const cofmsg_meter_features_stats_reply& msg);
 
-
-	/** destructor
-	 *
-	 */
-	virtual
-	~cofmsg_meter_features_stats_reply();
-
+public:
 
 	/**
-	 *
-	 */
-	cofmsg_meter_features_stats_reply(cmemory *memarea);
-
-
-	/** reset packet content
-	 *
-	 */
-	virtual void
-	reset();
-
-
-	/**
-	 *
-	 */
-	virtual uint8_t*
-	resize(size_t len);
-
-
-	/** returns length of packet in packed state
 	 *
 	 */
 	virtual size_t
 	length() const;
 
+	/**
+	 *
+	 */
+	virtual void
+	pack(
+			uint8_t *buf = (uint8_t*)0, size_t buflen = 0);
 
 	/**
 	 *
 	 */
 	virtual void
-	pack(uint8_t *buf = (uint8_t*)0, size_t buflen = 0);
-
-
-	/**
-	 *
-	 */
-	virtual void
-	unpack(uint8_t *buf, size_t buflen);
-
-
-	/** parse packet and validate it
-	 */
-	virtual void
-	validate();
+	unpack(
+			uint8_t *buf, size_t buflen);
 
 public:
 
@@ -175,23 +167,31 @@ public:
 	 *
 	 */
 	const rofl::openflow::cofmeter_features_reply&
-	get_meter_features_reply() const { return meter_features; };
+	get_meter_features_reply() const
+	{ return meter_features; };
 
 	/**
 	 *
 	 */
 	rofl::openflow::cofmeter_features_reply&
-	set_meter_features_reply() { return meter_features; };
-
+	set_meter_features_reply()
+	{ return meter_features; };
 
 public:
 
 	friend std::ostream&
-	operator<< (std::ostream& os, cofmsg_meter_features_stats_reply const& msg) {
-		os << dynamic_cast<cofmsg_stats_reply const&>( msg );
+	operator<< (std::ostream& os, const cofmsg_meter_features_stats_reply& msg) {
+		os << dynamic_cast<const cofmsg_stats_reply&>( msg );
 		os << indent(2) << "<cofmsg_meter_features_reply >" << std::endl;
 		indent i(4); os << msg.get_meter_features_reply();
 		return os;
+	};
+
+	virtual std::string
+	str() const {
+		std::stringstream ss;
+		ss << cofmsg_stats_reply::str() << "-Meter-Features-Stats-Reply- " << " ";
+		return ss.str();
 	};
 
 private:

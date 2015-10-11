@@ -1,28 +1,49 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 /*
- * crofendpnt.h
+ * crofsock.h
  *
  *  Created on: 31.12.2013
+ *  Revised on: 20.09.2015
  *      Author: andreas
  */
 
-#ifndef CROFENDPNT_H_
-#define CROFENDPNT_H_
+#ifndef CROFSOCK_H_
+#define CROFSOCK_H_
 
+#include <string.h>
+#include <assert.h>
 #include <inttypes.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <netinet/in.h>
+#include <sys/un.h>
+#include <sys/socket.h>
+#include <fcntl.h>
+#include <netinet/tcp.h>
+#include <sys/ioctl.h>
+#include <sys/uio.h>
 #include <stdio.h>
 #include <strings.h>
 #include <map>
 #include <set>
 #include <deque>
 #include <bitset>
+#include <iostream>
 #include <algorithm>
 
-#include "rofl/common/ciosrv.h"
+#include <openssl/bio.h>
+#include <openssl/ssl.h>
+#include <openssl/err.h>
+
 #include "rofl/common/cmemory.h"
-#include "rofl/common/csocket.h"
 #include "rofl/common/logging.h"
 #include "rofl/common/crofqueue.h"
-#include "rofl/common/thread_helper.h"
+#include "rofl/common/cthread.hpp"
+#include "rofl/common/csockaddr.h"
+#include "rofl/common/crandom.h"
 #include "rofl/common/croflexception.h"
 
 #include "rofl/common/openflow/messages/cofmsg.h"
@@ -66,6 +87,54 @@
 
 namespace rofl {
 
+
+
+class eRofSockBase : public RoflException {
+public:
+	eRofSockBase(
+			const std::string& __arg) :
+				RoflException(__arg)
+	{};
+};
+class eRofSockInvalid : public eRofSockBase {
+public:
+	eRofSockInvalid(
+			const std::string& __arg) :
+				eRofSockBase(__arg)
+	{};
+};
+class eRofSockNotFound : public eRofSockBase {
+public:
+	eRofSockNotFound(
+			const std::string& __arg) :
+				eRofSockBase(__arg)
+	{};
+};
+class eRofSockError : public eRofSockBase {
+public:
+	eRofSockError(
+			const std::string& __arg) :
+				eRofSockBase(__arg)
+	{};
+};
+class eRofSockNotEstablished : public eRofSockBase {
+public:
+	eRofSockNotEstablished(
+			const std::string& __arg) :
+				eRofSockBase(__arg)
+	{};
+};
+class eRofSockCongested : public eRofSockBase {
+public:
+	eRofSockCongested(
+			const std::string& __arg) :
+				eRofSockBase(__arg)
+	{};
+};
+
+
+
+
 class crofsock; // forward declaration
 
 /**
@@ -74,43 +143,103 @@ class crofsock; // forward declaration
  * @brief Environment expected by a rofl::crofsock instance.
  */
 class crofsock_env {
+	friend class crofsock;
 public:
-	virtual ~crofsock_env() {};
+	static
+	crofsock_env&
+	call_env(crofsock_env* env) {
+		AcquireReadLock lock(crofsock_env::socket_envs_lock);
+		if (crofsock_env::socket_envs.find(env) == crofsock_env::socket_envs.end()) {
+			throw eRofSockNotFound("crofsock_env::call_env() crofsock_env instance not found");
+		}
+		return *(env);
+	};
+public:
+	virtual
+	~crofsock_env() {
+		AcquireReadWriteLock lock(crofsock_env::socket_envs_lock);
+		crofsock_env::socket_envs.erase(this);
+	};
+	crofsock_env() {
+		AcquireReadWriteLock lock(crofsock_env::socket_envs_lock);
+		crofsock_env::socket_envs.insert(this);
+	};
 
 protected:
 
-	friend class crofsock;
+	virtual void
+	handle_listen(
+			crofsock& socket, int sd) = 0;
 
 	virtual void
-	handle_connect_refused(crofsock& endpnt) = 0;
+	handle_tcp_connect_refused(
+			crofsock& socket) = 0;
 
 	virtual void
-	handle_connect_failed(crofsock& endpnt) = 0;
+	handle_tcp_connect_failed(
+			crofsock& socket) = 0;
 
 	virtual void
-	handle_connected(crofsock& endpnt) = 0;
+	handle_tcp_connected(
+			crofsock& socket) = 0;
 
 	virtual void
-	handle_closed(crofsock& endpnt) = 0;
+	handle_tcp_accept_refused(
+			crofsock& socket) = 0;
 
 	virtual void
-	handle_write(crofsock& endpnt) = 0;
+	handle_tcp_accept_failed(
+			crofsock& socket) = 0;
 
 	virtual void
-	recv_message(crofsock& endpnt, rofl::openflow::cofmsg *msg) = 0;
+	handle_tcp_accepted(
+			crofsock& socket) = 0;
+
+	virtual void
+	handle_tls_connect_failed(
+			crofsock& socket) = 0;
+
+	virtual void
+	handle_tls_connected(
+			crofsock& socket) = 0;
+
+	virtual void
+	handle_tls_accept_failed(
+			crofsock& socket) = 0;
+
+	virtual void
+	handle_tls_accepted(
+			crofsock& socket) = 0;
+
+	virtual void
+	handle_closed(
+			crofsock& socket) = 0;
+
+	virtual void
+	handle_recv(
+			crofsock& socket, rofl::openflow::cofmsg *msg) = 0;
+
+	virtual void
+	congestion_occured_indication(
+			crofsock& socket) = 0;
+
+	virtual void
+	congestion_solved_indication(
+			crofsock& socket) = 0;
+
+private:
+	static std::set<crofsock_env*>  socket_envs;
+	static crwlock                  socket_envs_lock;
 };
 
-class eRofSockBase			: public RoflException {};
-class eRofSockTxAgain		: public eRofSockBase {};
-class eRofSockMsgTooLarge 	: public eRofSockBase {};
+
 
 /**
  * @ingroup common_devel_workflow
  * @brief	A socket capable of talking OpenFlow via TCP and vice versa
  */
 class crofsock :
-		public ciosrv,
-		public csocket_env
+		public cthread_env
 {
 	enum outqueue_type_t {
 		QUEUE_OAM  = 0, // Echo.request/Echo.reply
@@ -120,40 +249,38 @@ class crofsock :
 		QUEUE_MAX,		// do not use
 	};
 
-	enum crofsock_event_t {
-		EVENT_NONE				= 0,
-		EVENT_CONNECT			= 1,
-		EVENT_CONNECT_FAILED	= 2,
-		EVENT_CONNECT_REFUSED	= 3,
-		EVENT_CONNECTED			= 4,
-		EVENT_ACCEPT			= 5,
-		EVENT_ACCEPT_REFUSED	= 6,
-		EVENT_ACCEPTED			= 7,
-		EVENT_PEER_DISCONNECTED	= 8,
-		EVENT_LOCAL_DISCONNECT	= 9,
-		EVENT_CONGESTION_SOLVED	= 10,
-		EVENT_RX_QUEUE          = 11,
-	};
-
 	enum crofsock_flag_t {
-		FLAGS_CONGESTED 		= 1,
+		FLAG_CONGESTED 		    = 1,
+		FLAG_TX_BLOCK_QUEUEING  = 2,
+		FLAG_RECONNECT_ON_FAILURE = 3,
+		FLAG_TLS_IN_USE         = 4,
 	};
 
-	enum crofsock_state_t {
-		STATE_INIT				= 0,
+	enum socket_mode_t {
+		MODE_UNKNOWN            = 0,
+		MODE_LISTEN             = 1,
+		MODE_CLIENT             = 2,
+		MODE_SERVER             = 3,
+	};
+
+	enum socket_state_t {
+		STATE_IDLE              = 0,
 		STATE_CLOSED			= 1,
-		STATE_CONNECTING		= 2,
-		STATE_CONNECTED			= 3,
+		STATE_LISTENING         = 2,
+		STATE_TCP_CONNECTING	= 3,
+		STATE_TLS_CONNECTING	= 4,
+		STATE_TCP_ACCEPTING 	= 5,
+		STATE_TLS_ACCEPTING 	= 6,
+		STATE_TCP_ESTABLISHED	= 7,
+		STATE_TLS_ESTABLISHED	= 8,
+	};
+
+	enum crofsockimer_t {
+		TIMER_ID_UNKNOWN        = 0,
+		TIMER_ID_RECONNECT      = 1,
 	};
 
 public:
-
-	/**
-	 *
-	 */
-	crofsock(
-			crofsock_env *env,
-			pthread_t tid = 0);
 
 	/**
 	 *
@@ -161,69 +288,60 @@ public:
 	virtual
 	~crofsock();
 
+	/**
+	 *
+	 */
+	crofsock(
+			crofsock_env *env);
+
+public:
+
+	/**
+	 *
+	 */
+	virtual void
+	close();
+
+	/**
+	 *
+	 */
+	virtual void
+	listen();
+
+	/**
+	 *
+	 */
+	virtual void
+	tcp_accept(
+			int sd);
+
+	/**
+	 *
+	 */
+	virtual void
+	tcp_connect(
+			bool reconnect = true);
+
+	/**
+	 *
+	 */
+	virtual void
+	tls_accept(
+			int sd);
+
+	/**
+	 *
+	 */
+	virtual void
+	tls_connect(
+			bool reconnect = true);
+
 public:
 
 	/**
 	 *
 	 */
 	void
-	accept(
-			enum rofl::csocket::socket_type_t socket_type,
-			const cparams& socket_params,
-			int sd) {
-		RwLock rwlock(rofsock_lock, RwLock::RWLOCK_WRITE);
-		this->socket_type = socket_type;
-		this->socket_params = socket_params;
-		this->sd = sd;
-		run_engine(EVENT_ACCEPT);
-	};
-
-	/**
-	 *
-	 */
-	void
-	connect(
-			enum rofl::csocket::socket_type_t socket_type,
-			const cparams& socket_params) {
-		RwLock rwlock(rofsock_lock, RwLock::RWLOCK_WRITE);
-		this->socket_type = socket_type;
-		this->socket_params = socket_params;
-		run_engine(EVENT_CONNECT);
-	};
-
-	/**
-	 *
-	 */
-	void
-	reconnect() {
-		RwLock rwlock(rofsock_lock, RwLock::RWLOCK_WRITE);
-		run_engine(EVENT_CONNECT);
-	};
-
-	/**
-	 *
-	 */
-	void
-	close() {
-#if 0
-		RwLock rwlock(rofsock_lock, RwLock::RWLOCK_WRITE);
-		run_engine(EVENT_LOCAL_DISCONNECT);
-#endif
-		__close();
-		if (socket) socket->close();
-	};
-
-	/**
-	 *
-	 */
-	csocket const&
-	get_socket() const
-	{ return *socket; /* FIXME */ };
-
-	/**
-	 *
-	 */
-	unsigned int
 	send_message(
 			rofl::openflow::cofmsg *msg);
 
@@ -231,24 +349,300 @@ public:
 	 *
 	 */
 	bool
-	is_established() const
-	{ return socket->is_established(); };
+	is_established() const;
 
 	/**
-	 * @brief	Instructs crofsock to disable reception of messages on the socket.
+	 *
 	 */
-	void
-	rx_disable()
-	{ rx_disabled = true; };
+	bool
+	is_tls_encrypted() const;
 
 	/**
-	 * @brief	Instructs crofsock to re-enable reception of messages on the socket.
+	 *
+	 */
+	bool
+	is_passive() const;
+
+	/**
+	 *
+	 */
+	bool
+	is_congested() const;
+
+	/**
+	 * @brief	Disable reception of messages on this socket.
 	 */
 	void
-	rx_enable()
+	rx_disable();
+
+	/**
+	 * @brief	Reenable reception of messages on this socket.
+	 */
+	void
+	rx_enable();
+
+	/**
+	 * @brief	Disable transmission of messages on this socket.
+	 */
+	void
+	tx_disable();
+
+	/**
+	 * @brief	Reenable transmission of messages on this socket.
+	 */
+	void
+	tx_enable();
+
+public:
+
+	/**
+	 * @brief	Returns capacity of transmission queues in messages
+	 */
+	size_t
+	get_txqueue_max_size() const
+	{ return txqueue_size_congestion_occured; };
+
+	/**
+	 * @brief	Sets capacity of transmission queues in messages
+	 */
+	crofsock&
+	set_txqueue_max_size(
+			size_t txqueue_max_size)
 	{
-		rofl::ciosrv::notify(rofl::cevent(EVENT_RX_QUEUE));
-		rx_disabled = false;
+		this->txqueue_size_congestion_occured = txqueue_max_size;
+		for (unsigned int queue_id = 0; queue_id < QUEUE_MAX; queue_id++) {
+			txqueues[queue_id].set_queue_max_size(txqueue_max_size);
+		}
+		return *this;
+	};
+
+public:
+
+	/**
+	 *
+	 */
+	crofsock&
+	set_baddr(
+			const csockaddr& baddr)
+	{ this->baddr = baddr; return *this; };
+
+	/**
+	 *
+	 */
+	const csockaddr&
+	get_baddr() const
+	{ return baddr; };
+
+	/**
+	 *
+	 */
+	crofsock&
+	set_laddr(
+			const csockaddr& laddr)
+	{ this->laddr = laddr; return *this; };
+
+	/**
+	 *
+	 */
+	const csockaddr&
+	get_laddr() const
+	{ return laddr; };
+
+	/**
+	 *
+	 */
+	crofsock&
+	set_raddr(
+			const csockaddr& raddr)
+	{ this->raddr = raddr; return *this; };
+
+	/**
+	 *
+	 */
+	const csockaddr&
+	get_raddr() const
+	{ return raddr; };
+
+public:
+
+	/**
+	 *
+	 */
+	const std::string&
+	get_tls_capath() const
+	{ return capath; };
+
+	/**
+	 *
+	 */
+	crofsock&
+	set_tls_capath(
+			const std::string& capath)
+	{ this->capath = capath; return *this; };
+
+public:
+
+	/**
+	 *
+	 */
+	const std::string&
+	get_tls_cafile() const
+	{ return cafile; };
+
+	/**
+	 *
+	 */
+	crofsock&
+	set_tls_cafile(
+			const std::string& cafile)
+	{ this->cafile = cafile; return *this; };
+
+public:
+
+	/**
+	 *
+	 */
+	const std::string&
+	get_tls_certfile() const
+	{ return certfile; };
+
+	/**
+	 *
+	 */
+	crofsock&
+	set_tls_certfile(
+			const std::string& certfile)
+	{ this->certfile = certfile; return *this; };
+
+public:
+
+	/**
+	 *
+	 */
+	const std::string&
+	get_tls_keyfile() const
+	{ return keyfile; };
+
+	/**
+	 *
+	 */
+	crofsock&
+	set_tls_keyfile(
+			const std::string& keyfile)
+	{ this->keyfile = keyfile; return *this; };
+
+public:
+
+	/**
+	 *
+	 */
+	const std::string&
+	get_tls_pswd() const
+	{ return password; };
+
+	/**
+	 *
+	 */
+	crofsock&
+	set_tls_pswd(
+			const std::string& password)
+	{ this->password = password; return *this; };
+
+public:
+
+	/**
+	 *
+	 */
+	const std::string&
+	get_tls_verify_mode() const
+	{ return verify_mode; };
+
+	/**
+	 *
+	 */
+	crofsock&
+	set_tls_verify_mode(
+			const std::string& verify_mode)
+	{ this->verify_mode = verify_mode; return *this; };
+
+public:
+
+	/**
+	 *
+	 */
+	const std::string&
+	get_tls_verify_depth() const
+	{ return verify_depth; };
+
+	/**
+	 *
+	 */
+	crofsock&
+	set_tls_verify_depth(
+			const std::string& verify_depth)
+	{ this->verify_depth = verify_depth; return *this; };
+
+public:
+
+	/**
+	 *
+	 */
+	const std::string&
+	get_tls_ciphers() const
+	{ return ciphers; };
+
+	/**
+	 *
+	 */
+	crofsock&
+	set_tls_ciphers(
+			const std::string& ciphers)
+	{ this->ciphers = ciphers; return *this; };
+
+public:
+
+	friend std::ostream&
+	operator<< (std::ostream& os, crofsock const& rofsock) {
+		os << indent(0) << "<crofsock: transport-connection-established: " << rofsock.is_established() << ">" << std::endl;
+		return os;
+	};
+
+	std::string
+	str() const {
+		std::stringstream ss;
+		switch (state) {
+		case STATE_IDLE: {
+			ss << "state: -IDLE- ";
+		} break;
+		case STATE_CLOSED: {
+			ss << "state: -CLOSED- ";
+		} break;
+		case STATE_LISTENING: {
+			ss << "state: -LISTENING- ";
+		} break;
+		case STATE_TCP_ACCEPTING: {
+			ss << "state: -ACCEPTING- ";
+		} break;
+		case STATE_TLS_ACCEPTING: {
+			ss << "state: -TLS-ACCEPTING- ";
+		} break;
+		case STATE_TCP_CONNECTING: {
+			ss << "state: -CONNECTING- ";
+		} break;
+		case STATE_TLS_CONNECTING: {
+			ss << "state: -TLS-CONNECTING- ";
+		} break;
+		case STATE_TCP_ESTABLISHED: {
+			ss << "state: -ESTABLISHED- ";
+		} break;
+		case STATE_TLS_ESTABLISHED: {
+			ss << "state: -TLS-ESTABLISHED- ";
+		} break;
+		default: {
+			ss << "state: -unknown- ";
+		};
+		}
+		return ss.str();
 	};
 
 private:
@@ -258,440 +652,237 @@ private:
 	 * @brief	Private copy constructor for suppressing any copy attempt.
 	 */
 	crofsock(
-			const crofsock& endpnt) :
-		env(NULL),
-		socket(NULL),
-		state(STATE_INIT),
-		fragment(NULL),
-		msg_bytes_read(0),
-		max_pkts_rcvd_per_round(DEFAULT_MAX_PKTS_RVCD_PER_ROUND),
-		rx_disabled(false),
-		socket_type(rofl::csocket::SOCKET_TYPE_UNKNOWN),
-		sd(-1)
-	{};
+			const crofsock& socket);
 
 	/**
 	 * @brief	Private assignment operator.
 	 */
 	crofsock&
 	operator= (
-			const crofsock& endpnt)
-	{ return *this; };
+			const crofsock& socket);
 
 private:
 
-	/**
-	 *
-	 */
 	virtual void
-	handle_event(
-			cevent const &ev);
+	handle_wakeup(
+			cthread& thread);
+
+	virtual void
+	handle_timeout(
+			cthread& thread, uint32_t timer_id, const std::list<unsigned int>& ttypes);
+
+	virtual void
+	handle_read_event(
+			cthread& thread, int fd);
+
+	virtual void
+	handle_write_event(
+			cthread& thread, int fd);
 
 private:
 
-	/**
-	 *
-	 */
-	virtual void
-	handle_listen(
-			csocket& socket,
-			int newsd) {
-		// this should never happen, as passively opened sockets are handled outside of crofsock
-	};
+	void
+	tls_init();
 
-	/**
-	 *
-	 */
-	virtual void
-	handle_accept_refused(
-			csocket& socket) {
-		run_engine(EVENT_ACCEPT_REFUSED);
-	};
+	void
+	tls_destroy();
 
-	/**
-	 *
-	 */
-	virtual void
-	handle_accepted(
-			csocket& socket) {
-		run_engine(EVENT_ACCEPTED);
-	};
+	void
+	tls_init_context();
 
-	/**
-	 *
-	 */
-	virtual void
-	handle_connect_refused(
-			csocket& socket) {
-		run_engine(EVENT_CONNECT_REFUSED);
-	};
+	void
+	tls_destroy_context();
 
-	/**
-	 *
-	 */
-	virtual void
-	handle_connect_failed(
-			csocket& socket) {
-		run_engine(EVENT_CONNECT_FAILED);
-	};
+	static int
+	tls_pswd_cb(
+			char *buf, int size, int rwflag, void *userdata);
 
-	/**
-	 *
-	 */
-	virtual void
-	handle_connected(
-			csocket& socket) {
-		run_engine(EVENT_CONNECTED);
-	};
-
-	/**
-	 *
-	 */
-	virtual void
-	handle_write(
-			csocket& socket) {
-		run_engine(EVENT_CONGESTION_SOLVED);
-	};
-
-	/**
-	 *
-	 */
-	virtual void
-	handle_closed(
-			csocket& socket) {
-		run_engine(EVENT_PEER_DISCONNECTED);
-	};
-
-	/**
-	 *
-	 */
-	virtual void
-	handle_read(
-			csocket& socket);
+	bool
+	tls_verify_ok();
 
 private:
 
-	/**
-	 *
-	 */
 	void
-	run_engine(crofsock_event_t event = EVENT_NONE) {
-		if (EVENT_NONE != event) {
-			events.push_back(event);
-		}
+	recv_message();
 
-		while (not events.empty()) {
-			enum crofsock_event_t event = events.front();
-			events.pop_front();
-
-			switch (event) {
-			case EVENT_CONNECT:				event_connect();			break;
-			case EVENT_CONNECT_FAILED:		event_connect_failed();		break;
-			case EVENT_CONNECT_REFUSED: 	event_connect_refused();	break;
-			case EVENT_CONNECTED: 			event_connected(); 			break;
-			case EVENT_ACCEPT:				event_accept();				break;
-			case EVENT_ACCEPT_REFUSED:		event_accept_refused();		break;
-			case EVENT_ACCEPTED:			event_accepted();			break;
-			case EVENT_PEER_DISCONNECTED:	event_peer_disconnected();	return;
-			case EVENT_LOCAL_DISCONNECT:	event_local_disconnect();	return;
-			case EVENT_CONGESTION_SOLVED:	event_congestion_solved();	break;
-
-			default: {
-				LOGGING_ERROR << "[rofl-common][crofsock] unknown event seen, internal error" << std::endl << *this;
-			};
-			}
-		}
-	}
-
-	/**
-	 *
-	 */
 	void
-	event_connect() {
-		switch (state) {
-		case STATE_INIT:
-		case STATE_CLOSED: {
-			LOGGING_DEBUG2 << "[rofl-common][crofsock] EVENT-CONNECT => entering state -connecting-" << std::endl;
-			state = STATE_CONNECTING;
-			if (socket)
-				delete socket;
-			ciosrv::cancel_all_timers();
-			ciosrv::cancel_all_events();
-			(socket = csocket::csocket_factory(socket_type, this, get_thread_id()))->connect(socket_params);
-		} break;
-		case STATE_CONNECTING: {
-			// do nothing, we are already connecting ...
-		} break;
-		case STATE_CONNECTED: {
-			run_engine(EVENT_LOCAL_DISCONNECT);
-			run_engine(EVENT_CONNECT);
-		} break;
-		default: {
+	parse_message();
 
-		};
-		};
-	};
-
-	/**
-	 *
-	 */
-	void
-	event_connect_failed() {
-		LOGGING_DEBUG2 << "[rofl-common][crofsock] EVENT-CONNECT-FAILED => entering state -closed-" << std::endl;
-		state = STATE_CLOSED;
-		if (env) env->handle_connect_failed(*this);
-	};
-
-	/**
-	 *
-	 */
-	void
-	event_connect_refused() {
-		LOGGING_DEBUG2 << "[rofl-common][crofsock] EVENT-CONNECT-REFUSED => entering state -closed-" << std::endl;
-		state = STATE_CLOSED;
-		if (env) env->handle_connect_refused(*this);
-	};
-
-	/**
-	 *
-	 */
-	void
-	event_connected() {
-		LOGGING_DEBUG2 << "[rofl-common][crofsock] EVENT-CONNECTED => entering state -connected-" << std::endl;
-		state = STATE_CONNECTED;
-		if (env) env->handle_connected(*this);
-	};
-
-	/**
-	 *
-	 */
-	void
-	event_accept() {
-		switch (state) {
-		case STATE_INIT:
-		case STATE_CLOSED: {
-			LOGGING_DEBUG2 << "[rofl-common][crofsock] EVENT-ACCEPT => entering state -connected-" << std::endl;
-			state = STATE_CONNECTED;
-			if (socket)
-				delete socket;
-			LOGGING_DEBUG2 << "[rofl-common][crofsock][event_accept] "
-					<< "target tid: " << std::hex << get_thread_id() << std::dec
-					<< ", running tid: " << std::hex << pthread_self() << std::dec
-					<< std::endl;
-			(socket = csocket::csocket_factory(socket_type, this, get_thread_id()))->accept(socket_params, sd);
-		} break;
-		default: {
-
-		};
-		}
-	}
-
-	/**
-	 *
-	 */
-	void
-	event_accept_refused() {
-		LOGGING_DEBUG2 << "[rofl-common][crofsock] EVENT-ACCEPT-REFUSED => entering state -closed-" << std::endl;
-		state = STATE_CLOSED;
-	};
-
-	/**
-	 *
-	 */
-	void
-	event_accepted() {
-		LOGGING_DEBUG2 << "[rofl-common][crofsock] EVENT-ACCEPTED => entering state -connected-" << std::endl;
-		state = STATE_CONNECTED;
-		// do not call handle_connected() here
-	};
-
-	/**
-	 *
-	 */
-	void
-	event_peer_disconnected() {
-		LOGGING_DEBUG2 << "[rofl-common][crofsock] EVENT-PEER-DISCONNECTED => entering state -closed-" << std::endl;
-		__close();
-		if (env) env->handle_closed(*this);
-	};
-
-	/**
-	 *
-	 */
-	void
-	event_local_disconnect() {
-		LOGGING_DEBUG2 << "[rofl-common][crofsock] EVENT-LOCAL-DISCONNECT => entering state -closed-" << std::endl;
-		__close();
-		if (socket) socket->close();
-	};
-
-	/**
-	 *
-	 */
-	void
-	event_congestion_solved() {
-		flags.reset(FLAGS_CONGESTED);
-		rofl::ciosrv::notify(rofl::cevent(EVENT_CONGESTION_SOLVED));
-	};
-
-private:
-
-	/**
-	 * @brief
-	 */
-	void
-	__close() {
-		if (STATE_CLOSED == state)
-			return;
-		state = STATE_CLOSED;
-		if (fragment) {
-			delete fragment; fragment = NULL;
-		}
-		for (std::vector<crofqueue>::iterator
-				it = txqueues.begin(); it != txqueues.end(); ++it) {
-			(*it).clear();
-		}
-		ciosrv::cancel_all_timers();
-		ciosrv::cancel_all_events();
-	};
-
-	/**
-	 *
-	 */
-	void
-	parse_message(
-			cmemory *mem);
-
-	/**
-	 *
-	 */
 	void
 	parse_of10_message(
-			cmemory *mem, rofl::openflow::cofmsg **pmsg);
+			rofl::openflow::cofmsg **pmsg);
 
-	/**
-	 *
-	 */
 	void
 	parse_of12_message(
-			cmemory *mem, rofl::openflow::cofmsg **pmsg);
+			rofl::openflow::cofmsg **pmsg);
 
-	/**
-	 *
-	 */
 	void
 	parse_of13_message(
-			cmemory *mem, rofl::openflow::cofmsg **pmsg);
+			rofl::openflow::cofmsg **pmsg);
 
-	/**
-	 *
-	 */
 	void
 	send_from_queue();
 
-	/**
-	 *
-	 */
+private:
+
 	void
-	log_message(
-			std::string const& text, rofl::openflow::cofmsg const& pmsg);
+	backoff_reconnect(
+			bool reset_timeout = false);
 
-	/**
-	 *
-	 */
 	void
-	log_of10_message(
-			rofl::openflow::cofmsg const& pmsg);
+	handle_read_event_rxthread(
+			cthread& thread, int fd);
 
-	/**
-	 *
-	 */
 	void
-	log_of12_message(
-			rofl::openflow::cofmsg const& pmsg);
-
-	/**
-	 *
-	 */
-	void
-	log_of13_message(
-			rofl::openflow::cofmsg const& pmsg);
-
-
-public:
-
-	friend std::ostream&
-	operator<< (std::ostream& os, crofsock const& rofsock) {
-		os << indent(0) << "<crofsock: transport-connection-established: " << rofsock.get_socket().is_established() << ">" << std::endl;
-		return os;
-	};
-
-	std::string
-	str() const {
-		std::stringstream ss;
-		if (STATE_INIT == state) {
-			ss << "state: -INIT- ";
-		} else
-		if (STATE_CLOSED == state) {
-			ss << "state: -CLOSED- ";
-		} else
-		if (STATE_CONNECTING == state) {
-			ss << "state: -CONNECTING- ";
-		} else
-		if (STATE_CONNECTED == state) {
-			ss << "state: -CONNECTED- ";
-		}
-		return ss.str();
-	};
+	handle_write_event_rxthread(
+			cthread& thread, int fd);
 
 private:
 
 	// environment for this crofsock instance
 	crofsock_env*				env;
-	// socket abstraction towards peer
-	csocket*					socket;
+
 	// various flags for this crofsock instance
 	std::bitset<32>				flags;
+
 	// connection state
-	enum crofsock_state_t		state;
+	enum socket_state_t		    state;
+
+	// socket mode (TCP_SERVER, TCP CLIENT)
+	enum socket_mode_t          mode;
+
+	// RX thread
+	cthread                     rxthread;
+
+	// TX thread
+	cthread                     txthread;
+
+	/*
+	 * reconnect
+	 */
+	int                         reconnect_backoff_max;
+	int                         reconnect_backoff_start;
+	int                         reconnect_backoff_current;
+	int 						reconnect_counter;
+
+	/* socket parameters */
+
+	// socket descriptor
+	int							sd;
+
+	// socket domain
+	int                         domain;
+
+	// socket type
+	int                         type;
+
+	// socket protocol
+	int                         protocol;
+
+	// socket backlog
+	int                         backlog;
+
+	/* binding addrees */
+	csockaddr                   baddr;
+
+	/* local address */
+	csockaddr                   laddr;
+
+	/* remote address */
+	csockaddr                   raddr;
+
+	/*
+	 * OpenSSL related structures
+	 */
+
+	// read write lock
+	static crwlock      		rwlock;
+
+	// OpenSSL initialized
+	static bool                 tls_initialized;
+
+	// SSL context
+	SSL_CTX*                    ctx;
+
+	// SSL session
+	SSL*                        ssl;
+
+	// basic input/output
+	BIO*                        bio;
+
+	std::string					capath;
+	std::string					cafile;
+	std::string					certfile;
+	std::string 				keyfile;
+	std::string					password;
+	std::string					verify_mode;
+	std::string					verify_depth;
+	std::string					ciphers;
 
 	/*
 	 * receiving messages
 	 */
 
+	// fragment pending
+	bool                        rx_fragment_pending;
+
 	// incomplete fragment message fragment received in last round
-	cmemory*					fragment;
+	cmemory 					rxbuffer;
+
 	// number of bytes already received for current message fragment
 	unsigned int				msg_bytes_read;
-    // read not more than this number of packets per round before rescheduling
+
+	// read not more than this number of packets per round before rescheduling
     unsigned int                max_pkts_rcvd_per_round;
+
     // default value for max_pkts_rcvd_per_round
     static unsigned int const   DEFAULT_MAX_PKTS_RVCD_PER_ROUND = 16;
+
     // flag for RX reception on socket
     bool                        rx_disabled;
+
+    // flag for TX reception on socket
+    bool                        tx_disabled;
 
 	/*
 	 * scheduler and txqueues
 	 */
 
+    // number of packets waiting for transmission
+    unsigned int                txqueue_pending_pkts;
+
+    // size of tx queue when congestion occured
+    unsigned int                txqueue_size_congestion_occured;
+
+    // size of tx queue for reallowing transmissions
+    unsigned int                txqueue_size_tx_threshold;
+
 	// QUEUE_MAX txqueues
 	std::vector<crofqueue>		txqueues;
+
 	// relative scheduling weights for txqueues
 	std::vector<unsigned int>	txweights;
 
-	enum rofl::csocket::socket_type_t
-								socket_type;
+	/*
+	 * sending messages
+	 */
 
-	rofl::cparams 				socket_params;
+	// txthread is actively sending messages
+	bool                        tx_is_running;
 
-	int							sd;
+	// fragment pending
+	bool                        tx_fragment_pending;
 
-	std::deque<enum crofsock_event_t>
-								events;
+	// transmission buffer for packing cofmsg instances
+	cmemory                     txbuffer;
 
-	PthreadRwLock				rofsock_lock;
+	// number of bytes already sent for current message fragment
+	unsigned int				msg_bytes_sent;
+
+	// message length of current tx-fragment
+	size_t                      txlen;
 };
 
 } /* namespace rofl */
 
-#endif /* CROFENDPNT_H_ */
+#endif /* CROFSOCK_H_ */

@@ -3,7 +3,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #include "caddress.h"
-#include "large_types.h"
 
 using namespace rofl;
 
@@ -42,7 +41,7 @@ void
 caddress_ll::str2addr(
 		const std::string& addr)
 {
-    sscanf(addr.c_str(), "%"SCNx8":%"SCNx8":%"SCNx8":%"SCNx8":%"SCNx8":%"SCNx8,
+    sscanf(addr.c_str(), "%" SCNx8":%" SCNx8":%" SCNx8":%" SCNx8":%" SCNx8":%" SCNx8,
                     (uint8_t*)&((*this)[0]),
                     (uint8_t*)&((*this)[1]),
                     (uint8_t*)&((*this)[2]),

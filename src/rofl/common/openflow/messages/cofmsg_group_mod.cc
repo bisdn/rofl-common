@@ -2,158 +2,71 @@
 
 using namespace rofl::openflow;
 
-cofmsg_group_mod::cofmsg_group_mod(
-		uint8_t ofp_version, uint32_t xid, const cofgroupmod& groupmod) :
-				cofmsg(ofp_version, xid, rofl::openflow::OFPT_GROUP_MOD),
-				groupmod(groupmod)
-{
-	this->groupmod.set_version(ofp_version);
-}
-
-
-
-cofmsg_group_mod::cofmsg_group_mod(
-		cmemory *memarea) :
-	cofmsg(memarea),
-	groupmod(get_version())
-{
-
-}
-
-
-
-cofmsg_group_mod::cofmsg_group_mod(
-		const cofmsg_group_mod& groupmod)
-{
-	*this = groupmod;
-}
-
-
-
-cofmsg_group_mod&
-cofmsg_group_mod::operator= (
-		const cofmsg_group_mod& msg)
-{
-	if (this == &msg)
-		return *this;
-
-	cofmsg::operator= (msg);
-
-	groupmod	= msg.groupmod;
-
-	return *this;
-}
-
-
-
-cofmsg_group_mod::~cofmsg_group_mod()
-{
-
-}
-
-
-
-void
-cofmsg_group_mod::reset()
-{
-	cofmsg::reset();
-	groupmod.clear();
-}
-
-
-
 size_t
 cofmsg_group_mod::length() const
 {
-	switch (ofh_header->version) {
-	case openflow12::OFP_VERSION:
-	case openflow13::OFP_VERSION: {
-		return sizeof(struct rofl::openflow::ofp_header) + groupmod.length();
-	} break;
-	default:
-		throw eBadVersion();
-	}
-	return 0;
+	return cofmsg::length() + groupmod.length();
 }
 
 
 
 void
-cofmsg_group_mod::pack(uint8_t *buf, size_t buflen)
+cofmsg_group_mod::pack(
+		uint8_t *buf, size_t buflen)
 {
-	set_length(length());
+	cofmsg::pack(buf, buflen);
 
 	if ((0 == buf) || (0 == buflen))
 		return;
 
-	if (buflen < length())
-		throw eInval();
+	if (buflen < cofmsg_group_mod::length())
+		throw eMsgInval("cofmsg_group_mod::pack()");
 
 	switch (get_version()) {
-	case openflow12::OFP_VERSION:
-	case openflow13::OFP_VERSION: {
+	default: {
 
-		cofmsg::pack(buf, buflen);
-
-		struct rofl::openflow::ofp_header* hdr = (struct rofl::openflow::ofp_header*)buf;
+		struct rofl::openflow::ofp_header* hdr =
+				(struct rofl::openflow::ofp_header*)buf;
 
 		groupmod.pack(hdr->body, groupmod.length());
-
-	} break;
-	default:
-		throw eBadVersion();
+	};
 	}
 }
 
 
 
 void
-cofmsg_group_mod::unpack(uint8_t *buf, size_t buflen)
+cofmsg_group_mod::unpack(
+		uint8_t *buf, size_t buflen)
 {
 	cofmsg::unpack(buf, buflen);
 
-	validate();
-}
-
-
-
-void
-cofmsg_group_mod::validate()
-{
-	cofmsg::validate(); // check generic OpenFlow header
-
+	groupmod.set_version(get_version());
 	groupmod.clear();
 
+	if ((0 == buf) || (0 == buflen))
+		return;
+
+	if (buflen < cofmsg_group_mod::length())
+		throw eBadRequestBadLen("cofmsg_group_mod::unpack() buf too short");
+
 	switch (get_version()) {
-	case openflow12::OFP_VERSION:
-	case openflow13::OFP_VERSION: {
+	default: {
 
-		if (cofmsg::framelen() < length())
-			throw eInval("cofmsg_group_mod::validate() framelen too short");
+		if (get_type() != rofl::openflow::OFPT_GROUP_MOD)
+			throw eMsgInval("cofmsg_group_mod::unpack() invalid message type");
 
-		struct rofl::openflow::ofp_header* hdr = (struct rofl::openflow::ofp_header*)(cofmsg::soframe());
+		struct rofl::openflow::ofp_header* hdr =
+				(struct rofl::openflow::ofp_header*)buf;
 
-		size_t groupmodlen = cofmsg::framelen() - sizeof(struct rofl::openflow::ofp_header);
-
-		if (groupmodlen > 0) {
-			groupmod.unpack(hdr->body, groupmodlen);
+		if (buflen > sizeof(struct rofl::openflow::ofp_header)) {
+			groupmod.unpack(hdr->body, buflen - sizeof(struct rofl::openflow::ofp_header));
 		}
-
-	} break;
-	default:
-		throw eBadRequestBadVersion();
+	};
 	}
+
+	if (get_length() < cofmsg_group_mod::length())
+		throw eBadRequestBadLen("cofmsg_group_mod::unpack() buf too short");
 }
-
-
-
-void
-cofmsg_group_mod::check_prerequisites() const
-{
-
-}
-
-
-
 
 

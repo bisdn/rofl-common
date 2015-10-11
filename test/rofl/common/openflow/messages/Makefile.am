@@ -1,24 +1,40 @@
 MAINTAINERCLEANFILES = Makefile.in
 
-SUBDIRS = 
+#Subdirs; place '.' before any directory to force the current directory to
+#be compiled before the subdirs.
+SUBDIRS = \
+	cofmsgaggrstats \
+	cofmsgdescstats \
+	cofmsgexperimenterstats \
+	cofmsgflowstats \
+	cofmsggroupdescstats \
+	cofmsggroupfeaturesstats \
+	cofmsggroupstats \
+	cofmsgmeterconfigstats \
+	cofmsgmeterfeaturesstats \
+	cofmsgmeterstats \
+	cofmsgportdescstats \
+	cofmsgportstats \
+	cofmsgqueuestats \
+	cofmsgtablefeaturesstats \
+	cofmsgtablestats \
+	cofmsgasyncconfig \
+	cofmsgbarrier \
+	cofmsgconfig \
+	cofmsgecho \
+	cofmsgerror \
+	cofmsgexperimenter \
+	cofmsgfeatures \
+	cofmsgflowmod \
+	cofmsgflowremoved \
+	cofmsggroupmod \
+	cofmsghello \
+	cofmsgmetermod \
+	cofmsgpacketin \
+	cofmsgpacketout \
+	cofmsgportmod \
+	cofmsgportstatus \
+	cofmsgqueueconfig \
+	cofmsgrole \
+	cofmsgtablemod
 
-unittest_SOURCES= \
-	unittest.cc \
-	cofmsgtablefeatures_test.cc \
-	cofmsgtablefeatures_test.h \
-	cofmsgmetermod_test.cc \
-	cofmsgmetermod_test.h \
-	cofmsgmeterfeatures_test.cc \
-	cofmsgmeterfeatures_test.h \
-	cofmsgmeterconfig_test.cc \
-	cofmsgmeterconfig_test.h \
-	cofmsgmeterstats_test.cc \
-	cofmsgmeterstats_test.h \
-	cofmsgflowmod_test.cc \
-	cofmsgflowmod_test.h
-
-unittest_LDADD=$(top_builddir)/src/rofl/librofl_common.la -lcppunit
-
-check_PROGRAMS=unittest 
-
-TESTS=unittest

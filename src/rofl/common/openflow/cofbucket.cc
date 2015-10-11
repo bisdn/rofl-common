@@ -144,7 +144,7 @@ void
 cofbucket::unpack_of12(uint8_t* buf, size_t buflen)
 {
 	if (buflen < sizeof(struct openflow12::ofp_bucket))
-		throw eBucketBadLen();
+		return;
 
 	struct openflow12::ofp_bucket* bucket = (struct openflow12::ofp_bucket*)buf;
 
@@ -186,7 +186,7 @@ void
 cofbucket::unpack_of13(uint8_t *buf, size_t buflen)
 {
 	if (buflen < sizeof(struct openflow13::ofp_bucket))
-		throw eBucketBadLen();
+		return;
 
 	struct openflow13::ofp_bucket* bucket = (struct openflow13::ofp_bucket*)buf;
 

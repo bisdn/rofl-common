@@ -22,12 +22,8 @@
 #include <sys/uio.h>
 #include <assert.h>
 
-#include "rofl/common/croflexception.h"
-#include "rofl/common/cclock.h"
-#include "rofl/common/fframe.h"
 #include "rofl/common/cmemory.h"
-#include "rofl/common/thread_helper.h"
-
+#include "rofl/common/croflexception.h"
 #include "rofl/common/openflow/openflow.h"
 
 namespace rofl {
@@ -133,7 +129,7 @@ public:
 	 *
 	 */
 	bool
-	operator== (const cpacket& p) {
+	operator== (const cpacket& p) const {
 		if (length() != p.length())
 			return false;
 		return (not (memcmp(soframe(), p.soframe(), length())));
@@ -143,7 +139,7 @@ public:
 	 *
 	 */
 	bool
-	operator== (const cmemory& m) {
+	operator== (const cmemory& m) const {
 		if (length() != m.memlen())
 			return false;
 		return (not (memcmp(soframe(), m.somem(), length())));
@@ -338,6 +334,8 @@ public:
 		os << rofl::indent(0) << "<cpacket ";
 		os << "data:" << (void*)pack.soframe() << " ";
 		os << "datalen:" << (int)pack.length() << " ";
+		os << "head:" << (int)pack.head << " ";
+		os << "tail:" << (int)pack.tail << " ";
 		os << ">" << std::endl;
 		rofl::indent i(2);
 
