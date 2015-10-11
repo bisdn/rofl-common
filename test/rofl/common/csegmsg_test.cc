@@ -6,30 +6,30 @@
 #include "csegmsg_test.h"
 
 
-CPPUNIT_TEST_SUITE_REGISTRATION( csegmsg_test );
+CPPUNIT_TEST_SUITE_REGISTRATION( csegment_test );
 
 #if defined DEBUG
 #undef DEBUG
 #endif
 
 void
-csegmsg_test::setUp()
+csegment_test::setUp()
 {
 }
 
 
 
 void
-csegmsg_test::tearDown()
+csegment_test::tearDown()
 {
 }
 
 
 
 void
-csegmsg_test::testStoreAndMerge()
+csegment_test::testStoreAndMerge()
 {
-	rofl::csegmsg segmsg(0x11121314);
+	rofl::csegment segmsg(0x11121314, rofl::ctimespec().expire_in(8));
 
 	/*
 	 * first message
@@ -114,9 +114,9 @@ csegmsg_test::testStoreAndMerge()
 
 
 void
-csegmsg_test::testRetrieveAndDetach()
+csegment_test::testRetrieveAndDetach()
 {
-	rofl::csegmsg segmsg(0x11121314);
+	rofl::csegment segmsg(0x11121314, rofl::ctimespec().expire_in(8));
 
 	/*
 	 * first message

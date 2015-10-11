@@ -1,18 +1,22 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 /*
- * csegmsg.h
+ * csegment.hpp
  *
  *  Created on: 13.03.2014
  *      Author: andreas
  */
 
-#ifndef CSEGMSG_H_
-#define CSEGMSG_H_
+#ifndef CSEGMENT_HPP_
+#define CSEGMENT_HPP_
 
 #include <inttypes.h>
 
 #include <iostream>
 
-#include "rofl/common/cclock.h"
+#include "rofl/common/ctimespec.hpp"
 #include "rofl/common/logging.h"
 #include "rofl/common/croflexception.h"
 #include "rofl/common/openflow/messages/cofmsg_stats.h"
@@ -37,43 +41,63 @@ class eSegmentedMessageBase			: public RoflException {};
 class eSegmentedMessageInval		: public eSegmentedMessageBase {};
 class eSegmentedMessageNotFound		: public eSegmentedMessageBase {};
 
-class csegmsg {
-
-	cclock					expires_at;	// time this cmultipart message will expire
-	uint32_t 				xid;		// transaction id used by this multipart message
-	rofl::openflow::cofmsg* msg;		// stitched multipart message, allocated on heap
-
-	static time_t const DEFAULT_EXPIRATION_DELTA_SEC 	= 8;
-	static time_t const DEFAULT_EXPIRATION_DELTA_NSEC 	= 0;
-
+class csegment {
 public:
 
 	/**
 	 *
 	 */
-	csegmsg();
-
-	/**
-	 *
-	 */
-	csegmsg(uint32_t xid);
-
-	/**
-	 *
-	 */
 	virtual
-	~csegmsg();
+	~csegment() {
+		if (nullptr != msg) {
+			delete msg;
+		}
+	};
 
 	/**
 	 *
 	 */
-	csegmsg(csegmsg const& segmsg);
+	csegment() :
+		xid(0),
+		msg(nullptr)
+	{};
 
 	/**
 	 *
 	 */
-	csegmsg&
-	operator= (csegmsg const& segmsg);
+	csegment(
+			uint32_t xid,
+			const ctimespec& tspec) :
+				tspec(tspec),
+				xid(xid),
+				msg(nullptr)
+	{};
+
+	/**
+	 *
+	 */
+	csegment(
+			const csegment& segment)
+	{ *this = segment; }
+
+
+	/**
+	 *
+	 */
+	csegment&
+	operator= (
+			const csegment& segment) {
+		if (this == &segment)
+			return *this;
+		tspec       = segment.tspec;
+		xid			= segment.xid;
+		if (NULL != segment.msg) {
+			csegment::clone(*(segment.msg));
+		} else {
+			msg 	= NULL;
+		}
+		return *this;
+	};
 
 public:
 
@@ -81,20 +105,15 @@ public:
 	 *
 	 */
 	bool
-	has_expired() const;
-
-	/**
-	 *
-	 */
-	void
-	set_expiration_in(
-			time_t delta_sec = 0, time_t delta_nsec = 0);
+	is_expired() const
+	{ return tspec.is_expired(); };
 
 	/**
 	 *
 	 */
 	uint32_t
-	get_xid() const { return xid; };
+	get_xid() const
+	{ return xid; };
 
 	/**
 	 *
@@ -133,11 +152,25 @@ private:
 
 public:
 
+	/**
+	 *
+	 */
+	class csegment_is_expired {
+	public:
+		csegment_is_expired()
+		{};
+		bool
+		operator() (const std::pair<uint32_t, csegment>& p) const
+		{ return p.second.is_expired(); };
+	};
+
+public:
+
 	friend std::ostream&
-	operator<< (std::ostream& os, const csegmsg& msg) {
-		os << rofl::indent(0) << "<csegmsg" << " >" << std::endl;
+	operator<< (std::ostream& os, const csegment& msg) {
+		os << rofl::indent(0) << "<csegment" << " >" << std::endl;
 		os << rofl::indent(2) << "<expires: >" << std::endl;
-		{ rofl::indent i(4); os << msg.expires_at; }
+		{ rofl::indent i(4); os << msg.tspec; }
 		os << rofl::indent(2) << "<xid: 0x" << std::hex << (int)msg.xid << std::dec << " >" << std::endl;
 		rofl::indent i(2);
 
@@ -248,8 +281,19 @@ public:
 		}
 		return os;
 	};
+
+private:
+
+	// time this fragmented OpenFlow message will expire
+	ctimespec               tspec;
+
+	// transaction id used by this fragmented OpenFlow message
+	uint32_t 				xid;
+
+	// stitched multipart message, allocated on heap
+	rofl::openflow::cofmsg* msg;
 };
 
 }; // end of namespace rofl
 
-#endif /* CMULTIPART_H_ */
+#endif /* CSEGMENT_HPP_ */

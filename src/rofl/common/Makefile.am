@@ -53,10 +53,8 @@ librofl_common_base_la_SOURCES = \
 		cindex.h \
 		cdpid.h \
 		crofqueue.h \
-		csegmentation.h \
-		csegmentation.cc \
-		csegmsg.h \
-		csegmsg.cc
+		csegment.hpp \
+		csegment.cpp
 
 		
 
@@ -78,8 +76,7 @@ library_include_HEADERS= \
 		croflexception.h \
 		cmemory.h \
 		thread_helper.h \
-		csegmentation.h \
-		csegmsg.h \
+		csegment.hpp \
 		cauxid.h \
 		cctlid.h \
 		cdptid.h \

@@ -1,86 +1,20 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 /*
- * csegmsg.cc
+ * csegment.cpp
  *
  *  Created on: 13.03.2014
  *      Author: andreas
  */
 
-#include "rofl/common/csegmsg.h"
+#include "rofl/common/csegment.hpp"
 
 using namespace rofl;
 
-csegmsg::csegmsg() :
-	xid(0),
-	msg(NULL)
-{
-	set_expiration_in(DEFAULT_EXPIRATION_DELTA_SEC, DEFAULT_EXPIRATION_DELTA_NSEC);
-}
-
-
-
-csegmsg::csegmsg(uint32_t xid) :
-	xid(xid),
-	msg(NULL)
-{
-	set_expiration_in(DEFAULT_EXPIRATION_DELTA_SEC, DEFAULT_EXPIRATION_DELTA_NSEC);
-}
-
-
-
-csegmsg::~csegmsg()
-{
-	if (NULL != msg) {
-		delete msg;
-	}
-}
-
-
-
-csegmsg::csegmsg(csegmsg const& segmsg)
-{
-	*this = segmsg;
-}
-
-
-
-csegmsg&
-csegmsg::operator= (csegmsg const& segmsg)
-{
-	if (this == &segmsg)
-		return *this;
-
-	expires_at	= segmsg.expires_at;
-	xid			= segmsg.xid;
-
-	if (NULL != segmsg.msg) {
-		csegmsg::clone(*(segmsg.msg));
-	} else {
-		msg 	= NULL;
-	}
-
-	return *this;
-}
-
-
-
-bool
-csegmsg::has_expired() const
-{
-	return (cclock::now() > expires_at);
-}
-
-
-
 void
-csegmsg::set_expiration_in(time_t delta_sec, time_t delta_nsec)
-{
-	expires_at = cclock::now() + cclock(delta_sec, delta_nsec);
-}
-
-
-
-void
-csegmsg::clone(
+csegment::clone(
 		const rofl::openflow::cofmsg& msg_stats)
 {
 	if (NULL != msg) { delete msg; msg = NULL; }
@@ -226,12 +160,12 @@ csegmsg::clone(
 
 
 void
-csegmsg::store_and_merge_msg(
+csegment::store_and_merge_msg(
 		const rofl::openflow::cofmsg& msg_stats)
 {
 	if (NULL == msg) {
 
-		csegmsg::clone(msg_stats);
+		csegment::clone(msg_stats);
 
 	} else {
 
@@ -413,7 +347,7 @@ csegmsg::store_and_merge_msg(
 
 
 rofl::openflow::cofmsg*
-csegmsg::retrieve_and_detach_msg()
+csegment::retrieve_and_detach_msg()
 {
 	rofl::openflow::cofmsg* tmp = msg; msg = NULL; return tmp;
 }

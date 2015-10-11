@@ -22,7 +22,7 @@
 #include "rofl/common/openflow/cofhelloelems.h"
 #include "rofl/common/openflow/cofhelloelemversionbitmap.h"
 #include "rofl/common/crandom.h"
-#include "rofl/common/csegmentation.h"
+#include "rofl/common/csegment.hpp"
 #include "rofl/common/cauxid.h"
 #include "rofl/common/crofqueue.h"
 
@@ -196,7 +196,8 @@ class crofconn :
 		TIMER_ID_WAIT_FOR_FEATURES = 2,
 		TIMER_ID_WAIT_FOR_ECHO	   = 3,
 		TIMER_ID_NEED_LIFE_CHECK   = 4,
-		TIMER_ID_PENDING_REQUESTS      = 5,
+		TIMER_ID_PENDING_REQUESTS  = 5,
+		TIMER_ID_PENDING_SEGMENTS = 6,
 	};
 
 public:
@@ -336,7 +337,7 @@ public:
 	unsigned int
 	send_message(
 			rofl::openflow::cofmsg *msg)
-	{ return fragment_and_send_message(msg); };
+	{ return segment_and_send_message(msg); };
 
 	/**
 	 * @brief	Send OFP message via socket with expiration timer
@@ -936,84 +937,84 @@ private:
 	 *
 	 */
 	unsigned int
-	fragment_and_send_message(
+	segment_and_send_message(
 			rofl::openflow::cofmsg *msg);
 
 	/**
 	 *
 	 */
 	unsigned int
-	fragment_table_features_stats_request(
+	segment_table_features_stats_request(
 			rofl::openflow::cofmsg_table_features_stats_request *msg);
 
 	/**
 	 *
 	 */
 	unsigned int
-	fragment_flow_stats_reply(
+	segment_flow_stats_reply(
 			rofl::openflow::cofmsg_flow_stats_reply *msg);
 
 	/**
 	 *
 	 */
 	unsigned int
-	fragment_table_stats_reply(
+	segment_table_stats_reply(
 			rofl::openflow::cofmsg_table_stats_reply *msg);
 
 	/**
 	 *
 	 */
 	unsigned int
-	fragment_port_stats_reply(
+	segment_port_stats_reply(
 			rofl::openflow::cofmsg_port_stats_reply *msg);
 
 	/**
 	 *
 	 */
 	unsigned int
-	fragment_queue_stats_reply(
+	segment_queue_stats_reply(
 			rofl::openflow::cofmsg_queue_stats_reply *msg);
 
 	/**
 	 *
 	 */
 	unsigned int
-	fragment_group_stats_reply(
+	segment_group_stats_reply(
 			rofl::openflow::cofmsg_group_stats_reply *msg);
 
 	/**
 	 *
 	 */
 	unsigned int
-	fragment_group_desc_stats_reply(
+	segment_group_desc_stats_reply(
 			rofl::openflow::cofmsg_group_desc_stats_reply *msg);
 
 	/**
 	 *
 	 */
 	unsigned int
-	fragment_table_features_stats_reply(
+	segment_table_features_stats_reply(
 			rofl::openflow::cofmsg_table_features_stats_reply *msg);
 
 	/**
 	 *
 	 */
 	unsigned int
-	fragment_port_desc_stats_reply(
+	segment_port_desc_stats_reply(
 			rofl::openflow::cofmsg_port_desc_stats_reply *msg);
 
 	/**
 	 *
 	 */
 	unsigned int
-	fragment_meter_stats_reply(
+	segment_meter_stats_reply(
 			rofl::openflow::cofmsg_meter_stats_reply *msg);
 
 	/**
 	 *
 	 */
 	unsigned int
-	fragment_meter_config_stats_reply(
+	segment_meter_config_stats_reply(
 			rofl::openflow::cofmsg_meter_config_stats_reply *msg);
 
 private:
@@ -1117,6 +1118,16 @@ private:
 	 *
 	 */
 	void
+	clear_pending_requests() {
+		AcquireReadWriteLock rwlock(pending_requests_rwlock);
+		pending_requests.clear();
+		thread.drop_timer(TIMER_ID_PENDING_REQUESTS);
+	};
+
+	/**
+	 *
+	 */
+	void
 	add_pending_request(
 			uint32_t xid, const ctimespec& ts, uint8_t type, uint16_t sub_type = 0) {
 		AcquireReadWriteLock rwlock(pending_requests_rwlock);
@@ -1192,6 +1203,107 @@ private:
 
 private:
 
+	/**
+	 *
+	 */
+	void
+	clear_pending_segments() {
+		AcquireReadWriteLock rwlock(pending_segments_rwlock);
+		pending_segments.clear();
+		thread.drop_timer(TIMER_ID_PENDING_SEGMENTS);
+	};
+
+	/**
+	 *
+	 */
+	csegment&
+	add_pending_segment(
+			uint32_t xid) {
+		AcquireReadWriteLock rwlock(pending_segments_rwlock);
+		if (not (pending_segments.size() < pending_segments_max)) {
+			throw eRofConnInvalid("crofconn::add_pending_segment() too many segments in transit, dropping");
+		}
+		pending_segments[xid] = csegment(xid, ctimespec().expire_in(timeout_segments));
+		if (not thread.has_timer(TIMER_ID_PENDING_SEGMENTS)) {
+			thread.add_timer(TIMER_ID_PENDING_SEGMENTS, ctimespec().expire_in(timeout_segments));
+		}
+		return pending_segments[xid];
+	};
+
+	/**
+	 *
+	 */
+	csegment&
+	set_pending_segment(
+			uint32_t xid) {
+		AcquireReadWriteLock rwlock(pending_segments_rwlock);
+		if (not (pending_segments.size() < pending_segments_max)) {
+			throw eRofConnInvalid("crofconn::set_pending_segment() too many segments in transit, dropping");
+		}
+		if (pending_segments.find(xid) == pending_segments.end()) {
+			pending_segments[xid] = csegment(xid, ctimespec().expire_in(timeout_segments));
+		}
+		if (not thread.has_timer(TIMER_ID_PENDING_SEGMENTS)) {
+			thread.add_timer(TIMER_ID_PENDING_SEGMENTS, ctimespec().expire_in(timeout_segments));
+		}
+		return pending_segments[xid];
+	};
+
+	/**
+	 *
+	 */
+	const csegment&
+	get_pending_segment(
+			uint32_t xid) const {
+		AcquireReadLock rlock(pending_segments_rwlock);
+		if (pending_segments.find(xid) == pending_segments.end()) {
+			throw eRofConnNotFound("crofconn::get_pending_segment() xid not found");
+		}
+		return pending_segments.at(xid);
+	};
+
+	/**
+	 *
+	 */
+	bool
+	drop_pending_segment(
+			uint32_t xid) {
+		AcquireReadWriteLock rwlock(pending_segments_rwlock);
+		if (pending_segments.find(xid) == pending_segments.end()) {
+			return false;
+		}
+		pending_segments.erase(xid);
+		return true;
+	};
+
+	/**
+	 *
+	 */
+	bool
+	has_pending_segment(
+			uint32_t xid) const {
+		AcquireReadLock rlock(pending_segments_rwlock);
+		return (not (pending_segments.find(xid) == pending_segments.end()));
+	};
+
+	/**
+	 *
+	 */
+	void
+	check_pending_segments() {
+		AcquireReadWriteLock rwlock(pending_segments_rwlock);
+		std::map<uint32_t, csegment>::iterator it;
+		while ((it = find_if(pending_segments.begin(), pending_segments.end(),
+				csegment::csegment_is_expired())) != pending_segments.end()) {
+			pending_segments.erase(it);
+		}
+		if (not pending_segments.empty()) {
+			thread.add_timer(TIMER_ID_PENDING_SEGMENTS, ctimespec().expire_in(timeout_segments));
+		}
+	};
+
+private:
+
 	// environment for this instance
 	crofconn_env* 		        env;
 
@@ -1241,32 +1353,29 @@ private:
     size_t                      rxqueue_max_size;
 	static const int            RXQUEUE_MAX_SIZE_DEFAULT;
 
-	// segmentation and reassembly for multipart messages
-	csegmentation		        sar;
+	// maximum number of bytes for a multipart message before being segmented
+	size_t				        segmentation_threshold;
 
-	// maximum number of bytes for a multipart message before being fragmented
-	size_t				        fragmentation_threshold;
-
-	// default fragmentation threshold: 65535 bytes
-	static const unsigned int   DEFAULT_FRAGMENTATION_THRESHOLD;
+	// default segmentation threshold: 65535 bytes
+	static const unsigned int   DEFAULT_SEGMENTATION_THRESHOLD;
 
 	// timeout value for HELLO messages
-	unsigned int		        timeout_hello;
-	static const unsigned int   DEFAULT_HELLO_TIMEOUT;
+	time_t                      timeout_hello;
+	static const time_t         DEFAULT_HELLO_TIMEOUT;
 
 	// timeout value for FEATURES.request messages
-	unsigned int		        timeout_features;
-	static const unsigned int   DEFAULT_FEATURES_TIMEOUT;
+	time_t                      timeout_features;
+	static const time_t         DEFAULT_FEATURES_TIMEOUT;
 
 	// timeout value for ECHO.request messages
-	unsigned int		        timeout_echo;
-	static const unsigned int   DEFAULT_ECHO_TIMEOUT;
+	time_t                      timeout_echo;
+	static const time_t         DEFAULT_ECHO_TIMEOUT;
 
 	// timeout value for lifecheck
-	unsigned int		        timeout_lifecheck;
-	static const unsigned int   DEFAULT_LIFECHECK_TIMEOUT;
+	time_t                      timeout_lifecheck;
+	static const time_t         DEFAULT_LIFECHECK_TIMEOUT;
 
-	// set of pending transactions
+	// set of pending requests
 	std::set<ctransaction>      pending_requests;
 
 	// .. and associated rwlock
@@ -1280,6 +1389,20 @@ private:
 
 	// echo request xid
 	uint32_t                    xid_echo_request_last;
+
+	// set of pending OpenFlow message segments
+	std::map<uint32_t, csegment> pending_segments;
+
+	// ... and associated rwlock
+	crwlock                     pending_segments_rwlock;
+
+	// timeout value for pending segments
+	time_t                      timeout_segments;
+	static const time_t         DEFAULT_SEGMENTS_TIMEOUT;
+
+	// maximum number of pending segments in parallel
+	unsigned int                pending_segments_max;
+	static const unsigned int   DEFAULT_PENDING_SEGMENTS_MAX;
 };
 
 }; /* namespace rofl */
