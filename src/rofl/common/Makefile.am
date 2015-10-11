@@ -82,8 +82,7 @@ library_include_HEADERS= \
 		caddrinfos.h \
 		cindex.h \
 		cdpid.h \
-		crofqueue.h \
-		ctspaddress.h
+		crofqueue.h
 
 
 AM_CPPFLAGS=-fPIC

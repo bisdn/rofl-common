@@ -8,6 +8,11 @@ Legend:
 Change log
 ==========
 
+v0.10.0
+
+[+] revised workflow
+[+] enhanced flow control
+
 v0.7.0
 
 [+] New internal threading model, running rofl's main ioloop by 
