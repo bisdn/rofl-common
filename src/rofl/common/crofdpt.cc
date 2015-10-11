@@ -190,7 +190,7 @@ void
 crofdpt::handle_transaction_timeout(
 		crofchan& chan, crofconn& conn, uint32_t xid, uint8_t type, uint16_t sub_type)
 {
-	std::cerr << "[rofl-common][crofdpt] transaction expired, xid:" << std::endl;
+	std::cerr << "[rofl-common][crofdpt] transaction expired, xid: 0x" << std::hex << (unsigned int)xid << std::dec << std::endl;
 
 	try {
 		switch (get_version()) {

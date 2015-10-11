@@ -69,6 +69,17 @@ private:
 			const rofl::cauxid& auxid,
 			rofl::openflow::cofmsg_port_desc_stats_reply& msg);
 
+	virtual void
+	handle_barrier_reply(
+			rofl::crofdpt& dpt,
+			const rofl::cauxid& auxid,
+			rofl::openflow::cofmsg_barrier_reply& msg);
+
+	virtual void
+	handle_barrier_reply_timeout(
+			rofl::crofdpt& dpt,
+			uint32_t xid);
+
 private:
 
 	rofl::openflow::cofhello_elem_versionbitmap vbitmap;
@@ -134,6 +145,12 @@ private:
 			rofl::crofctl& ctl,
 			const rofl::cauxid& auxid,
 			rofl::openflow::cofmsg_port_desc_stats_request& msg);
+
+	virtual void
+	handle_barrier_request(
+			rofl::crofctl& ctl,
+			const rofl::cauxid& auxid,
+			rofl::openflow::cofmsg_barrier_request& msg);
 
 private:
 

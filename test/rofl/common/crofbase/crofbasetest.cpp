@@ -197,6 +197,19 @@ cdatapath::handle_get_config_request(
 
 
 void
+cdatapath::handle_barrier_request(
+		rofl::crofctl& ctl,
+		const rofl::cauxid& auxid,
+		rofl::openflow::cofmsg_barrier_request& msg)
+{
+	std::cerr << ">>> XXX -Barrier-Request- rcvd" << std::endl;
+
+	/* do not send barrier-reply back => wait for request timeout at controller */
+}
+
+
+
+void
 ccontroller::handle_get_config_reply(
 		rofl::crofdpt& dpt,
 		const rofl::cauxid& auxid,
@@ -257,6 +270,33 @@ ccontroller::handle_port_desc_stats_reply(
 		rofl::openflow::cofmsg_port_desc_stats_reply& msg)
 {
 	std::cerr << ">>> XXX -Port-Desc-Stats-Reply- rcvd" << std::endl;
+
+	for (int i = 0; i < 4; i++) {
+		dpt.send_barrier_request(auxid);
+	}
+}
+
+
+
+void
+ccontroller::handle_barrier_reply(
+		rofl::crofdpt& dpt,
+		const rofl::cauxid& auxid,
+		rofl::openflow::cofmsg_barrier_reply& msg)
+{
+	std::cerr << ">>> XXX -Barrier-Reply- rcvd" << std::endl;
+
+	CPPUNIT_ASSERT(false);
+}
+
+
+
+void
+ccontroller::handle_barrier_reply_timeout(
+		rofl::crofdpt& dpt,
+		uint32_t xid)
+{
+	std::cerr << ">>> XXX -Barrier-Reply-Timeout rcvd" << std::endl;
 
 	__keep_running = false;
 }
