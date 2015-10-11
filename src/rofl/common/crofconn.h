@@ -689,6 +689,23 @@ public:
 
 public:
 
+	/**
+	 *
+	 */
+	unsigned int
+	get_pending_segments_max() const
+	{ return pending_segments_max; };
+
+	/**
+	 *
+	 */
+	crofconn&
+	set_pending_segments_max(
+			unsigned int pending_segments_max)
+	{ this->pending_segments_max = pending_segments_max; return *this; };
+
+public:
+
 	friend std::ostream&
 	operator<< (std::ostream& os, const crofconn& conn) {
 		os << indent(0) << "<crofconn ofp-version:" << (int)conn.ofp_version << " "
@@ -1305,19 +1322,19 @@ private:
 private:
 
 	// environment for this instance
-	crofconn_env* 		        env;
+	crofconn_env*                   env;
 
 	// internal thread for application specific context
-	cthread                     thread;
+	cthread                         thread;
 
 	// crofsock instance
-	crofsock                    rofsock;
+	crofsock                        rofsock;
 
 	// OpenFlow datapath id
-	uint64_t			        dpid;
+	uint64_t                        dpid;
 
 	// connection identifier
-	cauxid				        auxid;
+	cauxid                          auxid;
 
 	// bitmap of acceptable OpenFlow versions
 	rofl::openflow::cofhello_elem_versionbitmap versionbitmap;
@@ -1326,83 +1343,83 @@ private:
 	rofl::openflow::cofhello_elem_versionbitmap versionbitmap_peer;
 
 	// OpenFlow version negotiated
-	uint8_t				        ofp_version;
+	uint8_t                         ofp_version;
 
 	// random number generator
-	crandom                     random;
+	crandom                         random;
 
 	// internal flags
-	std::bitset<32>		        flags;
+	std::bitset<32>                 flags;
 
 	// acts in controller or datapath mode (orthogonal to TCP client/server mode)
-	enum crofconn_mode_t        mode;
+	enum crofconn_mode_t            mode;
 
 	// internal state of finite state machine
-	enum crofconn_state_t       state;
+	enum crofconn_state_t           state;
 
 	// relative scheduling weights for rxqueues
-	std::vector<unsigned int>   rxweights;
+	std::vector<unsigned int>       rxweights;
 
 	// queues for storing received messages
-	std::vector<crofqueue>      rxqueues;
+	std::vector<crofqueue>          rxqueues;
 
 	// internal thread is working on pending messages
-	bool                        rx_thread_working;
+	bool                            rx_thread_working;
 
     // max size of rx queue
-    size_t                      rxqueue_max_size;
-	static const int            RXQUEUE_MAX_SIZE_DEFAULT;
+    size_t                          rxqueue_max_size;
+	static const int                RXQUEUE_MAX_SIZE_DEFAULT;
 
 	// maximum number of bytes for a multipart message before being segmented
-	size_t				        segmentation_threshold;
+	size_t                          segmentation_threshold;
 
 	// default segmentation threshold: 65535 bytes
-	static const unsigned int   DEFAULT_SEGMENTATION_THRESHOLD;
+	static const unsigned int       DEFAULT_SEGMENTATION_THRESHOLD;
 
 	// timeout value for HELLO messages
-	time_t                      timeout_hello;
-	static const time_t         DEFAULT_HELLO_TIMEOUT;
+	time_t                          timeout_hello;
+	static const time_t             DEFAULT_HELLO_TIMEOUT;
 
 	// timeout value for FEATURES.request messages
-	time_t                      timeout_features;
-	static const time_t         DEFAULT_FEATURES_TIMEOUT;
+	time_t                          timeout_features;
+	static const time_t             DEFAULT_FEATURES_TIMEOUT;
 
 	// timeout value for ECHO.request messages
-	time_t                      timeout_echo;
-	static const time_t         DEFAULT_ECHO_TIMEOUT;
+	time_t                          timeout_echo;
+	static const time_t             DEFAULT_ECHO_TIMEOUT;
 
 	// timeout value for lifecheck
-	time_t                      timeout_lifecheck;
-	static const time_t         DEFAULT_LIFECHECK_TIMEOUT;
+	time_t                          timeout_lifecheck;
+	static const time_t             DEFAULT_LIFECHECK_TIMEOUT;
 
 	// set of pending requests
-	std::set<ctransaction>      pending_requests;
+	std::set<ctransaction>          pending_requests;
 
 	// .. and associated rwlock
-	crwlock                     pending_requests_rwlock;
+	crwlock                         pending_requests_rwlock;
 
 	// hello xid
-	uint32_t                    xid_hello_last;
+	uint32_t                        xid_hello_last;
 
 	// features request xid
-	uint32_t                    xid_features_request_last;
+	uint32_t                        xid_features_request_last;
 
 	// echo request xid
-	uint32_t                    xid_echo_request_last;
+	uint32_t                        xid_echo_request_last;
 
 	// set of pending OpenFlow message segments
-	std::map<uint32_t, csegment> pending_segments;
+	std::map<uint32_t, csegment>    pending_segments;
 
 	// ... and associated rwlock
-	crwlock                     pending_segments_rwlock;
+	crwlock                         pending_segments_rwlock;
 
 	// timeout value for pending segments
-	time_t                      timeout_segments;
-	static const time_t         DEFAULT_SEGMENTS_TIMEOUT;
+	time_t                          timeout_segments;
+	static const time_t             DEFAULT_SEGMENTS_TIMEOUT;
 
 	// maximum number of pending segments in parallel
-	unsigned int                pending_segments_max;
-	static const unsigned int   DEFAULT_PENDING_SEGMENTS_MAX;
+	unsigned int                    pending_segments_max;
+	static const unsigned int       DEFAULT_PENDING_SEGMENTS_MAX;
 };
 
 }; /* namespace rofl */
