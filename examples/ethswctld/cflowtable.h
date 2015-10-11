@@ -46,7 +46,7 @@ public:
 	~cflowtable_env()
 	{};
 
-protected:
+public:
 
 	/**
 	 *

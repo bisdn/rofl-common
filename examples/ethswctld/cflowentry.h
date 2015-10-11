@@ -78,7 +78,7 @@ public:
 	~cflowentry_env()
 	{};
 
-protected:
+public:
 
 	/**
 	 * @brief	Called once the timer for this flow entry has expired.

@@ -17,7 +17,6 @@
 #include "rofl/common/openflow/openflow.h"
 #include "rofl/common/cmemory.h"
 #include "rofl/common/croflexception.h"
-#include "rofl/common/thread_helper.h"
 #include "rofl/common/openflow/cofactions.h"
 
 

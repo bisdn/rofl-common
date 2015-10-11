@@ -41,7 +41,6 @@
 #include "rofl/common/cmemory.h"
 #include "rofl/common/logging.h"
 #include "rofl/common/crofqueue.h"
-#include "rofl/common/thread_helper.h"
 #include "rofl/common/cthread.hpp"
 #include "rofl/common/csockaddr.h"
 #include "rofl/common/crandom.h"

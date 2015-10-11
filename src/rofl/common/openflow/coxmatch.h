@@ -25,7 +25,6 @@
 #include "rofl/common/cmemory.h"
 #include "rofl/common/caddress.h"
 #include "rofl/common/logging.h"
-#include "rofl/common/thread_helper.h"
 
 namespace rofl {
 namespace openflow {
