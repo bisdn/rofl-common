@@ -20,6 +20,7 @@
 #include <map>
 
 #include "rofl/common/ctimespec.hpp"
+#include "rofl/common/exception.hpp"
 #include "rofl/common/locking.hpp"
 
 namespace rofl {
@@ -118,16 +119,31 @@ public:
 		return log(severity, tmp);
 	};
 
+	/**
+	 *
+	 */
+	cjrnentry&
+	log(
+			const rofl::exception& e)
+	{
+		set_severity(LOG_EXCEPTION);
+		set_key("event", e.what());
+		for (auto key : e.keys()) {
+			set_key(key, e.get_key(key));
+		}
+		return *this;
+	};
+
 public:
 
 	/**
 	 *
 	 */
 	cjournal_level_t
-	get_errno() const
+	get_severity() const
 	{
 		int severity = 0;
-		std::istringstream ss(get_key("severity")); ss >> severity; return severity;
+		std::istringstream ss(get_key("severity")); ss >> severity; return (cjournal_level_t)severity;
 	};
 
 	/**
@@ -175,48 +191,6 @@ public:
 	set_method(
 			const std::string& method)
 	{ set_key("method", method); return *this; };
-
-public:
-
-	/**
-	 *
-	 */
-	const std::string&
-	get_reason() const
-	{ return get_key("reason"); };
-
-	/**
-	 *
-	 */
-	cjrnentry&
-	set_reason(
-			const std::string& reason)
-	{ set_key("reason", reason); return *this; };
-
-public:
-
-	/**
-	 *
-	 */
-	int
-	get_errno() const
-	{
-		int errno = 0;
-		std::istringstream ss(get_key("errno")); ss >> errno; return errno;
-	};
-
-	/**
-	 *
-	 */
-	cjrnentry&
-	set_errno(
-			int errno)
-	{
-		std::ostringstream ss; ss << errno;
-		set_key("errno", ss.str());
-		set_key("errstr", strerror(errno));
-		return *this;
-	};
 
 public:
 

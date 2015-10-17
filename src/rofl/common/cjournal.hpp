@@ -18,7 +18,7 @@
 #include <string>
 #include <cstdarg>
 
-#include "rofl/common/clocking.hpp"
+#include "rofl/common/locking.hpp"
 #include "rofl/common/exception.hpp"
 #include "rofl/common/ctimespec.hpp"
 #include "rofl/common/cjrnentry.hpp"
@@ -200,6 +200,14 @@ public:
 		return add_entry().log(level, tmp);
 	};
 
+	/**
+	 *
+	 */
+	cjrnentry&
+	log(
+			const rofl::exception& e)
+	{ return add_entry().log(e); };
+
 public:
 
 	/**
@@ -373,7 +381,6 @@ private:
 	static const unsigned int               MAX_ENTRIES_DEFAULT;
 };
 
-}; // end of namespace mme
-}; // end of namespace spring
+}; // end of namespace rofl
 
 #endif /* SRC_ROFL_COMMON_CJOURNAL_HPP_ */
