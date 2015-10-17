@@ -6,6 +6,9 @@ noinst_LTLIBRARIES = librofl_common_base.la
 
 librofl_common_base_la_SOURCES = \
 		exception.hpp \
+		cjournal.hpp \
+		cjournal.cpp \
+		cjrnentry.hpp \
 		logging.cc \
 		logging.h \
 		locking.hpp \
@@ -60,6 +63,9 @@ librofl_common_base_la_LIBADD=openflow/libopenflow.la -lrt
 
 library_includedir=$(includedir)/rofl/common
 library_include_HEADERS= \
+		exception.hpp \
+		cjournal.hpp \
+		cjrnentry.hpp \
 		caddress.h \
 		cpacket.h \
 		crandom.h \

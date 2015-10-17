@@ -304,6 +304,29 @@ public:
 	/**
 	 *
 	 */
+	std::string
+	str() const {
+		std::stringstream ss;
+		ss << tspec.tv_sec << ":" << tspec.tv_nsec;
+		return ss.str();
+	};
+
+	/**
+	 *
+	 */
+	std::string
+	date() const {
+		time_t t(get_tspec().tv_sec);
+		char s[128];
+		memset(s, 0, sizeof(s));
+		ctime_r(&t, s);
+		s[strnlen(s, sizeof(s)) - 1] = '\0';
+		return s;
+	};
+
+	/**
+	 *
+	 */
 	class ctimespec_find_by_timer_id {
 		uint32_t timer_id;
 	public:
