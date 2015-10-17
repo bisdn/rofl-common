@@ -26,12 +26,13 @@ crofctl::~crofctl()
 crofctl::crofctl(
 		crofctl_env* env,
 		const cctlid& ctlid) :
-			env(env),
-			ctlid(ctlid),
-			rofchan(this),
-			xid_last(random.uint32()),
-			async_config_role_default_template(rofl::openflow13::OFP_VERSION),
-			async_config(rofl::openflow13::OFP_VERSION)
+				cjournal(this),
+				env(env),
+				ctlid(ctlid),
+				rofchan(this),
+				xid_last(random.uint32()),
+				async_config_role_default_template(rofl::openflow13::OFP_VERSION),
+				async_config(rofl::openflow13::OFP_VERSION)
 {
 	init_async_config_role_default_template();
 	async_config = get_async_config_role_default_template();
@@ -627,11 +628,9 @@ crofctl::handle_recv(
 
 
 	} catch (eRofCtlNotFound& e) {
-		std::cerr << "[rofl-common][crofctl][handle_recv] environment not found" << std::endl;
 
 	} catch (eBadSyntaxTooShort& e) {
 
-		std::cerr << "[rofl-common][crofctl] eBadSyntaxTooShort exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -641,7 +640,6 @@ crofctl::handle_recv(
 
 	} catch (eBadVersion& e) {
 
-		std::cerr << "[rofl-common][crofctl] eBadVersion exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -651,7 +649,6 @@ crofctl::handle_recv(
 
 	} catch (eBadRequestBadVersion& e) {
 
-		std::cerr << "[rofl-common][crofctl] eBadRequestBadVersion exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -661,7 +658,6 @@ crofctl::handle_recv(
 
 	} catch (eBadRequestBadType& e) {
 
-		std::cerr << "[rofl-common][crofctl] eBadRequestBadType exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -671,7 +667,6 @@ crofctl::handle_recv(
 
 	} catch (eBadRequestBadStat& e) {
 
-		std::cerr << "[rofl-common][crofctl] eBadRequestBadStat exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -681,7 +676,6 @@ crofctl::handle_recv(
 
 	} catch (eBadRequestBadExperimenter& e) {
 
-		std::cerr << "[rofl-common][crofctl] eBadRequestBadExperimenter exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -691,7 +685,6 @@ crofctl::handle_recv(
 
 	} catch (eBadRequestBadExpType& e) {
 
-		std::cerr << "[rofl-common][crofctl] eBadRequestBadExpType exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -701,7 +694,6 @@ crofctl::handle_recv(
 
 	} catch (eBadRequestEperm& e) {
 
-		std::cerr << "[rofl-common][crofctl] eBadRequestEperm exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -711,7 +703,6 @@ crofctl::handle_recv(
 
 	} catch (eBadRequestBadLen& e) {
 
-		std::cerr << "[rofl-common][crofctl] eBadRequestBadLen exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -721,7 +712,6 @@ crofctl::handle_recv(
 
 	} catch (eBadRequestBufferEmpty& e) {
 
-		std::cerr << "[rofl-common][crofctl] eBadRequestBufferEmpty exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -731,7 +721,6 @@ crofctl::handle_recv(
 
 	} catch (eBadRequestBufferUnknown& e) {
 
-		std::cerr << "[rofl-common][crofctl] eBadRequestBufferUnknown exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -741,7 +730,6 @@ crofctl::handle_recv(
 
 	} catch (eBadRequestBadTableId& e) {
 
-		std::cerr << "[rofl-common][crofctl] eBadRequestBadTableId exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -751,7 +739,6 @@ crofctl::handle_recv(
 
 	} catch (eBadRequestIsSlave& e) {
 
-		std::cerr << "[rofl-common][crofctl] eBadRequestIsSlave exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -761,7 +748,6 @@ crofctl::handle_recv(
 
 	} catch (eBadRequestBadPort& e) {
 
-		std::cerr << "[rofl-common][crofctl] eBadRequestBadPort exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -771,7 +757,6 @@ crofctl::handle_recv(
 
 	} catch (eBadRequestBadPacket& e) {
 
-		std::cerr << "[rofl-common][crofctl] eBadRequestBadPacket exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -781,7 +766,6 @@ crofctl::handle_recv(
 
 	} catch (eBadRequestMultipartBufferOverflow& e) {
 
-		std::cerr << "[rofl-common][crofctl] eBadRequestMultipartBufferOverflow exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -791,11 +775,9 @@ crofctl::handle_recv(
 
 	} catch (eBadRequestBase& e) {
 
-		std::cerr << "[rofl-common][crofctl] eBadRequestBase exception, what: " << e.what() << std::endl;
 
 	} catch (eSwitchConfigBadFlags& e) {
 
-		std::cerr << "[rofl-common][crofctl] eSwitchConfigBadFlags exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -805,7 +787,6 @@ crofctl::handle_recv(
 
 	} catch (eSwitchConfigBadLen& e) {
 
-		std::cerr << "[rofl-common][crofctl] eSwitchConfigBadLen exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -815,7 +796,6 @@ crofctl::handle_recv(
 
 	} catch (eSwitchConfigEPerm& e) {
 
-		std::cerr << "[rofl-common][crofctl] eSwitchConfigEPerm exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -825,11 +805,9 @@ crofctl::handle_recv(
 
 	} catch (eSwitchConfigBase& e) {
 
-		std::cerr << "[rofl-common][crofctl] eSwitchConfigBase exception, what: " << e.what() << std::endl;
 
 	} catch (eFlowModUnknown& e) {
 
-		std::cerr << "[rofl-common][crofctl] eFlowModUnknown exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -839,7 +817,6 @@ crofctl::handle_recv(
 
 	} catch (eFlowModTableFull& e) {
 
-		std::cerr << "[rofl-common][crofctl] eFlowModTableFull exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -849,7 +826,6 @@ crofctl::handle_recv(
 
 	} catch (eFlowModBadTableId& e) {
 
-		std::cerr << "[rofl-common][crofctl] eFlowModBadTableId exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -859,7 +835,6 @@ crofctl::handle_recv(
 
 	} catch (eFlowModOverlap& e) {
 
-		std::cerr << "[rofl-common][crofctl] eFlowModOverlap exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -869,7 +844,6 @@ crofctl::handle_recv(
 
 	} catch (eFlowModEperm& e) {
 
-		std::cerr << "[rofl-common][crofctl] eFlowModEperm exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -879,7 +853,6 @@ crofctl::handle_recv(
 
 	} catch (eFlowModBadTimeout& e) {
 
-		std::cerr << "[rofl-common][crofctl] eFlowModBadTimeout exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -889,7 +862,6 @@ crofctl::handle_recv(
 
 	} catch (eFlowModBadCommand& e) {
 
-		std::cerr << "[rofl-common][crofctl] eFlowModBadCommand exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -899,7 +871,6 @@ crofctl::handle_recv(
 
 	} catch (eFlowModBadFlags& e) {
 
-		std::cerr << "[rofl-common][crofctl] eFlowModBadFlags exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -909,11 +880,9 @@ crofctl::handle_recv(
 
 	} catch (eFlowModBase& e) {
 
-		std::cerr << "[rofl-common][crofctl] eFlowModBase exception, what: " << e.what() << std::endl;
 
 	} catch (eGroupModExists& e) {
 
-		std::cerr << "[rofl-common][crofctl] eGroupModExists exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -923,7 +892,6 @@ crofctl::handle_recv(
 
 	} catch (eGroupModInvalGroup& e) {
 
-		std::cerr << "[rofl-common][crofctl] eGroupModInvalGroup exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -933,7 +901,6 @@ crofctl::handle_recv(
 
 	} catch (eGroupModWeightUnsupported& e) {
 
-		std::cerr << "[rofl-common][crofctl] eGroupModWeightUnsupported exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -943,7 +910,6 @@ crofctl::handle_recv(
 
 	} catch (eGroupModOutOfGroups& e) {
 
-		std::cerr << "[rofl-common][crofctl] eGroupModOutOfGroups exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -953,7 +919,6 @@ crofctl::handle_recv(
 
 	} catch (eGroupModOutOfBuckets& e) {
 
-		std::cerr << "[rofl-common][crofctl] eGroupModOutOfBuckets exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -963,7 +928,6 @@ crofctl::handle_recv(
 
 	} catch (eGroupModChainingUnsupported& e) {
 
-		std::cerr << "[rofl-common][crofctl] eGroupModChainingUnsupported exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -973,7 +937,6 @@ crofctl::handle_recv(
 
 	} catch (eGroupModWatchUnsupported& e) {
 
-		std::cerr << "[rofl-common][crofctl] eGroupModWatchUnsupported exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -983,7 +946,6 @@ crofctl::handle_recv(
 
 	} catch (eGroupModLoop& e) {
 
-		std::cerr << "[rofl-common][crofctl] eGroupModLoop exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -993,7 +955,6 @@ crofctl::handle_recv(
 
 	} catch (eGroupModUnknownGroup& e) {
 
-		std::cerr << "[rofl-common][crofctl] eGroupModUnknownGroup exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -1003,7 +964,6 @@ crofctl::handle_recv(
 
 	} catch (eGroupModChainedGroup& e) {
 
-		std::cerr << "[rofl-common][crofctl] eGroupModChainedGroup exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -1013,7 +973,6 @@ crofctl::handle_recv(
 
 	} catch (eGroupModBadType& e) {
 
-		std::cerr << "[rofl-common][crofctl] eGroupModBadType exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -1023,7 +982,6 @@ crofctl::handle_recv(
 
 	} catch (eGroupModBadCommand& e) {
 
-		std::cerr << "[rofl-common][crofctl] eGroupModBadCommand exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -1033,7 +991,6 @@ crofctl::handle_recv(
 
 	} catch (eGroupModBadBucket& e) {
 
-		std::cerr << "[rofl-common][crofctl] eGroupModBadBucket exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -1043,7 +1000,6 @@ crofctl::handle_recv(
 
 	} catch (eGroupModBadWatch& e) {
 
-		std::cerr << "[rofl-common][crofctl] eGroupModBadWatch exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -1053,7 +1009,6 @@ crofctl::handle_recv(
 
 	} catch (eGroupModEperm& e) {
 
-		std::cerr << "[rofl-common][crofctl] eGroupModEperm exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -1063,11 +1018,9 @@ crofctl::handle_recv(
 
 	} catch (eGroupModBase& e) {
 
-		std::cerr << "[rofl-common][crofctl] eGroupModBase exception, what: " << e.what() << std::endl;
 
 	} catch (ePortModBadPort& e) {
 
-		std::cerr << "[rofl-common][crofctl] ePortModBadPort exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -1077,7 +1030,6 @@ crofctl::handle_recv(
 
 	} catch (ePortModBadHwAddr& e) {
 
-		std::cerr << "[rofl-common][crofctl] ePortModBadHwAddr exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -1087,7 +1039,6 @@ crofctl::handle_recv(
 
 	} catch (ePortModBadConfig& e) {
 
-		std::cerr << "[rofl-common][crofctl] ePortModBadConfig exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -1097,7 +1048,6 @@ crofctl::handle_recv(
 
 	} catch (ePortModBadAdvertise& e) {
 
-		std::cerr << "[rofl-common][crofctl] ePortModBadAdvertise exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -1107,7 +1057,6 @@ crofctl::handle_recv(
 
 	} catch (ePortModEperm& e) {
 
-		std::cerr << "[rofl-common][crofctl] ePortModEperm exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -1117,11 +1066,9 @@ crofctl::handle_recv(
 
 	} catch (ePortModBase& e) {
 
-		std::cerr << "[rofl-common][crofctl] ePortModBase exception, what: " << e.what() << std::endl;
 
 	} catch (eTableModBadTable& e) {
 
-		std::cerr << "[rofl-common][crofctl] eTableModBadTable exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -1131,7 +1078,6 @@ crofctl::handle_recv(
 
 	} catch (eTableModBadConfig& e) {
 
-		std::cerr << "[rofl-common][crofctl] eTableModBadConfig exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -1141,7 +1087,6 @@ crofctl::handle_recv(
 
 	} catch (eTableModEperm& e) {
 
-		std::cerr << "[rofl-common][crofctl] eTableModEperm exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -1151,12 +1096,10 @@ crofctl::handle_recv(
 
 	} catch (eTableModBase& e) {
 
-		std::cerr << "[rofl-common][crofctl] eTableModBase exception, what: " << e.what() << std::endl;
 
 #if 0
 	} catch (rofl::openflow::eInstructionInvalType& e) {
 
-		std::cerr << "eInstructionInvalType " << *msg << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 		rofchan.send_message(auxid, new rofl::openflow::cofmsg_error_bad_inst_unknown_inst(
@@ -1164,7 +1107,6 @@ crofctl::handle_recv(
 
 	} catch (rofl::openflow::eInstructionBadExperimenter& e) {
 
-		std::cerr << "eInstructionBadExperimenter " << *msg << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 		rofchan.send_message(auxid, new rofl::openflow::cofmsg_error_bad_inst_bad_experimenter(
@@ -1173,7 +1115,6 @@ crofctl::handle_recv(
 
 	} catch (rofl::openflow::eOFmatchInvalBadValue& e) {
 
-		std::cerr << "eOFmatchInvalBadValue " << *msg << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 		rofchan.send_message(auxid, new rofl::openflow::cofmsg_error_bad_match_bad_value(
@@ -1182,7 +1123,6 @@ crofctl::handle_recv(
 
 	} catch (eBadActionBadType& e) {
 
-		std::cerr << "[rofl-common][crofctl] eBadActionBadType exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -1192,7 +1132,6 @@ crofctl::handle_recv(
 
 	} catch (eBadActionBadLen& e) {
 
-		std::cerr << "[rofl-common][crofctl] eBadActionBadLen exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -1202,7 +1141,6 @@ crofctl::handle_recv(
 
 	} catch (eBadActionBadExperimenter& e) {
 
-		std::cerr << "[rofl-common][crofctl] eBadActionBadExperimenter exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -1212,7 +1150,6 @@ crofctl::handle_recv(
 
 	} catch (eBadActionBadExperimenterType& e) {
 
-		std::cerr << "[rofl-common][crofctl] eBadActionBadExperimenterType exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -1222,7 +1159,6 @@ crofctl::handle_recv(
 
 	} catch (eBadActionBadOutPort& e) {
 
-		std::cerr << "[rofl-common][crofctl] eBadActionBadOutPort exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -1232,7 +1168,6 @@ crofctl::handle_recv(
 
 	} catch (eBadActionBadArgument& e) {
 
-		std::cerr << "[rofl-common][crofctl] eBadActionBadArgument exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -1242,7 +1177,6 @@ crofctl::handle_recv(
 
 	} catch (eBadActionEperm& e) {
 
-		std::cerr << "[rofl-common][crofctl] eBadActionEperm exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -1252,7 +1186,6 @@ crofctl::handle_recv(
 
 	} catch (eBadActionTooMany& e) {
 
-		std::cerr << "[rofl-common][crofctl] eBadActionTooMany exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -1262,7 +1195,6 @@ crofctl::handle_recv(
 
 	} catch (eBadActionBadQueue& e) {
 
-		std::cerr << "[rofl-common][crofctl] eBadActionBadQueue exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -1272,7 +1204,6 @@ crofctl::handle_recv(
 
 	} catch (eBadActionBadOutGroup& e) {
 
-		std::cerr << "[rofl-common][crofctl] eBadActionBadOutGroup exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -1282,7 +1213,6 @@ crofctl::handle_recv(
 
 	} catch (eBadActionMatchInconsistent& e) {
 
-		std::cerr << "[rofl-common][crofctl] eBadActionMatchInconsistent exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -1292,7 +1222,6 @@ crofctl::handle_recv(
 
 	} catch (eBadActionUnsupportedOrder& e) {
 
-		std::cerr << "[rofl-common][crofctl] eBadActionUnsuportedOrder exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -1302,7 +1231,6 @@ crofctl::handle_recv(
 
 	} catch (eBadActionBadTag& e) {
 
-		std::cerr << "[rofl-common][crofctl] eBadActionBadTag exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -1312,7 +1240,6 @@ crofctl::handle_recv(
 
 	} catch (eBadActionBadSetType& e) {
 
-		std::cerr << "[rofl-common][crofctl] eBadActionSetType exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -1322,7 +1249,6 @@ crofctl::handle_recv(
 
 	} catch (eBadActionBadSetLen& e) {
 
-		std::cerr << "[rofl-common][crofctl] eBadActionSetLen exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -1332,7 +1258,6 @@ crofctl::handle_recv(
 
 	} catch (eBadActionBadSetArgument& e) {
 
-		std::cerr << "[rofl-common][crofctl] eBadActionSetArgument exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -1342,11 +1267,9 @@ crofctl::handle_recv(
 
 	} catch (eBadActionBase& e) {
 
-		std::cerr << "[rofl-common][crofctl] eBadActionBase exception, what: " << e.what() << std::endl;
 
 	} catch (eBadInstUnknownInst& e) {
 
-		std::cerr << "[rofl-common][crofctl] eBadInstUnknownInst exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -1356,7 +1279,6 @@ crofctl::handle_recv(
 
 	} catch (eBadInstUnsupInst& e) {
 
-		std::cerr << "[rofl-common][crofctl] eBadInstUnsupInst exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -1366,7 +1288,6 @@ crofctl::handle_recv(
 
 	} catch (eBadInstBadTableId& e) {
 
-		std::cerr << "[rofl-common][crofctl] eBadInstBadTableId exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -1376,7 +1297,6 @@ crofctl::handle_recv(
 
 	} catch (eBadInstUnsupMetadata& e) {
 
-		std::cerr << "[rofl-common][crofctl] eBadInstUnsupMetadata exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -1386,7 +1306,6 @@ crofctl::handle_recv(
 
 	} catch (eBadInstUnsupMetadataMask& e) {
 
-		std::cerr << "[rofl-common][crofctl] eBadInstUnsupMetadataMask exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -1396,7 +1315,6 @@ crofctl::handle_recv(
 
 	} catch (eBadInstBadExperimenter& e) {
 
-		std::cerr << "[rofl-common][crofctl] eBadInstBadExperimenter exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -1406,7 +1324,6 @@ crofctl::handle_recv(
 
 	} catch (eBadInstBadExpType& e) {
 
-		std::cerr << "[rofl-common][crofctl] eBadInstBadExpType exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -1416,7 +1333,6 @@ crofctl::handle_recv(
 
 	} catch (eBadInstBadLen& e) {
 
-		std::cerr << "[rofl-common][crofctl] eBadInstBadLen exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -1426,7 +1342,6 @@ crofctl::handle_recv(
 
 	} catch (eBadInstEperm& e) {
 
-		std::cerr << "[rofl-common][crofctl] eBadInstEPerm exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -1436,11 +1351,9 @@ crofctl::handle_recv(
 
 	} catch (eBadInstBase& e) {
 
-		std::cerr << "[rofl-common][crofctl] eBadInstBase exception, what: " << e.what() << std::endl;
 
 	} catch (eBadMatchBadType& e) {
 
-		std::cerr << "[rofl-common][crofctl] eBadMatchBadType exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -1450,7 +1363,6 @@ crofctl::handle_recv(
 
 	} catch (eBadMatchBadLen& e) {
 
-		std::cerr << "[rofl-common][crofctl] eBadMatchBadLen exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -1460,7 +1372,6 @@ crofctl::handle_recv(
 
 	} catch (eBadMatchBadTag& e) {
 
-		std::cerr << "[rofl-common][crofctl] eBadMatchBadTag exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -1470,7 +1381,6 @@ crofctl::handle_recv(
 
 	} catch (eBadMatchBadDlAddrMask& e) {
 
-		std::cerr << "[rofl-common][crofctl] eBadMatchBadDlAddrMask exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -1480,7 +1390,6 @@ crofctl::handle_recv(
 
 	} catch (eBadMatchBadNwAddrMask& e) {
 
-		std::cerr << "[rofl-common][crofctl] eBadMatchBadNwAddrMask exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -1490,7 +1399,6 @@ crofctl::handle_recv(
 
 	} catch (eBadMatchBadWildcards& e) {
 
-		std::cerr << "[rofl-common][crofctl] eBadMatchBadWildcards exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -1500,7 +1408,6 @@ crofctl::handle_recv(
 
 	} catch (eBadMatchBadField& e) {
 
-		std::cerr << "[rofl-common][crofctl] eBadMatchBadField exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -1510,7 +1417,6 @@ crofctl::handle_recv(
 
 	} catch (eBadMatchBadValue& e) {
 
-		std::cerr << "[rofl-common][crofctl] eBadMatchBadValue exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -1520,7 +1426,6 @@ crofctl::handle_recv(
 
 	} catch (eBadMatchBadMask& e) {
 
-		std::cerr << "[rofl-common][crofctl] eBadMatchBadMask exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -1530,7 +1435,6 @@ crofctl::handle_recv(
 
 	} catch (eBadMatchBadPrereq& e) {
 
-		std::cerr << "[rofl-common][crofctl] eBadMatchBadPrereq exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -1540,7 +1444,6 @@ crofctl::handle_recv(
 
 	} catch (eBadMatchDupField& e) {
 
-		std::cerr << "[rofl-common][crofctl] eBadMatchDupField exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -1550,7 +1453,6 @@ crofctl::handle_recv(
 
 	} catch (eBadMatchEperm& e) {
 
-		std::cerr << "[rofl-common][crofctl] eBadMatchEPerm exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -1560,11 +1462,9 @@ crofctl::handle_recv(
 
 	} catch (eBadMatchBase& e) {
 
-		std::cerr << "[rofl-common][crofctl] eBadMatchBase exception, what: " << e.what() << std::endl;
 
 	} catch (eRoleRequestStale& e) {
 
-		std::cerr << "[rofl-common][crofctl] eRoleRequestStale exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -1574,7 +1474,6 @@ crofctl::handle_recv(
 
 	} catch (eRoleRequestUnsupported& e) {
 
-		std::cerr << "[rofl-common][crofctl] eRoleRequestUnsupported exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -1584,7 +1483,6 @@ crofctl::handle_recv(
 
 	} catch (eRoleRequestBadRole& e) {
 
-		std::cerr << "[rofl-common][crofctl] eRoleRequestBadRole exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -1594,11 +1492,9 @@ crofctl::handle_recv(
 
 	} catch (eRoleRequestBase& e) {
 
-		std::cerr << "[rofl-common][crofctl] eRoleRequestBase exception, what: " << e.what() << std::endl;
 
 	} catch (eMeterModUnknown& e) {
 
-		std::cerr << "[rofl-common][crofctl] eMeterModUnknown exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -1608,7 +1504,6 @@ crofctl::handle_recv(
 
 	} catch (eMeterModMeterExists& e) {
 
-		std::cerr << "[rofl-common][crofctl] eMeterModMeterExists exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -1618,7 +1513,6 @@ crofctl::handle_recv(
 
 	} catch (eMeterModInvalidMeter& e) {
 
-		std::cerr << "[rofl-common][crofctl] eMeterModInvalidMeter exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -1628,7 +1522,6 @@ crofctl::handle_recv(
 
 	} catch (eMeterModUnknownMeter& e) {
 
-		std::cerr << "[rofl-common][crofctl] eMeterModUnknownMeter exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -1638,7 +1531,6 @@ crofctl::handle_recv(
 
 	} catch (eMeterModBadCommand& e) {
 
-		std::cerr << "[rofl-common][crofctl] eMeterModBadCommand exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -1648,7 +1540,6 @@ crofctl::handle_recv(
 
 	} catch (eMeterModBadFlags& e) {
 
-		std::cerr << "[rofl-common][crofctl] eMeterModBadFlags exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -1658,7 +1549,6 @@ crofctl::handle_recv(
 
 	} catch (eMeterModBadRate& e) {
 
-		std::cerr << "[rofl-common][crofctl] eMeterModBadRate exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -1668,7 +1558,6 @@ crofctl::handle_recv(
 
 	} catch (eMeterModBadBurst& e) {
 
-		std::cerr << "[rofl-common][crofctl] eMeterModBadBurst exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -1678,7 +1567,6 @@ crofctl::handle_recv(
 
 	} catch (eMeterModBadBand& e) {
 
-		std::cerr << "[rofl-common][crofctl] eMeterModBadBand exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -1688,7 +1576,6 @@ crofctl::handle_recv(
 
 	} catch (eMeterModBadBandValue& e) {
 
-		std::cerr << "[rofl-common][crofctl] eMeterModBadBandValue exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -1698,7 +1585,6 @@ crofctl::handle_recv(
 
 	} catch (eMeterModOutOfMeters& e) {
 
-		std::cerr << "[rofl-common][crofctl] eMeterModOutOfMeters exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -1708,7 +1594,6 @@ crofctl::handle_recv(
 
 	} catch (eMeterModOutOfBands& e) {
 
-		std::cerr << "[rofl-common][crofctl] eMeterModOutOfBands exception, what: " << e.what() << std::endl;
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
 		msg->pack(mem.somem(), mem.length());
 
@@ -1718,15 +1603,10 @@ crofctl::handle_recv(
 
 	} catch (eMeterModBase& e) {
 
-		std::cerr << "[rofl-common][crofctl] eMeterModBase exception, what: " << e.what() << std::endl;
-
 	} catch (RoflException& e) {
-
-		std::cerr << "[rofl-common][crofctl] RoflException exception, what: " << e.what() << std::endl;
 
 	} catch (std::runtime_error& e) {
 
-		std::cerr << "[rofl-common][crofctl] exception, what: " << e.what() << std::endl;
 	}
 
 	delete msg;

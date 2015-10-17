@@ -109,9 +109,8 @@ public:
 	 *
 	 */
 	cjournal(
-			cjournal_env* env, uint32_t id) :
+			cjournal_env* env) :
 				env(env),
-				id(id),
 				last_entry_id(0),
 				max_entries(cjournal::MAX_ENTRIES_DEFAULT)
 	{
@@ -120,13 +119,6 @@ public:
 	};
 
 public:
-
-	/**
-	 * @brief	Return local identifier of this cjournal instance
-	 */
-	uint32_t
-	get_id() const
-	{ return id; };
 
 	/**
 	 * @brief	Returns const reference to starttime of this journal
@@ -357,9 +349,6 @@ private:
 
 	// environment for this cjournal instance
 	cjournal_env*                           env;
-
-	// local identifier for this cjournal instance
-	uint32_t                                id;
 
 	// start time (journal has been started)
 	ctimespec                               starttime;

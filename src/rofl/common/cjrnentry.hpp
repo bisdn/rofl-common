@@ -116,7 +116,7 @@ public:
 		va_start(args, format);
 		vsnprintf(tmp, sizeof(tmp), format, args);
 		va_end (args);
-		return log(severity, tmp);
+		return log(severity, std::string(tmp));
 	};
 
 	/**

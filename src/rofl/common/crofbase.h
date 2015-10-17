@@ -24,6 +24,7 @@
 #include "rofl/common/openflow/cofhelloelemversionbitmap.h"
 #include "rofl/common/crandom.h"
 #include "rofl/common/cthread.hpp"
+#include "rofl/common/cjournal.hpp"
 
 namespace rofl {
 
@@ -53,6 +54,8 @@ public:
 
 class crofbase :
 		public virtual rofl::cthread_env,
+		public rofl::cjournal_env,
+		public rofl::cjournal,
 		public rofl::crofconn_env,
 		public rofl::crofctl_env,
 		public rofl::crofdpt_env
@@ -960,23 +963,37 @@ public:
 	{};
 
 	/**
-	 * @brief	Called when a congestion situation on the control connection has been solved.
-	 *
-	 * A control channel may face congestion situations when insufficient bandwidth
-	 * on the underlying IP path or some backpressuring by the remote site requires
-	 * to throttle the overall message transmission rate on a control connection.
-	 * A congestion situation is indicated by the return values obtained from the various
-	 * send-methods defined within rofl::crofdpt. A solved congestion situation is
-	 * indicated by calling this method. Note that ROFL will store OpenFlow messages
-	 * even under congestion, thus filling up its internal buffers until no further
-	 * memory is available for doing so. It is up to the application designer to
-	 * throttle transmission of further messages according to the channel capacity.
+	 * @brief	Called when a negotiation failed with a peer datapath entity
 	 *
 	 * @param dpt datapath instance
 	 * @param auxid control connection identifier (main: 0)
 	 */
 	virtual void
-	handle_conn_writable(
+	handle_conn_negotiation_failed(
+			rofl::crofdpt& dpt,
+			const rofl::cauxid& auxid)
+	{};
+
+	/**
+	 * @brief	Called when a congestion situation on the control connection occurs
+	 *
+	 * @param dpt datapath instance
+	 * @param auxid control connection identifier (main: 0)
+	 */
+	virtual void
+	handle_conn_congestion_occured(
+			rofl::crofdpt& dpt,
+			const rofl::cauxid& auxid)
+	{};
+
+	/**
+	 * @brief	Called when a congestion situation on the control connection has been solved
+	 *
+	 * @param dpt datapath instance
+	 * @param auxid control connection identifier (main: 0)
+	 */
+	virtual void
+	handle_conn_congestion_solved(
 			rofl::crofdpt& dpt,
 			const rofl::cauxid& auxid)
 	{};
@@ -1079,23 +1096,37 @@ public:
 	{};
 
 	/**
-	 * @brief	Called when a congestion situation on the control connection has been solved.
-	 *
-	 * A control channel may face congestion situations when insufficient bandwidth
-	 * on the underlying IP path or some backpressuring by the remote site requires
-	 * to throttle the overall message transmission rate on a control connection.
-	 * A congestion situation is indicated by the return values obtained from the various
-	 * send-methods defined within rofl::crofctl. A solved congestion situation is
-	 * indicated by calling this method. Note that ROFL will store OpenFlow messages
-	 * even under congestion, thus filling up its internal buffers until no further
-	 * memory is available for doing so. It is up to the application designer to
-	 * throttle transmission of further messages according to the channel capacity.
+	 * @brief	Called when a negotiation failed with a peer controller entity
 	 *
 	 * @param ctl controller instance
 	 * @param auxid control connection identifier (main: 0)
 	 */
 	virtual void
-	handle_conn_writable(
+	handle_conn_negotiation_failed(
+			rofl::crofctl& ctl,
+			const rofl::cauxid& auxid)
+	{};
+
+	/**
+	 * @brief	Called when a congestion situation on the control connection occurs
+	 *
+	 * @param ctl controller instance
+	 * @param auxid control connection identifier (main: 0)
+	 */
+	virtual void
+	handle_conn_congestion_occured(
+			rofl::crofctl& ctl,
+			const rofl::cauxid& auxid)
+	{};
+
+	/**
+	 * @brief	Called when a congestion situation on the control connection has been solved
+	 *
+	 * @param ctl controller instance
+	 * @param auxid control connection identifier (main: 0)
+	 */
+	virtual void
+	handle_conn_congestion_solved(
 			rofl::crofctl& ctl,
 			const rofl::cauxid& auxid)
 	{};
@@ -2381,43 +2412,35 @@ private:
 
 	virtual void
 	handle_established(
-			crofdpt& dpt, crofconn& conn, uint8_t ofp_version)
-	{};
+			crofdpt& dpt, crofconn& conn, uint8_t ofp_version);
 
 	virtual void
 	handle_closed(
-			crofdpt& dpt, crofconn& conn)
-	{};
+			crofdpt& dpt, crofconn& conn);
 
 	virtual void
 	handle_connect_refused(
-			crofdpt& dpt, crofconn& conn)
-	{};
+			crofdpt& dpt, crofconn& conn);
 
 	virtual void
 	handle_connect_failed(
-			crofdpt& dpt, crofconn& conn)
-	{};
+			crofdpt& dpt, crofconn& conn);
 
 	virtual void
 	handle_accept_failed(
-			crofdpt& dpt, crofconn& conn)
-	{};
+			crofdpt& dpt, crofconn& conn);
 
 	virtual void
 	handle_negotiation_failed(
-			crofdpt& dpt, crofconn& conn)
-	{};
+			crofdpt& dpt, crofconn& conn);
 
 	virtual void
 	congestion_occured_indication(
-			crofdpt& dpt, crofconn& conn)
-	{};
+			crofdpt& dpt, crofconn& conn);
 
 	virtual void
 	congestion_solved_indication(
-			crofdpt& dpt, crofconn& conn)
-	{};
+			crofdpt& dpt, crofconn& conn);
 
 private:
 
@@ -2431,43 +2454,35 @@ private:
 
 	virtual void
 	handle_established(
-			crofctl& ctl, crofconn& conn, uint8_t ofp_version)
-	{};
+			crofctl& ctl, crofconn& conn, uint8_t ofp_version);
 
 	virtual void
 	handle_closed(
-			crofctl& ctl, crofconn& conn)
-	{};
+			crofctl& ctl, crofconn& conn);
 
 	virtual void
 	handle_connect_refused(
-			crofctl& ctl, crofconn& conn)
-	{};
+			crofctl& ctl, crofconn& conn);
 
 	virtual void
 	handle_connect_failed(
-			crofctl& ctl, crofconn& conn)
-	{};
+			crofctl& ctl, crofconn& conn);
 
 	virtual void
 	handle_accept_failed(
-			crofctl& ctl, crofconn& conn)
-	{};
+			crofctl& ctl, crofconn& conn);
 
 	virtual void
 	handle_negotiation_failed(
-			crofctl& ctl, crofconn& conn)
-	{};
+			crofctl& ctl, crofconn& conn);
 
 	virtual void
 	congestion_occured_indication(
-			crofctl& ctl, crofconn& conn)
-	{};
+			crofctl& ctl, crofconn& conn);
 
 	virtual void
 	congestion_solved_indication(
-			crofctl& ctl, crofconn& conn)
-	{};
+			crofctl& ctl, crofconn& conn);
 
 private:
 
