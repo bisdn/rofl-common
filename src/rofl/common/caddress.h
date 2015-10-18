@@ -11,7 +11,6 @@
 
 #include "rofl/common/exception.hpp"
 #include "rofl/common/cmemory.h"
-#include "rofl/common/logging.h"
 
 namespace rofl {
 

@@ -11,7 +11,6 @@
 #include <inttypes.h>
 #include <iostream>
 
-#include <rofl/common/logging.h>
 #include <rofl/common/cmemory.h>
 
 namespace rofl {

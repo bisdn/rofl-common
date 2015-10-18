@@ -12,7 +12,6 @@
 #include <iostream>
 #include <sstream>
 
-#include "rofl/common/logging.h"
 #include "rofl/common/exception.hpp"
 
 namespace rofl {
@@ -94,7 +93,7 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, const cauxid& auxid) {
-		os << rofl::indent(0) << "<cauxid id:" << (int)auxid.id << " >" << std::endl;
+		os << "<cauxid id:" << (int)auxid.id << " >" << std::endl;
 		return os;
 	};
 

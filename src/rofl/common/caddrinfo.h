@@ -17,7 +17,6 @@
 
 #include "rofl/common/csockaddr.h"
 #include "rofl/common/cmemory.h"
-#include "rofl/common/logging.h"
 #include "rofl/common/exception.hpp"
 
 namespace rofl {

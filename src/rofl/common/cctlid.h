@@ -13,8 +13,6 @@
 #include <iostream>
 #include <ios>
 
-#include "rofl/common/logging.h"
-
 namespace rofl {
 
 /**
@@ -109,7 +107,7 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, const cctlid& ctlid) {
-		os << rofl::indent(0) << "<cctlid:" << std::hex << (unsigned long long)ctlid.id << std::dec
+		os << "<cctlid:" << std::hex << (unsigned long long)ctlid.id << std::dec
 				<< "(" << ctlid.s_id << ")" << " >" << std::endl;
 		return os;
 	};

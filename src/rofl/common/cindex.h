@@ -15,8 +15,6 @@
 #include <iostream>
 #include <sstream>
 
-#include "rofl/common/logging.h"
-
 namespace rofl {
 
 class cindex {
@@ -132,7 +130,7 @@ public:
 	friend std::ostream&
 	operator<< (
 			std::ostream& os, const cindex& index) {
-		os << rofl::indent(0) << "<cindex idx:" << index.get_index() << " >";
+		os << "<cindex idx:" << index.get_index() << " >";
 		return os;
 	};
 

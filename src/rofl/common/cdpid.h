@@ -13,8 +13,6 @@
 #include <string>
 #include <sstream>
 
-#include "logging.h"
-
 namespace rofl {
 
 class cdpid {
@@ -95,7 +93,7 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, const cdpid& dpid) {
-		os << rofl::indent(0) << "<cdpid "
+		os << "<cdpid "
 				<< (unsigned long long)dpid.get_uint64_t() << " >" << std::endl;
 		return os;
 	};
