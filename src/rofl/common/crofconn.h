@@ -36,13 +36,6 @@ public:
 				exception(__arg)
 	{};
 };
-class eRofConnXidSpaceExhausted : public eRofConnBase {
-public:
-	eRofConnXidSpaceExhausted(
-			const std::string& __arg) :
-				eRofConnBase(__arg)
-	{};
-};
 class eRofConnBusy : public eRofConnBase {
 public:
 	eRofConnBusy(

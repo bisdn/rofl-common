@@ -45,6 +45,8 @@
 #include "rofl/common/csockaddr.h"
 #include "rofl/common/crandom.h"
 #include "rofl/common/croflexception.h"
+#include "rofl/common/exception.hpp"
+#include "rofl/common/cjournal.hpp"
 
 #include "rofl/common/openflow/messages/cofmsg.h"
 #include "rofl/common/openflow/messages/cofmsg_hello.h"
@@ -239,7 +241,9 @@ private:
  * @brief	A socket capable of talking OpenFlow via TCP and vice versa
  */
 class crofsock :
-		public cthread_env
+		public cthread_env,
+		public cjournal_env,
+		public cjournal
 {
 	enum outqueue_type_t {
 		QUEUE_OAM  = 0, // Echo.request/Echo.reply

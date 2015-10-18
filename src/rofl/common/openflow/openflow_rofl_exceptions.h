@@ -7,16 +7,16 @@
 
 #include <assert.h>
 
-#include "rofl/common/croflexception.h"
+#include "rofl/common/exception.hpp"
 
 
 namespace rofl {
 
-class eOpenFlowBase					: public RoflException {
+class eOpenFlowBase					: public exception {
 public:
 	eOpenFlowBase(
 			const std::string& __arg = std::string("eOpenFlowBase")) :
-				RoflException(__arg) {};
+				exception(__arg) {};
 	virtual ~eOpenFlowBase() throw() {};
 };
 

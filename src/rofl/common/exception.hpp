@@ -289,7 +289,7 @@ private:
 };
 
 
-class eOutOfRange : exception {
+class eOutOfRange : public exception {
 public:
 	eOutOfRange(
 			const std::string& __arg) :
@@ -297,7 +297,7 @@ public:
 	{};
 };
 
-class eOutOfMem : exception {
+class eOutOfMem : public exception {
 public:
 	eOutOfMem(
 			const std::string& __arg) :
@@ -305,7 +305,7 @@ public:
 	{};
 };
 
-class eInvalid : exception {
+class eInvalid : public exception {
 public:
 	eInvalid(
 			const std::string& __arg) :
@@ -313,7 +313,7 @@ public:
 	{};
 };
 
-class eSysCall : exception {
+class eSysCall : public exception {
 public:
 	eSysCall(
 			const std::string& __arg) :
@@ -329,6 +329,14 @@ public:
     }
 private:
     int __errno;
+};
+
+class eLibCall : public exception {
+public:
+	eLibCall(
+			const std::string& __arg) :
+				exception(__arg)
+	{};
 };
 
 }; // end of namespace rofl

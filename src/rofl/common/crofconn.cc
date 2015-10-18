@@ -330,10 +330,6 @@ crofconn::send_hello_message()
 
 		rofsock.send_message(msg);
 
-	} catch (eRofConnXidSpaceExhausted& e) {
-
-		std::cerr << "[rofl-common][crofconn] sending HELLO message failed: no idle xid available" << std::endl;
-
 	} catch (eRofConnNotFound& e) {
 
 		std::cerr << "[rofl-common][crofconn] sending HELLO message failed: env not found" << std::endl;
@@ -519,10 +515,6 @@ crofconn::send_features_request()
 
 		rofsock.send_message(msg);
 
-	} catch (eRofConnXidSpaceExhausted& e) {
-
-		std::cerr << "[rofl-common][crofconn] sending FEATURES.request message failed: no idle xid available" << std::endl;
-
 	} catch (eRofConnNotFound& e) {
 
 		std::cerr << "[rofl-common][crofconn] sending FEATURES.request message failed: env not found" << std::endl;
@@ -593,10 +585,6 @@ crofconn::send_echo_request()
 						++xid_echo_request_last);
 
 		rofsock.send_message(msg);
-
-	} catch (eRofConnXidSpaceExhausted& e) {
-
-		std::cerr << "[rofl-common][crofconn] sending ECHO.request message failed: no idle xid available" << std::endl;
 
 	} catch (eRofConnNotFound& e) {
 
