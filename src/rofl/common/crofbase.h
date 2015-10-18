@@ -16,7 +16,7 @@
 #include <vector>
 
 #include "rofl/common/locking.hpp"
-#include "rofl/common/croflexception.h"
+#include "rofl/common/exception.hpp"
 #include "rofl/common/logging.h"
 #include "rofl/common/crofdpt.h"
 #include "rofl/common/crofctl.h"
@@ -29,11 +29,11 @@
 namespace rofl {
 
 /* error classes */
-class eRofBaseBase : public RoflException {
+class eRofBaseBase : public exception {
 public:
 	eRofBaseBase(
 			const std::string& __arg) :
-				RoflException(__arg)
+				exception(__arg)
 	{};
 };
 class eRofBaseNotFound : public eRofBaseBase {
@@ -55,7 +55,6 @@ public:
 class crofbase :
 		public virtual rofl::cthread_env,
 		public rofl::cjournal_env,
-		public rofl::cjournal,
 		public rofl::crofconn_env,
 		public rofl::crofctl_env,
 		public rofl::crofdpt_env
@@ -78,6 +77,22 @@ public:
 	 * @brief	crofbase constructor
 	 */
 	crofbase();
+
+public:
+
+	/**
+	 *
+	 */
+	const cjournal&
+	get_journal() const
+	{ return journal; };
+
+	/**
+	 *
+	 */
+	cjournal&
+	set_journal()
+	{ return journal; };
 
 public:
 
@@ -2592,6 +2607,9 @@ private:
 	};
 
 private:
+
+	// journal
+	rofl::cjournal                  journal;
 
 	enum crofbase_timer_t {
 		TIMER_ID_ROFCTL_DESTROY = 1,

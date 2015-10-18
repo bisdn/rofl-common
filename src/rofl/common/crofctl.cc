@@ -26,7 +26,7 @@ crofctl::~crofctl()
 crofctl::crofctl(
 		crofctl_env* env,
 		const cctlid& ctlid) :
-				cjournal(this),
+				journal(this),
 				env(env),
 				ctlid(ctlid),
 				rofchan(this),
@@ -1603,7 +1603,7 @@ crofctl::handle_recv(
 
 	} catch (eMeterModBase& e) {
 
-	} catch (RoflException& e) {
+	} catch (exception& e) {
 
 	} catch (std::runtime_error& e) {
 
@@ -1641,10 +1641,10 @@ crofctl::send_features_reply(
 		rofchan.send_message(auxid, msg);
 
 	} catch (eRofConnNotConnected& e) {
-		cjournal::log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	} catch (eRofQueueFull& e) {
-		cjournal::log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	}
 }
@@ -1668,10 +1668,10 @@ crofctl::send_get_config_reply(
 		rofchan.send_message(auxid, msg);
 
 	} catch (eRofConnNotConnected& e) {
-		cjournal::log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	} catch (eRofQueueFull& e) {
-		cjournal::log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	}
 }
@@ -1695,10 +1695,10 @@ crofctl::send_desc_stats_reply(
 		rofchan.send_message(auxid, msg);
 
 	} catch (eRofConnNotConnected& e) {
-		cjournal::log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	} catch (eRofQueueFull& e) {
-		cjournal::log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	}
 }
@@ -1722,10 +1722,10 @@ crofctl::send_flow_stats_reply(
 		rofchan.send_message(auxid, msg);
 
 	} catch (eRofConnNotConnected& e) {
-		cjournal::log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	} catch (eRofQueueFull& e) {
-		cjournal::log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	}
 }
@@ -1750,10 +1750,10 @@ crofctl::send_aggr_stats_reply(
 		rofchan.send_message(auxid, msg);
 
 	} catch (eRofConnNotConnected& e) {
-		cjournal::log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	} catch (eRofQueueFull& e) {
-		cjournal::log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	}
 }
@@ -1777,10 +1777,10 @@ crofctl::send_table_stats_reply(
 		rofchan.send_message(auxid, msg);
 
 	} catch (eRofConnNotConnected& e) {
-		cjournal::log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	} catch (eRofQueueFull& e) {
-		cjournal::log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	}
 }
@@ -1804,10 +1804,10 @@ crofctl::send_port_stats_reply(
 		rofchan.send_message(auxid, msg);
 
 	} catch (eRofConnNotConnected& e) {
-		cjournal::log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	} catch (eRofQueueFull& e) {
-		cjournal::log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	}
 }
@@ -1831,10 +1831,10 @@ crofctl::send_queue_stats_reply(
 		rofchan.send_message(auxid, msg);
 
 	} catch (eRofConnNotConnected& e) {
-		cjournal::log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	} catch (eRofQueueFull& e) {
-		cjournal::log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	}
 }
@@ -1858,10 +1858,10 @@ crofctl::send_group_stats_reply(
 		rofchan.send_message(auxid, msg);
 
 	} catch (eRofConnNotConnected& e) {
-		cjournal::log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	} catch (eRofQueueFull& e) {
-		cjournal::log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	}
 }
@@ -1885,10 +1885,10 @@ crofctl::send_group_desc_stats_reply(
 		rofchan.send_message(auxid, msg);
 
 	} catch (eRofConnNotConnected& e) {
-		cjournal::log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	} catch (eRofQueueFull& e) {
-		cjournal::log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	}
 }
@@ -1912,10 +1912,10 @@ crofctl::send_group_features_stats_reply(
 		rofchan.send_message(auxid, msg);
 
 	} catch (eRofConnNotConnected& e) {
-		cjournal::log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	} catch (eRofQueueFull& e) {
-		cjournal::log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	}
 }
@@ -1939,10 +1939,10 @@ crofctl::send_table_features_stats_reply(
 		rofchan.send_message(auxid, msg);
 
 	} catch (eRofConnNotConnected& e) {
-		cjournal::log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	} catch (eRofQueueFull& e) {
-		cjournal::log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	}
 }
@@ -1966,10 +1966,10 @@ crofctl::send_port_desc_stats_reply(
 		rofchan.send_message(auxid, msg);
 
 	} catch (eRofConnNotConnected& e) {
-		cjournal::log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	} catch (eRofQueueFull& e) {
-		cjournal::log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	}
 }
@@ -1997,10 +1997,10 @@ crofctl::send_experimenter_stats_reply(
 		rofchan.send_message(auxid, msg);
 
 	} catch (eRofConnNotConnected& e) {
-		cjournal::log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	} catch (eRofQueueFull& e) {
-		cjournal::log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	}
 }
@@ -2024,10 +2024,10 @@ crofctl::send_meter_stats_reply(
 		rofchan.send_message(auxid, msg);
 
 	} catch (eRofConnNotConnected& e) {
-		cjournal::log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	} catch (eRofQueueFull& e) {
-		cjournal::log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	}
 }
@@ -2051,10 +2051,10 @@ crofctl::send_meter_config_stats_reply(
 		rofchan.send_message(auxid, msg);
 
 	} catch (eRofConnNotConnected& e) {
-		cjournal::log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	} catch (eRofQueueFull& e) {
-		cjournal::log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	}
 }
@@ -2078,10 +2078,10 @@ crofctl::send_meter_features_stats_reply(
 		rofchan.send_message(auxid, msg);
 
 	} catch (eRofConnNotConnected& e) {
-		cjournal::log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	} catch (eRofQueueFull& e) {
-		cjournal::log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	}
 }
@@ -2147,10 +2147,10 @@ crofctl::send_packet_in_message(
 		rofchan.send_message(auxid, msg);
 
 	} catch (eRofConnNotConnected& e) {
-		cjournal::log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	} catch (eRofQueueFull& e) {
-		cjournal::log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	}
 }
@@ -2170,10 +2170,10 @@ crofctl::send_barrier_reply(
 		rofchan.send_message(auxid, msg);
 
 	} catch (eRofConnNotConnected& e) {
-		cjournal::log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	} catch (eRofQueueFull& e) {
-		cjournal::log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	}
 }
@@ -2195,10 +2195,10 @@ crofctl::send_role_reply(
 		rofchan.send_message(auxid, msg);
 
 	} catch (eRofConnNotConnected& e) {
-		cjournal::log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	} catch (eRofQueueFull& e) {
-		cjournal::log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	}
 }
@@ -2225,10 +2225,10 @@ crofctl::send_error_message(
 		rofchan.send_message(auxid, msg);
 
 	} catch (eRofConnNotConnected& e) {
-		cjournal::log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	} catch (eRofQueueFull& e) {
-		cjournal::log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	}
 }
@@ -2256,10 +2256,10 @@ crofctl::send_experimenter_message(
 		rofchan.send_message(auxid, msg);
 
 	} catch (eRofConnNotConnected& e) {
-		cjournal::log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	} catch (eRofQueueFull& e) {
-		cjournal::log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	}
 }
@@ -2330,10 +2330,10 @@ crofctl::send_flow_removed_message(
 		rofchan.send_message(auxid, msg);
 
 	} catch (eRofConnNotConnected& e) {
-		cjournal::log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	} catch (eRofQueueFull& e) {
-		cjournal::log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	}
 }
@@ -2383,10 +2383,10 @@ crofctl::send_port_status_message(
 		rofchan.send_message(auxid, msg);
 
 	} catch (eRofConnNotConnected& e) {
-		cjournal::log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	} catch (eRofQueueFull& e) {
-		cjournal::log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	}
 }
@@ -2410,10 +2410,10 @@ crofctl::send_queue_get_config_reply(
 		rofchan.send_message(auxid, msg);
 
 	} catch (eRofConnNotConnected& e) {
-		cjournal::log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	} catch (eRofQueueFull& e) {
-		cjournal::log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	}
 }
@@ -2435,10 +2435,10 @@ crofctl::send_get_async_config_reply(
 		rofchan.send_message(auxid, msg);
 
 	} catch (eRofConnNotConnected& e) {
-		cjournal::log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	} catch (eRofQueueFull& e) {
-		cjournal::log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	}
 }

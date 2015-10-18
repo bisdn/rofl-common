@@ -33,7 +33,6 @@ librofl_common_base_la_SOURCES = \
 		endian_conversion.h \
 		rofcommon.h \
 		croflexception.h \
-		thread_helper.h \
 		caddress.h \
 		caddress.cc \
 		cpacket.h \
@@ -78,7 +77,6 @@ library_include_HEADERS= \
 		crofchan.h \
 		croflexception.h \
 		cmemory.h \
-		thread_helper.h \
 		csegment.hpp \
 		cauxid.h \
 		cctlid.h \

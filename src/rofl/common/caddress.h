@@ -15,9 +15,9 @@
 
 namespace rofl {
 
-class eAddress 							: public RoflException {
+class eAddress 							: public exception {
 public:
-	eAddress(const std::string& __arg) : RoflException(__arg) {};
+	eAddress(const std::string& __arg) : exception(__arg) {};
 };
 
 class eAddressInval 					: public eAddress {

@@ -334,7 +334,7 @@ crofconn::send_hello_message()
 
 		std::cerr << "[rofl-common][crofconn] sending HELLO message failed: env not found" << std::endl;
 
-	} catch (RoflException& e) {
+	} catch (exception& e) {
 
 		std::cerr << "[rofl-common][crofconn] sending HELLO message failed " << std::endl;
 
@@ -519,7 +519,7 @@ crofconn::send_features_request()
 
 		std::cerr << "[rofl-common][crofconn] sending FEATURES.request message failed: env not found" << std::endl;
 
-	} catch (RoflException& e) {
+	} catch (exception& e) {
 
 		std::cerr << "[rofl-common][crofconn] sending FEATURES.request message failed " << std::endl;
 
@@ -590,7 +590,7 @@ crofconn::send_echo_request()
 
 		std::cerr << "[rofl-common][crofconn] sending ECHO.request message failed: env not found" << std::endl;
 
-	} catch (RoflException& e) {
+	} catch (exception& e) {
 
 		std::cerr << "[rofl-common][crofconn] sending ECHO.request message failed " << std::endl;
 	}

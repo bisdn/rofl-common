@@ -111,7 +111,8 @@ public:
 	uint16_t
 	get_exp_type() const {
 		if (rofl::cmemory::memlen() < sizeof(struct ofp_exp_wlan_action_body_hdr))
-			throw eInval();
+			throw eInvalid("cofaction_exp_body_wlan::get_exp_type()").
+					set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 		return be16toh(((struct ofp_exp_wlan_action_body_hdr*)rofl::cmemory::somem())->exptype);
 	};
 
@@ -121,7 +122,8 @@ public:
 	void
 	set_exp_type(uint16_t exptype) {
 		if (rofl::cmemory::memlen() < sizeof(struct ofp_exp_wlan_action_body_hdr))
-			throw eInval();
+			throw eInvalid("cofaction_exp_body_wlan::set_exp_type()").
+					set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 		((struct ofp_exp_wlan_action_body_hdr*)rofl::cmemory::somem())->exptype = htobe16(exptype);
 	};
 
@@ -131,7 +133,8 @@ public:
 	uint16_t
 	get_exp_len() const {
 		if (rofl::cmemory::memlen() < sizeof(struct ofp_exp_wlan_action_body_hdr))
-			throw eInval();
+			throw eInvalid("cofaction_exp_body_wlan::get_exp_len()").
+					set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 		return be16toh(((struct ofp_exp_wlan_action_body_hdr*)rofl::cmemory::somem())->explen);
 	};
 
@@ -141,7 +144,8 @@ public:
 	void
 	set_exp_len(uint16_t explen) {
 		if (rofl::cmemory::memlen() < sizeof(struct ofp_exp_wlan_action_body_hdr))
-			throw eInval();
+			throw eInvalid("cofaction_exp_body_wlan::set_exp_len()").
+					set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 		((struct ofp_exp_wlan_action_body_hdr*)rofl::cmemory::somem())->explen = htobe16(explen);
 	};
 
@@ -223,7 +227,8 @@ public:
 	uint16_t
 	get_ether_type() const {
 		if (rofl::cmemory::memlen() < sizeof(struct ofp_exp_wlan_action_body_push_wlan))
-			throw eInval();
+			throw eInvalid("cofaction_exp_body_push_wlan::get_ether_type()").
+					set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 		return be16toh(((struct ofp_exp_wlan_action_body_push_wlan*)rofl::cmemory::somem())->ethertype);
 	};
 
@@ -233,7 +238,8 @@ public:
 	void
 	set_ether_type(uint16_t ethertype) {
 		if (rofl::cmemory::memlen() < sizeof(struct ofp_exp_wlan_action_body_push_wlan))
-			throw eInval();
+			throw eInvalid("cofaction_exp_body_push_wlan::set_ether_type()").
+					set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 		((struct ofp_exp_wlan_action_body_push_wlan*)rofl::cmemory::somem())->ethertype = htobe16(ethertype);
 	};
 
@@ -317,7 +323,8 @@ public:
 	uint16_t
 	get_ether_type() const {
 		if (rofl::cmemory::memlen() < sizeof(struct ofp_exp_wlan_action_body_pop_wlan))
-			throw eInval();
+			throw eInvalid("cofaction_exp_body_pop_wlan::get_ether_type()").
+					set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 		return be16toh(((struct ofp_exp_wlan_action_body_pop_wlan*)rofl::cmemory::somem())->ethertype);
 	};
 
@@ -327,7 +334,8 @@ public:
 	void
 	set_ether_type(uint16_t ethertype) {
 		if (rofl::cmemory::memlen() < sizeof(struct ofp_exp_wlan_action_body_pop_wlan))
-			throw eInval();
+			throw eInvalid("cofaction_exp_body_pop_wlan::set_ether_type()").
+					set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 		((struct ofp_exp_wlan_action_body_pop_wlan*)rofl::cmemory::somem())->ethertype = htobe16(ethertype);
 	};
 

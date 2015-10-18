@@ -48,7 +48,7 @@ caddrinfo::pack(struct addrinfo* buf, size_t buflen)
 		return;
 
 	if (buflen < length())
-		throw eInval("caddrinfo::pack() buflen too short");
+		throw eInvalid("caddrinfo::pack() buflen too short");
 
 	struct addrinfo* ai = (struct addrinfo*)buf;
 
@@ -69,7 +69,7 @@ caddrinfo::unpack(struct addrinfo* buf, size_t buflen)
 		return;
 
 	if (buflen < length())
-		throw eInval("caddrinfo::unpack() buflen too short");
+		throw eInvalid("caddrinfo::unpack() buflen too short");
 
 	struct addrinfo* ai = (struct addrinfo*)buf;
 
@@ -79,7 +79,7 @@ caddrinfo::unpack(struct addrinfo* buf, size_t buflen)
 	ai_protocol = ai->ai_protocol;
 	ai_addr.ca_saddr->sa_family = ai_family;
 	if ((0 == ai->ai_addr) || (ai->ai_addrlen < ai_addr.length()))
-		throw eInval("caddrinfo::unpack() ai_addr_len too short");
+		throw eInvalid("caddrinfo::unpack() ai_addr_len too short");
 	ai_addr.unpack((uint8_t*)(ai->ai_addr), ai->ai_addrlen);
 	ai_addr.salen = ai->ai_addrlen;
 }

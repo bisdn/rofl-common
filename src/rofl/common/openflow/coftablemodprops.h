@@ -10,8 +10,8 @@
 
 #include <map>
 
-#include "rofl/common/thread_helper.h"
-#include "rofl/common/croflexception.h"
+#include "rofl/common/locking.hpp"
+#include "rofl/common/exception.hpp"
 #include "rofl/common/openflow/openflow.h"
 #include "rofl/common/openflow/coftablemodprop.h"
 
@@ -91,7 +91,7 @@ public:
 	 */
 	void
 	clear() {
-		RwLock lock(rwlock_props, RwLock::RWLOCK_WRITE);
+		AcquireReadWriteLock lock(rwlock_props);
 		for (std::map<uint16_t, coftablemod_prop*>::iterator
 				it = properties.begin(); it != properties.end(); ++it) {
 			delete it->second;
@@ -111,7 +111,7 @@ public:
 	 */
 	coftablemod_prop_eviction&
 	add_table_mod_eviction() {
-		RwLock lock(rwlock_props, RwLock::RWLOCK_WRITE);
+		AcquireReadWriteLock lock(rwlock_props);
 		if (properties.find(rofl::openflow14::OFPTMPT_EVICTION) != properties.end()) {
 			delete properties[rofl::openflow14::OFPTMPT_EVICTION];
 		}
@@ -129,7 +129,7 @@ public:
 	 */
 	coftablemod_prop_eviction&
 	set_table_mod_eviction() {
-		RwLock lock(rwlock_props, RwLock::RWLOCK_WRITE);
+		AcquireReadWriteLock lock(rwlock_props);
 		if (properties.find(rofl::openflow14::OFPTMPT_EVICTION) == properties.end()) {
 			properties[rofl::openflow14::OFPTMPT_EVICTION] = new coftablemod_prop_eviction(get_version());
 		}
@@ -146,7 +146,7 @@ public:
 	 */
 	const coftablemod_prop_eviction&
 	get_table_mod_eviction() const {
-		RwLock lock(rwlock_props, RwLock::RWLOCK_READ);
+		AcquireReadLock lock(rwlock_props);
 		if (properties.find(rofl::openflow14::OFPTMPT_EVICTION) == properties.end()) {
 			throw eTableModPropNotFound("coftablemodprops::get_table_mod_eviction() not found");
 		}
@@ -158,7 +158,7 @@ public:
 	 */
 	void
 	drop_table_mod_eviction() {
-		RwLock lock(rwlock_props, RwLock::RWLOCK_WRITE);
+		AcquireReadWriteLock lock(rwlock_props);
 		if (properties.find(rofl::openflow14::OFPTMPT_EVICTION) == properties.end()) {
 			return;
 		}
@@ -186,7 +186,7 @@ public:
 	 */
 	coftablemod_prop_vacancy&
 	add_table_mod_vacancy() {
-		RwLock lock(rwlock_props, RwLock::RWLOCK_WRITE);
+		AcquireReadWriteLock lock(rwlock_props);
 		if (properties.find(rofl::openflow14::OFPTMPT_VACANCY) != properties.end()) {
 			delete properties[rofl::openflow14::OFPTMPT_VACANCY];
 		}
@@ -204,7 +204,7 @@ public:
 	 */
 	coftablemod_prop_vacancy&
 	set_table_mod_vacancy() {
-		RwLock lock(rwlock_props, RwLock::RWLOCK_WRITE);
+		AcquireReadWriteLock lock(rwlock_props);
 		if (properties.find(rofl::openflow14::OFPTMPT_VACANCY) == properties.end()) {
 			properties[rofl::openflow14::OFPTMPT_VACANCY] = new coftablemod_prop_vacancy(get_version());
 		}
@@ -221,7 +221,7 @@ public:
 	 */
 	const coftablemod_prop_vacancy&
 	get_table_mod_vacancy() const {
-		RwLock lock(rwlock_props, RwLock::RWLOCK_READ);
+		AcquireReadLock lock(rwlock_props);
 		if (properties.find(rofl::openflow14::OFPTMPT_VACANCY) == properties.end()) {
 			throw eTableModPropNotFound("coftablemodprops::get_table_mod_vacancy() not found");
 		}
@@ -233,7 +233,7 @@ public:
 	 */
 	void
 	drop_table_mod_vacancy() {
-		RwLock lock(rwlock_props, RwLock::RWLOCK_WRITE);
+		AcquireReadWriteLock lock(rwlock_props);
 		if (properties.find(rofl::openflow14::OFPTMPT_VACANCY) == properties.end()) {
 			return;
 		}
@@ -261,7 +261,7 @@ public:
 	 */
 	coftablemod_prop_experimenter&
 	add_table_mod_experimenter() {
-		RwLock lock(rwlock_props, RwLock::RWLOCK_WRITE);
+		AcquireReadWriteLock lock(rwlock_props);
 		if (properties.find(rofl::openflow14::OFPTMPT_EXPERIMENTER) != properties.end()) {
 			delete properties[rofl::openflow14::OFPTMPT_EXPERIMENTER];
 		}
@@ -279,7 +279,7 @@ public:
 	 */
 	coftablemod_prop_experimenter&
 	set_table_mod_experimenter() {
-		RwLock lock(rwlock_props, RwLock::RWLOCK_WRITE);
+		AcquireReadWriteLock lock(rwlock_props);
 		if (properties.find(rofl::openflow14::OFPTMPT_EXPERIMENTER) == properties.end()) {
 			properties[rofl::openflow14::OFPTMPT_EXPERIMENTER] = new coftablemod_prop_experimenter(get_version());
 		}
@@ -296,7 +296,7 @@ public:
 	 */
 	const coftablemod_prop_experimenter&
 	get_table_mod_experimenter() const {
-		RwLock lock(rwlock_props, RwLock::RWLOCK_READ);
+		AcquireReadLock lock(rwlock_props);
 		if (properties.find(rofl::openflow14::OFPTMPT_EXPERIMENTER) == properties.end()) {
 			throw eTableModPropNotFound("coftablemodprops::get_table_mod_experimenter() not found");
 		}
@@ -308,7 +308,7 @@ public:
 	 */
 	void
 	drop_table_mod_experimenter() {
-		RwLock lock(rwlock_props, RwLock::RWLOCK_WRITE);
+		AcquireReadWriteLock lock(rwlock_props);
 		if (properties.find(rofl::openflow14::OFPTMPT_EXPERIMENTER) == properties.end()) {
 			return;
 		}
@@ -383,9 +383,11 @@ public:
 
 private:
 
-	uint8_t 								ofp_version;
-	mutable PthreadRwLock					rwlock_props;
-	std::map<uint16_t, coftablemod_prop*>	properties;
+	uint8_t                                 ofp_version;
+
+	mutable rofl::crwlock                   rwlock_props;
+
+	std::map<uint16_t, coftablemod_prop*>   properties;
 };
 
 }; // end of namespace openflow

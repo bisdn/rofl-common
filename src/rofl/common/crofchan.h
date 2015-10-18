@@ -17,7 +17,7 @@
 #include <bitset>
 #include <inttypes.h>
 
-#include "rofl/common/croflexception.h"
+#include "rofl/common/exception.hpp"
 #include "rofl/common/crofconn.h"
 #include "rofl/common/openflow/messages/cofmsg.h"
 #include "rofl/common/openflow/cofhelloelemversionbitmap.h"
@@ -27,11 +27,11 @@
 
 namespace rofl {
 
-class eRofChanBase : public RoflException {
+class eRofChanBase : public exception {
 public:
 	eRofChanBase(
 			const std::string& __arg) :
-				RoflException(__arg)
+				exception(__arg)
 	{};
 };
 class eRofChanNotFound : public eRofChanBase {

@@ -18,13 +18,13 @@
 #include "rofl/common/caddress.h"
 #include "rofl/common/cmemory.h"
 #include "rofl/common/logging.h"
-#include "rofl/common/croflexception.h"
+#include "rofl/common/exception.hpp"
 
 namespace rofl {
 
-class eSockAddrBase		: public RoflException {
+class eSockAddrBase		: public exception {
 public:
-	eSockAddrBase(const std::string& __arg) : RoflException(__arg) {};
+	eSockAddrBase(const std::string& __arg) : exception(__arg) {};
 };
 
 class eSockAddrInval	: public eSockAddrBase {

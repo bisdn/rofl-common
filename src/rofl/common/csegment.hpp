@@ -18,7 +18,7 @@
 
 #include "rofl/common/ctimespec.hpp"
 #include "rofl/common/logging.h"
-#include "rofl/common/croflexception.h"
+#include "rofl/common/exception.hpp"
 #include "rofl/common/openflow/messages/cofmsg_stats.h"
 #include "rofl/common/openflow/messages/cofmsg_desc_stats.h"
 #include "rofl/common/openflow/messages/cofmsg_flow_stats.h"
@@ -37,9 +37,27 @@
 
 namespace rofl {
 
-class eSegmentedMessageBase			: public RoflException {};
-class eSegmentedMessageInval		: public eSegmentedMessageBase {};
-class eSegmentedMessageNotFound		: public eSegmentedMessageBase {};
+class eSegmentedMessageBase : public exception {
+public:
+	eSegmentedMessageBase(
+			const std::string& __arg) :
+				exception(__arg)
+	{};
+};
+class eSegmentedMessageInvalid : public eSegmentedMessageBase {
+public:
+	eSegmentedMessageInvalid(
+			const std::string& __arg) :
+				eSegmentedMessageBase(__arg)
+	{};
+};
+class eSegmentedMessageNotFound : public eSegmentedMessageBase {
+public:
+	eSegmentedMessageNotFound(
+			const std::string& __arg) :
+				eSegmentedMessageBase(__arg)
+	{};
+};
 
 class csegment {
 public:
@@ -121,7 +139,8 @@ public:
 	const rofl::openflow::cofmsg&
 	get_msg() const {
 		if (0 == msg)
-			throw eInval();
+			throw eInvalid("csegment::get_msg()").
+					set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 		return *msg;
 	};
 

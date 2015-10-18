@@ -23,14 +23,14 @@
 #include <assert.h>
 
 #include "rofl/common/cmemory.h"
-#include "rofl/common/croflexception.h"
+#include "rofl/common/exception.hpp"
 #include "rofl/common/openflow/openflow.h"
 
 namespace rofl {
 
-class ePacketBase			: public RoflException {
+class ePacketBase			: public exception {
 public:
-	ePacketBase(const std::string& __arg) : RoflException(__arg) {};
+	ePacketBase(const std::string& __arg) : exception(__arg) {};
 };
 class ePacketInval 			: public ePacketBase {
 public:

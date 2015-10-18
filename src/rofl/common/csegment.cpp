@@ -179,7 +179,8 @@ csegment::store_and_merge_msg(
 
 
 		if (msg->get_type() != msg_stats.get_type()) { // message types must match
-			throw eSegmentedMessageInval();
+			throw eSegmentedMessageInvalid("csegment::store_and_merge_msg()").
+					set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 		}
 
 
@@ -193,7 +194,8 @@ csegment::store_and_merge_msg(
 
 
 		if (a_stats_type != stats_type) { // stats types must match
-			throw eSegmentedMessageInval();
+			throw eSegmentedMessageInvalid("csegment::store_and_merge_msg()").
+					set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 		}
 
 		switch (msg_stats.get_type()) {

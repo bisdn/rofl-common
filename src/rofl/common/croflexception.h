@@ -32,16 +32,16 @@ public:
 public:
 	friend std::ostream&
 	operator<< (std::ostream& os, const RoflException& e) {
-		os << "<RoflException: " << e.what() << " >";
+		os << "<exception: " << e.what() << " >";
 		return os;
 	};
 };
 
 #if 0
-class eSysCall : public RoflException {
+class eSysCall : public exception {
 public:
 	eSysCall(std::string const& syscall = std::string("unknown")) :
-		RoflException("syscall: "+syscall+
+		exception("syscall: "+syscall+
 				" error: "+std::string(strerror(errno))+" "+
 				std::string(__FILE__)+std::string(":")+std::string(__func__)),
 		n_err(errno), s_err(strerror(errno)) {};
