@@ -30,6 +30,7 @@
 #include "rofl/common/cdpid.h"
 #include "rofl/common/crofqueue.h"
 #include "rofl/common/crandom.h"
+#include "rofl/common/cjournal.hpp"
 
 #include "rofl/common/openflow/cofports.h"
 #include "rofl/common/openflow/coftables.h"
@@ -1022,7 +1023,9 @@ protected:
  *
  */
 class crofdpt :
-		public rofl::crofchan_env
+		public rofl::crofchan_env,
+		public rofl::cjournal_env,
+		public rofl::cjournal
 {
 public:
 

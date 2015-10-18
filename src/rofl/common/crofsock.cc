@@ -1188,7 +1188,9 @@ crofsock::send_message(
 	}
 
 	if (flags.test(FLAG_TX_BLOCK_QUEUEING)) {
-		throw eRofQueueFull("crofsock::send_message() transmission blocked, congestion");
+		throw eRofQueueFull("crofsock::send_message() transmission blocked, congestion").
+				set_func(__PRETTY_FUNCTION__).
+				set_line(__LINE__);
 	}
 
 	txqueue_pending_pkts++;

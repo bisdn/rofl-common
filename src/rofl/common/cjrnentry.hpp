@@ -115,7 +115,7 @@ public:
 		va_list args;
 		va_start(args, format);
 		vsnprintf(tmp, sizeof(tmp), format, args);
-		va_end (args);
+		va_end(args);
 		return log(severity, std::string(tmp));
 	};
 
@@ -301,7 +301,9 @@ public:
 	friend std::ostream&
 	operator<< (std::ostream& os, const cjrnentry& jrnentry) {
 		os << "[" << jrnentry.logtime.str() << "] ";
-
+		for (auto key : jrnentry.keys()) {
+			os << key << "=" << jrnentry.get_key(key) << ", ";
+		}
 		return os;
 	};
 

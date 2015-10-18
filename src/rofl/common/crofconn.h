@@ -25,14 +25,15 @@
 #include "rofl/common/csegment.hpp"
 #include "rofl/common/cauxid.h"
 #include "rofl/common/crofqueue.h"
+#include "rofl/common/exception.hpp"
 
 namespace rofl {
 
-class eRofConnBase : public RoflException {
+class eRofConnBase : public exception {
 public:
 	eRofConnBase(
 			const std::string& __arg) :
-				RoflException(__arg)
+				exception(__arg)
 	{};
 };
 class eRofConnXidSpaceExhausted : public eRofConnBase {

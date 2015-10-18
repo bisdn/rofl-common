@@ -35,6 +35,82 @@ public:
 	 *
 	 */
 	const std::string&
+	get_caller() const
+	{ return get_key("caller"); };
+
+	/**
+	 *
+	 */
+	exception&
+	set_caller(
+			const std::string& s_caller)
+	{ set_key("caller", s_caller); return *this; };
+
+public:
+
+	/**
+	 *
+	 */
+	const std::string&
+	get_action() const
+	{ return get_key("action"); };
+
+	/**
+	 *
+	 */
+	exception&
+	set_action(
+			const std::string& s_action)
+	{ set_key("action", s_action); return *this; };
+
+public:
+
+	/**
+	 *
+	 */
+	const std::string&
+	get_func() const
+	{ return get_key("func"); };
+
+	/**
+	 *
+	 */
+	exception&
+	set_func(
+			const std::string& s_func)
+	{ set_key("func", s_func); return *this; };
+
+public:
+
+	/**
+	 *
+	 */
+	int
+	get_line() const
+	{
+		std::istringstream ss(get_key("line"));
+		int line = 0; ss >> line;
+		return line;
+	};
+
+	/**
+	 *
+	 */
+	exception&
+	set_line(
+			int line)
+	{
+		std::stringstream ss; ss << line;
+		set_key("line", ss.str());
+		return *this;
+	};
+
+public:
+
+	/**
+	 *
+	 */
+	const std::string&
 	get_class() const
 	{ return get_key("class"); };
 

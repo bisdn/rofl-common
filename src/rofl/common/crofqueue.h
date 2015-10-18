@@ -14,16 +14,16 @@
 #include "rofl/common/locking.hpp"
 #include "rofl/common/openflow/messages/cofmsg.h"
 #include "rofl/common/logging.h"
-#include "rofl/common/croflexception.h"
+#include "rofl/common/exception.hpp"
 
 namespace rofl {
 
 
-class eRofQueueBase : public RoflException {
+class eRofQueueBase : public exception {
 public:
 	eRofQueueBase(
 			const std::string& __arg) :
-				RoflException(__arg)
+				exception(__arg)
 	{};
 };
 class eRofQueueInvalid : public eRofQueueBase {

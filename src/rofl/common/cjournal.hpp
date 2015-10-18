@@ -17,6 +17,7 @@
 #include <set>
 #include <string>
 #include <cstdarg>
+#include <iostream>
 
 #include "rofl/common/locking.hpp"
 #include "rofl/common/exception.hpp"
@@ -103,7 +104,7 @@ public:
 	 *
 	 */
 	~cjournal()
-	{ clear(); };
+	{ clear_log_entries(); };
 
 	/**
 	 *
@@ -172,15 +173,23 @@ public:
 	/**
 	 *
 	 */
-	cjrnentry&
-	log(
-			cjournal_level_t level, const std::string& event)
-	{ return add_entry().log(level, event); };
+	cjournal&
+	log_on_stdout(
+			bool dump_on_stdout)
+	{ this->dump_on_stdout = dump_on_stdout; return *this; };
 
 	/**
 	 *
 	 */
-	cjrnentry&
+	cjournal&
+	log(
+			cjournal_level_t level, const std::string& event)
+	{ add_log_entry().log(level, event); return *this; };
+
+	/**
+	 *
+	 */
+	cjournal&
 	log(
 			cjournal_level_t level, const char* format, ...)
 	{
@@ -188,17 +197,18 @@ public:
 		va_list args;
 		va_start(args, format);
 		vsnprintf(tmp, sizeof(tmp), format, args);
-		va_end (args);
-		return add_entry().log(level, tmp);
+		va_end(args);
+		add_log_entry().log(level, tmp);
+		return *this;
 	};
 
 	/**
 	 *
 	 */
-	cjrnentry&
+	cjournal&
 	log(
 			const rofl::exception& e)
-	{ return add_entry().log(e); };
+	{ add_log_entry().log(e); return *this; };
 
 public:
 
@@ -206,7 +216,7 @@ public:
 	 *
 	 */
 	std::list<uint32_t>
-	get_entry_ids() const {
+	get_log_entry_ids() const {
 		std::list<uint32_t> ids;
 		AcquireReadLock rlock(entries_rwlock);
 		for (auto it : entries) {
@@ -219,7 +229,7 @@ public:
 	 *
 	 */
 	void
-	clear() {
+	clear_log_entries() {
 		AcquireReadWriteLock rwlock(entries_rwlock);
 		for (auto it : entries) {
 			delete it.second;
@@ -233,7 +243,7 @@ public:
 	 *
 	 */
 	cjrnentry&
-	add_entry() {
+	add_log_entry() {
 		AcquireReadWriteLock rwlock(entries_rwlock);
 		while (entries.size() > max_entries) {
 			uint32_t entry_id = entries.begin()->first;
@@ -243,7 +253,11 @@ public:
 		while (entries.find(last_entry_id) != entries.end()) {
 			last_entry_id++;
 		}
-		return *(entries[last_entry_id] = new cjrnentry(last_entry_id));
+		entries[last_entry_id] = new cjrnentry(last_entry_id);
+		if (dump_on_stdout) {
+			std::cout << *(entries[last_entry_id]) << std::endl;
+		}
+		return *(entries[last_entry_id]);
 	};
 
 public:
@@ -252,7 +266,7 @@ public:
 	 *
 	 */
 	cjrnentry&
-	add_entry(
+	add_log_entry(
 			uint32_t id) {
 		AcquireReadWriteLock rwlock(entries_rwlock);
 		while (entries.size() > max_entries) {
@@ -263,14 +277,18 @@ public:
 		if (entries.find(id) != entries.end()) {
 			delete entries[id];
 		}
-		return *(entries[id] = new cjrnentry(id));
+		entries[id] = new cjrnentry(id);
+		if (dump_on_stdout) {
+			std::cout << *(entries[id]) << std::endl;
+		}
+		return *(entries[id]);
 	};
 
 	/**
 	 *
 	 */
 	cjrnentry&
-	set_entry(
+	set_log_entry(
 			uint32_t id) {
 		AcquireReadWriteLock rwlock(entries_rwlock);
 		while (entries.size() > max_entries) {
@@ -288,7 +306,7 @@ public:
 	 *
 	 */
 	const cjrnentry&
-	get_entry(
+	get_log_entry(
 			uint32_t id) const {
 		AcquireReadLock rlock(entries_rwlock);
 		if (entries.find(id) == entries.end()) {
@@ -301,7 +319,7 @@ public:
 	 *
 	 */
 	bool
-	drop_entry(
+	drop_log_entry(
 			uint32_t id) {
 		AcquireReadWriteLock rwlock(entries_rwlock);
 		if (entries.find(id) == entries.end()) {
@@ -316,7 +334,7 @@ public:
 	 *
 	 */
 	bool
-	has_entry(
+	has_log_entry(
 			uint32_t id) const {
 		AcquireReadLock rlock(entries_rwlock);
 		return (not (entries.find(id) == entries.end()));
@@ -368,6 +386,9 @@ private:
 	// maximum number of entries in log
 	unsigned int                            max_entries;
 	static const unsigned int               MAX_ENTRIES_DEFAULT;
+
+	// dump on stdout
+	bool                                    dump_on_stdout;
 };
 
 }; // end of namespace rofl
