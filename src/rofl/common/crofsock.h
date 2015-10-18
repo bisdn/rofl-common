@@ -44,7 +44,6 @@
 #include "rofl/common/cthread.hpp"
 #include "rofl/common/csockaddr.h"
 #include "rofl/common/crandom.h"
-#include "rofl/common/croflexception.h"
 #include "rofl/common/exception.hpp"
 #include "rofl/common/cjournal.hpp"
 
@@ -91,11 +90,11 @@ namespace rofl {
 
 
 
-class eRofSockBase : public RoflException {
+class eRofSockBase : public exception {
 public:
 	eRofSockBase(
 			const std::string& __arg) :
-				RoflException(__arg)
+				exception(__arg)
 	{};
 };
 class eRofSockInvalid : public eRofSockBase {
@@ -703,6 +702,9 @@ private:
 
 	bool
 	tls_verify_ok();
+
+	void
+	tls_log_errors();
 
 private:
 

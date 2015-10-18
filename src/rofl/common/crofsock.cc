@@ -642,17 +642,12 @@ crofsock::tls_accept(
 	case STATE_CLOSED:
 	case STATE_TCP_ACCEPTING: {
 
-		//cjournal::log(LOG_INFO)
-		std::cerr << ">>> tls_accept() [1] <<<" << std::endl;
-
 		flags.set(FLAG_TLS_IN_USE);
 
 		crofsock::tcp_accept(sockfd);
 
 	} break;
 	case STATE_TCP_ESTABLISHED: {
-
-		std::cerr << ">>> tls_accept() [2] <<<" << std::endl;
 
 		tls_init_context();
 
@@ -674,51 +669,47 @@ crofsock::tls_accept(
 
 		state = STATE_TLS_ACCEPTING;
 
+		cjournal::log(LOG_INFO, "TLS: start passive connection");
+
 	} break;
 	case STATE_TLS_ACCEPTING: {
 
-		std::cerr << ">>> tls_accept() [3] <<<" << std::endl;
-
 		int rc = 0, err_code = 0;
-
-		std::cerr << "[rofl][crofsock][tls_accept] SSL accepting..." << std::endl;
 
 		if ((rc = SSL_accept(ssl)) <= 0) {
 			switch (err_code = SSL_get_error(ssl, rc)) {
 			case SSL_ERROR_WANT_READ: {
-				std::cerr << "[rofl][crofsock][tls_accept] accepting => SSL_ERROR_WANT_READ" << std::endl;
+				cjournal::log(LOG_INFO, "TLS: accept WANT READ");
 			} return;
 			case SSL_ERROR_WANT_WRITE: {
-				std::cerr << "[rofl][crofsock][tls_accept] accepting => SSL_ERROR_WANT_WRITE" << std::endl;
+				cjournal::log(LOG_INFO, "TLS: accept WANT WRITE");
 			} return;
 			case SSL_ERROR_WANT_ACCEPT: {
-				std::cerr << "[rofl][crofsock][tls_accept] accepting => SSL_ERROR_WANT_ACCEPT" << std::endl;
+				cjournal::log(LOG_INFO, "TLS: accept WANT ACCEPT");
 			} return;
 			case SSL_ERROR_WANT_CONNECT: {
-				std::cerr << "[rofl][crofsock][tls_accept] accepting => SSL_ERROR_WANT_CONNECT" << std::endl;
+				cjournal::log(LOG_INFO, "TLS: accept WANT CONNECT");
 			} return;
 
 
 			case SSL_ERROR_NONE: {
-				std::cerr << "[rofl][crofsock][tls_accept] SSL_accept() failed SSL_ERROR_NONE" << std::endl;
+				cjournal::log(LOG_INFO, "TLS: accept failed ERROR NONE");
 			} break;
 			case SSL_ERROR_SSL: {
-				std::cerr << "[rofl][crofsock][tls_accept] SSL_accept() failed SSL_ERROR_SSL" << std::endl;
+				cjournal::log(LOG_INFO, "TLS: accept failed ERROR SSL");
 			} break;
 			case SSL_ERROR_SYSCALL: {
-				std::cerr << "[rofl][crofsock][tls_accept] SSL_accept() failed SSL_ERROR_SYSCALL" << std::endl;
+				cjournal::log(LOG_INFO, "TLS: accept failed ERROR SYSCALL");
 			} break;
 			case SSL_ERROR_ZERO_RETURN: {
-				std::cerr << "[rofl][crofsock][tls_accept] SSL_accept() failed SSL_ERROR_ZERO_RETURN" << std::endl;
+				cjournal::log(LOG_INFO, "TLS: accept failed ERROR ZERO RETURN");
 			} break;
 			default: {
-				std::cerr << "[rofl][crofsock][tls_accept] SSL_accept() failed " << std::endl;
+				cjournal::log(LOG_INFO, "TLS: accept failed");
 			};
 			}
 
-			std::cerr << "[rofl][crofsock][tls_accept] SSL_accept() failed " << std::endl;
-
-			ERR_print_errors_fp(stderr);
+			tls_log_errors();
 
 			SSL_free(ssl); ssl = NULL; bio = NULL;
 
@@ -732,9 +723,9 @@ crofsock::tls_accept(
 		if (rc == 1) {
 
 			if (not tls_verify_ok()) {
-				std::cerr << "[rofl][crofsock][tls_accept] SSL_accept() peer verification failed " << std::endl;
+				cjournal::log(LOG_INFO, "TLS: accept peer verification failed");
 
-				ERR_print_errors_fp(stderr);
+				tls_log_errors();
 
 				SSL_free(ssl); ssl = NULL; bio = NULL;
 
@@ -747,7 +738,7 @@ crofsock::tls_accept(
 				return;
 			}
 
-			std::cerr << "[rofl][crofsock][tls_accept] SSL_accept() succeeded " << std::endl;
+			cjournal::log(LOG_INFO, "TLS: accept succeeded");
 
 			state = STATE_TLS_ESTABLISHED;
 
@@ -757,15 +748,13 @@ crofsock::tls_accept(
 	} break;
 	case STATE_TLS_ESTABLISHED: {
 
-		std::cerr << ">>> tls_accept() [4] <<<" << std::endl;
-
 		/* do nothing */
 
 	} break;
 	default: {
-		std::cerr << ">>> tls_accept() [E] <<<" << std::endl;
 
-		throw eRofSockError("[rofl][crofsock][tls_accept] called in invalid state");
+		throw eRofSockError("crofsock::tls_accept() called in invalid state").
+				set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	}
 }
@@ -781,16 +770,12 @@ crofsock::tls_connect(
 	case STATE_CLOSED:
 	case STATE_TCP_CONNECTING: {
 
-		std::cerr << ">>> tls_connect() [1] <<<" << std::endl;
-
 		flags.set(FLAG_TLS_IN_USE);
 
 		crofsock::tcp_connect(reconnect);
 
 	} break;
 	case STATE_TCP_ESTABLISHED: {
-
-		std::cerr << ">>> tls_connect() [2] <<<" << std::endl;
 
 		tls_init_context();
 
@@ -812,53 +797,49 @@ crofsock::tls_connect(
 
 		state = STATE_TLS_CONNECTING;
 
+		cjournal::log(LOG_INFO, "TLS: start active connection");
+
 		crofsock::tls_connect(reconnect);
 
 	} break;
 	case STATE_TLS_CONNECTING: {
 
-		std::cerr << ">>> tls_connect() [3] <<<" << std::endl;
-
 		int rc = 0, err_code = 0;
-
-		std::cerr << "[rofl][crofsock][tls_connect] SSL connecting..." << std::endl;
 
 		if ((rc = SSL_connect(ssl)) <= 0) {
 			switch (err_code = SSL_get_error(ssl, rc)) {
 			case SSL_ERROR_WANT_READ: {
-				std::cerr << "[rofl][crofsock][tls_connect] connecting => SSL_ERROR_WANT_READ" << std::endl;
+				cjournal::log(LOG_INFO, "TLS: connect WANT READ");
 			} return;
 			case SSL_ERROR_WANT_WRITE: {
-				std::cerr << "[rofl][crofsock][tls_connect] connecting => SSL_ERROR_WANT_WRITE" << std::endl;
+				cjournal::log(LOG_INFO, "TLS: connect WANT WRITE");
 			} return;
 			case SSL_ERROR_WANT_ACCEPT: {
-				std::cerr << "[rofl][crofsock][tls_connect] connecting => SSL_ERROR_WANT_ACCEPT" << std::endl;
+				cjournal::log(LOG_INFO, "TLS: connect WANT ACCEPT");
 			} return;
 			case SSL_ERROR_WANT_CONNECT: {
-				std::cerr << "[rofl][crofsock][tls_connect] connecting => SSL_ERROR_WANT_CONNECT" << std::endl;
+				cjournal::log(LOG_INFO, "TLS: connect WANT CONNECT");
 			} return;
 
 
 			case SSL_ERROR_NONE: {
-				std::cerr << "[rofl][crofsock][tls_connect] SSL_connect() failed SSL_ERROR_NONE" << std::endl;
+				cjournal::log(LOG_INFO, "TLS: connect failed ERROR NONE");
 			} break;
 			case SSL_ERROR_SSL: {
-				std::cerr << "[rofl][crofsock][tls_connect] SSL_connect() failed SSL_ERROR_SSL" << std::endl;
+				cjournal::log(LOG_INFO, "TLS: connect failed ERROR SSL");
 			} break;
 			case SSL_ERROR_SYSCALL: {
-				std::cerr << "[rofl][crofsock][tls_connect] SSL_connect() failed SSL_ERROR_SYSCALL" << std::endl;
+				cjournal::log(LOG_INFO, "TLS: connect failed ERROR SYSCALL");
 			} break;
 			case SSL_ERROR_ZERO_RETURN: {
-				std::cerr << "[rofl][crofsock][tls_connect] SSL_connect() failed SSL_ERROR_ZERO_RETURN" << std::endl;
+				cjournal::log(LOG_INFO, "TLS: connect failed ERROR ZERO RETURN");
 			} break;
 			default: {
-				std::cerr << "[rofl][crofsock][tls_connect] SSL_connect() failed " << std::endl;
+				cjournal::log(LOG_INFO, "TLS: connect failed");
 			};
 			}
 
-			std::cerr << "[rofl][crofsock][tls_connect] SSL_connect() failed " << std::endl;
-
-			ERR_print_errors_fp(stderr);
+			tls_log_errors();
 
 			SSL_free(ssl); ssl = NULL; bio = NULL;
 
@@ -872,9 +853,9 @@ crofsock::tls_connect(
 		if (rc == 1) {
 
 			if (not tls_verify_ok()) {
-				std::cerr << "[rofl][crofsock][tls_connect] SSL_connect() peer verification failed " << std::endl;
+				cjournal::log(LOG_INFO, "TLS: connect peer verification failed");
 
-				ERR_print_errors_fp(stderr);
+				tls_log_errors();
 
 				SSL_free(ssl); ssl = NULL; bio = NULL;
 
@@ -887,7 +868,7 @@ crofsock::tls_connect(
 				return;
 			}
 
-			std::cerr << "[rofl][crofsock][tls_connect] SSL_connect() succeeded " << std::endl;
+			cjournal::log(LOG_INFO, "TLS: connect succeeded");
 
 			state = STATE_TLS_ESTABLISHED;
 
@@ -897,14 +878,13 @@ crofsock::tls_connect(
 	} break;
 	case STATE_TLS_ESTABLISHED: {
 
-		std::cerr << ">>> tls_connect() [4] <<<" << std::endl;
 		/* do nothing */
 
 	} break;
 	default: {
-		std::cerr << ">>> tls_connect() [E] <<<" << std::endl;
 
-		throw eRofSockError("[rofl][crofsock][tls_connect] called in invalid state");
+		throw eRofSockError("crofsock::tls_connect() called in invalid state").
+				set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	}
 }
@@ -926,9 +906,9 @@ crofsock::tls_verify_ok()
 		X509* cert = (X509*)NULL;
 		if ((cert = SSL_get_peer_certificate(ssl)) == NULL) {
 
-			std::cerr << "[rofl][crofsock][tls_verify_ok] peer verification failed " << std::endl;
+			cjournal::log(LOG_INFO, "TLS: no certificate presented by peer");
 
-			ERR_print_errors_fp(stderr);
+			tls_log_errors();
 
 			SSL_free(ssl); ssl = NULL; bio = NULL;
 
@@ -948,106 +928,106 @@ crofsock::tls_verify_ok()
 
 			switch (result) {
 			case X509_V_OK: {
-				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: ok" << std::endl;
+				cjournal::log(LOG_INFO, "TLS: peer certificate verification: ok");
 			} break;
 			case X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT: {
-				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: unable to get issuer certificate" << std::endl;
+				cjournal::log(LOG_INFO, "TLS: peer certificate verification: unable to get issuer certificate");
 			} break;
 			case X509_V_ERR_UNABLE_TO_GET_CRL: {
-				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: unable to get certificate CRL" << std::endl;
+				cjournal::log(LOG_INFO, "TLS: peer certificate verification: unable to get certificate CRL");
 			} break;
 			case X509_V_ERR_UNABLE_TO_DECRYPT_CERT_SIGNATURE: {
-				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: unable to decrypt certificate's signature" << std::endl;
+				cjournal::log(LOG_INFO, "TLS: peer certificate verification: unable to decrypt certificate's signature");
 			} break;
 			case X509_V_ERR_UNABLE_TO_DECRYPT_CRL_SIGNATURE: {
-				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: unable to decrypt CRL's signature" << std::endl;
+				cjournal::log(LOG_INFO, "TLS: peer certificate verification: unable to decrypt CRL's signature");
 			} break;
 			case X509_V_ERR_UNABLE_TO_DECODE_ISSUER_PUBLIC_KEY: {
-				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: unable to decode issuer public key" << std::endl;
+				cjournal::log(LOG_INFO, "TLS: peer certificate verification: unable to decode issuer public key");
 			} break;
 			case X509_V_ERR_CERT_SIGNATURE_FAILURE: {
-				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: certificate signature failure" << std::endl;
+				cjournal::log(LOG_INFO, "TLS: peer certificate verification: certificate signature failure");
 			} break;
 			case X509_V_ERR_CRL_SIGNATURE_FAILURE: {
-				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: CRL signature failure" << std::endl;
+				cjournal::log(LOG_INFO, "TLS: peer certificate verification: CRL signature failure");
 			} break;
 			case X509_V_ERR_CERT_NOT_YET_VALID: {
-				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: certificate is not yet valid" << std::endl;
+				cjournal::log(LOG_INFO, "TLS: peer certificate verification: certificate is not yet valid");
 			} break;
 			case X509_V_ERR_CERT_HAS_EXPIRED: {
-				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: certificate has expired" << std::endl;
+				cjournal::log(LOG_INFO, "TLS: peer certificate verification: certificate has expired");
 			} break;
 			case X509_V_ERR_CRL_NOT_YET_VALID: {
-				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: CRL is not yet valid" << std::endl;
+				cjournal::log(LOG_INFO, "TLS: peer certificate verification: CRL is not yet valid");
 			} break;
 			case X509_V_ERR_CRL_HAS_EXPIRED: {
-				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: CRL has expired" << std::endl;
+				cjournal::log(LOG_INFO, "TLS: peer certificate verification: CRL has expired");
 			} break;
 			case X509_V_ERR_ERROR_IN_CERT_NOT_BEFORE_FIELD: {
-				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: format error in certificate's notBefore field" << std::endl;
+				cjournal::log(LOG_INFO, "TLS: peer certificate verification: format error in certificate's notBefore field");
 			} break;
 			case X509_V_ERR_ERROR_IN_CERT_NOT_AFTER_FIELD: {
-				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: format error in certificate's notAfter field" << std::endl;
+				cjournal::log(LOG_INFO, "TLS: peer certificate verification: format error in certificate's notAfter field");
 			} break;
 			case X509_V_ERR_ERROR_IN_CRL_LAST_UPDATE_FIELD: {
-				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: format error in CRL's lastUpdate field" << std::endl;
+				cjournal::log(LOG_INFO, "TLS: peer certificate verification: format error in CRL's lastUpdate field");
 			} break;
 			case X509_V_ERR_ERROR_IN_CRL_NEXT_UPDATE_FIELD: {
-				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: format error in CRL's nextUpdate field" << std::endl;
+				cjournal::log(LOG_INFO, "TLS: peer certificate verification: format error in CRL's nextUpdate field");
 			} break;
 			case X509_V_ERR_OUT_OF_MEM: {
-				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: out of memory" << std::endl;
+				cjournal::log(LOG_INFO, "TLS: peer certificate verification: out of memory");
 			} break;
 			case X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT: {
-				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: self signed certificate" << std::endl;
+				cjournal::log(LOG_INFO, "TLS: peer certificate verification: self signed certificate");
 			} break;
 			case X509_V_ERR_SELF_SIGNED_CERT_IN_CHAIN: {
-				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: self signed certificate in certificate chain" << std::endl;
+				cjournal::log(LOG_INFO, "TLS: peer certificate verification: self signed certificate in certificate chain");
 			} break;
 			case X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT_LOCALLY: {
-				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: unable to get local issuer certificate" << std::endl;
+				cjournal::log(LOG_INFO, "TLS: peer certificate verification: unable to get local issuer certificate");
 			} break;
 			case X509_V_ERR_UNABLE_TO_VERIFY_LEAF_SIGNATURE: {
-				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: unable to verify the first certificate" << std::endl;
+				cjournal::log(LOG_INFO, "TLS: peer certificate verification: unable to verify the first certificate");
 			} break;
 			case X509_V_ERR_CERT_CHAIN_TOO_LONG: {
-				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: certificate chain too long" << std::endl;
+				cjournal::log(LOG_INFO, "TLS: peer certificate verification: certificate chain too long");
 			} break;
 			case X509_V_ERR_CERT_REVOKED: {
-				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: certificate revoked" << std::endl;
+				cjournal::log(LOG_INFO, "TLS: peer certificate verification: certificate revoked");
 			} break;
 			case X509_V_ERR_INVALID_CA: {
-				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: invalid CA certificate" << std::endl;
+				cjournal::log(LOG_INFO, "TLS: peer certificate verification: invalid CA certificate");
 			} break;
 			case X509_V_ERR_PATH_LENGTH_EXCEEDED: {
-				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: path length constraint exceeded" << std::endl;
+				cjournal::log(LOG_INFO, "TLS: peer certificate verification: path length exceeded");
 			} break;
 			case X509_V_ERR_INVALID_PURPOSE: {
-				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: unsupported certificate purpose" << std::endl;
+				cjournal::log(LOG_INFO, "TLS: peer certificate verification: invalid purpose");
 			} break;
 			case X509_V_ERR_CERT_UNTRUSTED: {
-				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: certificate not trusted" << std::endl;
+				cjournal::log(LOG_INFO, "TLS: peer certificate verification: certificate untrusted");
 			} break;
 			case X509_V_ERR_CERT_REJECTED: {
-				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: certificate rejected" << std::endl;
+				cjournal::log(LOG_INFO, "TLS: peer certificate verification: certificate rejected");
 			} break;
 			case X509_V_ERR_SUBJECT_ISSUER_MISMATCH: {
-				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: subject issuer mismatch" << std::endl;
+				cjournal::log(LOG_INFO, "TLS: peer certificate verification: subject issuer mismatch");
 			} break;
 			case X509_V_ERR_AKID_SKID_MISMATCH: {
-				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: authority and subject key identifier mismatch" << std::endl;
+				cjournal::log(LOG_INFO, "TLS: peer certificate verification: authority key id and subject key id mismatch");
 			} break;
 			case X509_V_ERR_AKID_ISSUER_SERIAL_MISMATCH: {
-				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: authority and issuer serial number mismatch" << std::endl;
+				cjournal::log(LOG_INFO, "TLS: peer certificate verification: authority and issuer serial number mismatch");
 			} break;
 			case X509_V_ERR_KEYUSAGE_NO_CERTSIGN: {
-				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: key usage does not include certificate signing" << std::endl;
+				cjournal::log(LOG_INFO, "TLS: peer certificate verification: key usage does not include certificate signing");
 			} break;
 			case X509_V_ERR_APPLICATION_VERIFICATION: {
-				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: application verification failure" << std::endl;
+				cjournal::log(LOG_INFO, "TLS: peer certificate verification: application verification failure");
 			} break;
 			default: {
-				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: unknown error" << std::endl;
+				cjournal::log(LOG_INFO, "TLS: peer certificate verification: unknown error");
 			};
 			}
 
@@ -1056,6 +1036,24 @@ crofsock::tls_verify_ok()
 	}
 
 	return true;
+}
+
+
+
+void
+crofsock::tls_log_errors()
+{
+	BIO* ebio = BIO_new(BIO_s_mem());
+
+	ERR_print_errors(ebio);
+
+	while (!BIO_eof(ebio)) {
+		rofl::cmemory mem(1024);
+		BIO_read(ebio, mem.somem(), mem.length() - 1);
+		cjournal::log(LOG_CRIT_ERROR, "TLS: error history %s", (const char*)mem.somem());
+	}
+
+	BIO_free(ebio);
 }
 
 
@@ -1082,8 +1080,7 @@ crofsock::backoff_reconnect(
 		}
 	}
 
-	std::cerr << "[rofl-common][crofsock][backoff] "
-			<< " scheduled reconnect in: " << reconnect_backoff_current << "secs" << std::endl;
+	cjournal::log(LOG_NOTICE, " scheduled reconnect in: %d secs", reconnect_backoff_current);
 
 	rxthread.add_timer(TIMER_ID_RECONNECT, ctimespec().expire_in(reconnect_backoff_current, 0));
 
@@ -1548,7 +1545,7 @@ crofsock::handle_read_event_rxthread(
 
 	} catch (std::runtime_error& e) {
 
-		std::cerr << "crofsock::handle_read_event_rxthread() exception caught, what: " << e.what() << std::endl;
+		cjournal::log(LOG_RUNTIME_ERROR, "crofsock::handle_read_event_rxthread() exception caught, what: ", e.what());
 
 	} catch (...) {
 
