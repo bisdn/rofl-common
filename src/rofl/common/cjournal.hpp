@@ -174,9 +174,9 @@ public:
 	 *
 	 */
 	cjournal&
-	log_on_stdout(
+	log_on_stderr(
 			bool dump_on_stdout)
-	{ this->dump_on_stdout = dump_on_stdout; return *this; };
+	{ this->dump_on_stderr = dump_on_stdout; return *this; };
 
 	/**
 	 *
@@ -184,7 +184,13 @@ public:
 	cjournal&
 	log(
 			cjournal_level_t level, const std::string& event)
-	{ add_log_entry().log(level, event); return *this; };
+	{
+		cjrnentry& jrnentry = add_log_entry().log(level, event);
+		if (dump_on_stderr) {
+			std::cerr << jrnentry << std::endl;
+		}
+		return *this;
+	};
 
 	/**
 	 *
@@ -198,7 +204,10 @@ public:
 		va_start(args, format);
 		vsnprintf(tmp, sizeof(tmp), format, args);
 		va_end(args);
-		add_log_entry().log(level, tmp);
+		cjrnentry& jrnentry = add_log_entry().log(level,tmp);
+		if (dump_on_stderr) {
+			std::cerr << jrnentry << std::endl;
+		}
 		return *this;
 	};
 
@@ -208,7 +217,13 @@ public:
 	cjournal&
 	log(
 			const rofl::exception& e)
-	{ add_log_entry().log(e); return *this; };
+	{
+		cjrnentry& jrnentry = add_log_entry().log(e);
+		if (dump_on_stderr) {
+			std::cerr << jrnentry << std::endl;
+		}
+		return *this;
+	};
 
 public:
 
@@ -254,9 +269,6 @@ public:
 			last_entry_id++;
 		}
 		entries[last_entry_id] = new cjrnentry(last_entry_id);
-		if (dump_on_stdout) {
-			std::cout << *(entries[last_entry_id]) << std::endl;
-		}
 		return *(entries[last_entry_id]);
 	};
 
@@ -278,9 +290,6 @@ public:
 			delete entries[id];
 		}
 		entries[id] = new cjrnentry(id);
-		if (dump_on_stdout) {
-			std::cout << *(entries[id]) << std::endl;
-		}
 		return *(entries[id]);
 	};
 
@@ -388,7 +397,7 @@ private:
 	static const unsigned int               MAX_ENTRIES_DEFAULT;
 
 	// dump on stdout
-	bool                                    dump_on_stdout;
+	bool                                    dump_on_stderr;
 };
 
 }; // end of namespace rofl

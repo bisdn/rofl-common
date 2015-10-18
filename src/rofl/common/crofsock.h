@@ -241,8 +241,7 @@ private:
  */
 class crofsock :
 		public cthread_env,
-		public cjournal_env,
-		public cjournal
+		public cjournal_env
 {
 	enum outqueue_type_t {
 		QUEUE_OAM  = 0, // Echo.request/Echo.reply
@@ -296,6 +295,22 @@ public:
 	 */
 	crofsock(
 			crofsock_env *env);
+
+public:
+
+	/**
+	 *
+	 */
+	const cjournal&
+	get_journal() const
+	{ return journal; };
+
+	/**
+	 *
+	 */
+	cjournal&
+	set_journal()
+	{ return journal; };
 
 public:
 
@@ -744,6 +759,9 @@ private:
 			cthread& thread, int fd);
 
 private:
+
+	// journal
+	cjournal                    journal;
 
 	// environment for this crofsock instance
 	crofsock_env*				env;

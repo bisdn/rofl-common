@@ -50,10 +50,7 @@ public:
 			uint32_t id) :
 				id(id),
 				logtime(ctimespec::now(CLOCK_REALTIME))
-	{
-		set_key("logtime", logtime.str());
-		set_key("logdate", logtime.date());
-	};
+	{};
 
 	/**
 	 *
@@ -301,7 +298,8 @@ public:
 	friend std::ostream&
 	operator<< (std::ostream& os, const cjrnentry& jrnentry) {
 		os << "[" << jrnentry.logtime.str() << "] ";
-		for (auto key : jrnentry.keys()) {
+		std::vector<std::string> keys = jrnentry.keys();
+		for (auto key : keys) {
 			os << key << "=" << jrnentry.get_key(key) << ", ";
 		}
 		return os;

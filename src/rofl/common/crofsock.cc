@@ -32,7 +32,7 @@ crofsock::~crofsock()
 
 crofsock::crofsock(
 		crofsock_env* env) :
-				cjournal(this),
+				journal(this),
 				env(env),
 				state(STATE_IDLE),
 				mode(MODE_UNKNOWN),
@@ -669,7 +669,7 @@ crofsock::tls_accept(
 
 		state = STATE_TLS_ACCEPTING;
 
-		cjournal::log(LOG_INFO, "TLS: start passive connection");
+		journal.log(LOG_INFO, "TLS: start passive connection");
 
 	} break;
 	case STATE_TLS_ACCEPTING: {
@@ -679,33 +679,33 @@ crofsock::tls_accept(
 		if ((rc = SSL_accept(ssl)) <= 0) {
 			switch (err_code = SSL_get_error(ssl, rc)) {
 			case SSL_ERROR_WANT_READ: {
-				cjournal::log(LOG_INFO, "TLS: accept WANT READ");
+				journal.log(LOG_INFO, "TLS: accept WANT READ");
 			} return;
 			case SSL_ERROR_WANT_WRITE: {
-				cjournal::log(LOG_INFO, "TLS: accept WANT WRITE");
+				journal.log(LOG_INFO, "TLS: accept WANT WRITE");
 			} return;
 			case SSL_ERROR_WANT_ACCEPT: {
-				cjournal::log(LOG_INFO, "TLS: accept WANT ACCEPT");
+				journal.log(LOG_INFO, "TLS: accept WANT ACCEPT");
 			} return;
 			case SSL_ERROR_WANT_CONNECT: {
-				cjournal::log(LOG_INFO, "TLS: accept WANT CONNECT");
+				journal.log(LOG_INFO, "TLS: accept WANT CONNECT");
 			} return;
 
 
 			case SSL_ERROR_NONE: {
-				cjournal::log(LOG_INFO, "TLS: accept failed ERROR NONE");
+				journal.log(LOG_INFO, "TLS: accept failed ERROR NONE");
 			} break;
 			case SSL_ERROR_SSL: {
-				cjournal::log(LOG_INFO, "TLS: accept failed ERROR SSL");
+				journal.log(LOG_INFO, "TLS: accept failed ERROR SSL");
 			} break;
 			case SSL_ERROR_SYSCALL: {
-				cjournal::log(LOG_INFO, "TLS: accept failed ERROR SYSCALL");
+				journal.log(LOG_INFO, "TLS: accept failed ERROR SYSCALL");
 			} break;
 			case SSL_ERROR_ZERO_RETURN: {
-				cjournal::log(LOG_INFO, "TLS: accept failed ERROR ZERO RETURN");
+				journal.log(LOG_INFO, "TLS: accept failed ERROR ZERO RETURN");
 			} break;
 			default: {
-				cjournal::log(LOG_INFO, "TLS: accept failed");
+				journal.log(LOG_INFO, "TLS: accept failed");
 			};
 			}
 
@@ -723,7 +723,7 @@ crofsock::tls_accept(
 		if (rc == 1) {
 
 			if (not tls_verify_ok()) {
-				cjournal::log(LOG_INFO, "TLS: accept peer verification failed");
+				journal.log(LOG_INFO, "TLS: accept peer verification failed");
 
 				tls_log_errors();
 
@@ -738,7 +738,7 @@ crofsock::tls_accept(
 				return;
 			}
 
-			cjournal::log(LOG_INFO, "TLS: accept succeeded");
+			journal.log(LOG_INFO, "TLS: accept succeeded");
 
 			state = STATE_TLS_ESTABLISHED;
 
@@ -797,7 +797,7 @@ crofsock::tls_connect(
 
 		state = STATE_TLS_CONNECTING;
 
-		cjournal::log(LOG_INFO, "TLS: start active connection");
+		journal.log(LOG_INFO, "TLS: start active connection");
 
 		crofsock::tls_connect(reconnect);
 
@@ -809,33 +809,33 @@ crofsock::tls_connect(
 		if ((rc = SSL_connect(ssl)) <= 0) {
 			switch (err_code = SSL_get_error(ssl, rc)) {
 			case SSL_ERROR_WANT_READ: {
-				cjournal::log(LOG_INFO, "TLS: connect WANT READ");
+				journal.log(LOG_INFO, "TLS: connect WANT READ");
 			} return;
 			case SSL_ERROR_WANT_WRITE: {
-				cjournal::log(LOG_INFO, "TLS: connect WANT WRITE");
+				journal.log(LOG_INFO, "TLS: connect WANT WRITE");
 			} return;
 			case SSL_ERROR_WANT_ACCEPT: {
-				cjournal::log(LOG_INFO, "TLS: connect WANT ACCEPT");
+				journal.log(LOG_INFO, "TLS: connect WANT ACCEPT");
 			} return;
 			case SSL_ERROR_WANT_CONNECT: {
-				cjournal::log(LOG_INFO, "TLS: connect WANT CONNECT");
+				journal.log(LOG_INFO, "TLS: connect WANT CONNECT");
 			} return;
 
 
 			case SSL_ERROR_NONE: {
-				cjournal::log(LOG_INFO, "TLS: connect failed ERROR NONE");
+				journal.log(LOG_INFO, "TLS: connect failed ERROR NONE");
 			} break;
 			case SSL_ERROR_SSL: {
-				cjournal::log(LOG_INFO, "TLS: connect failed ERROR SSL");
+				journal.log(LOG_INFO, "TLS: connect failed ERROR SSL");
 			} break;
 			case SSL_ERROR_SYSCALL: {
-				cjournal::log(LOG_INFO, "TLS: connect failed ERROR SYSCALL");
+				journal.log(LOG_INFO, "TLS: connect failed ERROR SYSCALL");
 			} break;
 			case SSL_ERROR_ZERO_RETURN: {
-				cjournal::log(LOG_INFO, "TLS: connect failed ERROR ZERO RETURN");
+				journal.log(LOG_INFO, "TLS: connect failed ERROR ZERO RETURN");
 			} break;
 			default: {
-				cjournal::log(LOG_INFO, "TLS: connect failed");
+				journal.log(LOG_INFO, "TLS: connect failed");
 			};
 			}
 
@@ -853,7 +853,7 @@ crofsock::tls_connect(
 		if (rc == 1) {
 
 			if (not tls_verify_ok()) {
-				cjournal::log(LOG_INFO, "TLS: connect peer verification failed");
+				journal.log(LOG_INFO, "TLS: connect peer verification failed");
 
 				tls_log_errors();
 
@@ -868,7 +868,7 @@ crofsock::tls_connect(
 				return;
 			}
 
-			cjournal::log(LOG_INFO, "TLS: connect succeeded");
+			journal.log(LOG_INFO, "TLS: connect succeeded");
 
 			state = STATE_TLS_ESTABLISHED;
 
@@ -906,7 +906,7 @@ crofsock::tls_verify_ok()
 		X509* cert = (X509*)NULL;
 		if ((cert = SSL_get_peer_certificate(ssl)) == NULL) {
 
-			cjournal::log(LOG_INFO, "TLS: no certificate presented by peer");
+			journal.log(LOG_INFO, "TLS: no certificate presented by peer");
 
 			tls_log_errors();
 
@@ -928,106 +928,106 @@ crofsock::tls_verify_ok()
 
 			switch (result) {
 			case X509_V_OK: {
-				cjournal::log(LOG_INFO, "TLS: peer certificate verification: ok");
+				journal.log(LOG_INFO, "TLS: peer certificate verification: ok");
 			} break;
 			case X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT: {
-				cjournal::log(LOG_INFO, "TLS: peer certificate verification: unable to get issuer certificate");
+				journal.log(LOG_INFO, "TLS: peer certificate verification: unable to get issuer certificate");
 			} break;
 			case X509_V_ERR_UNABLE_TO_GET_CRL: {
-				cjournal::log(LOG_INFO, "TLS: peer certificate verification: unable to get certificate CRL");
+				journal.log(LOG_INFO, "TLS: peer certificate verification: unable to get certificate CRL");
 			} break;
 			case X509_V_ERR_UNABLE_TO_DECRYPT_CERT_SIGNATURE: {
-				cjournal::log(LOG_INFO, "TLS: peer certificate verification: unable to decrypt certificate's signature");
+				journal.log(LOG_INFO, "TLS: peer certificate verification: unable to decrypt certificate's signature");
 			} break;
 			case X509_V_ERR_UNABLE_TO_DECRYPT_CRL_SIGNATURE: {
-				cjournal::log(LOG_INFO, "TLS: peer certificate verification: unable to decrypt CRL's signature");
+				journal.log(LOG_INFO, "TLS: peer certificate verification: unable to decrypt CRL's signature");
 			} break;
 			case X509_V_ERR_UNABLE_TO_DECODE_ISSUER_PUBLIC_KEY: {
-				cjournal::log(LOG_INFO, "TLS: peer certificate verification: unable to decode issuer public key");
+				journal.log(LOG_INFO, "TLS: peer certificate verification: unable to decode issuer public key");
 			} break;
 			case X509_V_ERR_CERT_SIGNATURE_FAILURE: {
-				cjournal::log(LOG_INFO, "TLS: peer certificate verification: certificate signature failure");
+				journal.log(LOG_INFO, "TLS: peer certificate verification: certificate signature failure");
 			} break;
 			case X509_V_ERR_CRL_SIGNATURE_FAILURE: {
-				cjournal::log(LOG_INFO, "TLS: peer certificate verification: CRL signature failure");
+				journal.log(LOG_INFO, "TLS: peer certificate verification: CRL signature failure");
 			} break;
 			case X509_V_ERR_CERT_NOT_YET_VALID: {
-				cjournal::log(LOG_INFO, "TLS: peer certificate verification: certificate is not yet valid");
+				journal.log(LOG_INFO, "TLS: peer certificate verification: certificate is not yet valid");
 			} break;
 			case X509_V_ERR_CERT_HAS_EXPIRED: {
-				cjournal::log(LOG_INFO, "TLS: peer certificate verification: certificate has expired");
+				journal.log(LOG_INFO, "TLS: peer certificate verification: certificate has expired");
 			} break;
 			case X509_V_ERR_CRL_NOT_YET_VALID: {
-				cjournal::log(LOG_INFO, "TLS: peer certificate verification: CRL is not yet valid");
+				journal.log(LOG_INFO, "TLS: peer certificate verification: CRL is not yet valid");
 			} break;
 			case X509_V_ERR_CRL_HAS_EXPIRED: {
-				cjournal::log(LOG_INFO, "TLS: peer certificate verification: CRL has expired");
+				journal.log(LOG_INFO, "TLS: peer certificate verification: CRL has expired");
 			} break;
 			case X509_V_ERR_ERROR_IN_CERT_NOT_BEFORE_FIELD: {
-				cjournal::log(LOG_INFO, "TLS: peer certificate verification: format error in certificate's notBefore field");
+				journal.log(LOG_INFO, "TLS: peer certificate verification: format error in certificate's notBefore field");
 			} break;
 			case X509_V_ERR_ERROR_IN_CERT_NOT_AFTER_FIELD: {
-				cjournal::log(LOG_INFO, "TLS: peer certificate verification: format error in certificate's notAfter field");
+				journal.log(LOG_INFO, "TLS: peer certificate verification: format error in certificate's notAfter field");
 			} break;
 			case X509_V_ERR_ERROR_IN_CRL_LAST_UPDATE_FIELD: {
-				cjournal::log(LOG_INFO, "TLS: peer certificate verification: format error in CRL's lastUpdate field");
+				journal.log(LOG_INFO, "TLS: peer certificate verification: format error in CRL's lastUpdate field");
 			} break;
 			case X509_V_ERR_ERROR_IN_CRL_NEXT_UPDATE_FIELD: {
-				cjournal::log(LOG_INFO, "TLS: peer certificate verification: format error in CRL's nextUpdate field");
+				journal.log(LOG_INFO, "TLS: peer certificate verification: format error in CRL's nextUpdate field");
 			} break;
 			case X509_V_ERR_OUT_OF_MEM: {
-				cjournal::log(LOG_INFO, "TLS: peer certificate verification: out of memory");
+				journal.log(LOG_INFO, "TLS: peer certificate verification: out of memory");
 			} break;
 			case X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT: {
-				cjournal::log(LOG_INFO, "TLS: peer certificate verification: self signed certificate");
+				journal.log(LOG_INFO, "TLS: peer certificate verification: self signed certificate");
 			} break;
 			case X509_V_ERR_SELF_SIGNED_CERT_IN_CHAIN: {
-				cjournal::log(LOG_INFO, "TLS: peer certificate verification: self signed certificate in certificate chain");
+				journal.log(LOG_INFO, "TLS: peer certificate verification: self signed certificate in certificate chain");
 			} break;
 			case X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT_LOCALLY: {
-				cjournal::log(LOG_INFO, "TLS: peer certificate verification: unable to get local issuer certificate");
+				journal.log(LOG_INFO, "TLS: peer certificate verification: unable to get local issuer certificate");
 			} break;
 			case X509_V_ERR_UNABLE_TO_VERIFY_LEAF_SIGNATURE: {
-				cjournal::log(LOG_INFO, "TLS: peer certificate verification: unable to verify the first certificate");
+				journal.log(LOG_INFO, "TLS: peer certificate verification: unable to verify the first certificate");
 			} break;
 			case X509_V_ERR_CERT_CHAIN_TOO_LONG: {
-				cjournal::log(LOG_INFO, "TLS: peer certificate verification: certificate chain too long");
+				journal.log(LOG_INFO, "TLS: peer certificate verification: certificate chain too long");
 			} break;
 			case X509_V_ERR_CERT_REVOKED: {
-				cjournal::log(LOG_INFO, "TLS: peer certificate verification: certificate revoked");
+				journal.log(LOG_INFO, "TLS: peer certificate verification: certificate revoked");
 			} break;
 			case X509_V_ERR_INVALID_CA: {
-				cjournal::log(LOG_INFO, "TLS: peer certificate verification: invalid CA certificate");
+				journal.log(LOG_INFO, "TLS: peer certificate verification: invalid CA certificate");
 			} break;
 			case X509_V_ERR_PATH_LENGTH_EXCEEDED: {
-				cjournal::log(LOG_INFO, "TLS: peer certificate verification: path length exceeded");
+				journal.log(LOG_INFO, "TLS: peer certificate verification: path length exceeded");
 			} break;
 			case X509_V_ERR_INVALID_PURPOSE: {
-				cjournal::log(LOG_INFO, "TLS: peer certificate verification: invalid purpose");
+				journal.log(LOG_INFO, "TLS: peer certificate verification: invalid purpose");
 			} break;
 			case X509_V_ERR_CERT_UNTRUSTED: {
-				cjournal::log(LOG_INFO, "TLS: peer certificate verification: certificate untrusted");
+				journal.log(LOG_INFO, "TLS: peer certificate verification: certificate untrusted");
 			} break;
 			case X509_V_ERR_CERT_REJECTED: {
-				cjournal::log(LOG_INFO, "TLS: peer certificate verification: certificate rejected");
+				journal.log(LOG_INFO, "TLS: peer certificate verification: certificate rejected");
 			} break;
 			case X509_V_ERR_SUBJECT_ISSUER_MISMATCH: {
-				cjournal::log(LOG_INFO, "TLS: peer certificate verification: subject issuer mismatch");
+				journal.log(LOG_INFO, "TLS: peer certificate verification: subject issuer mismatch");
 			} break;
 			case X509_V_ERR_AKID_SKID_MISMATCH: {
-				cjournal::log(LOG_INFO, "TLS: peer certificate verification: authority key id and subject key id mismatch");
+				journal.log(LOG_INFO, "TLS: peer certificate verification: authority key id and subject key id mismatch");
 			} break;
 			case X509_V_ERR_AKID_ISSUER_SERIAL_MISMATCH: {
-				cjournal::log(LOG_INFO, "TLS: peer certificate verification: authority and issuer serial number mismatch");
+				journal.log(LOG_INFO, "TLS: peer certificate verification: authority and issuer serial number mismatch");
 			} break;
 			case X509_V_ERR_KEYUSAGE_NO_CERTSIGN: {
-				cjournal::log(LOG_INFO, "TLS: peer certificate verification: key usage does not include certificate signing");
+				journal.log(LOG_INFO, "TLS: peer certificate verification: key usage does not include certificate signing");
 			} break;
 			case X509_V_ERR_APPLICATION_VERIFICATION: {
-				cjournal::log(LOG_INFO, "TLS: peer certificate verification: application verification failure");
+				journal.log(LOG_INFO, "TLS: peer certificate verification: application verification failure");
 			} break;
 			default: {
-				cjournal::log(LOG_INFO, "TLS: peer certificate verification: unknown error");
+				journal.log(LOG_INFO, "TLS: peer certificate verification: unknown error");
 			};
 			}
 
@@ -1050,7 +1050,7 @@ crofsock::tls_log_errors()
 	while (!BIO_eof(ebio)) {
 		rofl::cmemory mem(1024);
 		BIO_read(ebio, mem.somem(), mem.length() - 1);
-		cjournal::log(LOG_CRIT_ERROR, "TLS: error history %s", (const char*)mem.somem());
+		journal.log(LOG_CRIT_ERROR, "TLS: error history %s", (const char*)mem.somem());
 	}
 
 	BIO_free(ebio);
@@ -1080,7 +1080,7 @@ crofsock::backoff_reconnect(
 		}
 	}
 
-	cjournal::log(LOG_NOTICE, " scheduled reconnect in: %d secs", reconnect_backoff_current);
+	journal.log(LOG_NOTICE, " scheduled reconnect in: %d secs", reconnect_backoff_current);
 
 	rxthread.add_timer(TIMER_ID_RECONNECT, ctimespec().expire_in(reconnect_backoff_current, 0));
 
@@ -1545,7 +1545,7 @@ crofsock::handle_read_event_rxthread(
 
 	} catch (std::runtime_error& e) {
 
-		cjournal::log(LOG_RUNTIME_ERROR, "crofsock::handle_read_event_rxthread() exception caught, what: ", e.what());
+		journal.log(LOG_RUNTIME_ERROR, "crofsock::handle_read_event_rxthread() exception caught, what: ", e.what());
 
 	} catch (...) {
 
@@ -1669,7 +1669,7 @@ crofsock::parse_message()
 
 	} catch (eBadRequestBadType& e) {
 
-		cjournal::log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message").set_key("xid", be32toh(hdr->xid)));
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message").set_key("xid", be32toh(hdr->xid)));
 
 		send_message(
 				new rofl::openflow::cofmsg_error_bad_request_bad_type(
@@ -1680,7 +1680,7 @@ crofsock::parse_message()
 
 	} catch (eBadRequestBadStat& e) {
 
-		cjournal::log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message").set_key("xid", be32toh(hdr->xid)));
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message").set_key("xid", be32toh(hdr->xid)));
 
 		send_message(
 				new rofl::openflow::cofmsg_error_bad_request_bad_stat(
@@ -1691,7 +1691,7 @@ crofsock::parse_message()
 
 	} catch (eBadRequestBadVersion& e) {
 
-		cjournal::log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message").set_key("xid", be32toh(hdr->xid)));
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message").set_key("xid", be32toh(hdr->xid)));
 
 		if (msg) delete msg;
 
@@ -1704,7 +1704,7 @@ crofsock::parse_message()
 
 	} catch (eBadRequestBadLen& e) {
 
-		cjournal::log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 
 		if (msg) delete msg;
 
@@ -1718,12 +1718,12 @@ crofsock::parse_message()
 
 	} catch (rofl::exception& e) {
 
-		cjournal::log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message").set_key("xid", be32toh(hdr->xid)));
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message").set_key("xid", be32toh(hdr->xid)));
 
 		//if (msg) delete msg;
 
 	} catch (std::runtime_error& e) {
-		cjournal::log(LOG_RUNTIME_ERROR, "std::runtime_error: %s", e.what());
+		journal.log(LOG_RUNTIME_ERROR, "std::runtime_error: %s", e.what());
 
 	}
 }

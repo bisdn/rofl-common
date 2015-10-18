@@ -64,7 +64,7 @@ crofsocktest::test()
 
 			sclient->set_raddr(baddr).tcp_connect(true);
 
-			sleep(5);
+			sleep(1);
 
 			while (keep_running && (timeout-- > 0)) {
 				struct timespec ts;
@@ -110,6 +110,9 @@ crofsocktest::test_tls()
 		slisten = new rofl::crofsock(this);
 		sclient = new rofl::crofsock(this);
 
+		slisten->set_journal().log_on_stderr(true);
+		sclient->set_journal().log_on_stderr(true);
+
 		/* try to find idle port for test */
 		bool lookup_idle_port = true;
 		while (lookup_idle_port) {
@@ -145,6 +148,9 @@ crofsocktest::test_tls()
 			CPPUNIT_ASSERT(false);
 		}
 
+		std::cerr << sclient->get_journal();
+		std::cerr << sserver->get_journal();
+
 		delete slisten;
 		delete sclient;
 		delete sserver;
@@ -166,6 +172,8 @@ crofsocktest::handle_listen(
 	std::cerr << "handle listen" << std::endl;
 
 	sserver = new rofl::crofsock(this);
+
+	sserver->set_journal().log_on_stderr(true);
 
 	switch (test_mode) {
 	case TEST_MODE_TCP: {
