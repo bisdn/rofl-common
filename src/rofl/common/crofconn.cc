@@ -32,6 +32,7 @@ crofconn::~crofconn()
 
 crofconn::crofconn(
 		crofconn_env* env) :
+				journal(this),
 				env(env),
 				thread(this),
 				rofsock(this),
@@ -157,7 +158,8 @@ crofconn::handle_timeout(
 		check_pending_segments();
 	} break;
 	default: {
-		std::cerr << "[rofl-common][crofconn][thread_int] unknown timer type:" << (unsigned int)timer_id << " rcvd" << str() << std::endl;
+		journal.log(LOG_RUNTIME_ERROR, "crofconn::handle_timeout() unknown timer type: %d", (unsigned int)timer_id).
+				set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	}
 }
@@ -171,13 +173,15 @@ crofconn::set_state(
 	try {
 		switch (state = new_state) {
 		case STATE_NEGOTIATION_FAILED: {
-			std::cerr << ">>> STATE_NEGOTIATION_FAILED <<<" << std::endl;
+			journal.log(LOG_INFO, "STATE_NEGOTIATION_FAILED").
+					set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 			set_state(STATE_CLOSING);
 			crofconn_env::call_env(env).handle_negotiation_failed(*this);
 
 		} break;
 		case STATE_CLOSING: {
-			std::cerr << ">>> STATE_CLOSING <<<" << std::endl;
+			journal.log(LOG_INFO, "STATE_CLOSING").
+					set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 			versionbitmap.clear();
 			versionbitmap_peer.clear();
 			set_version(rofl::openflow::OFP_VERSION_UNKNOWN);
@@ -187,7 +191,8 @@ crofconn::set_state(
 
 		} break;
 		case STATE_DISCONNECTED: {
-			std::cerr << ">>> STATE_DISCONNECTED <<<" << std::endl;
+			journal.log(LOG_INFO, "STATE_DISCONNECTED").
+					set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 
 			clear_pending_requests();
 			clear_pending_segments();
@@ -201,19 +206,24 @@ crofconn::set_state(
 
 		} break;
 		case STATE_CONNECT_PENDING: {
-			std::cerr << ">>> STATE_CONNECT_PENDING <<<" << std::endl;
+			journal.log(LOG_INFO, "STATE_CONNECT_PENDING").
+					set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 			versionbitmap_peer.clear();
 			set_version(rofl::openflow::OFP_VERSION_UNKNOWN);
 
 		} break;
 		case STATE_ACCEPT_PENDING: {
-			std::cerr << ">>> STATE_ACCEPT_PENDING <<<" << std::endl;
+			journal.log(LOG_INFO, "STATE_ACCEPT_PENDING").
+					set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 			versionbitmap_peer.clear();
 			set_version(rofl::openflow::OFP_VERSION_UNKNOWN);
 
 		} break;
 		case STATE_NEGOTIATING: {
-			std::cerr << ">>> STATE_NEGOTIATING <<<" << std::endl;
+			journal.log(LOG_INFO, "STATE_ACCEPT_PENDING offered versions: %s",
+					versionbitmap.str().c_str()).
+							set_func(__PRETTY_FUNCTION__).set_line(__LINE__).
+								set_key("offered versions", versionbitmap.str().c_str());
 			send_hello_message();
 
 			/* start working thread */
@@ -221,12 +231,17 @@ crofconn::set_state(
 
 		} break;
 		case STATE_NEGOTIATING2: {
-			std::cerr << ">>> STATE_NEGOTIATING2 <<<" << std::endl;
+			journal.log(LOG_INFO, "STATE_NEGOTIATING2 peer versions: %s, negotiated version: %d",
+					versionbitmap_peer.str().c_str(), ofp_version).
+							set_func(__PRETTY_FUNCTION__).set_line(__LINE__).
+								set_key("peer versions", versionbitmap_peer.str().c_str()).
+									set_key("version", ofp_version);
 			send_features_request();
 
 		} break;
 		case STATE_ESTABLISHED: {
-			std::cerr << ">>> STATE_ESTABLISHED <<<" << std::endl;
+			journal.log(LOG_INFO, "STATE_DISCONNECTED").
+					set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 			/* start periodic checks for connection state (OAM) */
 			thread.add_timer(TIMER_ID_NEED_LIFE_CHECK, ctimespec().expire_in(timeout_lifecheck));
 			crofconn_env::call_env(env).handle_established(*this, ofp_version);
@@ -236,7 +251,7 @@ crofconn::set_state(
 
 	} catch (std::runtime_error& e) {
 
-		std::cerr << "[rofl-common][crofconn] exception, what: " << e.what() << std::endl;
+		journal.log(LOG_RUNTIME_ERROR, e.what()).set_caller(__PRETTY_FUNCTION__);
 	}
 };
 

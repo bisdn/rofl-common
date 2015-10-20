@@ -181,7 +181,7 @@ public:
 	/**
 	 *
 	 */
-	cjournal&
+	cjrnentry&
 	log(
 			cjournal_level_t level, const std::string& event)
 	{
@@ -189,13 +189,13 @@ public:
 		if (dump_on_stderr) {
 			std::cerr << jrnentry << std::endl;
 		}
-		return *this;
+		return jrnentry;
 	};
 
 	/**
 	 *
 	 */
-	cjournal&
+	cjrnentry&
 	log(
 			cjournal_level_t level, const char* format, ...)
 	{
@@ -208,13 +208,13 @@ public:
 		if (dump_on_stderr) {
 			std::cerr << jrnentry << std::endl;
 		}
-		return *this;
+		return jrnentry;
 	};
 
 	/**
 	 *
 	 */
-	cjournal&
+	cjrnentry&
 	log(
 			const rofl::exception& e)
 	{
@@ -222,7 +222,7 @@ public:
 		if (dump_on_stderr) {
 			std::cerr << jrnentry << std::endl;
 		}
-		return *this;
+		return jrnentry;
 	};
 
 public:

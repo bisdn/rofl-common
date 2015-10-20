@@ -26,6 +26,7 @@
 #include "rofl/common/cauxid.h"
 #include "rofl/common/crofqueue.h"
 #include "rofl/common/exception.hpp"
+#include "rofl/common/cjournal.hpp"
 
 namespace rofl {
 
@@ -153,6 +154,7 @@ private:
  */
 class crofconn :
 		public cthread_env,
+		public cjournal_env,
 		public crofsock_env
 {
 	enum outqueue_type_t {
@@ -215,6 +217,22 @@ public:
 	 */
 	crofconn(
 			crofconn_env *env);
+
+public:
+
+	/**
+	 *
+	 */
+	const cjournal&
+	get_journal() const
+	{ return journal; };
+
+	/**
+	 *
+	 */
+	cjournal&
+	set_journal()
+	{ return journal; };
 
 public:
 
@@ -1315,14 +1333,17 @@ private:
 
 private:
 
+	// journal
+	rofl::cjournal                  journal;
+
 	// environment for this instance
-	crofconn_env*                   env;
+	rofl::crofconn_env*             env;
 
 	// internal thread for application specific context
-	cthread                         thread;
+	rofl::cthread                   thread;
 
 	// crofsock instance
-	crofsock                        rofsock;
+	rofl::crofsock                  rofsock;
 
 	// OpenFlow datapath id
 	uint64_t                        dpid;
@@ -1340,7 +1361,7 @@ private:
 	uint8_t                         ofp_version;
 
 	// random number generator
-	crandom                         random;
+	rofl::crandom                   random;
 
 	// internal flags
 	std::bitset<32>                 flags;
