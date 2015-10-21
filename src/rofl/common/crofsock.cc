@@ -1121,6 +1121,14 @@ crofsock::is_congested() const
 
 
 
+bool
+crofsock::is_rx_disabled() const
+{
+	return rx_disabled;
+}
+
+
+
 void
 crofsock::rx_disable()
 {

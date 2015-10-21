@@ -63,6 +63,10 @@ crofconntest::test()
 
 			sleep(2);
 
+			std::cerr << slisten->get_journal() << std::endl;
+			std::cerr << sclient->get_journal() << std::endl;
+			std::cerr << sserver->get_journal() << std::endl;
+
 			delete slisten;
 			delete sclient;
 			delete sserver;

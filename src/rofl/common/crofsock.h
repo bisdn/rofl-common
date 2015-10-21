@@ -388,6 +388,12 @@ public:
 	is_congested() const;
 
 	/**
+	 *
+	 */
+	bool
+	is_rx_disabled() const;
+
+	/**
 	 * @brief	Disable reception of messages on this socket.
 	 */
 	void
