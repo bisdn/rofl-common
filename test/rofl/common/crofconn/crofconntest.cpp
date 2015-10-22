@@ -252,7 +252,7 @@ void
 crofconntest::handle_recv(
 		rofl::crofconn& conn, rofl::openflow::cofmsg* pmsg)
 {
-	std::cerr << "crofconntest::handle_recv() " << conn.str() << std::endl;
+	//std::cerr << "crofconntest::handle_recv() " << conn.str() << std::endl;
 
 	dpid = 0xc1c2c3c4c5c6c7c8;
 	auxid = 0xd1;

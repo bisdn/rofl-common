@@ -666,6 +666,9 @@ crofconn::handle_tcp_connect_refused(
 		crofsock& rofsock)
 {
 	try {
+		journal.log(LOG_NOTICE, "socket indicates TCP connection -connect- refused").
+				set_func(__PRETTY_FUNCTION__);
+
 		set_state(STATE_DISCONNECTED);
 		crofconn_env::call_env(env).handle_connect_refused(*this);
 
@@ -681,6 +684,9 @@ crofconn::handle_tcp_connect_failed(
 		crofsock& rofsock)
 {
 	try {
+		journal.log(LOG_NOTICE, "socket indicates TCP connection -connect- failed").
+				set_func(__PRETTY_FUNCTION__);
+
 		set_state(STATE_DISCONNECTED);
 		crofconn_env::call_env(env).handle_connect_failed(*this);
 
@@ -696,6 +702,9 @@ crofconn::handle_tcp_connected (
 		crofsock& rofsock)
 {
 	try {
+		journal.log(LOG_NOTICE, "socket indicates TCP connection -connect- established").
+				set_func(__PRETTY_FUNCTION__);
+
 		set_state(STATE_NEGOTIATING);
 
 	} catch (eRofConnNotFound& e) {
@@ -710,6 +719,9 @@ crofconn::handle_tcp_accept_refused(
 		crofsock& socket)
 {
 	try {
+		journal.log(LOG_NOTICE, "socket indicates TCP connection -accept- refused").
+				set_func(__PRETTY_FUNCTION__);
+
 		set_state(STATE_DISCONNECTED);
 		crofconn_env::call_env(env).handle_accept_failed(*this);
 
@@ -725,6 +737,9 @@ crofconn::handle_tcp_accept_failed(
 		crofsock& socket)
 {
 	try {
+		journal.log(LOG_NOTICE, "socket indicates TCP connection -accept- failed").
+				set_func(__PRETTY_FUNCTION__);
+
 		set_state(STATE_DISCONNECTED);
 		crofconn_env::call_env(env).handle_accept_failed(*this);
 
@@ -740,6 +755,9 @@ crofconn::handle_tcp_accepted(
 		crofsock& socket)
 {
 	try {
+		journal.log(LOG_NOTICE, "socket indicates TCP connection -accept- established").
+				set_func(__PRETTY_FUNCTION__);
+
 		set_state(STATE_NEGOTIATING);
 
 	} catch (eRofConnNotFound& e) {
@@ -754,6 +772,9 @@ crofconn::handle_tls_connect_failed(
 		crofsock& socket)
 {
 	try {
+		journal.log(LOG_NOTICE, "socket indicates TLS connection -connect- failed").
+				set_func(__PRETTY_FUNCTION__);
+
 		set_state(STATE_DISCONNECTED);
 		crofconn_env::call_env(env).handle_connect_failed(*this);
 
@@ -769,6 +790,9 @@ crofconn::handle_tls_connected(
 		crofsock& socket)
 {
 	try {
+		journal.log(LOG_NOTICE, "socket indicates TLS connection -connect- established").
+				set_func(__PRETTY_FUNCTION__);
+
 		set_state(STATE_NEGOTIATING);
 
 	} catch (eRofConnNotFound& e) {
@@ -783,6 +807,9 @@ crofconn::handle_tls_accept_failed(
 		crofsock& socket)
 {
 	try {
+		journal.log(LOG_NOTICE, "socket indicates TLS connection -accept- failed").
+				set_func(__PRETTY_FUNCTION__);
+
 		set_state(STATE_DISCONNECTED);
 		crofconn_env::call_env(env).handle_accept_failed(*this);
 
@@ -798,6 +825,9 @@ crofconn::handle_tls_accepted(
 		crofsock& socket)
 {
 	try {
+		journal.log(LOG_NOTICE, "socket indicates TLS connection -accept- established").
+				set_func(__PRETTY_FUNCTION__);
+
 		set_state(STATE_NEGOTIATING);
 
 	} catch (eRofConnNotFound& e) {
@@ -812,6 +842,8 @@ crofconn::handle_closed(
 		crofsock& rofsock)
 {
 	try {
+		journal.log(LOG_NOTICE, "socket indicates close").
+				set_func(__PRETTY_FUNCTION__);
 		set_state(STATE_DISCONNECTED);
 		crofconn_env::call_env(env).handle_closed(*this);
 
@@ -826,6 +858,9 @@ void
 crofconn::congestion_solved_indication(
 		crofsock& rofsock)
 {
+	journal.log(LOG_NOTICE, "congestion solved indication").
+			set_func(__PRETTY_FUNCTION__).
+				set_action("message transmission unblocked");
 	crofconn_env::call_env(env).congestion_solved_indication(*this);
 };
 
@@ -835,6 +870,9 @@ void
 crofconn::congestion_occured_indication(
 		crofsock& rofsock)
 {
+	journal.log(LOG_NOTICE, "congestion occured indication").
+			set_func(__PRETTY_FUNCTION__).
+				set_action("message transmission blocked");
 	crofconn_env::call_env(env).congestion_occured_indication(*this);
 };
 
