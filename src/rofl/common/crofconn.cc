@@ -220,10 +220,9 @@ crofconn::set_state(
 
 		} break;
 		case STATE_NEGOTIATING: {
-			journal.log(LOG_INFO, "STATE_NEGOTIATING offered versions: %s",
-					versionbitmap.str().c_str()).
-							set_func(__PRETTY_FUNCTION__).set_line(__LINE__).
-								set_key("offered versions", versionbitmap.str().c_str());
+			journal.log(LOG_INFO, "STATE_NEGOTIATING").
+					set_func(__PRETTY_FUNCTION__).set_line(__LINE__).
+						set_key("offered versions", versionbitmap.str());
 			send_hello_message();
 
 			/* start working thread */
@@ -231,17 +230,16 @@ crofconn::set_state(
 
 		} break;
 		case STATE_NEGOTIATING2: {
-			journal.log(LOG_INFO, "STATE_NEGOTIATING2 peer versions: %s, negotiated version: %d",
-					versionbitmap_peer.str().c_str(), ofp_version).
-							set_func(__PRETTY_FUNCTION__).set_line(__LINE__).
-								set_key("peer versions", versionbitmap_peer.str().c_str()).
-									set_key("version", ofp_version);
+			journal.log(LOG_INFO, "STATE_NEGOTIATING2").
+					set_func(__PRETTY_FUNCTION__).set_line(__LINE__).
+						set_key("peer versions", versionbitmap_peer.str());
 			send_features_request();
 
 		} break;
 		case STATE_ESTABLISHED: {
 			journal.log(LOG_INFO, "STATE_ESTABLISHED").
-					set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+					set_func(__PRETTY_FUNCTION__).set_line(__LINE__).
+						set_key("negotiated version", (int)ofp_version);
 			/* start periodic checks for connection state (OAM) */
 			thread.add_timer(TIMER_ID_NEED_LIFE_CHECK, ctimespec().expire_in(timeout_lifecheck));
 			crofconn_env::call_env(env).handle_established(*this, ofp_version);
@@ -393,7 +391,7 @@ crofconn::hello_rcvd(
 			rofl::openflow::cofhelloelems helloIEs(msg->get_helloelems());
 
 			if (not helloIEs.has_hello_elem_versionbitmap()) {
-				journal.log(LOG_NOTICE, "HELLO message rcvd without HelloIE -VersionBitmap-").
+				journal.log(LOG_CRIT_ERROR, "HELLO message rcvd without HelloIE -VersionBitmap-").
 							set_func(__PRETTY_FUNCTION__);
 				versionbitmap_peer.add_ofp_version(msg->get_version());
 
@@ -401,16 +399,13 @@ crofconn::hello_rcvd(
 				versionbitmap_peer = helloIEs.get_hello_elem_versionbitmap();
 				// sanity check
 				if (not versionbitmap_peer.has_ofp_version(msg->get_version())) {
-					journal.log(LOG_NOTICE, "malformed HelloIE -VersionBitmap- => "
+					journal.log(LOG_CRIT_ERROR, "malformed HelloIE -VersionBitmap- => "
 							"does not contain version defined in OFP message header: %d", (int)msg->get_version()).
 									set_func(__PRETTY_FUNCTION__);
 				}
 			}
 		};
 		}
-
-		journal.log(LOG_NOTICE, "rcvd versions: %s", versionbitmap_peer.str().c_str()).
-				set_func(__PRETTY_FUNCTION__);
 
 		/* Step 2: select highest supported protocol version on both sides */
 
@@ -420,9 +415,6 @@ crofconn::hello_rcvd(
 		}
 
 		ofp_version = versionbitmap_common.get_highest_ofp_version();
-
-		journal.log(LOG_NOTICE, "negotiated version: %d", ofp_version).
-				set_func(__PRETTY_FUNCTION__);
 
 		/* move on finite state machine */
 		if (ofp_version == rofl::openflow::OFP_VERSION_UNKNOWN) {
@@ -1215,7 +1207,11 @@ crofconn::handle_rx_messages()
 	thread.add_timer(TIMER_ID_NEED_LIFE_CHECK, ctimespec().expire_in(timeout_lifecheck));
 
 	/* reenable reception of messages on socket */
-	rofsock.rx_enable();
+	if (rofsock.is_rx_disabled()) {
+		journal.log(LOG_NOTICE, "re-enabling reception of messages on underlying socket").
+				set_func(__PRETTY_FUNCTION__);
+		rofsock.rx_enable();
+	}
 }
 
 
@@ -1233,7 +1229,7 @@ crofconn::handle_rx_multipart_message(
 		rofl::openflow::cofmsg_stats_request *stats = dynamic_cast<rofl::openflow::cofmsg_stats_request*>( msg );
 
 		if (NULL == stats) {
-			journal.log(LOG_CRIT_ERROR, "dropping multipart message, invalid message type").
+			journal.log(LOG_CRIT_ERROR, "dropping multipart request, invalid message type").
 					set_func(__PRETTY_FUNCTION__);
 			delete msg; return;
 		}
@@ -1271,7 +1267,8 @@ crofconn::handle_rx_multipart_message(
 		rofl::openflow::cofmsg_stats_reply *stats = dynamic_cast<rofl::openflow::cofmsg_stats_reply*>( msg );
 
 		if (NULL == stats) {
-			std::cerr << "[rofl-common][crofconn] dropping multipart message, invalid message type." << str() << std::endl;
+			journal.log(LOG_CRIT_ERROR, "dropping multipart reply, invalid message type").
+					set_func(__PRETTY_FUNCTION__);
 			delete msg; return;
 		}
 

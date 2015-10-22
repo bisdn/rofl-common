@@ -77,6 +77,13 @@ crofsocktest::test()
 				CPPUNIT_ASSERT(false);
 			}
 
+			std::cerr << "listen log:" << std::endl;
+			std::cerr << slisten->get_journal() << std::endl;
+			std::cerr << "client log:" << std::endl;
+			std::cerr << sclient->get_journal() << std::endl;
+			std::cerr << "server log:" << std::endl;
+			std::cerr << sserver->get_journal() << std::endl;
+
 			slisten->close();
 			sclient->close();
 			sserver->close();
@@ -148,8 +155,12 @@ crofsocktest::test_tls()
 			CPPUNIT_ASSERT(false);
 		}
 
-		std::cerr << sclient->get_journal();
-		std::cerr << sserver->get_journal();
+		std::cerr << "listen log:" << std::endl;
+		std::cerr << slisten->get_journal() << std::endl;
+		std::cerr << "client log:" << std::endl;
+		std::cerr << sclient->get_journal() << std::endl;
+		std::cerr << "server log:" << std::endl;
+		std::cerr << sserver->get_journal() << std::endl;
 
 		delete slisten;
 		delete sclient;

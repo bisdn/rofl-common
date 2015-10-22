@@ -113,7 +113,8 @@ public:
 			cjournal_env* env) :
 				env(env),
 				last_entry_id(0),
-				max_entries(cjournal::MAX_ENTRIES_DEFAULT)
+				max_entries(cjournal::MAX_ENTRIES_DEFAULT),
+				dump_on_stderr(false)
 	{
 		start();
 		(void)this->env;
@@ -175,8 +176,8 @@ public:
 	 */
 	cjournal&
 	log_on_stderr(
-			bool dump_on_stdout)
-	{ this->dump_on_stderr = dump_on_stdout; return *this; };
+			bool dump_on_stderr)
+	{ this->dump_on_stderr = dump_on_stderr; return *this; };
 
 	/**
 	 *

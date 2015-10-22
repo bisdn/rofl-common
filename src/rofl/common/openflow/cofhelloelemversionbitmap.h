@@ -162,13 +162,13 @@ public:
 		std::stringstream ss;
 		ss << "VersionBitmap ";
 		if (has_ofp_version(rofl::openflow10::OFP_VERSION)) {
-			ss << "1.0 ";
+			ss << "1.0(" << (int)rofl::openflow10::OFP_VERSION << ") ";
 		}
 		if (has_ofp_version(rofl::openflow12::OFP_VERSION)) {
-			ss << "1.2 ";
+			ss << "1.2(" << (int)rofl::openflow12::OFP_VERSION << ") ";
 		}
 		if (has_ofp_version(rofl::openflow13::OFP_VERSION)) {
-			ss << "1.3 ";
+			ss << "1.3(" << (int)rofl::openflow13::OFP_VERSION << ") ";
 		}
 		return ss.str();
 	};
