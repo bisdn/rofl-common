@@ -117,6 +117,8 @@ crofconntest::test_tls()
 			pselect(0, NULL, NULL, NULL, &ts, NULL);
 		}
 
+		sleep(1);
+
 		delete slisten;
 		delete sclient;
 		delete sserver;
@@ -139,9 +141,9 @@ crofconntest::handle_listen(
 
 	switch (test_mode) {
 	case TEST_MODE_TCP: {
-		versionbitmap_ctl.add_ofp_version(rofl::openflow10::OFP_VERSION);
+		//versionbitmap_ctl.add_ofp_version(rofl::openflow10::OFP_VERSION);
 		versionbitmap_ctl.add_ofp_version(rofl::openflow12::OFP_VERSION);
-		versionbitmap_ctl.add_ofp_version(rofl::openflow13::OFP_VERSION);
+		//versionbitmap_ctl.add_ofp_version(rofl::openflow13::OFP_VERSION);
 
 		(sserver = new rofl::crofconn(this))->tcp_accept(sd, versionbitmap_ctl, rofl::crofconn::MODE_CONTROLLER);
 

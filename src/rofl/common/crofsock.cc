@@ -22,10 +22,11 @@ using namespace rofl;
 crofsock::~crofsock()
 {
 	close();
-
+#if 0
 	/* stop rx and tx threads */
 	rxthread.stop();
 	txthread.stop();
+#endif
 }
 
 
@@ -91,13 +92,8 @@ crofsock::close()
 	case STATE_IDLE: {
 
 		/* TLS down, TCP down => set rx_disabled flag back to false */
-		rx_disable();
-		tx_disable();
-
-		/* remove all pending messages from tx queues */
-		for (auto queue : txqueues) {
-			queue.clear();
-		}
+		rx_disabled = false;
+		tx_disabled = false;
 
 	} break;
 	case STATE_CLOSED: {
@@ -105,6 +101,13 @@ crofsock::close()
 		/* stop threads */
 		rxthread.stop();
 		txthread.stop();
+
+		sleep(1);
+
+		/* remove all pending messages from tx queues */
+		for (auto queue : txqueues) {
+			queue.clear();
+		}
 
 		sleep(1);
 
@@ -1345,7 +1348,7 @@ crofsock::send_from_queue()
 			for (unsigned int num = 0; num < txweights[queue_id]; ++num) {
 
 				if ((tx_disabled) || (state < STATE_TCP_ESTABLISHED)) {
-					tx_is_running= false;
+					tx_is_running = false;
 					return;
 				}
 
@@ -1354,9 +1357,9 @@ crofsock::send_from_queue()
 					rofl::openflow::cofmsg *msg = nullptr;
 
 					/* fetch a new message for transmission from tx queue */
-					if ((msg = txqueues[queue_id].front()) == NULL)
+					if ((msg = txqueues[queue_id].retrieve()) == NULL)
 						break;
-					txqueues[queue_id].pop();
+					//txqueues[queue_id].pop();
 
 					/* bytes of this message sent so far */
 					msg_bytes_sent = 0;
