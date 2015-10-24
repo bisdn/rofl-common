@@ -61,11 +61,17 @@ crofconntest::test()
 				pselect(0, NULL, NULL, NULL, &ts, NULL);
 			}
 
-			sleep(2);
+			sleep(1);
+
+			slisten->close();
+			sclient->close();
+			sserver->close();
 
 			std::cerr << slisten->get_journal() << std::endl;
 			std::cerr << sclient->get_journal() << std::endl;
 			std::cerr << sserver->get_journal() << std::endl;
+
+			sleep(1);
 
 			delete slisten;
 			delete sclient;
@@ -116,6 +122,16 @@ crofconntest::test_tls()
 			ts.tv_nsec = 1000;
 			pselect(0, NULL, NULL, NULL, &ts, NULL);
 		}
+
+		sleep(1);
+
+		slisten->close();
+		sclient->close();
+		sserver->close();
+
+		std::cerr << slisten->get_journal() << std::endl;
+		std::cerr << sclient->get_journal() << std::endl;
+		std::cerr << sserver->get_journal() << std::endl;
 
 		sleep(1);
 
