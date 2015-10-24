@@ -69,7 +69,7 @@ cofpacket_queue::length() const
 		return (sizeof(struct rofl::openflow13::ofp_packet_queue) + queue_props.length());
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
  	}
 }
 
@@ -115,7 +115,7 @@ cofpacket_queue::pack(
 
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -169,7 +169,7 @@ cofpacket_queue::unpack(
 
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 

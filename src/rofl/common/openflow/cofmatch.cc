@@ -74,7 +74,7 @@ cofmatch::length() const
 		return total_length;
 	}
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 	return 0;
 }
@@ -87,7 +87,7 @@ cofmatch::pack(uint8_t* buf, size_t buflen)
 	case rofl::openflow10::OFP_VERSION: return pack_of10(buf, buflen); break;
 	case rofl::openflow12::OFP_VERSION:
 	case rofl::openflow13::OFP_VERSION: return pack_of13(buf, buflen); break;
-	default: throw eBadVersion();
+	default: throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -99,7 +99,7 @@ cofmatch::unpack(uint8_t *buf, size_t buflen)
 	case rofl::openflow10::OFP_VERSION: unpack_of10(buf, buflen); break;
 	case rofl::openflow12::OFP_VERSION:
 	case rofl::openflow13::OFP_VERSION: unpack_of13(buf, buflen); break;
-	default: throw eBadVersion();
+	default: throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 

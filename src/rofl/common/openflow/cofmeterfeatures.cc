@@ -104,7 +104,7 @@ cofmeter_features_reply::length() const
 		return (sizeof(struct rofl::openflow13::ofp_meter_features));
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 	return 0;
 }
@@ -133,7 +133,7 @@ cofmeter_features_reply::pack(uint8_t *buf, size_t buflen)
 
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -162,7 +162,7 @@ cofmeter_features_reply::unpack(uint8_t *buf, size_t buflen)
 
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 

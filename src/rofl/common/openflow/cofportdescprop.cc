@@ -32,7 +32,7 @@ cofportdesc_prop::pack(
 
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -62,7 +62,7 @@ cofportdesc_prop::unpack(
 
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -95,7 +95,7 @@ cofportdesc_prop_ethernet::pack(
 
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -131,7 +131,7 @@ cofportdesc_prop_ethernet::unpack(
 
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -167,7 +167,7 @@ cofportdesc_prop_optical::pack(
 
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -206,7 +206,7 @@ cofportdesc_prop_optical::unpack(
 
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -236,7 +236,7 @@ cofportdesc_prop_experimenter::pack(
 
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -269,7 +269,7 @@ cofportdesc_prop_experimenter::unpack(
 
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 

@@ -253,7 +253,7 @@ public:
 
 		} break;
 		default: {
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 		};
 		}
 		return os;

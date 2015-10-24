@@ -74,7 +74,7 @@ cofrole::length() const
 		return sizeof(struct role_t);
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -100,7 +100,7 @@ cofrole::pack(uint8_t *buf, size_t buflen)
 
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -123,7 +123,7 @@ cofrole::unpack(uint8_t *buf, size_t buflen)
 
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 

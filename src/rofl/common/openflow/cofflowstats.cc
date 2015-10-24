@@ -171,7 +171,7 @@ cofflow_stats_request::set_out_group(uint32_t out_group)
 	case rofl::openflow13::OFP_VERSION: {
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 	this->out_group = out_group;
 }
@@ -186,7 +186,7 @@ cofflow_stats_request::get_out_group() const
 	case rofl::openflow13::OFP_VERSION:
 		break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 	return out_group;
 }
@@ -209,7 +209,7 @@ cofflow_stats_request::get_cookie() const
 	case rofl::openflow13::OFP_VERSION:
 		break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 	return cookie;
 }
@@ -232,7 +232,7 @@ cofflow_stats_request::get_cookie_mask() const
 	case rofl::openflow13::OFP_VERSION:
 		break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 	return cookie_mask;
 }
@@ -269,7 +269,7 @@ cofflow_stats_request::pack(uint8_t *buf, size_t buflen)
 		match.pack((uint8_t*)&(req->match), buflen - sizeof(struct rofl::openflow12::ofp_flow_stats_request) + sizeof(struct rofl::openflow12::ofp_match));
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -307,7 +307,7 @@ cofflow_stats_request::unpack(uint8_t *buf, size_t buflen)
 		cookie_mask 	= be64toh(req->cookie_mask);
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -325,7 +325,7 @@ cofflow_stats_request::length() const
 		return (sizeof(struct rofl::openflow12::ofp_flow_stats_request) - sizeof(struct rofl::openflow12::ofp_match) + match.length());
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -556,7 +556,7 @@ cofflow_stats_reply::pack(uint8_t *buf, size_t buflen)
 	} break;
 
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -661,7 +661,7 @@ cofflow_stats_reply::unpack(uint8_t *buf, size_t buflen)
 
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -681,7 +681,7 @@ cofflow_stats_reply::length() const
 		return (sizeof(struct rofl::openflow13::ofp_flow_stats) - sizeof(struct rofl::openflow13::ofp_match) + match.length() + instructions.length());
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 	return 0;
 }

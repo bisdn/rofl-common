@@ -59,7 +59,7 @@ cofmsg_queue_stats_request::length() const
 		return (sizeof(struct rofl::openflow13::ofp_multipart_request) + queue_stats.length());
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 	return 0;
 }
@@ -200,7 +200,7 @@ cofmsg_queue_stats_reply::length() const
 		return (sizeof(struct rofl::openflow13::ofp_multipart_reply) + queuestatsarray.length());
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 	return 0;
 }

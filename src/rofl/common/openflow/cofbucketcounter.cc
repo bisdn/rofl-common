@@ -64,7 +64,7 @@ cofbucket_counter::length() const
 		return sizeof(struct rofl::openflow13::ofp_bucket_counter);
 	} break;
 	default: {
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	}
 }
@@ -92,7 +92,7 @@ cofbucket_counter::pack(uint8_t* buf, size_t buflen)
 		bc->byte_count 		= htobe64(byte_count);
 	} break;
 	default: {
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	}
 }
@@ -116,7 +116,7 @@ cofbucket_counter::unpack(uint8_t* buf, size_t buflen)
 		byte_count			= be64toh(bc->byte_count);
 	} break;
 	default: {
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	}
 }

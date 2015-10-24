@@ -53,7 +53,7 @@ cofmsg_table_features_stats_request::length() const
 		return (sizeof(struct rofl::openflow13::ofp_multipart_request) + tables.length());
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -173,7 +173,7 @@ cofmsg_table_features_stats_reply::length() const
 		return (sizeof(struct rofl::openflow13::ofp_multipart_request) + tables.length());
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 

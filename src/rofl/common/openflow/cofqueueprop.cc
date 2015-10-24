@@ -19,7 +19,7 @@ cofqueue_prop::length() const
 		return (sizeof(struct rofl::openflow13::ofp_queue_prop_header));
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -49,7 +49,7 @@ cofqueue_prop::pack(uint8_t *buf, size_t buflen)
 
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -80,7 +80,7 @@ cofqueue_prop::unpack(uint8_t *buf, size_t buflen)
 
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -96,7 +96,7 @@ cofqueue_prop_min_rate::length() const
 		return (sizeof(struct rofl::openflow13::ofp_queue_prop_min_rate));
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -125,7 +125,7 @@ cofqueue_prop_min_rate::pack(uint8_t *buf, size_t buflen)
 
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -157,7 +157,7 @@ cofqueue_prop_min_rate::unpack(uint8_t *buf, size_t buflen)
 
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -173,7 +173,7 @@ cofqueue_prop_max_rate::length() const
 		return (sizeof(struct rofl::openflow13::ofp_queue_prop_max_rate));
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -202,7 +202,7 @@ cofqueue_prop_max_rate::pack(uint8_t *buf, size_t buflen)
 
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -234,7 +234,7 @@ cofqueue_prop_max_rate::unpack(uint8_t *buf, size_t buflen)
 
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -250,7 +250,7 @@ cofqueue_prop_experimenter::length() const
 		return (sizeof(struct rofl::openflow13::ofp_queue_prop_experimenter) + exp_body.memlen());
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -280,7 +280,7 @@ cofqueue_prop_experimenter::pack(uint8_t *buf, size_t buflen)
 
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -313,7 +313,7 @@ cofqueue_prop_experimenter::unpack(uint8_t *buf, size_t buflen)
 
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 

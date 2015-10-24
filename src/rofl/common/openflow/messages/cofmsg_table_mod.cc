@@ -54,7 +54,7 @@ cofmsg_table_mod::length() const
 		return (sizeof(struct rofl::openflow13::ofp_table_mod));
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 	return 0;
 }

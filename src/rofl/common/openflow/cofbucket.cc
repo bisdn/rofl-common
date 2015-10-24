@@ -92,7 +92,7 @@ cofbucket::pack(uint8_t* bucket, size_t bclen)
 		return pack_of13(bucket, bclen);
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -111,7 +111,7 @@ cofbucket::unpack(
 		unpack_of13(bucket, bclen);
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 

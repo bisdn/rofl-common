@@ -212,20 +212,6 @@ cthread::add_timer(
 		}
 	}
 
-#if 0
-	if (not ordered_timers.empty()) {
-		for (auto tspec : ordered_timers) {
-			std::cerr << "cthread::add_timer() element: " << tspec << std::endl;
-		}
-	} else {
-		std::cerr << "cthread::add_timer() ordered_timers list is EMPTY" << std::endl;
-	}
-	std::cerr << "cthread::add_timer() now: " << ctimespec::now() << std::endl;
-	if (not ordered_timers.empty()) {
-		std::cerr << "cthread::add_timer() timeout: " << ordered_timers.begin()->get_relative_timeout() << std::endl;
-	}
-#endif
-
 	return *(timers[timer_id]);
 };
 
@@ -276,20 +262,6 @@ cthread::drop_timer(
 	if (tid != pthread_self()) {
 		wakeup();
 	}
-
-#if 0
-	if (not ordered_timers.empty()) {
-		for (auto tspec : ordered_timers) {
-			std::cerr << "cthread::drop_timer() element: " << tspec << std::endl;
-		}
-	} else {
-		std::cerr << "cthread::drop_timer() ordered_timers list is EMPTY" << std::endl;
-	}
-	std::cerr << "cthread::drop_timer() now: " << ctimespec::now() << std::endl;
-	if (not ordered_timers.empty()) {
-		std::cerr << "cthread::drop_timer() timeout: " << ordered_timers.begin()->get_relative_timeout() << std::endl;
-	}
-#endif
 
 	return true;
 };

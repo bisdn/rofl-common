@@ -807,7 +807,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_BAD_ACTION, OFPBAC_BAD_OUT_GROUP, data, datalen) {
 		if (ofp_version < rofl::openflow12::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_bad_action_bad_out_group() {};
 };
@@ -823,7 +823,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_BAD_ACTION, OFPBAC_MATCH_INCONSISTENT, data, datalen) {
 		if (ofp_version < rofl::openflow12::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_bad_action_match_inconsistent() {};
 };
@@ -839,7 +839,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_BAD_ACTION, OFPBAC_UNSUPPORTED_ORDER, data, datalen) {
 		if (ofp_version < rofl::openflow12::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_bad_action_unsupported_order() {};
 };
@@ -855,7 +855,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_BAD_ACTION, OFPBAC_BAD_TAG, data, datalen) {
 		if (ofp_version < rofl::openflow12::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_bad_action_bad_tag() {};
 };
@@ -871,7 +871,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_BAD_ACTION, OFPBAC_BAD_SET_LEN, data, datalen) {
 		if (ofp_version < rofl::openflow13::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_bad_action_bad_set_len() {};
 };
@@ -887,7 +887,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_BAD_ACTION, OFPBAC_BAD_SET_TYPE, data, datalen) {
 		if (ofp_version < rofl::openflow13::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_bad_action_bad_set_type() {};
 };
@@ -903,7 +903,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_BAD_ACTION, OFPBAC_BAD_SET_ARGUMENT, data, datalen) {
 		if (ofp_version < rofl::openflow13::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_bad_action_bad_set_argument() {};
 };
@@ -919,7 +919,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_BAD_INSTRUCTION, OFPBIC_UNKNOWN_INST, data, datalen) {
 		if (ofp_version < rofl::openflow12::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_bad_inst_unknown_inst() {};
 };
@@ -935,7 +935,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_BAD_INSTRUCTION, OFPBIC_UNSUP_INST, data, datalen) {
 		if (ofp_version < rofl::openflow12::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_bad_inst_unsup_inst() {};
 };
@@ -951,7 +951,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_BAD_INSTRUCTION, OFPBIC_BAD_TABLE_ID, data, datalen) {
 		if (ofp_version < rofl::openflow12::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_bad_inst_bad_table_id() {};
 };
@@ -967,7 +967,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_BAD_INSTRUCTION, OFPBIC_UNSUP_METADATA, data, datalen) {
 		if (ofp_version < rofl::openflow12::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_bad_inst_unsup_metadata() {};
 };
@@ -983,7 +983,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_BAD_INSTRUCTION, OFPBIC_UNSUP_METADATA_MASK, data, datalen) {
 		if (ofp_version < rofl::openflow12::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_bad_inst_unsup_metadata_mask() {};
 };
@@ -999,7 +999,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_BAD_INSTRUCTION, OFPBIC_BAD_EXPERIMENTER, data, datalen) {
 		if (ofp_version < rofl::openflow12::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_bad_inst_bad_experimenter() {};
 };
@@ -1015,7 +1015,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_BAD_INSTRUCTION, OFPBIC_BAD_EXP_TYPE, data, datalen) {
 		if (ofp_version < rofl::openflow13::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_bad_inst_bad_exp_type() {};
 };
@@ -1031,7 +1031,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_BAD_INSTRUCTION, OFPBIC_BAD_LEN, data, datalen) {
 		if (ofp_version < rofl::openflow13::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_bad_inst_bad_len() {};
 };
@@ -1047,7 +1047,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_BAD_INSTRUCTION, OFPBIC_EPERM, data, datalen) {
 		if (ofp_version < rofl::openflow13::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_bad_inst_eperm() {};
 };
@@ -1063,7 +1063,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_BAD_MATCH, OFPBMC_BAD_TYPE, data, datalen) {
 		if (ofp_version < rofl::openflow12::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_bad_match_bad_type() {};
 };
@@ -1079,7 +1079,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_BAD_MATCH, OFPBMC_BAD_LEN, data, datalen) {
 		if (ofp_version < rofl::openflow12::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_bad_match_bad_len() {};
 };
@@ -1095,7 +1095,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_BAD_MATCH, OFPBMC_BAD_TAG, data, datalen) {
 		if (ofp_version < rofl::openflow12::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_bad_match_bad_tag() {};
 };
@@ -1111,7 +1111,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_BAD_MATCH, OFPBMC_BAD_DL_ADDR_MASK, data, datalen) {
 		if (ofp_version < rofl::openflow12::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_bad_match_bad_dladdr_mask() {};
 };
@@ -1127,7 +1127,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_BAD_MATCH, OFPBMC_BAD_NW_ADDR_MASK, data, datalen) {
 		if (ofp_version < rofl::openflow12::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_bad_match_bad_nwaddr_mask() {};
 };
@@ -1143,7 +1143,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_BAD_MATCH, OFPBMC_BAD_WILDCARDS, data, datalen) {
 		if (ofp_version < rofl::openflow12::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_bad_match_bad_wildcards() {};
 };
@@ -1159,7 +1159,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_BAD_MATCH, OFPBMC_BAD_FIELD, data, datalen) {
 		if (ofp_version < rofl::openflow12::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_bad_match_bad_field() {};
 };
@@ -1175,7 +1175,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_BAD_MATCH, OFPBMC_BAD_VALUE, data, datalen) {
 		if (ofp_version < rofl::openflow12::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_bad_match_bad_value() {};
 };
@@ -1191,7 +1191,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_BAD_MATCH, OFPBMC_BAD_MASK, data, datalen) {
 		if (ofp_version < rofl::openflow12::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_bad_match_bad_mask() {};
 };
@@ -1207,7 +1207,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_BAD_MATCH, OFPBMC_BAD_PREREQ, data, datalen) {
 		if (ofp_version < rofl::openflow12::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_bad_match_bad_prereq() {};
 };
@@ -1223,7 +1223,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_BAD_MATCH, OFPBMC_DUP_FIELD, data, datalen) {
 		if (ofp_version < rofl::openflow12::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_bad_match_dup_field() {};
 };
@@ -1239,7 +1239,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_BAD_MATCH, OFPBMC_EPERM, data, datalen) {
 		if (ofp_version < rofl::openflow12::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_bad_match_eperm() {};
 };
@@ -1269,7 +1269,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_HELLO_FAILED, OFPHFC_EPERM, data, datalen) {
 		if (ofp_version < rofl::openflow12::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_hello_failed_eperm() {};
 };
@@ -1285,7 +1285,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_SWITCH_CONFIG_FAILED, OFPSCFC_BAD_FLAGS, data, datalen) {
 		if (ofp_version < rofl::openflow12::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_switch_config_failed_bad_flags() {};
 };
@@ -1301,7 +1301,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_SWITCH_CONFIG_FAILED, OFPSCFC_BAD_LEN, data, datalen) {
 		if (ofp_version < rofl::openflow12::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_switch_config_failed_bad_len() {};
 };
@@ -1317,7 +1317,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_SWITCH_CONFIG_FAILED, OFPSCFC_EPERM, data, datalen) {
 		if (ofp_version < rofl::openflow12::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_switch_config_failed_eperm() {};
 };
@@ -1333,7 +1333,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_FLOW_MOD_FAILED, OFPFMFC_UNKNOWN, data, datalen) {
 		if (ofp_version < rofl::openflow12::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_flow_mod_failed_unknown() {};
 };
@@ -1375,7 +1375,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_FLOW_MOD_FAILED, OFPFMFC_BAD_TABLE_ID, data, datalen) {
 		if (ofp_version < rofl::openflow12::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_flow_mod_failed_bad_table_id() {};
 };
@@ -1495,7 +1495,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, rofl::openflow10::OFPET_FLOW_MOD_FAILED, rofl::openflow10::OFPFMFC_UNSUPPORTED, data, datalen) {
 		if (ofp_version > rofl::openflow10::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_flow_mod_failed_unsupported() {};
 };
@@ -1511,7 +1511,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_FLOW_MOD_FAILED, OFPFMFC_BAD_FLAGS, data, datalen) {
 		if (ofp_version < rofl::openflow13::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_flow_mod_failed_bad_flags() {};
 };
@@ -1527,7 +1527,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_GROUP_MOD_FAILED, OFPGMFC_GROUP_EXISTS, data, datalen) {
 		if (ofp_version < rofl::openflow12::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_group_mod_failed_group_exists() {};
 };
@@ -1543,7 +1543,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_GROUP_MOD_FAILED, OFPGMFC_INVALID_GROUP, data, datalen) {
 		if (ofp_version < rofl::openflow12::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_group_mod_failed_inval_group() {};
 };
@@ -1559,7 +1559,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_GROUP_MOD_FAILED, OFPGMFC_WEIGHT_UNSUPPORTED, data, datalen) {
 		if (ofp_version < rofl::openflow12::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_group_mod_failed_weight_unsupported() {};
 };
@@ -1575,7 +1575,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_GROUP_MOD_FAILED, OFPGMFC_OUT_OF_GROUPS, data, datalen) {
 		if (ofp_version < rofl::openflow12::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_group_mod_failed_out_of_groups() {};
 };
@@ -1591,7 +1591,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_GROUP_MOD_FAILED, OFPGMFC_OUT_OF_BUCKETS, data, datalen) {
 		if (ofp_version < rofl::openflow12::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_group_mod_failed_out_of_buckets() {};
 };
@@ -1607,7 +1607,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_GROUP_MOD_FAILED, OFPGMFC_CHAINING_UNSUPPORTED, data, datalen) {
 		if (ofp_version < rofl::openflow12::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_group_mod_failed_chaining_unsupported() {};
 };
@@ -1623,7 +1623,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_GROUP_MOD_FAILED, OFPGMFC_WATCH_UNSUPPORTED, data, datalen) {
 		if (ofp_version < rofl::openflow12::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_group_mod_failed_watch_unsupported() {};
 };
@@ -1639,7 +1639,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_GROUP_MOD_FAILED, OFPGMFC_LOOP, data, datalen) {
 		if (ofp_version < rofl::openflow12::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_group_mod_failed_loop() {};
 };
@@ -1655,7 +1655,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_GROUP_MOD_FAILED, OFPGMFC_UNKNOWN_GROUP, data, datalen) {
 		if (ofp_version < rofl::openflow12::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_group_mod_failed_unknown_group() {};
 };
@@ -1671,7 +1671,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_GROUP_MOD_FAILED, OFPGMFC_CHAINED_GROUP, data, datalen) {
 		if (ofp_version < rofl::openflow12::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_group_mod_failed_chained_group() {};
 };
@@ -1687,7 +1687,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_GROUP_MOD_FAILED, OFPGMFC_BAD_TYPE, data, datalen) {
 		if (ofp_version < rofl::openflow12::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_group_mod_failed_bad_type() {};
 };
@@ -1703,7 +1703,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_GROUP_MOD_FAILED, OFPGMFC_BAD_COMMAND, data, datalen) {
 		if (ofp_version < rofl::openflow12::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_group_mod_failed_bad_command() {};
 };
@@ -1719,7 +1719,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_GROUP_MOD_FAILED, OFPGMFC_BAD_BUCKET, data, datalen) {
 		if (ofp_version < rofl::openflow12::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_group_mod_failed_bad_bucket() {};
 };
@@ -1735,7 +1735,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_GROUP_MOD_FAILED, OFPGMFC_BAD_WATCH, data, datalen) {
 		if (ofp_version < rofl::openflow12::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_group_mod_failed_bad_watch() {};
 };
@@ -1751,7 +1751,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_GROUP_MOD_FAILED, OFPGMFC_EPERM, data, datalen) {
 		if (ofp_version < rofl::openflow12::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_group_mod_failed_eperm() {};
 };
@@ -1767,7 +1767,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_PORT_MOD_FAILED, OFPPMFC_BAD_PORT, data, datalen) {
 		if (ofp_version < rofl::openflow12::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_port_mod_failed_bad_port() {};
 };
@@ -1783,7 +1783,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_PORT_MOD_FAILED, OFPPMFC_BAD_HW_ADDR, data, datalen) {
 		if (ofp_version < rofl::openflow12::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_port_mod_failed_bad_hwaddr() {};
 };
@@ -1799,7 +1799,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_PORT_MOD_FAILED, OFPPMFC_BAD_CONFIG, data, datalen) {
 		if (ofp_version < rofl::openflow12::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_port_mod_failed_bad_config() {};
 };
@@ -1815,7 +1815,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_PORT_MOD_FAILED, OFPPMFC_BAD_ADVERTISE, data, datalen) {
 		if (ofp_version < rofl::openflow12::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_port_mod_failed_bad_advertise() {};
 };
@@ -1831,7 +1831,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_PORT_MOD_FAILED, OFPPMFC_EPERM, data, datalen) {
 		if (ofp_version < rofl::openflow12::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_port_mod_failed_eperm() {};
 };
@@ -1847,7 +1847,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_TABLE_MOD_FAILED, OFPTMFC_BAD_TABLE, data, datalen) {
 		if (ofp_version < rofl::openflow12::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_table_mod_failed_bad_table() {};
 };
@@ -1863,7 +1863,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_TABLE_MOD_FAILED, OFPTMFC_BAD_CONFIG, data, datalen) {
 		if (ofp_version < rofl::openflow12::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_table_mod_failed_bad_config() {};
 };
@@ -1879,7 +1879,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_TABLE_MOD_FAILED, OFPTMFC_EPERM, data, datalen) {
 		if (ofp_version < rofl::openflow12::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_table_mod_failed_eperm() {};
 };
@@ -1895,7 +1895,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_ROLE_REQUEST_FAILED, OFPRRFC_STALE, data, datalen) {
 		if (ofp_version < rofl::openflow12::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_role_request_failed_stale() {};
 };
@@ -1911,7 +1911,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_ROLE_REQUEST_FAILED, OFPRRFC_UNSUP, data, datalen) {
 		if (ofp_version < rofl::openflow12::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_role_request_failed_unsupported() {};
 };
@@ -1927,7 +1927,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_ROLE_REQUEST_FAILED, OFPRRFC_BAD_ROLE, data, datalen) {
 		if (ofp_version < rofl::openflow12::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_role_request_failed_bad_role() {};
 };
@@ -1943,7 +1943,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_METER_MOD_FAILED, OFPMMFC_UNKNOWN, data, datalen) {
 		if (ofp_version < rofl::openflow13::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_meter_mod_unknown() {};
 };
@@ -1959,7 +1959,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_METER_MOD_FAILED, OFPMMFC_METER_EXISTS, data, datalen) {
 		if (ofp_version < rofl::openflow13::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_meter_mod_meter_exists() {};
 };
@@ -1975,7 +1975,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_METER_MOD_FAILED, OFPMMFC_INVALID_METER, data, datalen) {
 		if (ofp_version < rofl::openflow13::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_meter_mod_invalid_meter() {};
 };
@@ -1991,7 +1991,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_METER_MOD_FAILED, OFPMMFC_UNKNOWN_METER, data, datalen) {
 		if (ofp_version < rofl::openflow13::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_meter_mod_unknown_meter() {};
 };
@@ -2007,7 +2007,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_METER_MOD_FAILED, OFPMMFC_BAD_COMMAND, data, datalen) {
 		if (ofp_version < rofl::openflow13::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_meter_mod_bad_command() {};
 };
@@ -2023,7 +2023,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_METER_MOD_FAILED, OFPMMFC_BAD_FLAGS, data, datalen) {
 		if (ofp_version < rofl::openflow13::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_meter_mod_bad_flags() {};
 };
@@ -2039,7 +2039,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_METER_MOD_FAILED, OFPMMFC_BAD_RATE, data, datalen) {
 		if (ofp_version < rofl::openflow13::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_meter_mod_bad_rate() {};
 };
@@ -2055,7 +2055,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_METER_MOD_FAILED, OFPMMFC_BAD_BURST, data, datalen) {
 		if (ofp_version < rofl::openflow13::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_meter_mod_bad_burst() {};
 };
@@ -2071,7 +2071,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_METER_MOD_FAILED, OFPMMFC_BAD_BAND, data, datalen) {
 		if (ofp_version < rofl::openflow13::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_meter_mod_bad_band() {};
 };
@@ -2087,7 +2087,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_METER_MOD_FAILED, OFPMMFC_BAD_BAND_VALUE, data, datalen) {
 		if (ofp_version < rofl::openflow13::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_meter_mod_bad_band_value() {};
 };
@@ -2103,7 +2103,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_METER_MOD_FAILED, OFPMMFC_OUT_OF_METERS, data, datalen) {
 		if (ofp_version < rofl::openflow13::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_meter_mod_out_of_meters() {};
 };
@@ -2119,7 +2119,7 @@ public:
 				size_t datalen = 0) :
 					cofmsg_error(ofp_version, xid, OFPET_METER_MOD_FAILED, OFPMMFC_OUT_OF_BANDS, data, datalen) {
 		if (ofp_version < rofl::openflow13::OFP_VERSION)
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	virtual ~cofmsg_error_meter_mod_out_of_bands() {};
 };

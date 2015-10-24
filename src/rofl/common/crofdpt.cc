@@ -173,13 +173,14 @@ crofdpt::handle_recv(
 		}
 
 
-	} catch (exception& e) {
+	} catch (rofl::exception& e) {
 
-		std::cerr << "[rofl-common][crofdpt] exception exception, what: " << e.what() << std::endl;
+		journal.log(e.set_caller(__PRETTY_FUNCTION__));
 
 	} catch (std::runtime_error& e) {
 
-		std::cerr << "[rofl-common][crofdpt] exception, what: " << e.what() << std::endl;
+		journal.log(LOG_CRIT_ERROR, "runtime error: %s", e.what()).
+				set_caller(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 
 	delete msg;
@@ -191,7 +192,8 @@ void
 crofdpt::handle_transaction_timeout(
 		crofchan& chan, crofconn& conn, uint32_t xid, uint8_t type, uint16_t sub_type)
 {
-	std::cerr << "[rofl-common][crofdpt] transaction expired, xid: 0x" << std::hex << (unsigned int)xid << std::dec << std::endl;
+	journal.log(LOG_NOTICE, "transaction expired, xid: 0x%x", (unsigned int)xid).
+			set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 
 	try {
 		switch (get_version()) {

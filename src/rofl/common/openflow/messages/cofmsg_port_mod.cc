@@ -77,7 +77,7 @@ cofmsg_port_mod::length() const
 		return sizeof(struct rofl::openflow13::ofp_port_mod);
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 	return 0;
 }

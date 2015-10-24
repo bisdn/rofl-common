@@ -77,7 +77,7 @@ cofasync_config::length() const
 		return (sizeof(struct async_config_t));
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -106,7 +106,7 @@ cofasync_config::pack(uint8_t* buf, size_t buflen)
 
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -134,7 +134,7 @@ cofasync_config::unpack(uint8_t* buf, size_t buflen)
 
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -148,7 +148,7 @@ cofasync_config::get_packet_in_mask_master() const
 		return packet_in_mask.at(0);
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -170,7 +170,7 @@ cofasync_config::set_packet_in_mask_master()
 		return packet_in_mask[0];
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -184,7 +184,7 @@ cofasync_config::get_packet_in_mask_slave() const
 		return packet_in_mask.at(1);
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -206,7 +206,7 @@ cofasync_config::set_packet_in_mask_slave()
 		return packet_in_mask[1];
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -220,7 +220,7 @@ cofasync_config::get_port_status_mask_master() const
 		return port_status_mask.at(0);
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -242,7 +242,7 @@ cofasync_config::set_port_status_mask_master()
 		return port_status_mask[0];
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -256,7 +256,7 @@ cofasync_config::get_port_status_mask_slave() const
 		return port_status_mask.at(1);
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -278,7 +278,7 @@ cofasync_config::set_port_status_mask_slave()
 		return port_status_mask[1];
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -292,7 +292,7 @@ cofasync_config::get_flow_removed_mask_master() const
 		return flow_removed_mask.at(0);
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -314,7 +314,7 @@ cofasync_config::set_flow_removed_mask_master()
 		return flow_removed_mask[0];
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -328,7 +328,7 @@ cofasync_config::get_flow_removed_mask_slave() const
 		return flow_removed_mask.at(1);
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -350,7 +350,7 @@ cofasync_config::set_flow_removed_mask_slave()
 		return flow_removed_mask[1];
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 

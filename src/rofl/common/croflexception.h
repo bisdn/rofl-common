@@ -74,18 +74,6 @@ public:
 	virtual ~eInval() throw() {};
 };
 
-class eBadVersion : public RoflException {
-public:
-	eBadVersion(
-			const std::string& __arg = std::string("eBadVersion")) :
-				RoflException(__arg) {
-#ifndef NDEBUG
-		std::cerr << "BAD-WOLF" << std::endl;
-//		assert(0 == 1);
-#endif
-	};
-};
-
 class eBadSyntax					: public RoflException {
 public:
 	eBadSyntax(

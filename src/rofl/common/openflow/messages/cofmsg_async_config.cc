@@ -78,7 +78,8 @@ cofmsg_get_async_config_request::unpack(
 		return;
 
 	if (buflen < cofmsg_get_async_config_request::length())
-		throw eBadRequestBadLen("cofmsg_get_async_config_request::unpack() buf too short");
+		throw eBadRequestBadLen("cofmsg_get_async_config_request::unpack() buf too short").
+				set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 
 	switch (get_version()) {
 	default: {
@@ -88,7 +89,8 @@ cofmsg_get_async_config_request::unpack(
 	}
 
 	if (get_length() < cofmsg_get_async_config_request::length())
-		throw eBadRequestBadLen("cofmsg_get_async_config_request::unpack() buf too short");
+		throw eBadRequestBadLen("cofmsg_get_async_config_request::unpack() buf too short").
+				set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 }
 
 
@@ -147,7 +149,8 @@ cofmsg_get_async_config_reply::length() const
 		return (sizeof(struct rofl::openflow13::ofp_header) + async_config.length());
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("cofmsg_get_async_config_reply::length()").
+				set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 	return 0;
 }
@@ -187,7 +190,8 @@ cofmsg_get_async_config_reply::unpack(
 		return;
 
 	if (buflen < cofmsg_get_async_config_reply::length())
-		throw eBadRequestBadLen("cofmsg_get_async_config_reply::unpack() buf too short");
+		throw eBadRequestBadLen("cofmsg_get_async_config_reply::unpack() buf too short").
+				set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 
 	switch (get_version()) {
 	default: {
@@ -202,7 +206,8 @@ cofmsg_get_async_config_reply::unpack(
 	}
 
 	if (get_length() < cofmsg_get_async_config_reply::length())
-		throw eBadRequestBadLen("cofmsg_get_async_config_reply::unpack() buf too short");
+		throw eBadRequestBadLen("cofmsg_get_async_config_reply::unpack() buf too short").
+				set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 }
 
 
@@ -260,7 +265,8 @@ cofmsg_set_async_config::length() const
 		return (sizeof(struct rofl::openflow13::ofp_header) + async_config.length());
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("cofmsg_set_async_config::length()").
+				set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 	return 0;
 }
@@ -300,7 +306,8 @@ cofmsg_set_async_config::unpack(
 		return;
 
 	if (buflen < cofmsg_set_async_config::length())
-		throw eBadRequestBadLen("cofmsg_set_async_config::unpack() buf too short");
+		throw eBadRequestBadLen("cofmsg_set_async_config::unpack() buf too short").
+				set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 
 	switch (get_version()) {
 	default: {
@@ -315,7 +322,8 @@ cofmsg_set_async_config::unpack(
 	}
 
 	if (get_length() < cofmsg_set_async_config::length())
-		throw eBadRequestBadLen("cofmsg_set_async_config::unpack() buf too short");
+		throw eBadRequestBadLen("cofmsg_set_async_config::unpack() buf too short").
+				set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 }
 
 

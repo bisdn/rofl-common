@@ -54,7 +54,7 @@ coftable_features::length() const
 		return (sizeof(struct rofl::openflow13::ofp_table_features) + table_feature_props.length());
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -77,7 +77,7 @@ coftable_features::pack(uint8_t *buf, size_t buflen)
 		table_feature_props.pack(buf + sizeof(struct rofl::openflow13::ofp_table_features), buflen - sizeof(struct rofl::openflow13::ofp_table_features));
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 

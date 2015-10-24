@@ -61,7 +61,7 @@ cofmsg_meter_mod::length() const
 		return (sizeof(struct rofl::openflow13::ofp_meter_mod) + meter_bands.length());
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 	return 0;
 }

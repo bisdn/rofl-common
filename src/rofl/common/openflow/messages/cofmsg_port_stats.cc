@@ -62,7 +62,7 @@ cofmsg_port_stats_request::length() const
 				sizeof(struct rofl::openflow13::ofp_port_stats_request));
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 	return 0;
 }
@@ -200,7 +200,7 @@ cofmsg_port_stats_reply::length() const
 		return (sizeof(struct rofl::openflow13::ofp_multipart_reply) + portstatsarray.length());
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 	return 0;
 }

@@ -106,7 +106,7 @@ cofport_stats_request::pack(uint8_t *buf, size_t buflen) const
 
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -141,7 +141,7 @@ cofport_stats_request::unpack(uint8_t *buf, size_t buflen)
 
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -161,7 +161,7 @@ cofport_stats_request::length() const
 		return sizeof(struct rofl::openflow13::ofp_port_stats_request);
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -368,7 +368,7 @@ cofport_stats_reply::pack(uint8_t *buf, size_t buflen) const
 
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -441,7 +441,7 @@ cofport_stats_reply::unpack(uint8_t *buf, size_t buflen)
 
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -461,7 +461,7 @@ cofport_stats_reply::length() const
 		return (sizeof(struct rofl::openflow13::ofp_port_stats));
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 	return 0;
 }
@@ -617,7 +617,7 @@ cofport_stats_reply::get_duration_sec() const
 		return duration_sec;
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -631,7 +631,7 @@ cofport_stats_reply::get_duration_nsec() const
 		return duration_nsec;
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -749,7 +749,7 @@ cofport_stats_reply::set_duration_sec(uint32_t duration_sec)
 		this->duration_sec = duration_sec;
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -763,7 +763,7 @@ cofport_stats_reply::set_duration_nsec(uint32_t duration_nsec)
 		this->duration_nsec = duration_nsec;
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 

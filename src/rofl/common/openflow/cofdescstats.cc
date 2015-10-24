@@ -110,7 +110,7 @@ cofdesc_stats_reply::get_dp_desc() const
 		return dp_desc;
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -146,7 +146,7 @@ cofdesc_stats_reply::pack(uint8_t *buf, size_t buflen) const
 		snprintf(desc->dp_desc, 	DESC_STR_LEN, dp_desc.c_str(), 		dp_desc.length());
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -184,7 +184,7 @@ cofdesc_stats_reply::unpack(uint8_t *buf, size_t buflen)
 
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -204,7 +204,7 @@ cofdesc_stats_reply::length() const
 		return (sizeof(struct openflow13::ofp_desc));
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 	return 0;
 }

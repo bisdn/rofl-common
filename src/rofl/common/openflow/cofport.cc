@@ -163,7 +163,7 @@ cofport::link_state_set_blocked()
 		set_state(get_state() | openflow12::OFPPS_BLOCKED);
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -178,7 +178,7 @@ cofport::link_state_clr_blocked()
 		set_state(get_state() & ~openflow12::OFPPS_BLOCKED);
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -193,7 +193,7 @@ cofport::link_state_is_blocked() const
 		return (get_state() & openflow12::OFPPS_BLOCKED);
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -208,7 +208,7 @@ cofport::link_state_set_live()
 		set_state(get_state() | openflow12::OFPPS_LIVE);
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -223,7 +223,7 @@ cofport::link_state_clr_live()
 		set_state(get_state() & ~openflow12::OFPPS_LIVE);
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -238,7 +238,7 @@ cofport::link_state_is_live() const
 		return (get_state() & openflow12::OFPPS_LIVE);
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -254,7 +254,7 @@ cofport::link_state_set_link_down()
 		set_state(get_state() | openflow10::OFPPS_LINK_DOWN);
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -270,7 +270,7 @@ cofport::link_state_clr_link_down()
 		set_state(get_state() & ~openflow10::OFPPS_LINK_DOWN);
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -284,7 +284,7 @@ cofport::link_state_is_link_down() const
 	case rofl::openflow12::OFP_VERSION: return (get_state() & openflow12::OFPPS_LINK_DOWN); break;
 	case rofl::openflow13::OFP_VERSION: return (get_state() & openflow12::OFPPS_LINK_DOWN); break; // FIXME: openflow13::OFPPS_LINK_DOWN, once it's been defined
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -300,7 +300,7 @@ cofport::link_state_phy_down()
 		set_state(get_state() | openflow10::OFPPS_LINK_DOWN);
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -316,7 +316,7 @@ cofport::link_state_phy_up()
 		set_state(get_state() & ~openflow10::OFPPS_LINK_DOWN);
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -332,7 +332,7 @@ cofport::link_state_phy_is_up() const
 		return not (get_state() & openflow10::OFPPS_LINK_DOWN);
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -348,7 +348,7 @@ cofport::config_is_port_down() const
 		return (get_config() & openflow10::OFPPS_LINK_DOWN);
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -370,7 +370,7 @@ cofport::recv_port_mod(
 		recv_port_mod_of12(config, mask, advertise);
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 

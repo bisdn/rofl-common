@@ -93,7 +93,6 @@ public:
 		AcquireReadWriteLock rwlock(queue_lock);
 		while (not queue.empty()) {
 			rofl::openflow::cofmsg* msg = queue.front(); queue.pop_front();
-			std::cerr << "[rofl-common][crofqueue][clear] msg: " << std::endl << *msg;
 			delete msg;
 		}
 	};
@@ -104,7 +103,6 @@ public:
 	size_t
 	store(rofl::openflow::cofmsg* msg, bool enforce = false) {
 		AcquireReadWriteLock rwlock(queue_lock);
-		//std::cerr << "[rofl-common][crofqueue][store] msg: " << std::endl << *msg;
 		if ((not enforce) && (queue.size() >= queue_max_size)) {
 			throw eRofQueueFull("crofqueue::store() queue max size exceeded");
 		}
@@ -123,7 +121,6 @@ public:
 			return msg;
 		}
 		msg = queue.front(); queue.pop_front();
-		//std::cerr << "[rofl-common][crofqueue][retrieve] msg: " << std::endl << *msg;
 		return msg;
 	};
 
@@ -138,7 +135,6 @@ public:
 			return msg;
 		}
 		msg = queue.front();
-		//std::cerr << "[rofl-common][crofqueue][front] msg: " << std::endl << *msg;
 		return msg;
 	};
 
@@ -152,7 +148,6 @@ public:
 			return;
 		}
 		queue.pop_front();
-		//std::cerr << "[rofl-common][crofqueue][pop] " << std::endl;
 	};
 
 	/**

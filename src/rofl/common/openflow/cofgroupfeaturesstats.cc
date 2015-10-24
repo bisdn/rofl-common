@@ -89,7 +89,7 @@ cofgroup_features_stats_reply::pack(uint8_t *buf, size_t buflen) const
 		}
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -113,7 +113,7 @@ cofgroup_features_stats_reply::unpack(uint8_t *buf, size_t buflen)
 		}
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -128,7 +128,7 @@ cofgroup_features_stats_reply::length() const
 		return (sizeof(struct rofl::openflow12::ofp_group_features_stats));
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 	return 0;
 }

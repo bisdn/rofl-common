@@ -6,11 +6,23 @@
 #define OPENFLOW_ROFL_EXCEPTIONS_H 1
 
 #include <assert.h>
+#include <iostream>
 
 #include "rofl/common/exception.hpp"
 
 
 namespace rofl {
+
+class eBadVersion : public exception {
+public:
+	eBadVersion(
+			const std::string& __arg = std::string("eBadVersion")) :
+				exception(__arg) {
+#ifndef NDEBUG
+		std::cerr << "BAD-WOLF" << std::endl;
+#endif
+	};
+};
 
 class eOpenFlowBase					: public exception {
 public:

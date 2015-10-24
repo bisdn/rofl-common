@@ -55,7 +55,7 @@ cofmsg_role_request::length() const
 		return (sizeof(struct rofl::openflow13::ofp_header) + role.length());
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 	return 0;
 }
@@ -170,7 +170,7 @@ cofmsg_role_reply::length() const
 		return (sizeof(struct rofl::openflow13::ofp_header) + role.length());
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 	return 0;
 }

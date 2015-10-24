@@ -237,10 +237,10 @@ public:
 		if (not thread.ordered_timers.empty()) {
 			os << "next timeout: " << thread.ordered_timers.begin()->get_relative_timeout() << std::endl;
 			for (auto tspec : thread.ordered_timers) {
-				std::cerr << "timer: " << tspec << std::endl;
+				os << "timer: " << tspec << std::endl;
 			}
 		} else {
-			std::cerr << "timers list is EMPTY" << std::endl;
+			os << "timers list is EMPTY" << std::endl;
 		}
 		return os;
 	};
