@@ -1236,6 +1236,11 @@ crofconn::handle_rx_messages()
 
 					rofl::openflow::cofmsg* msg = (rofl::openflow::cofmsg*)0;
 
+					if (STATE_ESTABLISHED != state) {
+						rx_thread_working = false;
+						return;
+					}
+
 					if ((msg = rxqueues[queue_id].retrieve()) == NULL) {
 						continue; // no further messages in this queue
 					}

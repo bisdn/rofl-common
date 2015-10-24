@@ -93,6 +93,7 @@ public:
 		AcquireReadWriteLock rwlock(queue_lock);
 		while (not queue.empty()) {
 			rofl::openflow::cofmsg* msg = queue.front(); queue.pop_front();
+			std::cerr << "[rofl-common][crofqueue][clear] msg: " << std::endl << *msg;
 			delete msg;
 		}
 	};

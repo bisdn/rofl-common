@@ -113,8 +113,10 @@ crofsock::close()
 	} break;
 	case STATE_LISTENING: {
 
-		rxthread.drop_read_fd(sd);
-		::close(sd); sd = -1;
+		if (sd > 0) {
+			rxthread.drop_read_fd(sd);
+			::close(sd); sd = -1;
+		}
 
 		state = STATE_CLOSED;
 

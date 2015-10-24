@@ -362,8 +362,7 @@ cthread::stop()
 void
 cthread::wakeup()
 {
-	//std::cerr << "TRIGGER WAKEUP" << std::endl;
-	if (wakeup_pending || (tid == pthread_self()))
+	if (wakeup_pending)
 		return;
 	char c = 1;
 	if (write(pipefd[PIPE_WRITE_FD], &c, sizeof(c)) < 0) {

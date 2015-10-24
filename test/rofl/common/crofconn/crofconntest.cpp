@@ -37,8 +37,9 @@ crofconntest::test()
 			keep_running = true;
 			msg_counter = 0;
 			xid = 0xa1a2a3a4;
-			server_established = false;
-			client_established = false;
+			server_established = 0;
+			client_established = 0;
+			num_of_packets = 128;
 
 			slisten = new rofl::crofsock(this);
 			sclient = new rofl::crofconn(this);
@@ -61,8 +62,6 @@ crofconntest::test()
 				pselect(0, NULL, NULL, NULL, &ts, NULL);
 			}
 
-			sleep(1);
-
 			slisten->close();
 			sclient->close();
 			sserver->close();
@@ -70,8 +69,6 @@ crofconntest::test()
 			std::cerr << slisten->get_journal() << std::endl;
 			std::cerr << sclient->get_journal() << std::endl;
 			std::cerr << sserver->get_journal() << std::endl;
-
-			sleep(1);
 
 			delete slisten;
 			delete sclient;
@@ -100,6 +97,10 @@ crofconntest::test_tls()
 		test_mode = TEST_MODE_TLS;
 		keep_running = true;
 		msg_counter = 0;
+		xid = 0xa1a2a3a4;
+		server_established = 0;
+		client_established = 0;
+		num_of_packets = 128;
 
 		slisten = new rofl::crofsock(this);
 		sclient = new rofl::crofconn(this);
@@ -123,8 +124,6 @@ crofconntest::test_tls()
 			pselect(0, NULL, NULL, NULL, &ts, NULL);
 		}
 
-		sleep(1);
-
 		slisten->close();
 		sclient->close();
 		sserver->close();
@@ -132,8 +131,6 @@ crofconntest::test_tls()
 		std::cerr << slisten->get_journal() << std::endl;
 		std::cerr << sclient->get_journal() << std::endl;
 		std::cerr << sserver->get_journal() << std::endl;
-
-		sleep(1);
 
 		delete slisten;
 		delete sclient;
@@ -185,19 +182,17 @@ void
 crofconntest::handle_established(
 		rofl::crofconn& conn, uint8_t ofp_version)
 {
-	std::cerr << "crofconntest::handle_established()" << std::endl << conn;
+	std::cerr << "crofconntest::handle_established()" << std::endl;
 
 	if (&conn == sserver) {
-		server_established = true;
+		std::cerr << "[Ss], ";
+		server_established = 0;
 		send_packet_out(ofp_version);
 	} else
 	if (&conn == sclient) {
-		client_established = true;
+		std::cerr << "[Sc], ";
+		client_established = 0;
 		send_packet_in(ofp_version);
-	}
-
-	if (client_established && server_established) {
-		keep_running = false;
 	}
 }
 
@@ -270,14 +265,15 @@ void
 crofconntest::handle_recv(
 		rofl::crofconn& conn, rofl::openflow::cofmsg* pmsg)
 {
-	//std::cerr << "crofconntest::handle_recv() " << conn.str() << std::endl;
+	std::cerr << "crofconntest::handle_recv() " << std::endl << *pmsg;
 
 	dpid = 0xc1c2c3c4c5c6c7c8;
 	auxid = 0xd1;
 	n_buffers = 0xe1e2e3e4;
 	n_tables = 0xff;
 
-	if (pmsg->get_type() == rofl::openflow::OFPT_FEATURES_REQUEST) {
+	switch (pmsg->get_type()) {
+	case rofl::openflow::OFPT_FEATURES_REQUEST: {
 		rofl::openflow::cofmsg_features_reply* msg =
 				new rofl::openflow::cofmsg_features_reply(
 						pmsg->get_version(),
@@ -287,6 +283,23 @@ crofconntest::handle_recv(
 						n_tables,
 						auxid);
 		conn.send_message(msg);
+	} break;
+	case rofl::openflow::OFPT_PACKET_IN: {
+		server_established++;
+		std::cerr << "s:" << server_established << "(" << client_established << "), ";
+	} break;
+	case rofl::openflow::OFPT_PACKET_OUT: {
+		client_established++;
+		std::cerr << "c:" << client_established << "(" << server_established << "), ";
+	} break;
+	default: {
+
+	};
+	}
+
+	if ((server_established == num_of_packets) && (client_established == num_of_packets)) {
+		std::cerr << "[E] " << std::endl;
+		keep_running = false;
 	}
 
 	delete pmsg;
@@ -298,12 +311,12 @@ void
 crofconntest::send_packet_in(
 		uint8_t version)
 {
-	for (int i = 0; i < 100; i++) {
-		rofl::openflow::cofmsg_packet_in* msg =
+	xid_client = 0;
+	for (int i = 0; i < num_of_packets; i++) {
+		sclient->send_message(
 				new rofl::openflow::cofmsg_packet_in(
 						version,
-						++xid_client);
-		sclient->send_message(msg);
+						++xid_client));
 	}
 }
 
@@ -313,12 +326,12 @@ void
 crofconntest::send_packet_out(
 		uint8_t version)
 {
-	for (int i = 0; i < 100; i++) {
-		rofl::openflow::cofmsg_packet_out* msg =
+	xid_server = 0;
+	for (int i = 0; i < num_of_packets; i++) {
+		sserver->send_message(
 				new rofl::openflow::cofmsg_packet_out(
 						version,
-						++xid_server);
-		sserver->send_message(msg);
+						++xid_server));
 	}
 }
 

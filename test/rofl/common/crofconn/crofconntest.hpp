@@ -186,8 +186,9 @@ private:
 	uint32_t            n_buffers;
 	uint8_t             n_tables;
 
-	bool                server_established;
-	bool                client_established;
+	unsigned int        num_of_packets;
+	unsigned int        server_established;
+	unsigned int        client_established;
 };
 
 #endif /* TEST_SRC_ROFL_COMMON_OPENFLOW_MESSAGES_COFMSGAGGRSTATS_TEST_HPP_ */
