@@ -296,7 +296,7 @@ public:
 	 */
 	friend std::ostream&
 	operator<< (std::ostream& os, const ctimespec& ts) {
-		os << "<ctimespec " << (unsigned int)ts.tspec.tv_sec << "." << ts.tspec.tv_nsec << "s ";
+		os << "<ctimespec timeout: " << (unsigned int)ts.tspec.tv_sec << "." << ts.tspec.tv_nsec << "s, ";
 			os << "timer_id: " << (unsigned int)ts.get_timer_id() << " >";
 		return os;
 	};

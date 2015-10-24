@@ -207,8 +207,9 @@ cthread::add_timer(
 		ts.set_timer_id(timer_id);
 		ordered_timers.insert(ts);
 
-		if (do_wakeup)
+		if ((do_wakeup) && (tid != pthread_self())) {
 			wakeup();
+		}
 	}
 
 #if 0
@@ -272,7 +273,9 @@ cthread::drop_timer(
 	delete timers[timer_id];
 	timers.erase(timer_id);
 
-	wakeup();
+	if (tid != pthread_self()) {
+		wakeup();
+	}
 
 #if 0
 	if (not ordered_timers.empty()) {
@@ -406,76 +409,39 @@ cthread::run_loop()
 				AcquireReadLock lock(tlock);
 				if (not ordered_timers.empty()) {
 					timeout = ordered_timers.begin()->get_relative_timeout();
-#if 0
-					if (not ordered_timers.empty()) {
-						for (auto tspec : ordered_timers) {
-							std::cerr << "cthread::run_loop() element: " << tspec << std::endl;
-						}
-					} else {
-						std::cerr << "cthread::run_loop() ordered_timers list is EMPTY" << std::endl;
-					}
-					std::cerr << "cthread::run_loop() now: " << ctimespec::now() << std::endl;
-
-					std::cerr << ">>> P0.0 (AAA) timeout: " << timeout << std::endl;
-#endif
 				}
 			}
-#if 0
-			std::cerr << ">>> P0.0 (final) timeout: " << timeout << std::endl;
-#endif
 
 			rc = epoll_pwait(epfd, events, 64, timeout, &sigmask);
 
-			if (rc == 0) {
-
-				std::list<unsigned int> ttypes;
-				uint32_t timer_id = 0;
-				ctimespec ts;
-				while (true) {
-					{
-						AcquireReadLock lock(tlock);
-						if (ordered_timers.empty()) {
-							break;
-						}
-#if 0
-						std::cerr << ">>> P1.0" << std::endl;
-#endif
-						ts = *(ordered_timers.begin());
-						if (not ts.is_expired()) {
-							break;
-						}
-#if 0
-						std::cerr << ">>> P2.0" << std::endl;
-#endif
-						ordered_timers.erase(ordered_timers.begin());
-					} // release lock here
-#if 0
-					std::cerr << ">>> P3.0" << std::endl;
-#endif
-					timer_id = ts.get_timer_id();
-					if (has_timer(timer_id)) {
-						ttypes = get_timer(timer_id).get_timer_types();
+			/* handle expired timers */
+			std::list<unsigned int> ttypes;
+			uint32_t timer_id = 0;
+			ctimespec ts;
+			while (true) {
+				{
+					AcquireReadLock lock(tlock);
+					if (ordered_timers.empty()) {
+						break;
 					}
-					drop_timer(timer_id);
-#if 0
-					std::cerr << "spring::netlink::cthread::run_loop() ordered_timers list: " << std::endl;
-					for (auto tspec : ordered_timers) {
-						std::cerr << "spring::netlink::cthread::run_loop() element: " << tspec << std::endl;
+					ts = *(ordered_timers.begin());
+					if (not ts.is_expired()) {
+						break;
 					}
-					std::cerr << "spring::netlink::cthread::run_loop() now: " << ctimespec::now() << std::endl;
-					std::cerr << ">>> P4.0" << std::endl;
-#endif
-					cthread_env::call_env(env).handle_timeout(*this, timer_id, ttypes);
+					ordered_timers.erase(ordered_timers.begin());
+				} // release lock here
+				timer_id = ts.get_timer_id();
+				if (has_timer(timer_id)) {
+					ttypes = get_timer(timer_id).get_timer_types();
 				}
+				drop_timer(timer_id);
+				cthread_env::call_env(env).handle_timeout(*this, timer_id, ttypes);
+			}
 
-			} else
+			/* handle file descriptors */
 			if (rc > 0) {
 				for (int i = 0; i < rc; i++) {
 					if (events[i].data.fd == pipefd[PIPE_READ_FD]) {
-#if 0
-						std::cerr << "WAKEUP" << std::endl;
-#endif
-						wakeup_pending = false;
 
 						if (not run_thread) {
 							return &retval;
@@ -487,6 +453,8 @@ cthread::run_loop()
 							(void)rcode;
 							cthread_env::call_env(env).handle_wakeup(*this);
 						}
+
+						wakeup_pending = false;
 
 					} else {
 						if (events[i].events & EPOLLIN)
