@@ -152,12 +152,12 @@ cofmsgmeterconfigstatstest::testRequestParser13()
 			std::cerr << ">>> request <<<" << std::endl << msg;
 			std::cerr << ">>> memory <<<" << std::endl << mem;
 
-			/* unpack() Must yield an axception */
+			/* unpack() Must yield an exception */
 			CPPUNIT_ASSERT(false);
 
-		} catch (rofl::eBadRequestBadLen& e) {
+		} catch (rofl::exception& e) {
 			CPPUNIT_ASSERT(i < msglen);
-		}
+		};
 	}
 
 	for (unsigned int i = msglen; i == msglen; i++) {
@@ -166,14 +166,14 @@ cofmsgmeterconfigstatstest::testRequestParser13()
 			stats->header.length = htobe16(i);
 			msg.unpack(mem.somem(), i);
 
-		} catch (rofl::eBadRequestBadLen& e) {
+		} catch (rofl::exception& e) {
 
 			std::cerr << ">>> testing length values (len: " << i << ") <<< " << std::endl;
 			std::cerr << "[FAILURE] unpack() exception seen" << std::endl;
 			std::cerr << ">>> request <<<" << std::endl << msg;
 			std::cerr << ">>> memory <<<" << std::endl << mem;
 
-			/* unpack() Must yield an axception */
+			/* unpack() Must yield an exception */
 			CPPUNIT_ASSERT(false);
 		}
 	}
