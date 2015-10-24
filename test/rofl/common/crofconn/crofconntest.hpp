@@ -155,10 +155,12 @@ private:
 private:
 
 	void
-	send_packet_in();
+	send_packet_in(
+			uint8_t version);
 
 	void
-	send_packet_out();
+	send_packet_out(
+			uint8_t version);
 
 private:
 

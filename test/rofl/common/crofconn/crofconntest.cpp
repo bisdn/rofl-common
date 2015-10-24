@@ -173,11 +173,11 @@ crofconntest::handle_established(
 
 	if (&conn == sserver) {
 		server_established = true;
-		send_packet_out();
+		send_packet_out(ofp_version);
 	} else
 	if (&conn == sclient) {
 		client_established = true;
-		send_packet_in();
+		send_packet_in(ofp_version);
 	}
 
 	if (client_established && server_established) {
@@ -279,12 +279,13 @@ crofconntest::handle_recv(
 
 
 void
-crofconntest::send_packet_in()
+crofconntest::send_packet_in(
+		uint8_t version)
 {
 	for (int i = 0; i < 100; i++) {
 		rofl::openflow::cofmsg_packet_in* msg =
 				new rofl::openflow::cofmsg_packet_in(
-						rofl::openflow13::OFP_VERSION,
+						version,
 						++xid_client);
 		sclient->send_message(msg);
 	}
@@ -293,12 +294,13 @@ crofconntest::send_packet_in()
 
 
 void
-crofconntest::send_packet_out()
+crofconntest::send_packet_out(
+		uint8_t version)
 {
 	for (int i = 0; i < 100; i++) {
 		rofl::openflow::cofmsg_packet_out* msg =
 				new rofl::openflow::cofmsg_packet_out(
-						rofl::openflow13::OFP_VERSION,
+						version,
 						++xid_server);
 		sserver->send_message(msg);
 	}

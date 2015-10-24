@@ -22,11 +22,6 @@ using namespace rofl;
 crofsock::~crofsock()
 {
 	close();
-#if 0
-	/* stop rx and tx threads */
-	rxthread.stop();
-	txthread.stop();
-#endif
 }
 
 

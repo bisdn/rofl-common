@@ -91,10 +91,10 @@ public:
 	void
 	clear() {
 		AcquireReadWriteLock rwlock(queue_lock);
-		for (auto msg : queue) {
+		while (not queue.empty()) {
+			rofl::openflow::cofmsg* msg = queue.front(); queue.pop_front();
 			delete msg;
 		}
-		queue.clear();
 	};
 
 	/**

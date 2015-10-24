@@ -27,7 +27,9 @@ using namespace rofl;
 
 
 crofconn::~crofconn()
-{}
+{
+	set_state(STATE_CLOSING);
+}
 
 
 crofconn::crofconn(
@@ -194,15 +196,17 @@ crofconn::set_state(
 			journal.log(LOG_INFO, "STATE_DISCONNECTED").
 					set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 
+			rofsock.close();
+
 			clear_pending_requests();
 			clear_pending_segments();
+
+			/* stop working thread */
+			thread.stop();
 
 			for (auto rxqueue : rxqueues) {
 				rxqueue.clear();
 			}
-
-			/* stop working thread */
-			thread.stop();
 
 		} break;
 		case STATE_CONNECT_PENDING: {
@@ -892,7 +896,20 @@ crofconn::handle_recv(
 	case STATE_NEGOTIATING: {
 
 		if (msg->get_version() == rofl::openflow::OFP_VERSION_UNKNOWN) {
-			throw eBadRequestBadVersion("crofconn::handle_recv() unknown version in state NEGOTIATING");
+			journal.log(LOG_NOTICE, "message with invalid version received").
+					set_func(__PRETTY_FUNCTION__).set_line(__LINE__).
+						set_key("state", "STATE_NEGOTIATING").
+							set_key("rcvd version", msg->get_version()).
+								set_key("negotiated version", ofp_version);
+
+			rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+			msg->pack(mem.somem(), mem.length());
+
+			send_message(
+					new rofl::openflow::cofmsg_error_bad_request_bad_version(
+							ofp_version, msg->get_xid(), mem.somem(), mem.length()));
+
+			delete msg; return;
 		}
 
 		if (rofl::openflow::OFPT_HELLO == msg->get_type()) {
@@ -909,7 +926,20 @@ crofconn::handle_recv(
 	case STATE_NEGOTIATING2: {
 
 		if (msg->get_version() != ofp_version) {
-			throw eBadRequestBadVersion("crofconn::handle_recv() version mismatch in state NEGOTIATING2");
+			journal.log(LOG_NOTICE, "message with invalid version received").
+					set_func(__PRETTY_FUNCTION__).set_line(__LINE__).
+						set_key("state", "STATE_NEGOTIATING2").
+							set_key("rcvd version", msg->get_version()).
+								set_key("negotiated version", ofp_version);
+
+			rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+			msg->pack(mem.somem(), mem.length());
+
+			send_message(
+					new rofl::openflow::cofmsg_error_bad_request_bad_version(
+							ofp_version, msg->get_xid(), mem.somem(), mem.length()));
+
+			delete msg; return;
 		}
 
 		if (rofl::openflow::OFPT_FEATURES_REPLY == msg->get_type()) {
@@ -932,7 +962,20 @@ crofconn::handle_recv(
 
 		/* sanity check: message version must match negotiated version */
 		if (msg->get_version() != ofp_version) {
-			throw eBadRequestBadVersion("crofconn::handle_recv() version mismatch in state ESTABLISHED");
+			journal.log(LOG_NOTICE, "message with invalid version received").
+					set_func(__PRETTY_FUNCTION__).set_line(__LINE__).
+						set_key("state", "STATE_ESTABLISHED").
+							set_key("rcvd version", msg->get_version()).
+								set_key("negotiated version", ofp_version);
+
+			rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+			msg->pack(mem.somem(), mem.length());
+
+			send_message(
+					new rofl::openflow::cofmsg_error_bad_request_bad_version(
+							ofp_version, msg->get_xid(), mem.somem(), mem.length()));
+
+			delete msg; return;
 		}
 
 		if (rofl::openflow::OFPT_ECHO_REQUEST == msg->get_type()) {
