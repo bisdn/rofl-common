@@ -39,7 +39,7 @@ crofconntest::test()
 			xid = 0xa1a2a3a4;
 			server_established = 0;
 			client_established = 0;
-			num_of_packets = 128;
+			num_of_packets = 256;
 
 			slisten = new rofl::crofsock(this);
 			sclient = new rofl::crofconn(this);
@@ -100,7 +100,7 @@ crofconntest::test_tls()
 		xid = 0xa1a2a3a4;
 		server_established = 0;
 		client_established = 0;
-		num_of_packets = 128;
+		num_of_packets = 256;
 
 		slisten = new rofl::crofsock(this);
 		sclient = new rofl::crofconn(this);
@@ -312,7 +312,7 @@ crofconntest::send_packet_in(
 		uint8_t version)
 {
 	xid_client = 0;
-	for (int i = 0; i < num_of_packets; i++) {
+	for (unsigned int i = 0; i < num_of_packets; i++) {
 		sclient->send_message(
 				new rofl::openflow::cofmsg_packet_in(
 						version,
@@ -327,7 +327,7 @@ crofconntest::send_packet_out(
 		uint8_t version)
 {
 	xid_server = 0;
-	for (int i = 0; i < num_of_packets; i++) {
+	for (unsigned int i = 0; i < num_of_packets; i++) {
 		sserver->send_message(
 				new rofl::openflow::cofmsg_packet_out(
 						version,
