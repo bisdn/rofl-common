@@ -256,7 +256,7 @@ cofqueue_props::length() const
 		return len;
 	} break;
 	default:
-		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -269,7 +269,7 @@ cofqueue_props::pack(uint8_t *buf, size_t buflen)
 		return;
 
 	if (buflen < cofqueue_props::length())
-		throw eInval();
+		throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 	switch (ofp_version) {
 	case openflow10::OFP_VERSION:
@@ -284,7 +284,7 @@ cofqueue_props::pack(uint8_t *buf, size_t buflen)
 		}
 	} break;
 	default:
-		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -310,7 +310,7 @@ cofqueue_props::unpack(
 			uint16_t len		= be16toh(hdr->len);
 
 			if ((buflen < len) || (0 == len))
-				throw eInval();
+				throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 			switch (property) {
 			case rofl::openflow13::OFPQT_MIN_RATE: {
@@ -339,7 +339,7 @@ cofqueue_props::unpack(
 
 	} break;
 	default:
-		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 

@@ -68,7 +68,7 @@ cofmsg_group_stats_request::pack(
 		return;
 
 	if (buflen < cofmsg_group_stats_request::length())
-		throw eMsgInval("cofmsg_group_stats_request::pack() buf too short");
+		throw eInvalid("eInvalid").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 
 	switch (get_version()) {
 	default: {
@@ -93,12 +93,12 @@ cofmsg_group_stats_request::unpack(
 		return;
 
 	if (buflen < cofmsg_group_stats_request::length())
-		throw eBadRequestBadLen("cofmsg_group_stats_request::unpack() buf too short");
+		throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 	switch (get_version()) {
 	default: {
 		if (get_stats_type() != rofl::openflow13::OFPMP_GROUP)
-			throw eMsgInval("cofmsg_group_stats_request::unpack() invalid statistics type");
+			throw eBadRequestBadStat("eBadRequestBadStat", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		struct rofl::openflow13::ofp_multipart_reply* hdr =
 				(struct rofl::openflow13::ofp_multipart_reply*)buf;
@@ -109,7 +109,7 @@ cofmsg_group_stats_request::unpack(
 	}
 
 	if (get_length() < cofmsg_group_stats_request::length())
-		throw eBadRequestBadLen("cofmsg_group_stats_request::unpack() buf too short");
+		throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 }
 
 
@@ -179,7 +179,7 @@ cofmsg_group_stats_reply::pack(
 		return;
 
 	if (buflen < cofmsg_group_stats_reply::length())
-		throw eMsgInval("cofmsg_group_stats_reply::pack() buf too short");
+		throw eInvalid("eInvalid").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 
 	switch (get_version()) {
 	default: {
@@ -205,12 +205,12 @@ cofmsg_group_stats_reply::unpack(
 		return;
 
 	if (buflen < cofmsg_group_stats_reply::length())
-		throw eBadRequestBadLen("cofmsg_group_stats_reply::unpack() buf too short");
+		throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 	switch (get_version()) {
 	default: {
 		if (get_stats_type() != rofl::openflow13::OFPMP_GROUP)
-			throw eMsgInval("cofmsg_group_stats_reply::unpack() invalid statistics type");
+			throw eBadRequestBadStat("eBadRequestBadStat", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		struct rofl::openflow13::ofp_multipart_reply* hdr =
 				(struct rofl::openflow13::ofp_multipart_reply*)buf;
@@ -221,7 +221,7 @@ cofmsg_group_stats_reply::unpack(
 	}
 
 	if (get_length() < cofmsg_group_stats_reply::length())
-		throw eBadRequestBadLen("cofmsg_group_stats_reply::unpack() buf too short");
+		throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 }
 
 

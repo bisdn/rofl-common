@@ -112,7 +112,7 @@ public:
 		std::string s_flags;
 
 		os << dynamic_cast<cofmsg const&>( msg );
-		os << indent(2) << "<cofmsg_stats_request ";
+		os << "<cofmsg_stats_request ";
 		os << "type:" << (int)msg.get_stats_type() << " ";
 		os << "flags: 0x" << std::hex << (int)msg.get_stats_flags() << std::dec << " " << msg.s_flags() << " ";
 		os << ">" << std::endl;;
@@ -247,7 +247,7 @@ public:
 		std::string s_flags;
 
 		os << dynamic_cast<cofmsg const&>( msg );
-		os << indent(2) << "<cofmsg_stats_reply ";
+		os << "<cofmsg_stats_reply ";
 		os << "type:" << (int)msg.get_stats_type() << " ";
 		os << "flags: 0x" << std::hex << (int)msg.get_stats_flags() << std::dec << " " << msg.s_flags() << " ";
 		os << ">" << std::endl;;

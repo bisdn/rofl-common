@@ -87,7 +87,7 @@ cofbucket_counters::pack(uint8_t* buf, size_t buflen)
 		return;
 
 	if (buflen < length())
-		throw eInval();
+		throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 	switch (ofp_version) {
 	case rofl::openflow12::OFP_VERSION:
@@ -100,7 +100,7 @@ cofbucket_counters::pack(uint8_t* buf, size_t buflen)
 		}
 	} break;
 	default: {
-		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	};
 	}
 }
@@ -135,7 +135,7 @@ cofbucket_counters::unpack(uint8_t* buf, size_t buflen)
 
 	} break;
 	default: {
-		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	};
 	}
 

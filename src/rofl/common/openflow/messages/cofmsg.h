@@ -7,28 +7,11 @@
 
 #include <sstream>
 
-#include "rofl/common/logging.h"
-#include "rofl/common/croflexception.h"
 #include "rofl/common/openflow/openflow_rofl_exceptions.h"
 #include "rofl/common/openflow/openflow.h"
 
 namespace rofl {
 namespace openflow {
-
-class eMsgBase 			: public RoflException {
-public:
-	eMsgBase(
-			const std::string& __arg) :
-				RoflException(__arg)
-	{};
-};
-class eMsgInval 		: public eMsgBase {
-public:
-	eMsgInval(
-			const std::string& __arg) :
-				eMsgBase(__arg)
-	{};
-};
 
 /**
  *
@@ -168,7 +151,7 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, cofmsg const& msg) {
-		os << indent(0) << "<cofmsg ";
+		os << "<cofmsg ";
 			os << "version: " 	<< (int)msg.get_version() 			<< " ";
 			os << "type: " 		<< std::dec << (int)msg.get_type() 	<< " ";
 			os << "length: " 	<< (int)msg.get_length() 			<< " ";

@@ -239,7 +239,7 @@ public:
 
 		} break;
 		default: {
-			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+			throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		};
 		}
 		return os;
@@ -394,7 +394,7 @@ public:
 			os << indent(2) << "<flow-count:" << (int)reply.get_flow_count() << " >" << std::endl;
 		} break;
 		default: {
-			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+			throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		};
 		}
 		return os;

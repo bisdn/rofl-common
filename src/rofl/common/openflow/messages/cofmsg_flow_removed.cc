@@ -33,7 +33,7 @@ cofmsg_flow_removed::pack(
 		return;
 
 	if (buflen < cofmsg_flow_removed::length())
-		throw eMsgInval("cofmsg_flow_removed::pack()");
+		throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 	switch (get_version()) {
 	case rofl::openflow10::OFP_VERSION: {
@@ -95,10 +95,10 @@ cofmsg_flow_removed::unpack(
 	case rofl::openflow10::OFP_VERSION: {
 
 		if (buflen < sizeof(struct rofl::openflow10::ofp_flow_removed))
-			throw eBadRequestBadLen("cofmsg_flow_removed::unpack() buf too short");
+			throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		if (get_type() != rofl::openflow10::OFPT_FLOW_REMOVED)
-			throw eMsgInval("cofmsg_flow_removed::unpack() invalid message type");
+			throw eBadRequestBadType("eBadRequestBadType", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		struct rofl::openflow10::ofp_flow_removed* hdr =
 				(struct rofl::openflow10::ofp_flow_removed*)buf;
@@ -118,16 +118,16 @@ cofmsg_flow_removed::unpack(
 				sizeof(struct rofl::openflow10::ofp_match));
 
 		if (get_length() < sizeof(struct rofl::openflow10::ofp_flow_removed))
-			throw eBadRequestBadLen("cofmsg_flow_removed::unpack() buf too short");
+			throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 	} break;
 	default: {
 
 		if (buflen < sizeof(struct rofl::openflow13::ofp_flow_removed))
-			throw eBadRequestBadLen("cofmsg_flow_removed::unpack()");
+			throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		if (get_type() != rofl::openflow13::OFPT_FLOW_REMOVED)
-			throw eMsgInval("cofmsg_flow_removed::unpack() invalid message type");
+			throw eBadRequestBadType("eBadRequestBadType", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		struct rofl::openflow12::ofp_flow_removed* hdr =
 				(struct rofl::openflow12::ofp_flow_removed*)buf;
@@ -148,7 +148,7 @@ cofmsg_flow_removed::unpack(
 		}
 
 		if (get_length() < sizeof(struct rofl::openflow13::ofp_flow_removed))
-			throw eBadRequestBadLen("cofmsg_flow_removed::unpack()");
+			throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	};
 	}
 }

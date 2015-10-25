@@ -212,7 +212,17 @@ cofmsgaggrstatstest::testRequestParser10()
 			CPPUNIT_ASSERT(false);
 
 		} catch (rofl::eBadRequestBadLen& e) {
+			std::cerr << "WWWWWWWWWWWWWWWWWWWWWWWW [1] " << e << std::endl;
 			CPPUNIT_ASSERT(i < msglen);
+		} catch (rofl::eBadRequestBase& e) {
+			std::cerr << "WWWWWWWWWWWWWWWWWWWWWWWW [2] " << e << std::endl;
+			CPPUNIT_ASSERT(i < msglen);
+		} catch (rofl::eOpenFlowBase& e) {
+			std::cerr << "WWWWWWWWWWWWWWWWWWWWWWWW [3] " << e << std::endl;
+			CPPUNIT_ASSERT(i < msglen);
+		} catch (rofl::exception& e) {
+			std::cerr << "WWWWWWWWWWWWWWWWWWWWWWWW [4] " << e << std::endl;
+			throw;
 		}
 	}
 

@@ -104,7 +104,7 @@ cofmeter_features_reply::length() const
 		return (sizeof(struct rofl::openflow13::ofp_meter_features));
 	} break;
 	default:
-		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 	return 0;
 }
@@ -120,7 +120,7 @@ cofmeter_features_reply::pack(uint8_t *buf, size_t buflen)
 	switch (of_version) {
 	case rofl::openflow13::OFP_VERSION: {
 		if (buflen < length())
-			throw eInval();
+			throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		struct rofl::openflow13::ofp_meter_features *meter_features =
 				(struct rofl::openflow13::ofp_meter_features*)buf;
@@ -133,7 +133,7 @@ cofmeter_features_reply::pack(uint8_t *buf, size_t buflen)
 
 	} break;
 	default:
-		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -149,7 +149,7 @@ cofmeter_features_reply::unpack(uint8_t *buf, size_t buflen)
 	case rofl::openflow13::OFP_VERSION: {
 
 		if (buflen < length())
-			throw eInval();
+			throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		struct rofl::openflow13::ofp_meter_features* meter_features =
 				(struct rofl::openflow13::ofp_meter_features*)buf;
@@ -162,7 +162,7 @@ cofmeter_features_reply::unpack(uint8_t *buf, size_t buflen)
 
 	} break;
 	default:
-		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 

@@ -45,7 +45,7 @@ cofmsg_packet_in::pack(uint8_t *buf, size_t buflen)
 		return;
 
 	if (buflen < get_length())
-		throw eMsgInval("cofmsg_packet_in::pack()");
+		throw eInvalid("eInvalid").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 
 	switch (get_version()) {
 	case rofl::openflow10::OFP_VERSION: {
@@ -119,10 +119,10 @@ cofmsg_packet_in::unpack(uint8_t *buf, size_t buflen)
 	case rofl::openflow10::OFP_VERSION: {
 
 		if (get_length() < sizeof(struct rofl::openflow10::ofp_packet_in))
-			throw eBadRequestBadLen("cofmsg_packet_in::unpack()");
+			throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		if (get_type() != rofl::openflow10::OFPT_PACKET_IN)
-			throw eMsgInval("cofmsg_packet_in::unpack() invalid message type");
+			throw eBadRequestBadType("eBadRequestBadType", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		struct rofl::openflow10::ofp_packet_in* hdr =
 				(struct rofl::openflow10::ofp_packet_in*)buf;
@@ -143,10 +143,10 @@ cofmsg_packet_in::unpack(uint8_t *buf, size_t buflen)
 	case rofl::openflow12::OFP_VERSION: {
 
 		if (get_length() < sizeof(struct rofl::openflow12::ofp_packet_in))
-			throw eBadRequestBadLen("cofmsg_packet_in::unpack()");
+			throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		if (get_type() != rofl::openflow12::OFPT_PACKET_IN)
-			throw eMsgInval("cofmsg_packet_in::unpack() invalid message type");
+			throw eBadRequestBadType("eBadRequestBadType", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		struct rofl::openflow12::ofp_packet_in* hdr =
 				(struct rofl::openflow12::ofp_packet_in*)buf;
@@ -164,7 +164,7 @@ cofmsg_packet_in::unpack(uint8_t *buf, size_t buflen)
 
 		/* fixed part outside of struct ofp_match is 16bytes */
 		if (be16toh(hdr->match.length) > (buflen - OFP12_PACKET_IN_STATIC_HDR_LEN))
-			throw eBadRequestBadLen("cofmsg_packet_in::unpack()");
+			throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		match.unpack((uint8_t*)&(hdr->match), be16toh(hdr->match.length));
 
@@ -172,7 +172,7 @@ cofmsg_packet_in::unpack(uint8_t *buf, size_t buflen)
 		uint16_t offset = OFP12_PACKET_IN_STATIC_HDR_LEN + match.length() + 2; // +2: magic :)
 
 		if (offset > buflen)
-			throw eBadRequestBadLen("cofmsg_packet_in::unpack()");
+			throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		packet.unpack((uint8_t*)(buf + offset), buflen - offset);
 
@@ -180,10 +180,10 @@ cofmsg_packet_in::unpack(uint8_t *buf, size_t buflen)
 	default: {
 
 		if (get_length() < sizeof(struct rofl::openflow13::ofp_packet_in))
-			throw eBadRequestBadLen("cofmsg_packet_in::unpack()");
+			throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		if (get_type() != rofl::openflow13::OFPT_PACKET_IN)
-			throw eMsgInval("cofmsg_packet_in::unpack() invalid message type");
+			throw eBadRequestBadType("eBadRequestBadType", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		struct rofl::openflow13::ofp_packet_in* hdr =
 				(struct rofl::openflow13::ofp_packet_in*)buf;
@@ -201,7 +201,7 @@ cofmsg_packet_in::unpack(uint8_t *buf, size_t buflen)
 
 		/* fixed part outside of struct ofp_match is 16bytes */
 		if (be16toh(hdr->match.length) > (buflen - OFP13_PACKET_IN_STATIC_HDR_LEN))
-			throw eBadRequestBadLen("cofmsg_packet_in::unpack()");
+			throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		match.unpack((uint8_t*)&(hdr->match), be16toh(hdr->match.length));
 
@@ -209,7 +209,7 @@ cofmsg_packet_in::unpack(uint8_t *buf, size_t buflen)
 		uint16_t offset = OFP13_PACKET_IN_STATIC_HDR_LEN + match.length() + 2; // +2: magic :)
 
 		if (offset > buflen)
-			throw eBadRequestBadLen("cofmsg_packet_in::unpack()");
+			throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		packet.unpack((uint8_t*)(buf + offset), buflen - offset);
 

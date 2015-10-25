@@ -851,7 +851,7 @@ public:
 	 */
 	void
 	check_role() const
-	{ if (is_slave()) throw eBadRequestIsSlave(); };
+	{ if (is_slave()) throw eBadRequestIsSlave("eBadRequestIsSlave", __FILE__, __PRETTY_FUNCTION__, __LINE__); };
 
 	/**
 	 * @brief	Returns a reference to the current asynchronous event configuration of this controller entity.

@@ -80,7 +80,7 @@ cofmsg_stats_request::pack(
 		return;
 
 	if (buflen < cofmsg_stats_request::length())
-		throw eMsgInval("cofmsg_stats_request::pack() buf too short");
+		throw eInvalid("eInvalid").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 
 	switch (get_version()) {
 	case rofl::openflow10::OFP_VERSION: {
@@ -109,12 +109,12 @@ cofmsg_stats_request::unpack(uint8_t *buf, size_t buflen)
 		return;
 
 	if (buflen < cofmsg_stats_request::length())
-		throw eBadRequestBadLen("cofmsg_stats_request::unpack() buf too short");
+		throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 	switch (get_version()) {
 	case rofl::openflow10::OFP_VERSION: {
 		if (get_type() != rofl::openflow10::OFPT_STATS_REQUEST)
-			throw eMsgInval("cofmsg_stats_request::unpack() invalid message type");
+			throw eBadRequestBadType("eBadRequestBadType", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		struct rofl::openflow10::ofp_stats_request* hdr =
 				(struct rofl::openflow10::ofp_stats_request*)buf;
@@ -123,7 +123,7 @@ cofmsg_stats_request::unpack(uint8_t *buf, size_t buflen)
 	} break;
 	default: {
 		if (get_type() != rofl::openflow13::OFPT_MULTIPART_REQUEST)
-			throw eMsgInval("cofmsg_stats_request::unpack() invalid message type");
+			throw eBadRequestBadType("eBadRequestBadType", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		struct rofl::openflow13::ofp_multipart_request* hdr =
 				(struct rofl::openflow13::ofp_multipart_request*)buf;
@@ -133,7 +133,7 @@ cofmsg_stats_request::unpack(uint8_t *buf, size_t buflen)
 	}
 
 	if (get_length() < cofmsg_stats_request::length())
-		throw eBadRequestBadLen("cofmsg_stats_request::unpack() buf too short");
+		throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 }
 
 
@@ -212,7 +212,7 @@ cofmsg_stats_reply::pack(
 		return;
 
 	if (buflen < cofmsg_stats_reply::length())
-		throw eMsgInval("cofmsg_stats_reply::pack() buf too short");
+		throw eInvalid("eInvalid").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 
 	switch (get_version()) {
 	case rofl::openflow10::OFP_VERSION: {
@@ -241,12 +241,12 @@ cofmsg_stats_reply::unpack(uint8_t *buf, size_t buflen)
 		return;
 
 	if (buflen < cofmsg_stats_reply::length())
-		throw eBadRequestBadLen("cofmsg_stats_reply::unpack() buf too short");
+		throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 	switch (get_version()) {
 	case rofl::openflow10::OFP_VERSION: {
 		if (get_type() != rofl::openflow10::OFPT_STATS_REPLY)
-			throw eMsgInval("cofmsg_stats_reply::unpack() invalid message type");
+			throw eBadRequestBadType("eBadRequestBadType", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		struct rofl::openflow10::ofp_stats_reply* hdr =
 				(struct rofl::openflow10::ofp_stats_reply*)buf;
@@ -255,7 +255,7 @@ cofmsg_stats_reply::unpack(uint8_t *buf, size_t buflen)
 	} break;
 	default: {
 		if (get_type() != rofl::openflow13::OFPT_MULTIPART_REPLY)
-			throw eMsgInval("cofmsg_stats_reply::unpack() invalid message type");
+			throw eBadRequestBadType("eBadRequestBadType", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		struct rofl::openflow13::ofp_multipart_reply* hdr =
 				(struct rofl::openflow13::ofp_multipart_reply*)buf;
@@ -265,7 +265,7 @@ cofmsg_stats_reply::unpack(uint8_t *buf, size_t buflen)
 	}
 
 	if (get_length() < cofmsg_stats_reply::length())
-		throw eBadRequestBadLen("cofmsg_stats_reply::unpack() buf too short");
+		throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 }
 
 

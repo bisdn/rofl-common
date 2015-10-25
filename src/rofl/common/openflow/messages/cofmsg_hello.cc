@@ -19,7 +19,7 @@ cofmsg_hello::pack(uint8_t *buf, size_t buflen)
 		return;
 
 	if (buflen < get_length())
-		throw eMsgInval("cofmsg_hello::pack() buf too short");
+		throw eInvalid("eInvalid").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 
 	helloelems.pack(buf + sizeof(struct rofl::openflow::ofp_header),
 			buflen - sizeof(struct rofl::openflow::ofp_header));
@@ -41,7 +41,7 @@ cofmsg_hello::unpack(uint8_t *buf, size_t buflen)
 		return;
 
 	if (get_type() != rofl::openflow::OFPT_HELLO)
-		throw eMsgInval("cofmsg_hello::unpack() invalid message type");
+		throw eBadRequestBadType("eBadRequestBadType", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 	if (buflen > sizeof(struct rofl::openflow::ofp_header)) {
 		helloelems.unpack(buf + sizeof(struct rofl::openflow::ofp_header),

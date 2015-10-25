@@ -72,7 +72,7 @@ cofmsg_role_request::pack(
 		return;
 
 	if (buflen < cofmsg_role_request::length())
-		throw eMsgInval("cofmsg_role_request::pack() buf too short");
+		throw eInvalid("eInvalid").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 
 	switch (get_version()) {
 	default: {
@@ -95,13 +95,13 @@ cofmsg_role_request::unpack(
 		return;
 
 	if (buflen < cofmsg_role_request::length())
-		throw eBadRequestBadLen("cofmsg_role_request::unpack() buf too short");
+		throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 	switch (get_version()) {
 	default: {
 
 		if (get_type() != rofl::openflow13::OFPT_ROLE_REQUEST)
-			throw eMsgInval("cofmsg_role_reply::unpack() invalid message type");
+			throw eBadRequestBadType("eBadRequestBadType", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		if (buflen > sizeof(struct rofl::openflow13::ofp_header)) {
 			role.unpack(buf + sizeof(struct rofl::openflow13::ofp_header), buflen - sizeof(struct rofl::openflow13::ofp_header));
@@ -110,7 +110,7 @@ cofmsg_role_request::unpack(
 	}
 
 	if (get_length() < cofmsg_role_request::length())
-		throw eBadRequestBadLen("cofmsg_role_request::unpack() buf too short");
+		throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 }
 
 
@@ -187,7 +187,7 @@ cofmsg_role_reply::pack(
 		return;
 
 	if (buflen < cofmsg_role_reply::length())
-		throw eMsgInval("cofmsg_role_reply::pack() buf too short");
+		throw eInvalid("eInvalid").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 
 	switch (get_version()) {
 	default: {
@@ -210,13 +210,13 @@ cofmsg_role_reply::unpack(
 		return;
 
 	if (buflen < cofmsg_role_reply::length())
-		throw eBadRequestBadLen("cofmsg_role_reply::unpack() buf too short");
+		throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 	switch (get_version()) {
 	default: {
 
 		if (get_type() != rofl::openflow13::OFPT_ROLE_REPLY)
-			throw eMsgInval("cofmsg_role_reply::unpack() invalid message type");
+			throw eBadRequestBadType("eBadRequestBadType", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		if (buflen > sizeof(struct rofl::openflow13::ofp_header)) {
 			role.unpack(buf + sizeof(struct rofl::openflow13::ofp_header), buflen - sizeof(struct rofl::openflow13::ofp_header));
@@ -225,7 +225,7 @@ cofmsg_role_reply::unpack(
 	}
 
 	if (get_length() < cofmsg_role_reply::length())
-		throw eBadRequestBadLen("cofmsg_role_reply::unpack() buf too short");
+		throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 }
 
 

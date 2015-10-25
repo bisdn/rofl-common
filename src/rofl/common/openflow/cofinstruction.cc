@@ -66,7 +66,7 @@ cofinstruction::length() const
 		return (len = sizeof(struct ofp_instruction) + body.memlen());
 	} break;
 	default:
-		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -80,7 +80,7 @@ cofinstruction::pack(
 		return;
 
 	if (buflen < cofinstruction::length())
-		throw eInval();
+		throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 	switch (ofp_version) {
 	case openflow12::OFP_VERSION:
@@ -99,7 +99,7 @@ cofinstruction::pack(
 
 	} break;
 	default:
-		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -112,7 +112,7 @@ cofinstruction::unpack(uint8_t* buf, size_t buflen)
 		return;
 
 	if (buflen < sizeof(struct ofp_instruction))
-		throw eInval();
+		throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 	body = rofl::cmemory(0);
 	type = len = 0;
@@ -128,13 +128,13 @@ cofinstruction::unpack(uint8_t* buf, size_t buflen)
 
 		if (buflen > sizeof(struct ofp_instruction)) {
 			if (buflen < be16toh(hdr->len))
-				throw eInval();
+				throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 			body.unpack(hdr->body, len - sizeof(struct ofp_instruction));
 		}
 
 	} break;
 	default:
-		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -149,7 +149,7 @@ cofinstruction_actions::length() const
 		return (sizeof(struct rofl::openflow13::ofp_instruction_actions) + actions.length());
 	} break;
 	default:
-		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -163,7 +163,7 @@ cofinstruction_actions::pack(
 		return;
 
 	if (buflen < cofinstruction_actions::length())
-		throw eInval();
+		throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 	switch (get_version()) {
 	case rofl::openflow12::OFP_VERSION:
@@ -178,7 +178,7 @@ cofinstruction_actions::pack(
 
 	} break;
 	default:
-		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -192,7 +192,7 @@ cofinstruction_actions::unpack(
 		return;
 
 	if (buflen < sizeof(struct rofl::openflow13::ofp_instruction_actions))
-		throw eInval();
+		throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 	actions.clear();
 
@@ -206,13 +206,13 @@ cofinstruction_actions::unpack(
 				(struct rofl::openflow13::ofp_instruction_actions*)buf;
 
 		if (buflen < get_length())
-			throw eInval();
+			throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		actions.unpack((uint8_t*)hdr->actions, get_length() - sizeof(struct rofl::openflow13::ofp_instruction_actions));
 
 	} break;
 	default:
-		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -227,7 +227,7 @@ cofinstruction_goto_table::length() const
 		return (sizeof(struct rofl::openflow13::ofp_instruction_goto_table));
 	} break;
 	default:
-		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -241,7 +241,7 @@ cofinstruction_goto_table::pack(
 		return;
 
 	if (buflen < cofinstruction_goto_table::length())
-		throw eInval();
+		throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 	switch (get_version()) {
 	case rofl::openflow12::OFP_VERSION:
@@ -256,7 +256,7 @@ cofinstruction_goto_table::pack(
 
 	} break;
 	default:
-		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -270,7 +270,7 @@ cofinstruction_goto_table::unpack(
 		return;
 
 	if (buflen < sizeof(struct rofl::openflow13::ofp_instruction_goto_table))
-		throw eInval();
+		throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 	switch (get_version()) {
 	case rofl::openflow12::OFP_VERSION:
@@ -282,13 +282,13 @@ cofinstruction_goto_table::unpack(
 				(struct rofl::openflow13::ofp_instruction_goto_table*)buf;
 
 		if (buflen < get_length())
-			throw eInval();
+			throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		table_id	= hdr->table_id;
 
 	} break;
 	default:
-		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -321,7 +321,7 @@ cofinstruction_write_metadata::length() const
 		return (sizeof(struct rofl::openflow13::ofp_instruction_write_metadata));
 	} break;
 	default:
-		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -335,7 +335,7 @@ cofinstruction_write_metadata::pack(
 		return;
 
 	if (buflen < cofinstruction_write_metadata::length())
-		throw eInval();
+		throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 	switch (get_version()) {
 	case rofl::openflow12::OFP_VERSION:
@@ -351,7 +351,7 @@ cofinstruction_write_metadata::pack(
 
 	} break;
 	default:
-		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -365,7 +365,7 @@ cofinstruction_write_metadata::unpack(
 		return;
 
 	if (buflen < sizeof(struct rofl::openflow13::ofp_instruction_write_metadata))
-		throw eInval();
+		throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 	switch (get_version()) {
 	case rofl::openflow12::OFP_VERSION:
@@ -377,14 +377,14 @@ cofinstruction_write_metadata::unpack(
 				(struct rofl::openflow13::ofp_instruction_write_metadata*)buf;
 
 		if (buflen < get_length())
-			throw eInval();
+			throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		metadata		= be64toh(hdr->metadata);
 		metadata_mask	= be64toh(hdr->metadata_mask);
 
 	} break;
 	default:
-		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -398,7 +398,7 @@ cofinstruction_meter::length() const
 		return (sizeof(struct rofl::openflow13::ofp_instruction_meter));
 	} break;
 	default:
-		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -412,7 +412,7 @@ cofinstruction_meter::pack(
 		return;
 
 	if (buflen < cofinstruction_meter::length())
-		throw eInval();
+		throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 	switch (get_version()) {
 	case rofl::openflow13::OFP_VERSION: {
@@ -426,7 +426,7 @@ cofinstruction_meter::pack(
 
 	} break;
 	default:
-		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -440,7 +440,7 @@ cofinstruction_meter::unpack(
 		return;
 
 	if (buflen < sizeof(struct rofl::openflow13::ofp_instruction_meter))
-		throw eInval();
+		throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 	switch (get_version()) {
 	case rofl::openflow13::OFP_VERSION: {
@@ -451,13 +451,13 @@ cofinstruction_meter::unpack(
 				(struct rofl::openflow13::ofp_instruction_meter*)buf;
 
 		if (buflen < get_length())
-			throw eInval();
+			throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		meter_id	= be32toh(hdr->meter_id);
 
 	} break;
 	default:
-		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -473,7 +473,7 @@ cofinstruction_experimenter::length() const
 		return (sizeof(struct rofl::openflow13::ofp_instruction_experimenter) + exp_body.memlen());
 	} break;
 	default:
-		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -487,7 +487,7 @@ cofinstruction_experimenter::pack(
 		return;
 
 	if (buflen < cofinstruction_experimenter::length())
-		throw eInval();
+		throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 	switch (get_version()) {
 	case rofl::openflow12::OFP_VERSION:
@@ -504,7 +504,7 @@ cofinstruction_experimenter::pack(
 
 	} break;
 	default:
-		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -518,7 +518,7 @@ cofinstruction_experimenter::unpack(
 		return;
 
 	if (buflen < sizeof(struct rofl::openflow13::ofp_instruction_experimenter))
-		throw eInval();
+		throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 	switch (get_version()) {
 	case rofl::openflow12::OFP_VERSION:
@@ -530,7 +530,7 @@ cofinstruction_experimenter::unpack(
 				(struct rofl::openflow13::ofp_instruction_experimenter*)buf;
 
 		if (buflen < get_length())
-			throw eInval();
+			throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		exp_id			= be32toh(hdr->experimenter);
 
@@ -538,7 +538,7 @@ cofinstruction_experimenter::unpack(
 
 	} break;
 	default:
-		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 

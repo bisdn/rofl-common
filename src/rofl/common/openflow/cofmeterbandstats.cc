@@ -68,7 +68,7 @@ cofmeter_band_stats::length() const
 		return (sizeof(struct rofl::openflow13::ofp_meter_band_stats));
 	} break;
 	default:
-		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -84,7 +84,7 @@ cofmeter_band_stats::pack(uint8_t *buf, size_t buflen)
 	case rofl::openflow13::OFP_VERSION: {
 
 		if (buflen < length())
-			throw eInval();
+			throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		struct rofl::openflow13::ofp_meter_band_stats* mbs =
 				(struct rofl::openflow13::ofp_meter_band_stats*)buf;
@@ -94,7 +94,7 @@ cofmeter_band_stats::pack(uint8_t *buf, size_t buflen)
 
 	} break;
 	default:
-		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -107,7 +107,7 @@ cofmeter_band_stats::unpack(uint8_t *buf, size_t buflen)
 	case rofl::openflow13::OFP_VERSION: {
 
 		if (buflen < length())
-			throw eInval();
+			throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		struct rofl::openflow13::ofp_meter_band_stats* mbs =
 				(struct rofl::openflow13::ofp_meter_band_stats*)buf;
@@ -117,7 +117,7 @@ cofmeter_band_stats::unpack(uint8_t *buf, size_t buflen)
 
 	} break;
 	default:
-		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 

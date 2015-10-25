@@ -1652,8 +1652,7 @@ crofsock::parse_message()
 	rofl::openflow::cofmsg *msg = (rofl::openflow::cofmsg*)0;
 	try {
 		if (rxbuffer.length() < sizeof(struct rofl::openflow::ofp_header)) {
-			throw eBadRequestBadLen("crofsock::parse_message() buf too short").
-					set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+			throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		}
 
 		/* make sure to have a valid cofmsg* msg object after parsing */
@@ -1668,8 +1667,7 @@ crofsock::parse_message()
 			parse_of13_message(&msg);
 		} break;
 		default: {
-			throw eBadRequestBadVersion("crofsock::parse_message() unsupported OpenFlow version").
-					set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+			throw eBadRequestBadVersion("eBadRequestBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		};
 		}
 
@@ -1677,7 +1675,8 @@ crofsock::parse_message()
 
 	} catch (eBadRequestBadType& e) {
 
-		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message").set_key("xid", be32toh(hdr->xid)));
+		e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message").set_key("xid", be32toh(hdr->xid));
+		journal.log(e);
 
 		send_message(
 				new rofl::openflow::cofmsg_error_bad_request_bad_type(
@@ -1688,7 +1687,8 @@ crofsock::parse_message()
 
 	} catch (eBadRequestBadStat& e) {
 
-		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message").set_key("xid", be32toh(hdr->xid)));
+		e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message").set_key("xid", be32toh(hdr->xid));
+		journal.log(e);
 
 		send_message(
 				new rofl::openflow::cofmsg_error_bad_request_bad_stat(
@@ -1699,7 +1699,8 @@ crofsock::parse_message()
 
 	} catch (eBadRequestBadVersion& e) {
 
-		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message").set_key("xid", be32toh(hdr->xid)));
+		e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message").set_key("xid", be32toh(hdr->xid));
+		journal.log(e);
 
 		if (msg) delete msg;
 
@@ -1712,7 +1713,8 @@ crofsock::parse_message()
 
 	} catch (eBadRequestBadLen& e) {
 
-		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
+		e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message").set_key("xid", be32toh(hdr->xid));
+		journal.log(e);
 
 		if (msg) delete msg;
 
@@ -1726,7 +1728,8 @@ crofsock::parse_message()
 
 	} catch (rofl::exception& e) {
 
-		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message").set_key("xid", be32toh(hdr->xid)));
+		e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message").set_key("xid", be32toh(hdr->xid));
+		journal.log(e);
 
 		//if (msg) delete msg;
 
@@ -1795,7 +1798,7 @@ crofsock::parse_of10_message(
 	} break;
 	case rofl::openflow10::OFPT_STATS_REQUEST: {
 		if (rxbuffer.length() < sizeof(struct rofl::openflow10::ofp_stats_request)) {
-			throw eBadRequestBadLen("crofsock::parse_of10_message() stats buf too short");
+			throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		}
 		uint16_t stats_type = be16toh(((struct rofl::openflow10::ofp_stats_request*)rxbuffer.somem())->type);
 		switch (stats_type) {
@@ -1821,13 +1824,13 @@ crofsock::parse_of10_message(
 			*pmsg = new rofl::openflow::cofmsg_experimenter_stats_request();
 		} break;
 		default: {
-			throw eBadRequestBadStat("crofsock::parse_of10_message() invalid stats message type");
+			throw eBadRequestBadStat("eBadRequestBadStat", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		};
 		}
 	} break;
 	case rofl::openflow10::OFPT_STATS_REPLY: {
 		if (rxbuffer.length() < sizeof(struct rofl::openflow10::ofp_stats_reply)) {
-			throw eBadRequestBadLen("crofsock::parse_of10_message() stats buf too short");
+			throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		}
 		uint16_t stats_type = be16toh(((struct rofl::openflow10::ofp_stats_reply*)rxbuffer.somem())->type);
 		switch (stats_type) {
@@ -1853,7 +1856,7 @@ crofsock::parse_of10_message(
 			*pmsg = new rofl::openflow::cofmsg_experimenter_stats_reply();
 		} break;
 		default: {
-			throw eBadRequestBadStat("crofsock::parse_of12_message() invalid stats message type");
+			throw eBadRequestBadStat("eBadRequestBadStat", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		};
 		}
 	} break;
@@ -1870,7 +1873,7 @@ crofsock::parse_of10_message(
 		*pmsg = new rofl::openflow::cofmsg_queue_get_config_reply();
 	} break;
 	default: {
-		throw eBadRequestBadType("crofsock::parse_of10_message() invalid message type");
+		throw eBadRequestBadType("eBadRequestBadType", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	};
 	}
 
@@ -1942,7 +1945,7 @@ crofsock::parse_of12_message(
 	} break;
 	case rofl::openflow12::OFPT_STATS_REQUEST: {
 		if (rxbuffer.length() < sizeof(struct rofl::openflow12::ofp_stats_request)) {
-			throw eBadRequestBadLen("crofsock::parse_of12_message() stats buf too short");
+			throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		}
 		uint16_t stats_type = be16toh(((struct rofl::openflow12::ofp_stats_request*)rxbuffer.somem())->type);
 		switch (stats_type) {
@@ -1977,13 +1980,13 @@ crofsock::parse_of12_message(
 			*pmsg = new rofl::openflow::cofmsg_experimenter_stats_request();
 		} break;
 		default: {
-			throw eBadRequestBadStat("crofsock::parse_of12_message() invalid stats message type");
+			throw eBadRequestBadStat("eBadRequestBadStat", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		};
 		}
 	} break;
 	case rofl::openflow12::OFPT_STATS_REPLY: {
 		if (rxbuffer.length() < sizeof(struct rofl::openflow12::ofp_stats_reply)) {
-			throw eBadRequestBadLen("crofsock::parse_of12_message() stats buf too short");
+			throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		}
 		uint16_t stats_type = be16toh(((struct rofl::openflow12::ofp_stats_reply*)rxbuffer.somem())->type);
 		switch (stats_type) {
@@ -2018,7 +2021,7 @@ crofsock::parse_of12_message(
 			*pmsg = new rofl::openflow::cofmsg_experimenter_stats_reply();
 		} break;
 		default: {
-			throw eBadRequestBadStat("crofsock::parse_of12_message() invalid stats message type");
+			throw eBadRequestBadStat("eBadRequestBadStat", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		};
 		}
 	} break;
@@ -2050,7 +2053,7 @@ crofsock::parse_of12_message(
     	*pmsg = new rofl::openflow::cofmsg_set_async_config();
     } break;
 	default: {
-		throw eBadRequestBadType("crofsock::parse_of12_message() invalid message type");
+		throw eBadRequestBadType("eBadRequestBadType", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	};
 	}
 
@@ -2122,7 +2125,7 @@ crofsock::parse_of13_message(
 	} break;
 	case rofl::openflow13::OFPT_MULTIPART_REQUEST: {
 		if (rxbuffer.memlen() < sizeof(struct rofl::openflow13::ofp_multipart_request)) {
-			throw eBadRequestBadLen("crofsock::parse_of13_message() stats buf too short");
+			throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		}
 		uint16_t stats_type = be16toh(((struct rofl::openflow13::ofp_multipart_request*)rxbuffer.somem())->type);
 		switch (stats_type) {
@@ -2172,13 +2175,13 @@ crofsock::parse_of13_message(
 			*pmsg = new rofl::openflow::cofmsg_experimenter_stats_request();
 		} break;
 		default: {
-			throw eBadRequestBadStat("crofsock::parse_of13_message() invalid stats message type");
+			throw eBadRequestBadStat("eBadRequestBadStat", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		};
 		}
 	} break;
 	case rofl::openflow13::OFPT_MULTIPART_REPLY: {
 		if (rxbuffer.memlen() < sizeof(struct rofl::openflow13::ofp_multipart_reply)) {
-			throw eBadRequestBadLen("crofsock::parse_of13_message() stats buf too short");
+			throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		}
 		uint16_t stats_type = be16toh(((struct rofl::openflow13::ofp_multipart_reply*)rxbuffer.somem())->type);
 		switch (stats_type) {
@@ -2228,7 +2231,7 @@ crofsock::parse_of13_message(
 			*pmsg = new rofl::openflow::cofmsg_experimenter_stats_reply();
 		} break;
 		default: {
-			throw eBadRequestBadStat("crofsock::parse_of13_message() invalid stats message type");
+			throw eBadRequestBadStat("eBadRequestBadStat", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		};
 		}
 	} break;
@@ -2263,7 +2266,7 @@ crofsock::parse_of13_message(
 		*pmsg = new rofl::openflow::cofmsg_meter_mod();
 	} break;
 	default: {
-		throw eBadRequestBadType("crofsock::parse_of13_message() invalid message type");
+		throw eBadRequestBadType("eBadRequestBadType", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	};
 	}
 

@@ -20,7 +20,7 @@ cofmsg_get_config_reply::pack(
 		return;
 
 	if (buflen < get_length())
-		throw eMsgInval("cofmsg_get_config_reply::pack()");
+		throw eInvalid("eInvalid").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 
 	struct rofl::openflow10::ofp_switch_config* hdr =
 			(struct rofl::openflow10::ofp_switch_config*)buf;
@@ -41,7 +41,7 @@ cofmsg_get_config_reply::unpack(
 		return;
 
 	if (buflen < cofmsg_get_config_reply::length())
-		throw eBadRequestBadLen("cofmsg_get_config_reply::unpack() but too short");
+		throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 	switch (get_version()) {
 	default: {
@@ -49,7 +49,7 @@ cofmsg_get_config_reply::unpack(
 				(struct rofl::openflow10::ofp_switch_config*)buf;
 
 		if (get_type() != rofl::openflow10::OFPT_GET_CONFIG_REPLY)
-			throw eMsgInval("cofmsg_get_config_reply::unpack() invalid message type");
+			throw eBadRequestBadType("eBadRequestBadType", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		flags         = be16toh(hdr->flags);
 		miss_send_len = be16toh(hdr->miss_send_len);
@@ -58,7 +58,7 @@ cofmsg_get_config_reply::unpack(
 	}
 
 	if (get_length() < cofmsg_get_config_reply::length())
-		throw eBadRequestBadLen("cofmsg_get_config_reply::unpack() but too short");
+		throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 }
 
 
@@ -81,7 +81,7 @@ cofmsg_set_config::pack(
 		return;
 
 	if (buflen < get_length())
-		throw eMsgInval("cofmsg_set_config::pack()");
+		throw eInvalid("eInvalid").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 
 	struct rofl::openflow10::ofp_switch_config* hdr =
 			(struct rofl::openflow10::ofp_switch_config*)buf;
@@ -102,12 +102,12 @@ cofmsg_set_config::unpack(
 		return;
 
 	if (buflen < cofmsg_set_config::length())
-		throw eBadRequestBadLen("cofmsg_set_config::unpack() but too short");
+		throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 	switch (get_version()) {
 	default: {
 		if (get_type() != rofl::openflow10::OFPT_SET_CONFIG)
-			throw eMsgInval("cofmsg_set_config::unpack() invalid message type");
+			throw eBadRequestBadType("eBadRequestBadType", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		struct rofl::openflow10::ofp_switch_config* hdr =
 				(struct rofl::openflow10::ofp_switch_config*)buf;
@@ -119,7 +119,7 @@ cofmsg_set_config::unpack(
 	}
 
 	if (get_length() < cofmsg_set_config::length())
-		throw eBadRequestBadLen("cofmsg_set_config::unpack() but too short");
+		throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 }
 
 

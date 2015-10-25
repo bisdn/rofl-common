@@ -120,9 +120,9 @@ public:
 	friend std::ostream&
 	operator<< (std::ostream& os, cofmsg_table_mod const& msg) {
 		os << dynamic_cast<cofmsg const&>( msg );
-		os << indent(0) << "<cofmsg_table_mod >" << std::endl;
-			os << indent(2) << "<table_id: " << (int)msg.get_table_id() << " >" << std::endl;
-			os << indent(2) << "<config: 0x" << std::hex << (unsigned int)msg.get_config() << std::dec << " >" << std::endl;
+		os << "<cofmsg_table_mod >" << std::endl;
+			os << "<table_id: " << (int)msg.get_table_id() << " >" << std::endl;
+			os << "<config: 0x" << std::hex << (unsigned int)msg.get_config() << std::dec << " >" << std::endl;
 		return os;
 	};
 

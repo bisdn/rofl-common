@@ -76,7 +76,7 @@ cofgroup_desc_stats_reply::pack(uint8_t *buf, size_t buflen)
 	switch (of_version) {
 	case rofl::openflow12::OFP_VERSION: {
 		if (buflen < (sizeof(struct rofl::openflow12::ofp_group_desc_stats) + buckets.length()))
-			throw eInval();
+			throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		struct rofl::openflow12::ofp_group_desc_stats *stats = (struct rofl::openflow12::ofp_group_desc_stats*)buf;
 
@@ -89,7 +89,7 @@ cofgroup_desc_stats_reply::pack(uint8_t *buf, size_t buflen)
 	} break;
 	case rofl::openflow13::OFP_VERSION: {
 		if (buflen < (sizeof(struct rofl::openflow13::ofp_group_desc) + buckets.length()))
-			throw eInval();
+			throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		struct rofl::openflow13::ofp_group_desc *stats = (struct rofl::openflow13::ofp_group_desc*)buf;
 
@@ -101,7 +101,7 @@ cofgroup_desc_stats_reply::pack(uint8_t *buf, size_t buflen)
 
 	} break;
 	default:
-		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -113,12 +113,12 @@ cofgroup_desc_stats_reply::unpack(uint8_t *buf, size_t buflen)
 	switch (of_version) {
 	case rofl::openflow12::OFP_VERSION: {
 		if (buflen < sizeof(struct rofl::openflow12::ofp_group_desc_stats))
-			throw eInval();
+			throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		struct rofl::openflow12::ofp_group_desc_stats *stats = (struct rofl::openflow12::ofp_group_desc_stats*)buf;
 
 		if (be16toh(stats->length) > buflen)
-			throw eInval();
+			throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		group_id		= be32toh(stats->group_id);
 		type			= stats->type;
@@ -128,12 +128,12 @@ cofgroup_desc_stats_reply::unpack(uint8_t *buf, size_t buflen)
 	} break;
 	case rofl::openflow13::OFP_VERSION: {
 		if (buflen < sizeof(struct rofl::openflow13::ofp_group_desc))
-			throw eInval();
+			throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		struct rofl::openflow13::ofp_group_desc *stats = (struct rofl::openflow13::ofp_group_desc*)buf;
 
 		if (be16toh(stats->length) > buflen)
-			throw eInval();
+			throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		group_id		= be32toh(stats->group_id);
 		type			= stats->type;
@@ -142,7 +142,7 @@ cofgroup_desc_stats_reply::unpack(uint8_t *buf, size_t buflen)
 
 	} break;
 	default:
-		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -159,7 +159,7 @@ cofgroup_desc_stats_reply::length() const
 		return (sizeof(struct rofl::openflow13::ofp_group_desc) + buckets.length());
 	} break;
 	default:
-		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 	return 0;
 }

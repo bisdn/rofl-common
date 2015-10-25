@@ -58,8 +58,8 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, cofmsg_get_config_request const& msg) {
-		os << indent(0) << dynamic_cast<cofmsg const&>( msg );
-		os << indent(2) << "<cofmsg_get_config_request >" << std::endl;;
+		os << dynamic_cast<cofmsg const&>( msg );
+		os << "<cofmsg_get_config_request >" << std::endl;;
 		return os;
 	};
 
@@ -216,8 +216,8 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, const cofmsg_get_config_reply& msg) {
-		os << indent(0) << dynamic_cast<const cofmsg&>( msg );
-		os << indent(2) << "<cofmsg_get_config_reply ";
+		os << dynamic_cast<const cofmsg&>( msg );
+		os << "<cofmsg_get_config_reply ";
 		os << "flags:" << msg.s_flags() << ", ";
 		os << "miss-send-len:" << (int)msg.get_miss_send_len() << " ";
 		os << " >" << std::endl;
@@ -385,8 +385,8 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, const cofmsg_set_config& msg) {
-		os << indent(0) << dynamic_cast<const cofmsg&>( msg );
-		os << indent(2) << "<cofmsg_set_config ";
+		os << dynamic_cast<const cofmsg&>( msg );
+		os << "<cofmsg_set_config ";
 		os << "flags:" << msg.s_flags() << ", ";
 		os << "miss-send-len:" << (int)msg.get_miss_send_len() << " ";
 		os << " >" << std::endl;

@@ -229,7 +229,7 @@ public:
 				}
 			} break;
 			default:
-				throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+				throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 			}
 			os << "group-id: 0x" << std::hex << (unsigned int)groupmod.get_group_id() << std::dec << " >" << std::endl;
 			os << indent(2) << "<buckets: >" << std::endl;

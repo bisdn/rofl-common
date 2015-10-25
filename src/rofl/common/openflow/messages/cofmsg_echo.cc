@@ -20,7 +20,7 @@ cofmsg_echo_request::pack(
 		return;
 
 	if (buflen < get_length())
-		throw eMsgInval("cofmsg_echo_request::pack() buf too short");
+		throw eInvalid("eInvalid").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 
 	body.pack(buf + sizeof(struct rofl::openflow::ofp_header),
 			buflen - sizeof(struct rofl::openflow::ofp_header));
@@ -40,12 +40,12 @@ cofmsg_echo_request::unpack(
 		return;
 
 	if (buflen < cofmsg_echo_request::length())
-		throw eBadRequestBadLen("cofmsg_echo_request::unpack() buf too short");
+		throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 	switch (get_version()) {
 	default: {
 		if (get_type() != rofl::openflow13::OFPT_ECHO_REQUEST)
-			throw eMsgInval("cofmsg_echo_request::unpack() invalid message type [1]");
+			throw eBadRequestBadType("eBadRequestBadType", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		if (buflen > sizeof(struct rofl::openflow::ofp_header)) {
 			body.unpack(buf + sizeof(struct rofl::openflow::ofp_header),
@@ -55,7 +55,7 @@ cofmsg_echo_request::unpack(
 	}
 
 	if (get_length() < cofmsg_echo_request::length())
-		throw eBadRequestBadLen("cofmsg_echo_request::unpack() buf too short [2]");
+		throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 }
 
 
@@ -78,7 +78,7 @@ cofmsg_echo_reply::pack(
 		return;
 
 	if (buflen < get_length())
-		throw eMsgInval("cofmsg_echo_reply::pack() buf too short");
+		throw eInvalid("eInvalid").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 
 	body.pack(buf + sizeof(struct rofl::openflow::ofp_header),
 			buflen - sizeof(struct rofl::openflow::ofp_header));
@@ -98,12 +98,12 @@ cofmsg_echo_reply::unpack(
 		return;
 
 	if (buflen < cofmsg_echo_reply::length())
-		throw eBadRequestBadLen("cofmsg_echo_reply::unpack() buf too short");
+		throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 	switch (get_version()) {
 	default: {
 		if (get_type() != rofl::openflow13::OFPT_ECHO_REPLY)
-			throw eMsgInval("cofmsg_echo_reply::unpack() invalid message type");
+			throw eBadRequestBadType("eBadRequestBadType", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		if (buflen > sizeof(struct rofl::openflow::ofp_header)) {
 			body.unpack(buf + sizeof(struct rofl::openflow::ofp_header),
@@ -113,7 +113,7 @@ cofmsg_echo_reply::unpack(
 	}
 
 	if (get_length() < cofmsg_echo_reply::length())
-		throw eBadRequestBadLen("cofmsg_echo_reply::unpack() buf too short");
+		throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 }
 
 

@@ -153,12 +153,12 @@ coftable_feature_props::unpack(uint8_t *buf, size_t buflen)
 		}
 
 		if (be16toh(prop->length) < sizeof(struct openflow13::ofp_table_feature_prop_header)) {
-			throw eTableFeaturesReqBadLen();
+			throw eTableFeaturesReqBadLen("eTableFeaturesReqBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		}
 
 		size_t total_length = be16toh(prop->length) + ((0x7 & be16toh(prop->length)) ? 8 - (0x7 & be16toh(prop->length)) : 0);
 		if (total_length > buflen) {
-			throw eTableFeaturesReqBadLen();
+			throw eTableFeaturesReqBadLen("eTableFeaturesReqBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		}
 
 		switch (be16toh(prop->type)) {

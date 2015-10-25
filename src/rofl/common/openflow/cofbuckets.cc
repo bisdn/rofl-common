@@ -100,7 +100,7 @@ cofbuckets::pack(uint8_t* buf, size_t buflen)
 	switch (ofp_version) {
 	case openflow12::OFP_VERSION:
 	case openflow13::OFP_VERSION:	return pack_of13(buf, buflen);
-	default:						throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+	default:						throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -112,7 +112,7 @@ cofbuckets::unpack(uint8_t* buf, size_t buflen)
 	switch (ofp_version) {
 	case openflow12::OFP_VERSION:
 	case openflow13::OFP_VERSION:	unpack_of13(buf, buflen); break;
-	default:						throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+	default:						throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 

@@ -92,7 +92,7 @@ public:
 			return (sizeof(struct rofl::openflow14::ofp_port_desc_prop_header));
 		} break;
 		default:
-			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+			throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		}
 	};
 
@@ -249,7 +249,7 @@ public:
 			return (sizeof(struct rofl::openflow14::ofp_port_desc_prop_ethernet));
 		} break;
 		default:
-			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+			throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		}
 	};
 
@@ -445,7 +445,7 @@ public:
 			return (sizeof(struct rofl::openflow14::ofp_port_desc_prop_optical));
 		} break;
 		default:
-			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+			throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		}
 	};
 
@@ -676,7 +676,7 @@ public:
 			return (sizeof(struct rofl::openflow14::ofp_port_desc_prop_experimenter) + exp_body.memlen());
 		} break;
 		default:
-			throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+			throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		}
 	};
 

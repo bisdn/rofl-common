@@ -20,7 +20,7 @@ cofmsg_error::pack(
 		return;
 
 	if (buflen < get_length())
-		throw eMsgInval("cofmsg_error::pack() buf too short");
+		throw eInvalid("eInvalid").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 
 	struct rofl::openflow::ofp_error_msg* hdr =
 			(struct rofl::openflow::ofp_error_msg*)buf;
@@ -46,12 +46,12 @@ cofmsg_error::unpack(
 		return;
 
 	if (buflen < cofmsg_error::length())
-		throw eBadRequestBadLen("cofmsg_error::unpack() buf too short [1]");
+		throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 	switch (get_version()) {
 	default: {
 		if (get_type() != rofl::openflow::OFPT_ERROR)
-			throw eMsgInval("cofmsg_error::unpack() invalid message type");
+			throw eBadRequestBadType("eBadRequestBadType", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		struct rofl::openflow::ofp_error_msg* hdr =
 				(struct rofl::openflow::ofp_error_msg*)buf;
@@ -67,7 +67,7 @@ cofmsg_error::unpack(
 	}
 
 	if (get_length() < cofmsg_error::length())
-		throw eBadRequestBadLen("cofmsg_error::unpack() buf too short [2]");
+		throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 }
 
 

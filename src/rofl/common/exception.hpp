@@ -29,6 +29,35 @@ public:
 				std::runtime_error(__arg)
 	{};
 
+	exception(
+			const std::string& __arg,
+			const std::string& __file,
+			const std::string& __func,
+			int __line) :
+				std::runtime_error(__arg)
+	{
+		set_file(__file);
+		set_func(__func);
+		set_line(__line);
+	};
+
+	exception(
+			const exception& e) :
+				std::runtime_error(e.what())
+	{ *this = e; };
+
+	exception&
+	operator= (
+			const exception& e) {
+		if (this == &e)
+			return *this;
+		kvmap.clear();
+		for (auto it : e.kvmap) {
+			set_key(it.first, it.second);
+		}
+		return *this;
+	};
+
 public:
 
 	/**
@@ -79,6 +108,23 @@ public:
 	set_func(
 			const std::string& s_func)
 	{ set_key("func", s_func); return *this; };
+
+public:
+
+	/**
+	 *
+	 */
+	const std::string&
+	get_file() const
+	{ return get_key("file"); };
+
+	/**
+	 *
+	 */
+	exception&
+	set_file(
+			const std::string& s_file)
+	{ set_key("file", s_file); return *this; };
 
 public:
 
@@ -308,8 +354,11 @@ public:
 class eInvalid : public exception {
 public:
 	eInvalid(
-			const std::string& __arg) :
-					exception(__arg)
+			const std::string& __arg = std::string("eInvalid"),
+			const std::string& __file = std::string(""),
+			const std::string& __func = std::string(""),
+			int __line = 0) :
+					exception(__arg, __file, __func, __line)
 	{};
 };
 
