@@ -12,6 +12,8 @@ v0.10.0
 
 [+] revised workflow
 [+] enhanced flow control
+[+] revised exceptions structure
+[+] new journaling subsystem replacing logging facility
 
 v0.7.0
 
