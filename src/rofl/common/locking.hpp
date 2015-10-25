@@ -14,6 +14,8 @@
 
 #include <pthread.h>
 
+#include "rofl/common/exception.hpp"
+
 namespace rofl {
 
 class crwlock {
@@ -22,12 +24,14 @@ public:
 public:
 	~crwlock() {
 		if (pthread_rwlock_destroy(&rwlock) < 0) {
-			// TODO: log error
+			throw eSysCall("pthread_rwlock_destroy syscall failed").
+					set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 		}
 	};
 	crwlock() {
 		if (pthread_rwlock_init(&rwlock, NULL) < 0) {
-			// TODO: log error
+			throw eSysCall("pthread_rwlock_init syscall failed").
+					set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 		}
 	};
 };
@@ -38,14 +42,16 @@ class AcquireReadLock {
 public:
 	~AcquireReadLock() {
 		if (pthread_rwlock_unlock(rwlock) < 0) {
-			// TODO: log error
+			throw eSysCall("pthread_rwlock_unlock syscall failed").
+					set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 		}
 	};
 	AcquireReadLock(
 			const crwlock& lock) :
 		rwlock(&(lock.rwlock)) {
 		if (pthread_rwlock_rdlock(rwlock) < 0) {
-			// TODO: log error
+			throw eSysCall("pthread_rwlock_rdlock syscall failed").
+					set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 		}
 	};
 };
@@ -56,14 +62,16 @@ class AcquireReadWriteLock {
 public:
 	~AcquireReadWriteLock() {
 		if (pthread_rwlock_unlock(rwlock) < 0) {
-			// TODO: log error
+			throw eSysCall("pthread_rwlock_unlock syscall failed").
+					set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 		}
 	};
 	AcquireReadWriteLock(
 			const crwlock& lock) :
 		rwlock(&(lock.rwlock)) {
 		if (pthread_rwlock_wrlock(rwlock) < 0) {
-			// TODO: log error
+			throw eSysCall("pthread_rwlock_wrlock syscall failed").
+					set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 		}
 	};
 };

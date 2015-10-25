@@ -24,7 +24,7 @@ cofmsg::pack(
 		return;
 
 	if (buflen < cofmsg::length())
-		throw eMsgInval("cofmsg::pack() buf too short");
+		throw eInvalid("eInvalid").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 
 	struct rofl::openflow::ofp_header* hdr =
 			(struct rofl::openflow::ofp_header*)buf;
@@ -45,7 +45,7 @@ cofmsg::unpack(
 		return;
 
 	if (buflen < cofmsg::length())
-		throw eBadRequestBadLen("cofmsg::unpack() buf too short");
+		throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 	struct rofl::openflow::ofp_header* hdr =
 			(struct rofl::openflow::ofp_header*)buf;
@@ -56,9 +56,9 @@ cofmsg::unpack(
 	xid     = be32toh(hdr->xid);
 
 	if (len < cofmsg::length())
-		throw eBadRequestBadLen("cofmsg::unpack() buf too short (header)");
+		throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	if (len > buflen)
-		throw eBadRequestBadLen("cofmsg::unpack() buf too short (payload)");
+		throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 }
 
 

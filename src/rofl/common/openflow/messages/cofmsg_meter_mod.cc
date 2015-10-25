@@ -61,7 +61,7 @@ cofmsg_meter_mod::length() const
 		return (sizeof(struct rofl::openflow13::ofp_meter_mod) + meter_bands.length());
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 	return 0;
 }
@@ -78,7 +78,7 @@ cofmsg_meter_mod::pack(
 		return;
 
 	if (buflen < cofmsg_meter_mod::length())
-		throw eMsgInval("cofmsg_meter_mod::pack() buf too short");
+		throw eInvalid("eInvalid").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 
 	switch (get_version()) {
 	default: {
@@ -107,13 +107,13 @@ cofmsg_meter_mod::unpack(
 		return;
 
 	if (buflen < cofmsg_meter_mod::length())
-		throw eBadRequestBadLen("cofmsg_meter_mod::unpack() buf too short");
+		throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 	switch (get_version()) {
 	default: {
 
 		if (get_type() != rofl::openflow13::OFPT_METER_MOD)
-			throw eMsgInval("cofmsg_meter_mod::unpack() invalid message type");
+			throw eBadRequestBadType("eBadRequestBadType", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		struct rofl::openflow13::ofp_meter_mod* hdr =
 				(struct rofl::openflow13::ofp_meter_mod*)buf;
@@ -127,7 +127,7 @@ cofmsg_meter_mod::unpack(
 	}
 
 	if (get_length() < cofmsg_meter_mod::length())
-		throw eBadRequestBadLen("cofmsg_meter_mod::unpack() buf too short");
+		throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 }
 
 

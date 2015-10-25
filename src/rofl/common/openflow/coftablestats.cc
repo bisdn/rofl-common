@@ -223,7 +223,7 @@ coftable_stats_reply::get_table_id() const
 		return table_id;
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -239,7 +239,7 @@ coftable_stats_reply::set_table_id(uint8_t table_id)
 		this->table_id = table_id;
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -254,7 +254,7 @@ coftable_stats_reply::get_name() const
 		return name;
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -269,7 +269,7 @@ coftable_stats_reply::set_name(std::string const& name)
 		this->name = name;
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -283,7 +283,7 @@ coftable_stats_reply::get_match() const
 		return match;
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -297,7 +297,7 @@ coftable_stats_reply::set_match(uint64_t match)
 		this->match = match;
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -312,7 +312,7 @@ coftable_stats_reply::get_wildcards() const
 		return wildcards;
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -327,7 +327,7 @@ coftable_stats_reply::set_wildcards(uint64_t wildcards)
 		this->wildcards = wildcards;
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -341,7 +341,7 @@ coftable_stats_reply::get_write_actions() const
 		return write_actions;
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -355,7 +355,7 @@ coftable_stats_reply::set_write_actions(uint32_t write_actions)
 		this->write_actions = write_actions;
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -369,7 +369,7 @@ coftable_stats_reply::get_apply_actions() const
 		return apply_actions;
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -383,7 +383,7 @@ coftable_stats_reply::set_apply_actions(uint32_t apply_actions)
 		this->apply_actions = apply_actions;
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -397,7 +397,7 @@ coftable_stats_reply::get_write_setfields() const
 		return write_setfields;
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -411,7 +411,7 @@ coftable_stats_reply::set_write_setfields(uint64_t write_setfields)
 		this->write_setfields = write_setfields;
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -425,7 +425,7 @@ coftable_stats_reply::get_apply_setfields() const
 		return apply_setfields;
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -439,7 +439,7 @@ coftable_stats_reply::set_apply_setfields(uint64_t apply_setfields)
 		this->apply_setfields = apply_setfields;
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -453,7 +453,7 @@ coftable_stats_reply::get_metadata_match() const
 		return metadata_match;
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -467,7 +467,7 @@ coftable_stats_reply::set_metadata_match(uint64_t metadata_match)
 		this->metadata_match = metadata_match;
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -481,7 +481,7 @@ coftable_stats_reply::get_metadata_write() const
 		return metadata_write;
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -495,7 +495,7 @@ coftable_stats_reply::set_metadata_write(uint64_t metadata_write)
 		this->metadata_write = metadata_write;
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -509,7 +509,7 @@ coftable_stats_reply::get_instructions() const
 		return instructions;
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -523,7 +523,7 @@ coftable_stats_reply::set_instructions(uint32_t instructions)
 		this->instructions = instructions;
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -537,7 +537,7 @@ coftable_stats_reply::set_config(uint32_t config)
 		this->config = config;
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -551,7 +551,7 @@ coftable_stats_reply::get_config() const
 		return config;
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -566,7 +566,7 @@ coftable_stats_reply::set_max_entries(uint32_t max_entries)
 		this->max_entries = max_entries;
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -581,7 +581,7 @@ coftable_stats_reply::get_max_entries() const
 		return max_entries;
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -597,7 +597,7 @@ coftable_stats_reply::set_active_count(uint32_t active_count)
 		this->active_count = active_count;
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -613,7 +613,7 @@ coftable_stats_reply::get_active_count() const
 		return active_count;
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -629,7 +629,7 @@ coftable_stats_reply::set_lookup_count(uint64_t lookup_count)
 		this->lookup_count = lookup_count;
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -645,7 +645,7 @@ coftable_stats_reply::get_lookup_count() const
 		return lookup_count;
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -661,7 +661,7 @@ coftable_stats_reply::set_matched_count(uint64_t matched_count)
 		this->matched_count = matched_count;
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -677,7 +677,7 @@ coftable_stats_reply::get_matched_count() const
 		return matched_count;
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -689,7 +689,7 @@ coftable_stats_reply::pack(uint8_t *buf, size_t buflen) const
 	switch (of_version) {
 	case rofl::openflow10::OFP_VERSION: {
 		if (buflen < sizeof(struct rofl::openflow10::ofp_table_stats))
-			throw eInval();
+			throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		struct rofl::openflow10::ofp_table_stats *table_stats = (struct rofl::openflow10::ofp_table_stats*)buf;
 
@@ -704,7 +704,7 @@ coftable_stats_reply::pack(uint8_t *buf, size_t buflen) const
 	} break;
 	case rofl::openflow12::OFP_VERSION: {
 		if (buflen < sizeof(struct rofl::openflow12::ofp_table_stats))
-			throw eInval();
+			throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		struct rofl::openflow12::ofp_table_stats *table_stats = (struct rofl::openflow12::ofp_table_stats*)buf;
 
@@ -728,7 +728,7 @@ coftable_stats_reply::pack(uint8_t *buf, size_t buflen) const
 	} break;
 	case rofl::openflow13::OFP_VERSION: {
 		if (buflen < sizeof(struct rofl::openflow13::ofp_table_stats))
-			throw eInval();
+			throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		struct rofl::openflow13::ofp_table_stats *table_stats = (struct rofl::openflow13::ofp_table_stats*)buf;
 
@@ -739,7 +739,7 @@ coftable_stats_reply::pack(uint8_t *buf, size_t buflen) const
 
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -751,7 +751,7 @@ coftable_stats_reply::unpack(uint8_t *buf, size_t buflen)
 	switch (of_version) {
 	case rofl::openflow10::OFP_VERSION: {
 		if (buflen < sizeof(struct rofl::openflow10::ofp_table_stats))
-			throw eInval();
+			throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		struct rofl::openflow10::ofp_table_stats *table_stats = (struct rofl::openflow10::ofp_table_stats*)buf;
 
@@ -766,7 +766,7 @@ coftable_stats_reply::unpack(uint8_t *buf, size_t buflen)
 	} break;
 	case openflow12::OFP_VERSION: {
 		if (buflen < sizeof(struct rofl::openflow12::ofp_table_stats))
-			throw eInval();
+			throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		struct rofl::openflow12::ofp_table_stats *table_stats = (struct rofl::openflow12::ofp_table_stats*)buf;
 
@@ -790,7 +790,7 @@ coftable_stats_reply::unpack(uint8_t *buf, size_t buflen)
 	} break;
 	case rofl::openflow13::OFP_VERSION: {
 		if (buflen < sizeof(struct rofl::openflow13::ofp_table_stats))
-			throw eInval();
+			throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		struct rofl::openflow13::ofp_table_stats *table_stats = (struct rofl::openflow13::ofp_table_stats*)buf;
 
@@ -801,7 +801,7 @@ coftable_stats_reply::unpack(uint8_t *buf, size_t buflen)
 
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -821,7 +821,7 @@ coftable_stats_reply::length() const
 		return (sizeof(struct rofl::openflow13::ofp_table_stats));
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 

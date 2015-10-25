@@ -22,16 +22,13 @@ using namespace rofl;
 crofsock::~crofsock()
 {
 	close();
-
-	/* stop rx and tx threads */
-	rxthread.stop();
-	txthread.stop();
 }
 
 
 
 crofsock::crofsock(
 		crofsock_env* env) :
+				journal(this),
 				env(env),
 				state(STATE_IDLE),
 				mode(MODE_UNKNOWN),
@@ -90,13 +87,8 @@ crofsock::close()
 	case STATE_IDLE: {
 
 		/* TLS down, TCP down => set rx_disabled flag back to false */
-		rx_disable();
-		tx_disable();
-
-		/* remove all pending messages from tx queues */
-		for (auto queue : txqueues) {
-			queue.clear();
-		}
+		rx_disabled = false;
+		tx_disabled = false;
 
 	} break;
 	case STATE_CLOSED: {
@@ -107,6 +99,13 @@ crofsock::close()
 
 		sleep(1);
 
+		/* remove all pending messages from tx queues */
+		for (auto queue : txqueues) {
+			queue.clear();
+		}
+
+		sleep(1);
+
 		state = STATE_IDLE;
 
 		crofsock::close();
@@ -114,8 +113,10 @@ crofsock::close()
 	} break;
 	case STATE_LISTENING: {
 
-		rxthread.drop_read_fd(sd);
-		::close(sd); sd = -1;
+		if (sd > 0) {
+			rxthread.drop_read_fd(sd);
+			::close(sd); sd = -1;
+		}
 
 		state = STATE_CLOSED;
 
@@ -229,17 +230,17 @@ crofsock::listen()
 
 	/* open socket */
 	if ((sd = ::socket(baddr.get_family(), type, protocol)) < 0) {
-		throw eSysCall("socket()");
+		throw eSysCall("socket syscall failed").set_func(__PRETTY_FUNCTION__).set_line(__LINE__).set_errnum(errno);
 	}
 
 	/* make socket non-blocking */
 	long flags;
 	if ((flags = ::fcntl(sd, F_GETFL)) < 0) {
-		throw eSysCall("fnctl() F_GETFL");
+		throw eSysCall("fcntl (F_GETFL) syscall failed").set_func(__PRETTY_FUNCTION__).set_line(__LINE__).set_errnum(errno);
 	}
 	flags |= O_NONBLOCK;
 	if ((rc = ::fcntl(sd, F_SETFL, flags)) < 0) {
-		throw eSysCall("fcntl() F_SETGL");
+		throw eSysCall("fcntl (F_SETFL) syscall failed").set_func(__PRETTY_FUNCTION__).set_line(__LINE__).set_errnum(errno);
 	}
 
 	if ((SOCK_STREAM == type) && (IPPROTO_TCP == protocol)) {
@@ -247,42 +248,42 @@ crofsock::listen()
 
 		// set SO_REUSEADDR option on TCP sockets
 		if ((rc = ::setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, (int*)&optval, sizeof(optval))) < 0) {
-			throw eSysCall("setsockopt() SOL_SOCKET, SO_REUSEADDR");
+			throw eSysCall("setsockopt (SO_REUSEADDR) syscall failed").set_func(__PRETTY_FUNCTION__).set_line(__LINE__).set_errnum(errno);
 		}
 
 #if 0
 		int on = 1;
 		if ((rc = ::setsockopt(sd, SOL_SOCKET, SO_REUSEPORT, &on, sizeof(on))) < 0) {
-			throw eSysCall("setsockopt(SOL_SOCKET, SO_REUSEPORT)");
+			throw eSysCall("setsockopt (SO_REUSEPORT) syscall failed").set_func(__PRETTY_FUNCTION__).set_line(__LINE__).set_errnum(errno);
 		}
 #endif
 
 		// set TCP_NODELAY option on TCP sockets
 		if ((rc = ::setsockopt(sd, IPPROTO_TCP, TCP_NODELAY, (int*)&optval, sizeof(optval))) < 0) {
-			throw eSysCall("setsockopt() IPPROTO_TCP, TCP_NODELAY");
+			throw eSysCall("setsockopt (TCP_NODELAY) syscall failed").set_func(__PRETTY_FUNCTION__).set_line(__LINE__).set_errnum(errno);
 		}
 
 		// set SO_RCVLOWAT
 		if ((rc = ::setsockopt(sd, SOL_SOCKET, SO_RCVLOWAT, (int*)&optval, sizeof(optval))) < 0) {
-			throw eSysCall("setsockopt() SOL_SOCKET, SO_RCVLOWAT");
+			throw eSysCall("setsockopt (SO_RCVLOWAT) syscall failed").set_func(__PRETTY_FUNCTION__).set_line(__LINE__).set_errnum(errno);
 		}
 
 		// read TCP_NODELAY option for debugging purposes
 		socklen_t optlen = sizeof(int);
 		int optvalc;
 		if ((rc = ::getsockopt(sd, IPPROTO_TCP, TCP_NODELAY, (int*)&optvalc, &optlen)) < 0) {
-			throw eSysCall("getsockopt() IPPROTO_TCP, TCP_NODELAY");
+			throw eSysCall("getsockopt (TCP_NODELAY) syscall failed").set_func(__PRETTY_FUNCTION__).set_line(__LINE__).set_errnum(errno);
 		}
 	}
 
 	/* bind to local address */
 	if ((rc = ::bind(sd, baddr.ca_saddr, (socklen_t)(baddr.salen))) < 0) {
-		throw eSysCall("bind");
+		throw eSysCall("bind syscall failed").set_func(__PRETTY_FUNCTION__).set_line(__LINE__).set_errnum(errno).set_key("baddr", baddr.str());
 	}
 
 	/* listen on socket */
 	if ((rc = ::listen(sd, backlog)) < 0) {
-		throw eSysCall("listen");
+		throw eSysCall("listen syscall failed").set_func(__PRETTY_FUNCTION__).set_line(__LINE__).set_errnum(errno);
 	}
 
 	state = STATE_LISTENING;
@@ -297,86 +298,88 @@ void
 crofsock::tcp_accept(
 		int sockfd)
 {
-	try {
-		if (sd >= 0) {
-			close();
-		}
+	if (sd >= 0) {
+		close();
+	}
 
-		/* start thread */
-		rxthread.start();
-		txthread.start();
+	/* start thread */
+	rxthread.start();
+	txthread.start();
 
-		/* cancel potentially pending reconnect timer */
-		rxthread.drop_timer(TIMER_ID_RECONNECT);
+	/* cancel potentially pending reconnect timer */
+	rxthread.drop_timer(TIMER_ID_RECONNECT);
 
-		/* socket in server mode */
-		mode = MODE_SERVER;
+	/* socket in server mode */
+	mode = MODE_SERVER;
 
-		/* reconnect is not possible for server sockets */
-		flags.set(FLAG_RECONNECT_ON_FAILURE, false);
+	/* reconnect is not possible for server sockets */
+	flags.set(FLAG_RECONNECT_ON_FAILURE, false);
 
-		/* new state */
-		state = STATE_TCP_ACCEPTING;
+	/* new state */
+	state = STATE_TCP_ACCEPTING;
 
-		/* extract new connection from listening queue */
-		if ((sd = ::accept(sockfd, laddr.ca_saddr, &(laddr.salen))) < 0) {
-			throw eSysCall("accept()");
-		}
+	/* extract new connection from listening queue */
+	if ((sd = ::accept(sockfd, laddr.ca_saddr, &(laddr.salen))) < 0) {
+		throw eSysCall("accept syscall failed").
+				set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+	}
 
-		/* make socket non-blocking, as this status is not inherited */
-		long sockflags = 0;
-		if ((sockflags = ::fcntl(sd, F_GETFL)) < 0) {
-			throw eSysCall("fnctl() F_GETFL");
-		}
-		sockflags |= O_NONBLOCK;
-		if ((::fcntl(sd, F_SETFL, sockflags)) < 0) {
-			throw eSysCall("fcntl() F_SETGL");
-		}
+	/* make socket non-blocking, as this status is not inherited */
+	long sockflags = 0;
+	if ((sockflags = ::fcntl(sd, F_GETFL)) < 0) {
+		throw eSysCall("fcntl (F_GETFL) syscall failed").
+				set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+	}
+	sockflags |= O_NONBLOCK;
+	if ((::fcntl(sd, F_SETFL, sockflags)) < 0) {
+		throw eSysCall("fcntl (F_SETFL) syscall failed").
+				set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+	}
 
-		socklen_t optlen = 0;
-		if ((::getsockname(sd, laddr.ca_saddr, &(laddr.salen))) < 0) {
-			throw eSysCall("getsockname()");
-		}
+	socklen_t optlen = 0;
+	if ((::getsockname(sd, laddr.ca_saddr, &(laddr.salen))) < 0) {
+		throw eSysCall("getsockname syscall failed").
+				set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+	}
 
-		if ((::getpeername(sd, raddr.ca_saddr, &(raddr.salen))) < 0) {
-			std::cerr << "crofsock::tcp_accept() errno: " << errno << " (" << strerror(errno) << ")" << std::endl;
-			throw eSysCall("getpeername()");
-		}
-
-/* Some kernels do not define this option */
-#ifdef SO_PROTOCOL
-		optlen = sizeof(domain);
-		if ((::getsockopt(sd, SOL_SOCKET, SO_DOMAIN, &domain, &optlen)) < 0) {
-			throw eSysCall("getsockopt() SO_DOMAIN");
-		}
-#endif
-
-		optlen = sizeof(type);
-		if ((::getsockopt(sd, SOL_SOCKET, SO_TYPE, &type, &optlen)) < 0) {
-			throw eSysCall("getsockopt() SO_TYPE");
-		}
+	if ((::getpeername(sd, raddr.ca_saddr, &(raddr.salen))) < 0) {
+		throw eSysCall("getpeername syscall failed").
+				set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+	}
 
 /* Some kernels do not define this option */
 #ifdef SO_PROTOCOL
-		optlen = sizeof(protocol);
-		if ((::getsockopt(sd, SOL_SOCKET, SO_PROTOCOL, &protocol, &optlen)) < 0) {
-			throw eSysCall("getsockopt() SO_PROTOCOL");
-		}
+	optlen = sizeof(domain);
+	if ((::getsockopt(sd, SOL_SOCKET, SO_DOMAIN, &domain, &optlen)) < 0) {
+		throw eSysCall("getsockopt (SO_DOMAIN) syscall failed").
+				set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+	}
 #endif
 
-		state = STATE_TCP_ESTABLISHED;
+	optlen = sizeof(type);
+	if ((::getsockopt(sd, SOL_SOCKET, SO_TYPE, &type, &optlen)) < 0) {
+		throw eSysCall("getsockopt (SO_TYPE) syscall failed").
+				set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+	}
 
-		/* instruct rxthread to read from socket descriptor */
-		rxthread.add_read_fd(sd);
+/* Some kernels do not define this option */
+#ifdef SO_PROTOCOL
+	optlen = sizeof(protocol);
+	if ((::getsockopt(sd, SOL_SOCKET, SO_PROTOCOL, &protocol, &optlen)) < 0) {
+		throw eSysCall("getsockopt (SO_PROTOCOL) syscall failed").
+				set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+	}
+#endif
 
-		if (flags.test(FLAG_TLS_IN_USE)) {
-			crofsock::tls_accept(sockfd);
-		} else {
-			crofsock_env::call_env(env).handle_tcp_accepted(*this);
-		}
+	state = STATE_TCP_ESTABLISHED;
 
-	} catch (std::runtime_error& e) {
-		std::cerr << "crofsock::tcp_accept() exception, what: " << e.what() << std::endl;
+	/* instruct rxthread to read from socket descriptor */
+	rxthread.add_read_fd(sd);
+
+	if (flags.test(FLAG_TLS_IN_USE)) {
+		crofsock::tls_accept(sockfd);
+	} else {
+		crofsock_env::call_env(env).handle_tcp_accepted(*this);
 	}
 }
 
@@ -386,118 +389,121 @@ void
 crofsock::tcp_connect(
 		bool reconnect)
 {
-	try {
-		int rc;
+	int rc;
 
-		if (sd > 0) {
-			close();
+	if (sd > 0) {
+		close();
+	}
+
+	/* start thread */
+	rxthread.start();
+	txthread.start();
+
+	/* cancel potentially pending reconnect timer */
+	rxthread.drop_timer(TIMER_ID_RECONNECT);
+
+	/* we do an active connect */
+	mode = MODE_CLIENT;
+
+	/* reconnect in case of an error? */
+	flags.set(FLAG_RECONNECT_ON_FAILURE, reconnect);
+
+	/* new state */
+	state = STATE_TCP_CONNECTING;
+
+	/* open socket */
+	if ((sd = ::socket(raddr.get_family(), type, protocol)) < 0) {
+		throw eSysCall("socket syscall failed").
+				set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+	}
+
+	/* make socket non-blocking */
+	long sockflags;
+	if ((sockflags = ::fcntl(sd, F_GETFL)) < 0) {
+		throw eSysCall("fcntl (F_GETFL) syscall failed").
+				set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+	}
+	sockflags |= O_NONBLOCK;
+	if ((rc = ::fcntl(sd, F_SETFL, sockflags)) < 0) {
+		throw eSysCall("fcntl (F_SETFL) syscall failed").
+				set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+	}
+
+	/* set REUSEADDR and TCP_NODELAY options (for TCP sockets only) */
+	if ((SOCK_STREAM == type) && (IPPROTO_TCP == protocol)) {
+		int optval = 1;
+
+		/* set SO_REUSEADDR option */
+		if ((rc = ::setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval))) < 0) {
+			throw eSysCall("setsockopt (SO_REUSEADDR) syscall failed").
+					set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 		}
 
-		/* start thread */
-		rxthread.start();
-		txthread.start();
-
-		/* cancel potentially pending reconnect timer */
-		rxthread.drop_timer(TIMER_ID_RECONNECT);
-
-		/* we do an active connect */
-		mode = MODE_CLIENT;
-
-		/* reconnect in case of an error? */
-		flags.set(FLAG_RECONNECT_ON_FAILURE, reconnect);
-
-		/* new state */
-		state = STATE_TCP_CONNECTING;
-
-		/* open socket */
-		if ((sd = ::socket(raddr.get_family(), type, protocol)) < 0) {
-			throw eSysCall("socket");
+		/* set TCP_NODELAY option */
+		if ((rc = ::setsockopt(sd, IPPROTO_TCP, TCP_NODELAY, &optval, sizeof(optval))) < 0) {
+			throw eSysCall("setsockopt (TCP_NODELAY) syscall failed").
+					set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 		}
+	}
 
-		/* make socket non-blocking */
-		long sockflags;
-		if ((sockflags = ::fcntl(sd, F_GETFL)) < 0) {
-			throw eSysCall("fnctl() F_GETFL");
+	/* bind to local address */
+	if (laddr.get_family() != AF_UNSPEC) {
+		if ((rc = ::bind(sd, laddr.ca_saddr, (socklen_t)(laddr.salen))) < 0) {
+			throw eSysCall("bind syscall failed").
+					set_func(__PRETTY_FUNCTION__).set_line(__LINE__).set_key("laddr", laddr.str());
 		}
-		sockflags |= O_NONBLOCK;
-		if ((rc = ::fcntl(sd, F_SETFL, sockflags)) < 0) {
-			throw eSysCall("fnctl() F_SETFL");
-		}
+	}
 
-		/* set REUSEADDR and TCP_NODELAY options (for TCP sockets only) */
-		if ((SOCK_STREAM == type) && (IPPROTO_TCP == protocol)) {
-			int optval = 1;
-
-			/* set SO_REUSEADDR option */
-			if ((rc = ::setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval))) < 0) {
-				throw eSysCall("setsockopt() SOL_SOCKET, SO_REUSEADDR");
-			}
-
-			/* set TCP_NODELAY option */
-			if ((rc = ::setsockopt(sd, IPPROTO_TCP, TCP_NODELAY, &optval, sizeof(optval))) < 0) {
-				throw eSysCall("setsockopt() IPPROTO_TCP, TCP_NODELAY");
-			}
-		}
-
-		/* bind to local address */
-		if (laddr.get_family() != AF_UNSPEC) {
-			if ((rc = ::bind(sd, laddr.ca_saddr, (socklen_t)(laddr.salen))) < 0) {
-				throw eSysCall("bind()");
-			}
-		}
-
-		/* connect to remote address */
-		if ((rc = ::connect(sd, (const struct sockaddr*)raddr.ca_saddr, (socklen_t)raddr.salen)) < 0) {
-			/* connect did not succeed, handle error */
-			switch (errno) {
-			case EINPROGRESS: {
-				/* register socket descriptor for write operations */
-				rxthread.add_write_fd(sd);
-			} break;
-			case ECONNREFUSED: {
-				if (flags.test(FLAG_RECONNECT_ON_FAILURE)) {
-					backoff_reconnect(false);
-					::close(sd); sd = -1;
-				} else {
-					close();
-				}
-				crofsock_env::call_env(env).handle_tcp_connect_refused(*this);
-			} break;
-			default: {
-				if (flags.test(FLAG_RECONNECT_ON_FAILURE)) {
-					backoff_reconnect(false);
-					::close(sd); sd = -1;
-				} else {
-					close();
-				}
-				crofsock_env::call_env(env).handle_tcp_connect_failed(*this);
-			};
-			}
-		} else {
-			/* connect succeeded */
-
-			if ((getsockname(sd, laddr.ca_saddr, &(laddr.salen))) < 0) {
-				throw eSysCall("getsockname()");
-			}
-
-			if ((getpeername(sd, raddr.ca_saddr, &(raddr.salen))) < 0) {
-				throw eSysCall("getpeername()");
-			}
-
-			state = STATE_TCP_ESTABLISHED;
-
-			/* register socket descriptor for read operations */
-			rxthread.add_read_fd(sd);
-
-			if (flags.test(FLAG_TLS_IN_USE)) {
-				crofsock::tls_connect(flags.test(FLAG_RECONNECT_ON_FAILURE));
+	/* connect to remote address */
+	if ((rc = ::connect(sd, (const struct sockaddr*)raddr.ca_saddr, (socklen_t)raddr.salen)) < 0) {
+		/* connect did not succeed, handle error */
+		switch (errno) {
+		case EINPROGRESS: {
+			/* register socket descriptor for write operations */
+			rxthread.add_write_fd(sd);
+		} break;
+		case ECONNREFUSED: {
+			if (flags.test(FLAG_RECONNECT_ON_FAILURE)) {
+				backoff_reconnect(false);
+				::close(sd); sd = -1;
 			} else {
-				crofsock_env::call_env(env).handle_tcp_connected(*this);
+				close();
 			}
+			crofsock_env::call_env(env).handle_tcp_connect_refused(*this);
+		} break;
+		default: {
+			if (flags.test(FLAG_RECONNECT_ON_FAILURE)) {
+				backoff_reconnect(false);
+				::close(sd); sd = -1;
+			} else {
+				close();
+			}
+			crofsock_env::call_env(env).handle_tcp_connect_failed(*this);
+		};
+		}
+	} else {
+		/* connect succeeded */
+
+		if ((getsockname(sd, laddr.ca_saddr, &(laddr.salen))) < 0) {
+			throw eSysCall("getsockname syscall failed").
+					set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 		}
 
-	} catch(RoflException& e) {
+		if ((getpeername(sd, raddr.ca_saddr, &(raddr.salen))) < 0) {
+			throw eSysCall("getpeername syscall failed").
+					set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+		}
 
+		state = STATE_TCP_ESTABLISHED;
+
+		/* register socket descriptor for read operations */
+		rxthread.add_read_fd(sd);
+
+		if (flags.test(FLAG_TLS_IN_USE)) {
+			crofsock::tls_connect(flags.test(FLAG_RECONNECT_ON_FAILURE));
+		} else {
+			crofsock_env::call_env(env).handle_tcp_connected(*this);
+		}
 	}
 }
 
@@ -551,7 +557,8 @@ crofsock::tls_init_context()
 
 	// certificate
 	if (!SSL_CTX_use_certificate_file(ctx, certfile.c_str(), SSL_FILETYPE_PEM)) {
-		throw eSysCall("[rofl][crofsock][tls_init_context] unable to read certfile: " + certfile);
+		throw eLibCall("SSL_CTX_use_certificate_file libcall failed").
+				set_func(__PRETTY_FUNCTION__).set_line(__LINE__).set_key("certfile", certfile);
 	}
 
 	// private key
@@ -559,19 +566,22 @@ crofsock::tls_init_context()
 	SSL_CTX_set_default_passwd_cb_userdata(ctx, (void*)this);
 
 	if (!SSL_CTX_use_PrivateKey_file(ctx, keyfile.c_str(), SSL_FILETYPE_PEM)) {
-		throw eSysCall("[rofl][crofsock][tls_init_context] unable to read keyfile: " + keyfile);
+		throw eLibCall("SSL_CTX_use_PrivateKey_file libcall failed").
+				set_func(__PRETTY_FUNCTION__).set_line(__LINE__).set_key("keyfile", keyfile);
 	}
 
 	// ciphers
 	if ((not ciphers.empty()) && (0 == SSL_CTX_set_cipher_list(ctx, ciphers.c_str()))) {
-		throw eSysCall("[rofl][crofsock][tls_init_context] unable to set ciphers: " + ciphers);
+		throw eLibCall("SSL_CTX_set_cipher_list libcall failed").
+				set_func(__PRETTY_FUNCTION__).set_line(__LINE__).set_key("ciphers", ciphers);
 	}
 
 	// capath/cafile
 	if (!SSL_CTX_load_verify_locations(ctx,
 			cafile.empty() ? NULL : cafile.c_str(),
 			capath.empty() ? NULL : capath.c_str())) {
-		throw eSysCall("[rofl][crofsock][tls_init_context] unable to load ca locations");
+		throw eLibCall("SSL_CTX_load_verify_locations libcall failed").
+				set_func(__PRETTY_FUNCTION__).set_line(__LINE__).set_key("cafile", cafile).set_key("capath", capath);
 	}
 
 	int mode = SSL_VERIFY_NONE;
@@ -632,8 +642,6 @@ crofsock::tls_accept(
 	case STATE_CLOSED:
 	case STATE_TCP_ACCEPTING: {
 
-		std::cerr << ">>> tls_accept() [1] <<<" << std::endl;
-
 		flags.set(FLAG_TLS_IN_USE);
 
 		crofsock::tcp_accept(sockfd);
@@ -641,16 +649,16 @@ crofsock::tls_accept(
 	} break;
 	case STATE_TCP_ESTABLISHED: {
 
-		std::cerr << ">>> tls_accept() [2] <<<" << std::endl;
-
 		tls_init_context();
 
 		if ((ssl = SSL_new(ctx)) == NULL) {
-			throw eSysCall("[rofl][crofsock][tls_accept] unable to create new SSL object");
+			throw eLibCall("SSL_new libcall failed").
+					set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 		}
 
 		if ((bio = BIO_new(BIO_s_socket())) == NULL) {
-			throw eSysCall("[rofl][crofsock][tls_accept] unable to create new BIO object");
+			throw eLibCall("BIO_new libcall failed").
+					set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 		}
 
 		BIO_set_fd(bio, sd, BIO_NOCLOSE);
@@ -661,51 +669,47 @@ crofsock::tls_accept(
 
 		state = STATE_TLS_ACCEPTING;
 
+		journal.log(LOG_INFO, "TLS: start passive connection");
+
 	} break;
 	case STATE_TLS_ACCEPTING: {
 
-		std::cerr << ">>> tls_accept() [3] <<<" << std::endl;
-
 		int rc = 0, err_code = 0;
-
-		std::cerr << "[rofl][crofsock][tls_accept] SSL accepting..." << std::endl;
 
 		if ((rc = SSL_accept(ssl)) <= 0) {
 			switch (err_code = SSL_get_error(ssl, rc)) {
 			case SSL_ERROR_WANT_READ: {
-				std::cerr << "[rofl][crofsock][tls_accept] accepting => SSL_ERROR_WANT_READ" << std::endl;
+				journal.log(LOG_INFO, "TLS: accept WANT READ");
 			} return;
 			case SSL_ERROR_WANT_WRITE: {
-				std::cerr << "[rofl][crofsock][tls_accept] accepting => SSL_ERROR_WANT_WRITE" << std::endl;
+				journal.log(LOG_INFO, "TLS: accept WANT WRITE");
 			} return;
 			case SSL_ERROR_WANT_ACCEPT: {
-				std::cerr << "[rofl][crofsock][tls_accept] accepting => SSL_ERROR_WANT_ACCEPT" << std::endl;
+				journal.log(LOG_INFO, "TLS: accept WANT ACCEPT");
 			} return;
 			case SSL_ERROR_WANT_CONNECT: {
-				std::cerr << "[rofl][crofsock][tls_accept] accepting => SSL_ERROR_WANT_CONNECT" << std::endl;
+				journal.log(LOG_INFO, "TLS: accept WANT CONNECT");
 			} return;
 
 
 			case SSL_ERROR_NONE: {
-				std::cerr << "[rofl][crofsock][tls_accept] SSL_accept() failed SSL_ERROR_NONE" << std::endl;
+				journal.log(LOG_INFO, "TLS: accept failed ERROR NONE");
 			} break;
 			case SSL_ERROR_SSL: {
-				std::cerr << "[rofl][crofsock][tls_accept] SSL_accept() failed SSL_ERROR_SSL" << std::endl;
+				journal.log(LOG_INFO, "TLS: accept failed ERROR SSL");
 			} break;
 			case SSL_ERROR_SYSCALL: {
-				std::cerr << "[rofl][crofsock][tls_accept] SSL_accept() failed SSL_ERROR_SYSCALL" << std::endl;
+				journal.log(LOG_INFO, "TLS: accept failed ERROR SYSCALL");
 			} break;
 			case SSL_ERROR_ZERO_RETURN: {
-				std::cerr << "[rofl][crofsock][tls_accept] SSL_accept() failed SSL_ERROR_ZERO_RETURN" << std::endl;
+				journal.log(LOG_INFO, "TLS: accept failed ERROR ZERO RETURN");
 			} break;
 			default: {
-				std::cerr << "[rofl][crofsock][tls_accept] SSL_accept() failed " << std::endl;
+				journal.log(LOG_INFO, "TLS: accept failed");
 			};
 			}
 
-			std::cerr << "[rofl][crofsock][tls_accept] SSL_accept() failed " << std::endl;
-
-			ERR_print_errors_fp(stderr);
+			tls_log_errors();
 
 			SSL_free(ssl); ssl = NULL; bio = NULL;
 
@@ -719,9 +723,9 @@ crofsock::tls_accept(
 		if (rc == 1) {
 
 			if (not tls_verify_ok()) {
-				std::cerr << "[rofl][crofsock][tls_accept] SSL_accept() peer verification failed " << std::endl;
+				journal.log(LOG_INFO, "TLS: accept peer verification failed");
 
-				ERR_print_errors_fp(stderr);
+				tls_log_errors();
 
 				SSL_free(ssl); ssl = NULL; bio = NULL;
 
@@ -734,7 +738,7 @@ crofsock::tls_accept(
 				return;
 			}
 
-			std::cerr << "[rofl][crofsock][tls_accept] SSL_accept() succeeded " << std::endl;
+			journal.log(LOG_INFO, "TLS: accept succeeded");
 
 			state = STATE_TLS_ESTABLISHED;
 
@@ -744,15 +748,13 @@ crofsock::tls_accept(
 	} break;
 	case STATE_TLS_ESTABLISHED: {
 
-		std::cerr << ">>> tls_accept() [4] <<<" << std::endl;
-
 		/* do nothing */
 
 	} break;
 	default: {
-		std::cerr << ">>> tls_accept() [E] <<<" << std::endl;
 
-		throw eRofSockError("[rofl][crofsock][tls_accept] called in invalid state");
+		throw eRofSockError("crofsock::tls_accept() called in invalid state").
+				set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	}
 }
@@ -768,8 +770,6 @@ crofsock::tls_connect(
 	case STATE_CLOSED:
 	case STATE_TCP_CONNECTING: {
 
-		std::cerr << ">>> tls_connect() [1] <<<" << std::endl;
-
 		flags.set(FLAG_TLS_IN_USE);
 
 		crofsock::tcp_connect(reconnect);
@@ -777,16 +777,16 @@ crofsock::tls_connect(
 	} break;
 	case STATE_TCP_ESTABLISHED: {
 
-		std::cerr << ">>> tls_connect() [2] <<<" << std::endl;
-
 		tls_init_context();
 
 		if ((ssl = SSL_new(ctx)) == NULL) {
-			throw eSysCall("[rofl][crofsock][tls_connect] unable to create new SSL object");
+			throw eLibCall("SSL_new libcall failed").
+					set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 		}
 
 		if ((bio = BIO_new(BIO_s_socket())) == NULL) {
-			throw eSysCall("[rofl][crofsock][tls_connect] unable to create new BIO object");
+			throw eLibCall("BIO_new libcall failed").
+					set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 		}
 
 		BIO_set_fd(bio, sd, BIO_NOCLOSE);
@@ -797,53 +797,49 @@ crofsock::tls_connect(
 
 		state = STATE_TLS_CONNECTING;
 
+		journal.log(LOG_INFO, "TLS: start active connection");
+
 		crofsock::tls_connect(reconnect);
 
 	} break;
 	case STATE_TLS_CONNECTING: {
 
-		std::cerr << ">>> tls_connect() [3] <<<" << std::endl;
-
 		int rc = 0, err_code = 0;
-
-		std::cerr << "[rofl][crofsock][tls_connect] SSL connecting..." << std::endl;
 
 		if ((rc = SSL_connect(ssl)) <= 0) {
 			switch (err_code = SSL_get_error(ssl, rc)) {
 			case SSL_ERROR_WANT_READ: {
-				std::cerr << "[rofl][crofsock][tls_connect] connecting => SSL_ERROR_WANT_READ" << std::endl;
+				journal.log(LOG_INFO, "TLS: connect WANT READ");
 			} return;
 			case SSL_ERROR_WANT_WRITE: {
-				std::cerr << "[rofl][crofsock][tls_connect] connecting => SSL_ERROR_WANT_WRITE" << std::endl;
+				journal.log(LOG_INFO, "TLS: connect WANT WRITE");
 			} return;
 			case SSL_ERROR_WANT_ACCEPT: {
-				std::cerr << "[rofl][crofsock][tls_connect] connecting => SSL_ERROR_WANT_ACCEPT" << std::endl;
+				journal.log(LOG_INFO, "TLS: connect WANT ACCEPT");
 			} return;
 			case SSL_ERROR_WANT_CONNECT: {
-				std::cerr << "[rofl][crofsock][tls_connect] connecting => SSL_ERROR_WANT_CONNECT" << std::endl;
+				journal.log(LOG_INFO, "TLS: connect WANT CONNECT");
 			} return;
 
 
 			case SSL_ERROR_NONE: {
-				std::cerr << "[rofl][crofsock][tls_connect] SSL_connect() failed SSL_ERROR_NONE" << std::endl;
+				journal.log(LOG_INFO, "TLS: connect failed ERROR NONE");
 			} break;
 			case SSL_ERROR_SSL: {
-				std::cerr << "[rofl][crofsock][tls_connect] SSL_connect() failed SSL_ERROR_SSL" << std::endl;
+				journal.log(LOG_INFO, "TLS: connect failed ERROR SSL");
 			} break;
 			case SSL_ERROR_SYSCALL: {
-				std::cerr << "[rofl][crofsock][tls_connect] SSL_connect() failed SSL_ERROR_SYSCALL" << std::endl;
+				journal.log(LOG_INFO, "TLS: connect failed ERROR SYSCALL");
 			} break;
 			case SSL_ERROR_ZERO_RETURN: {
-				std::cerr << "[rofl][crofsock][tls_connect] SSL_connect() failed SSL_ERROR_ZERO_RETURN" << std::endl;
+				journal.log(LOG_INFO, "TLS: connect failed ERROR ZERO RETURN");
 			} break;
 			default: {
-				std::cerr << "[rofl][crofsock][tls_connect] SSL_connect() failed " << std::endl;
+				journal.log(LOG_INFO, "TLS: connect failed");
 			};
 			}
 
-			std::cerr << "[rofl][crofsock][tls_connect] SSL_connect() failed " << std::endl;
-
-			ERR_print_errors_fp(stderr);
+			tls_log_errors();
 
 			SSL_free(ssl); ssl = NULL; bio = NULL;
 
@@ -857,9 +853,9 @@ crofsock::tls_connect(
 		if (rc == 1) {
 
 			if (not tls_verify_ok()) {
-				std::cerr << "[rofl][crofsock][tls_connect] SSL_connect() peer verification failed " << std::endl;
+				journal.log(LOG_INFO, "TLS: connect peer verification failed");
 
-				ERR_print_errors_fp(stderr);
+				tls_log_errors();
 
 				SSL_free(ssl); ssl = NULL; bio = NULL;
 
@@ -872,7 +868,7 @@ crofsock::tls_connect(
 				return;
 			}
 
-			std::cerr << "[rofl][crofsock][tls_connect] SSL_connect() succeeded " << std::endl;
+			journal.log(LOG_INFO, "TLS: connect succeeded");
 
 			state = STATE_TLS_ESTABLISHED;
 
@@ -882,14 +878,13 @@ crofsock::tls_connect(
 	} break;
 	case STATE_TLS_ESTABLISHED: {
 
-		std::cerr << ">>> tls_connect() [4] <<<" << std::endl;
 		/* do nothing */
 
 	} break;
 	default: {
-		std::cerr << ">>> tls_connect() [E] <<<" << std::endl;
 
-		throw eRofSockError("[rofl][crofsock][tls_connect] called in invalid state");
+		throw eRofSockError("crofsock::tls_connect() called in invalid state").
+				set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	};
 	}
 }
@@ -911,9 +906,9 @@ crofsock::tls_verify_ok()
 		X509* cert = (X509*)NULL;
 		if ((cert = SSL_get_peer_certificate(ssl)) == NULL) {
 
-			std::cerr << "[rofl][crofsock][tls_verify_ok] peer verification failed " << std::endl;
+			journal.log(LOG_INFO, "TLS: no certificate presented by peer");
 
-			ERR_print_errors_fp(stderr);
+			tls_log_errors();
 
 			SSL_free(ssl); ssl = NULL; bio = NULL;
 
@@ -933,106 +928,106 @@ crofsock::tls_verify_ok()
 
 			switch (result) {
 			case X509_V_OK: {
-				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: ok" << std::endl;
+				journal.log(LOG_INFO, "TLS: peer certificate verification: ok");
 			} break;
 			case X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT: {
-				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: unable to get issuer certificate" << std::endl;
+				journal.log(LOG_INFO, "TLS: peer certificate verification: unable to get issuer certificate");
 			} break;
 			case X509_V_ERR_UNABLE_TO_GET_CRL: {
-				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: unable to get certificate CRL" << std::endl;
+				journal.log(LOG_INFO, "TLS: peer certificate verification: unable to get certificate CRL");
 			} break;
 			case X509_V_ERR_UNABLE_TO_DECRYPT_CERT_SIGNATURE: {
-				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: unable to decrypt certificate's signature" << std::endl;
+				journal.log(LOG_INFO, "TLS: peer certificate verification: unable to decrypt certificate's signature");
 			} break;
 			case X509_V_ERR_UNABLE_TO_DECRYPT_CRL_SIGNATURE: {
-				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: unable to decrypt CRL's signature" << std::endl;
+				journal.log(LOG_INFO, "TLS: peer certificate verification: unable to decrypt CRL's signature");
 			} break;
 			case X509_V_ERR_UNABLE_TO_DECODE_ISSUER_PUBLIC_KEY: {
-				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: unable to decode issuer public key" << std::endl;
+				journal.log(LOG_INFO, "TLS: peer certificate verification: unable to decode issuer public key");
 			} break;
 			case X509_V_ERR_CERT_SIGNATURE_FAILURE: {
-				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: certificate signature failure" << std::endl;
+				journal.log(LOG_INFO, "TLS: peer certificate verification: certificate signature failure");
 			} break;
 			case X509_V_ERR_CRL_SIGNATURE_FAILURE: {
-				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: CRL signature failure" << std::endl;
+				journal.log(LOG_INFO, "TLS: peer certificate verification: CRL signature failure");
 			} break;
 			case X509_V_ERR_CERT_NOT_YET_VALID: {
-				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: certificate is not yet valid" << std::endl;
+				journal.log(LOG_INFO, "TLS: peer certificate verification: certificate is not yet valid");
 			} break;
 			case X509_V_ERR_CERT_HAS_EXPIRED: {
-				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: certificate has expired" << std::endl;
+				journal.log(LOG_INFO, "TLS: peer certificate verification: certificate has expired");
 			} break;
 			case X509_V_ERR_CRL_NOT_YET_VALID: {
-				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: CRL is not yet valid" << std::endl;
+				journal.log(LOG_INFO, "TLS: peer certificate verification: CRL is not yet valid");
 			} break;
 			case X509_V_ERR_CRL_HAS_EXPIRED: {
-				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: CRL has expired" << std::endl;
+				journal.log(LOG_INFO, "TLS: peer certificate verification: CRL has expired");
 			} break;
 			case X509_V_ERR_ERROR_IN_CERT_NOT_BEFORE_FIELD: {
-				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: format error in certificate's notBefore field" << std::endl;
+				journal.log(LOG_INFO, "TLS: peer certificate verification: format error in certificate's notBefore field");
 			} break;
 			case X509_V_ERR_ERROR_IN_CERT_NOT_AFTER_FIELD: {
-				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: format error in certificate's notAfter field" << std::endl;
+				journal.log(LOG_INFO, "TLS: peer certificate verification: format error in certificate's notAfter field");
 			} break;
 			case X509_V_ERR_ERROR_IN_CRL_LAST_UPDATE_FIELD: {
-				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: format error in CRL's lastUpdate field" << std::endl;
+				journal.log(LOG_INFO, "TLS: peer certificate verification: format error in CRL's lastUpdate field");
 			} break;
 			case X509_V_ERR_ERROR_IN_CRL_NEXT_UPDATE_FIELD: {
-				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: format error in CRL's nextUpdate field" << std::endl;
+				journal.log(LOG_INFO, "TLS: peer certificate verification: format error in CRL's nextUpdate field");
 			} break;
 			case X509_V_ERR_OUT_OF_MEM: {
-				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: out of memory" << std::endl;
+				journal.log(LOG_INFO, "TLS: peer certificate verification: out of memory");
 			} break;
 			case X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT: {
-				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: self signed certificate" << std::endl;
+				journal.log(LOG_INFO, "TLS: peer certificate verification: self signed certificate");
 			} break;
 			case X509_V_ERR_SELF_SIGNED_CERT_IN_CHAIN: {
-				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: self signed certificate in certificate chain" << std::endl;
+				journal.log(LOG_INFO, "TLS: peer certificate verification: self signed certificate in certificate chain");
 			} break;
 			case X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT_LOCALLY: {
-				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: unable to get local issuer certificate" << std::endl;
+				journal.log(LOG_INFO, "TLS: peer certificate verification: unable to get local issuer certificate");
 			} break;
 			case X509_V_ERR_UNABLE_TO_VERIFY_LEAF_SIGNATURE: {
-				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: unable to verify the first certificate" << std::endl;
+				journal.log(LOG_INFO, "TLS: peer certificate verification: unable to verify the first certificate");
 			} break;
 			case X509_V_ERR_CERT_CHAIN_TOO_LONG: {
-				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: certificate chain too long" << std::endl;
+				journal.log(LOG_INFO, "TLS: peer certificate verification: certificate chain too long");
 			} break;
 			case X509_V_ERR_CERT_REVOKED: {
-				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: certificate revoked" << std::endl;
+				journal.log(LOG_INFO, "TLS: peer certificate verification: certificate revoked");
 			} break;
 			case X509_V_ERR_INVALID_CA: {
-				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: invalid CA certificate" << std::endl;
+				journal.log(LOG_INFO, "TLS: peer certificate verification: invalid CA certificate");
 			} break;
 			case X509_V_ERR_PATH_LENGTH_EXCEEDED: {
-				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: path length constraint exceeded" << std::endl;
+				journal.log(LOG_INFO, "TLS: peer certificate verification: path length exceeded");
 			} break;
 			case X509_V_ERR_INVALID_PURPOSE: {
-				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: unsupported certificate purpose" << std::endl;
+				journal.log(LOG_INFO, "TLS: peer certificate verification: invalid purpose");
 			} break;
 			case X509_V_ERR_CERT_UNTRUSTED: {
-				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: certificate not trusted" << std::endl;
+				journal.log(LOG_INFO, "TLS: peer certificate verification: certificate untrusted");
 			} break;
 			case X509_V_ERR_CERT_REJECTED: {
-				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: certificate rejected" << std::endl;
+				journal.log(LOG_INFO, "TLS: peer certificate verification: certificate rejected");
 			} break;
 			case X509_V_ERR_SUBJECT_ISSUER_MISMATCH: {
-				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: subject issuer mismatch" << std::endl;
+				journal.log(LOG_INFO, "TLS: peer certificate verification: subject issuer mismatch");
 			} break;
 			case X509_V_ERR_AKID_SKID_MISMATCH: {
-				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: authority and subject key identifier mismatch" << std::endl;
+				journal.log(LOG_INFO, "TLS: peer certificate verification: authority key id and subject key id mismatch");
 			} break;
 			case X509_V_ERR_AKID_ISSUER_SERIAL_MISMATCH: {
-				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: authority and issuer serial number mismatch" << std::endl;
+				journal.log(LOG_INFO, "TLS: peer certificate verification: authority and issuer serial number mismatch");
 			} break;
 			case X509_V_ERR_KEYUSAGE_NO_CERTSIGN: {
-				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: key usage does not include certificate signing" << std::endl;
+				journal.log(LOG_INFO, "TLS: peer certificate verification: key usage does not include certificate signing");
 			} break;
 			case X509_V_ERR_APPLICATION_VERIFICATION: {
-				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: application verification failure" << std::endl;
+				journal.log(LOG_INFO, "TLS: peer certificate verification: application verification failure");
 			} break;
 			default: {
-				std::cerr << "[rofl][crofsock][tls_verify_ok] SSL certificate verification: unknown error" << std::endl;
+				journal.log(LOG_INFO, "TLS: peer certificate verification: unknown error");
 			};
 			}
 
@@ -1041,6 +1036,24 @@ crofsock::tls_verify_ok()
 	}
 
 	return true;
+}
+
+
+
+void
+crofsock::tls_log_errors()
+{
+	BIO* ebio = BIO_new(BIO_s_mem());
+
+	ERR_print_errors(ebio);
+
+	while (!BIO_eof(ebio)) {
+		rofl::cmemory mem(1024);
+		BIO_read(ebio, mem.somem(), mem.length() - 1);
+		journal.log(LOG_CRIT_ERROR, "TLS: error history %s", (const char*)mem.somem());
+	}
+
+	BIO_free(ebio);
 }
 
 
@@ -1067,8 +1080,7 @@ crofsock::backoff_reconnect(
 		}
 	}
 
-	std::cerr << "[rofl-common][crofsock][backoff] "
-			<< " scheduled reconnect in: " << reconnect_backoff_current << "secs" << std::endl;
+	journal.log(LOG_NOTICE, " scheduled reconnect in: %d secs", reconnect_backoff_current);
 
 	rxthread.add_timer(TIMER_ID_RECONNECT, ctimespec().expire_in(reconnect_backoff_current, 0));
 
@@ -1105,6 +1117,14 @@ bool
 crofsock::is_congested() const
 {
 	return flags.test(FLAG_CONGESTED);
+}
+
+
+
+bool
+crofsock::is_rx_disabled() const
+{
+	return rx_disabled;
 }
 
 
@@ -1188,7 +1208,9 @@ crofsock::send_message(
 	}
 
 	if (flags.test(FLAG_TX_BLOCK_QUEUEING)) {
-		throw eRofQueueFull("crofsock::send_message() transmission blocked, congestion");
+		throw eRofQueueFull("crofsock::send_message() transmission blocked, congestion").
+				set_func(__PRETTY_FUNCTION__).
+				set_line(__LINE__);
 	}
 
 	txqueue_pending_pkts++;
@@ -1323,7 +1345,7 @@ crofsock::send_from_queue()
 			for (unsigned int num = 0; num < txweights[queue_id]; ++num) {
 
 				if ((tx_disabled) || (state < STATE_TCP_ESTABLISHED)) {
-					tx_is_running= false;
+					tx_is_running = false;
 					return;
 				}
 
@@ -1332,9 +1354,9 @@ crofsock::send_from_queue()
 					rofl::openflow::cofmsg *msg = nullptr;
 
 					/* fetch a new message for transmission from tx queue */
-					if ((msg = txqueues[queue_id].front()) == NULL)
+					if ((msg = txqueues[queue_id].retrieve()) == NULL)
 						break;
-					txqueues[queue_id].pop();
+					//txqueues[queue_id].pop();
 
 					/* bytes of this message sent so far */
 					msg_bytes_sent = 0;
@@ -1442,7 +1464,8 @@ crofsock::handle_read_event_rxthread(
 			int optlen = sizeof(optval);
 			if ((rc = getsockopt(sd, SOL_SOCKET, SO_ERROR,
 								 (void*)&optval, (socklen_t*)&optlen)) < 0) {
-				throw eSysCall("getsockopt() SOL_SOCKET, SO_ERROR");
+				throw eSysCall("getsockopt (SOL_SOCKET:SO_ERROR) syscall failed").
+						set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 			}
 
 			switch (optval) {
@@ -1451,11 +1474,13 @@ crofsock::handle_read_event_rxthread(
 				rxthread.drop_write_fd(sd);
 
 				if ((getsockname(sd, laddr.ca_saddr, &(laddr.salen))) < 0) {
-					throw eSysCall("getsockname()");
+					throw eSysCall("getsockname syscall failed").
+							set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 				}
 
 				if ((getpeername(sd, raddr.ca_saddr, &(raddr.salen))) < 0) {
-					throw eSysCall("getpeername()");
+					throw eSysCall("getpeername syscall failed").
+							set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 				}
 
 				state = STATE_TCP_ESTABLISHED;
@@ -1528,7 +1553,7 @@ crofsock::handle_read_event_rxthread(
 
 	} catch (std::runtime_error& e) {
 
-		std::cerr << "crofsock::handle_read_event_rxthread() exception caught, what: " << e.what() << std::endl;
+		journal.log(LOG_RUNTIME_ERROR, "crofsock::handle_read_event_rxthread() exception caught, what: ", e.what());
 
 	} catch (...) {
 
@@ -1627,7 +1652,7 @@ crofsock::parse_message()
 	rofl::openflow::cofmsg *msg = (rofl::openflow::cofmsg*)0;
 	try {
 		if (rxbuffer.length() < sizeof(struct rofl::openflow::ofp_header)) {
-			throw eBadRequestBadLen("crofsock::parse_message() buf too short");
+			throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		}
 
 		/* make sure to have a valid cofmsg* msg object after parsing */
@@ -1642,7 +1667,7 @@ crofsock::parse_message()
 			parse_of13_message(&msg);
 		} break;
 		default: {
-			throw eBadRequestBadVersion("crofsock::parse_message() unsupported OpenFlow version");
+			throw eBadRequestBadVersion("eBadRequestBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		};
 		}
 
@@ -1650,7 +1675,8 @@ crofsock::parse_message()
 
 	} catch (eBadRequestBadType& e) {
 
-		std::cerr << "crofsock::parse_message() eBadRequestBadType, what: " << e.what() << std::endl;
+		e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message").set_key("xid", be32toh(hdr->xid));
+		journal.log(e);
 
 		send_message(
 				new rofl::openflow::cofmsg_error_bad_request_bad_type(
@@ -1661,7 +1687,8 @@ crofsock::parse_message()
 
 	} catch (eBadRequestBadStat& e) {
 
-		std::cerr << "crofsock::parse_message() eBadRequestBadStat, what: " << e.what() << std::endl;
+		e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message").set_key("xid", be32toh(hdr->xid));
+		journal.log(e);
 
 		send_message(
 				new rofl::openflow::cofmsg_error_bad_request_bad_stat(
@@ -1672,7 +1699,8 @@ crofsock::parse_message()
 
 	} catch (eBadRequestBadVersion& e) {
 
-		std::cerr << "crofsock::parse_message() eBadRequestBadVersion, what: " << e.what() << std::endl;
+		e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message").set_key("xid", be32toh(hdr->xid));
+		journal.log(e);
 
 		if (msg) delete msg;
 
@@ -1685,7 +1713,8 @@ crofsock::parse_message()
 
 	} catch (eBadRequestBadLen& e) {
 
-		std::cerr << "crofsock::parse_message() eBadRequestBadLen, what: " << e.what() << std::endl;
+		e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message").set_key("xid", be32toh(hdr->xid));
+		journal.log(e);
 
 		if (msg) delete msg;
 
@@ -1696,11 +1725,16 @@ crofsock::parse_message()
 						rxbuffer.somem(),
 						(rxbuffer.length() > 64) ? 64 : msg_bytes_read));
 
-	} catch (std::runtime_error& e) {
 
-		std::cerr << "crofsock::parse_message() std::runtime_error, what: " << e.what() << std::endl;
+	} catch (rofl::exception& e) {
+
+		e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message").set_key("xid", be32toh(hdr->xid));
+		journal.log(e);
 
 		//if (msg) delete msg;
+
+	} catch (std::runtime_error& e) {
+		journal.log(LOG_RUNTIME_ERROR, "std::runtime_error: %s", e.what());
 
 	}
 }
@@ -1764,7 +1798,7 @@ crofsock::parse_of10_message(
 	} break;
 	case rofl::openflow10::OFPT_STATS_REQUEST: {
 		if (rxbuffer.length() < sizeof(struct rofl::openflow10::ofp_stats_request)) {
-			throw eBadRequestBadLen("crofsock::parse_of10_message() stats buf too short");
+			throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		}
 		uint16_t stats_type = be16toh(((struct rofl::openflow10::ofp_stats_request*)rxbuffer.somem())->type);
 		switch (stats_type) {
@@ -1790,13 +1824,13 @@ crofsock::parse_of10_message(
 			*pmsg = new rofl::openflow::cofmsg_experimenter_stats_request();
 		} break;
 		default: {
-			throw eBadRequestBadStat("crofsock::parse_of10_message() invalid stats message type");
+			throw eBadRequestBadStat("eBadRequestBadStat", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		};
 		}
 	} break;
 	case rofl::openflow10::OFPT_STATS_REPLY: {
 		if (rxbuffer.length() < sizeof(struct rofl::openflow10::ofp_stats_reply)) {
-			throw eBadRequestBadLen("crofsock::parse_of10_message() stats buf too short");
+			throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		}
 		uint16_t stats_type = be16toh(((struct rofl::openflow10::ofp_stats_reply*)rxbuffer.somem())->type);
 		switch (stats_type) {
@@ -1822,7 +1856,7 @@ crofsock::parse_of10_message(
 			*pmsg = new rofl::openflow::cofmsg_experimenter_stats_reply();
 		} break;
 		default: {
-			throw eBadRequestBadStat("crofsock::parse_of12_message() invalid stats message type");
+			throw eBadRequestBadStat("eBadRequestBadStat", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		};
 		}
 	} break;
@@ -1839,7 +1873,7 @@ crofsock::parse_of10_message(
 		*pmsg = new rofl::openflow::cofmsg_queue_get_config_reply();
 	} break;
 	default: {
-		throw eBadRequestBadType("crofsock::parse_of10_message() invalid message type");
+		throw eBadRequestBadType("eBadRequestBadType", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	};
 	}
 
@@ -1911,7 +1945,7 @@ crofsock::parse_of12_message(
 	} break;
 	case rofl::openflow12::OFPT_STATS_REQUEST: {
 		if (rxbuffer.length() < sizeof(struct rofl::openflow12::ofp_stats_request)) {
-			throw eBadRequestBadLen("crofsock::parse_of12_message() stats buf too short");
+			throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		}
 		uint16_t stats_type = be16toh(((struct rofl::openflow12::ofp_stats_request*)rxbuffer.somem())->type);
 		switch (stats_type) {
@@ -1946,13 +1980,13 @@ crofsock::parse_of12_message(
 			*pmsg = new rofl::openflow::cofmsg_experimenter_stats_request();
 		} break;
 		default: {
-			throw eBadRequestBadStat("crofsock::parse_of12_message() invalid stats message type");
+			throw eBadRequestBadStat("eBadRequestBadStat", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		};
 		}
 	} break;
 	case rofl::openflow12::OFPT_STATS_REPLY: {
 		if (rxbuffer.length() < sizeof(struct rofl::openflow12::ofp_stats_reply)) {
-			throw eBadRequestBadLen("crofsock::parse_of12_message() stats buf too short");
+			throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		}
 		uint16_t stats_type = be16toh(((struct rofl::openflow12::ofp_stats_reply*)rxbuffer.somem())->type);
 		switch (stats_type) {
@@ -1987,7 +2021,7 @@ crofsock::parse_of12_message(
 			*pmsg = new rofl::openflow::cofmsg_experimenter_stats_reply();
 		} break;
 		default: {
-			throw eBadRequestBadStat("crofsock::parse_of12_message() invalid stats message type");
+			throw eBadRequestBadStat("eBadRequestBadStat", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		};
 		}
 	} break;
@@ -2019,7 +2053,7 @@ crofsock::parse_of12_message(
     	*pmsg = new rofl::openflow::cofmsg_set_async_config();
     } break;
 	default: {
-		throw eBadRequestBadType("crofsock::parse_of12_message() invalid message type");
+		throw eBadRequestBadType("eBadRequestBadType", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	};
 	}
 
@@ -2091,7 +2125,7 @@ crofsock::parse_of13_message(
 	} break;
 	case rofl::openflow13::OFPT_MULTIPART_REQUEST: {
 		if (rxbuffer.memlen() < sizeof(struct rofl::openflow13::ofp_multipart_request)) {
-			throw eBadRequestBadLen("crofsock::parse_of13_message() stats buf too short");
+			throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		}
 		uint16_t stats_type = be16toh(((struct rofl::openflow13::ofp_multipart_request*)rxbuffer.somem())->type);
 		switch (stats_type) {
@@ -2141,13 +2175,13 @@ crofsock::parse_of13_message(
 			*pmsg = new rofl::openflow::cofmsg_experimenter_stats_request();
 		} break;
 		default: {
-			throw eBadRequestBadStat("crofsock::parse_of13_message() invalid stats message type");
+			throw eBadRequestBadStat("eBadRequestBadStat", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		};
 		}
 	} break;
 	case rofl::openflow13::OFPT_MULTIPART_REPLY: {
 		if (rxbuffer.memlen() < sizeof(struct rofl::openflow13::ofp_multipart_reply)) {
-			throw eBadRequestBadLen("crofsock::parse_of13_message() stats buf too short");
+			throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		}
 		uint16_t stats_type = be16toh(((struct rofl::openflow13::ofp_multipart_reply*)rxbuffer.somem())->type);
 		switch (stats_type) {
@@ -2197,7 +2231,7 @@ crofsock::parse_of13_message(
 			*pmsg = new rofl::openflow::cofmsg_experimenter_stats_reply();
 		} break;
 		default: {
-			throw eBadRequestBadStat("crofsock::parse_of13_message() invalid stats message type");
+			throw eBadRequestBadStat("eBadRequestBadStat", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		};
 		}
 	} break;
@@ -2232,7 +2266,7 @@ crofsock::parse_of13_message(
 		*pmsg = new rofl::openflow::cofmsg_meter_mod();
 	} break;
 	default: {
-		throw eBadRequestBadType("crofsock::parse_of13_message() invalid message type");
+		throw eBadRequestBadType("eBadRequestBadType", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	};
 	}
 

@@ -54,7 +54,7 @@ coftable_features::length() const
 		return (sizeof(struct rofl::openflow13::ofp_table_features) + table_feature_props.length());
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -67,7 +67,7 @@ coftable_features::pack(uint8_t *buf, size_t buflen)
 		return;
 
 	if (buflen < length())
-		throw eInval();
+		throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 	set_length(length());
 
@@ -77,7 +77,7 @@ coftable_features::pack(uint8_t *buf, size_t buflen)
 		table_feature_props.pack(buf + sizeof(struct rofl::openflow13::ofp_table_features), buflen - sizeof(struct rofl::openflow13::ofp_table_features));
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -96,7 +96,7 @@ coftable_features::unpack(uint8_t *buf, size_t buflen)
 		ofh_tf_generic = rofl::cmemory::somem();
 
 		if (get_length() > buflen) {
-			throw eTableFeaturesReqBadLen();
+			throw eTableFeaturesReqBadLen("eTableFeaturesReqBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		}
 
 		table_feature_props.clear();
@@ -104,7 +104,7 @@ coftable_features::unpack(uint8_t *buf, size_t buflen)
 									buflen - sizeof(struct rofl::openflow13::ofp_table_features));
 	} break;
 	default:
-		throw eBadRequestBadVersion();
+		throw eBadRequestBadVersion("eBadRequestBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 

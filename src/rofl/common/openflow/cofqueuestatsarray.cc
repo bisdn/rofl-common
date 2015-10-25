@@ -120,7 +120,7 @@ cofqueuestatsarray::pack(uint8_t *buf, size_t buflen)
 		return;
 
 	if (buflen < length())
-		throw eInval();
+		throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 	switch (ofp_version) {
 	case rofl::openflow10::OFP_VERSION:
@@ -138,7 +138,7 @@ cofqueuestatsarray::pack(uint8_t *buf, size_t buflen)
 
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -178,7 +178,7 @@ cofqueuestatsarray::unpack(uint8_t *buf, size_t buflen)
 		}
 	} break;
 	default:
-		throw eBadRequestBadVersion();
+		throw eBadRequestBadVersion("eBadRequestBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 

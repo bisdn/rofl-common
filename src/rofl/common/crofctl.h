@@ -22,10 +22,11 @@
 #include "rofl/common/cctlid.h"
 #include "rofl/common/cmemory.h"
 #include "rofl/common/crofchan.h"
-#include "rofl/common/croflexception.h"
+#include "rofl/common/exception.hpp"
 #include "rofl/common/locking.hpp"
 #include "rofl/common/logging.h"
 #include "rofl/common/crandom.h"
+#include "rofl/common/cjournal.hpp"
 
 #include "rofl/common/openflow/openflow.h"
 #include "rofl/common/openflow/messages/cofmsg.h"
@@ -53,11 +54,11 @@
 
 namespace rofl {
 
-class eRofCtlBase : public RoflException {
+class eRofCtlBase : public exception {
 public:
 	eRofCtlBase(
 			const std::string& __arg) :
-				RoflException(__arg)
+				exception(__arg)
 	{};
 };
 class eRofCtlNotFound : public eRofCtlBase {
@@ -759,7 +760,8 @@ protected:
  *
  */
 class crofctl :
-		public rofl::crofchan_env
+		public rofl::crofchan_env,
+		public rofl::cjournal_env
 {
 public:
 
@@ -780,6 +782,22 @@ public:
 	crofctl(
 			crofctl_env* env,
 			const cctlid& ctlid);
+
+public:
+
+	/**
+	 *
+	 */
+	const cjournal&
+	get_journal() const
+	{ return journal; };
+
+	/**
+	 *
+	 */
+	cjournal&
+	set_journal()
+	{ return journal; };
 
 public:
 
@@ -833,7 +851,7 @@ public:
 	 */
 	void
 	check_role() const
-	{ if (is_slave()) throw eBadRequestIsSlave(); };
+	{ if (is_slave()) throw eBadRequestIsSlave("eBadRequestIsSlave", __FILE__, __PRETTY_FUNCTION__, __LINE__); };
 
 	/**
 	 * @brief	Returns a reference to the current asynchronous event configuration of this controller entity.
@@ -1502,6 +1520,9 @@ private:
 	init_async_config_role_default_template();
 
 private:
+
+	// journal
+	rofl::cjournal                   journal;
 
 	// environment
 	rofl::crofctl_env*               env;

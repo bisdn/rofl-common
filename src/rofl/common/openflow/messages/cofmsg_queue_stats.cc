@@ -59,7 +59,7 @@ cofmsg_queue_stats_request::length() const
 		return (sizeof(struct rofl::openflow13::ofp_multipart_request) + queue_stats.length());
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 	return 0;
 }
@@ -76,7 +76,7 @@ cofmsg_queue_stats_request::pack(
 		return;
 
 	if (buflen < cofmsg_queue_stats_request::length())
-		throw eMsgInval("cofmsg_queue_stats_request::pack() buf too short");
+		throw eInvalid("eInvalid").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 
 	switch (get_version()) {
 	case rofl::openflow10::OFP_VERSION: {
@@ -106,12 +106,12 @@ cofmsg_queue_stats_request::unpack(
 		return;
 
 	if (buflen < cofmsg_queue_stats_request::length())
-		throw eBadRequestBadLen("cofmsg_queue_stats_request::unpack() buf too short");
+		throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 	switch (get_version()) {
 	case rofl::openflow10::OFP_VERSION: {
 		if (get_stats_type() != rofl::openflow10::OFPST_QUEUE)
-			throw eMsgInval("cofmsg_queue_stats_request::unpack() invalid statistics type");
+			throw eBadRequestBadStat("eBadRequestBadStat", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		struct rofl::openflow10::ofp_stats_request* hdr =
 				(struct rofl::openflow10::ofp_stats_request*)buf;
@@ -121,7 +121,7 @@ cofmsg_queue_stats_request::unpack(
 	} break;
 	default: {
 		if (get_stats_type() != rofl::openflow13::OFPMP_QUEUE)
-			throw eMsgInval("cofmsg_queue_stats_request::unpack() invalid statistics type");
+			throw eBadRequestBadStat("eBadRequestBadStat", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		struct rofl::openflow13::ofp_multipart_request* hdr =
 				(struct rofl::openflow13::ofp_multipart_request*)buf;
@@ -132,7 +132,7 @@ cofmsg_queue_stats_request::unpack(
 	}
 
 	if (get_length() < cofmsg_queue_stats_request::length())
-		throw eBadRequestBadLen("cofmsg_queue_stats_request::unpack() buf too short");
+		throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 }
 
 
@@ -200,7 +200,7 @@ cofmsg_queue_stats_reply::length() const
 		return (sizeof(struct rofl::openflow13::ofp_multipart_reply) + queuestatsarray.length());
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 	return 0;
 }
@@ -217,7 +217,7 @@ cofmsg_queue_stats_reply::pack(
 		return;
 
 	if (buflen < cofmsg_queue_stats_reply::length())
-		throw eMsgInval("cofmsg_queue_stats_reply::pack() buf too short");
+		throw eInvalid("eInvalid").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 
 	switch (get_version()) {
 	case rofl::openflow10::OFP_VERSION: {
@@ -248,12 +248,12 @@ cofmsg_queue_stats_reply::unpack(
 		return;
 
 	if (buflen < cofmsg_queue_stats_reply::length())
-		throw eBadRequestBadLen("cofmsg_queue_stats_reply::unpack() buf too short");
+		throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 	switch (get_version()) {
 	case rofl::openflow10::OFP_VERSION: {
 		if (get_stats_type() != rofl::openflow10::OFPST_QUEUE)
-			throw eMsgInval("cofmsg_queue_stats_reply::unpack() invalid statistics type");
+			throw eBadRequestBadStat("eBadRequestBadStat", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		struct rofl::openflow10::ofp_stats_reply* hdr =
 				(struct rofl::openflow10::ofp_stats_reply*)buf;
@@ -263,7 +263,7 @@ cofmsg_queue_stats_reply::unpack(
 	} break;
 	default: {
 		if (get_stats_type() != rofl::openflow13::OFPMP_QUEUE)
-			throw eMsgInval("cofmsg_queue_stats_reply::unpack() invalid statistics type");
+			throw eBadRequestBadStat("eBadRequestBadStat", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		struct rofl::openflow13::ofp_multipart_reply* hdr =
 				(struct rofl::openflow13::ofp_multipart_reply*)buf;
@@ -274,7 +274,7 @@ cofmsg_queue_stats_reply::unpack(
 	}
 
 	if (get_length() < cofmsg_queue_stats_reply::length())
-		throw eBadRequestBadLen("cofmsg_queue_stats_reply::unpack() buf too short");
+		throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 }
 
 

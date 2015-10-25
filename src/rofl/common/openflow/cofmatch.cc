@@ -74,7 +74,7 @@ cofmatch::length() const
 		return total_length;
 	}
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 	return 0;
 }
@@ -87,7 +87,7 @@ cofmatch::pack(uint8_t* buf, size_t buflen)
 	case rofl::openflow10::OFP_VERSION: return pack_of10(buf, buflen); break;
 	case rofl::openflow12::OFP_VERSION:
 	case rofl::openflow13::OFP_VERSION: return pack_of13(buf, buflen); break;
-	default: throw eBadVersion();
+	default: throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -99,7 +99,7 @@ cofmatch::unpack(uint8_t *buf, size_t buflen)
 	case rofl::openflow10::OFP_VERSION: unpack_of10(buf, buflen); break;
 	case rofl::openflow12::OFP_VERSION:
 	case rofl::openflow13::OFP_VERSION: unpack_of13(buf, buflen); break;
-	default: throw eBadVersion();
+	default: throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -363,7 +363,7 @@ cofmatch::unpack_of13(uint8_t* buf, size_t buflen)
 	type = be16toh(m->type);
 
 	if (rofl::openflow13::OFPMT_OXM != type) {
-		throw eBadMatchBadType();
+		throw eBadMatchBadType("eBadMatchBadType", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 
 	buflen -= 2 * sizeof(uint16_t);
@@ -391,14 +391,14 @@ cofmatch::check_prerequisites() const
 		if (matches.has_ofb_in_phy_port()) {
 			if (not matches.has_ofb_in_port()) {
 				std::cerr << "[rofl][match] rejecting ofp_match: IN-PHY-PORT defined while no IN-PORT is present" << std::endl << matches;
-				throw eBadMatchBadPrereq();
+				throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 			}
 		}
 
 		if (matches.has_ofb_vlan_pcp()) {
 			if (openflow::OFPVID_NONE == matches.get_ofb_vlan_vid().get_u16value()) {
 				std::cerr << "[rofl][match] rejecting ofp_match: VLAN-PCP defined while VID is set to OFPVID-NONE" << std::endl << matches;
-				throw eBadMatchBadPrereq();
+				throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 			}
 		}
 
@@ -407,7 +407,7 @@ cofmatch::check_prerequisites() const
 					((matches.get_ofb_eth_type().get_u16value() != 0x0800) &&
 					 (matches.get_ofb_eth_type().get_u16value() != 0x86dd))) {
 				std::cerr << "[rofl][match] rejecting ofp_match: IP-DSCP defined while ETH-TYPE is not IPv4/IPv6" << std::endl << matches;
-				throw eBadMatchBadPrereq();
+				throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 			}
 		}
 
@@ -416,7 +416,7 @@ cofmatch::check_prerequisites() const
 					((matches.get_ofb_eth_type().get_u16value() != 0x0800) &&
 					 (matches.get_ofb_eth_type().get_u16value() != 0x86dd))) {
 				std::cerr << "[rofl][match] rejecting ofp_match: IP-ECN defined while ETH-TYPE is not IPv4/IPv6" << std::endl << matches;
-				throw eBadMatchBadPrereq();
+				throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 			}
 		}
 
@@ -425,7 +425,7 @@ cofmatch::check_prerequisites() const
 					((matches.get_ofb_eth_type().get_u16value() != 0x0800) &&
 					 (matches.get_ofb_eth_type().get_u16value() != 0x86dd))) {
 				std::cerr << "[rofl][match] rejecting ofp_match: IP-PROTO defined while ETH-TYPE is not IPv4/IPv6" << std::endl << matches;
-				throw eBadMatchBadPrereq();
+				throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 			}
 		}
 
@@ -433,7 +433,7 @@ cofmatch::check_prerequisites() const
 			if ((not matches.has_ofb_eth_type()) ||
 					(matches.get_ofb_eth_type().get_u16value() != 0x0800)) {
 				std::cerr << "[rofl][match] rejecting ofp_match: IPV4-SRC defined while ETH-TYPE is not IPv4" << std::endl << matches;
-				throw eBadMatchBadPrereq();
+				throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 			}
 		}
 
@@ -441,7 +441,7 @@ cofmatch::check_prerequisites() const
 			if ((not matches.has_ofb_eth_type()) ||
 					(matches.get_ofb_eth_type().get_u16value() != 0x0800)) {
 				std::cerr << "[rofl][match] rejecting ofp_match: IPV4-DST defined while ETH-TYPE is not IPv4" << std::endl << matches;
-				throw eBadMatchBadPrereq();
+				throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 			}
 		}
 
@@ -449,7 +449,7 @@ cofmatch::check_prerequisites() const
 			if ((not matches.has_ofb_ip_proto()) ||
 					(matches.get_ofb_ip_proto().get_u8value() != 6)) {
 				std::cerr << "[rofl][match] rejecting ofp_match: TCP-SRC defined while IP-PROTO is not TCP" << std::endl << matches;
-				throw eBadMatchBadPrereq();
+				throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 			}
 		}
 
@@ -457,7 +457,7 @@ cofmatch::check_prerequisites() const
 			if ((not matches.has_ofb_ip_proto()) ||
 					(matches.get_ofb_ip_proto().get_u8value() != 6)) {
 				std::cerr << "[rofl][match] rejecting ofp_match: TCP-DST defined while IP-PROTO is not TCP" << std::endl << matches;
-				throw eBadMatchBadPrereq();
+				throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 			}
 		}
 
@@ -465,7 +465,7 @@ cofmatch::check_prerequisites() const
 			if ((not matches.has_ofb_ip_proto()) ||
 					(matches.get_ofb_ip_proto().get_u8value() != 17)) {
 				std::cerr << "[rofl][match] rejecting ofp_match: UDP-SRC defined while IP-PROTO is not UDP" << std::endl << matches;
-				throw eBadMatchBadPrereq();
+				throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 			}
 		}
 
@@ -473,7 +473,7 @@ cofmatch::check_prerequisites() const
 			if ((not matches.has_ofb_ip_proto()) ||
 					(matches.get_ofb_ip_proto().get_u8value() != 17)) {
 				std::cerr << "[rofl][match] rejecting ofp_match: UDP-DST defined while IP-PROTO is not UDP" << std::endl << matches;
-				throw eBadMatchBadPrereq();
+				throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 			}
 		}
 
@@ -481,7 +481,7 @@ cofmatch::check_prerequisites() const
 			if ((not matches.has_ofb_ip_proto()) ||
 					(matches.get_ofb_ip_proto().get_u8value() != 132)) {
 				std::cerr << "[rofl][match] rejecting ofp_match: SCTP-SRC defined while IP-PROTO is not SCTP" << std::endl << matches;
-				throw eBadMatchBadPrereq();
+				throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 			}
 		}
 
@@ -489,7 +489,7 @@ cofmatch::check_prerequisites() const
 			if ((not matches.has_ofb_ip_proto()) ||
 					(matches.get_ofb_ip_proto().get_u8value() != 132)) {
 				std::cerr << "[rofl][match] rejecting ofp_match: SCTP-DST defined while IP-PROTO is not SCTP" << std::endl << matches;
-				throw eBadMatchBadPrereq();
+				throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 			}
 		}
 
@@ -497,7 +497,7 @@ cofmatch::check_prerequisites() const
 			if ((not matches.has_ofb_ip_proto()) ||
 					(matches.get_ofb_ip_proto().get_u8value() != 1)) {
 				std::cerr << "[rofl][match] rejecting ofp_match: ICMPV4-TYPE defined while IP-PROTO is not ICMPV4" << std::endl << matches;
-				throw eBadMatchBadPrereq();
+				throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 			}
 		}
 
@@ -505,7 +505,7 @@ cofmatch::check_prerequisites() const
 			if ((not matches.has_ofb_ip_proto()) ||
 					(matches.get_ofb_ip_proto().get_u8value() != 1)) {
 				std::cerr << "[rofl][match] rejecting ofp_match: ICMPV4-CODE defined while IP-PROTO is not ICMPV4" << std::endl << matches;
-				throw eBadMatchBadPrereq();
+				throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 			}
 		}
 
@@ -513,7 +513,7 @@ cofmatch::check_prerequisites() const
 			if ((not matches.has_ofb_eth_type()) ||
 					(matches.get_ofb_eth_type().get_u16value() != 0x0806)) {
 				std::cerr << "[rofl][match] rejecting ofp_match: ARP-OPCODE defined while ETH-TYPE is not ARP" << std::endl << matches;
-				throw eBadMatchBadPrereq();
+				throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 			}
 		}
 
@@ -521,7 +521,7 @@ cofmatch::check_prerequisites() const
 			if ((not matches.has_ofb_eth_type()) ||
 					(matches.get_ofb_eth_type().get_u16value() != 0x0806)) {
 				std::cerr << "[rofl][match] rejecting ofp_match: ARP-SPA defined while ETH-TYPE is not ARP" << std::endl << matches;
-				throw eBadMatchBadPrereq();
+				throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 			}
 		}
 
@@ -529,7 +529,7 @@ cofmatch::check_prerequisites() const
 			if ((not matches.has_ofb_eth_type()) ||
 					(matches.get_ofb_eth_type().get_u16value() != 0x0806)) {
 				std::cerr << "[rofl][match] rejecting ofp_match: ARP-TPA defined while ETH-TYPE is not ARP" << std::endl << matches;
-				throw eBadMatchBadPrereq();
+				throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 			}
 		}
 
@@ -537,7 +537,7 @@ cofmatch::check_prerequisites() const
 			if ((not matches.has_ofb_eth_type()) ||
 					(matches.get_ofb_eth_type().get_u16value() != 0x0806)) {
 				std::cerr << "[rofl][match] rejecting ofp_match: ARP-SHA defined while ETH-TYPE is not ARP" << std::endl << matches;
-				throw eBadMatchBadPrereq();
+				throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 			}
 		}
 
@@ -545,7 +545,7 @@ cofmatch::check_prerequisites() const
 			if ((not matches.has_ofb_eth_type()) ||
 					(matches.get_ofb_eth_type().get_u16value() != 0x0806)) {
 				std::cerr << "[rofl][match] rejecting ofp_match: ARP-THA defined while ETH-TYPE is not ARP" << std::endl << matches;
-				throw eBadMatchBadPrereq();
+				throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 			}
 		}
 
@@ -553,7 +553,7 @@ cofmatch::check_prerequisites() const
 			if ((not matches.has_ofb_eth_type()) ||
 					(matches.get_ofb_eth_type().get_u16value() != 0x86dd)) {
 				std::cerr << "[rofl][match] rejecting ofp_match: IPV6-SRC defined while ETH-TYPE is not IPv6" << std::endl << matches;
-				throw eBadMatchBadPrereq();
+				throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 			}
 		}
 
@@ -561,7 +561,7 @@ cofmatch::check_prerequisites() const
 			if ((not matches.has_ofb_eth_type()) ||
 					(matches.get_ofb_eth_type().get_u16value() != 0x86dd)) {
 				std::cerr << "[rofl][match] rejecting ofp_match: IPV6-DST defined while ETH-TYPE is not IPv6" << std::endl << matches;
-				throw eBadMatchBadPrereq();
+				throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 			}
 		}
 
@@ -569,7 +569,7 @@ cofmatch::check_prerequisites() const
 			if ((not matches.has_ofb_eth_type()) ||
 					(matches.get_ofb_eth_type().get_u16value() != 0x86dd)) {
 				std::cerr << "[rofl][match] rejecting ofp_match: IPV6-FLABEL defined while ETH-TYPE is not IPv6" << std::endl << matches;
-				throw eBadMatchBadPrereq();
+				throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 			}
 		}
 
@@ -577,7 +577,7 @@ cofmatch::check_prerequisites() const
 			if ((not matches.has_ofb_ip_proto()) ||
 					(matches.get_ofb_ip_proto().get_u8value() != 58)) {
 				std::cerr << "[rofl][match] rejecting ofp_match: ICMPV6-TYPE defined while IP-PROTO is not ICMPV6" << std::endl << matches;
-				throw eBadMatchBadPrereq();
+				throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 			}
 		}
 
@@ -585,7 +585,7 @@ cofmatch::check_prerequisites() const
 			if ((not matches.has_ofb_ip_proto()) ||
 					(matches.get_ofb_ip_proto().get_u8value() != 58)) {
 				std::cerr << "[rofl][match] rejecting ofp_match: ICMPV6-CODE defined while IP-PROTO is not ICMPV6" << std::endl << matches;
-				throw eBadMatchBadPrereq();
+				throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 			}
 		}
 
@@ -594,7 +594,7 @@ cofmatch::check_prerequisites() const
 					((matches.get_ofb_icmpv6_type().get_u8value() != 135) &&
 							(matches.get_ofb_icmpv6_type().get_u8value() != 136))) {
 				std::cerr << "[rofl][match] rejecting ofp_match: IPv6-ND-TARGET defined while ICMPV6-TYPE is not ND-SOLICITATION or ND-ADVERTISEMENT" << std::endl << matches;
-				throw eBadMatchBadPrereq();
+				throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 			}
 		}
 
@@ -602,7 +602,7 @@ cofmatch::check_prerequisites() const
 			if ((not matches.has_ofb_icmpv6_type()) ||
 					(matches.get_ofb_icmpv6_type().get_u8value() != 135)) {
 				std::cerr << "[rofl][match] rejecting ofp_match: IPv6-ND-SLL defined while ICMPV6-TYPE is not ND-SOLICITATION" << std::endl << matches;
-				throw eBadMatchBadPrereq();
+				throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 			}
 		}
 
@@ -610,7 +610,7 @@ cofmatch::check_prerequisites() const
 			if ((not matches.has_ofb_icmpv6_type()) ||
 					(matches.get_ofb_icmpv6_type().get_u8value() != 136)) {
 				std::cerr << "[rofl][match] rejecting ofp_match: IPv6-ND-TLL defined while ICMPV6-TYPE is not ND-ADVERTISEMENT" << std::endl << matches;
-				throw eBadMatchBadPrereq();
+				throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 			}
 		}
 
@@ -619,7 +619,7 @@ cofmatch::check_prerequisites() const
 					((matches.get_ofb_eth_type().get_u16value() != 0x8847) &&
 					 (matches.get_ofb_eth_type().get_u16value() != 0x8848))) {
 				std::cerr << "[rofl][match] rejecting ofp_match: MPLS-LABEL defined while ETH-TYPE is not MPLS/MPLS-UPSTREAM" << std::endl << matches;
-				throw eBadMatchBadPrereq();
+				throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 			}
 		}
 
@@ -628,7 +628,7 @@ cofmatch::check_prerequisites() const
 					((matches.get_ofb_eth_type().get_u16value() != 0x8847) &&
 					 (matches.get_ofb_eth_type().get_u16value() != 0x8848))) {
 				std::cerr << "[rofl][match] rejecting ofp_match: MPLS-TC defined while ETH-TYPE is not MPLS/MPLS-UPSTREAM" << std::endl << matches;
-				throw eBadMatchBadPrereq();
+				throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 			}
 		}
 
@@ -637,7 +637,7 @@ cofmatch::check_prerequisites() const
 					((matches.get_ofb_eth_type().get_u16value() != 0x8847) &&
 					 (matches.get_ofb_eth_type().get_u16value() != 0x8848))) {
 				std::cerr << "[rofl][match] rejecting ofp_match: MPLS-BOS defined while ETH-TYPE is not MPLS/MPLS-UPSTREAM" << std::endl << matches;
-				throw eBadMatchBadPrereq();
+				throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 			}
 		}
 
@@ -645,7 +645,7 @@ cofmatch::check_prerequisites() const
 			if ((not matches.has_ofb_eth_type()) ||
 					(matches.get_ofb_eth_type().get_u16value() != 0x88e7)) {
 				std::cerr << "[rofl][match] rejecting ofp_match: PBB-ISID defined while ETH-TYPE is not PBB" << std::endl << matches;
-				throw eBadMatchBadPrereq();
+				throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 			}
 		}
 
@@ -653,7 +653,7 @@ cofmatch::check_prerequisites() const
 			if ((not matches.has_ofb_eth_type()) ||
 					(matches.get_ofb_eth_type().get_u16value() != 0x86dd)) {
 				std::cerr << "[rofl][match] rejecting ofp_match: IPV6-EXTHDR defined while ETH-TYPE is not IPv6" << std::endl << matches;
-				throw eBadMatchBadPrereq();
+				throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 			}
 		}
 

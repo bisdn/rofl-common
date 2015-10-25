@@ -69,7 +69,7 @@ cofpacket_queue::length() const
 		return (sizeof(struct rofl::openflow13::ofp_packet_queue) + queue_props.length());
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
  	}
 }
 
@@ -83,7 +83,7 @@ cofpacket_queue::pack(
 		return;
 
 	if (buflen < cofpacket_queue::length())
-		throw eInval();
+		throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 	switch (ofp_version) {
 	case rofl::openflow10::OFP_VERSION: {
@@ -115,7 +115,7 @@ cofpacket_queue::pack(
 
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -135,7 +135,7 @@ cofpacket_queue::unpack(
 	case rofl::openflow10::OFP_VERSION: {
 
 		if (buflen < sizeof(struct rofl::openflow10::ofp_packet_queue))
-			throw eInval();
+			throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		struct rofl::openflow10::ofp_packet_queue* hdr =
 				(struct rofl::openflow10::ofp_packet_queue*)buf;
@@ -144,7 +144,7 @@ cofpacket_queue::unpack(
 		len			= be16toh(hdr->len);
 
 		if (buflen < len)
-			throw eInval();
+			throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		queue_props.unpack((uint8_t*)hdr->properties, len - sizeof(struct rofl::openflow10::ofp_packet_queue));
 
@@ -153,7 +153,7 @@ cofpacket_queue::unpack(
 	case rofl::openflow13::OFP_VERSION: {
 
 		if (buflen < sizeof(struct rofl::openflow13::ofp_packet_queue))
-			throw eInval();
+			throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		struct rofl::openflow12::ofp_packet_queue* hdr =
 				(struct rofl::openflow12::ofp_packet_queue*)buf;
@@ -163,13 +163,13 @@ cofpacket_queue::unpack(
 		len			= be16toh(hdr->len);
 
 		if (buflen < len)
-			throw eInval();
+			throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		queue_props.unpack((uint8_t*)hdr->properties, len - sizeof(struct rofl::openflow13::ofp_packet_queue));
 
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 

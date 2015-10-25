@@ -50,7 +50,7 @@ cmemory::cmemory(
 
 
 
-cmemory::cmemory(cmemory const& m) :
+cmemory::cmemory(const cmemory& m) :
 		data(std::make_pair<uint8_t*, size_t>(NULL,0))
 {
 #if 0
@@ -83,7 +83,7 @@ cmemory::~cmemory()
 
 cmemory&
 cmemory::operator= (
-		cmemory const& m)
+		const cmemory& m)
 {
 	if (this == &m)
 		return *this;
@@ -118,7 +118,8 @@ cmemory::operator[] (
 		size_t index) const
 {
 	if (index >= data.second) {
-		throw eMemOutOfRange();
+		throw eOutOfRange("cmemory::operator[] ()").
+				set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 	return *(somem() + index);
 }
@@ -126,7 +127,8 @@ cmemory::operator[] (
 
 
 bool
-cmemory::operator< (const cmemory& m) const
+cmemory::operator< (
+		const cmemory& m) const
 {
 	if (this->memlen() < m.memlen()) {
 		return true;
@@ -149,7 +151,8 @@ cmemory::operator< (const cmemory& m) const
 
 
 bool
-cmemory::operator> (const cmemory& m) const
+cmemory::operator> (
+		const cmemory& m) const
 {
 	if (this->memlen() > m.memlen()) {
 		return true;
@@ -172,10 +175,12 @@ cmemory::operator> (const cmemory& m) const
 
 
 cmemory
-cmemory::operator& (const cmemory& m) const
+cmemory::operator& (
+		const cmemory& m) const
 {
 	if (memlen() != m.memlen()) {
-		throw eMemInval();
+		throw eInvalid("cmemory::operator& ()").
+				set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 
 	cmemory tmp(*this);
@@ -190,7 +195,8 @@ cmemory::operator& (const cmemory& m) const
 
 
 cmemory&
-cmemory::operator+= (cmemory const& m)
+cmemory::operator+= (
+		const cmemory& m)
 {
 	size_t offset = memlen();
 
@@ -204,7 +210,8 @@ cmemory::operator+= (cmemory const& m)
 
 
 cmemory
-cmemory::operator+ (cmemory const& m)
+cmemory::operator+ (
+		const cmemory& m)
 {
 	cmemory tmp(*this);
 
@@ -216,7 +223,7 @@ cmemory::operator+ (cmemory const& m)
 
 
 bool
-cmemory::operator== (cmemory const& m) const
+cmemory::operator== (const cmemory& m) const
 {
 	if (this->memlen() == m.memlen()) {
 		if (!memcmp(this->somem(), m.somem(), this->memlen())) {
@@ -230,7 +237,7 @@ cmemory::operator== (cmemory const& m) const
 
 bool
 cmemory::operator!= (
-		cmemory const& m) const
+		const cmemory& m) const
 {
 	return (not operator== (m));
 }
@@ -257,7 +264,8 @@ cmemory::resize(
 		mfree();
 	} else if (len <= data.second) {
 		if ((data.first = (uint8_t*)realloc(data.first, len)) == 0) {
-			throw eMemAllocFailed();
+			throw eSysCall("realloc syscall failed").
+					set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 		}
 		//memset(data.first + len, 0x00, data.second);
 
@@ -265,7 +273,8 @@ cmemory::resize(
 		data.second = len;
 	} else {
 		if ((data.first = (uint8_t*)realloc(data.first, len)) == 0) {
-			throw eMemAllocFailed();
+			throw eSysCall("realloc syscall failed").
+					set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 		}
 		memset(data.first + data.second, 0x00, len - data.second);
 
@@ -294,7 +303,7 @@ cmemory::pack(
 		size_t buflen)
 {
 	if (buflen < memlen())
-		throw eInval("cmemory::pack()");
+		throw eInvalid("cmemory::pack()");
 	memcpy(buf, somem(), memlen());
 }
 
@@ -311,7 +320,6 @@ cmemory::toString() const
 void
 cmemory::mallocate(
 		size_t len)
-		throw (eMemAllocFailed)
 {
 	if (data.first) {
 		mfree();
@@ -320,7 +328,8 @@ cmemory::mallocate(
 
 
 	if ((data.first = (uint8_t*)calloc(1, data.second)) == 0) {
-		throw eMemAllocFailed();
+		throw eSysCall("calloc syscall failed").
+				set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 
 	memset(data.first, 0, data.second);
@@ -346,7 +355,8 @@ cmemory::insert(
 		size_t len)
 {
 	if (not ((ptr >= data.first) && (ptr < (data.first + data.second)))) {
-		throw eMemInval();
+		throw eOutOfRange("cmemory::insert()").
+				set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 
 	return insert(ptr - data.first, len);
@@ -360,7 +370,8 @@ cmemory::insert(
 		size_t len)
 {
 	if (offset > data.second) {
-		throw eMemInval();
+		throw eOutOfRange("offset > data.second").
+				set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 
 	if (0 == data.first) {
@@ -373,7 +384,8 @@ cmemory::insert(
 
 
 	if ((p_ptr = (uint8_t*)calloc(1, p_len)) == 0) {
-		throw eMemInval();
+		throw eSysCall("calloc syscall failed").
+				set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 
 	memcpy(p_ptr, data.first, offset);
@@ -396,11 +408,13 @@ cmemory::remove(
 		size_t len)
 {
 	if (not ((ptr >= data.first) && (ptr < (data.first + data.second)))) {
-		throw eMemInval();
+		throw eOutOfRange("cmemory::remove()").
+				set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 
 	if (not (((ptr + len) >= data.first) && ((ptr + len) < (data.first + data.second)))) {
-		throw eMemInval();
+		throw eOutOfRange("cmemory::remove()").
+				set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 
 	remove(ptr - data.first, len);
@@ -433,7 +447,8 @@ cmemory::find_first_of(
 			return i;
 		}
 	}
-	throw eMemNotFound();
+	throw eMemNotFound("cmemory::find_first_of()").
+			set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 }
 
 

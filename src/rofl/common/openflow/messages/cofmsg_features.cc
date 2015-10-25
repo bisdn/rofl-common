@@ -30,7 +30,7 @@ cofmsg_features_reply::pack(
 		return;
 
 	if (buflen < get_length())
-		throw eMsgInval("cofmsg_features_reply::pack()");
+		throw eInvalid("eInvalid").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 
 	switch (get_version()) {
 	case rofl::openflow10::OFP_VERSION: {
@@ -92,13 +92,13 @@ cofmsg_features_reply::unpack(
 		return;
 
 	if (buflen < cofmsg_features_reply::length())
-		throw eBadRequestBadLen("cofmsg_features_reply::unpack() buf too short");
+		throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 	switch (get_version()) {
 	case rofl::openflow10::OFP_VERSION: {
 
 		if (get_type() != rofl::openflow10::OFPT_FEATURES_REPLY)
-			throw eMsgInval("cofmsg_features_reply::unpack() invalid message type");
+			throw eBadRequestBadType("eBadRequestBadType", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		struct rofl::openflow10::ofp_switch_features* hdr =
 				(struct rofl::openflow10::ofp_switch_features*)buf;
@@ -118,7 +118,7 @@ cofmsg_features_reply::unpack(
 	case rofl::openflow12::OFP_VERSION: {
 
 		if (get_type() != rofl::openflow12::OFPT_FEATURES_REPLY)
-			throw eMsgInval("cofmsg_features_reply::unpack() invalid message type");
+			throw eBadRequestBadType("eBadRequestBadType", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		struct rofl::openflow12::ofp_switch_features* hdr =
 				(struct rofl::openflow12::ofp_switch_features*)buf;
@@ -137,7 +137,7 @@ cofmsg_features_reply::unpack(
 	default: {
 
 		if (get_type() != rofl::openflow13::OFPT_FEATURES_REPLY)
-			throw eMsgInval("cofmsg_features_reply::unpack() invalid message type");
+			throw eBadRequestBadType("eBadRequestBadType", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		struct rofl::openflow13::ofp_switch_features* hdr =
 				(struct rofl::openflow13::ofp_switch_features*)buf;
@@ -152,7 +152,7 @@ cofmsg_features_reply::unpack(
 	}
 
 	if (get_length() < cofmsg_features_reply::length())
-		throw eBadRequestBadLen("cofmsg_features_reply::unpack() buf too short");
+		throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 }
 
 

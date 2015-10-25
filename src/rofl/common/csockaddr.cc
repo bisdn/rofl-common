@@ -29,7 +29,7 @@ csockaddr::csockaddr(
 		ca_s6addr->sin6_port = htobe16(portno);
 	} break;
 	default:
-		throw eInval("csockaddr::csockaddr() unsupported family");
+		throw eInvalid("csockaddr::csockaddr() unsupported family");
 	}
 }
 
@@ -78,7 +78,7 @@ csockaddr::length() const
 		return sizeof(struct sockaddr_in6);
 	} break;
 	default:
-		throw eInval("csockaddr::length() unsupported family");
+		throw eInvalid("csockaddr::length() unsupported family");
 	}
 }
 
@@ -92,7 +92,7 @@ csockaddr::pack(
 		return;
 
 	if (salen < csockaddr::length())
-		throw eInval("csockaddr::pack() buflen too short");
+		throw eInvalid("csockaddr::pack() buflen too short");
 
 	cmemory::pack((uint8_t*)sa, salen);
 }
@@ -107,7 +107,7 @@ csockaddr::unpack(
 		return;
 
 	if (salen < csockaddr::length())
-		throw eInval("csockaddr::unpack() salen too short");
+		throw eInvalid("csockaddr::unpack() salen too short");
 
 	cmemory::unpack((uint8_t*)sa, salen);
 	ca_mem = cmemory::somem();

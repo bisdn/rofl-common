@@ -68,7 +68,7 @@ cofmsg_flow_mod::pack(
 		return;
 
 	if (buflen < get_length())
-		throw eMsgInval("cofmsg_features_reply::pack()");
+		throw eInvalid("eInvalid").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 
 	switch (get_version()) {
 	default: {
@@ -96,13 +96,13 @@ cofmsg_flow_mod::unpack(
 		return;
 
 	if (buflen < cofmsg_flow_mod::length())
-		throw eBadRequestBadLen("cofmsg_flow_mod::unpack() buf too short");
+		throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 	switch (get_version()) {
 	default: {
 
 		if (get_type() != rofl::openflow::OFPT_FLOW_MOD)
-			throw eMsgInval("cofmsg_flow_mod::unpack() invalid message type");
+			throw eBadRequestBadType("eBadRequestBadType", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		struct rofl::openflow::ofp_header* hdr =
 				(struct rofl::openflow::ofp_header*)buf;
@@ -114,7 +114,7 @@ cofmsg_flow_mod::unpack(
 	}
 
 	if (get_length() < cofmsg_flow_mod::length())
-		throw eBadRequestBadLen("cofmsg_flow_mod::unpack() buf too short");
+		throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 }
 
 

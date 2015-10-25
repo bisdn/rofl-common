@@ -125,7 +125,7 @@ coftables::unpack(
 		struct rofl::openflow13::ofp_table_features *table = (struct rofl::openflow13::ofp_table_features*)buf;
 
 		if ((be16toh(table->length) > buflen) || (be16toh(table->length) < sizeof(struct rofl::openflow13::ofp_table_features))) {
-			throw eTableFeaturesReqBadLen();
+			throw eTableFeaturesReqBadLen("eTableFeaturesReqBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		}
 
 		rofl::openflow::coftable_features table_features(get_version());

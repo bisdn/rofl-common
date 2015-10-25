@@ -57,7 +57,7 @@ cofportdesc_props::length() const
 		return len;
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -70,7 +70,7 @@ cofportdesc_props::pack(uint8_t *buf, size_t buflen)
 		return;
 
 	if (buflen < cofportdesc_props::length())
-		throw eInval();
+		throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 	switch (ofp_version) {
 	case openflow14::OFP_VERSION: {
@@ -100,7 +100,7 @@ cofportdesc_props::pack(uint8_t *buf, size_t buflen)
 		}
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -124,7 +124,7 @@ cofportdesc_props::unpack(
 			uint16_t len	= be16toh(hdr->length);
 
 			if ((buflen < len) || (0 == len))
-				throw eInval();
+				throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 			switch (type) {
 			case rofl::openflow14::OFPPDPT_ETHERNET: {
@@ -153,7 +153,7 @@ cofportdesc_props::unpack(
 
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 

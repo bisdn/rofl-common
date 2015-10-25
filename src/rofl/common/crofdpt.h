@@ -24,12 +24,13 @@
 #include "rofl/common/cmemory.h"
 #include "rofl/common/logging.h"
 #include "rofl/common/crofchan.h"
-#include "rofl/common/croflexception.h"
+#include "rofl/common/exception.hpp"
 #include "rofl/common/cdptid.h"
 #include "rofl/common/cauxid.h"
 #include "rofl/common/cdpid.h"
 #include "rofl/common/crofqueue.h"
 #include "rofl/common/crandom.h"
+#include "rofl/common/cjournal.hpp"
 
 #include "rofl/common/openflow/cofports.h"
 #include "rofl/common/openflow/coftables.h"
@@ -52,11 +53,11 @@
 namespace rofl {
 
 /* error classes */
-class eRofDptBase : public RoflException {
+class eRofDptBase : public exception {
 public:
 	eRofDptBase(
 			const std::string& __arg) :
-				RoflException(__arg)
+				exception(__arg)
 	{};
 };
 class eRofDptNotFound : public eRofDptBase {
@@ -1022,7 +1023,8 @@ protected:
  *
  */
 class crofdpt :
-		public rofl::crofchan_env
+		public rofl::crofchan_env,
+		public rofl::cjournal_env
 {
 public:
 
@@ -1043,6 +1045,22 @@ public:
 	crofdpt(
 			rofl::crofdpt_env* env,
 			const rofl::cdptid& dptid);
+
+public:
+
+	/**
+	 *
+	 */
+	const cjournal&
+	get_journal() const
+	{ return journal; };
+
+	/**
+	 *
+	 */
+	cjournal&
+	set_journal()
+	{ return journal; };
 
 public:
 
@@ -2071,6 +2089,9 @@ private:
 			const rofl::cauxid& auxid, rofl::openflow::cofmsg *msg);
 
 private:
+
+	// journal
+	rofl::cjournal                   journal;
 
 	// environment
 	rofl::crofdpt_env*               env;

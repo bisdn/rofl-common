@@ -110,7 +110,7 @@ cofdesc_stats_reply::get_dp_desc() const
 		return dp_desc;
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -122,7 +122,7 @@ cofdesc_stats_reply::pack(uint8_t *buf, size_t buflen) const
 	switch (of_version) {
 	case rofl::openflow10::OFP_VERSION: {
 		if (buflen < sizeof(struct openflow10::ofp_desc_stats))
-			throw eInval();
+			throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		struct openflow10::ofp_desc_stats *desc = (struct openflow10::ofp_desc_stats*)buf;
 
@@ -135,7 +135,7 @@ cofdesc_stats_reply::pack(uint8_t *buf, size_t buflen) const
 	case rofl::openflow12::OFP_VERSION:
 	case rofl::openflow13::OFP_VERSION: {
 		if (buflen < sizeof(struct openflow12::ofp_desc_stats))
-			throw eInval();
+			throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		struct openflow12::ofp_desc_stats *desc = (struct openflow12::ofp_desc_stats*)buf;
 
@@ -146,7 +146,7 @@ cofdesc_stats_reply::pack(uint8_t *buf, size_t buflen) const
 		snprintf(desc->dp_desc, 	DESC_STR_LEN, dp_desc.c_str(), 		dp_desc.length());
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -158,7 +158,7 @@ cofdesc_stats_reply::unpack(uint8_t *buf, size_t buflen)
 	switch (of_version) {
 	case rofl::openflow10::OFP_VERSION: {
 		if (buflen < sizeof(struct openflow10::ofp_desc_stats))
-			throw eInval();
+			throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		struct openflow10::ofp_desc_stats *desc = (struct openflow10::ofp_desc_stats*)buf;
 
@@ -172,7 +172,7 @@ cofdesc_stats_reply::unpack(uint8_t *buf, size_t buflen)
 	case rofl::openflow12::OFP_VERSION:
 	case rofl::openflow13::OFP_VERSION: {
 		if (buflen < sizeof(struct openflow12::ofp_desc_stats))
-			throw eInval();
+			throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		struct openflow12::ofp_desc_stats *desc = (struct openflow12::ofp_desc_stats*)buf;
 
@@ -184,7 +184,7 @@ cofdesc_stats_reply::unpack(uint8_t *buf, size_t buflen)
 
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -204,7 +204,7 @@ cofdesc_stats_reply::length() const
 		return (sizeof(struct openflow13::ofp_desc));
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 	return 0;
 }

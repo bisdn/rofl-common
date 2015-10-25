@@ -134,7 +134,7 @@ cofports::pack(
 		}
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -193,7 +193,7 @@ cofports::unpack(
 
 		} break;
 		default:
-			throw eBadVersion();
+			throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		}
 	}
 }

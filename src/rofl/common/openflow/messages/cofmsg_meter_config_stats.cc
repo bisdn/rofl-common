@@ -66,7 +66,7 @@ cofmsg_meter_config_stats_request::length() const
 		return (sizeof(struct rofl::openflow13::ofp_multipart_request) + meter_config.length());
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -82,7 +82,7 @@ cofmsg_meter_config_stats_request::pack(
 		return;
 
 	if (buflen < cofmsg_meter_config_stats_request::length())
-		throw eMsgInval("cofmsg_meter_config_stats_request::pack() buf too short");
+		throw eInvalid("eInvalid").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 
 	switch (get_version()) {
 	default: {
@@ -107,12 +107,12 @@ cofmsg_meter_config_stats_request::unpack(
 		return;
 
 	if (buflen < cofmsg_meter_config_stats_request::length())
-		throw eBadRequestBadLen("cofmsg_meter_config_stats_request::unpack() buf too short");
+		throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 	switch (get_version()) {
 	default: {
 		if (get_stats_type() != rofl::openflow13::OFPMP_METER_CONFIG)
-			throw eMsgInval("cofmsg_meter_config_stats_request::unpack() invalid statistics type");
+			throw eBadRequestBadStat("eBadRequestBadStat", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		struct rofl::openflow13::ofp_multipart_request* hdr =
 				(struct rofl::openflow13::ofp_multipart_request*)buf;
@@ -123,7 +123,7 @@ cofmsg_meter_config_stats_request::unpack(
 	}
 
 	if (get_length() < cofmsg_meter_config_stats_request::length())
-		throw eBadRequestBadLen("cofmsg_meter_config_stats_request::unpack() buf too short");
+		throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 }
 
 
@@ -185,7 +185,7 @@ cofmsg_meter_config_stats_reply::length() const
 		return (sizeof(struct rofl::openflow13::ofp_multipart_reply) + array.length());
 	} break;
 	default:
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 }
 
@@ -201,7 +201,7 @@ cofmsg_meter_config_stats_reply::pack(
 		return;
 
 	if (buflen < cofmsg_meter_config_stats_reply::length())
-		throw eMsgInval("cofmsg_meter_config_stats_reply::pack() buf too short");
+		throw eInvalid("eInvalid").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 
 	switch (get_version()) {
 	default: {
@@ -227,12 +227,12 @@ cofmsg_meter_config_stats_reply::unpack(
 		return;
 
 	if (buflen < cofmsg_meter_config_stats_reply::length())
-		throw eBadRequestBadLen("cofmsg_meter_config_stats_reply::unpack() buf too short");
+		throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 	switch (get_version()) {
 	default: {
 		if (get_stats_type() != rofl::openflow13::OFPMP_METER_CONFIG)
-			throw eMsgInval("cofmsg_meter_config_stats_reply::unpack() invalid statistics type");
+			throw eBadRequestBadStat("eBadRequestBadStat", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		struct rofl::openflow13::ofp_multipart_reply* hdr =
 				(struct rofl::openflow13::ofp_multipart_reply*)buf;
@@ -243,7 +243,7 @@ cofmsg_meter_config_stats_reply::unpack(
 	}
 
 	if (get_length() < cofmsg_meter_config_stats_reply::length())
-		throw eBadRequestBadLen("cofmsg_meter_config_stats_reply::unpack() buf too short");
+		throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 }
 
 

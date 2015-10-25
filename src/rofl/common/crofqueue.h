@@ -14,16 +14,16 @@
 #include "rofl/common/locking.hpp"
 #include "rofl/common/openflow/messages/cofmsg.h"
 #include "rofl/common/logging.h"
-#include "rofl/common/croflexception.h"
+#include "rofl/common/exception.hpp"
 
 namespace rofl {
 
 
-class eRofQueueBase : public RoflException {
+class eRofQueueBase : public exception {
 public:
 	eRofQueueBase(
 			const std::string& __arg) :
-				RoflException(__arg)
+				exception(__arg)
 	{};
 };
 class eRofQueueInvalid : public eRofQueueBase {
@@ -91,10 +91,10 @@ public:
 	void
 	clear() {
 		AcquireReadWriteLock rwlock(queue_lock);
-		for (auto msg : queue) {
+		while (not queue.empty()) {
+			rofl::openflow::cofmsg* msg = queue.front(); queue.pop_front();
 			delete msg;
 		}
-		queue.clear();
 	};
 
 	/**
@@ -103,7 +103,6 @@ public:
 	size_t
 	store(rofl::openflow::cofmsg* msg, bool enforce = false) {
 		AcquireReadWriteLock rwlock(queue_lock);
-		//std::cerr << "[rofl-common][crofqueue][store] msg: " << std::endl << *msg;
 		if ((not enforce) && (queue.size() >= queue_max_size)) {
 			throw eRofQueueFull("crofqueue::store() queue max size exceeded");
 		}
@@ -122,7 +121,6 @@ public:
 			return msg;
 		}
 		msg = queue.front(); queue.pop_front();
-		//std::cerr << "[rofl-common][crofqueue][retrieve] msg: " << std::endl << *msg;
 		return msg;
 	};
 
@@ -137,7 +135,6 @@ public:
 			return msg;
 		}
 		msg = queue.front();
-		//std::cerr << "[rofl-common][crofqueue][front] msg: " << std::endl << *msg;
 		return msg;
 	};
 
@@ -151,7 +148,6 @@ public:
 			return;
 		}
 		queue.pop_front();
-		//std::cerr << "[rofl-common][crofqueue][pop] " << std::endl;
 	};
 
 	/**

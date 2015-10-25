@@ -28,16 +28,17 @@ crofdpt::~crofdpt()
 crofdpt::crofdpt(
 		rofl::crofdpt_env* env,
 		const rofl::cdptid& dptid) :
-			env(env),
-			dptid(dptid),
-			snoop(true),
-			rofchan(this),
-			xid_last(random.uint32()),
-			n_buffers(0),
-			n_tables(0),
-			capabilities(0),
-			miss_send_len(0),
-			flags(0)
+				journal(this),
+				env(env),
+				dptid(dptid),
+				snoop(true),
+				rofchan(this),
+				xid_last(random.uint32()),
+				n_buffers(0),
+				n_tables(0),
+				capabilities(0),
+				miss_send_len(0),
+				flags(0)
 {};
 
 
@@ -172,13 +173,14 @@ crofdpt::handle_recv(
 		}
 
 
-	} catch (RoflException& e) {
+	} catch (rofl::exception& e) {
 
-		std::cerr << "[rofl-common][crofdpt] RoflException exception, what: " << e.what() << std::endl;
+		journal.log(e.set_caller(__PRETTY_FUNCTION__));
 
 	} catch (std::runtime_error& e) {
 
-		std::cerr << "[rofl-common][crofdpt] exception, what: " << e.what() << std::endl;
+		journal.log(LOG_CRIT_ERROR, "runtime error: %s", e.what()).
+				set_caller(__PRETTY_FUNCTION__).set_line(__LINE__);
 	}
 
 	delete msg;
@@ -190,7 +192,8 @@ void
 crofdpt::handle_transaction_timeout(
 		crofchan& chan, crofconn& conn, uint32_t xid, uint8_t type, uint16_t sub_type)
 {
-	std::cerr << "[rofl-common][crofdpt] transaction expired, xid: 0x" << std::hex << (unsigned int)xid << std::dec << std::endl;
+	journal.log(LOG_NOTICE, "transaction expired, xid: 0x%x", (unsigned int)xid).
+			set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 
 	try {
 		switch (get_version()) {
@@ -1011,10 +1014,10 @@ crofdpt::send_features_request(
 		rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
 
 	} catch (eRofConnNotConnected& e) {
-		std::cerr << "[rofl-common][crofdpt][send_features_request] channel not established, dropping message" << std::endl;
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	} catch (eRofQueueFull& e) {
-		std::cerr << "[rofl-common][crofdpt][send_features_request] connection congested, dropping message" << std::endl;
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	}
 
@@ -1039,10 +1042,10 @@ crofdpt::send_get_config_request(
 		rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
 
 	} catch (eRofConnNotConnected& e) {
-		std::cerr << "[rofl-common][crofdpt][send_get_config_request] channel not established, dropping message" << std::endl;
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	} catch (eRofQueueFull& e) {
-		std::cerr << "[rofl-common][crofdpt][send_get_config_request] connection congested, dropping message" << std::endl;
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	}
 
@@ -1069,10 +1072,10 @@ crofdpt::send_desc_stats_request(
 		rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
 
 	} catch (eRofConnNotConnected& e) {
-		std::cerr << "[rofl-common][crofdpt][send_desc_stats_request] channel not established, dropping message" << std::endl;
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	} catch (eRofQueueFull& e) {
-		std::cerr << "[rofl-common][crofdpt][send_desc_stats_request] connection congested, dropping message" << std::endl;
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	}
 
@@ -1101,10 +1104,10 @@ crofdpt::send_flow_stats_request(
 		rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
 
 	} catch (eRofConnNotConnected& e) {
-		std::cerr << "[rofl-common][crofdpt][send_flow_stats_request] channel not established, dropping message" << std::endl;
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	} catch (eRofQueueFull& e) {
-		std::cerr << "[rofl-common][crofdpt][send_flow_stats_request] connection congested, dropping message" << std::endl;
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	}
 
@@ -1133,10 +1136,10 @@ crofdpt::send_aggr_stats_request(
 		rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
 
 	} catch (eRofConnNotConnected& e) {
-		std::cerr << "[rofl-common][crofdpt][send_aggr_stats_request] channel not established, dropping message" << std::endl;
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	} catch (eRofQueueFull& e) {
-		std::cerr << "[rofl-common][crofdpt][send_aggr_stats_request] connection congested, dropping message" << std::endl;
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	}
 
@@ -1163,10 +1166,10 @@ crofdpt::send_table_stats_request(
 		rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
 
 	} catch (eRofConnNotConnected& e) {
-		std::cerr << "[rofl-common][crofdpt][send_table_stats_request] channel not established, dropping message" << std::endl;
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	} catch (eRofQueueFull& e) {
-		std::cerr << "[rofl-common][crofdpt][send_table_stats_request] connection congested, dropping message" << std::endl;
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	}
 
@@ -1195,10 +1198,10 @@ crofdpt::send_port_stats_request(
 		rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
 
 	} catch (eRofConnNotConnected& e) {
-		std::cerr << "[rofl-common][crofdpt][send_port_stats_request] channel not established, dropping message" << std::endl;
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	} catch (eRofQueueFull& e) {
-		std::cerr << "[rofl-common][crofdpt][send_port_stats_request] connection congested, dropping message" << std::endl;
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	}
 
@@ -1227,10 +1230,10 @@ crofdpt::send_queue_stats_request(
 		rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
 
 	} catch (eRofConnNotConnected& e) {
-		std::cerr << "[rofl-common][crofdpt][send_queue_stats_request] channel not established, dropping message" << std::endl;
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	} catch (eRofQueueFull& e) {
-		std::cerr << "[rofl-common][crofdpt][send_queue_stats_request] connection congested, dropping message" << std::endl;
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	}
 
@@ -1259,10 +1262,10 @@ crofdpt::send_group_stats_request(
 		rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
 
 	} catch (eRofConnNotConnected& e) {
-		std::cerr << "[rofl-common][crofdpt][send_group_stats_request] channel not established, dropping message" << std::endl;
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	} catch (eRofQueueFull& e) {
-		std::cerr << "[rofl-common][crofdpt][send_group_stats_request] connection congested, dropping message" << std::endl;
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	}
 
@@ -1289,10 +1292,10 @@ crofdpt::send_group_desc_stats_request(
 		rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
 
 	} catch (eRofConnNotConnected& e) {
-		std::cerr << "[rofl-common][crofdpt][send_group_desc_stats_request] channel not established, dropping message" << std::endl;
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	} catch (eRofQueueFull& e) {
-		std::cerr << "[rofl-common][crofdpt][send_group_desc_stats_request] connection congested, dropping message" << std::endl;
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	}
 
@@ -1319,10 +1322,10 @@ crofdpt::send_group_features_stats_request(
 		rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
 
 	} catch (eRofConnNotConnected& e) {
-		std::cerr << "[rofl-common][crofdpt][send_group_features_stats_request] channel not established, dropping message" << std::endl;
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	} catch (eRofQueueFull& e) {
-		std::cerr << "[rofl-common][crofdpt][send_group_features_stats_request] connection congested, dropping message" << std::endl;
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	}
 
@@ -1349,10 +1352,10 @@ crofdpt::send_table_features_stats_request(
 		rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
 
 	} catch (eRofConnNotConnected& e) {
-		std::cerr << "[rofl-common][crofdpt][send_table_features_stats_request] channel not established, dropping message" << std::endl;
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	} catch (eRofQueueFull& e) {
-		std::cerr << "[rofl-common][crofdpt][send_table_features_stats_request] connection congested, dropping message" << std::endl;
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	}
 
@@ -1379,10 +1382,10 @@ crofdpt::send_port_desc_stats_request(
 		rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
 
 	} catch (eRofConnNotConnected& e) {
-		std::cerr << "[rofl-common][crofdpt][send_port_desc_stats_request] channel not established, dropping message" << std::endl;
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	} catch (eRofQueueFull& e) {
-		std::cerr << "[rofl-common][crofdpt][send_port_desc_stats_request] connection congested, dropping message" << std::endl;
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	}
 
@@ -1415,10 +1418,10 @@ crofdpt::send_experimenter_stats_request(
 		rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
 
 	} catch (eRofConnNotConnected& e) {
-		std::cerr << "[rofl-common][crofdpt][send_experimenter_stats_request] channel not established, dropping message" << std::endl;
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	} catch (eRofQueueFull& e) {
-		std::cerr << "[rofl-common][crofdpt][send_experimenter_stats_request] connection congested, dropping message" << std::endl;
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	}
 
@@ -1447,10 +1450,10 @@ crofdpt::send_meter_stats_request(
 		rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
 
 	} catch (eRofConnNotConnected& e) {
-		std::cerr << "[rofl-common][crofdpt][send_meter_stats_request] channel not established, dropping message" << std::endl;
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	} catch (eRofQueueFull& e) {
-		std::cerr << "[rofl-common][crofdpt][send_meter_stats_request] connection congested, dropping message" << std::endl;
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	}
 
@@ -1479,10 +1482,10 @@ crofdpt::send_meter_config_stats_request(
 		rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
 
 	} catch (eRofConnNotConnected& e) {
-		std::cerr << "[rofl-common][crofdpt][send_meter_config_stats_request] channel not established, dropping message" << std::endl;
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	} catch (eRofQueueFull& e) {
-		std::cerr << "[rofl-common][crofdpt][send_meter_config_stats_request] connection congested, dropping message" << std::endl;
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	}
 
@@ -1509,10 +1512,10 @@ crofdpt::send_meter_features_stats_request(
 		rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
 
 	} catch (eRofConnNotConnected& e) {
-		std::cerr << "[rofl-common][crofdpt][send_meter_features_stats_request] channel not established, dropping message" << std::endl;
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	} catch (eRofQueueFull& e) {
-		std::cerr << "[rofl-common][crofdpt][send_meter_features_stats_request] connection congested, dropping message" << std::endl;
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	}
 
@@ -1546,10 +1549,10 @@ crofdpt::send_packet_out_message(
 		rofchan.send_message(auxid, msg);
 
 	} catch (eRofConnNotConnected& e) {
-		std::cerr << "[rofl-common][crofdpt][send_packet_out_message] channel not established, dropping message" << std::endl;
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	} catch (eRofQueueFull& e) {
-		std::cerr << "[rofl-common][crofdpt][send_packet_out_message] connection congested, dropping message" << std::endl;
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	}
 
@@ -1574,10 +1577,10 @@ crofdpt::send_barrier_request(
 		rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
 
 	} catch (eRofConnNotConnected& e) {
-		std::cerr << "[rofl-common][crofdpt][send_barrier_request] channel not established, dropping message" << std::endl;
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	} catch (eRofQueueFull& e) {
-		std::cerr << "[rofl-common][crofdpt][send_barrier_request] connection congested, dropping message" << std::endl;
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	}
 
@@ -1604,10 +1607,10 @@ crofdpt::send_role_request(
 		rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
 
 	} catch (eRofConnNotConnected& e) {
-		std::cerr << "[rofl-common][crofdpt][send_role_request] channel not established, dropping message" << std::endl;
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	} catch (eRofQueueFull& e) {
-		std::cerr << "[rofl-common][crofdpt][send_role_request] connection congested, dropping message" << std::endl;
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	}
 
@@ -1633,10 +1636,10 @@ crofdpt::send_flow_mod_message(
 		rofchan.send_message(auxid, msg);
 
 	} catch (eRofConnNotConnected& e) {
-		std::cerr << "[rofl-common][crofdpt][send_flow_mod_message] channel not established, dropping message" << std::endl;
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	} catch (eRofQueueFull& e) {
-		std::cerr << "[rofl-common][crofdpt][send_flow_mod_message] connection congested, dropping message" << std::endl;
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	}
 
@@ -1662,10 +1665,10 @@ crofdpt::send_group_mod_message(
 		rofchan.send_message(auxid, msg);
 
 	} catch (eRofConnNotConnected& e) {
-		std::cerr << "[rofl-common][crofdpt][send_group_mod_message] channel not established, dropping message" << std::endl;
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	} catch (eRofQueueFull& e) {
-		std::cerr << "[rofl-common][crofdpt][send_group_mod_message] connection congested, dropping message" << std::endl;
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	}
 
@@ -1693,10 +1696,10 @@ crofdpt::send_table_mod_message(
 		rofchan.send_message(auxid, msg);
 
 	} catch (eRofConnNotConnected& e) {
-		std::cerr << "[rofl-common][crofdpt][send_table_mod_message] channel not established, dropping message" << std::endl;
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	} catch (eRofQueueFull& e) {
-		std::cerr << "[rofl-common][crofdpt][send_table_mod_message] connection congested, dropping message" << std::endl;
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	}
 
@@ -1739,10 +1742,10 @@ crofdpt::send_port_mod_message(
 		}
 
 	} catch (eRofConnNotConnected& e) {
-		std::cerr << "[rofl-common][crofdpt][send_port_mod_message] channel not established, dropping message" << std::endl;
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	} catch (eRofQueueFull& e) {
-		std::cerr << "[rofl-common][crofdpt][send_port_mod_message] connection congested, dropping message" << std::endl;
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	}
 
@@ -1775,10 +1778,10 @@ crofdpt::send_set_config_message(
 		}
 
 	} catch (eRofConnNotConnected& e) {
-		std::cerr << "[rofl-common][crofdpt][send_set_config_message] channel not established, dropping message" << std::endl;
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	} catch (eRofQueueFull& e) {
-		std::cerr << "[rofl-common][crofdpt][send_set_config_message] connection congested, dropping message" << std::endl;
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	}
 
@@ -1805,10 +1808,10 @@ crofdpt::send_queue_get_config_request(
 		rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
 
 	} catch (eRofConnNotConnected& e) {
-		std::cerr << "[rofl-common][crofdpt][send_queue_get_config_request] channel not established, dropping message" << std::endl;
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	} catch (eRofQueueFull& e) {
-		std::cerr << "[rofl-common][crofdpt][send_queue_get_config_request] connection congested, dropping message" << std::endl;
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	}
 
@@ -1833,10 +1836,10 @@ crofdpt::send_get_async_config_request(
 		rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
 
 	} catch (eRofConnNotConnected& e) {
-		std::cerr << "[rofl-common][crofdpt][send_get_async_config_request] channel not established, dropping message" << std::endl;
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	} catch (eRofQueueFull& e) {
-		std::cerr << "[rofl-common][crofdpt][send_get_async_config_request] connection congested, dropping message" << std::endl;
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	}
 
@@ -1862,10 +1865,10 @@ crofdpt::send_set_async_config_message(
 		rofchan.send_message(auxid, msg);
 
 	} catch (eRofConnNotConnected& e) {
-		std::cerr << "[rofl-common][crofdpt][send_set_async_config_message] channel not established, dropping message" << std::endl;
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	} catch (eRofQueueFull& e) {
-		std::cerr << "[rofl-common][crofdpt][send_set_async_config_message] connection congested, dropping message" << std::endl;
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	}
 
@@ -1897,10 +1900,10 @@ crofdpt::send_meter_mod_message(
 		rofchan.send_message(auxid, msg);
 
 	} catch (eRofConnNotConnected& e) {
-		std::cerr << "[rofl-common][crofdpt][send_meter_mod_message] channel not established, dropping message" << std::endl;
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	} catch (eRofQueueFull& e) {
-		std::cerr << "[rofl-common][crofdpt][send_meter_mod_message] connection congested, dropping message" << std::endl;
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	}
 
@@ -1931,10 +1934,10 @@ crofdpt::send_error_message(
 		rofchan.send_message(auxid, msg);
 
 	} catch (eRofConnNotConnected& e) {
-		std::cerr << "[rofl-common][crofdpt][send_error_message] channel not established, dropping message" << std::endl;
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	} catch (eRofQueueFull& e) {
-		std::cerr << "[rofl-common][crofdpt][send_error_message] connection congested, dropping message" << std::endl;
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	}
 }
@@ -1965,10 +1968,10 @@ crofdpt::send_experimenter_message(
 		rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
 
 	} catch (eRofConnNotConnected& e) {
-		std::cerr << "[rofl-common][crofdpt][send_experimenter_message] channel not established, dropping message" << std::endl;
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	} catch (eRofQueueFull& e) {
-		std::cerr << "[rofl-common][crofdpt][send_experimenter_message] connection congested, dropping message" << std::endl;
+		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
 		delete msg; throw;
 	}
 

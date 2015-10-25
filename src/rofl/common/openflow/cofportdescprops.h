@@ -10,8 +10,8 @@
 
 #include <map>
 
-#include "rofl/common/thread_helper.h"
-#include "rofl/common/croflexception.h"
+#include "rofl/common/locking.hpp"
+#include "rofl/common/exception.hpp"
 #include "rofl/common/openflow/openflow.h"
 #include "rofl/common/openflow/cofportdescprop.h"
 
@@ -91,7 +91,7 @@ public:
 	 */
 	void
 	clear() {
-		RwLock lock(rwlock_props, RwLock::RWLOCK_WRITE);
+		AcquireReadWriteLock lock(rwlock_props);
 		for (std::map<uint16_t, cofportdesc_prop*>::iterator
 				it = properties.begin(); it != properties.end(); ++it) {
 			delete it->second;
@@ -111,7 +111,7 @@ public:
 	 */
 	cofportdesc_prop_ethernet&
 	add_port_desc_ethernet() {
-		RwLock lock(rwlock_props, RwLock::RWLOCK_WRITE);
+		AcquireReadWriteLock lock(rwlock_props);
 		if (properties.find(rofl::openflow14::OFPPDPT_ETHERNET) != properties.end()) {
 			delete properties[rofl::openflow14::OFPPDPT_ETHERNET];
 		}
@@ -129,7 +129,7 @@ public:
 	 */
 	cofportdesc_prop_ethernet&
 	set_port_desc_ethernet() {
-		RwLock lock(rwlock_props, RwLock::RWLOCK_WRITE);
+		AcquireReadWriteLock lock(rwlock_props);
 		if (properties.find(rofl::openflow14::OFPPDPT_ETHERNET) == properties.end()) {
 			properties[rofl::openflow14::OFPPDPT_ETHERNET] = new cofportdesc_prop_ethernet(get_version());
 		}
@@ -146,7 +146,7 @@ public:
 	 */
 	const cofportdesc_prop_ethernet&
 	get_port_desc_ethernet() const {
-		RwLock lock(rwlock_props, RwLock::RWLOCK_READ);
+		AcquireReadLock lock(rwlock_props);
 		if (properties.find(rofl::openflow14::OFPPDPT_ETHERNET) == properties.end()) {
 			throw ePortDescPropNotFound("cofportdescprops::get_port_desc_ethernet() not found");
 		}
@@ -158,7 +158,7 @@ public:
 	 */
 	void
 	drop_port_desc_ethernet() {
-		RwLock lock(rwlock_props, RwLock::RWLOCK_WRITE);
+		AcquireReadWriteLock lock(rwlock_props);
 		if (properties.find(rofl::openflow14::OFPPDPT_ETHERNET) == properties.end()) {
 			return;
 		}
@@ -186,7 +186,7 @@ public:
 	 */
 	cofportdesc_prop_optical&
 	add_port_desc_optical() {
-		RwLock lock(rwlock_props, RwLock::RWLOCK_WRITE);
+		AcquireReadWriteLock lock(rwlock_props);
 		if (properties.find(rofl::openflow14::OFPPDPT_OPTICAL) != properties.end()) {
 			delete properties[rofl::openflow14::OFPPDPT_OPTICAL];
 		}
@@ -204,7 +204,7 @@ public:
 	 */
 	cofportdesc_prop_optical&
 	set_port_desc_optical() {
-		RwLock lock(rwlock_props, RwLock::RWLOCK_WRITE);
+		AcquireReadWriteLock lock(rwlock_props);
 		if (properties.find(rofl::openflow14::OFPPDPT_OPTICAL) == properties.end()) {
 			properties[rofl::openflow14::OFPPDPT_OPTICAL] = new cofportdesc_prop_optical(get_version());
 		}
@@ -221,7 +221,7 @@ public:
 	 */
 	const cofportdesc_prop_optical&
 	get_port_desc_optical() const {
-		RwLock lock(rwlock_props, RwLock::RWLOCK_READ);
+		AcquireReadLock lock(rwlock_props);
 		if (properties.find(rofl::openflow14::OFPPDPT_OPTICAL) == properties.end()) {
 			throw ePortDescPropNotFound("cofportdescprops::get_port_desc_optical() not found");
 		}
@@ -233,7 +233,7 @@ public:
 	 */
 	void
 	drop_port_desc_optical() {
-		RwLock lock(rwlock_props, RwLock::RWLOCK_WRITE);
+		AcquireReadWriteLock lock(rwlock_props);
 		if (properties.find(rofl::openflow14::OFPPDPT_OPTICAL) == properties.end()) {
 			return;
 		}
@@ -261,7 +261,7 @@ public:
 	 */
 	cofportdesc_prop_experimenter&
 	add_port_desc_experimenter() {
-		RwLock lock(rwlock_props, RwLock::RWLOCK_WRITE);
+		AcquireReadWriteLock lock(rwlock_props);
 		if (properties.find(rofl::openflow14::OFPPDPT_EXPERIMENTER) != properties.end()) {
 			delete properties[rofl::openflow14::OFPPDPT_EXPERIMENTER];
 		}
@@ -279,7 +279,7 @@ public:
 	 */
 	cofportdesc_prop_experimenter&
 	set_port_desc_experimenter() {
-		RwLock lock(rwlock_props, RwLock::RWLOCK_WRITE);
+		AcquireReadWriteLock lock(rwlock_props);
 		if (properties.find(rofl::openflow14::OFPPDPT_EXPERIMENTER) == properties.end()) {
 			properties[rofl::openflow14::OFPPDPT_EXPERIMENTER] = new cofportdesc_prop_experimenter(get_version());
 		}
@@ -296,7 +296,7 @@ public:
 	 */
 	const cofportdesc_prop_experimenter&
 	get_port_desc_experimenter() const {
-		RwLock lock(rwlock_props, RwLock::RWLOCK_READ);
+		AcquireReadLock lock(rwlock_props);
 		if (properties.find(rofl::openflow14::OFPPDPT_EXPERIMENTER) == properties.end()) {
 			throw ePortDescPropNotFound("cofportdescprops::get_port_desc_experimenter() not found");
 		}
@@ -308,7 +308,7 @@ public:
 	 */
 	void
 	drop_port_desc_experimenter() {
-		RwLock lock(rwlock_props, RwLock::RWLOCK_WRITE);
+		AcquireReadWriteLock lock(rwlock_props);
 		if (properties.find(rofl::openflow14::OFPPDPT_EXPERIMENTER) == properties.end()) {
 			return;
 		}
@@ -383,9 +383,9 @@ public:
 
 private:
 
-	uint8_t 								ofp_version;
-	mutable PthreadRwLock					rwlock_props;
-	std::map<uint16_t, cofportdesc_prop*>	properties;
+	uint8_t                                 ofp_version;
+	mutable rofl::crwlock                   rwlock_props;
+	std::map<uint16_t, cofportdesc_prop*>   properties;
 };
 
 }; // end of namespace openflow

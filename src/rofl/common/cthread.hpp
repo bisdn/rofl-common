@@ -229,6 +229,22 @@ public:
 	void
 	stop();
 
+public:
+
+	friend std::ostream&
+	operator<< (std::ostream& os, const cthread& thread) {
+		os << "cthread, tid: " << &thread << std::endl;
+		if (not thread.ordered_timers.empty()) {
+			os << "next timeout: " << thread.ordered_timers.begin()->get_relative_timeout() << std::endl;
+			for (auto tspec : thread.ordered_timers) {
+				os << "timer: " << tspec << std::endl;
+			}
+		} else {
+			os << "timers list is EMPTY" << std::endl;
+		}
+		return os;
+	};
+
 private:
 
 	/**

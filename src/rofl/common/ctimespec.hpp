@@ -296,9 +296,32 @@ public:
 	 */
 	friend std::ostream&
 	operator<< (std::ostream& os, const ctimespec& ts) {
-		os << "<ctimespec " << (unsigned int)ts.tspec.tv_sec << "." << ts.tspec.tv_nsec << "s ";
+		os << "<ctimespec timeout: " << (unsigned int)ts.tspec.tv_sec << "." << ts.tspec.tv_nsec << "s, ";
 			os << "timer_id: " << (unsigned int)ts.get_timer_id() << " >";
 		return os;
+	};
+
+	/**
+	 *
+	 */
+	std::string
+	str() const {
+		std::stringstream ss;
+		ss << tspec.tv_sec << ":" << tspec.tv_nsec;
+		return ss.str();
+	};
+
+	/**
+	 *
+	 */
+	std::string
+	date() const {
+		time_t t(get_tspec().tv_sec);
+		char s[128];
+		memset(s, 0, sizeof(s));
+		ctime_r(&t, s);
+		s[strnlen(s, sizeof(s)) - 1] = '\0';
+		return s;
 	};
 
 	/**

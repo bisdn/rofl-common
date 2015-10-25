@@ -12,18 +12,27 @@
 #include <pthread.h>
 #include <stdlib.h>
 
-#include "croflexception.h"
+#include "exception.hpp"
 #include "logging.h"
 
-namespace rofl
-{
+namespace rofl {
 
 /* error classes */
-class eMemBase 				: public RoflException {};
-class eMemAllocFailed 		: public eMemBase {};
-class eMemOutOfRange 		: public eMemBase {};
-class eMemNotFound 			: public eMemBase {};
-class eMemInval 			: public eMemBase {};
+class eMemBase : public exception {
+public:
+	eMemBase(
+			const std::string& __arg) :
+				exception(__arg)
+	{};
+};
+class eMemNotFound : public eMemBase {
+public:
+	eMemNotFound(
+			const std::string& __arg) :
+				eMemBase(__arg)
+	{};
+};
+
 
 
 
@@ -85,7 +94,7 @@ public:
 	 * @param m cmemory instance
 	 */
 	cmemory(
-			cmemory const& m);
+			const cmemory& m);
 
 
 
@@ -112,7 +121,7 @@ public:
 	 */
 	cmemory&
 	operator= (
-			cmemory const& m);
+			const cmemory& m);
 
 
 
@@ -136,7 +145,7 @@ public:
 	 */
 	bool
 	operator== (
-			cmemory const& m) const;
+			const cmemory& m) const;
 
 
 
@@ -147,7 +156,7 @@ public:
 	 */
 	bool
 	operator!= (
-			cmemory const& m) const;
+			const cmemory& m) const;
 
 
 
@@ -158,7 +167,7 @@ public:
 	 */
 	bool
 	operator< (
-			cmemory const& m) const;
+			const cmemory& m) const;
 
 
 	/**
@@ -168,7 +177,7 @@ public:
 	 */
 	bool
 	operator> (
-			cmemory const& m) const;
+			const cmemory& m) const;
 
 
 
@@ -180,7 +189,7 @@ public:
 	 */
 	cmemory
 	operator& (
-			cmemory const& m) const;
+			const cmemory& m) const;
 
 
 
@@ -191,7 +200,7 @@ public:
 	 */
 	cmemory&
 	operator+= (
-			cmemory const& m);
+			const cmemory& m);
 
 
 
@@ -202,7 +211,7 @@ public:
 	 */
 	cmemory
 	operator+ (
-			cmemory const& m);
+			const cmemory& m);
 
 
 
@@ -241,7 +250,8 @@ public:
 	 *
 	 */
 	virtual size_t
-	length() const { return data.second; };
+	length() const
+	{ return data.second; };
 
 
 
@@ -383,7 +393,7 @@ private: // methods
 	 */
 	void
 	mallocate(
-			size_t len) throw (eMemAllocFailed);
+			size_t len);
 
 
 	/** free memory
@@ -394,7 +404,7 @@ private: // methods
 public:
 
 	friend std::ostream&
-	operator<< (std::ostream& os, cmemory const& mem) {
+	operator<< (std::ostream& os, const cmemory& mem) {
 		os << indent(0) << "<cmemory: ";
 		os << "data:" << (void*)mem.data.first << " ";
 		os << "datalen:" << (int)mem.data.second << " ";

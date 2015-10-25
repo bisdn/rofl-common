@@ -12,14 +12,13 @@
 #include <iostream>
 #include <sstream>
 
-#include "rofl/common/logging.h"
-#include "rofl/common/croflexception.h"
+#include "rofl/common/exception.hpp"
 
 namespace rofl {
 
-class eAuxIdBase 		: public RoflException {
+class eAuxIdBase 		: public exception {
 public:
-	eAuxIdBase(const std::string __arg) : RoflException(__arg) {};
+	eAuxIdBase(const std::string __arg) : exception(__arg) {};
 };
 
 class eAuxIdNotFound 	: public eAuxIdBase {
@@ -94,7 +93,7 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, const cauxid& auxid) {
-		os << rofl::indent(0) << "<cauxid id:" << (int)auxid.id << " >" << std::endl;
+		os << "<cauxid id:" << (int)auxid.id << " >" << std::endl;
 		return os;
 	};
 

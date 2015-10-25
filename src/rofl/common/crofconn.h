@@ -25,21 +25,16 @@
 #include "rofl/common/csegment.hpp"
 #include "rofl/common/cauxid.h"
 #include "rofl/common/crofqueue.h"
+#include "rofl/common/exception.hpp"
+#include "rofl/common/cjournal.hpp"
 
 namespace rofl {
 
-class eRofConnBase : public RoflException {
+class eRofConnBase : public exception {
 public:
 	eRofConnBase(
 			const std::string& __arg) :
-				RoflException(__arg)
-	{};
-};
-class eRofConnXidSpaceExhausted : public eRofConnBase {
-public:
-	eRofConnXidSpaceExhausted(
-			const std::string& __arg) :
-				eRofConnBase(__arg)
+				exception(__arg)
 	{};
 };
 class eRofConnBusy : public eRofConnBase {
@@ -159,6 +154,7 @@ private:
  */
 class crofconn :
 		public cthread_env,
+		public cjournal_env,
 		public crofsock_env
 {
 	enum outqueue_type_t {
@@ -196,8 +192,9 @@ class crofconn :
 		TIMER_ID_WAIT_FOR_FEATURES = 2,
 		TIMER_ID_WAIT_FOR_ECHO	   = 3,
 		TIMER_ID_NEED_LIFE_CHECK   = 4,
-		TIMER_ID_PENDING_REQUESTS  = 5,
-		TIMER_ID_PENDING_SEGMENTS = 6,
+		TIMER_ID_RX_THREAD         = 5,
+		TIMER_ID_PENDING_REQUESTS  = 6,
+		TIMER_ID_PENDING_SEGMENTS  = 7,
 	};
 
 public:
@@ -221,6 +218,22 @@ public:
 	 */
 	crofconn(
 			crofconn_env *env);
+
+public:
+
+	/**
+	 *
+	 */
+	const cjournal&
+	get_journal() const
+	{ return journal; };
+
+	/**
+	 *
+	 */
+	cjournal&
+	set_journal()
+	{ return journal; };
 
 public:
 
@@ -1321,14 +1334,17 @@ private:
 
 private:
 
+	// journal
+	rofl::cjournal                  journal;
+
 	// environment for this instance
-	crofconn_env*                   env;
+	rofl::crofconn_env*             env;
 
 	// internal thread for application specific context
-	cthread                         thread;
+	rofl::cthread                   thread;
 
 	// crofsock instance
-	crofsock                        rofsock;
+	rofl::crofsock                  rofsock;
 
 	// OpenFlow datapath id
 	uint64_t                        dpid;
@@ -1346,7 +1362,7 @@ private:
 	uint8_t                         ofp_version;
 
 	// random number generator
-	crandom                         random;
+	rofl::crandom                   random;
 
 	// internal flags
 	std::bitset<32>                 flags;

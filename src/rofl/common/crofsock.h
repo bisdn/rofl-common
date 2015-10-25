@@ -44,7 +44,8 @@
 #include "rofl/common/cthread.hpp"
 #include "rofl/common/csockaddr.h"
 #include "rofl/common/crandom.h"
-#include "rofl/common/croflexception.h"
+#include "rofl/common/exception.hpp"
+#include "rofl/common/cjournal.hpp"
 
 #include "rofl/common/openflow/messages/cofmsg.h"
 #include "rofl/common/openflow/messages/cofmsg_hello.h"
@@ -89,11 +90,11 @@ namespace rofl {
 
 
 
-class eRofSockBase : public RoflException {
+class eRofSockBase : public exception {
 public:
 	eRofSockBase(
 			const std::string& __arg) :
-				RoflException(__arg)
+				exception(__arg)
 	{};
 };
 class eRofSockInvalid : public eRofSockBase {
@@ -239,7 +240,8 @@ private:
  * @brief	A socket capable of talking OpenFlow via TCP and vice versa
  */
 class crofsock :
-		public cthread_env
+		public cthread_env,
+		public cjournal_env
 {
 	enum outqueue_type_t {
 		QUEUE_OAM  = 0, // Echo.request/Echo.reply
@@ -293,6 +295,22 @@ public:
 	 */
 	crofsock(
 			crofsock_env *env);
+
+public:
+
+	/**
+	 *
+	 */
+	const cjournal&
+	get_journal() const
+	{ return journal; };
+
+	/**
+	 *
+	 */
+	cjournal&
+	set_journal()
+	{ return journal; };
 
 public:
 
@@ -368,6 +386,12 @@ public:
 	 */
 	bool
 	is_congested() const;
+
+	/**
+	 *
+	 */
+	bool
+	is_rx_disabled() const;
 
 	/**
 	 * @brief	Disable reception of messages on this socket.
@@ -700,6 +724,9 @@ private:
 	bool
 	tls_verify_ok();
 
+	void
+	tls_log_errors();
+
 private:
 
 	void
@@ -738,6 +765,9 @@ private:
 			cthread& thread, int fd);
 
 private:
+
+	// journal
+	cjournal                    journal;
 
 	// environment for this crofsock instance
 	crofsock_env*				env;

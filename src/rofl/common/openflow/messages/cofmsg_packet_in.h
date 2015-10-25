@@ -52,7 +52,7 @@ public:
 				cookie(cookie),
 				match(match),
 				packet(data, datalen)
-	{};
+	{ this->match.set_version(version); };
 
 	/**
 	 *

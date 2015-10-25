@@ -64,7 +64,7 @@ cofbucket_counter::length() const
 		return sizeof(struct rofl::openflow13::ofp_bucket_counter);
 	} break;
 	default: {
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	};
 	}
 }
@@ -78,7 +78,7 @@ cofbucket_counter::pack(uint8_t* buf, size_t buflen)
 	}
 
 	if (buflen < length())
-		throw eInval();
+		throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 	switch (ofp_version) {
 	case rofl::openflow12::OFP_VERSION: {
@@ -92,7 +92,7 @@ cofbucket_counter::pack(uint8_t* buf, size_t buflen)
 		bc->byte_count 		= htobe64(byte_count);
 	} break;
 	default: {
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	};
 	}
 }
@@ -102,7 +102,7 @@ void
 cofbucket_counter::unpack(uint8_t* buf, size_t buflen)
 {
 	if (buflen < length())
-		throw eInval();
+		throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 	switch (ofp_version) {
 	case rofl::openflow12::OFP_VERSION: {
@@ -116,7 +116,7 @@ cofbucket_counter::unpack(uint8_t* buf, size_t buflen)
 		byte_count			= be64toh(bc->byte_count);
 	} break;
 	default: {
-		throw eBadVersion();
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	};
 	}
 }

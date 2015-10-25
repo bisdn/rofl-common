@@ -296,7 +296,7 @@ ccontroller::handle_barrier_reply_timeout(
 		rofl::crofdpt& dpt,
 		uint32_t xid)
 {
-	std::cerr << ">>> XXX -Barrier-Reply-Timeout rcvd" << std::endl;
+	std::cerr << ">>> XXX -Barrier-Reply-Timeout- rcvd" << std::endl;
 
 	__keep_running = false;
 }
