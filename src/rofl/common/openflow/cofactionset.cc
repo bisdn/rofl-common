@@ -10,7 +10,7 @@
  */
 
 #include "rofl/common/openflow/cofactionset.h"
-#include "rofl/common/logging.h"
+
 
 using namespace rofl::openflow;
 

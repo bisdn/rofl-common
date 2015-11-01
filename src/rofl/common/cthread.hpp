@@ -31,7 +31,6 @@
 
 #include "rofl/common/exception.hpp"
 #include "rofl/common/locking.hpp"
-#include "rofl/common/logging.h"
 #include "rofl/common/ctimer.hpp"
 
 namespace rofl {
@@ -285,9 +284,6 @@ private:
 
 	// thread environment
 	cthread_env*        env;
-
-	// internal logging facility
-	logging             log;
 
 	// thread related variables
 	static const int 	PIPE_READ_FD;

@@ -13,7 +13,7 @@
 
 #include "rofl/common/openflow/cofhelloelem.h"
 #include "rofl/common/openflow/cofhelloelemversionbitmap.h"
-#include "rofl/common/logging.h"
+
 
 namespace rofl {
 namespace openflow {
@@ -116,9 +116,9 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, cofhelloelems const& elems) {
-		os << indent(0) << "<cofhelloelems #elems:" << (int)elems.elems.size() <<
+		os  << "<cofhelloelems #elems:" << (int)elems.elems.size() <<
 				" length:" << (int)elems.length() << " >" << std::endl;
-		indent i(2);
+		
 		for (std::map<uint8_t, cofhello_elem*>::const_iterator
 				it = elems.elems.begin(); it != elems.elems.end(); ++it) {
 			const cofhello_elem& elem = *(it->second);

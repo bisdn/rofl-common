@@ -284,66 +284,66 @@ public:
 	operator<< (std::ostream& os, cofmsg_flow_removed const& msg) {
 		switch (msg.get_version()) {
 		case rofl::openflow10::OFP_VERSION: {
-			os << indent(0) << dynamic_cast<cofmsg const&>( msg );
-			os << indent(2) << "<cofmsg_flow_removed >" << std::endl;
-				os << indent(4) << "<cookie:0x" << std::hex << (int)msg.get_cookie() << std::dec << " >" << std::endl;
-				os << indent(4) << "<priority:0x" << std::hex << (int)msg.get_priority() << std::dec << " >" << std::endl;
+			os  << dynamic_cast<cofmsg const&>( msg );
+			os << "<cofmsg_flow_removed >" << std::endl;
+				os << "<cookie:0x" << std::hex << (int)msg.get_cookie() << std::dec << " >" << std::endl;
+				os << "<priority:0x" << std::hex << (int)msg.get_priority() << std::dec << " >" << std::endl;
 				switch (msg.get_reason()) {
 				case rofl::openflow10::OFPRR_IDLE_TIMEOUT: {
-					os << indent(4) << "<reason: -IDLE-TIMEOUT- >" << std::endl;
+					os << "<reason: -IDLE-TIMEOUT- >" << std::endl;
 				} break;
 				case rofl::openflow10::OFPRR_HARD_TIMEOUT: {
-					os << indent(4) << "<reason: -HARD-TIMEOUT- >" << std::endl;
+					os << "<reason: -HARD-TIMEOUT- >" << std::endl;
 				} break;
 				case rofl::openflow10::OFPRR_DELETE: {
-					os << indent(4) << "<reason: -DELETE- >" << std::endl;
+					os << "<reason: -DELETE- >" << std::endl;
 				} break;
 				default: {
-					os << indent(4) << "<reason: -UNKNOWN- >" << std::endl;
+					os << "<reason: -UNKNOWN- >" << std::endl;
 				};
 				}
-				os << indent(4) << "<duration-sec:" << (int)msg.get_duration_sec() << " >" << std::endl;
-				os << indent(4) << "<duration-nsec:" << (int)msg.get_duration_nsec() << " >" << std::endl;
-				os << indent(4) << "<idle-timeout:" << (int)msg.get_idle_timeout() << " >" << std::endl;
-				os << indent(4) << "<packet-count:" << (int)msg.get_packet_count() << " >" << std::endl;
-				os << indent(4) << "<byte-count:" << (int)msg.get_byte_count() << " >" << std::endl;
-				os << indent(4) << "<matches: >" << std::endl;
-				indent i(6);
+				os << "<duration-sec:" << (int)msg.get_duration_sec() << " >" << std::endl;
+				os << "<duration-nsec:" << (int)msg.get_duration_nsec() << " >" << std::endl;
+				os << "<idle-timeout:" << (int)msg.get_idle_timeout() << " >" << std::endl;
+				os << "<packet-count:" << (int)msg.get_packet_count() << " >" << std::endl;
+				os << "<byte-count:" << (int)msg.get_byte_count() << " >" << std::endl;
+				os << "<matches: >" << std::endl;
+				
 				os << msg.match;
 
 		} break;
 		case rofl::openflow12::OFP_VERSION:
 		case rofl::openflow13::OFP_VERSION: {
-			os << indent(0) << dynamic_cast<cofmsg const&>( msg );
-			os << indent(2) << "<cofmsg_flow_removed >" << std::endl;
-				os << indent(4) << "<cookie:0x" << std::hex << (int)msg.get_cookie() << std::dec << " >" << std::endl;
-				os << indent(4) << "<priority:0x" << std::hex << (int)msg.get_priority() << std::dec << " >" << std::endl;
+			os  << dynamic_cast<cofmsg const&>( msg );
+			os << "<cofmsg_flow_removed >" << std::endl;
+				os << "<cookie:0x" << std::hex << (int)msg.get_cookie() << std::dec << " >" << std::endl;
+				os << "<priority:0x" << std::hex << (int)msg.get_priority() << std::dec << " >" << std::endl;
 				switch (msg.get_reason()) {
 				case rofl::openflow12::OFPRR_IDLE_TIMEOUT: {
-					os << indent(4) << "<reason: -IDLE-TIMEOUT- >" << std::endl;
+					os << "<reason: -IDLE-TIMEOUT- >" << std::endl;
 				} break;
 				case rofl::openflow12::OFPRR_HARD_TIMEOUT: {
-					os << indent(4) << "<reason: -HARD-TIMEOUT- >" << std::endl;
+					os << "<reason: -HARD-TIMEOUT- >" << std::endl;
 				} break;
 				case rofl::openflow12::OFPRR_DELETE: {
-					os << indent(4) << "<reason: -DELETE- >" << std::endl;
+					os << "<reason: -DELETE- >" << std::endl;
 				} break;
 				case rofl::openflow12::OFPRR_GROUP_DELETE: {
-					os << indent(4) << "<reason: -GROUP-DELETE- >" << std::endl;
+					os << "<reason: -GROUP-DELETE- >" << std::endl;
 				} break;
 				default: {
-					os << indent(4) << "<reason: -UNKNOWN- >" << std::endl;
+					os << "<reason: -UNKNOWN- >" << std::endl;
 				};
 				}
-				os << indent(4) << "<table-id:" << (int)msg.get_table_id() << " >" << std::endl;
-				os << indent(4) << "<duration-sec:" << (int)msg.get_duration_sec() << " >" << std::endl;
-				os << indent(4) << "<duration-nsec:" << (int)msg.get_duration_nsec() << " >" << std::endl;
-				os << indent(4) << "<idle-timeout:" << (int)msg.get_idle_timeout() << " >" << std::endl;
-				os << indent(4) << "<hard-timeout:" << (int)msg.get_hard_timeout() << " >" << std::endl;
-				os << indent(4) << "<packet-count:" << (int)msg.get_packet_count() << " >" << std::endl;
-				os << indent(4) << "<byte-count:" << (int)msg.get_byte_count() << " >" << std::endl;
-				os << indent(4) << "<matches: >" << std::endl;
-				indent i(6);
+				os << "<table-id:" << (int)msg.get_table_id() << " >" << std::endl;
+				os << "<duration-sec:" << (int)msg.get_duration_sec() << " >" << std::endl;
+				os << "<duration-nsec:" << (int)msg.get_duration_nsec() << " >" << std::endl;
+				os << "<idle-timeout:" << (int)msg.get_idle_timeout() << " >" << std::endl;
+				os << "<hard-timeout:" << (int)msg.get_hard_timeout() << " >" << std::endl;
+				os << "<packet-count:" << (int)msg.get_packet_count() << " >" << std::endl;
+				os << "<byte-count:" << (int)msg.get_byte_count() << " >" << std::endl;
+				os << "<matches: >" << std::endl;
+				
 				os << msg.match;
 
 		} break;

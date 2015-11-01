@@ -331,19 +331,19 @@ public:
 	 */
 	friend std::ostream &
 	operator<<(std::ostream& os, const cpacket& pack) {
-		os << rofl::indent(0) << "<cpacket ";
+		os  << "<cpacket ";
 		os << "data:" << (void*)pack.soframe() << " ";
 		os << "datalen:" << (int)pack.length() << " ";
 		os << "head:" << (int)pack.head << " ";
 		os << "tail:" << (int)pack.tail << " ";
 		os << ">" << std::endl;
-		rofl::indent i(2);
+		
 
 		unsigned int nbytes = 32;
 		if (pack.length() > 0) {
 			for (unsigned int i=0; i < pack.length(); i++) {
 				if (0 == (i % nbytes)) {
-					os << indent(2)
+					os 
 						<< std::setfill('0')
 						<< std::setw(4)
 						<< std::dec << (i/nbytes) << ": " << std::hex

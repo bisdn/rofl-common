@@ -81,7 +81,7 @@ public:
 	friend std::ostream&
 	operator<< (std::ostream& os, const cofmsg_group_features_stats_request& msg) {
 		os << dynamic_cast<const cofmsg_stats_request&>( msg );
-		os << indent(2) << "<cofmsg_group_features_stats_request >" << std::endl;
+		os << "<cofmsg_group_features_stats_request >" << std::endl;
 		return os;
 	};
 
@@ -174,8 +174,8 @@ public:
 	friend std::ostream&
 	operator<< (std::ostream& os, const cofmsg_group_features_stats_reply& msg) {
 		os << dynamic_cast<const cofmsg_stats_reply&>( msg );
-		os << indent(2) << "<cofmsg_group_features_stats_reply >" << std::endl;
-		indent i(4);
+		os << "<cofmsg_group_features_stats_reply >" << std::endl;
+		
 		os << msg.group_features_stats;
 		return os;
 	};

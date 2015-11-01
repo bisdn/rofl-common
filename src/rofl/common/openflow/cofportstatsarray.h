@@ -151,8 +151,8 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, cofportstatsarray const& portstatsarray) {
-		os << rofl::indent(0) << "<cofportstatsarray #ports:" << (int)portstatsarray.array.size() << " >" << std::endl;
-		rofl::indent i(2);
+		os  << "<cofportstatsarray #ports:" << (int)portstatsarray.array.size() << " >" << std::endl;
+		
 		for (std::map<uint32_t, cofport_stats_reply>::const_iterator
 				it = portstatsarray.array.begin(); it != portstatsarray.array.end(); ++it) {
 			os << it->second;

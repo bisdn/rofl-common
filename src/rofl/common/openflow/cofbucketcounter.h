@@ -15,7 +15,7 @@
 #include "rofl/common/openflow/openflow.h"
 #include "rofl/common/openflow/openflow_rofl_exceptions.h"
 #include "rofl/common/croflexception.h"
-#include "rofl/common/logging.h"
+
 
 namespace rofl {
 namespace openflow {
@@ -126,7 +126,7 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, cofbucket_counter const& bc) {
-		os << rofl::indent(0) << "<cofbucket_counter ";
+		os  << "<cofbucket_counter ";
 		os << "ofp-version: " << (int)bc.ofp_version << " ";
 		os << std::hex;
 		os << "packet-count: 0x" << (unsigned long long)bc.packet_count << " ";

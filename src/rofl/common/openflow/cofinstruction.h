@@ -156,12 +156,12 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, cofinstruction const& inst) {
-		os << rofl::indent(0) << "<cofinstruction ";
+		os  << "<cofinstruction ";
 		os << "type: 0x" << std::hex << (int)inst.get_type() << std::dec << " ";
 		os << "length: " << (int)inst.length() << " ";
 		os << ">" << std::endl;
 		if (not inst.get_body().empty()) {
-			rofl::indent i(2); os << inst.get_body();
+			 os << inst.get_body();
 		}
 		return os;
 	};
@@ -285,9 +285,9 @@ public:
 public:
 	friend std::ostream&
 	operator<< (std::ostream& os, cofinstruction_actions const& inst) {
-		os << rofl::indent(0) << "<cofinstruction_actions >" << std::endl;
-		{ rofl::indent i(2); os << dynamic_cast<cofinstruction const&>( inst ); }
-		{ rofl::indent i(4); os << inst.actions; }
+		os  << "<cofinstruction_actions >" << std::endl;
+		{  os << dynamic_cast<cofinstruction const&>( inst ); }
+		{  os << inst.actions; }
 		return os;
 	};
 
@@ -339,8 +339,8 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, const cofinstruction_apply_actions& inst) {
-		os << rofl::indent(0) << "<cofinstruction_apply_actions >" << std::endl;
-		{ rofl::indent i(2); os << dynamic_cast<const cofinstruction_actions&>( inst ); }
+		os  << "<cofinstruction_apply_actions >" << std::endl;
+		{  os << dynamic_cast<const cofinstruction_actions&>( inst ); }
 		return os;
 	};
 };
@@ -388,8 +388,8 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, const cofinstruction_write_actions& inst) {
-		os << rofl::indent(0) << "<cofinstruction_write_actions >" << std::endl;
-		{ rofl::indent i(2); os << dynamic_cast<const cofinstruction_actions&>( inst ); }
+		os  << "<cofinstruction_write_actions >" << std::endl;
+		{  os << dynamic_cast<const cofinstruction_actions&>( inst ); }
 		return os;
 	};
 };
@@ -437,8 +437,8 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, const cofinstruction_clear_actions& inst) {
-		os << rofl::indent(0) << "<cofinstruction_clear_actions >" << std::endl;
-		{ rofl::indent i(2); os << dynamic_cast<const cofinstruction_actions&>( inst ); }
+		os  << "<cofinstruction_clear_actions >" << std::endl;
+		{  os << dynamic_cast<const cofinstruction_actions&>( inst ); }
 		return os;
 	};
 };
@@ -531,9 +531,9 @@ public:
 public:
 	friend std::ostream&
 	operator<< (std::ostream& os, cofinstruction_goto_table const& inst) {
-		os << rofl::indent(0) << "<cofinstruction_goto_table >" << std::endl;
-		{ rofl::indent i(2); os << dynamic_cast<const cofinstruction&>( inst ); }
-		os << rofl::indent(4) << "<table-id:" << (int)inst.get_table_id() << " >" << std::endl;
+		os  << "<cofinstruction_goto_table >" << std::endl;
+		{  os << dynamic_cast<const cofinstruction&>( inst ); }
+		os  << "<table-id:" << (int)inst.get_table_id() << " >" << std::endl;
 		return os;
 	};
 
@@ -639,11 +639,11 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, cofinstruction_write_metadata const& inst) {
-		os << rofl::indent(0) << "<cofinstruction_write_metadata >" << std::endl;
-		{ rofl::indent i(2); os << dynamic_cast<const cofinstruction&>( inst ); }
+		os  << "<cofinstruction_write_metadata >" << std::endl;
+		{  os << dynamic_cast<const cofinstruction&>( inst ); }
 		os << std::hex;
-		os << indent(4) << "<metadata: 0x" << (unsigned long long)inst.get_metadata() << " >" << std::endl;
-		os << indent(4) << "<metadata-mask: 0x" << (unsigned long long)inst.get_metadata_mask() << " >" << std::endl;
+		os << "<metadata: 0x" << (unsigned long long)inst.get_metadata() << " >" << std::endl;
+		os << "<metadata-mask: 0x" << (unsigned long long)inst.get_metadata_mask() << " >" << std::endl;
 		os << std::dec;
 		return os;
 	};
@@ -768,10 +768,10 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, cofinstruction_experimenter const& inst) {
-		os << rofl::indent(0) << "<cofinstruction_experimenter >" << std::endl;
-		{ rofl::indent i(2); os << dynamic_cast<const cofinstruction&>( inst ); }
-		os << rofl::indent(4) << "<exp-id: 0x" << std::hex << inst.get_exp_id() << std::dec << " >" << std::endl;
-		{ rofl::indent i(4); os << inst.get_exp_body(); }
+		os  << "<cofinstruction_experimenter >" << std::endl;
+		{  os << dynamic_cast<const cofinstruction&>( inst ); }
+		os  << "<exp-id: 0x" << std::hex << inst.get_exp_id() << std::dec << " >" << std::endl;
+		{  os << inst.get_exp_body(); }
 		return os;
 	};
 
@@ -867,8 +867,8 @@ public:
 	friend std::ostream&
 	operator<< (std::ostream& os, cofinstruction_meter const& inst) {
 		os << "<cofinstruction_meter >" << std::endl;
-		{ rofl::indent i(2); os << dynamic_cast<cofinstruction const&>( inst ); }
-		os << rofl::indent(4) << "<meter-id: 0x" << std::hex << inst.get_meter_id() << " >" << std::endl;
+		{  os << dynamic_cast<cofinstruction const&>( inst ); }
+		os  << "<meter-id: 0x" << std::hex << inst.get_meter_id() << " >" << std::endl;
 		return os;
 	};
 

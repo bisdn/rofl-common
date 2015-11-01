@@ -12,7 +12,7 @@
 #include <map>
 
 #include "rofl/common/openflow/cofgroupdescstats.h"
-#include "rofl/common/logging.h"
+
 
 namespace rofl {
 namespace openflow {
@@ -148,8 +148,8 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, cofgroupdescstatsarray const& groupdescstatsarray) {
-		os << rofl::indent(0) << "<cofgroupdescstatsarray #groups:" << (int)groupdescstatsarray.array.size() << " >" << std::endl;
-		rofl::indent i(2);
+		os  << "<cofgroupdescstatsarray #groups:" << (int)groupdescstatsarray.array.size() << " >" << std::endl;
+		
 		for (std::map<uint32_t, cofgroup_desc_stats_reply>::const_iterator
 				it = groupdescstatsarray.array.begin(); it != groupdescstatsarray.array.end(); ++it) {
 			os << it->second;

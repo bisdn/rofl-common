@@ -358,9 +358,9 @@ public:
 	 */
 	friend std::ostream&
 	operator<< (std::ostream& os, coftablemod_props const& props) {
-		os << rofl::indent(0) << "<coftablemod_props version: " << (unsigned int)props.get_version()
+		os  << "<coftablemod_props version: " << (unsigned int)props.get_version()
 				<< " #props: " << props.get_properties().size() << " >" << std::endl;
-		rofl::indent i(2);
+		
 		for (std::map<uint16_t, coftablemod_prop*>::const_iterator
 				it = props.properties.begin(); it != props.properties.end(); ++it) {
 			switch (it->second->get_type()) {

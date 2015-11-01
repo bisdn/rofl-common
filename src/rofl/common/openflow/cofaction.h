@@ -20,7 +20,7 @@
 #include "rofl/common/caddress.h"
 #include "rofl/common/openflow/openflow_rofl_exceptions.h"
 #include "rofl/common/openflow/coxmatch.h"
-#include "rofl/common/logging.h"
+
 #include "rofl/common/cindex.h"
 
 
@@ -152,7 +152,7 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, cofaction const& action) {
-		os << rofl::indent(0) << "<cofaction ";
+		os  << "<cofaction ";
 			os << "ofp-version:" << (int)action.get_version() << " ";
 			os << "type:0x" << std::hex << (int)action.get_type() << std::dec << " ";
 			os << "length:" << (int)action.get_length() << " ";
@@ -284,13 +284,13 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, cofaction_output const& action) {
-		os << rofl::indent(0) << "<cofaction_output ";
+		os  << "<cofaction_output ";
 		os << std::hex;
 		os << "port-no: 0x" << (unsigned int)action.get_port_no() << " ";
 		os << "max-len: 0x" << (unsigned int)action.get_max_len() << " ";
 		os << std::dec;
 		os << ">" << std::endl;
-		rofl::indent i(2);
+		
 		os << dynamic_cast<cofaction const&>( action );
 		return os;
 	};
@@ -387,9 +387,9 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, cofaction_set_vlan_vid const& action) {
-		os << rofl::indent(0) << "<cofaction_set_vlan_vid ";
+		os  << "<cofaction_set_vlan_vid ";
 		os << "vid:0x" << std::hex << (unsigned int)action.get_vlan_vid() << std::dec << " >" << std::endl;
-		rofl::indent i(2);
+		
 		os << dynamic_cast<cofaction const&>( action );
 		return os;
 	};
@@ -481,9 +481,9 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, cofaction_set_vlan_pcp const& action) {
-		os << rofl::indent(0) << "<cofaction_set_vlan_pcp ";
+		os  << "<cofaction_set_vlan_pcp ";
 		os << "pcp:ox" << std::hex << (unsigned int)action.get_vlan_pcp() << std::dec << " >" << std::endl;
-		rofl::indent i(2);
+		
 		os << dynamic_cast<cofaction const&>( action );
 		return os;
 	};
@@ -557,8 +557,8 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, const cofaction_strip_vlan& action) {
-		os << rofl::indent(0) << "<cofaction_strip_vlan >" << std::endl;
-		rofl::indent i(2);
+		os  << "<cofaction_strip_vlan >" << std::endl;
+		
 		os << dynamic_cast<const cofaction&>( action );
 		return os;
 	};
@@ -649,9 +649,9 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, const cofaction_set_dl_src& action) {
-		os << rofl::indent(0) << "<cofaction_set_dl_src macaddr:";
+		os  << "<cofaction_set_dl_src macaddr:";
 		os << action.get_dl_src() << " >" << std::endl;
-		rofl::indent i(2);
+		
 		os << dynamic_cast<cofaction const&>( action );
 		return os;
 	};
@@ -746,9 +746,9 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, const cofaction_set_dl_dst& action) {
-		os << rofl::indent(0) << "<cofaction_set_dl_dst macaddr:";
+		os  << "<cofaction_set_dl_dst macaddr:";
 		os << action.get_dl_dst() << " >" << std::endl;
-		rofl::indent i(2);
+		
 		os << dynamic_cast<cofaction const&>( action );
 		return os;
 	};
@@ -844,9 +844,9 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, const cofaction_set_nw_src& action) {
-		os << rofl::indent(0) << "<cofaction_set_nw_src ";
+		os  << "<cofaction_set_nw_src ";
 		os << "nw-src:" << action.get_nw_src() << " >" << std::endl;
-		rofl::indent i(2);
+		
 		os << dynamic_cast<cofaction const&>( action );
 		return os;
 	};
@@ -942,9 +942,9 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, const cofaction_set_nw_dst& action) {
-		os << rofl::indent(0) << "<cofaction_set_nw_dst ";
+		os  << "<cofaction_set_nw_dst ";
 		os << "nw-dst:" << action.get_nw_dst() << " >" << std::endl;
-		rofl::indent i(2);
+		
 		os << dynamic_cast<cofaction const&>( action );
 		return os;
 	};
@@ -1034,9 +1034,9 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, cofaction_set_nw_tos const& action) {
-		os << rofl::indent(0) << "<cofaction_set_nw_tos ";
+		os  << "<cofaction_set_nw_tos ";
 		os << "nw-tos:0x" << std::hex << (unsigned int)action.get_nw_tos() << std::dec << " >" << std::endl;
-		rofl::indent i(2);
+		
 		os << dynamic_cast<cofaction const&>( action );
 		return os;
 	};
@@ -1125,9 +1125,9 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, const cofaction_set_tp_src& action) {
-		os << rofl::indent(0) << "<cofaction_set_tp_src ";
+		os  << "<cofaction_set_tp_src ";
 		os << "tp-src:" << (unsigned int)action.get_tp_src() << " >" << std::endl;
-		rofl::indent i(2);
+		
 		os << dynamic_cast<cofaction const&>( action );
 		return os;
 	};
@@ -1216,9 +1216,9 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, const cofaction_set_tp_dst& action) {
-		os << rofl::indent(0) << "<cofaction_set_tp_dst ";
+		os  << "<cofaction_set_tp_dst ";
 		os << "tp-dst:" << (unsigned int)action.get_tp_dst() << " >" << std::endl;
-		rofl::indent i(2);
+		
 		os << dynamic_cast<cofaction const&>( action );
 		return os;
 	};
@@ -1322,12 +1322,12 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, const cofaction_enqueue& action) {
-		os << rofl::indent(0) << "<cofaction_enqueue ";
+		os  << "<cofaction_enqueue ";
 		os << std::hex;
 		os << "port-no:0x" << (unsigned int)action.get_port_no() << " ";
 		os << "queue-id:0x" << (unsigned int)action.get_queue_id() << " >" << std::endl;
 		os << std::dec;
-		rofl::indent i(2);
+		
 		os << dynamic_cast<cofaction const&>( action );
 		return os;
 	};
@@ -1432,9 +1432,9 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, const cofaction_vendor& action) {
-		os << rofl::indent(0) << "<cofaction_vendor ";
+		os  << "<cofaction_vendor ";
 		os << "exp-id:0x" << std::hex << (unsigned int)action.get_exp_id() << std::dec << " >" << std::endl;
-		rofl::indent i(2);
+		
 		os << dynamic_cast<cofaction const&>( action );
 		os << action.get_exp_body();
 		return os;
@@ -1507,8 +1507,8 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, cofaction_copy_ttl_out const& action) {
-		os << rofl::indent(0) << "<cofaction_copy_ttl_out >" << std::endl;
-		rofl::indent i(2);
+		os  << "<cofaction_copy_ttl_out >" << std::endl;
+		
 		os << dynamic_cast<cofaction const&>( action );
 		return os;
 	};
@@ -1575,8 +1575,8 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, cofaction_copy_ttl_in const& action) {
-		os << rofl::indent(0) << "<cofaction_copy_ttl_in >" << std::endl;
-		rofl::indent i(2);
+		os  << "<cofaction_copy_ttl_in >" << std::endl;
+		
 		os << dynamic_cast<cofaction const&>( action );
 		return os;
 	};
@@ -1661,9 +1661,9 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, const cofaction_set_mpls_ttl& action) {
-		os << rofl::indent(0) << "<cofaction_set_mpls_ttl ";
+		os  << "<cofaction_set_mpls_ttl ";
 		os << "mpls-ttl:0x" << std::hex << (unsigned int)action.get_mpls_ttl() << std::dec << " >" << std::endl;
-		rofl::indent i(2);
+		
 		os << dynamic_cast<cofaction const&>( action );
 		return os;
 	};
@@ -1735,8 +1735,8 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, cofaction_dec_mpls_ttl const& action) {
-		os << rofl::indent(0) << "<cofaction_dec_mpls_ttl >" << std::endl;
-		rofl::indent i(2);
+		os  << "<cofaction_dec_mpls_ttl >" << std::endl;
+		
 		os << dynamic_cast<cofaction const&>( action );
 		return os;
 	};
@@ -1821,9 +1821,9 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, const cofaction_push_vlan& action) {
-		os << rofl::indent(0) << "<cofaction_push_vlan ";
+		os  << "<cofaction_push_vlan ";
 		os << "eth-type:0x" << std::hex << (unsigned int)action.get_eth_type() << std::dec << " >" << std::endl;
-		rofl::indent i(2);
+		
 		os << dynamic_cast<cofaction const&>( action );
 		return os;
 	};
@@ -1894,8 +1894,8 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, const cofaction_pop_vlan& action) {
-		os << rofl::indent(0) << "<cofaction_pop_vlan >" << std::endl;
-		rofl::indent i(2);
+		os  << "<cofaction_pop_vlan >" << std::endl;
+		
 		os << dynamic_cast<cofaction const&>( action );
 		return os;
 	};
@@ -1980,9 +1980,9 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, const cofaction_push_mpls& action) {
-		os << rofl::indent(0) << "<cofaction_push_mpls ";
+		os  << "<cofaction_push_mpls ";
 		os << "eth-type:0x" << std::hex << (unsigned int)action.get_eth_type() << std::dec << " >" << std::endl;
-		rofl::indent i(2);
+		
 		os << dynamic_cast<cofaction const&>( action );
 		return os;
 	};
@@ -2071,9 +2071,9 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, const cofaction_pop_mpls& action) {
-		os << rofl::indent(0) << "<cofaction_pop_mpls ";
+		os  << "<cofaction_pop_mpls ";
 		os << "eth-type:0x" << std::hex << (unsigned int)action.get_eth_type() << std::dec << " >" << std::endl;
-		rofl::indent i(2);
+		
 		os << dynamic_cast<cofaction const&>( action );
 		return os;
 	};
@@ -2161,9 +2161,9 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, const cofaction_group& action) {
-		os << rofl::indent(0) << "<cofaction_group ";
+		os  << "<cofaction_group ";
 		os << "group-id:0x" << std::hex << (int)action.get_group_id() << std::dec << " >" << std::endl;
-		rofl::indent i(2);
+		
 		os << dynamic_cast<cofaction const&>( action );
 		return os;
 	};
@@ -2252,9 +2252,9 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, const cofaction_set_nw_ttl& action) {
-		os << rofl::indent(0) << "<cofaction_set_nw_ttl ";
+		os  << "<cofaction_set_nw_ttl ";
 		os << "nw-ttl:" << (unsigned int)action.get_nw_ttl() << " >" << std::endl;
-		rofl::indent i(2);
+		
 		os << dynamic_cast<cofaction const&>( action );
 		return os;
 	};
@@ -2325,8 +2325,8 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, cofaction_dec_nw_ttl const& action) {
-		os << rofl::indent(0) << "<cofaction_dec_nw_ttl >" << std::endl;
-		rofl::indent i(2);
+		os  << "<cofaction_dec_nw_ttl >" << std::endl;
+		
 		os << dynamic_cast<cofaction const&>( action );
 		return os;
 	};
@@ -2411,9 +2411,9 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, const cofaction_set_queue& action) {
-		os << rofl::indent(0) << "<cofaction_set_queue ";
+		os  << "<cofaction_set_queue ";
 		os << "queue-id:" << (unsigned int)action.get_queue_id() << " >" << std::endl;
-		rofl::indent i(2);
+		
 		os << dynamic_cast<cofaction const&>( action );
 		return os;
 	};
@@ -2892,8 +2892,8 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, const cofaction_set_field& action) {
-		os << rofl::indent(0) << "<cofaction_set_field >" << std::endl;
-		rofl::indent i(2);
+		os  << "<cofaction_set_field >" << std::endl;
+		
 		os << dynamic_cast<const cofaction&>( action );
 		switch (action.get_oxm_set_field_type()) {
 		case OXM_TYPE_8: {
@@ -3041,12 +3041,12 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, cofaction_experimenter const& action) {
-		os << rofl::indent(0) << "<cofaction_experimenter ";
+		os  << "<cofaction_experimenter ";
 		os << std::hex;
 		os << "exp-id:0x" << (unsigned int)action.get_exp_id() << " ";
 		os << std::dec;
 		os << ">" << std::endl;
-		rofl::indent i(2);
+		
 		os << dynamic_cast<cofaction const&>( action );
 		os << action.get_exp_body();
 		return os;
@@ -3137,9 +3137,9 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, const cofaction_push_pbb& action) {
-		os << rofl::indent(0) << "<cofaction_push_pbb ";
+		os  << "<cofaction_push_pbb ";
 		os << "eth-type:0x" << std::hex << (unsigned int)action.get_eth_type() << std::dec << " >" << std::endl;
-		rofl::indent i(2);
+		
 		os << dynamic_cast<cofaction const&>( action );
 		return os;
 	};
@@ -3210,8 +3210,8 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, const cofaction_pop_pbb& action) {
-		os << rofl::indent(0) << "<cofaction_pop_pbb >" << std::endl;
-		rofl::indent i(2);
+		os  << "<cofaction_pop_pbb >" << std::endl;
+		
 		os << dynamic_cast<cofaction const&>( action );
 		return os;
 	};

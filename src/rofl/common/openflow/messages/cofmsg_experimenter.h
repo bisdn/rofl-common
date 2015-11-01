@@ -138,17 +138,17 @@ public:
 	friend std::ostream&
 	operator<< (std::ostream& os, cofmsg_experimenter const& msg) {
 		os << dynamic_cast<cofmsg const&>( msg );
-		os << indent(2) << "<cofmsg_experimenter >" << std::endl;
-		os << indent(4) << "<exp-id:" << (int)msg.get_exp_id() << " >" << std::endl;
+		os << "<cofmsg_experimenter >" << std::endl;
+		os << "<exp-id:" << (int)msg.get_exp_id() << " >" << std::endl;
 		switch (msg.get_version()) {
 		case rofl::openflow10::OFP_VERSION: {
 			/* field does not exist in OFP 1.0 */
 		} break;
 		default: {
-			os << indent(4) << "<exp-type:" << (int)msg.get_exp_type() << " >" << std::endl;
+			os << "<exp-type:" << (int)msg.get_exp_type() << " >" << std::endl;
 		};
 		}
-		indent i(4);
+		
 		os << msg.body;
 		return os;
 	};

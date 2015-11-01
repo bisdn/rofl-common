@@ -277,35 +277,35 @@ public:
 	friend std::ostream&
 	operator<< (std::ostream& os, cofmsg_packet_in const& msg) {
 		os << dynamic_cast<cofmsg const&>( msg );
-		os << indent(2) << "<cofmsg_packet_in >" << std::endl;
+		os << "<cofmsg_packet_in >" << std::endl;
 		switch (msg.get_version()) {
 		case openflow10::OFP_VERSION: {
-			os << indent(4) << "<buffer-id:" 	<< (int)msg.get_buffer_id() << " >" << std::endl;
-			os << indent(4) << "<total-len:" 	<< (int)msg.get_total_len() << " >" << std::endl;
-			os << indent(4) << "<reason:" 		<< msg.s_reason() 	<< " >" << std::endl;
-			os << indent(4) << "<in-port:" 		<< (int)msg.get_in_port() 	<< " >" << std::endl;
+			os << "<buffer-id:" 	<< (int)msg.get_buffer_id() << " >" << std::endl;
+			os << "<total-len:" 	<< (int)msg.get_total_len() << " >" << std::endl;
+			os << "<reason:" 		<< msg.s_reason() 	<< " >" << std::endl;
+			os << "<in-port:" 		<< (int)msg.get_in_port() 	<< " >" << std::endl;
 		} break;
 		case openflow12::OFP_VERSION: {
-			os << indent(4) << "<buffer-id:"	<< (int)msg.get_buffer_id() << " >" << std::endl;
-			os << indent(4) << "<total-len:" 	<< (int)msg.get_total_len() << " >" << std::endl;
-			os << indent(4) << "<reason:" 		<< msg.s_reason() 	<< " >" << std::endl;
-			os << indent(4) << "<table-id:" 	<< (int)msg.get_table_id() 	<< " >" << std::endl;
+			os << "<buffer-id:"	<< (int)msg.get_buffer_id() << " >" << std::endl;
+			os << "<total-len:" 	<< (int)msg.get_total_len() << " >" << std::endl;
+			os << "<reason:" 		<< msg.s_reason() 	<< " >" << std::endl;
+			os << "<table-id:" 	<< (int)msg.get_table_id() 	<< " >" << std::endl;
 
 		} break;
 		case openflow13::OFP_VERSION: {
-			os << indent(4) << "<buffer-id:" 	<< (int)msg.get_buffer_id() << " >" << std::endl;
-			os << indent(4) << "<total-len:" 	<< (int)msg.get_total_len() << " >" << std::endl;
-			os << indent(4) << "<reason:" 		<< msg.s_reason() 	<< " >" << std::endl;
-			os << indent(4) << "<table-id: " 	<< (int)msg.get_table_id() 	<< " >" << std::endl;
-			os << indent(4) << "<cookie: 0x" 	<< std::hex << (unsigned long long)msg.get_cookie() << std::dec << " >" << std::endl;
+			os << "<buffer-id:" 	<< (int)msg.get_buffer_id() << " >" << std::endl;
+			os << "<total-len:" 	<< (int)msg.get_total_len() << " >" << std::endl;
+			os << "<reason:" 		<< msg.s_reason() 	<< " >" << std::endl;
+			os << "<table-id: " 	<< (int)msg.get_table_id() 	<< " >" << std::endl;
+			os << "<cookie: 0x" 	<< std::hex << (unsigned long long)msg.get_cookie() << std::dec << " >" << std::endl;
 
 		} break;
 		default: {
 			os << "<unsupported OF version: " 	<< (int)msg.get_version() 	<< " >" << std::endl;
 		} break;
 		}
-		os << indent(2) << msg.match;
-		os << indent(2) << msg.packet;
+		os << msg.match;
+		os << msg.packet;
 		return os;
 	};
 

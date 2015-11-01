@@ -169,7 +169,7 @@ public:
 	 */
 	friend std::ostream&
 	operator<< (std::ostream& os, cofportdesc_prop const& prop) {
-		os << rofl::indent(0) << "<cofportdesc_prop "
+		os  << "<cofportdesc_prop "
 				<< "version: " << (int)prop.get_version() << " "
 				<< std::hex
 				<< "type: 0x" << (int)prop.get_type() << " "
@@ -357,14 +357,14 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, const cofportdesc_prop_ethernet& prop) {
-		os << rofl::indent(0) << "<cofportdesc_prop_ethernet version: " << (unsigned int)prop.get_version() << " >" << std::endl;
-		{ rofl::indent i(2); os << dynamic_cast<const cofportdesc_prop&>( prop ); }
-		os << rofl::indent(4) << "<curr: 0x" << std::hex << (unsigned int)prop.get_curr() << std::dec << " >" << std::endl;
-		os << rofl::indent(4) << "<advertised: 0x" << std::hex << (unsigned int)prop.get_advertised() << std::dec << " >" << std::endl;
-		os << rofl::indent(4) << "<supported: 0x" << std::hex << (unsigned int)prop.get_supported() << std::dec << " >" << std::endl;
-		os << rofl::indent(4) << "<peer: 0x" << std::hex << (unsigned int)prop.get_peer() << std::dec << " >" << std::endl;
-		os << rofl::indent(4) << "<curr_speed: 0x" << std::hex << (unsigned int)prop.get_curr_speed() << std::dec << " >" << std::endl;
-		os << rofl::indent(4) << "<max_speed: 0x" << std::hex << (unsigned int)prop.get_max_speed() << std::dec << " >" << std::endl;
+		os  << "<cofportdesc_prop_ethernet version: " << (unsigned int)prop.get_version() << " >" << std::endl;
+		{  os << dynamic_cast<const cofportdesc_prop&>( prop ); }
+		os  << "<curr: 0x" << std::hex << (unsigned int)prop.get_curr() << std::dec << " >" << std::endl;
+		os  << "<advertised: 0x" << std::hex << (unsigned int)prop.get_advertised() << std::dec << " >" << std::endl;
+		os  << "<supported: 0x" << std::hex << (unsigned int)prop.get_supported() << std::dec << " >" << std::endl;
+		os  << "<peer: 0x" << std::hex << (unsigned int)prop.get_peer() << std::dec << " >" << std::endl;
+		os  << "<curr_speed: 0x" << std::hex << (unsigned int)prop.get_curr_speed() << std::dec << " >" << std::endl;
+		os  << "<max_speed: 0x" << std::hex << (unsigned int)prop.get_max_speed() << std::dec << " >" << std::endl;
 		return os;
 	};
 
@@ -595,17 +595,17 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, const cofportdesc_prop_optical& prop) {
-		os << rofl::indent(0) << "<cofportdesc_prop_optical version: " << (unsigned int)prop.get_version() << " >" << std::endl;
-		{ rofl::indent i(2); os << dynamic_cast<const cofportdesc_prop&>( prop ); }
-		os << rofl::indent(4) << "<supported: 0x" << std::hex << (unsigned int)prop.get_supported() << std::dec << " >" << std::endl;
-		os << rofl::indent(4) << "<tx_min_freq_lmda: 0x" << std::hex << (unsigned int)prop.get_tx_min_freq_lmda() << std::dec << " >" << std::endl;
-		os << rofl::indent(4) << "<tx_max_freq_lmda: 0x" << std::hex << (unsigned int)prop.get_tx_max_freq_lmda() << std::dec << " >" << std::endl;
-		os << rofl::indent(4) << "<tx_grid_freq_lmda: 0x" << std::hex << (unsigned int)prop.get_tx_grid_freq_lmda() << std::dec << " >" << std::endl;
-		os << rofl::indent(4) << "<rx_min_freq_lmda: 0x" << std::hex << (unsigned int)prop.get_rx_min_freq_lmda() << std::dec << " >" << std::endl;
-		os << rofl::indent(4) << "<rx_max_freq_lmda: 0x" << std::hex << (unsigned int)prop.get_rx_max_freq_lmda() << std::dec << " >" << std::endl;
-		os << rofl::indent(4) << "<rx_grid_freq_lmda: 0x" << std::hex << (unsigned int)prop.get_rx_grid_freq_lmda() << std::dec << " >" << std::endl;
-		os << rofl::indent(4) << "<tx_pwr_min: 0x" << std::hex << (unsigned int)prop.get_tx_pwr_min() << std::dec << " >" << std::endl;
-		os << rofl::indent(4) << "<tx_pwr_max: 0x" << std::hex << (unsigned int)prop.get_tx_pwr_max() << std::dec << " >" << std::endl;
+		os  << "<cofportdesc_prop_optical version: " << (unsigned int)prop.get_version() << " >" << std::endl;
+		{  os << dynamic_cast<const cofportdesc_prop&>( prop ); }
+		os  << "<supported: 0x" << std::hex << (unsigned int)prop.get_supported() << std::dec << " >" << std::endl;
+		os  << "<tx_min_freq_lmda: 0x" << std::hex << (unsigned int)prop.get_tx_min_freq_lmda() << std::dec << " >" << std::endl;
+		os  << "<tx_max_freq_lmda: 0x" << std::hex << (unsigned int)prop.get_tx_max_freq_lmda() << std::dec << " >" << std::endl;
+		os  << "<tx_grid_freq_lmda: 0x" << std::hex << (unsigned int)prop.get_tx_grid_freq_lmda() << std::dec << " >" << std::endl;
+		os  << "<rx_min_freq_lmda: 0x" << std::hex << (unsigned int)prop.get_rx_min_freq_lmda() << std::dec << " >" << std::endl;
+		os  << "<rx_max_freq_lmda: 0x" << std::hex << (unsigned int)prop.get_rx_max_freq_lmda() << std::dec << " >" << std::endl;
+		os  << "<rx_grid_freq_lmda: 0x" << std::hex << (unsigned int)prop.get_rx_grid_freq_lmda() << std::dec << " >" << std::endl;
+		os  << "<tx_pwr_min: 0x" << std::hex << (unsigned int)prop.get_tx_pwr_min() << std::dec << " >" << std::endl;
+		os  << "<tx_pwr_max: 0x" << std::hex << (unsigned int)prop.get_tx_pwr_max() << std::dec << " >" << std::endl;
 		return os;
 	};
 
@@ -742,11 +742,11 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, const cofportdesc_prop_experimenter& prop) {
-		os << rofl::indent(0) << "<cofportdesc_prop_experimenter version: " << (unsigned int)prop.get_version() << " >" << std::endl;
-		{ rofl::indent i(2); os << dynamic_cast<const cofportdesc_prop&>( prop ); }
-		os << rofl::indent(4) << "<exp-id: 0x" << std::hex << (unsigned int)prop.get_exp_id() << " >" << std::dec << std::endl;
-		os << rofl::indent(4) << "<exp-type: 0x" << std::hex << (unsigned int)prop.get_exp_type() << " >" << std::dec << std::endl;
-		{ rofl::indent i(4); os << prop.get_exp_body(); }
+		os  << "<cofportdesc_prop_experimenter version: " << (unsigned int)prop.get_version() << " >" << std::endl;
+		{  os << dynamic_cast<const cofportdesc_prop&>( prop ); }
+		os  << "<exp-id: 0x" << std::hex << (unsigned int)prop.get_exp_id() << " >" << std::dec << std::endl;
+		os  << "<exp-type: 0x" << std::hex << (unsigned int)prop.get_exp_type() << " >" << std::dec << std::endl;
+		{  os << prop.get_exp_body(); }
 		return os;
 	};
 

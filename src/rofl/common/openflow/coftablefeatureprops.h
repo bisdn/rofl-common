@@ -17,7 +17,7 @@
 
 #include "rofl/common/openflow/coftablefeatureprop.h"
 #include "rofl/common/croflexception.h"
-#include "rofl/common/logging.h"
+
 
 namespace rofl {
 namespace openflow {
@@ -542,10 +542,10 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, coftable_feature_props const& tfps) {
-		os << indent(0) << "<coftable_feature_props ofp-version:" << (int)tfps.get_version() << " >" << std::endl;
+		os  << "<coftable_feature_props ofp-version:" << (int)tfps.get_version() << " >" << std::endl;
 		for (std::map<uint16_t, coftable_feature_prop*>::const_iterator
 				it = tfps.tfprops.begin(); it != tfps.tfprops.end(); ++it) {
-			indent i(2);
+			
 
 			unsigned int type = it->first;
 

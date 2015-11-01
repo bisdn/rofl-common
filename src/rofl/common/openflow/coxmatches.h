@@ -3375,8 +3375,8 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, coxmatches const& oxmatches) {
-		os << rofl::indent(0) << "<coxmatches #matches:" << oxmatches.matches.size() << " >" << std::endl;
-		rofl::indent i(2);
+		os  << "<coxmatches #matches:" << oxmatches.matches.size() << " >" << std::endl;
+		
 		std::vector<uint64_t> ids = oxmatches.get_ids();
 		for (std::vector<uint64_t>::const_iterator
 				it = ids.begin(); it != ids.end(); ++it) {

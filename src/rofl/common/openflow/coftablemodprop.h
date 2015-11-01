@@ -169,7 +169,7 @@ public:
 	 */
 	friend std::ostream&
 	operator<< (std::ostream& os, coftablemod_prop const& prop) {
-		os << rofl::indent(0) << "<coftablemod_prop "
+		os  << "<coftablemod_prop "
 				<< "version: " << (int)prop.get_version() << " "
 				<< std::hex
 				<< "type: 0x" << (int)prop.get_type() << " "
@@ -279,9 +279,9 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, const coftablemod_prop_eviction& prop) {
-		os << rofl::indent(0) << "<coftablemod_prop_eviction version: " << (unsigned int)prop.get_version() << " >" << std::endl;
-		{ rofl::indent i(2); os << dynamic_cast<const coftablemod_prop&>( prop ); }
-		os << rofl::indent(4) << "<flags: 0x" << std::hex << (unsigned int)prop.get_flags() << std::dec << " >" << std::endl;
+		os  << "<coftablemod_prop_eviction version: " << (unsigned int)prop.get_version() << " >" << std::endl;
+		{  os << dynamic_cast<const coftablemod_prop&>( prop ); }
+		os  << "<flags: 0x" << std::hex << (unsigned int)prop.get_flags() << std::dec << " >" << std::endl;
 		return os;
 	};
 
@@ -413,11 +413,11 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, const coftablemod_prop_vacancy& prop) {
-		os << rofl::indent(0) << "<coftablemod_prop_vacancy version: " << (unsigned int)prop.get_version() << " >" << std::endl;
-		{ rofl::indent i(2); os << dynamic_cast<const coftablemod_prop&>( prop ); }
-		os << rofl::indent(4) << "<vacancy_down: 0x" << std::hex << (unsigned int)prop.get_vacancy_down() << std::dec << " >" << std::endl;
-		os << rofl::indent(4) << "<vacancy_up: 0x" << std::hex << (unsigned int)prop.get_vacancy_up() << std::dec << " >" << std::endl;
-		os << rofl::indent(4) << "<vacancy: 0x" << std::hex << (unsigned int)prop.get_vacancy() << std::dec << " >" << std::endl;
+		os  << "<coftablemod_prop_vacancy version: " << (unsigned int)prop.get_version() << " >" << std::endl;
+		{  os << dynamic_cast<const coftablemod_prop&>( prop ); }
+		os  << "<vacancy_down: 0x" << std::hex << (unsigned int)prop.get_vacancy_down() << std::dec << " >" << std::endl;
+		os  << "<vacancy_up: 0x" << std::hex << (unsigned int)prop.get_vacancy_up() << std::dec << " >" << std::endl;
+		os  << "<vacancy: 0x" << std::hex << (unsigned int)prop.get_vacancy() << std::dec << " >" << std::endl;
 		return os;
 	};
 
@@ -550,11 +550,11 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, const coftablemod_prop_experimenter& prop) {
-		os << rofl::indent(0) << "<coftablemod_prop_experimenter version: " << (unsigned int)prop.get_version() << " >" << std::endl;
-		{ rofl::indent i(2); os << dynamic_cast<const coftablemod_prop&>( prop ); }
-		os << rofl::indent(4) << "<exp-id: 0x" << std::hex << (unsigned int)prop.get_exp_id() << " >" << std::dec << std::endl;
-		os << rofl::indent(4) << "<exp-type: 0x" << std::hex << (unsigned int)prop.get_exp_type() << " >" << std::dec << std::endl;
-		{ rofl::indent i(4); os << prop.get_exp_body(); }
+		os  << "<coftablemod_prop_experimenter version: " << (unsigned int)prop.get_version() << " >" << std::endl;
+		{  os << dynamic_cast<const coftablemod_prop&>( prop ); }
+		os  << "<exp-id: 0x" << std::hex << (unsigned int)prop.get_exp_id() << " >" << std::dec << std::endl;
+		os  << "<exp-type: 0x" << std::hex << (unsigned int)prop.get_exp_type() << " >" << std::dec << std::endl;
+		{  os << prop.get_exp_body(); }
 		return os;
 	};
 

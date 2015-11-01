@@ -120,8 +120,8 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, cofmeter_stats_request const& r) {
-		os << indent(0) << "<cofmeter_stats_request >" << std::endl;
-		os << indent(2) << "<meter-id: 0x" << std::hex << (int)r.get_meter_id() << std::dec << " >" << std::endl;
+		os  << "<cofmeter_stats_request >" << std::endl;
+		os << "<meter-id: 0x" << std::hex << (int)r.get_meter_id() << std::dec << " >" << std::endl;
 		return os;
 	};
 
@@ -315,16 +315,16 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, cofmeter_stats_reply const& r) {
-		os << indent(0) << "<cofmeter_stats_reply >" << std::endl;
+		os  << "<cofmeter_stats_reply >" << std::endl;
 		os << std::hex;
-		os << indent(2) << "<meter-id: 0x" 			<< (unsigned int)r.get_meter_id() << " >" << std::endl;
-		os << indent(2) << "<flow-count: 0x" 		<< (unsigned int)r.get_flow_count() << " >" << std::endl;
-		os << indent(2) << "<packet-in-count: 0x" 	<< (unsigned long long)r.get_packet_in_count() << " >" << std::endl;
-		os << indent(2) << "<byte-in-count: 0x" 	<< (unsigned long long)r.get_byte_in_count() << " >" << std::endl;
-		os << indent(2) << "<duration-sec: 0x" 		<< (unsigned long long)r.get_duration_sec() 	<< " >" << std::endl;
-		os << indent(2) << "<duration-nsec: 0x" 	<< (unsigned long long)r.get_duration_nsec() 	<< " >" << std::endl;
+		os << "<meter-id: 0x" 			<< (unsigned int)r.get_meter_id() << " >" << std::endl;
+		os << "<flow-count: 0x" 		<< (unsigned int)r.get_flow_count() << " >" << std::endl;
+		os << "<packet-in-count: 0x" 	<< (unsigned long long)r.get_packet_in_count() << " >" << std::endl;
+		os << "<byte-in-count: 0x" 	<< (unsigned long long)r.get_byte_in_count() << " >" << std::endl;
+		os << "<duration-sec: 0x" 		<< (unsigned long long)r.get_duration_sec() 	<< " >" << std::endl;
+		os << "<duration-nsec: 0x" 	<< (unsigned long long)r.get_duration_nsec() 	<< " >" << std::endl;
 		os << std::dec;
-		{ rofl::indent i(2); os << r.get_meter_band_stats(); }
+		{  os << r.get_meter_band_stats(); }
 		return os;
 	};
 

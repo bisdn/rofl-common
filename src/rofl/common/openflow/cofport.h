@@ -420,20 +420,20 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, cofport const& port) {
-		os << indent(0) << "<cofport >" << std::endl;
-		os << indent(2) << "<portno: " << (int)port.get_port_no() << " >" << std::endl;
-		os << indent(2) << "<hwaddr: " << port.get_hwaddr().str() << " >"	<< std::endl;
-		os << indent(2) << "<name: " << port.get_name() << " >" << std::endl;
-		os << indent(2) << "<config: " << (int)port.get_config()	<< " >" << std::endl;
-		os << indent(2) << "<state: " << (int)port.get_state() << " >" << std::endl;
+		os  << "<cofport >" << std::endl;
+		os << "<portno: " << (int)port.get_port_no() << " >" << std::endl;
+		os << "<hwaddr: " << port.get_hwaddr().str() << " >"	<< std::endl;
+		os << "<name: " << port.get_name() << " >" << std::endl;
+		os << "<config: " << (int)port.get_config()	<< " >" << std::endl;
+		os << "<state: " << (int)port.get_state() << " >" << std::endl;
 		if (port.has_ethernet()) {
-			rofl::indent i(2); os << port.get_ethernet();
+			 os << port.get_ethernet();
 		}
 		if (port.has_optical()) {
-			rofl::indent i(2); os << port.get_optical();
+			 os << port.get_optical();
 		}
 		if (port.has_experimenter()) {
-			rofl::indent i(2); os << port.get_experimenter();
+			 os << port.get_experimenter();
 		}
 		return os;
 	};

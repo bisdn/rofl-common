@@ -47,7 +47,7 @@ public:
 	friend std::ostream&
 	operator<< (std::ostream& os, const coxmatch_ofx_pppoe_code& oxm) {
 		os << dynamic_cast<const coxmatch_exp&>(oxm);
-		os << indent(2) << "<pppoe-code: "
+		os << "<pppoe-code: "
 						<< (int)oxm.get_u8value()
 						<< " >" << std::endl;
 		return os;
@@ -74,7 +74,7 @@ public:
 	friend std::ostream&
 	operator<< (std::ostream& os, coxmatch_ofx_pppoe_type const& oxm) {
 		os << dynamic_cast<const coxmatch_exp&>(oxm);
-		os << indent(2) << "<pppoe-type: "
+		os << "<pppoe-type: "
 						<< (int)oxm.get_u8value()
 						<< " >" << std::endl;
 		return os;
@@ -101,7 +101,7 @@ public:
 	friend std::ostream&
 	operator<< (std::ostream& os, const coxmatch_ofx_pppoe_sid& oxm) {
 		os << dynamic_cast<const coxmatch_exp&>(oxm);
-		os << indent(2) << "<pppoe-sid: "
+		os << "<pppoe-sid: "
 						<< (int)oxm.get_u16value()
 						<< " >" << std::endl;
 		return os;
@@ -127,7 +127,7 @@ public:
 	friend std::ostream&
 	operator<< (std::ostream& os, const coxmatch_ofx_ppp_prot& oxm) {
 		os << dynamic_cast<const coxmatch_exp&>(oxm);
-		os << indent(2) << "<ppp-prot: "
+		os << "<ppp-prot: "
 						<< (int)oxm.get_u16value()
 						<< " >" << std::endl;
 		return os;

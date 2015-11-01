@@ -97,8 +97,8 @@ public:
 	friend std::ostream&
 	operator<< (std::ostream& os, const cofmsg_role_request& msg) {
 		os << dynamic_cast<const cofmsg&>( msg );
-		os << indent(0) << "<cofmsg_role_request >" << std::endl;
-		rofl::indent i(2);
+		os  << "<cofmsg_role_request >" << std::endl;
+		
 		os << msg.role;
 		return os;
 	};
@@ -195,8 +195,8 @@ public:
 	friend std::ostream&
 	operator<< (std::ostream& os, const cofmsg_role_reply& msg) {
 		os << dynamic_cast<const cofmsg&>( msg );
-		os << indent(0) << "<cofmsg_role_reply >" << std::endl;
-		rofl::indent i(2);
+		os  << "<cofmsg_role_reply >" << std::endl;
+		
 		os << msg.role;
 		return os;
 	};

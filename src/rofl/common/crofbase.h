@@ -17,7 +17,7 @@
 
 #include "rofl/common/locking.hpp"
 #include "rofl/common/exception.hpp"
-#include "rofl/common/logging.h"
+
 #include "rofl/common/crofdpt.h"
 #include "rofl/common/crofctl.h"
 #include "rofl/common/openflow/openflow.h"
@@ -2378,11 +2378,11 @@ public:
 	friend std::ostream&
 	operator<< (std::ostream& os, const crofbase& rofbase) {
 		for (auto it : rofbase.rofctls) {
-			rofl::indent i(2);
+			
 			os << it.first;
 		}
 		for (auto it : rofbase.rofdpts) {
-			rofl::indent i(2);
+			
 			os << it.first;
 		}
 		return os;

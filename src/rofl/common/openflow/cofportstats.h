@@ -114,8 +114,8 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, cofport_stats_request const& r) {
-		os << indent(0) << "<cofport_stats_request >" << std::endl;
-		os << indent(2) << "<port-no: 0x" << std::hex << (int)r.get_portno() << std::dec << " >" << std::endl;
+		os  << "<cofport_stats_request >" << std::endl;
+		os << "<port-no: 0x" << std::hex << (int)r.get_portno() << std::dec << " >" << std::endl;
 		return os;
 	};
 };
@@ -433,26 +433,26 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, cofport_stats_reply const& r) {
-		os << indent(0) << "<cofport_stats_reply >" << std::endl;
+		os  << "<cofport_stats_reply >" << std::endl;
 		os << std::hex;
-		os << indent(2) << "<port-no: 0x" 		<< (int)r.get_port_no() << " >" << std::endl;
-		os << indent(2) << "<rx-packets: 0x" 	<< (unsigned long long)r.get_rx_packets() 	<< " >" << std::endl;
-		os << indent(2) << "<tx-packets: 0x" 	<< (unsigned long long)r.get_tx_packets() 	<< " >" << std::endl;
-		os << indent(2) << "<rx-bytes: 0x" 		<< (unsigned long long)r.get_rx_bytes() 	<< " >" << std::endl;
-		os << indent(2) << "<tx-bytes: 0x" 		<< (unsigned long long)r.get_tx_bytes() 	<< " >" << std::endl;
-		os << indent(2) << "<rx-dropped: 0x" 	<< (unsigned long long)r.get_rx_dropped() 	<< " >" << std::endl;
-		os << indent(2) << "<tx-dropped: 0x" 	<< (unsigned long long)r.get_tx_dropped() 	<< " >" << std::endl;
-		os << indent(2) << "<rx-errors: 0x" 	<< (unsigned long long)r.get_rx_errors() 	<< " >" << std::endl;
-		os << indent(2) << "<tx-errors: 0x" 	<< (unsigned long long)r.get_tx_errors() 	<< " >" << std::endl;
-		os << indent(2) << "<rx-frame-err: 0x"	<< (unsigned long long)r.get_rx_frame_err()	<< " >" << std::endl;
-		os << indent(2) << "<rx-over-err: 0x" 	<< (unsigned long long)r.get_rx_over_err() 	<< " >" << std::endl;
-		os << indent(2) << "<rx-crc-err: 0x" 	<< (unsigned long long)r.get_rx_crc_err() 	<< " >" << std::endl;
-		os << indent(2) << "<collisions: 0x" 	<< (unsigned long long)r.get_collisions() 	<< " >" << std::endl;
+		os << "<port-no: 0x" 		<< (int)r.get_port_no() << " >" << std::endl;
+		os << "<rx-packets: 0x" 	<< (unsigned long long)r.get_rx_packets() 	<< " >" << std::endl;
+		os << "<tx-packets: 0x" 	<< (unsigned long long)r.get_tx_packets() 	<< " >" << std::endl;
+		os << "<rx-bytes: 0x" 		<< (unsigned long long)r.get_rx_bytes() 	<< " >" << std::endl;
+		os << "<tx-bytes: 0x" 		<< (unsigned long long)r.get_tx_bytes() 	<< " >" << std::endl;
+		os << "<rx-dropped: 0x" 	<< (unsigned long long)r.get_rx_dropped() 	<< " >" << std::endl;
+		os << "<tx-dropped: 0x" 	<< (unsigned long long)r.get_tx_dropped() 	<< " >" << std::endl;
+		os << "<rx-errors: 0x" 	<< (unsigned long long)r.get_rx_errors() 	<< " >" << std::endl;
+		os << "<tx-errors: 0x" 	<< (unsigned long long)r.get_tx_errors() 	<< " >" << std::endl;
+		os << "<rx-frame-err: 0x"	<< (unsigned long long)r.get_rx_frame_err()	<< " >" << std::endl;
+		os << "<rx-over-err: 0x" 	<< (unsigned long long)r.get_rx_over_err() 	<< " >" << std::endl;
+		os << "<rx-crc-err: 0x" 	<< (unsigned long long)r.get_rx_crc_err() 	<< " >" << std::endl;
+		os << "<collisions: 0x" 	<< (unsigned long long)r.get_collisions() 	<< " >" << std::endl;
 		os << std::dec;
 		switch (r.get_version()) {
 		case rofl::openflow13::OFP_VERSION: {
-			os << indent(2) << "<duration-sec: " 	<< (unsigned long long)r.get_duration_sec() 	<< " >" << std::endl;
-			os << indent(2) << "<duration-nsec: " 	<< (unsigned long long)r.get_duration_nsec() 	<< " >" << std::endl;
+			os << "<duration-sec: " 	<< (unsigned long long)r.get_duration_sec() 	<< " >" << std::endl;
+			os << "<duration-nsec: " 	<< (unsigned long long)r.get_duration_nsec() 	<< " >" << std::endl;
 		} break;
 		default: {
 		};

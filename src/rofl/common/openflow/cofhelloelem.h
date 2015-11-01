@@ -9,7 +9,7 @@
 #define COFHELLO_ELEM_H_
 
 #include "rofl/common/cmemory.h"
-#include "rofl/common/logging.h"
+
 #include "rofl/common/openflow/openflow.h"
 
 namespace rofl {
@@ -123,7 +123,7 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, cofhello_elem const& elem) {
-		os << indent(0) << "<cofhello_elem type:" << elem.get_type()
+		os  << "<cofhello_elem type:" << elem.get_type()
 				<< " length:" << elem.get_length() << " padding:" << (elem.length()-elem.get_length()) << " >" << std::endl;
 		return os;
 	};

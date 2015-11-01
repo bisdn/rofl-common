@@ -123,9 +123,9 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, const cofmsg_group_mod& msg) {
-		os << rofl::indent(0) << "<cofmsg_group_mod >" << std::endl;
-		{ rofl::indent i(2); os << dynamic_cast<const cofmsg&>( msg ); };
-		{ rofl::indent i(4); os << msg.get_groupmod(); };
+		os  << "<cofmsg_group_mod >" << std::endl;
+		{  os << dynamic_cast<const cofmsg&>( msg ); };
+		{  os << msg.get_groupmod(); };
 		return os;
 	};
 

@@ -39,7 +39,7 @@
 #include <openssl/err.h>
 
 #include "rofl/common/cmemory.h"
-#include "rofl/common/logging.h"
+
 #include "rofl/common/crofqueue.h"
 #include "rofl/common/cthread.hpp"
 #include "rofl/common/csockaddr.h"
@@ -657,7 +657,7 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, crofsock const& rofsock) {
-		os << indent(0) << "<crofsock: transport-connection-established: " << rofsock.is_established() << ">" << std::endl;
+		os  << "<crofsock: transport-connection-established: " << rofsock.is_established() << ">" << std::endl;
 		return os;
 	};
 

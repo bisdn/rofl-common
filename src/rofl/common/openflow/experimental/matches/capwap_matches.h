@@ -53,7 +53,7 @@ public:
 	friend std::ostream&
 	operator<< (std::ostream& os, const coxmatch_ofx_capwap_wbid& oxm) {
 		os << dynamic_cast<const coxmatch_exp&>(oxm);
-		os << indent(2) << "<capwap-wbid: 0x" << std::hex
+		os << "<capwap-wbid: 0x" << std::hex
 						<< (int)oxm.get_u8value() << "/0x" << (int)oxm.get_u8mask()
 						<< std::dec << " >" << std::endl;
 		return os;
@@ -85,7 +85,7 @@ public:
 	friend std::ostream&
 	operator<< (std::ostream& os, const coxmatch_ofx_capwap_rid& oxm) {
 		os << dynamic_cast<const coxmatch_exp&>(oxm);
-		os << indent(2) << "<capwap-rid: 0x" << std::hex
+		os << "<capwap-rid: 0x" << std::hex
 						<< (int)oxm.get_u8value() << "/0x" << (int)oxm.get_u8mask()
 						<< std::dec << " >" << std::endl;
 		return os;
@@ -117,7 +117,7 @@ public:
 	friend std::ostream&
 	operator<< (std::ostream& os, const coxmatch_ofx_capwap_flags& oxm) {
 		os << dynamic_cast<const coxmatch_exp&>(oxm);
-		os << indent(2) << "<capwap-flags: 0x" << std::hex
+		os << "<capwap-flags: 0x" << std::hex
 						<< (int)oxm.get_u16value() << "/0x" << (int)oxm.get_u16mask()
 						<< std::dec << " >" << std::endl;
 		return os;

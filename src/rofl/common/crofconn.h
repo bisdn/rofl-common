@@ -721,34 +721,34 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, const crofconn& conn) {
-		os << indent(0) << "<crofconn ofp-version:" << (int)conn.ofp_version << " "
+		os  << "<crofconn ofp-version:" << (int)conn.ofp_version << " "
 				<< "openflow-connection-established: " << conn.is_established() << " "
 				<< "transport-connection-established: " << conn.is_transport_established() << " "
 				<< ">" << std::endl;
-		{ rofl::indent i(2); os << conn.get_auxid(); }
+		{  os << conn.get_auxid(); }
 		if (conn.state == STATE_NEGOTIATION_FAILED) {
-			os << indent(2) << "<state: -NEGOTIATION-FAILED- >" << std::endl;
+			os << "<state: -NEGOTIATION-FAILED- >" << std::endl;
 		}
 		else if (conn.state == STATE_CLOSING) {
-			os << indent(2) << "<state: -CLOSING- >" << std::endl;
+			os << "<state: -CLOSING- >" << std::endl;
 		}
 		else if (conn.state == STATE_DISCONNECTED) {
-			os << indent(2) << "<state: -DISCONNECTED- >" << std::endl;
+			os << "<state: -DISCONNECTED- >" << std::endl;
 		}
 		else if (conn.state == STATE_CONNECT_PENDING) {
-			os << indent(2) << "<state: -CONNECT-PENDING- >" << std::endl;
+			os << "<state: -CONNECT-PENDING- >" << std::endl;
 		}
 		else if (conn.state == STATE_ACCEPT_PENDING) {
-			os << indent(2) << "<state: -ACCEPT-PENDING- >" << std::endl;
+			os << "<state: -ACCEPT-PENDING- >" << std::endl;
 		}
 		else if (conn.state == STATE_NEGOTIATING) {
-			os << indent(2) << "<state: -NEGOTIATING- >" << std::endl;
+			os << "<state: -NEGOTIATING- >" << std::endl;
 		}
 		else if (conn.state == STATE_NEGOTIATING2) {
-			os << indent(2) << "<state: -NEGOTIATING2- >" << std::endl;
+			os << "<state: -NEGOTIATING2- >" << std::endl;
 		}
 		else if (conn.state == STATE_ESTABLISHED) {
-			os << indent(2) << "<state: -ESTABLISHED- >" << std::endl;
+			os << "<state: -ESTABLISHED- >" << std::endl;
 		}
 		return os;
 	};

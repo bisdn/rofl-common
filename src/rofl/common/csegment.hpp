@@ -17,7 +17,6 @@
 #include <iostream>
 
 #include "rofl/common/ctimespec.hpp"
-#include "rofl/common/logging.h"
 #include "rofl/common/exception.hpp"
 #include "rofl/common/openflow/messages/cofmsg_stats.h"
 #include "rofl/common/openflow/messages/cofmsg_desc_stats.h"
@@ -187,11 +186,10 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, const csegment& msg) {
-		os << rofl::indent(0) << "<csegment" << " >" << std::endl;
-		os << rofl::indent(2) << "<expires: >" << std::endl;
-		{ rofl::indent i(4); os << msg.tspec; }
-		os << rofl::indent(2) << "<xid: 0x" << std::hex << (int)msg.xid << std::dec << " >" << std::endl;
-		rofl::indent i(2);
+		os << "<csegment" << " >" << std::endl;
+		os << "<expires: >" << std::endl;
+		{ os << msg.tspec; }
+		os << "<xid: 0x" << std::hex << (int)msg.xid << std::dec << " >" << std::endl;
 
 		uint16_t stats_type = 0;
 		if (dynamic_cast<const rofl::openflow::cofmsg_stats_request*>( (msg.msg) )) {

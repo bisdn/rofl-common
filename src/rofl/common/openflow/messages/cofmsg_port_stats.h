@@ -98,8 +98,8 @@ public:
 	friend std::ostream&
 	operator<< (std::ostream& os, const cofmsg_port_stats_request& msg) {
 		os << dynamic_cast<const cofmsg_stats_request&>( msg );
-		os << indent(2) << "<cofmsg_port_stats_request >" << std::endl;
-		indent i(4);
+		os << "<cofmsg_port_stats_request >" << std::endl;
+		
 		os << msg.port_stats;
 		return os;
 	};
@@ -197,8 +197,8 @@ public:
 	friend std::ostream&
 	operator<< (std::ostream& os, cofmsg_port_stats_reply const& msg) {
 		os << dynamic_cast<cofmsg const&>( msg );
-		os << indent(2) << "<cofmsg_port_stats_reply >" << std::endl;
-		indent i(4);
+		os << "<cofmsg_port_stats_reply >" << std::endl;
+		
 		os << msg.portstatsarray;
 		return os;
 	};

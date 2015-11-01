@@ -110,8 +110,8 @@ public:
 	friend std::ostream&
 	operator<< (std::ostream& os, const cofmsg_meter_stats_request& msg) {
 		os << dynamic_cast<const cofmsg_stats_request&>( msg );
-		os << indent(2) << "<cofmsg_meter_request >" << std::endl;
-		rofl::indent i(4); os << msg.get_meter_stats();
+		os << "<cofmsg_meter_request >" << std::endl;
+		 os << msg.get_meter_stats();
 		return os;
 	};
 
@@ -213,8 +213,8 @@ public:
 	friend std::ostream&
 	operator<< (std::ostream& os, const cofmsg_meter_stats_reply& msg) {
 		os << dynamic_cast<const cofmsg_stats_reply&>( msg );
-		os << indent(2) << "<cofmsg_meter_stats_reply >" << std::endl;
-		indent i(4); os << msg.get_meter_stats_array();
+		os << "<cofmsg_meter_stats_reply >" << std::endl;
+		 os << msg.get_meter_stats_array();
 		return os;
 	};
 

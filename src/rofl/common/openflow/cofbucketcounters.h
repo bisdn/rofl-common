@@ -14,7 +14,7 @@
 #include <map>
 
 #include "rofl/common/openflow/cofbucketcounter.h"
-#include "rofl/common/logging.h"
+
 
 namespace rofl {
 namespace openflow {
@@ -136,8 +136,8 @@ public:
 	 */
 	friend std::ostream&
 	operator<< (std::ostream& os, cofbucket_counters const& bcs) {
-		os << rofl::indent(0) << "<cofbucket_counters #bucket-counters:" << bcs.bucketcounters.size() << " >" << std::endl;
-		rofl::indent i(2);
+		os  << "<cofbucket_counters #bucket-counters:" << bcs.bucketcounters.size() << " >" << std::endl;
+		
 		for (std::map<uint32_t, cofbucket_counter>::const_iterator
 				it = bcs.bucketcounters.begin(); it != bcs.bucketcounters.end(); ++it) {
 			os << it->second;

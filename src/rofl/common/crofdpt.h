@@ -22,7 +22,7 @@
 #include <bitset>
 
 #include "rofl/common/cmemory.h"
-#include "rofl/common/logging.h"
+
 #include "rofl/common/crofchan.h"
 #include "rofl/common/exception.hpp"
 #include "rofl/common/cdptid.h"
@@ -48,7 +48,7 @@
 #include "rofl/common/openflow/cofmeterbands.h"
 
 #include "rofl/common/locking.hpp"
-#include "rofl/common/logging.h"
+
 
 namespace rofl {
 
@@ -1896,9 +1896,9 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, const crofdpt& dpt) {
-		os << indent(0) << "<crofdpt >";
-		{ rofl::indent i(2); os << dpt.get_dptid(); }
-		{ rofl::indent i(2); os << dpt.rofchan; }
+		os  << "<crofdpt >";
+		{  os << dpt.get_dptid(); }
+		{  os << dpt.rofchan; }
 		return os;
 	};
 

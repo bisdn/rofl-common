@@ -178,12 +178,12 @@ public:
 	friend std::ostream&
 	operator<< (std::ostream& os, const cetherswitch& sw) {
 		try {
-			os << rofl::indent(0) << "<ethswitch dpid: "
+			os << "<ethswitch dpid: "
 					<< sw.get_dpt(sw.dptid).get_dpid().str() << " >" << std::endl;
 		} catch (rofl::eRofDptNotFound& e) {
-			os << rofl::indent(0) << "<ethswitch dptid: " << sw.dptid << " >" << std::endl;
+			os << "<ethswitch dptid: " << sw.dptid << " >" << std::endl;
 		}
-		rofl::indent i(2);
+		
 		try {
 			os << cfibtable::set_fib(sw.dptid);
 			os << cflowtable::get_flowtable(sw.dptid);

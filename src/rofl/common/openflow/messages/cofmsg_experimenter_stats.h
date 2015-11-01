@@ -130,10 +130,10 @@ public:
 	friend std::ostream&
 	operator<< (std::ostream& os, const cofmsg_experimenter_stats_request& msg) {
 		os << dynamic_cast<const cofmsg_stats_request&>( msg );
-		os << indent(2) << "<cofmsg_experimenter_stats_request >" << std::endl;
-		os << indent(4) << "<exp_id: 0x" << std::hex << (unsigned int)msg.get_exp_id() << std::dec << " >" << std::endl;
-		os << indent(4) << "<exp_type: 0x" << std::hex << (unsigned int)msg.get_exp_type() << std::dec << " >" << std::endl;
-		indent i(4);
+		os << "<cofmsg_experimenter_stats_request >" << std::endl;
+		os << "<exp_id: 0x" << std::hex << (unsigned int)msg.get_exp_id() << std::dec << " >" << std::endl;
+		os << "<exp_type: 0x" << std::hex << (unsigned int)msg.get_exp_type() << std::dec << " >" << std::endl;
+		
 		os << msg.exp_body;
 		return os;
 	};
@@ -265,10 +265,10 @@ public:
 	friend std::ostream&
 	operator<< (std::ostream& os, const cofmsg_experimenter_stats_reply& msg) {
 		os << dynamic_cast<const cofmsg_stats_reply&>( msg );
-		os << indent(2) << "<cofmsg_experimenter_stats_reply >" << std::endl;
-		os << indent(4) << "<exp_id: 0x" << std::hex << (unsigned int)msg.get_exp_id() << std::dec << " >" << std::endl;
-		os << indent(4) << "<exp_type: 0x" << std::hex << (unsigned int)msg.get_exp_type() << std::dec << " >" << std::endl;
-		indent i(4);
+		os << "<cofmsg_experimenter_stats_reply >" << std::endl;
+		os << "<exp_id: 0x" << std::hex << (unsigned int)msg.get_exp_id() << std::dec << " >" << std::endl;
+		os << "<exp_type: 0x" << std::hex << (unsigned int)msg.get_exp_type() << std::dec << " >" << std::endl;
+		
 		os << msg.exp_body;
 		return os;
 	};

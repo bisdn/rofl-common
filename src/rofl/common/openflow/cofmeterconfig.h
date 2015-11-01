@@ -120,8 +120,8 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, cofmeter_config_request const& r) {
-		os << indent(0) << "<cofmeter_config_request >" << std::endl;
-		os << indent(2) << "<meter-id: 0x" << std::hex << (int)r.get_meter_id() << std::dec << " >" << std::endl;
+		os  << "<cofmeter_config_request >" << std::endl;
+		os << "<meter-id: 0x" << std::hex << (int)r.get_meter_id() << std::dec << " >" << std::endl;
 		return os;
 	};
 
@@ -263,12 +263,12 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, cofmeter_config_reply const& r) {
-		os << indent(0) << "<cofmeter_config_reply >" << std::endl;
+		os  << "<cofmeter_config_reply >" << std::endl;
 		os << std::hex;
-		os << indent(2) << "<flags: 0x"		 		<< (unsigned int)r.get_flags() << " >" << std::endl;
-		os << indent(2) << "<meter-id: 0x" 			<< (unsigned int)r.get_meter_id() << " >" << std::endl;
+		os << "<flags: 0x"		 		<< (unsigned int)r.get_flags() << " >" << std::endl;
+		os << "<meter-id: 0x" 			<< (unsigned int)r.get_meter_id() << " >" << std::endl;
 		os << std::dec;
-		{ rofl::indent i(2); os << r.get_meter_bands(); }
+		{  os << r.get_meter_bands(); }
 		return os;
 	};
 

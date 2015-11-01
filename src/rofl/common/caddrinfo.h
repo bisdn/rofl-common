@@ -159,14 +159,14 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, const caddrinfo& ai) {
-		os << rofl::indent(0) << "<caddrinfo >" << std::endl;
-		os << rofl::indent(2) << "<ai_flags: " 		<< ai.get_ai_flags() 	<< " >" << std::endl;
-		os << rofl::indent(2) << "<ai_family: " 	<< ai.get_ai_family() 	<< " >" << std::endl;
-		os << rofl::indent(2) << "<ai_socktype: " 	<< ai.get_ai_socktype() << " >" << std::endl;
-		os << rofl::indent(2) << "<ai_protocol: " 	<< ai.get_ai_protocol() << " >" << std::endl;
-		os << rofl::indent(2) << "<ai_flags: " 		<< ai.get_ai_flags() 	<< " >" << std::endl;
-		os << rofl::indent(2) << "<ai_addr: >"		<< std::endl;
-		rofl::indent i(4);
+		os  << "<caddrinfo >" << std::endl;
+		os  << "<ai_flags: " 		<< ai.get_ai_flags() 	<< " >" << std::endl;
+		os  << "<ai_family: " 	<< ai.get_ai_family() 	<< " >" << std::endl;
+		os  << "<ai_socktype: " 	<< ai.get_ai_socktype() << " >" << std::endl;
+		os  << "<ai_protocol: " 	<< ai.get_ai_protocol() << " >" << std::endl;
+		os  << "<ai_flags: " 		<< ai.get_ai_flags() 	<< " >" << std::endl;
+		os  << "<ai_addr: >"		<< std::endl;
+		
 		os << ai.get_ai_addr();
 		return os;
 	};

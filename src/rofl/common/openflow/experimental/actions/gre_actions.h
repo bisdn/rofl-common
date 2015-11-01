@@ -152,10 +152,10 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, const cofaction_exp_body_gre& body) {
-		os << rofl::indent(0) << "<cofaction_exp_body_gre exp-type: 0x" <<
+		os << "<cofaction_exp_body_gre exp-type: 0x" <<
 				std::hex << (unsigned int)body.get_exp_type() << std::dec
 				<< ">" << std::endl;
-		rofl::indent i(2);
+		
 		os << dynamic_cast<const rofl::cmemory&>( body );
 		return os;
 	};
@@ -246,10 +246,10 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, const cofaction_exp_body_push_gre& action) {
-		os << rofl::indent(0) << "<cofaction_push_gre ether-type: 0x" <<
+		os << "<cofaction_push_gre ether-type: 0x" <<
 				std::hex << (unsigned int)action.get_ether_type() << std::dec
 				<< ">" << std::endl;
-		rofl::indent i(2);
+		
 		os << dynamic_cast<const rofl::cmemory&>( action );
 		return os;
 	};
@@ -342,10 +342,10 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, const cofaction_exp_body_pop_gre& action) {
-		os << rofl::indent(0) << "<cofaction_pop_gre ether-type: 0x" <<
+		os << "<cofaction_pop_gre ether-type: 0x" <<
 				std::hex << (unsigned int)action.get_ether_type() << std::dec
 				<< ">" << std::endl;
-		rofl::indent i(2);
+		
 		os << dynamic_cast<const rofl::cmemory&>( action );
 		return os;
 	};

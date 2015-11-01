@@ -214,8 +214,8 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, coftables const& tables) {
-		os << indent(0) << "<coftables #tables:" << tables.tables.size() << " >" << std::endl;
-		indent i(2);
+		os  << "<coftables #tables:" << tables.tables.size() << " >" << std::endl;
+		
 		for (std::map<uint8_t, coftable_features>::const_iterator
 				it = tables.tables.begin(); it != tables.tables.end(); ++it) {
 			os << it->second;

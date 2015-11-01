@@ -208,7 +208,7 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, cofgroupmod const& groupmod) {
-		os << rofl::indent(0) << "<cofgroupmod ";
+		os  << "<cofgroupmod ";
 			os << "cmd:";
 			switch (groupmod.ofp_version) {
 			case openflow12::OFP_VERSION:
@@ -232,8 +232,8 @@ public:
 				throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 			}
 			os << "group-id: 0x" << std::hex << (unsigned int)groupmod.get_group_id() << std::dec << " >" << std::endl;
-			os << indent(2) << "<buckets: >" << std::endl;
-			indent i(4);
+			os << "<buckets: >" << std::endl;
+			
 			os << groupmod.buckets;
 		return os;
 	};

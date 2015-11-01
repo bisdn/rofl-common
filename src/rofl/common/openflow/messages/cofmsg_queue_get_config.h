@@ -99,8 +99,8 @@ public:
 	friend std::ostream&
 	operator<< (std::ostream& os, const cofmsg_queue_get_config_request& msg) {
 		os << dynamic_cast<const cofmsg&>( msg );
-		os << indent(0) << "<cofmsg_queue_get_config_request >" << std::endl;
-			os << indent(2) << "<portno: 0x" << std::hex << (unsigned int)msg.get_portno() << std::dec << " >" << std::endl;
+		os  << "<cofmsg_queue_get_config_request >" << std::endl;
+			os << "<portno: 0x" << std::hex << (unsigned int)msg.get_portno() << std::dec << " >" << std::endl;
 		return os;
 	};
 
@@ -213,9 +213,9 @@ public:
 	friend std::ostream&
 	operator<< (std::ostream& os, const cofmsg_queue_get_config_reply& msg) {
 		os << dynamic_cast<const cofmsg&>( msg );
-		os << indent(0) << "<cofmsg_queue_get_config_request >" << std::endl;
-			os << indent(2) << "<portno: 0x" << std::hex << (unsigned int)msg.get_portno() << std::dec << " >" << std::endl;
-			indent i(4);
+		os  << "<cofmsg_queue_get_config_request >" << std::endl;
+			os << "<portno: 0x" << std::hex << (unsigned int)msg.get_portno() << std::dec << " >" << std::endl;
+			
 			os << msg.queues;
 		return os;
 	};

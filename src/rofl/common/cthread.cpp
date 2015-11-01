@@ -29,16 +29,12 @@ cthread::initialize()
 
 	// worker thread
 	if ((epfd = epoll_create(1)) < 0) {
-		log << logging::error << "cthread::initialize() failed to create epoll set: "
-				<< "errno: " << errno << " (" << strerror(errno) << ")" << std::flush;
-		throw eSysCall("cthread::initialize() syscall epoll_create() failed");
+		throw eSysCall("eSysCall", "epoll_create", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 
 	// pipe
 	if (pipe2(pipefd, pipe_flags) < 0) {
-		log << logging::error << "cthread::initialize() syscall pipe2(): "
-				<< "errno: " << errno << " (" << strerror(errno) << ")" << std::flush;
-		throw eSysCall("cthread::initialize() unable to create rxpipe");
+		throw eSysCall("eSysCall", "pipe2", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 
 	add_read_fd(pipefd[PIPE_READ_FD]);
@@ -82,10 +78,8 @@ cthread::add_read_fd(
 			/* fd already registered */
 		} break;
 		default: {
-			log << logging::error << "cthread::add_read_fd() failed to add fd to epoll set: "
-					<< "errno: " << errno << " (" << strerror(errno) << ")" << std::flush;
 			if (exception)
-				throw eSysCall("cthread::add_read_fd() syscall epoll_ctl() failed");
+				throw eSysCall("eSysCall", "epoll_ctl (EPOLL_CTL_ADD)", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		};
 		}
 	}
@@ -112,10 +106,8 @@ cthread::drop_read_fd(
 			/* fd not registered */
 		} break;
 		default: {
-			log << logging::error << "cthread::drop_read_fd() failed to add fd to epoll set: "
-					<< "errno: " << errno << " (" << strerror(errno) << ")" << std::flush;
 			if (exception)
-				throw eSysCall("cthread::drop_read_fd() syscall epoll_ctl() failed");
+				throw eSysCall("eSysCall", "epoll_ctl (EPOLL_CTL_DEL)", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		};
 		}
 	}
@@ -137,9 +129,7 @@ cthread::add_write_fd(
 	epev.events = EPOLLOUT;
 	epev.data.fd = fd;
 	if (epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &epev) < 0) {
-		log << logging::error << "cthread::add_write_fd() failed to add fd to epoll set: "
-				<< "errno: " << errno << " (" << strerror(errno) << ")" << std::flush;
-		throw eSysCall("cthread::add_write_fd() syscall epoll_ctl() failed");
+		throw eSysCall("eSysCall", "epoll_ctl (EPOLL_CTL_ADD)", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 
 	wakeup();
@@ -159,9 +149,7 @@ cthread::drop_write_fd(
 	epev.events = EPOLLOUT;
 	epev.data.fd = fd;
 	if (epoll_ctl(epfd, EPOLL_CTL_DEL, fd, &epev) < 0) {
-		log << logging::error << "cthread::drop_write_fd() failed to add fd to epoll set: "
-				<< "errno: " << errno << " (" << strerror(errno) << ")" << std::flush;
-		throw eSysCall("cthread::drop_write_fd() syscall epoll_ctl() failed");
+		throw eSysCall("eSysCall", "epoll_ctl (EPOLL_CTL_DEL)", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 
 	wakeup();
@@ -286,9 +274,7 @@ cthread::start()
 
 		run_thread = true;
 		if (pthread_create(&tid, NULL, &(cthread::start_loop), this) < 0) {
-			log << logging::error << "cthread::start_thread() failed to start worker thread: "
-							<< "errno=" << errno << " (" << strerror(errno) << ")" << std::flush;
-			throw eSysCall("cthread::start_thread() failed to start RX thread");
+			throw eSysCall("eSysCall", "pthread_create", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		}
 
 		state = STATE_RUNNING;
@@ -318,9 +304,6 @@ cthread::stop()
 			wakeup();
 
 			if (pthread_join(tid, NULL) < 0) {
-
-				log << logging::error << "cthread::stop_thread() failed to stop worker thread: "
-								<< "errno: " << errno << " (" << strerror(errno) << ")" << std::flush;
 				pthread_cancel(tid);
 			}
 		}
@@ -341,8 +324,6 @@ cthread::wakeup()
 		return;
 	char c = 1;
 	if (write(pipefd[PIPE_WRITE_FD], &c, sizeof(c)) < 0) {
-		log << logging::error << "cthread::thread_wakeup() syscall send() failed, "
-				<< "errno: " << errno << " (" << strerror(errno) << ")" << std::ends;
 		switch (errno) {
 		case EAGAIN: {
 			// do nothing
@@ -351,7 +332,7 @@ cthread::wakeup()
 			// signal received
 		} break;
 		default: {
-			throw eSysCall("cthread::thread_wakeup() unable to wakeup RX thread");
+			throw eSysCall("eSysCall", "write", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		};
 		}
 	}
@@ -443,8 +424,6 @@ cthread::run_loop()
 					// signal received
 				} break;
 				default: {
-					log << logging::error << "cthread::run_loop() syscall epoll_wait() failed "
-								<< "errno: " << errno << " (" << strerror(errno) << ")" << std::flush;
 					retval = -1;
 					goto out;
 				};
@@ -453,11 +432,11 @@ cthread::run_loop()
 			}
 
 		} catch (eThreadNotFound& e) {
-			log << logging::error << "cthread::run_loop() env not found" << std::flush;
+
 		} catch (std::runtime_error& e) {
-			log << logging::error << "cthread::run_loop() exception, what: " << e.what() << std::flush;
+
 		} catch (...) {
-			log << logging::error << "cthread::run_loop() exception" << std::flush;
+
 		}
 	}
 

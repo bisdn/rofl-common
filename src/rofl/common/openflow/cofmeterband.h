@@ -197,7 +197,7 @@ public:
 	 */
 	friend std::ostream&
 	operator<< (std::ostream& os, cofmeter_band const& mb) {
-		os << rofl::indent(0) << "<cofmeter_band "
+		os  << "<cofmeter_band "
 			<< std::hex
 			<< " type: 0x" << mb.get_type()
 			<< " len: 0x" << mb.get_length()
@@ -205,7 +205,7 @@ public:
 			<< " burst_size: 0x" << mb.get_burst_size()
 			<< std::dec
 			<< " >" << std::endl;
-		{ rofl::indent i(2); os << mb.get_body(); }
+		{  os << mb.get_body(); }
 		return os;
 	};
 
@@ -273,8 +273,8 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, const cofmeter_band_drop& mb) {
-		os << rofl::indent(0) << "<cofmeter_band_drop >" << std::endl;
-		rofl::indent i(2);
+		os  << "<cofmeter_band_drop >" << std::endl;
+		
 		os << dynamic_cast<const cofmeter_band&>( mb );
 		return os;
 	};
@@ -374,9 +374,9 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, const cofmeter_band_dscp_remark& mb) {
-		os << rofl::indent(0) << "<cofmeter_band_dscp_remark prec-level: 0x"
+		os  << "<cofmeter_band_dscp_remark prec-level: 0x"
 				<< std::hex << (int)mb.get_prec_level() << std::dec << " >" << std::endl;
-		rofl::indent i(2);
+		
 		os << dynamic_cast<const cofmeter_band&>( mb );
 		return os;
 	};
@@ -505,11 +505,11 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, const cofmeter_band_experimenter& mb) {
-		os << rofl::indent(0) << "<cofmeter_band_experimenter exp_id: 0x"
+		os  << "<cofmeter_band_experimenter exp_id: 0x"
 				<< std::hex << (int)mb.get_exp_id() << std::dec << " >" << std::endl;
-		{ rofl::indent i(2); os << dynamic_cast<const cofmeter_band&>( mb ); }
-		os << rofl::indent(2) << "<experimental body: >" << std::endl;
-		{ rofl::indent i(4); os << mb.get_exp_body(); }
+		{  os << dynamic_cast<const cofmeter_band&>( mb ); }
+		os  << "<experimental body: >" << std::endl;
+		{  os << mb.get_exp_body(); }
 		return os;
 	};
 

@@ -162,12 +162,12 @@ public:
 	friend std::ostream&
 	operator<< (std::ostream& os, cofmsg_port_mod const& msg) {
 		os << dynamic_cast<cofmsg const&>( msg );
-		os << indent(2) << "<cofmsg_port_mod >" << std::endl;
-		os << indent(2) << "<port-no: 0x"	<< std::hex << (unsigned int)msg.get_portno() 	 << std::dec << " >" << std::endl;
-		os << indent(2) << "<lladdr: " 		<< msg.get_lladdr().str()    	                 << " >" << std::endl;
-		os << indent(2) << "<config: 0x"	<< std::hex << (unsigned int)msg.get_config() 	 << std::dec << " >" << std::endl;
-		os << indent(2) << "<mask: 0x"		<< std::hex << (unsigned int)msg.get_mask()      << std::dec << " >" << std::endl;
-		os << indent(2) << "<advertise: 0x"	<< std::hex << (unsigned int)msg.get_advertise() << std::dec << " >" << std::endl;
+		os << "<cofmsg_port_mod >" << std::endl;
+		os << "<port-no: 0x"	<< std::hex << (unsigned int)msg.get_portno() 	 << std::dec << " >" << std::endl;
+		os << "<lladdr: " 		<< msg.get_lladdr().str()    	                 << " >" << std::endl;
+		os << "<config: 0x"	<< std::hex << (unsigned int)msg.get_config() 	 << std::dec << " >" << std::endl;
+		os << "<mask: 0x"		<< std::hex << (unsigned int)msg.get_mask()      << std::dec << " >" << std::endl;
+		os << "<advertise: 0x"	<< std::hex << (unsigned int)msg.get_advertise() << std::dec << " >" << std::endl;
 		return os;
 	};
 

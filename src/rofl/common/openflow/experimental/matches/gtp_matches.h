@@ -49,7 +49,7 @@ public:
 	friend std::ostream&
 	operator<< (std::ostream& os, const coxmatch_ofx_gtp_teid& oxm) {
 		os << dynamic_cast<const coxmatch_exp&>(oxm);
-		os << indent(2) << "<gtp-teid: "
+		os << "<gtp-teid: "
 						<< (int)oxm.get_u32value() << "/" << (int)oxm.get_u32mask()
 						<< " >" << std::endl;
 		return os;
@@ -82,7 +82,7 @@ public:
 	friend std::ostream&
 	operator<< (std::ostream& os, const coxmatch_ofx_gtp_msg_type& oxm) {
 		os << dynamic_cast<const coxmatch_exp&>(oxm);
-		os << indent(2) << "<gtp-msg-type: "
+		os << "<gtp-msg-type: "
 						<< (int)oxm.get_u8value()
 						<< " >" << std::endl;
 		return os;

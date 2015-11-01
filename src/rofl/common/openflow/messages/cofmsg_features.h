@@ -61,8 +61,8 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, cofmsg_features_request const& msg) {
-		os << indent(0) << dynamic_cast<cofmsg const&>( msg );
-		os << indent(2) << "<cofmsg_features_request >" << std::endl;
+		os  << dynamic_cast<cofmsg const&>( msg );
+		os << "<cofmsg_features_request >" << std::endl;
 		return os;
 	};
 
@@ -271,7 +271,7 @@ public:
 	friend std::ostream&
 	operator<< (std::ostream& os, const cofmsg_features_reply& msg) {
 		os << dynamic_cast<const cofmsg&>( msg );
-		os << indent(2) << "<cofmsg_features_reply ";
+		os << "<cofmsg_features_reply ";
 		switch (msg.get_version()) {
 		case openflow10::OFP_VERSION: {
 			os << "dpid:" 			<< msg.get_dpid() 				<< " ";
@@ -280,7 +280,7 @@ public:
 			os << "capabilities:0x"	<< std::hex << (int)msg.get_capabilities() << std::dec << " ";
 			os << "actions:" 		<< (int)msg.get_actions_bitmap() << " ";
 			os << " >" << std::endl;
-			indent i(4);
+			
 			os << msg.ports;
 		} break;
 		case openflow12::OFP_VERSION: {
@@ -289,7 +289,7 @@ public:
 			os << "#tables:" 		<< (int)msg.get_n_tables() 		<< " ";
 			os << "capabilities:0x"	<< std::hex << (int)msg.get_capabilities() << std::dec << " ";
 			os << " >" << std::endl;
-			indent i(4);
+			
 			os << msg.ports;
 		} break;
 		case openflow13::OFP_VERSION: {

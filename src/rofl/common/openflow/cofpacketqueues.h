@@ -141,12 +141,12 @@ public:
 				it = pql.pqueues.begin(); it != pql.pqueues.end(); ++it) {
 			count += it->second.size();
 		}
-		os << rofl::indent(0) << "<cofpacket_queues #queues: " << count << " >" << std::endl;
+		os  << "<cofpacket_queues #queues: " << count << " >" << std::endl;
 		for (std::map<uint32_t, std::map<uint32_t, cofpacket_queue> >::const_iterator
 				it = pql.pqueues.begin(); it != pql.pqueues.end(); ++it) {
 			for (std::map<uint32_t, cofpacket_queue>::const_iterator
 					jt = it->second.begin(); jt != it->second.end(); ++jt) {
-				rofl::indent i(2); os << (jt->second);
+				 os << (jt->second);
 			}
 		}
 		return os;

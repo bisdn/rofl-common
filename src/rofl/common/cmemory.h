@@ -5,15 +5,16 @@
 #ifndef CMEMORY_H
 #define CMEMORY_H 1
 
-#include <set>
-#include <string>
-#include <sstream>
 #include <inttypes.h>
 #include <pthread.h>
 #include <stdlib.h>
 
-#include "exception.hpp"
-#include "logging.h"
+#include <set>
+#include <string>
+#include <sstream>
+#include <iomanip>
+
+#include "rofl/common/exception.hpp"
 
 namespace rofl {
 
@@ -405,7 +406,7 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, const cmemory& mem) {
-		os << indent(0) << "<cmemory: ";
+		os  << "<cmemory: ";
 		os << "data:" << (void*)mem.data.first << " ";
 		os << "datalen:" << (int)mem.data.second << " ";
 		os << ">" << std::endl;
@@ -415,7 +416,7 @@ public:
 		if (mem.data.second > 0) {
 			for (unsigned int i=0; i < mem.data.second; i++) {
 				if (0 == (i % width)) {
-					os << indent(2)
+					os
 						<< std::setfill('0')
 						<< std::setw(4)
 						<< std::dec << (i/width) << ": " << std::hex

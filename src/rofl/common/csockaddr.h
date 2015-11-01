@@ -17,7 +17,7 @@
 
 #include "rofl/common/caddress.h"
 #include "rofl/common/cmemory.h"
-#include "rofl/common/logging.h"
+
 #include "rofl/common/exception.hpp"
 
 namespace rofl {
@@ -141,19 +141,19 @@ public:
 
 	friend std::ostream&
 	operator<<(std::ostream& os, const csockaddr& sockaddr) {
-		os << rofl::indent(0) << "<csockaddr >" << std::endl;
+		os  << "<csockaddr >" << std::endl;
 		switch (sockaddr.ca_saddr->sa_family) {
 		case AF_INET: {
 			caddress_in4 addr; addr.set_addr_nbo(sockaddr.ca_s4addr->sin_addr.s_addr);
-			rofl::indent i(2);
+			
 			os << addr;
-			os << rofl::indent(0) << "<portno: " << (unsigned int)be16toh(sockaddr.ca_s4addr->sin_port) << " >" << std::endl;
+			os  << "<portno: " << (unsigned int)be16toh(sockaddr.ca_s4addr->sin_port) << " >" << std::endl;
 		} break;
 		case AF_INET6: {
 			caddress_in6 addr; addr.unpack(sockaddr.ca_s6addr->sin6_addr.s6_addr, 16);
-			rofl::indent i(2);
+			
 			os << addr;
-			os << rofl::indent(0) << "<portno: " << (unsigned int)be16toh(sockaddr.ca_s6addr->sin6_port) << " >" << std::endl;
+			os  << "<portno: " << (unsigned int)be16toh(sockaddr.ca_s6addr->sin6_port) << " >" << std::endl;
 		} break;
 		}
 		return os;

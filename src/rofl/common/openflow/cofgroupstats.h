@@ -119,8 +119,8 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, cofgroup_stats_request const& r) {
-		os << indent(0) << "<cofgroup_stats_request >" << std::endl;
-		os << indent(2) << "<group-id: " << (int)r.get_group_id() << " >" << std::endl;
+		os  << "<cofgroup_stats_request >" << std::endl;
+		os << "<group-id: " << (int)r.get_group_id() << " >" << std::endl;
 		return os;
 	};
 };
@@ -312,24 +312,24 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, cofgroup_stats_reply const& r) {
-		os << indent(0) << "<cofgroup_stats_reply >" << std::endl;
+		os  << "<cofgroup_stats_reply >" << std::endl;
 		os << std::hex;
-		os << indent(2) << "<group-id: 0x" << (int)r.get_group_id() << " >" << std::endl;
-		os << indent(2) << "<ref-count: 0x" << (int)r.get_ref_count() << " >" << std::endl;
-		os << indent(2) << "<packet-count: 0x" << (int)r.get_packet_count() << " >" << std::endl;
-		os << indent(2) << "<byte-count: 0x" << (int)r.get_byte_count() << " >" << std::endl;
+		os << "<group-id: 0x" << (int)r.get_group_id() << " >" << std::endl;
+		os << "<ref-count: 0x" << (int)r.get_ref_count() << " >" << std::endl;
+		os << "<packet-count: 0x" << (int)r.get_packet_count() << " >" << std::endl;
+		os << "<byte-count: 0x" << (int)r.get_byte_count() << " >" << std::endl;
 		os << std::dec;
 		switch (r.get_version()) {
 		case rofl::openflow13::OFP_VERSION: {
 			os << std::hex;
-			os << indent(2) << "<duration-sec: 0x" << (int)r.get_duration_sec() << " >" << std::endl;
-			os << indent(2) << "<duration-nsec: 0x" << (int)r.get_duration_nsec() << " >" << std::endl;
+			os << "<duration-sec: 0x" << (int)r.get_duration_sec() << " >" << std::endl;
+			os << "<duration-nsec: 0x" << (int)r.get_duration_nsec() << " >" << std::endl;
 			os << std::dec;
 		} break;
 		default: {
 		};
 		}
-		indent i(2);
+		
 		os << r.bucket_counters;
 		return os;
 	};

@@ -203,8 +203,8 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, cofports const& ports) {
-		os << rofl::indent(0) << "<cofports #ports:" << (int)ports.get_ports().size() << " >" << std::endl;;
-		rofl::indent i(2);
+		os  << "<cofports #ports:" << (int)ports.get_ports().size() << " >" << std::endl;;
+		
 		for (std::map<uint32_t, cofport*>::const_iterator
 				it = ports.get_ports().begin(); it != ports.get_ports().end(); ++it) {
 			os << *(it->second);

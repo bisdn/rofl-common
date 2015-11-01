@@ -14,7 +14,7 @@
 #include <rofl/common/caddress.h>
 #include <rofl/common/crofbase.h>
 #include <rofl/common/crofdpt.h>
-#include <rofl/common/logging.h>
+
 #include <rofl/common/cthread.hpp>
 
 namespace rofl {
@@ -207,8 +207,8 @@ public:
 	 */
 	friend std::ostream&
 	operator<< (std::ostream& os, const cflowentry& entry) {
-		os << rofl::indent(0) << "<cflowentry portno: " << (unsigned int)entry.port_no << " >" << std::endl;
-		rofl::indent i(2);
+		os << "<cflowentry portno: " << (unsigned int)entry.port_no << " >" << std::endl;
+		
 		os << entry.src;
 		os << entry.dst;
 		return os;

@@ -157,8 +157,8 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, cofflowstatsarray const& flowstatsarray) {
-		os << rofl::indent(0) << "<cofflowstatsarray #flows:" << (int)flowstatsarray.array.size() << " >" << std::endl;
-		rofl::indent i(2);
+		os  << "<cofflowstatsarray #flows:" << (int)flowstatsarray.array.size() << " >" << std::endl;
+		
 		for (std::map<uint32_t, cofflow_stats_reply>::const_iterator
 				it = flowstatsarray.array.begin(); it != flowstatsarray.array.end(); ++it) {
 			os << it->second;

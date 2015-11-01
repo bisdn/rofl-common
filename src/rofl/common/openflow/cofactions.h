@@ -696,9 +696,9 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, cofactions const& actions) {
-		os << rofl::indent(0) << "<cofactions ofp-version:" << (int)actions.get_version() <<
+		os  << "<cofactions ofp-version:" << (int)actions.get_version() <<
 				" #actions:" << (int)actions.get_actions().size() << " >" << std::endl;
-		rofl::indent i(2);
+		
 		for (std::map<cindex, cofaction*>::const_iterator
 				it = actions.actions.begin(); it != actions.actions.end(); ++it) {
 			cofaction::dump(os, *(it->second));

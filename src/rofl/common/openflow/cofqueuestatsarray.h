@@ -152,11 +152,11 @@ public:
 	friend std::ostream&
 	operator<< (std::ostream& os, cofqueuestatsarray const& groupstatsarray) {
 		os << "<cofqueuestatsarray #ports:" << (int)groupstatsarray.array.size() << " >" << std::endl;
-		rofl::indent i(2);
+		
 		for (std::map<uint32_t, std::map<uint32_t, cofqueue_stats_reply> >::const_iterator
 				jt = groupstatsarray.array.begin(); jt != groupstatsarray.array.end(); ++jt) {
-			os << rofl::indent(0) << "<portno: " << (int)jt->first << " #queues: " << (int)jt->second.size() << " >" << std::endl;
-			rofl::indent j(2);
+			os  << "<portno: " << (int)jt->first << " #queues: " << (int)jt->second.size() << " >" << std::endl;
+			
 			for (std::map<uint32_t, cofqueue_stats_reply>::const_iterator
 					it = jt->second.begin(); it != jt->second.end(); ++it) {
 				os << it->second;

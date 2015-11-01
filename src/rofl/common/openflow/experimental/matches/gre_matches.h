@@ -59,7 +59,7 @@ public:
 	friend std::ostream&
 	operator<< (std::ostream& os, const coxmatch_ofx_gre_version& oxm) {
 		os << dynamic_cast<const coxmatch_exp&>(oxm);
-		os << indent(2) << "<gre-version: "
+		os << "<gre-version: "
 						<< (int)oxm.get_u16value() << "/" << (int)oxm.get_u16mask()
 						<< " >" << std::endl;
 		return os;
@@ -92,7 +92,7 @@ public:
 	friend std::ostream&
 	operator<< (std::ostream& os, const coxmatch_ofx_gre_prot_type& oxm) {
 		os << dynamic_cast<const coxmatch_exp&>(oxm);
-		os << indent(2) << "<gre-prot-type: "
+		os << "<gre-prot-type: "
 						<< (int)oxm.get_u16value() << "/" << (int)oxm.get_u16mask()
 						<< " >" << std::endl;
 		return os;
@@ -124,7 +124,7 @@ public:
 	friend std::ostream&
 	operator<< (std::ostream& os, const coxmatch_ofx_gre_key& oxm) {
 		os << dynamic_cast<const coxmatch_exp&>(oxm);
-		os << indent(2) << "<gre-key: "
+		os << "<gre-key: "
 						<< (int)oxm.get_u32value() << "/" << (int)oxm.get_u32mask()
 						<< " >" << std::endl;
 		return os;

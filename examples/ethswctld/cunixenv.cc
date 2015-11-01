@@ -4,7 +4,6 @@
 
 #include "cunixenv.h"
 #include <sstream> 
-#include <rofl/common/logging.h>
 
 using namespace rofl;
 

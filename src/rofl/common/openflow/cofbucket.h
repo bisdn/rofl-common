@@ -233,22 +233,22 @@ public:
 	operator<< (std::ostream& os, cofbucket const& bucket) {
 		switch (bucket.get_version()) {
 		case rofl::openflow::OFP_VERSION_UNKNOWN: {
-			os << indent(0) << "<cofbucket ";
+			os  << "<cofbucket ";
 				os << "ofp-version:" 	<< (int)bucket.ofp_version 	<< " >" << std::endl;
 		} break;
 		case rofl::openflow12::OFP_VERSION:
 		case rofl::openflow13::OFP_VERSION: {
-			os << indent(0) << "<cofbucket ";
+			os  << "<cofbucket ";
 				os << "ofp-version:" 	<< (int)bucket.ofp_version 	<< " >" << std::endl;
 				os << std::hex;
-				os << indent(2) << "<weight: 0x" 		<< (int)bucket.weight 	<< " >" << std::endl;
-				os << indent(2) << "<watch-group: 0x" 	<< (int)bucket.watch_group 	<< " >" << std::endl;
-				os << indent(2) << "<watch-port: 0x" 	<< (int)bucket.watch_port 	<< " >" << std::endl;
-				os << indent(2) << "<packet-count: 0x"	<< (int)bucket.packet_count << " >" << std::endl;
-				os << indent(2) << "<byte-count: 0x" 	<< (int)bucket.byte_count 	<< " >" << std::endl;
+				os << "<weight: 0x" 		<< (int)bucket.weight 	<< " >" << std::endl;
+				os << "<watch-group: 0x" 	<< (int)bucket.watch_group 	<< " >" << std::endl;
+				os << "<watch-port: 0x" 	<< (int)bucket.watch_port 	<< " >" << std::endl;
+				os << "<packet-count: 0x"	<< (int)bucket.packet_count << " >" << std::endl;
+				os << "<byte-count: 0x" 	<< (int)bucket.byte_count 	<< " >" << std::endl;
 				os << std::dec;
-				os << indent(2) << "<actions: >"	<< std::endl;
-				indent i(4);
+				os << "<actions: >"	<< std::endl;
+				
 				os << bucket.actions;
 
 		} break;

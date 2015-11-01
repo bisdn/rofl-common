@@ -12,7 +12,7 @@
 
 #include <iostream>
 
-#include "rofl/common/logging.h"
+
 #include "rofl/common/croflexception.h"
 #include "rofl/common/openflow/openflow.h"
 #include "rofl/common/openflow/openflow_rofl_exceptions.h"
@@ -157,10 +157,10 @@ public:
 	 */
 	friend std::ostream&
 	operator<< (std::ostream& os, cofrole const& role) {
-		os << rofl::indent(0) << "<cofrole ofp-version:" << (int)role.get_version() << " >" << std::endl;
+		os << "<cofrole ofp-version:" << (int)role.get_version() << " >" << std::endl;
 		os << std::hex;
-		os << rofl::indent(2) << "<role: 0x" << (unsigned int)role.get_role() << " >" << std::endl;
-		os << rofl::indent(2) << "<generation-id: 0x" << (unsigned long long)role.get_generation_id() << " >" << std::endl;
+		os << "<role: 0x" << (unsigned int)role.get_role() << " >" << std::endl;
+		os << "<generation-id: 0x" << (unsigned long long)role.get_generation_id() << " >" << std::endl;
 		os << std::dec;
 		return os;
 	};

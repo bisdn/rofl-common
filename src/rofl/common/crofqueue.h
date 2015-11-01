@@ -13,7 +13,7 @@
 
 #include "rofl/common/locking.hpp"
 #include "rofl/common/openflow/messages/cofmsg.h"
-#include "rofl/common/logging.h"
+
 #include "rofl/common/exception.hpp"
 
 namespace rofl {
@@ -194,8 +194,8 @@ public:
 	friend std::ostream&
 	operator<< (std::ostream& os, const crofqueue& queue) {
 		AcquireReadLock rwlock(queue.queue_lock);
-		os << rofl::indent(0) << "<crofqueue size #" << queue.queue.size() << " >" << std::endl;
-		rofl::indent i(2);
+		os  << "<crofqueue size #" << queue.queue.size() << " >" << std::endl;
+		
 		for (std::list<rofl::openflow::cofmsg*>::const_iterator
 				it = queue.queue.begin(); it != queue.queue.end(); ++it) {
 			os << *(*it);

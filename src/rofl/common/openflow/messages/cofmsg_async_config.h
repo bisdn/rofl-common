@@ -80,7 +80,7 @@ public:
 	friend std::ostream&
 	operator<< (std::ostream& os, const cofmsg_get_async_config_request& msg) {
 		os << dynamic_cast<const cofmsg&>( msg );
-		os << indent(2) << "<cofmsg_get_async_config_request >" << std::endl;
+		os << "<cofmsg_get_async_config_request >" << std::endl;
 		return os;
 	};
 
@@ -177,8 +177,8 @@ public:
 	friend std::ostream&
 	operator<< (std::ostream& os, const cofmsg_get_async_config_reply& msg) {
 		os << dynamic_cast<const cofmsg&>( msg );
-		os << indent(2) << "<cofmsg_get_async_config_reply >" << std::endl;
-		rofl::indent i(4);
+		os << "<cofmsg_get_async_config_reply >" << std::endl;
+		
 		os << msg.async_config;
 		return os;
 	};
@@ -277,8 +277,8 @@ public:
 	friend std::ostream&
 	operator<< (std::ostream& os, const cofmsg_set_async_config& msg) {
 		os << dynamic_cast<const cofmsg&>( msg );
-		os << indent(2) << "<cofmsg_set_async_config >" << std::endl;
-		rofl::indent i(4);
+		os << "<cofmsg_set_async_config >" << std::endl;
+		
 		os << msg.async_config;
 		return os;
 	};

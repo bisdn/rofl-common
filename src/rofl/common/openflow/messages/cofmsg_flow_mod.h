@@ -95,9 +95,9 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, const cofmsg_flow_mod& msg) {
-		os << rofl::indent(0) << "<cofmsg_flow_mod >" << std::endl;
-		{ rofl::indent i(2); os << dynamic_cast<const cofmsg&>( msg ); };
-		{ rofl::indent i(4); os << msg.get_flowmod(); };
+		os  << "<cofmsg_flow_mod >" << std::endl;
+		{  os << dynamic_cast<const cofmsg&>( msg ); };
+		{  os << msg.get_flowmod(); };
 		return os;
 	};
 

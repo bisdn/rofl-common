@@ -101,9 +101,9 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, const cofmsg_echo_request& msg) {
-		os << indent(0) << dynamic_cast<const cofmsg&>( msg );
-		os << indent(2) << "<cofmsg_echo_request >" << std::endl;
-		os << indent(2) << msg.body;
+		os  << dynamic_cast<const cofmsg&>( msg );
+		os << "<cofmsg_echo_request >" << std::endl;
+		os << msg.body;
 		return os;
 	};
 
@@ -208,9 +208,9 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, cofmsg_echo_reply const& msg) {
-		os << indent(0) << dynamic_cast<cofmsg const&>( msg );
-		os << indent(2) << "<cofmsg_echo_reply >" << std::endl;
-		os << indent(2) << msg.body;
+		os  << dynamic_cast<cofmsg const&>( msg );
+		os << "<cofmsg_echo_reply >" << std::endl;
+		os << msg.body;
 		return os;
 	};
 

@@ -176,13 +176,13 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, cofmeter_features_reply const& r) {
-		os << indent(0) << "<cofmeter_features_reply ofp-version: " << (int)r.get_version() << " >" << std::endl;
+		os  << "<cofmeter_features_reply ofp-version: " << (int)r.get_version() << " >" << std::endl;
 		os << std::hex;
-		os << indent(2) << "<max-meter: 0x"			<< (unsigned int)r.get_max_meter() << " >" << std::endl;
-		os << indent(2) << "<band-types: 0x" 		<< (unsigned int)r.get_band_types() << " >" << std::endl;
-		os << indent(2) << "<capabilities: 0x" 		<< (unsigned int)r.get_capabilities() << " >" << std::endl;
-		os << indent(2) << "<max-bands: 0x" 		<< (unsigned int)r.get_max_bands() << " >" << std::endl;
-		os << indent(2) << "<max-color: 0x" 		<< (unsigned int)r.get_max_color() << " >" << std::endl;
+		os << "<max-meter: 0x"			<< (unsigned int)r.get_max_meter() << " >" << std::endl;
+		os << "<band-types: 0x" 		<< (unsigned int)r.get_band_types() << " >" << std::endl;
+		os << "<capabilities: 0x" 		<< (unsigned int)r.get_capabilities() << " >" << std::endl;
+		os << "<max-bands: 0x" 		<< (unsigned int)r.get_max_bands() << " >" << std::endl;
+		os << "<max-color: 0x" 		<< (unsigned int)r.get_max_color() << " >" << std::endl;
 		os << std::dec;
 		return os;
 	};

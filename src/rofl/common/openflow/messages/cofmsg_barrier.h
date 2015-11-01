@@ -111,8 +111,8 @@ public:
 	friend std::ostream&
 	operator<< (std::ostream& os, cofmsg_barrier_request const& msg) {
 		os << dynamic_cast<cofmsg const&>( msg );
-		os << indent(2) << "<cofmsg_barrier_request >" << std::endl;
-		indent i(4);
+		os << "<cofmsg_barrier_request >" << std::endl;
+		
 		os << msg.body;
 		return os;
 	};
@@ -228,8 +228,8 @@ public:
 	friend std::ostream&
 	operator<< (std::ostream& os, cofmsg_barrier_reply const& msg) {
 		os << dynamic_cast<cofmsg const&>( msg );
-		os << indent(2) << "<cofmsg_barrier_reply >" << std::endl;
-		indent i(4);
+		os << "<cofmsg_barrier_reply >" << std::endl;
+		
 		os << msg.body;
 		return os;
 	};

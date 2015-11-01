@@ -13,7 +13,7 @@
 
 #include "rofl/common/openflow/openflow_rofl_exceptions.h"
 #include "rofl/common/openflow/openflow.h"
-#include "rofl/common/logging.h"
+
 
 namespace rofl {
 namespace openflow {
@@ -125,7 +125,7 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, const cofmeter_band_stats& mbs) {
-		os << rofl::indent(0) << "<cofmeter_band_stats "
+		os  << "<cofmeter_band_stats "
 				<< std::hex
 				<< "packet_band_count: 0x" << mbs.get_packet_band_count() << " "
 				<< "byte_band_count: 0x" << mbs.get_byte_band_count() << " "

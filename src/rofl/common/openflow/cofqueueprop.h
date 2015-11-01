@@ -149,7 +149,7 @@ public:
 	 */
 	friend std::ostream&
 	operator<< (std::ostream& os, cofqueue_prop const& prop) {
-		os << rofl::indent(0) << "<cofqueue_prop "
+		os  << "<cofqueue_prop "
 				<< "version: " << (int)prop.get_version() << " "
 				<< std::hex
 				<< "property: 0x" << (int)prop.get_property() << " "
@@ -252,9 +252,9 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, const cofqueue_prop_min_rate& prop) {
-		os << rofl::indent(0) << "<cofqueue_prop_min_rate version: " << (unsigned int)prop.get_version() << " >" << std::endl;
-		{ rofl::indent i(2); os << dynamic_cast<const cofqueue_prop&>( prop ); }
-		os << rofl::indent(4) << "<min-rate: 0x" << std::hex << (unsigned int)prop.get_min_rate() << std::dec << " >" << std::endl;
+		os  << "<cofqueue_prop_min_rate version: " << (unsigned int)prop.get_version() << " >" << std::endl;
+		{  os << dynamic_cast<const cofqueue_prop&>( prop ); }
+		os  << "<min-rate: 0x" << std::hex << (unsigned int)prop.get_min_rate() << std::dec << " >" << std::endl;
 		return os;
 	};
 
@@ -348,9 +348,9 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, const cofqueue_prop_max_rate& prop) {
-		os << rofl::indent(0) << "<cofqueue_prop_max_rate version: " << (unsigned int)prop.get_version() << " >" << std::endl;
-		{ rofl::indent i(2); os << dynamic_cast<const cofqueue_prop&>( prop ); }
-		os << rofl::indent(4) << "<max-rate: 0x" << std::hex << (unsigned int)prop.get_max_rate() << std::dec << " >" << std::endl;
+		os  << "<cofqueue_prop_max_rate version: " << (unsigned int)prop.get_version() << " >" << std::endl;
+		{  os << dynamic_cast<const cofqueue_prop&>( prop ); }
+		os  << "<max-rate: 0x" << std::hex << (unsigned int)prop.get_max_rate() << std::dec << " >" << std::endl;
 		return os;
 	};
 
@@ -459,10 +459,10 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, const cofqueue_prop_experimenter& prop) {
-		os << rofl::indent(0) << "<cofqueue_prop_experimenter version: " << (unsigned int)prop.get_version() << " >" << std::endl;
-		{ rofl::indent i(2); os << dynamic_cast<const cofqueue_prop&>( prop ); }
-		os << rofl::indent(4) << "<exp-id: 0x" << std::hex << (unsigned int)prop.get_exp_id() << " >" << std::dec << std::endl;
-		{ rofl::indent i(4); os << prop.get_exp_body(); }
+		os  << "<cofqueue_prop_experimenter version: " << (unsigned int)prop.get_version() << " >" << std::endl;
+		{  os << dynamic_cast<const cofqueue_prop&>( prop ); }
+		os  << "<exp-id: 0x" << std::hex << (unsigned int)prop.get_exp_id() << " >" << std::dec << std::endl;
+		{  os << prop.get_exp_body(); }
 		return os;
 	};
 

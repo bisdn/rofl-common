@@ -147,14 +147,14 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, cofpacket_queue const& pq) {
-		os << rofl::indent(0) << "<cofpacket_queue version: " << (int)pq.get_version() << " "
+		os  << "<cofpacket_queue version: " << (int)pq.get_version() << " "
 				<< "length: " << pq.length() << " "
 				<< ">" << std::endl;
 		os << std::hex;
-		os << rofl::indent(2) << "<port-no: 0x" << (unsigned int)pq.get_port_no() << " >" << std::endl;
-		os << rofl::indent(2) << "<queue-id: 0x" << (unsigned int)pq.get_queue_id() << " >" << std::endl;
+		os  << "<port-no: 0x" << (unsigned int)pq.get_port_no() << " >" << std::endl;
+		os  << "<queue-id: 0x" << (unsigned int)pq.get_queue_id() << " >" << std::endl;
 		os << std::dec;
-			indent i(2);
+			
 			os << pq.queue_props;
 		return os;
 	};

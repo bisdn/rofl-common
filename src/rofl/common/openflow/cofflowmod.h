@@ -280,40 +280,40 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, cofflowmod const& fe) {
-		os << rofl::indent(0) << "<cofflowmod ofp-version:" << (int)fe.get_version() << " >" << std::endl;
+		os  << "<cofflowmod ofp-version:" << (int)fe.get_version() << " >" << std::endl;
 
 		switch (fe.get_command()) {
 		case rofl::openflow::OFPFC_ADD:
-			os << rofl::indent(2) << "<command: ADD >" 			<< std::endl; break;
+			os  << "<command: ADD >" 			<< std::endl; break;
 		case rofl::openflow::OFPFC_DELETE:
-			os << rofl::indent(2) << "<command: DELETE >" 		<< std::endl; break;
+			os  << "<command: DELETE >" 		<< std::endl; break;
 		case rofl::openflow::OFPFC_DELETE_STRICT:
-			os << rofl::indent(2) << "<command: DELETE-STRICT >"<< std::endl; break;
+			os  << "<command: DELETE-STRICT >"<< std::endl; break;
 		case rofl::openflow::OFPFC_MODIFY:
-			os << rofl::indent(2) << "<command: MODIFY >" 		<< std::endl; break;
+			os  << "<command: MODIFY >" 		<< std::endl; break;
 		case rofl::openflow::OFPFC_MODIFY_STRICT:
-			os << rofl::indent(2) << "<command: MODIFY-STRICT >"<< std::endl; break;
+			os  << "<command: MODIFY-STRICT >"<< std::endl; break;
 		default:
-			os << rofl::indent(2) << "<command: UNKNOWN >" 		<< std::endl; break;
+			os  << "<command: UNKNOWN >" 		<< std::endl; break;
 		}
 
 		os << std::hex;
-		os << rofl::indent(2) << "<cookie: 0x" 		<< (unsigned long long)fe.get_cookie() 		<< " >" << std::endl;
-		os << rofl::indent(2) << "<cookie-mask: 0x"	<< (unsigned long long)fe.get_cookie_mask()	<< " >" << std::endl;
+		os  << "<cookie: 0x" 		<< (unsigned long long)fe.get_cookie() 		<< " >" << std::endl;
+		os  << "<cookie-mask: 0x"	<< (unsigned long long)fe.get_cookie_mask()	<< " >" << std::endl;
 		os << std::dec;
-		os << rofl::indent(2) << "<table-id: " 		<< (unsigned int)fe.get_table_id() 		<< " >" << std::endl;
-		os << rofl::indent(2) << "<idle-timeout: " 	<< (unsigned int)fe.get_idle_timeout() 	<< " >" << std::endl;
-		os << rofl::indent(2) << "<hard-timeout: " 	<< (unsigned int)fe.get_hard_timeout() 	<< " >" << std::endl;
+		os  << "<table-id: " 		<< (unsigned int)fe.get_table_id() 		<< " >" << std::endl;
+		os  << "<idle-timeout: " 	<< (unsigned int)fe.get_idle_timeout() 	<< " >" << std::endl;
+		os  << "<hard-timeout: " 	<< (unsigned int)fe.get_hard_timeout() 	<< " >" << std::endl;
 
 		os << std::hex;
-		os << rofl::indent(2) << "<priority: 0x" 	<< (unsigned int)fe.get_priority() 		<< " >" << std::endl;
-		os << rofl::indent(2) << "<buffer-id: 0x"	<< (unsigned int)fe.get_buffer_id() 	<< " >" << std::endl;
-		os << rofl::indent(2) << "<out-port: 0x" 	<< (unsigned int)fe.get_out_port() 		<< " >" << std::endl;
-		os << rofl::indent(2) << "<out-group: 0x"	<< (unsigned int)fe.get_out_group() 	<< " >" << std::endl;
-		os << rofl::indent(2) << "<flags: 0x" 		<< (unsigned int)fe.get_flags() 		<< " >" << std::endl;
+		os  << "<priority: 0x" 	<< (unsigned int)fe.get_priority() 		<< " >" << std::endl;
+		os  << "<buffer-id: 0x"	<< (unsigned int)fe.get_buffer_id() 	<< " >" << std::endl;
+		os  << "<out-port: 0x" 	<< (unsigned int)fe.get_out_port() 		<< " >" << std::endl;
+		os  << "<out-group: 0x"	<< (unsigned int)fe.get_out_group() 	<< " >" << std::endl;
+		os  << "<flags: 0x" 		<< (unsigned int)fe.get_flags() 		<< " >" << std::endl;
 		os << std::dec;
 
-		rofl::indent i(2);
+		
 		os << fe.get_match();
 
 		switch (fe.get_version()) {

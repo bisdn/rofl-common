@@ -445,9 +445,9 @@ public:
 	friend std::ostream&
 	operator<< (std::ostream& os, crofchan const& chan) {
 		AcquireReadLock rwlock(chan.conns_rwlock);
-		os << indent(0) << "<crofchan established:" << chan.is_established()
+		os  << "<crofchan established:" << chan.is_established()
 				<< " ofp-version: " << (int)chan.ofp_version << " >" << std::endl;
-		indent i(2);
+		
 		for (std::map<cauxid, crofconn*>::const_iterator
 				it = chan.conns.begin(); it != chan.conns.end(); ++it) {
 			os << *(it->second);

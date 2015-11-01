@@ -151,8 +151,8 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, coftablestatsarray const& tablestatsarray) {
-		os << rofl::indent(0) << "<coftablestatsarray #tables:" << (int)tablestatsarray.array.size() << " >" << std::endl;
-		rofl::indent i(2);
+		os  << "<coftablestatsarray #tables:" << (int)tablestatsarray.array.size() << " >" << std::endl;
+		
 		for (std::map<uint8_t, coftable_stats_reply>::const_iterator
 				it = tablestatsarray.array.begin(); it != tablestatsarray.array.end(); ++it) {
 			os << it->second;

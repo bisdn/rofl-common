@@ -147,9 +147,9 @@ public:
 	friend std::ostream&
 	operator<< (std::ostream& os, cofhello_elem_versionbitmap const& elem) {
 		os << dynamic_cast<cofhello_elem const&>( elem );
-		os << indent(2) << "<cofhello_elem_versionbitmap >" << std::endl;
+		os << "<cofhello_elem_versionbitmap >" << std::endl;
 		for (unsigned int i = 0; i < elem.bitmaps.size(); i++) {
-			os << indent(4) << "<bitmap[" << i << "] 0x" <<
+			os << "<bitmap[" << i << "] 0x" <<
 					std::setfill('0') << std::setw(8) <<
 					std::hex << elem.bitmaps[i] << std::dec <<
 					std::setw(0) << std::setfill(' ') << " >" << std::endl;

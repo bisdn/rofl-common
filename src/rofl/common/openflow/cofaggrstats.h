@@ -206,35 +206,35 @@ public:
 	operator<< (std::ostream& os, cofaggr_stats_request const& aggr_stats_request) {
 		switch (aggr_stats_request.get_version()) {
 		case rofl::openflow::OFP_VERSION_UNKNOWN: {
-			os << indent(0) << "<cofaggr_stats_request >" << std::endl;
+			os  << "<cofaggr_stats_request >" << std::endl;
 		} break;
 		case rofl::openflow10::OFP_VERSION: {
-			os << indent(0) << "<cofaggr_stats_request >" << std::endl;
-			os << indent(2) << "<table-id:" << (int)aggr_stats_request.get_table_id() << " >" << std::endl;
-			os << indent(2) << "<out-port:0x" << std::hex << (int)aggr_stats_request.get_out_port() << std::dec << " >" << std::endl;
-			indent i(2);
+			os  << "<cofaggr_stats_request >" << std::endl;
+			os << "<table-id:" << (int)aggr_stats_request.get_table_id() << " >" << std::endl;
+			os << "<out-port:0x" << std::hex << (int)aggr_stats_request.get_out_port() << std::dec << " >" << std::endl;
+			
 			os << aggr_stats_request.match;
 
 		} break;
 		case rofl::openflow12::OFP_VERSION: {
-			os << indent(0) << "<cofaggr_stats_request >" << std::endl;
-			os << indent(2) << "<table-id:" << (int)aggr_stats_request.get_table_id() << " >" << std::endl;
-			os << indent(2) << "<out-port:0x" << std::hex << (int)aggr_stats_request.get_out_port() << std::dec << " >" << std::endl;
-			os << indent(2) << "<out-group:0x" << std::hex << (int)aggr_stats_request.get_out_group() << std::dec << " >" << std::endl;
-			os << indent(2) << "<cookie:0x" << std::hex << (unsigned long long)aggr_stats_request.get_cookie() << std::dec << " >" << std::endl;
-			os << indent(2) << "<cookie-mask:0x" << std::hex << (unsigned long long)aggr_stats_request.get_cookie_mask() << std::dec << " >" << std::endl;
-			indent i(2);
+			os  << "<cofaggr_stats_request >" << std::endl;
+			os << "<table-id:" << (int)aggr_stats_request.get_table_id() << " >" << std::endl;
+			os << "<out-port:0x" << std::hex << (int)aggr_stats_request.get_out_port() << std::dec << " >" << std::endl;
+			os << "<out-group:0x" << std::hex << (int)aggr_stats_request.get_out_group() << std::dec << " >" << std::endl;
+			os << "<cookie:0x" << std::hex << (unsigned long long)aggr_stats_request.get_cookie() << std::dec << " >" << std::endl;
+			os << "<cookie-mask:0x" << std::hex << (unsigned long long)aggr_stats_request.get_cookie_mask() << std::dec << " >" << std::endl;
+			
 			os << aggr_stats_request.match;
 
 		} break;
 		case rofl::openflow13::OFP_VERSION: {
-			os << indent(0) << "<cofaggr_stats_request >" << std::endl;
-			os << indent(2) << "<table-id:" << (int)aggr_stats_request.get_table_id() << " >" << std::endl;
-			os << indent(2) << "<out-port:0x" << std::hex << (int)aggr_stats_request.get_out_port() << std::dec << " >" << std::endl;
-			os << indent(2) << "<out-group:0x" << std::hex << (int)aggr_stats_request.get_out_group() << std::dec << " >" << std::endl;
-			os << indent(2) << "<cookie:0x" << std::hex << (unsigned long long)aggr_stats_request.get_cookie() << std::dec << " >" << std::endl;
-			os << indent(2) << "<cookie-mask:0x" << std::hex << (unsigned long long)aggr_stats_request.get_cookie_mask() << std::dec << " >" << std::endl;
-			indent i(2);
+			os  << "<cofaggr_stats_request >" << std::endl;
+			os << "<table-id:" << (int)aggr_stats_request.get_table_id() << " >" << std::endl;
+			os << "<out-port:0x" << std::hex << (int)aggr_stats_request.get_out_port() << std::dec << " >" << std::endl;
+			os << "<out-group:0x" << std::hex << (int)aggr_stats_request.get_out_group() << std::dec << " >" << std::endl;
+			os << "<cookie:0x" << std::hex << (unsigned long long)aggr_stats_request.get_cookie() << std::dec << " >" << std::endl;
+			os << "<cookie-mask:0x" << std::hex << (unsigned long long)aggr_stats_request.get_cookie_mask() << std::dec << " >" << std::endl;
+			
 			os << aggr_stats_request.match;
 
 		} break;
@@ -383,15 +383,15 @@ public:
 	operator<< (std::ostream& os, cofaggr_stats_reply const& reply) {
 		switch (reply.get_version()) {
 		case rofl::openflow::OFP_VERSION_UNKNOWN: {
-			os << indent(0) << "<cofaggr_stats_reply >" << std::endl;
+			os  << "<cofaggr_stats_reply >" << std::endl;
 		} break;
 		case rofl::openflow10::OFP_VERSION:
 		case rofl::openflow12::OFP_VERSION:
 		case rofl::openflow13::OFP_VERSION: {
-			os << indent(0) << "<cofaggr_stats_reply >" << std::endl;
-			os << indent(2) << "<packet-count:" << (int)reply.get_packet_count() << " >" << std::endl;
-			os << indent(2) << "<byte-count:" << (int)reply.get_byte_count() << " >" << std::endl;
-			os << indent(2) << "<flow-count:" << (int)reply.get_flow_count() << " >" << std::endl;
+			os  << "<cofaggr_stats_reply >" << std::endl;
+			os << "<packet-count:" << (int)reply.get_packet_count() << " >" << std::endl;
+			os << "<byte-count:" << (int)reply.get_byte_count() << " >" << std::endl;
+			os << "<flow-count:" << (int)reply.get_flow_count() << " >" << std::endl;
 		} break;
 		default: {
 			throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);

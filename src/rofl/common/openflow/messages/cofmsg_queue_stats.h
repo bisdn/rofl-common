@@ -99,8 +99,8 @@ public:
 	friend std::ostream&
 	operator<< (std::ostream& os, cofmsg_queue_stats_request const& msg) {
 		os << dynamic_cast<cofmsg const&>( msg );
-		os << indent(2) << "<cofmsg_queue_stats_request >" << std::endl;
-		indent i(4);
+		os << "<cofmsg_queue_stats_request >" << std::endl;
+		
 		os << msg.queue_stats;
 		return os;
 	};
@@ -199,8 +199,8 @@ public:
 	friend std::ostream&
 	operator<< (std::ostream& os, cofmsg_queue_stats_reply const& msg) {
 		os << dynamic_cast<cofmsg const&>( msg );
-		os << indent(2) << "<cofmsg_queue_stats_reply >" << std::endl;
-		indent i(4);
+		os << "<cofmsg_queue_stats_reply >" << std::endl;
+		
 		os << msg.queuestatsarray;
 		return os;
 	};

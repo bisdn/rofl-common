@@ -284,10 +284,10 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, cofinstructions const& inlist) {
-		os << indent(0) << "<cofintructions ofp-version:" << (int)inlist.ofp_version << " >" << std::endl;
+		os  << "<cofintructions ofp-version:" << (int)inlist.ofp_version << " >" << std::endl;
 		for (std::map<uint16_t, cofinstruction*>::const_iterator
 				it = inlist.instmap.begin(); it != inlist.instmap.end(); ++it) {
-			indent i(2);
+			
 			switch (it->second->get_type()) {
 			case openflow::OFPIT_GOTO_TABLE:
 				os << inlist.get_inst_goto_table(); break;

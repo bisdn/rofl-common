@@ -208,16 +208,16 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, coftable_features const& msg) {
-		os << indent(0) << "<coftable_features >" << std::endl;
-		os << indent(2) << "<table-id: " 		<< (int)msg.get_table_id() 						<< " >" << std::endl;
-		os << indent(2) << "<name: " 			<< msg.get_name() 								<< " >" << std::endl;
+		os  << "<coftable_features >" << std::endl;
+		os << "<table-id: " 		<< (int)msg.get_table_id() 						<< " >" << std::endl;
+		os << "<name: " 			<< msg.get_name() 								<< " >" << std::endl;
 		os << std::hex;
-		os << indent(2) << "<metadata-match: 0x"<< (unsigned long long)msg.get_metadata_match() << " >" << std::endl;
-		os << indent(2) << "<metadata-write: 0x"<< (unsigned long long)msg.get_metadata_write() << " >" << std::endl;
-		os << indent(2) << "<config: 0x"		<< (unsigned int)msg.get_config() 				<< " >" << std::endl;
-		os << indent(2) << "<max-entries: 0x" 	<< (unsigned int)msg.get_max_entries() 			<< " >" << std::endl;
+		os << "<metadata-match: 0x"<< (unsigned long long)msg.get_metadata_match() << " >" << std::endl;
+		os << "<metadata-write: 0x"<< (unsigned long long)msg.get_metadata_write() << " >" << std::endl;
+		os << "<config: 0x"		<< (unsigned int)msg.get_config() 				<< " >" << std::endl;
+		os << "<max-entries: 0x" 	<< (unsigned int)msg.get_max_entries() 			<< " >" << std::endl;
 		os << std::dec;
-		indent i(2);
+		
 		os << msg.get_properties();
 		return os;
 	};

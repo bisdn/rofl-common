@@ -24,7 +24,7 @@
 #include "rofl/common/crofchan.h"
 #include "rofl/common/exception.hpp"
 #include "rofl/common/locking.hpp"
-#include "rofl/common/logging.h"
+
 #include "rofl/common/crandom.h"
 #include "rofl/common/cjournal.hpp"
 
@@ -1418,7 +1418,7 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, const crofctl& ctl) {
-		os << indent(0) << "<crofctl ";
+		os  << "<crofctl ";
 		os << "ctlid:0x" << ctl.ctlid.str() << " ";
 		os << ">" << std::endl;
 		return os;

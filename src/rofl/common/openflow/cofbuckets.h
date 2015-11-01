@@ -174,16 +174,16 @@ public:
 	operator<< (std::ostream& os, cofbuckets const& buckets) {
 		switch (buckets.get_version()) {
 		case rofl::openflow::OFP_VERSION_UNKNOWN: {
-			os << indent(0) << "<cofbuckets ";
+			os  << "<cofbuckets ";
 					os << "ofp-version:" << (int)buckets.ofp_version << " >" << std::endl;
 
 		} break;
 		case rofl::openflow12::OFP_VERSION:
 		case rofl::openflow13::OFP_VERSION: {
-			os << indent(0) << "<cofbuckets ";
+			os  << "<cofbuckets ";
 			os << "ofp-version:" << (int)buckets.ofp_version << " ";
 			os << "#buckets:" << buckets.buckets.size() << " >" << std::endl;
-			indent i(2);
+			
 			for (std::map<uint32_t, cofbucket>::const_iterator
 					it = buckets.buckets.begin(); it != buckets.buckets.end(); ++it) {
 				os << it->second;

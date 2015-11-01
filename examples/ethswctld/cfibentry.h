@@ -15,7 +15,6 @@
 #include <rofl/common/caddress.h>
 #include <rofl/common/crofbase.h>
 #include <rofl/common/crofdpt.h>
-#include <rofl/common/logging.h>
 
 namespace rofl {
 namespace examples {
@@ -194,9 +193,8 @@ public:
 	 */
 	friend std::ostream&
 	operator<< (std::ostream& os, cfibentry const& entry) {
-		os << rofl::indent(0) << "<cfibentry portno: "
+		os << "<cfibentry portno: "
 				<< entry.port_no << " >" << std::endl;
-		rofl::indent i(2);
 		os << entry.hwaddr;
 		return os;
 	};

@@ -329,13 +329,13 @@ public:
 	operator<< (std::ostream& os, cfibtable const& fib) {
 		try {
 #if 0
-			os << rofl::indent(0) << "<cfibtable dpid: "
+			os << "<cfibtable dpid: "
 					<< rofl::crofdpt::get_dpt(fib.dptid).get_dpid().str() << " >" << std::endl;
 #endif
 		} catch (rofl::eRofDptNotFound& e) {
-			os << rofl::indent(0) << "<cfibtable dptid:" << fib.dptid.str() << " >" << std::endl;
+			os << "<cfibtable dptid:" << fib.dptid.str() << " >" << std::endl;
 		}
-		rofl::indent i(2);
+		
 		for (std::map<rofl::caddress_ll, cfibentry*>::const_iterator
 				it = fib.ftable.begin(); it != fib.ftable.end(); ++it) {
 			os << *(it->second);
