@@ -197,8 +197,16 @@ public:
 	/**
 	 *
 	 */
+	const cofmatch&
+	get_match() const
+	{ return match; };
+
+	/**
+	 *
+	 */
 	cofmatch&
-	get_match();
+	set_match()
+	{ return match; };
 
 public:
 

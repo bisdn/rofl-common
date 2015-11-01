@@ -111,14 +111,6 @@ cofaggr_stats_request::get_version() const
 
 
 
-cofmatch&
-cofaggr_stats_request::get_match()
-{
-	return match;
-}
-
-
-
 void
 cofaggr_stats_request::set_table_id(uint8_t table_id)
 {
