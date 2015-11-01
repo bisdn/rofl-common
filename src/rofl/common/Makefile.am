@@ -5,6 +5,7 @@ SUBDIRS = openflow
 noinst_LTLIBRARIES = librofl_common_base.la
 
 librofl_common_base_la_SOURCES = \
+		rofcommon.h \
 		exception.hpp \
 		cjournal.hpp \
 		cjournal.cpp \
@@ -22,6 +23,7 @@ librofl_common_base_la_SOURCES = \
 		crofconn.h \
 		crofsock.cc \
 		crofsock.h \
+		crofqueue.h \
 		ctimespec.cpp \
 		ctimespec.hpp \
 		ctimer.cpp \
@@ -29,7 +31,6 @@ librofl_common_base_la_SOURCES = \
 		cthread.cpp \
 		cthread.hpp \
 		endian_conversion.h \
-		rofcommon.h \
 		caddress.h \
 		caddress.cc \
 		cpacket.h \
@@ -49,7 +50,6 @@ librofl_common_base_la_SOURCES = \
 		caddrinfos.cc \
 		cindex.h \
 		cdpid.h \
-		crofqueue.h \
 		csegment.hpp \
 		csegment.cpp
 
@@ -59,21 +59,26 @@ librofl_common_base_la_LIBADD=openflow/libopenflow.la -lrt
 
 library_includedir=$(includedir)/rofl/common
 library_include_HEADERS= \
+		rofcommon.h \
 		exception.hpp \
 		cjournal.hpp \
 		cjrnentry.hpp \
-		caddress.h \
-		cpacket.h \
-		crandom.h \
-		endian_conversion.h \
-		rofcommon.h \
+		locking.hpp \
 		crofbase.h \
 		crofdpt.h \
 		crofctl.h \
-		crofconn.h \
 		crofchan.h \
+		crofconn.h \
+		crofsock.h \
+		crofqueue.h \
+		ctimespec.hpp \
+		ctimer.hpp \
+		cthread.hpp \
+		endian_conversion.h \
+		caddress.h \
+		cpacket.h \
+		crandom.h \
 		cmemory.h \
-		csegment.hpp \
 		cauxid.h \
 		cctlid.h \
 		cdptid.h \
@@ -82,7 +87,8 @@ library_include_HEADERS= \
 		caddrinfos.h \
 		cindex.h \
 		cdpid.h \
-		crofqueue.h
+		csegment.hpp
+
 
 
 AM_CPPFLAGS=-fPIC
