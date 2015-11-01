@@ -22,29 +22,41 @@ namespace rofl {
 class eRofQueueBase : public exception {
 public:
 	eRofQueueBase(
-			const std::string& __arg) :
-				exception(__arg)
+			const std::string& __arg,
+			const std::string& __file = std::string(""),
+			const std::string& __func = std::string(""),
+			int __line = 0) :
+				exception(__arg, __file, __func, __line)
 	{};
 };
 class eRofQueueInvalid : public eRofQueueBase {
 public:
 	eRofQueueInvalid(
-			const std::string& __arg) :
-				eRofQueueBase(__arg)
+			const std::string& __arg,
+			const std::string& __file = std::string(""),
+			const std::string& __func = std::string(""),
+			int __line = 0) :
+				eRofQueueBase(__arg, __file, __func, __line)
 	{};
 };
 class eRofQueueNotFound : public eRofQueueBase {
 public:
 	eRofQueueNotFound(
-			const std::string& __arg) :
-				eRofQueueBase(__arg)
+			const std::string& __arg,
+			const std::string& __file = std::string(""),
+			const std::string& __func = std::string(""),
+			int __line = 0) :
+				eRofQueueBase(__arg, __file, __func, __line)
 	{};
 };
 class eRofQueueFull : public eRofQueueBase {
 public:
 	eRofQueueFull(
-			const std::string& __arg) :
-				eRofQueueBase(__arg)
+			const std::string& __arg,
+			const std::string& __file = std::string(""),
+			const std::string& __func = std::string(""),
+			int __line = 0) :
+				eRofQueueBase(__arg, __file, __func, __line)
 	{};
 };
 

@@ -64,6 +64,23 @@ public:
 	 *
 	 */
 	const std::string&
+	get_exception() const
+	{ return get_key("exception"); };
+
+	/**
+	 *
+	 */
+	exception&
+	set_exception(
+			const std::string& s_exception)
+	{ set_key("exception", s_exception); return *this; };
+
+public:
+
+	/**
+	 *
+	 */
+	const std::string&
 	get_caller() const
 	{ return get_key("caller"); };
 
@@ -244,7 +261,7 @@ public:
 	/**
 	 *
 	 */
-	exception&
+	virtual exception&
 	set_key(
 			const std::string& key, int value) {
 		std::stringstream ss; ss << value;
@@ -254,7 +271,7 @@ public:
 	/**
 	 *
 	 */
-	exception&
+	virtual exception&
 	set_key(
 			const std::string& key, unsigned int value) {
 		std::stringstream ss; ss << value;
@@ -264,7 +281,7 @@ public:
 	/**
 	 *
 	 */
-	exception&
+	virtual exception&
 	set_key(
 			const std::string& key, const std::string& value) {
 		kvmap[key] = value; return *this;
@@ -365,10 +382,52 @@ public:
 class eSysCall : public exception {
 public:
 	eSysCall(
-			const std::string& __arg) :
-				exception(__arg),
+			const std::string& __exception = std::string("eSysCall"),
+			const std::string& __arg = std::string(""),
+			const std::string& __file = std::string(""),
+			const std::string& __func = std::string(""),
+			int __line = 0) :
+				exception(__arg, __file, __func, __line),
 				__errno(errno)
-	{ set_errnum(errno); };
+	{
+		set_exception(__exception);
+		set_errnum(errno);
+	};
+
+public:
+
+	/**
+	 *
+	 */
+	virtual eSysCall&
+	set_key(
+			const std::string& key, int value) {
+		exception::set_key(key, value);
+		return *this;
+	};
+
+	/**
+	 *
+	 */
+	virtual eSysCall&
+	set_key(
+			const std::string& key, unsigned int value) {
+		exception::set_key(key, value);
+		return *this;
+	};
+
+	/**
+	 *
+	 */
+	virtual eSysCall&
+	set_key(
+			const std::string& key, const std::string& value) {
+		exception::set_key(key, value);
+		return *this;
+	};
+
+public:
+
     virtual
 	const char*
     what() const noexcept {
@@ -383,9 +442,47 @@ private:
 class eLibCall : public exception {
 public:
 	eLibCall(
-			const std::string& __arg) :
-				exception(__arg)
-	{};
+			const std::string& __exception = std::string("eLibCall"),
+			const std::string& __arg = std::string(""),
+			const std::string& __file = std::string(""),
+			const std::string& __func = std::string(""),
+			int __line = 0) :
+				exception(__arg, __file, __func, __line)
+	{
+		set_exception(__exception);
+	};
+
+public:
+
+	/**
+	 *
+	 */
+	virtual eLibCall&
+	set_key(
+			const std::string& key, int value) {
+		exception::set_key(key, value);
+		return *this;
+	};
+
+	/**
+	 *
+	 */
+	virtual eLibCall&
+	set_key(
+			const std::string& key, unsigned int value) {
+		exception::set_key(key, value);
+		return *this;
+	};
+
+	/**
+	 *
+	 */
+	virtual eLibCall&
+	set_key(
+			const std::string& key, const std::string& value) {
+		exception::set_key(key, value);
+		return *this;
+	};
 };
 
 }; // end of namespace rofl

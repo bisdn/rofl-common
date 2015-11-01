@@ -230,17 +230,17 @@ crofsock::listen()
 
 	/* open socket */
 	if ((sd = ::socket(baddr.get_family(), type, protocol)) < 0) {
-		throw eSysCall("socket syscall failed").set_func(__PRETTY_FUNCTION__).set_line(__LINE__).set_errnum(errno);
+		throw eSysCall("eSysCall", "socket", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 
 	/* make socket non-blocking */
 	long flags;
 	if ((flags = ::fcntl(sd, F_GETFL)) < 0) {
-		throw eSysCall("fcntl (F_GETFL) syscall failed").set_func(__PRETTY_FUNCTION__).set_line(__LINE__).set_errnum(errno);
+		throw eSysCall("eSysCall", "fcntl (F_GETFL)", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 	flags |= O_NONBLOCK;
 	if ((rc = ::fcntl(sd, F_SETFL, flags)) < 0) {
-		throw eSysCall("fcntl (F_SETFL) syscall failed").set_func(__PRETTY_FUNCTION__).set_line(__LINE__).set_errnum(errno);
+		throw eSysCall("eSysCall", "fcntl (F_SETFL)", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 
 	if ((SOCK_STREAM == type) && (IPPROTO_TCP == protocol)) {
@@ -248,42 +248,42 @@ crofsock::listen()
 
 		// set SO_REUSEADDR option on TCP sockets
 		if ((rc = ::setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, (int*)&optval, sizeof(optval))) < 0) {
-			throw eSysCall("setsockopt (SO_REUSEADDR) syscall failed").set_func(__PRETTY_FUNCTION__).set_line(__LINE__).set_errnum(errno);
+			throw eSysCall("eSysCall", "setsockopt (SO_REUSEADDR)", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		}
 
 #if 0
 		int on = 1;
 		if ((rc = ::setsockopt(sd, SOL_SOCKET, SO_REUSEPORT, &on, sizeof(on))) < 0) {
-			throw eSysCall("setsockopt (SO_REUSEPORT) syscall failed").set_func(__PRETTY_FUNCTION__).set_line(__LINE__).set_errnum(errno);
+			throw eSysCall("eSysCall", "setsockopt (SO_REUSEPORT)", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		}
 #endif
 
 		// set TCP_NODELAY option on TCP sockets
 		if ((rc = ::setsockopt(sd, IPPROTO_TCP, TCP_NODELAY, (int*)&optval, sizeof(optval))) < 0) {
-			throw eSysCall("setsockopt (TCP_NODELAY) syscall failed").set_func(__PRETTY_FUNCTION__).set_line(__LINE__).set_errnum(errno);
+			throw eSysCall("eSysCall", "setsockopt (TCP_NODELAY)", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		}
 
 		// set SO_RCVLOWAT
 		if ((rc = ::setsockopt(sd, SOL_SOCKET, SO_RCVLOWAT, (int*)&optval, sizeof(optval))) < 0) {
-			throw eSysCall("setsockopt (SO_RCVLOWAT) syscall failed").set_func(__PRETTY_FUNCTION__).set_line(__LINE__).set_errnum(errno);
+			throw eSysCall("eSysCall", "setsockopt (SO_RCVLOWAT)", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		}
 
 		// read TCP_NODELAY option for debugging purposes
 		socklen_t optlen = sizeof(int);
 		int optvalc;
 		if ((rc = ::getsockopt(sd, IPPROTO_TCP, TCP_NODELAY, (int*)&optvalc, &optlen)) < 0) {
-			throw eSysCall("getsockopt (TCP_NODELAY) syscall failed").set_func(__PRETTY_FUNCTION__).set_line(__LINE__).set_errnum(errno);
+			throw eSysCall("eSysCall", "getsockopt (TCP_NODELAY)", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		}
 	}
 
 	/* bind to local address */
 	if ((rc = ::bind(sd, baddr.ca_saddr, (socklen_t)(baddr.salen))) < 0) {
-		throw eSysCall("bind syscall failed").set_func(__PRETTY_FUNCTION__).set_line(__LINE__).set_errnum(errno).set_key("baddr", baddr.str());
+		throw eSysCall("eSysCall", "bind", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 
 	/* listen on socket */
 	if ((rc = ::listen(sd, backlog)) < 0) {
-		throw eSysCall("listen syscall failed").set_func(__PRETTY_FUNCTION__).set_line(__LINE__).set_errnum(errno);
+		throw eSysCall("eSysCall", "listen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 
 	state = STATE_LISTENING;
@@ -320,54 +320,46 @@ crofsock::tcp_accept(
 
 	/* extract new connection from listening queue */
 	if ((sd = ::accept(sockfd, laddr.ca_saddr, &(laddr.salen))) < 0) {
-		throw eSysCall("accept syscall failed").
-				set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+		throw eSysCall("eSysCall", "accept", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 
 	/* make socket non-blocking, as this status is not inherited */
 	long sockflags = 0;
 	if ((sockflags = ::fcntl(sd, F_GETFL)) < 0) {
-		throw eSysCall("fcntl (F_GETFL) syscall failed").
-				set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+		throw eSysCall("eSysCall", "fcntl (F_GETFL)", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 	sockflags |= O_NONBLOCK;
 	if ((::fcntl(sd, F_SETFL, sockflags)) < 0) {
-		throw eSysCall("fcntl (F_SETFL) syscall failed").
-				set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+		throw eSysCall("eSysCall", "fcntl (F_SETFL)", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 
 	socklen_t optlen = 0;
 	if ((::getsockname(sd, laddr.ca_saddr, &(laddr.salen))) < 0) {
-		throw eSysCall("getsockname syscall failed").
-				set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+		throw eSysCall("eSysCall", "getsockname", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 
 	if ((::getpeername(sd, raddr.ca_saddr, &(raddr.salen))) < 0) {
-		throw eSysCall("getpeername syscall failed").
-				set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+		throw eSysCall("eSysCall", "getpeername", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 
 /* Some kernels do not define this option */
 #ifdef SO_PROTOCOL
 	optlen = sizeof(domain);
 	if ((::getsockopt(sd, SOL_SOCKET, SO_DOMAIN, &domain, &optlen)) < 0) {
-		throw eSysCall("getsockopt (SO_DOMAIN) syscall failed").
-				set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+		throw eSysCall("eSysCall", "getsockopt (SO_DOMAIN)", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 #endif
 
 	optlen = sizeof(type);
 	if ((::getsockopt(sd, SOL_SOCKET, SO_TYPE, &type, &optlen)) < 0) {
-		throw eSysCall("getsockopt (SO_TYPE) syscall failed").
-				set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+		throw eSysCall("eSysCall", "getsockopt (SO_TYPE)", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 
 /* Some kernels do not define this option */
 #ifdef SO_PROTOCOL
 	optlen = sizeof(protocol);
 	if ((::getsockopt(sd, SOL_SOCKET, SO_PROTOCOL, &protocol, &optlen)) < 0) {
-		throw eSysCall("getsockopt (SO_PROTOCOL) syscall failed").
-				set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+		throw eSysCall("eSysCall", "getsockopt (SO_PROTOCOL)", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 #endif
 
@@ -413,20 +405,17 @@ crofsock::tcp_connect(
 
 	/* open socket */
 	if ((sd = ::socket(raddr.get_family(), type, protocol)) < 0) {
-		throw eSysCall("socket syscall failed").
-				set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+		throw eSysCall("eSysCall", "socket", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 
 	/* make socket non-blocking */
 	long sockflags;
 	if ((sockflags = ::fcntl(sd, F_GETFL)) < 0) {
-		throw eSysCall("fcntl (F_GETFL) syscall failed").
-				set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+		throw eSysCall("eSysCall", "fcntl (F_GETCL)", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 	sockflags |= O_NONBLOCK;
 	if ((rc = ::fcntl(sd, F_SETFL, sockflags)) < 0) {
-		throw eSysCall("fcntl (F_SETFL) syscall failed").
-				set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+		throw eSysCall("eSysCall", "fcntl (F_SETCL)", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 
 	/* set REUSEADDR and TCP_NODELAY options (for TCP sockets only) */
@@ -435,22 +424,19 @@ crofsock::tcp_connect(
 
 		/* set SO_REUSEADDR option */
 		if ((rc = ::setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval))) < 0) {
-			throw eSysCall("setsockopt (SO_REUSEADDR) syscall failed").
-					set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+			throw eSysCall("eSysCall", "setsockopt (SO_REUSEADDR)", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		}
 
 		/* set TCP_NODELAY option */
 		if ((rc = ::setsockopt(sd, IPPROTO_TCP, TCP_NODELAY, &optval, sizeof(optval))) < 0) {
-			throw eSysCall("setsockopt (TCP_NODELAY) syscall failed").
-					set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+			throw eSysCall("eSysCall", "setsockopt (TCP_NODELAY)", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		}
 	}
 
 	/* bind to local address */
 	if (laddr.get_family() != AF_UNSPEC) {
 		if ((rc = ::bind(sd, laddr.ca_saddr, (socklen_t)(laddr.salen))) < 0) {
-			throw eSysCall("bind syscall failed").
-					set_func(__PRETTY_FUNCTION__).set_line(__LINE__).set_key("laddr", laddr.str());
+			throw eSysCall("eSysCall", "bind", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		}
 	}
 
@@ -485,13 +471,11 @@ crofsock::tcp_connect(
 		/* connect succeeded */
 
 		if ((getsockname(sd, laddr.ca_saddr, &(laddr.salen))) < 0) {
-			throw eSysCall("getsockname syscall failed").
-					set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+			throw eSysCall("eSysCall", "getsockname", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		}
 
 		if ((getpeername(sd, raddr.ca_saddr, &(raddr.salen))) < 0) {
-			throw eSysCall("getpeername syscall failed").
-					set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+			throw eSysCall("eSysCall", "getpeername", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		}
 
 		state = STATE_TCP_ESTABLISHED;
@@ -557,8 +541,7 @@ crofsock::tls_init_context()
 
 	// certificate
 	if (!SSL_CTX_use_certificate_file(ctx, certfile.c_str(), SSL_FILETYPE_PEM)) {
-		throw eLibCall("SSL_CTX_use_certificate_file libcall failed").
-				set_func(__PRETTY_FUNCTION__).set_line(__LINE__).set_key("certfile", certfile);
+		throw eLibCall("eLibCall", "SSL_CTX_use_certificate_file", __FILE__, __PRETTY_FUNCTION__, __LINE__).set_key("certfile", certfile);
 	}
 
 	// private key
@@ -566,22 +549,19 @@ crofsock::tls_init_context()
 	SSL_CTX_set_default_passwd_cb_userdata(ctx, (void*)this);
 
 	if (!SSL_CTX_use_PrivateKey_file(ctx, keyfile.c_str(), SSL_FILETYPE_PEM)) {
-		throw eLibCall("SSL_CTX_use_PrivateKey_file libcall failed").
-				set_func(__PRETTY_FUNCTION__).set_line(__LINE__).set_key("keyfile", keyfile);
+		throw eLibCall("eLibCall", "SSL_CTX_use_PrivateKey_file", __FILE__, __PRETTY_FUNCTION__, __LINE__).set_key("keyfile", keyfile);
 	}
 
 	// ciphers
 	if ((not ciphers.empty()) && (0 == SSL_CTX_set_cipher_list(ctx, ciphers.c_str()))) {
-		throw eLibCall("SSL_CTX_set_cipher_list libcall failed").
-				set_func(__PRETTY_FUNCTION__).set_line(__LINE__).set_key("ciphers", ciphers);
+		throw eLibCall("eLibCall", "SSL_CTX_set_cipher_list", __FILE__, __PRETTY_FUNCTION__, __LINE__).set_key("ciphers", ciphers);
 	}
 
 	// capath/cafile
 	if (!SSL_CTX_load_verify_locations(ctx,
 			cafile.empty() ? NULL : cafile.c_str(),
 			capath.empty() ? NULL : capath.c_str())) {
-		throw eLibCall("SSL_CTX_load_verify_locations libcall failed").
-				set_func(__PRETTY_FUNCTION__).set_line(__LINE__).set_key("cafile", cafile).set_key("capath", capath);
+		throw eLibCall("eLibCall", "SSL_CTX_load_verify_locations", __FILE__, __PRETTY_FUNCTION__, __LINE__).set_key("cafile", cafile).set_key("capath", capath);
 	}
 
 	int mode = SSL_VERIFY_NONE;
@@ -652,13 +632,11 @@ crofsock::tls_accept(
 		tls_init_context();
 
 		if ((ssl = SSL_new(ctx)) == NULL) {
-			throw eLibCall("SSL_new libcall failed").
-					set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+			throw eLibCall("eLibCall", "SSL_new", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		}
 
 		if ((bio = BIO_new(BIO_s_socket())) == NULL) {
-			throw eLibCall("BIO_new libcall failed").
-					set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+			throw eLibCall("eLibCall", "BIO_new", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		}
 
 		BIO_set_fd(bio, sd, BIO_NOCLOSE);
@@ -753,8 +731,7 @@ crofsock::tls_accept(
 	} break;
 	default: {
 
-		throw eRofSockError("crofsock::tls_accept() called in invalid state").
-				set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+		throw eRofSockError("crofsock::tls_accept() called in invalid state", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	};
 	}
 }
@@ -780,13 +757,11 @@ crofsock::tls_connect(
 		tls_init_context();
 
 		if ((ssl = SSL_new(ctx)) == NULL) {
-			throw eLibCall("SSL_new libcall failed").
-					set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+			throw eLibCall("eLibCall", "SSL_new", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		}
 
 		if ((bio = BIO_new(BIO_s_socket())) == NULL) {
-			throw eLibCall("BIO_new libcall failed").
-					set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+			throw eLibCall("eLibCall", "BIO_new", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		}
 
 		BIO_set_fd(bio, sd, BIO_NOCLOSE);
@@ -883,8 +858,7 @@ crofsock::tls_connect(
 	} break;
 	default: {
 
-		throw eRofSockError("crofsock::tls_connect() called in invalid state").
-				set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+		throw eRofSockError("crofsock::tls_connect() called in invalid state", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	};
 	}
 }
@@ -1208,9 +1182,7 @@ crofsock::send_message(
 	}
 
 	if (flags.test(FLAG_TX_BLOCK_QUEUEING)) {
-		throw eRofQueueFull("crofsock::send_message() transmission blocked, congestion").
-				set_func(__PRETTY_FUNCTION__).
-				set_line(__LINE__);
+		throw eRofQueueFull("crofsock::send_message() transmission blocked, congestion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 
 	txqueue_pending_pkts++;
@@ -1293,7 +1265,7 @@ crofsock::send_message(
 	} break;
 	default: {
 		delete msg;
-		throw eRofSockNotEstablished("crofsock::send_message() socket not established");
+		throw eRofSockNotEstablished("crofsock::send_message() socket not established", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	};
 	}
 }
@@ -1464,8 +1436,7 @@ crofsock::handle_read_event_rxthread(
 			int optlen = sizeof(optval);
 			if ((rc = getsockopt(sd, SOL_SOCKET, SO_ERROR,
 								 (void*)&optval, (socklen_t*)&optlen)) < 0) {
-				throw eSysCall("getsockopt (SOL_SOCKET:SO_ERROR) syscall failed").
-						set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+				throw eSysCall("eSysCall", "getsockopt (SO_ERROR)", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 			}
 
 			switch (optval) {
@@ -1474,13 +1445,11 @@ crofsock::handle_read_event_rxthread(
 				rxthread.drop_write_fd(sd);
 
 				if ((getsockname(sd, laddr.ca_saddr, &(laddr.salen))) < 0) {
-					throw eSysCall("getsockname syscall failed").
-							set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+					throw eSysCall("eSysCall", "getsockname", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 				}
 
 				if ((getpeername(sd, raddr.ca_saddr, &(raddr.salen))) < 0) {
-					throw eSysCall("getpeername syscall failed").
-							set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+					throw eSysCall("eSysCall", "getpeername", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 				}
 
 				state = STATE_TCP_ESTABLISHED;

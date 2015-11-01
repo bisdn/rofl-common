@@ -93,44 +93,74 @@ namespace rofl {
 class eRofSockBase : public exception {
 public:
 	eRofSockBase(
-			const std::string& __arg) :
-				exception(__arg)
-	{};
+			const std::string& __arg,
+			const std::string& __file = std::string(""),
+			const std::string& __func = std::string(""),
+			int __line = 0) :
+				exception(__arg, __file, __func, __line)
+	{
+		set_exception("eRofSockBase");
+	};
 };
 class eRofSockInvalid : public eRofSockBase {
 public:
 	eRofSockInvalid(
-			const std::string& __arg) :
-				eRofSockBase(__arg)
-	{};
+			const std::string& __arg,
+			const std::string& __file = std::string(""),
+			const std::string& __func = std::string(""),
+			int __line = 0) :
+				eRofSockBase(__arg, __file, __func, __line)
+	{
+		set_exception("eRofSockInvalid");
+	};
 };
 class eRofSockNotFound : public eRofSockBase {
 public:
 	eRofSockNotFound(
-			const std::string& __arg) :
-				eRofSockBase(__arg)
-	{};
+			const std::string& __arg,
+			const std::string& __file = std::string(""),
+			const std::string& __func = std::string(""),
+			int __line = 0) :
+				eRofSockBase(__arg, __file, __func, __line)
+	{
+		set_exception("eRofSockNotFound");
+	};
 };
 class eRofSockError : public eRofSockBase {
 public:
 	eRofSockError(
-			const std::string& __arg) :
-				eRofSockBase(__arg)
-	{};
+			const std::string& __arg,
+			const std::string& __file = std::string(""),
+			const std::string& __func = std::string(""),
+			int __line = 0) :
+				eRofSockBase(__arg, __file, __func, __line)
+	{
+		set_exception("eRofSockError");
+	};
 };
 class eRofSockNotEstablished : public eRofSockBase {
 public:
 	eRofSockNotEstablished(
-			const std::string& __arg) :
-				eRofSockBase(__arg)
-	{};
+			const std::string& __arg,
+			const std::string& __file = std::string(""),
+			const std::string& __func = std::string(""),
+			int __line = 0) :
+				eRofSockBase(__arg, __file, __func, __line)
+	{
+		set_exception("eRofSockNotEstablished");
+	};
 };
 class eRofSockCongested : public eRofSockBase {
 public:
 	eRofSockCongested(
-			const std::string& __arg) :
-				eRofSockBase(__arg)
-	{};
+			const std::string& __arg,
+			const std::string& __file = std::string(""),
+			const std::string& __func = std::string(""),
+			int __line = 0) :
+				eRofSockBase(__arg, __file, __func, __line)
+	{
+		set_exception("eRofSockCongested");
+	};
 };
 
 
