@@ -17,9 +17,24 @@
 namespace rofl {
 namespace openflow {
 
-class ePortStatsBase			: public RoflException {};
-class ePortStatsInval			: public ePortStatsBase {};
-class ePortStatsNotFound		: public ePortStatsBase {};
+class ePortStatsBase			: public exception {
+public:
+	ePortStatsBase(
+			const std::string& __arg = std::string("")) :
+				exception(__arg)
+	{
+		set_exception("ePortStatsBase");
+	};
+};
+class ePortStatsNotFound		: public ePortStatsBase {
+public:
+	ePortStatsNotFound(
+			const std::string& __arg = std::string("")) :
+				ePortStatsBase(__arg)
+	{
+		set_exception("ePortStatsNotFound");
+	};
+};
 
 class cofport_stats_request
 {

@@ -191,7 +191,7 @@ csegment_test::testRetrieveAndDetach()
 	try {
 		segmsg.get_msg();
 		CPPUNIT_ASSERT(false);
-	} catch(rofl::eInval& e) {};
+	} catch(rofl::eInvalid& e) {};
 
 	delete merged;
 }

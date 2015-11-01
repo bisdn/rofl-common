@@ -10,7 +10,7 @@
 
 #include <inttypes.h>
 
-#include "rofl/common/croflexception.h"
+#include "rofl/common/exception.hpp"
 
 #include "rofl/common/openflow/openflow10.h"
 #include "rofl/common/openflow/openflow12.h"

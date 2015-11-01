@@ -17,14 +17,30 @@
 
 #include "rofl/common/openflow/openflow_rofl_exceptions.h"
 #include "rofl/common/cmemory.h"
-#include "rofl/common/croflexception.h"
+#include "rofl/common/exception.hpp"
 #include "rofl/common/openflow/openflow.h"
 
 namespace rofl {
 namespace openflow {
 
-class eQueuePropBase 		: public RoflException {};
-class eQueuePropNotFound 	: public eQueuePropBase {};
+class eQueuePropBase 		: public exception {
+public:
+	eQueuePropBase(
+			const std::string& __arg = std::string("")) :
+				exception(__arg)
+	{
+		set_exception("eQueuePropBase");
+	};
+};
+class eQueuePropNotFound 	: public eQueuePropBase {
+public:
+	eQueuePropNotFound(
+			const std::string& __arg = std::string("")) :
+				eQueuePropBase(__arg)
+	{
+		set_exception("eQueuePropNotFound");
+	};
+};
 
 
 class cofqueue_prop {

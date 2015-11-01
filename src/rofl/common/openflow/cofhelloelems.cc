@@ -85,7 +85,7 @@ cofhelloelems::pack(
 		uint8_t *buf, size_t buflen)
 {
 	if (buflen < cofhelloelems::length())
-		throw eHelloElemsInval();
+		throw eInvalid("cofhelloelems::pack()");
 
 	for (std::map<uint8_t, cofhello_elem*>::const_iterator
 			it = elems.begin(); it != elems.end(); ++it) {

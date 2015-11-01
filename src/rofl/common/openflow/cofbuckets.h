@@ -19,10 +19,42 @@
 namespace rofl {
 namespace openflow {
 
-class eBucketsBase 			: public RoflException {};
-class eBucketsInval 		: public eBucketsBase {};
-class eBucketsNotFound 		: public eBucketsBase {};
-class eBucketsOutOfRange 	: public eBucketsBase {};
+class eBucketsBase 			: public exception {
+public:
+	eBucketsBase(
+			const std::string& __arg = std::string("")) :
+				exception(__arg)
+	{
+		set_exception("eBucketsBase");
+	};
+};
+class eBucketsInval 		: public eBucketsBase {
+public:
+	eBucketsInval(
+			const std::string& __arg = std::string("")) :
+				eBucketsBase(__arg)
+	{
+		set_exception("eBucketsInval");
+	};
+};
+class eBucketsNotFound 		: public eBucketsBase {
+public:
+	eBucketsNotFound(
+			const std::string& __arg = std::string("")) :
+				eBucketsBase(__arg)
+	{
+		set_exception("eBucketsNotFound");
+	};
+};
+class eBucketsOutOfRange 	: public eBucketsBase {
+public:
+	eBucketsOutOfRange(
+			const std::string& __arg = std::string("")) :
+				eBucketsBase(__arg)
+	{
+		set_exception("eBucketsOutOfRange");
+	};
+};
 
 
 class cofbuckets

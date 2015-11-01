@@ -15,9 +15,24 @@
 namespace rofl {
 namespace openflow {
 
-class eTableStatsBase			: public RoflException {};
-class eTableStatsInval			: public eTableStatsBase {};
-class eTableStatsNotFound		: public eTableStatsBase {};
+class eTableStatsBase			: public exception {
+public:
+	eTableStatsBase(
+			const std::string& __arg = std::string("")) :
+				exception(__arg)
+	{
+		set_exception("eTableStatsBase");
+	};
+};
+class eTableStatsNotFound		: public eTableStatsBase {
+public:
+	eTableStatsNotFound(
+			const std::string& __arg = std::string("")) :
+				eTableStatsBase(__arg)
+	{
+		set_exception("eTableStatsNotFound");
+	};
+};
 
 class coftable_stats_reply
 {

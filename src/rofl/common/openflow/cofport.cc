@@ -28,7 +28,7 @@ cofport::pack(
 		uint8_t *buf, size_t buflen)
 {
 	if (buflen < length()) {
-		throw ePortInval("cofport::pack()");
+		throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 
 	switch (get_version()) {
@@ -92,7 +92,7 @@ cofport::unpack(
 		uint8_t *buf, size_t buflen)
 {
 	if (buflen < length())
-		throw ePortInval("cofport::unpack() too short");
+		throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 	switch (get_version()) {
 	case rofl::openflow10::OFP_VERSION: {

@@ -19,7 +19,7 @@ cofmsg_hello::pack(uint8_t *buf, size_t buflen)
 		return;
 
 	if (buflen < get_length())
-		throw eInvalid("eInvalid").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+		throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 	helloelems.pack(buf + sizeof(struct rofl::openflow::ofp_header),
 			buflen - sizeof(struct rofl::openflow::ofp_header));

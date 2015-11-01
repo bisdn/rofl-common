@@ -7,17 +7,31 @@
 
 #include <algorithm>
 
-#include "rofl/common/croflexception.h"
+#include "rofl/common/exception.hpp"
 #include "rofl/common/openflow/openflow.h"
 #include "rofl/common/openflow/cofport.h"
 
 namespace rofl {
 namespace openflow {
 
-class ePortsBase 		: public RoflException {}; // base error class cofinlist
-class ePortsInval 		: public ePortsBase {}; // invalid parameter
-class ePortsNotFound 	: public ePortsBase {}; // element not found
-class ePortsOutOfRange 	: public ePortsBase {}; // out of range
+class ePortsBase 		: public exception {
+public:
+	ePortsBase(
+			const std::string& __arg = std::string("")) :
+				exception(__arg)
+	{
+		set_exception("ePortsBase");
+	};
+}; // base error class cofinlist
+class ePortsNotFound 	: public ePortsBase {
+public:
+	ePortsNotFound(
+			const std::string& __arg = std::string("")) :
+				ePortsBase(__arg)
+	{
+		set_exception("ePortsNotFound");
+	};
+}; // element not found
 
 class cofports
 {

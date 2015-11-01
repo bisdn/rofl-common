@@ -20,7 +20,7 @@ cofmsg_group_mod::pack(
 		return;
 
 	if (buflen < cofmsg_group_mod::length())
-		throw eInvalid("eInvalid").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+		throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 	switch (get_version()) {
 	default: {

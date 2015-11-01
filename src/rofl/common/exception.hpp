@@ -351,21 +351,43 @@ private:
 	std::map<std::string, std::string> kvmap;
 };
 
+class eNotImplemented : public exception {
+public:
+	eNotImplemented(
+			const std::string& __arg = std::string("eNotImplemented"),
+			const std::string& __file = std::string(""),
+			const std::string& __func = std::string(""),
+			int __line = 0) :
+					exception(__arg, __file, __func, __line)
+	{
+		set_exception("eNotImplemented");
+	};
+};
 
 class eOutOfRange : public exception {
 public:
 	eOutOfRange(
-			const std::string& __arg) :
-				exception(__arg)
-	{};
+			const std::string& __arg = std::string("eOutOfRange"),
+			const std::string& __file = std::string(""),
+			const std::string& __func = std::string(""),
+			int __line = 0) :
+					exception(__arg, __file, __func, __line)
+	{
+		set_exception("eOutOfRange");
+	};
 };
 
 class eOutOfMem : public exception {
 public:
 	eOutOfMem(
-			const std::string& __arg) :
-					exception(__arg)
-	{};
+			const std::string& __arg = std::string("eOutOfMem"),
+			const std::string& __file = std::string(""),
+			const std::string& __func = std::string(""),
+			int __line = 0) :
+					exception(__arg, __file, __func, __line)
+	{
+		set_exception("eOutOfMem");
+	};
 };
 
 class eInvalid : public exception {

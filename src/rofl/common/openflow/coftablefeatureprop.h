@@ -14,7 +14,7 @@
 #include <algorithm>
 
 #include "rofl/common/cmemory.h"
-#include "rofl/common/croflexception.h"
+#include "rofl/common/exception.hpp"
 #include "rofl/common/openflow/openflow.h"
 #include "rofl/common/openflow/cofaction.h"
 #include "rofl/common/openflow/cofinstruction.h"
@@ -22,8 +22,24 @@
 namespace rofl {
 namespace openflow {
 
-class eOFTableFeaturePropBase		: public RoflException {};
-class eOFTableFeaturePropInval		: public eOFTableFeaturePropBase {};
+class eOFTableFeaturePropBase		: public exception {
+public:
+	eOFTableFeaturePropBase(
+			const std::string& __arg = std::string("")) :
+				exception(__arg)
+	{
+		set_exception("eOFTableFeaturePropBase");
+	};
+};
+class eOFTableFeaturePropInval		: public eOFTableFeaturePropBase {
+public:
+	eOFTableFeaturePropInval(
+			const std::string& __arg = std::string("")) :
+				eOFTableFeaturePropBase(__arg)
+	{
+		set_exception("eOFTableFeaturePropInval");
+	};
+};
 
 class coftable_feature_prop :
 	public cmemory

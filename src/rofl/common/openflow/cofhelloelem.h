@@ -9,14 +9,11 @@
 #define COFHELLO_ELEM_H_
 
 #include "rofl/common/cmemory.h"
-
+#include "rofl/common/exception.hpp"
 #include "rofl/common/openflow/openflow.h"
 
 namespace rofl {
 namespace openflow {
-
-class eHelloElemBase 		: public RoflException {};
-class eHelloElemInval		: public eHelloElemBase {};
 
 class cofhello_elem :
 			public cmemory

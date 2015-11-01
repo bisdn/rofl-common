@@ -13,16 +13,32 @@
 #include <map>
 
 #include "rofl/common/openflow/coftablefeatures.h"
-#include "rofl/common/croflexception.h"
+#include "rofl/common/exception.hpp"
 
 #include "rofl/common/openflow/coftablestatsarray.h"
 
 namespace rofl {
 namespace openflow {
 
-class eOFTablesBase 		: public RoflException {};
-class eOFTablesInval		: public eOFTablesBase {};
-class eOFTablesNotFound		: public eOFTablesBase {};
+class eTablesBase 		: public exception {
+public:
+	eTablesBase(
+			const std::string& __arg = std::string("")) :
+				exception(__arg)
+	{
+		set_exception("eOFTablesBase");
+	};
+};
+class eTablesNotFound		: public eTablesBase {
+public:
+	eTablesNotFound(
+			const std::string& __arg = std::string("")) :
+				eTablesBase(__arg)
+	{
+		set_exception("eOFTablesNotFound");
+	};
+};
+
 
 class coftables
 {

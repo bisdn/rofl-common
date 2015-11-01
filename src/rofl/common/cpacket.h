@@ -255,22 +255,6 @@ public:
 		memcpy(soframe(), buf, buflen);
 	};
 
-private:
-
-	/**
-	 *
-	 */
-	uint8_t*
-	tag_insert(
-			uint8_t* ptr, size_t len) { throw eNotImplemented(); };
-
-	/**
-	 *
-	 */
-	void
-	tag_remove(
-			uint8_t* ptr, size_t len) { throw eNotImplemented(); };
-
 public:
 
 	/**

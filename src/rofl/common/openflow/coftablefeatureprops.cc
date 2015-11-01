@@ -118,7 +118,7 @@ coftable_feature_props::pack(uint8_t *buf, size_t buflen)
 	size_t total_length = length();
 
 	if (buflen < total_length) {
-		throw eOFTableFeaturePropsInval();
+		throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 
 	for (std::map<uint16_t, coftable_feature_prop*>::iterator

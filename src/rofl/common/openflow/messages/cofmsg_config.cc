@@ -20,7 +20,7 @@ cofmsg_get_config_reply::pack(
 		return;
 
 	if (buflen < get_length())
-		throw eInvalid("eInvalid").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+		throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 	struct rofl::openflow10::ofp_switch_config* hdr =
 			(struct rofl::openflow10::ofp_switch_config*)buf;
@@ -81,7 +81,7 @@ cofmsg_set_config::pack(
 		return;
 
 	if (buflen < get_length())
-		throw eInvalid("eInvalid").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+		throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 	struct rofl::openflow10::ofp_switch_config* hdr =
 			(struct rofl::openflow10::ofp_switch_config*)buf;

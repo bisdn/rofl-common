@@ -63,7 +63,7 @@ cofmsg_get_async_config_request::pack(
 		return;
 
 	if (buflen < cofmsg_get_async_config_request::length())
-		throw eInvalid("eInvalid").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+		throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 }
 
 
@@ -164,7 +164,7 @@ cofmsg_get_async_config_reply::pack(
 		return;
 
 	if (buflen < cofmsg_get_async_config_reply::length())
-		throw eInvalid("eInvalid").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+		throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 	switch (get_version()) {
 	default: {
@@ -277,7 +277,7 @@ cofmsg_set_async_config::pack(
 		return;
 
 	if (buflen < cofmsg_set_async_config::length())
-		throw eInvalid("eInvalid").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+		throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 	switch (get_version()) {
 	default: {

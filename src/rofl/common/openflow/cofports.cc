@@ -108,7 +108,7 @@ cofports::pack(
 	size_t buflen)
 {
 	if (buflen < length()) {
-		throw ePortsInval();
+		throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 
 	switch (ofp_version) {
@@ -231,7 +231,7 @@ cofports::set_port(const std::string& devname)
 	std::map<uint32_t, cofport*>::iterator it;
 	if ((it = find_if(ports.begin(), ports.end(),
 			cofport_find_by_port_name(devname))) == ports.end()) {
-		throw ePortNotFound("cofports::set_port(const std::string&)");
+		throw ePortsNotFound("ePortsNotFound");
 	}
 	return *(it->second);
 }
@@ -244,7 +244,7 @@ cofports::set_port(const rofl::caddress_ll& hwaddr)
 	std::map<uint32_t, cofport*>::iterator it;
 	if ((it = find_if(ports.begin(), ports.end(),
 			cofport_find_by_maddr(hwaddr))) == ports.end()) {
-		throw ePortNotFound("cofports::set_port(const rofl::caddress_ll&)");
+		throw ePortsNotFound("ePortsNotFound");
 	}
 	return *(it->second);
 }
@@ -255,7 +255,7 @@ cofport const&
 cofports::get_port(uint32_t portno) const
 {
 	if (ports.find(portno) == ports.end()) {
-		throw ePortNotFound("cofports::get_port(uint32_t)");
+		throw ePortsNotFound("ePortsNotFound");
 	}
 	return *(ports.at(portno));
 }
@@ -268,7 +268,7 @@ cofports::get_port(const std::string& devname) const
 	std::map<uint32_t, cofport*>::const_iterator it;
 	if ((it = find_if(ports.begin(), ports.end(),
 			cofport_find_by_port_name(devname))) == ports.end()) {
-		throw ePortNotFound("cofports::get_port(const std::string&)");
+		throw ePortsNotFound("ePortsNotFound");
 	}
 	return *(it->second);
 }
@@ -281,7 +281,7 @@ cofports::get_port(const rofl::caddress_ll& hwaddr) const
 	std::map<uint32_t, cofport*>::const_iterator it;
 	if ((it = find_if(ports.begin(), ports.end(),
 			cofport_find_by_maddr(hwaddr))) == ports.end()) {
-		throw ePortNotFound("cofports::get_port(const rofl::caddress_ll&)");
+		throw ePortsNotFound("ePortsNotFound");
 	}
 	return *(it->second);
 }

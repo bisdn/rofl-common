@@ -133,7 +133,7 @@ void
 cofhello_elem_versionbitmap::pack(uint8_t *buf, size_t buflen)
 {
 	if (buflen < length())
-		throw eHelloElemVersionBitmapInval();
+		throw eInvalid("cofhello_elem_versionbitmap::pack()");
 
 	set_length(sizeof(struct openflow13::ofp_hello_elem_header) + bitmaps.size() * sizeof(uint32_t));
 
@@ -151,14 +151,14 @@ void
 cofhello_elem_versionbitmap::unpack(uint8_t *buf, size_t buflen)
 {
 	if (buflen < sizeof(struct openflow13::ofp_hello_elem_header))
-		throw eHelloElemVersionBitmapInval();
+		throw eInvalid("cofhello_elem_versionbitmap::unpack()");
 
 	resize(buflen);
 	assign(buf, buflen);
 	ofh_hello_elem_version_bitmap_generic = somem();
 
 	if (buflen < get_length())
-		throw eHelloElemVersionBitmapInval();
+		throw eInvalid("cofhello_elem_versionbitmap::unpack()");
 
 	uint32_t *bitmap = (uint32_t*)(somem() + sizeof(struct openflow13::ofp_hello_elem_header));
 	for (unsigned int i = 0; i < ((get_length() - 2*sizeof(uint16_t)) / sizeof(uint32_t)); i++) {

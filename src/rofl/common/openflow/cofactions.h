@@ -10,7 +10,7 @@
 #include <list>
 #include <algorithm>
 
-#include "rofl/common/croflexception.h"
+#include "rofl/common/exception.hpp"
 #include "rofl/common/openflow/openflow.h"
 #include "rofl/common/openflow/cofaction.h"
 #include "rofl/common/openflow/experimental/actions/gtp_actions.h"

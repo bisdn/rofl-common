@@ -21,7 +21,6 @@
 #include <iostream>
 #include <string>
 #include <stdexcept>
-#include "rofl/common/croflexception.h"
 
 namespace rofl
 {

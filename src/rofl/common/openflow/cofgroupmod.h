@@ -8,18 +8,18 @@
 #include <string>
 #include <vector>
 
-#include "rofl/common/croflexception.h"
+#include "rofl/common/exception.hpp"
 #include "rofl/common/openflow/cofbuckets.h"
 #include "rofl/common/openflow/openflow.h"
 
 namespace rofl {
 namespace openflow {
 
-class eGroupModBase 	: public RoflException {
+class eGroupModBase 	: public exception {
 public:
 	eGroupModBase(
 			const std::string& __arg) :
-				RoflException(__arg)
+				exception(__arg)
 	{};
 };
 class eGroupModInval 	: public eGroupModBase {

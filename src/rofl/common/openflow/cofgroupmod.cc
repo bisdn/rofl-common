@@ -30,7 +30,7 @@ cofgroupmod::pack(
 		return;
 
 	if (buflen < cofgroupmod::length())
-		throw eInval("cofgroupmod::pack() buflen too short");
+		throw eInvalid("cofgroupmod::pack() buflen too short", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 	switch (get_version()) {
 	case rofl::openflow12::OFP_VERSION:
@@ -63,7 +63,7 @@ cofgroupmod::unpack(
 		return;
 
 	if (buflen < cofgroupmod::length())
-		throw eInval("cofgroupmod::unpack() buflen too short");
+		throw eInvalid("cofgroupmod::unpack() buflen too short", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 	switch (get_version()) {
 	case rofl::openflow12::OFP_VERSION:

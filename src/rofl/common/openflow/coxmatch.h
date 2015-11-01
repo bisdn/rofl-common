@@ -21,7 +21,7 @@
 #endif
 
 #include "rofl/common/openflow/openflow.h"
-#include "rofl/common/croflexception.h"
+#include "rofl/common/exception.hpp"
 #include "rofl/common/cmemory.h"
 #include "rofl/common/caddress.h"
 
@@ -30,11 +30,11 @@ namespace rofl {
 namespace openflow {
 
 /* error classes */
-class eOxmBase : public RoflException {
+class eOxmBase : public exception {
 public:
 	eOxmBase(
 			const std::string& __arg) :
-				RoflException(__arg)
+				exception(__arg)
 	{};
 };
 class eOxmInval : public eOxmBase {

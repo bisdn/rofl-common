@@ -629,15 +629,6 @@ crofctl::handle_recv(
 
 	} catch (eRofCtlNotFound& e) {
 
-	} catch (eBadSyntaxTooShort& e) {
-
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
-		msg->pack(mem.somem(), mem.length());
-
-		rofchan.send_message(conn.get_auxid(),
-				new rofl::openflow::cofmsg_error_bad_request_bad_len(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
-
 	} catch (eBadVersion& e) {
 
 		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);

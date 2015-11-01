@@ -85,7 +85,7 @@ void
 cofhello_elem::pack(uint8_t *buf, size_t buflen)
 {
 	if (buflen < length())
-		throw eHelloElemInval();
+		throw eInvalid("cofhello_elem::pack()");
 	memcpy(buf, somem(), memlen());
 }
 

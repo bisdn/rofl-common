@@ -100,7 +100,7 @@ coftables::pack(
 	}
 
 	if (buflen < length()) {
-		throw eOFTablesInval();
+		throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 
 	for (std::map<uint8_t, coftable_features>::iterator
@@ -167,7 +167,7 @@ const coftable_features&
 coftables::get_table(uint8_t table_id) const
 {
 	if (tables.find(table_id) == tables.end()) {
-		throw eOFTablesNotFound();
+		throw eTablesNotFound();
 	}
 	return tables.at(table_id);
 }

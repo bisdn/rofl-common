@@ -64,7 +64,7 @@ cofmsg_meter_features_stats_request::pack(
 		return;
 
 	if (buflen < cofmsg_meter_features_stats_request::length())
-		throw eInvalid("eInvalid").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+		throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 }
 
 
@@ -158,7 +158,7 @@ cofmsg_meter_features_stats_reply::pack(uint8_t *buf, size_t buflen)
 		return;
 
 	if (buflen < cofmsg_meter_features_stats_reply::length())
-		throw eInvalid("eInvalid").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+		throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 	switch (get_version()) {
 	default: {

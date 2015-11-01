@@ -14,14 +14,29 @@
 #include "rofl/common/openflow/cofinstructions.h"
 #include "rofl/common/openflow/openflow.h"
 #include "rofl/common/openflow/openflow_rofl_exceptions.h"
-#include "rofl/common/croflexception.h"
+#include "rofl/common/exception.hpp"
 
 namespace rofl {
 namespace openflow {
 
-class eFlowStatsBase		: public RoflException {};
-class eFlowStatsInval		: public eFlowStatsBase {};
-class eFlowStatsNotFound	: public eFlowStatsBase {};
+class eFlowStatsBase		: public exception {
+public:
+	eFlowStatsBase(
+			const std::string& __arg = std::string("")) :
+				exception(__arg)
+	{
+		set_exception("eFlowStatsBase");
+	};
+};
+class eFlowStatsNotFound	: public eFlowStatsBase {
+public:
+	eFlowStatsNotFound(
+			const std::string& __arg = std::string("")) :
+				eFlowStatsBase(__arg)
+	{
+		set_exception("eFlowStatsNotFound");
+	};
+};
 
 class cofflow_stats_request
 {

@@ -45,7 +45,7 @@ cofmsg_packet_in::pack(uint8_t *buf, size_t buflen)
 		return;
 
 	if (buflen < get_length())
-		throw eInvalid("eInvalid").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+		throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 	switch (get_version()) {
 	case rofl::openflow10::OFP_VERSION: {
@@ -160,7 +160,7 @@ cofmsg_packet_in::unpack(uint8_t *buf, size_t buflen)
 
 		/* get variable length struct ofp_match */
 		if (rofl::openflow12::OFPMT_OXM != be16toh(hdr->match.type)) // must be extensible match
-			throw eBadSyntax("cofmsg_packet_in::unpack() unexpected match type");
+			throw eBadMatchBadType("eBadMatchBadType", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		/* fixed part outside of struct ofp_match is 16bytes */
 		if (be16toh(hdr->match.length) > (buflen - OFP12_PACKET_IN_STATIC_HDR_LEN))
@@ -197,7 +197,7 @@ cofmsg_packet_in::unpack(uint8_t *buf, size_t buflen)
 
 		/* get variable length struct ofp_match */
 		if (rofl::openflow13::OFPMT_OXM != be16toh(hdr->match.type)) // must be extensible match
-			throw eBadSyntax("cofmsg_packet_in::unpack() unexpected match type");
+			throw eBadMatchBadType("eBadMatchBadType", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		/* fixed part outside of struct ofp_match is 16bytes */
 		if (be16toh(hdr->match.length) > (buflen - OFP13_PACKET_IN_STATIC_HDR_LEN))

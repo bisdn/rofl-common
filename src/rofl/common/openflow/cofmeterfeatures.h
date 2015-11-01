@@ -15,7 +15,7 @@
 namespace rofl {
 namespace openflow {
 
-class eRofMeterFeaturesBase		: public RoflException {};
+class eRofMeterFeaturesBase		: public exception {};
 class eRofMeterFeaturesInval	: public eRofMeterFeaturesBase {};
 class eRofMeterFeaturesNotFound	: public eRofMeterFeaturesBase {};
 

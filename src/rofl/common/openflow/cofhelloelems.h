@@ -18,9 +18,24 @@
 namespace rofl {
 namespace openflow {
 
-class eHelloElemsBase 		: public RoflException {};
-class eHelloElemsInval		: public eHelloElemsBase {};
-class eHelloElemsNotFound	: public eHelloElemsBase {};
+class eHelloElemsBase 		: public exception {
+public:
+	eHelloElemsBase(
+			const std::string& __arg = std::string("")) :
+				exception(__arg)
+	{
+		set_exception("eHelloElemsBase");
+	};
+};
+class eHelloElemsNotFound	: public eHelloElemsBase {
+public:
+	eHelloElemsNotFound(
+			const std::string& __arg = std::string("")) :
+				eHelloElemsBase(__arg)
+	{
+		set_exception("eHelloElemsNotFound");
+	};
+};
 
 class cofhelloelems
 {

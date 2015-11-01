@@ -18,7 +18,7 @@
 #include "rofl/common/openflow/openflow_common.h"
 #include "rofl/common/openflow/openflow.h"
 #include "rofl/common/cmemory.h"
-#include "rofl/common/croflexception.h"
+#include "rofl/common/exception.hpp"
 #include "rofl/common/caddress.h"
 #include "rofl/common/openflow/openflow_rofl_exceptions.h"
 #include "rofl/common/openflow/cofportstats.h"
@@ -34,21 +34,6 @@
 
 namespace rofl {
 namespace openflow {
-
-class ePortBase 			: public RoflException {
-public:
-	ePortBase(const std::string& __arg) : RoflException(__arg) {};
-};
-class ePortInval	 		: public ePortBase {
-public:
-	ePortInval(const std::string& __arg) : ePortBase(__arg) {};
-};
-class ePortNotFound 		: public ePortBase {
-public:
-	ePortNotFound(const std::string& __arg) : ePortBase(__arg) {};
-};
-
-
 
 class cofport {
 public:

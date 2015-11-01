@@ -47,8 +47,6 @@ libopenflow_la_SOURCES= \
 	cofportdescprop.cc \
 	cofportdescprops.h \
 	cofportdescprops.cc \
-	cofstats.h \
-	cofstats.cc \
 	cofdescstats.h \
 	cofdescstats.cc \
 	cofflowstatsarray.h \
@@ -161,7 +159,6 @@ library_include_HEADERS = \
 	cofports.h \
 	cofportdescprop.h \
 	cofportdescprops.h \
-	cofstats.h \
 	cofdescstats.h \
 	cofflowstatsarray.h \
 	cofflowstats.h \

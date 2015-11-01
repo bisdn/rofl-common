@@ -16,15 +16,30 @@
 #include <algorithm>
 
 #include "rofl/common/openflow/coftablefeatureprop.h"
-#include "rofl/common/croflexception.h"
+#include "rofl/common/exception.hpp"
 
 
 namespace rofl {
 namespace openflow {
 
-class eOFTableFeaturePropsBase		: public RoflException {};
-class eOFTableFeaturePropsInval		: public eOFTableFeaturePropsBase {};
-class eOFTableFeaturePropsNotFound	: public eOFTableFeaturePropsBase {};
+class eOFTableFeaturePropsBase		: public exception {
+public:
+	eOFTableFeaturePropsBase(
+			const std::string& __arg = std::string("")) :
+				exception(__arg)
+	{
+		set_exception("eOFTableFeaturePropsBase");
+	};
+};
+class eOFTableFeaturePropsNotFound	: public eOFTableFeaturePropsBase {
+public:
+	eOFTableFeaturePropsNotFound(
+			const std::string& __arg = std::string("")) :
+				eOFTableFeaturePropsBase(__arg)
+	{
+		set_exception("eOFTableFeaturePropsNotFound");
+	};
+};
 
 class coftable_feature_props {
 

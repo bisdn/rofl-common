@@ -16,9 +16,25 @@
 namespace rofl {
 namespace openflow {
 
-class eRofMeterStatsBase		: public RoflException {};
-class eRofMeterStatsInval		: public eRofMeterStatsBase {};
-class eRofMeterStatsNotFound	: public eRofMeterStatsBase {};
+class eRofMeterStatsBase		: public exception {
+public:
+	eRofMeterStatsBase(
+			const std::string& __arg = std::string("")) :
+				exception(__arg)
+	{
+		set_exception("eRofMeterStatsBase");
+	};
+};
+class eRofMeterStatsNotFound	: public eRofMeterStatsBase {
+public:
+	eRofMeterStatsNotFound(
+			const std::string& __arg = std::string("")) :
+				eRofMeterStatsBase(__arg)
+	{
+		set_exception("eRofMeterStatsNotFound");
+	};
+};
+
 
 class cofmeter_stats_request
 {

@@ -15,7 +15,7 @@
 #endif
 
 
-#include "rofl/common/croflexception.h"
+#include "rofl/common/exception.hpp"
 #include "rofl/common/cmemory.h"
 #include "rofl/common/caddress.h"
 #include "rofl/common/openflow/openflow_rofl_exceptions.h"
@@ -28,7 +28,12 @@ namespace rofl {
 namespace openflow {
 
 /* error classes */
-class eActionBase 			: public RoflException {};
+class eActionBase 			: public exception {
+public:
+	eActionBase() :
+		exception("eActionBase")
+	{};
+};
 class eActionInval 			: public eActionBase {}; // invalid parameter
 class eActionInvalType 		: public eActionBase {}; // invalid action type
 class eActionNotFound		: public eActionBase {};

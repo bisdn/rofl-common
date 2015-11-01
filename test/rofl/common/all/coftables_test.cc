@@ -145,7 +145,7 @@ coftablesTest::testAddDropSetGetHas()
 	try {
 		tables.get_table(1);
 		CPPUNIT_ASSERT(false);
-	} catch (rofl::openflow::eOFTablesNotFound& e) {};
+	} catch (rofl::openflow::eTablesNotFound& e) {};
 
 	if (tables.has_table(1)) {
 		CPPUNIT_ASSERT(false);
@@ -154,13 +154,13 @@ coftablesTest::testAddDropSetGetHas()
 
 	try {
 		tables.get_table(1);
-	} catch (rofl::openflow::eOFTablesNotFound& e) {
+	} catch (rofl::openflow::eTablesNotFound& e) {
 		CPPUNIT_ASSERT(false);
 	}
 
 	try {
 		tables.set_table(1);
-	} catch (rofl::openflow::eOFTablesNotFound& e) {
+	} catch (rofl::openflow::eTablesNotFound& e) {
 		CPPUNIT_ASSERT(false);
 	}
 
@@ -173,7 +173,7 @@ coftablesTest::testAddDropSetGetHas()
 	try {
 		tables.get_table(1);
 		CPPUNIT_ASSERT(false);
-	} catch (rofl::openflow::eOFTablesNotFound& e) {};
+	} catch (rofl::openflow::eTablesNotFound& e) {};
 
 	if (tables.has_table(1)) {
 		CPPUNIT_ASSERT(false);

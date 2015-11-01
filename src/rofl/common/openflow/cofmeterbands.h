@@ -18,7 +18,7 @@
 namespace rofl {
 namespace openflow {
 
-class eRofMeterBandsBase 		: public RoflException {};
+class eRofMeterBandsBase 		: public exception {};
 class eRofMeterBandsNotFound 	: public eRofMeterBandsBase {};
 
 class cofmeter_bands {

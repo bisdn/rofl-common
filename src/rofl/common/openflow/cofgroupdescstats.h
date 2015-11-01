@@ -16,9 +16,24 @@
 namespace rofl {
 namespace openflow {
 
-class eGroupDescStatsBase			: public RoflException {};
-class eGroupDescStatsInval			: public eGroupDescStatsBase {};
-class eGroupDescStatsNotFound		: public eGroupDescStatsBase {};
+class eGroupDescStatsBase			: public exception {
+public:
+	eGroupDescStatsBase(
+			const std::string& __arg = std::string("")) :
+				exception(__arg)
+	{
+		set_exception("eGroupDescStatsBase");
+	};
+};
+class eGroupDescStatsNotFound		: public eGroupDescStatsBase {
+public:
+	eGroupDescStatsNotFound(
+			const std::string& __arg = std::string("")) :
+				eGroupDescStatsBase(__arg)
+	{
+		set_exception("eGroupDescStatsNotFound");
+	};
+};
 
 class cofgroup_desc_stats_reply
 {

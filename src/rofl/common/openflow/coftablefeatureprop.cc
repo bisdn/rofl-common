@@ -297,7 +297,7 @@ coftable_feature_prop_instructions::unpack(
 			buf += be16toh(inst->len);
 			buflen -= be16toh(inst->len);
 		}
-	} catch (eInstructionInvalType& e) {
+	} catch (eInvalid& e) {
 		// padding
 	}
 }

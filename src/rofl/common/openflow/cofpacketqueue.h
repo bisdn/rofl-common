@@ -11,7 +11,7 @@
 #include <ostream>
 
 #include "rofl/common/cmemory.h"
-#include "rofl/common/croflexception.h"
+#include "rofl/common/exception.hpp"
 #include "rofl/common/openflow/openflow.h"
 #include "rofl/common/openflow/openflow_rofl_exceptions.h"
 #include "rofl/common/openflow/cofqueueprops.h"
@@ -19,9 +19,24 @@
 namespace rofl {
 namespace openflow {
 
-
-class ePacketQueueBase 		: public RoflException {};
-class ePacketQueueNotFound 	: public ePacketQueueBase {};
+class ePacketQueueBase 		: public exception {
+public:
+	ePacketQueueBase(
+			const std::string& __arg = std::string("")) :
+				exception(__arg)
+	{
+		set_exception("ePacketQueueBase");
+	};
+};
+class ePacketQueueNotFound 	: public ePacketQueueBase {
+public:
+	ePacketQueueNotFound(
+			const std::string& __arg = std::string("")) :
+				ePacketQueueBase(__arg)
+	{
+		set_exception("ePacketQueueNotFound");
+	};
+};
 
 
 class cofpacket_queue {

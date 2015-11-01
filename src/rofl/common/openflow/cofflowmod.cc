@@ -127,7 +127,7 @@ cofflowmod::pack(
 		return;
 
 	if (buflen < length())
-		throw eInval("cofflowmod::pack() buflen too short");
+		throw eInvalid("cofflowmod::pack() buflen too short", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 	switch (get_version()) {
 	case rofl::openflow10::OFP_VERSION: {
@@ -192,7 +192,7 @@ cofflowmod::unpack(
 	case rofl::openflow10::OFP_VERSION: {
 
 		if (buflen < sizeof(struct ofp10_flow_mod))
-			throw eInval("cofflowmod::unpack() buflen too short");
+			throw eInvalid("cofflowmod::unpack() buflen too short", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		struct ofp10_flow_mod* hdr = (struct ofp10_flow_mod*)buf;
 
@@ -218,7 +218,7 @@ cofflowmod::unpack(
 	case rofl::openflow13::OFP_VERSION: {
 
 		if (buflen < sizeof(struct ofp13_flow_mod))
-			throw eInval("cofflowmod::unpack() buflen too short");
+			throw eInvalid("cofflowmod::unpack() buflen too short", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		struct ofp13_flow_mod* hdr = (struct ofp13_flow_mod*)buf;
 
@@ -237,7 +237,7 @@ cofflowmod::unpack(
 		size_t matchhdrlen = buflen - sizeof(struct ofp13_flow_mod);
 
 		if (matchhdrlen < sizeof(struct rofl::openflow13::ofp_match))
-			throw eInval("cofflowmod::unpack() buflen too short");
+			throw eInvalid("cofflowmod::unpack() buflen too short", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		struct rofl::openflow13::ofp_match* m = (struct rofl::openflow13::ofp_match*)(hdr->match);
 

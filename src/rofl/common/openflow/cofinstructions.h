@@ -8,16 +8,48 @@
 #include <assert.h>
 #include <map>
 #include <algorithm>
-#include "rofl/common/croflexception.h"
+#include "rofl/common/exception.hpp"
 #include "rofl/common/openflow/cofinstruction.h"
 
 namespace rofl {
 namespace openflow {
 
-class eInstructionsBase 		: public RoflException {};
-class eInstructionsInval 		: public eInstructionsBase {};
-class eInstructionsNotFound 	: public eInstructionsBase {};
-class eInstructionsOutOfRange	: public eInstructionsBase {};
+class eInstructionsBase 		: public exception {
+public:
+	eInstructionsBase(
+			const std::string& __arg = std::string("")) :
+				exception(__arg)
+	{
+		set_exception("eInstructionsBase");
+	};
+};
+class eInstructionsInval 		: public eInstructionsBase {
+public:
+	eInstructionsInval(
+			const std::string& __arg = std::string("")) :
+				eInstructionsBase(__arg)
+	{
+		set_exception("eInstructionsInval");
+	};
+};
+class eInstructionsNotFound 	: public eInstructionsBase {
+public:
+	eInstructionsNotFound(
+			const std::string& __arg = std::string("")) :
+				eInstructionsBase(__arg)
+	{
+		set_exception("eInstructionsNotFound");
+	};
+};
+class eInstructionsBadLen 			: public eInstructionsBase {
+public:
+	eInstructionsBadLen(
+			const std::string& __arg = std::string("")) :
+				eInstructionsBase(__arg)
+	{
+		set_exception("eInstructionsBadLen");
+	};
+}; // bad length
 
 
 

@@ -20,7 +20,7 @@ cofmsg_echo_request::pack(
 		return;
 
 	if (buflen < get_length())
-		throw eInvalid("eInvalid").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+		throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 	body.pack(buf + sizeof(struct rofl::openflow::ofp_header),
 			buflen - sizeof(struct rofl::openflow::ofp_header));
@@ -78,7 +78,7 @@ cofmsg_echo_reply::pack(
 		return;
 
 	if (buflen < get_length())
-		throw eInvalid("eInvalid").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+		throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 	body.pack(buf + sizeof(struct rofl::openflow::ofp_header),
 			buflen - sizeof(struct rofl::openflow::ofp_header));

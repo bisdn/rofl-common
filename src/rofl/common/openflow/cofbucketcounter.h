@@ -14,15 +14,39 @@
 
 #include "rofl/common/openflow/openflow.h"
 #include "rofl/common/openflow/openflow_rofl_exceptions.h"
-#include "rofl/common/croflexception.h"
+#include "rofl/common/exception.hpp"
 
 
 namespace rofl {
 namespace openflow {
 
-class eBucketCounterBase			: public RoflException {};
-class eBucketCounterInval			: public eBucketCounterBase {};
-class eBucketCounterNotFound		: public eBucketCounterBase {};
+class eBucketCounterBase			: public exception {
+public:
+	eBucketCounterBase(
+			const std::string& __arg = std::string("")) :
+				exception(__arg)
+	{
+		set_exception("eBucketCounterBase");
+	};
+};
+class eBucketCounterInval			: public eBucketCounterBase {
+public:
+	eBucketCounterInval(
+			const std::string& __arg = std::string("")) :
+				eBucketCounterBase(__arg)
+	{
+		set_exception("eBucketCounterInval");
+	};
+};
+class eBucketCounterNotFound		: public eBucketCounterBase {
+public:
+	eBucketCounterNotFound(
+			const std::string& __arg = std::string("")) :
+				eBucketCounterBase(__arg)
+	{
+		set_exception("eBucketCounterNotFound");
+	};
+};
 
 class cofbucket_counter
 {

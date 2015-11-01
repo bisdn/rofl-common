@@ -16,9 +16,6 @@
 namespace rofl {
 namespace openflow {
 
-class eHelloElemVersionBitmapBase 	: public eHelloElemBase {};
-class eHelloElemVersionBitmapInval	: public eHelloElemVersionBitmapBase {};
-
 class cofhello_elem_versionbitmap :
 		public cofhello_elem
 {

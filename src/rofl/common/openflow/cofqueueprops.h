@@ -10,7 +10,7 @@
 
 #include <map>
 
-#include "rofl/common/croflexception.h"
+#include "rofl/common/exception.hpp"
 #include "rofl/common/openflow/openflow.h"
 #include "rofl/common/openflow/cofqueueprop.h"
 

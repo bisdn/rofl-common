@@ -16,23 +16,12 @@
 
 #include "rofl/common/openflow/openflow.h"
 #include "rofl/common/cmemory.h"
-#include "rofl/common/croflexception.h"
+#include "rofl/common/exception.hpp"
 #include "rofl/common/openflow/cofactions.h"
 
 
 namespace rofl {
 namespace openflow {
-
-/* error classes */
-class eInstructionBase 				: public RoflException {}; // error base class for class cofinstruction
-class eInstructionInval 			: public eInstructionBase {}; // invalid parameter
-class eInstructionNotFound 			: public eInstructionBase {}; // not found
-class eInstructionBadLen 			: public eInstructionBase {}; // bad length
-class eInstructionInvalType 		: public eInstructionBase {}; // invalid instruction type
-class eInstructionHeaderInval 		: public eInstructionBase {}; // invalid instruction header
-class eInstructionActionNotFound 	: public eInstructionBase {}; // action not found in instruction
-class eInstructionBadExperimenter 	: public eInstructionBase {}; // unknown experimenter instruction
-
 
 class cofinstruction {
 public:

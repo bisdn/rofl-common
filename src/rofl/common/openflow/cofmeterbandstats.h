@@ -18,8 +18,24 @@
 namespace rofl {
 namespace openflow {
 
-class eRofMeterBandStatsBase		: public RoflException {};
-class eRofMeterBandStatsNotFound	: public eRofMeterBandStatsBase {};
+class eRofMeterBandStatsBase		: public exception {
+public:
+	eRofMeterBandStatsBase(
+			const std::string& __arg = std::string("")) :
+				exception(__arg)
+	{
+		set_exception("eRofMeterBandStatsBase");
+	};
+};
+class eRofMeterBandStatsNotFound	: public eRofMeterBandStatsBase {
+public:
+	eRofMeterBandStatsNotFound(
+			const std::string& __arg = std::string("")) :
+				eRofMeterBandStatsBase(__arg)
+	{
+		set_exception("eRofMeterBandStatsNotFound");
+	};
+};
 
 class cofmeter_band_stats {
 public:

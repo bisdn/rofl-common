@@ -71,7 +71,7 @@ cofmsg_table_stats_request::pack(
 		return;
 
 	if (buflen < cofmsg_table_stats_request::length())
-		throw eInvalid("eInvalid").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+		throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 }
 
 
@@ -185,7 +185,7 @@ cofmsg_table_stats_reply::pack(
 		return;
 
 	if (buflen < cofmsg_table_stats_reply::length())
-		throw eInvalid("eInvalid").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+		throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 	switch (get_version()) {
 	case rofl::openflow10::OFP_VERSION: {

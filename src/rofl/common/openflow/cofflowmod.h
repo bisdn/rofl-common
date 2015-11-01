@@ -11,7 +11,7 @@
 #include <endian.h>
 #include <strings.h>
 
-#include "rofl/common/croflexception.h"
+#include "rofl/common/exception.hpp"
 #include "rofl/common/cmemory.h"
 #include "rofl/common/caddress.h"
 #include "rofl/common/openflow/cofmatch.h"
@@ -22,11 +22,6 @@
 
 namespace rofl {
 namespace openflow {
-
-class eFlowModBase 		: public RoflException {}; // error base class cflowentry
-class eFlowModInvalid 	: public eFlowModBase {}; // invalid parameter
-class eFlowModOutOfMem 	: public eFlowModBase {}; // out of memory
-
 
 class cofflowmod {
 public:

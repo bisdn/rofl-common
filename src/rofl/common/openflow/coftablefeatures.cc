@@ -89,7 +89,7 @@ coftable_features::unpack(uint8_t *buf, size_t buflen)
 	switch (get_version()) {
 	case openflow13::OFP_VERSION: {
 		if (buflen < sizeof(struct rofl::openflow13::ofp_table_features)) {
-			throw eOFTableFeaturesInval();
+			throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		}
 
 		rofl::cmemory::unpack(buf, sizeof(struct rofl::openflow13::ofp_table_features));

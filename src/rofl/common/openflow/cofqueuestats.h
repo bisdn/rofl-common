@@ -15,9 +15,24 @@
 namespace rofl {
 namespace openflow {
 
-class eQueueStatsBase			: public RoflException {};
-class eQueueStatsInval			: public eQueueStatsBase {};
-class eQueueStatsNotFound		: public eQueueStatsBase {};
+class eQueueStatsBase			: public exception {
+public:
+	eQueueStatsBase(
+			const std::string& __arg = std::string("")) :
+				exception(__arg)
+	{
+		set_exception("eQueueStatsBase");
+	};
+};
+class eQueueStatsNotFound		: public eQueueStatsBase {
+public:
+	eQueueStatsNotFound(
+			const std::string& __arg = std::string("")) :
+				eQueueStatsBase(__arg)
+	{
+		set_exception("eQueueStatsNotFound");
+	};
+};
 
 class cofqueue_stats_request
 {

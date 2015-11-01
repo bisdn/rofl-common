@@ -108,7 +108,7 @@ void
 cofmatch::pack_of10(uint8_t* buf, size_t buflen)
 {
 	if (buflen < length()) {
-		throw eOFmatchInval();
+		throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 
 	uint32_t wildcards = 0;
@@ -221,7 +221,7 @@ cofmatch::unpack_of10(uint8_t* buf, size_t buflen)
 	matches.clear();
 
 	if (buflen < sizeof(struct rofl::openflow10::ofp_match)) {
-		throw eOFmatchInval();
+		throw eBadMatchBadLen("eBadMatchBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 
 	struct rofl::openflow10::ofp_match *m = (struct rofl::openflow10::ofp_match*)buf;
@@ -335,7 +335,7 @@ void
 cofmatch::pack_of13(uint8_t* buf, size_t buflen)
 {
 	if (buflen < length()) {
-		throw eOFmatchInval();
+		throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 
 	struct rofl::openflow13::ofp_match* m = (struct rofl::openflow13::ofp_match*)buf;
@@ -354,7 +354,7 @@ cofmatch::unpack_of13(uint8_t* buf, size_t buflen)
 	matches.clear();
 
 	if (buflen < 2*sizeof(uint16_t)) {
-		throw eOFmatchInval();
+		throw eBadMatchBadLen("eBadMatchBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 
 	struct rofl::openflow13::ofp_match* m = (struct rofl::openflow13::ofp_match*)buf;

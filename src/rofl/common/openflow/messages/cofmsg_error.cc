@@ -20,7 +20,7 @@ cofmsg_error::pack(
 		return;
 
 	if (buflen < get_length())
-		throw eInvalid("eInvalid").set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+		throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 	struct rofl::openflow::ofp_error_msg* hdr =
 			(struct rofl::openflow::ofp_error_msg*)buf;

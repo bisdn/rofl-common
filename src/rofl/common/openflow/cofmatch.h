@@ -18,20 +18,13 @@
 #include "rofl/common/openflow/openflow.h"
 #include "rofl/common/cmemory.h"
 #include "rofl/common/caddress.h"
-#include "rofl/common/croflexception.h"
+#include "rofl/common/exception.hpp"
 #include "rofl/common/caddress.h"
 #include "rofl/common/openflow/openflow_rofl_exceptions.h"
 #include "rofl/common/openflow/coxmatches.h"
 
 namespace rofl {
 namespace openflow {
-
-class eOFmatchBase 			: public RoflException {};
-class eOFmatchType 			: public eOFmatchBase {};
-class eOFmatchInval 		: public eOFmatchBase {};
-class eOFmatchNotFound 		: public eOFmatchBase {};
-class eOFmatchInvalBadValue	: public eOFmatchInval {};
-
 
 class cofmatch
 {

@@ -15,7 +15,7 @@
 #endif
 
 #include "rofl/common/openflow/openflow.h"
-#include "rofl/common/croflexception.h"
+#include "rofl/common/exception.hpp"
 #include "rofl/common/cmemory.h"
 #include "rofl/common/openflow/cofactions.h"
 
@@ -23,9 +23,33 @@ namespace rofl {
 namespace openflow {
 
 /* error classes */
-class eBucketBase 	: public RoflException {}; // error base class for class cofbucket
-class eBucketInval 	: public eBucketBase {}; // parameter is invalid
-class eBucketBadLen : public eBucketBase {}; // invalid length
+class eBucketBase 	: public exception {
+public:
+	eBucketBase(
+			const std::string& __arg = std::string("")) :
+				exception(__arg)
+	{
+		set_exception("eBucketBase");
+	};
+}; // error base class for class cofbucket
+class eBucketInval 	: public eBucketBase {
+public:
+	eBucketInval(
+			const std::string& __arg = std::string("")) :
+				eBucketBase(__arg)
+	{
+		set_exception("eBucketInval");
+	};
+}; // parameter is invalid
+class eBucketBadLen : public eBucketBase {
+public:
+	eBucketBadLen(
+			const std::string& __arg = std::string("")) :
+				eBucketBase(__arg)
+	{
+		set_exception("eBucketBadLen");
+	};
+}; // invalid length
 
 
 
