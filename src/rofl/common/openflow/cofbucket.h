@@ -54,18 +54,7 @@ public:
 
 
 class cofbucket {
-
-	uint8_t ofp_version;
-
-	uint64_t packet_count; // packet count for this bucket
-	uint64_t byte_count; // byte count for this bucket
-    uint16_t weight;
-    uint32_t watch_port;
-    uint32_t watch_group;
-
-	cofactions actions; // list of OpenFlow actions
-
-public: // per instance methods
+public:
 
 	/**
 	 *
@@ -76,7 +65,6 @@ public: // per instance methods
 			uint32_t watch_port = 0,
 			uint32_t watch_group = 0);
 
-
 	/**
 	 *
 	 */
@@ -85,13 +73,11 @@ public: // per instance methods
 			uint8_t *bucket,
 			size_t bclen);
 
-
 	/**
 	 *
 	 */
 	virtual
 	~cofbucket();
-
 
 	/**
 	 *
@@ -107,6 +93,7 @@ public: // per instance methods
 	operator== (
 			const cofbucket& b);
 
+public:
 
 	/**
 	 *
@@ -114,13 +101,11 @@ public: // per instance methods
 	uint8_t*
 	pack(uint8_t* bucket, size_t bclen);
 
-
 	/**
 	 *
 	 */
 	void
 	unpack(uint8_t* bucket, size_t bclen);
-
 
 	/**
 	 *
@@ -128,14 +113,12 @@ public: // per instance methods
 	size_t
 	length() const;
 
-
 	/**
 	 *
 	 */
 	void
 	get_bucket_stats(
 			cmemory& body);
-
 
 	/**
 	 *
@@ -148,108 +131,106 @@ public:
 	/**
 	 *
 	 */
+	cofbucket&
+	set_version(
+			uint8_t ofp_version)
+	{ this->ofp_version = ofp_version; return *this; };
+
+	/**
+	 *
+	 */
 	uint8_t
-	get_version() const { return ofp_version; };
+	get_version() const
+	{ return ofp_version; };
 
 	/**
 	 *
 	 */
-	void
-	set_version(uint8_t ofp_version) { this->ofp_version = ofp_version; };
-
-	/**
-	 *
-	 */
-	uint64_t
-	get_packet_count() const { return packet_count; };
-
-	/**
-	 *
-	 */
-	void
-	set_packet_count(uint64_t packet_count) { this->packet_count = packet_count; };
+	cofbucket&
+	set_packet_count(
+			uint64_t packet_count)
+	{ this->packet_count = packet_count; return *this; };
 
 	/**
 	 *
 	 */
 	uint64_t
-	get_byte_count() const { return byte_count; };
+	get_packet_count() const
+	{ return packet_count; };
 
 	/**
 	 *
 	 */
-	void
-	set_byte_count(uint64_t byte_count) { this->byte_count = byte_count; };
+	cofbucket&
+	set_byte_count(
+			uint64_t byte_count)
+	{ this->byte_count = byte_count; return *this; };
 
 	/**
 	 *
 	 */
-	void
-	set_weight(uint16_t weight) { this->weight = weight; };
+	uint64_t
+	get_byte_count() const
+	{ return byte_count; };
+
+	/**
+	 *
+	 */
+	cofbucket&
+	set_weight(
+			uint16_t weight)
+	{ this->weight = weight; return *this; };
 
 	/**
 	 *
 	 */
 	uint16_t
-	get_weight() const { return weight; };
+	get_weight() const
+	{ return weight; };
 
 	/**
 	 *
 	 */
-	void
-	set_watch_port(uint32_t watch_port) { this->watch_port = watch_port; };
-
-	/**
-	 *
-	 */
-	uint32_t
-	get_watch_port() const { return watch_port; };
-
-	/**
-	 *
-	 */
-	void
-	set_watch_group(uint32_t watch_group) { this->watch_group = watch_group; };
+	cofbucket&
+	set_watch_port(
+			uint32_t watch_port)
+	{ this->watch_port = watch_port; return *this; };
 
 	/**
 	 *
 	 */
 	uint32_t
-	get_watch_group() const { return watch_group; };
+	get_watch_port() const
+	{ return watch_port; };
+
+	/**
+	 *
+	 */
+	cofbucket&
+	set_watch_group(
+			uint32_t watch_group)
+	{ this->watch_group = watch_group; return *this; };
+
+	/**
+	 *
+	 */
+	uint32_t
+	get_watch_group() const
+	{ return watch_group; };
 
 	/**
 	 *
 	 */
 	cofactions&
-	set_actions() { return actions; };
+	set_actions()
+	{ return actions; };
 
 	/**
 	 *
 	 */
-	cofactions const&
-	get_actions() const { return actions; };
-
-private:
-
-	/** pack bucket
-	 */
-	uint8_t*
-	pack_of12(uint8_t* buf, size_t buflen);
-
-	/** unpack bucket
-	 */
-	void
-	unpack_of12(uint8_t *buf, size_t buflen);
-
-	/** pack bucket
-	 */
-	uint8_t*
-	pack_of13(uint8_t* buf, size_t buflen);
-
-	/** unpack bucket
-	 */
-	void
-	unpack_of13(uint8_t *buf, size_t buflen);
+	const cofactions&
+	get_actions() const
+	{ return actions; };
 
 public:
 
@@ -282,6 +263,32 @@ public:
 		}
 		return os;
 	};
+
+private:
+
+	uint8_t*
+	pack_of12(uint8_t* buf, size_t buflen);
+
+	void
+	unpack_of12(uint8_t *buf, size_t buflen);
+
+	uint8_t*
+	pack_of13(uint8_t* buf, size_t buflen);
+
+	void
+	unpack_of13(uint8_t *buf, size_t buflen);
+
+private:
+
+	uint8_t ofp_version;
+
+	uint64_t packet_count; // packet count for this bucket
+	uint64_t byte_count; // byte count for this bucket
+    uint16_t weight;
+    uint32_t watch_port;
+    uint32_t watch_group;
+
+	cofactions actions; // list of OpenFlow actions
 };
 
 }; // end of namespace

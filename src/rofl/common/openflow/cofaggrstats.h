@@ -18,89 +18,99 @@
 namespace rofl {
 namespace openflow {
 
-class cofaggr_stats_request
-{
-private: // data structures
-
-	uint8_t 	of_version;
-	cofmatch 	match;
-	uint8_t 	table_id;
-	uint32_t	out_port;
-	uint32_t	out_group;
-	uint64_t	cookie;
-	uint64_t	cookie_mask;
-
-	std::string info;
-
-public: // data structures
-
-
+class cofaggr_stats_request {
 public:
+
+	/**
+	 *
+	 */
+	virtual
+	~cofaggr_stats_request()
+	{};
+
 	/**
 	 *
 	 */
 	cofaggr_stats_request(
 			uint8_t of_version = openflow::OFP_VERSION_UNKNOWN,
 			uint8_t *buf = (uint8_t*)0,
-			size_t buflen = 0);
+			size_t buflen = 0) :
+				of_version(of_version),
+				match(of_version),
+				table_id(0),
+				out_port(0),
+				out_group(0),
+				cookie(0),
+				cookie_mask(0)
+	{
+		if ((buflen == 0) || (nullptr == buf)) {
+			return;
+		}
+		unpack(buf, buflen);
+	};
 
 	/**
 	 *
 	 */
 	cofaggr_stats_request(
 			uint8_t of_version,
-			cofmatch const& match,
-			uint8_t table_id,
-			uint16_t out_port);
-
-
-	/**
-	 *
-	 */
-	cofaggr_stats_request(
-			uint8_t of_version,
-			cofmatch const& match,
-			uint8_t table_id,
-			uint32_t out_port,
-			uint32_t out_group,
-			uint64_t cookie,
-			uint64_t cookie_mask);
-
-
-	/**
-	 *
-	 */
-	virtual
-	~cofaggr_stats_request();
-
+			const cofmatch& match,
+			uint8_t table_id = 0xff,
+			uint32_t out_port = rofl::openflow::OFPP_ALL,
+			uint32_t out_group = rofl::openflow::OFPG_ALL,
+			uint64_t cookie = 0,
+			uint64_t cookie_mask = 0) :
+				of_version(of_version),
+				match(match),
+				table_id(table_id),
+				out_port(out_port),
+				out_group(out_group),
+				cookie(cookie),
+				cookie_mask(cookie_mask)
+	{ this->match.set_version(of_version); };
 
 	/**
 	 *
 	 */
 	cofaggr_stats_request(
-			cofaggr_stats_request const& flowstatsrequest);
+			const cofaggr_stats_request& req)
+	{ *this = req; };
 
 	/**
 	 *
 	 */
 	cofaggr_stats_request&
 	operator= (
-			cofaggr_stats_request const& flowstatsrequest);
+			const cofaggr_stats_request& req) {
+		if (this == &req)
+			return *this;
 
+		of_version 	= req.of_version;
+		match		= req.match;
+		table_id	= req.table_id;
+		out_port	= req.out_port;
+		out_group	= req.out_group;
+		cookie		= req.cookie;
+		cookie_mask	= req.cookie_mask;
+
+		return *this;
+	};
+
+public:
 
 	/**
 	 *
 	 */
 	void
-	pack(uint8_t *buf, size_t buflen);
-
+	pack(
+			uint8_t *buf, size_t buflen);
 
 	/**
 	 *
 	 */
 	void
-	unpack(uint8_t *buf, size_t buflen);
-
+	unpack(
+			uint8_t *buf, size_t buflen);
 
 	/**
 	 *
@@ -108,104 +118,118 @@ public:
 	size_t
 	length() const;
 
+public:
 
 	/**
 	 *
 	 */
-	void
-	set_version(uint8_t of_version);
-
-
-	/**
-	 *
-	 */
-	uint8_t
-	get_version() const;
-
-
-	/**
-	 *
-	 */
-	void
-	set_table_id(uint8_t table_id);
-
+	cofaggr_stats_request&
+	set_version(
+			uint8_t of_version)
+	{ this->of_version = of_version; match.set_version(of_version); return *this; };
 
 	/**
 	 *
 	 */
 	uint8_t
-	get_table_id() const;
-
+	get_version() const
+	{ return of_version; };
 
 	/**
 	 *
 	 */
-	void
-	set_out_port(uint32_t out_port);
+	cofaggr_stats_request&
+	set_table_id(
+			uint8_t table_id)
+	{ this->table_id = table_id; return *this; };
 
+	/**
+	 *
+	 */
+	uint8_t
+	get_table_id() const
+	{ return table_id; };
+
+	/**
+	 *
+	 */
+	cofaggr_stats_request&
+	set_out_port(
+			uint32_t out_port)
+	{ this->out_port = out_port; return *this; };
 
 	/**
 	 *
 	 */
 	uint32_t
-	get_out_port() const;
-
+	get_out_port() const
+	{ return out_port; };
 
 	/**
 	 *
 	 */
-	void
-	set_out_group(uint32_t out_group);
-
+	cofaggr_stats_request&
+	set_out_group(
+			uint32_t out_group)
+	{ this->out_group = out_group; return *this; };
 
 	/**
 	 *
 	 */
 	uint32_t
-	get_out_group() const;
-
-
-
-	/**
-	 *
-	 */
-	void
-	set_cookie(uint64_t cookie);
-
+	get_out_group() const
+	{ return out_group; };
 
 	/**
 	 *
 	 */
-	uint64_t
-	get_cookie() const;
-
-
-	/**
-	 *
-	 */
-	void
-	set_cookie_mask(uint64_t cookie_mask);
-
+	cofaggr_stats_request&
+	set_cookie(
+			uint64_t cookie)
+	{ this->cookie = cookie; return *this; };
 
 	/**
 	 *
 	 */
 	uint64_t
-	get_cookie_mask() const;
-
+	get_cookie() const
+	{ return cookie; };
 
 	/**
 	 *
 	 */
-	const cofmatch&
-	get_match() const
-	{ return match; };
+	cofaggr_stats_request&
+	set_cookie_mask(
+			uint64_t cookie_mask)
+	{ this->cookie_mask = cookie_mask; return *this; };
+
+	/**
+	 *
+	 */
+	uint64_t
+	get_cookie_mask() const
+	{ return cookie_mask; };
+
+	/**
+	 *
+	 */
+	cofaggr_stats_request&
+	set_match(
+			const cofmatch& match)
+	{ this->match = match; this->match.set_version(of_version); return *this; };
 
 	/**
 	 *
 	 */
 	cofmatch&
 	set_match()
+	{ return match; };
+
+	/**
+	 *
+	 */
+	const cofmatch&
+	get_match() const
 	{ return match; };
 
 public:
@@ -252,31 +276,47 @@ public:
 		}
 		return os;
 	};
+
+private: // data structures
+
+	uint8_t 	of_version;
+	cofmatch 	match;
+	uint8_t 	table_id;
+	uint32_t	out_port;
+	uint32_t	out_group;
+	uint64_t	cookie;
+	uint64_t	cookie_mask;
 };
 
 
 
-class cofaggr_stats_reply
-{
-private: // data structures
-
-	uint8_t 	of_version;
-	uint64_t	packet_count;
-	uint64_t	byte_count;
-	uint32_t	flow_count;
-
-public: // data structures
-
-
+class cofaggr_stats_reply {
 public:
+
+	/**
+	 *
+	 */
+	virtual
+	~cofaggr_stats_reply()
+	{};
+
 	/**
 	 *
 	 */
 	cofaggr_stats_reply(
 			uint8_t of_version = 0,
 			uint8_t *buf = (uint8_t*)0,
-			size_t buflen = 0);
-
+			size_t buflen = 0) :
+				of_version(of_version),
+				packet_count(0),
+				byte_count(0),
+				flow_count(0)
+	{
+		if ((buflen == 0) || (nullptr == buf)) {
+			return;
+		}
+		unpack(buf, buflen);
+	};
 
 	/**
 	 *
@@ -285,43 +325,52 @@ public:
 			uint8_t of_version,
 			uint64_t packet_count,
 			uint64_t byte_count,
-			uint32_t flow_count);
-
-
-	/**
-	 *
-	 */
-	virtual
-	~cofaggr_stats_reply();
-
+			uint32_t flow_count) :
+				of_version(of_version),
+				packet_count(packet_count),
+				byte_count(byte_count),
+				flow_count(flow_count)
+	{};
 
 	/**
 	 *
 	 */
 	cofaggr_stats_reply(
-			cofaggr_stats_reply const& aggrstats);
+			const cofaggr_stats_reply& rep)
+	{ *this = rep; };
 
 	/**
 	 *
 	 */
 	cofaggr_stats_reply&
 	operator= (
-			cofaggr_stats_reply const& aggrstats);
+			const cofaggr_stats_reply& rep) {
+		if (this == &rep)
+			return *this;
 
+		of_version 		= rep.of_version;
+		packet_count	= rep.packet_count;
+		byte_count		= rep.byte_count;
+		flow_count		= rep.flow_count;
+
+		return *this;
+	};
+
+public:
 
 	/**
 	 *
 	 */
 	void
-	pack(uint8_t *buf, size_t buflen);
-
+	pack(
+			uint8_t *buf, size_t buflen);
 
 	/**
 	 *
 	 */
 	void
-	unpack(uint8_t *buf, size_t buflen);
-
+	unpack(
+			uint8_t *buf, size_t buflen);
 
 	/**
 	 *
@@ -329,61 +378,67 @@ public:
 	size_t
 	length() const;
 
+public:
 
 	/**
 	 *
 	 */
-	void
-	set_version(uint8_t of_version);
-
+	cofaggr_stats_reply&
+	set_version(
+			uint8_t of_version)
+	{ this->of_version = of_version; return *this; };
 
 	/**
 	 *
 	 */
 	uint8_t
-	get_version() const;
+	get_version() const
+	{ return of_version; };
 
+	/**
+	 *
+	 */
+	cofaggr_stats_reply&
+	set_packet_count(
+			uint64_t packet_count)
+	{ this->packet_count = packet_count; return *this; };
 
 	/**
 	 *
 	 */
 	uint64_t
-	get_packet_count() const;
+	get_packet_count() const
+	{ return packet_count; };
 
+	/**
+	 *
+	 */
+	cofaggr_stats_reply&
+	set_byte_count(
+			uint64_t byte_count)
+	{ this->byte_count = byte_count; return *this; };
 
 	/**
 	 *
 	 */
 	uint64_t
-	get_byte_count() const;
+	get_byte_count() const
+	{ return byte_count; };
 
+	/**
+	 *
+	 */
+	cofaggr_stats_reply&
+	set_flow_count(
+			uint32_t flow_count)
+	{ this->flow_count = flow_count; return *this; };
 
 	/**
 	 *
 	 */
 	uint32_t
-	get_flow_count() const;
-
-
-	/**
-	 *
-	 */
-	void
-	set_packet_count(uint64_t packet_count);
-
-
-	/**
-	 *
-	 */
-	void
-	set_byte_count(uint64_t byte_count);
-
-
-	/**
-	 *
-	 */
-	void
-	set_flow_count(uint32_t flow_count);
+	get_flow_count() const
+	{ return flow_count; };
 
 public:
 
@@ -407,6 +462,13 @@ public:
 		}
 		return os;
 	};
+
+private:
+
+	uint8_t 	of_version;
+	uint64_t	packet_count;
+	uint64_t	byte_count;
+	uint32_t	flow_count;
 };
 
 
