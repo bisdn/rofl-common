@@ -59,11 +59,26 @@ public:
 	/**
 	 *
 	 */
+	virtual
+	~cofbucket()
+	{};
+
+	/**
+	 *
+	 */
 	cofbucket(
 			uint8_t ofp_version = openflow::OFP_VERSION_UNKNOWN,
-			uint16_t weigth = 0,
+			uint16_t weight = 0,
 			uint32_t watch_port = 0,
-			uint32_t watch_group = 0);
+			uint32_t watch_group = 0) :
+				ofp_version(ofp_version),
+				packet_count(0),
+				byte_count(0),
+				weight(weight),
+				watch_port(watch_port),
+				watch_group(watch_group),
+				actions(ofp_version)
+	{};
 
 	/**
 	 *
@@ -71,27 +86,55 @@ public:
 	cofbucket(
 			uint8_t ofp_version,
 			uint8_t *bucket,
-			size_t bclen);
-
-	/**
-	 *
-	 */
-	virtual
-	~cofbucket();
+			size_t bclen) :
+				ofp_version(ofp_version),
+				packet_count(0),
+				byte_count(0),
+				weight(0),
+				watch_port(0),
+				watch_group(0),
+				actions(ofp_version)
+	{
+		if ((nullptr == bucket) || (bclen == 0)) {
+			return;
+		}
+		unpack(bucket, bclen);
+	};
 
 	/**
 	 *
 	 */
 	cofbucket&
 	operator= (
-			const cofbucket& b);
+			const cofbucket& b) {
+		if (this == &b)
+			return *this;
+
+		this->ofp_version	= b.ofp_version;
+		this->actions 		= b.actions;
+		this->packet_count 	= b.packet_count;
+		this->byte_count 	= b.byte_count;
+		this->weight 		= b.weight;
+		this->watch_group 	= b.watch_group;
+		this->watch_port 	= b.watch_port;
+
+		return *this;
+	};
 
 	/**
 	 *
 	 */
 	bool
 	operator== (
-			const cofbucket& b);
+			const cofbucket& b) {
+		return ((ofp_version 	== b.ofp_version) &&
+				(actions 		== b.actions) &&
+				(packet_count 	== b.packet_count) &&
+				(byte_count 	== b.byte_count) &&
+				(weight 		== b.weight) &&
+				(watch_group 	== b.watch_group) &&
+				(watch_port 	== b.watch_port));
+	};
 
 public:
 

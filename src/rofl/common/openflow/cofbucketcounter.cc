@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 /*
  * cofbucketcounter.cc
  *
@@ -8,49 +12,6 @@
 #include "rofl/common/openflow/cofbucketcounter.h"
 
 using namespace rofl::openflow;
-
-cofbucket_counter::cofbucket_counter(
-			uint8_t ofp_version) :
-					ofp_version(ofp_version),
-					packet_count(0),
-					byte_count(0)
-{}
-
-
-cofbucket_counter::~cofbucket_counter()
-{}
-
-
-cofbucket_counter::cofbucket_counter(
-			cofbucket_counter const& bc)
-{
-	*this = bc;
-}
-
-
-cofbucket_counter&
-cofbucket_counter::operator= (
-			cofbucket_counter const& bc)
-{
-	if (this == &bc)
-		return *this;
-
-	ofp_version		= bc.ofp_version;
-	packet_count	= bc.packet_count;
-	byte_count		= bc.byte_count;
-
-	return *this;
-}
-
-
-bool
-cofbucket_counter::operator== (
-			cofbucket_counter const& bc)
-{
-	return ((ofp_version 	== bc.ofp_version) &&
-			(packet_count 	== bc.packet_count) &&
-			(byte_count 	== bc.byte_count));
-}
 
 
 size_t
