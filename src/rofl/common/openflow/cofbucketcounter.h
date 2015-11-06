@@ -9,8 +9,8 @@
  *      Author: andreas
  */
 
-#ifndef COFBUCKETCOUNTER_H_
-#define COFBUCKETCOUNTER_H_
+#ifndef ROFL_COMMON_OPENFLOW_COFBUCKETCOUNTER_H
+#define ROFL_COMMON_OPENFLOW_COFBUCKETCOUNTER_H 1
 
 #include <inttypes.h>
 
@@ -201,4 +201,4 @@ private:
 }; // end of namespace openflow
 }; // end of namespace rofl
 
-#endif /* COFBUCKETCOUNTER_H_ */
+#endif /* ROFL_COMMON_OPENFLOW_COFBUCKETCOUNTER_H */

@@ -9,8 +9,8 @@
  *      Author: andi
  */
 
-#ifndef COFAGGRSTATS_H_
-#define COFAGGRSTATS_H_ 1
+#ifndef ROFL_COMMON_OPENFLOW_COFAGGRSTATS_H
+#define ROFL_COMMON_OPENFLOW_COFAGGRSTATS_H 1
 
 #include "rofl/common/cmemory.h"
 #include "rofl/common/openflow/cofmatch.h"
@@ -479,4 +479,4 @@ private:
 } /* end of namespace openflow */
 } /* end of namespace rofl */
 
-#endif /* COFAGGRSTATS_H_ */
+#endif /* ROFL_COMMON_OPENFLOW_COFAGGRSTATS_H */

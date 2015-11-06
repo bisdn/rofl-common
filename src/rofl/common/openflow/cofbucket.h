@@ -2,8 +2,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#ifndef COFBUCKET_H
-#define COFBUCKET_H 1
+#ifndef ROFL_COMMON_OPENFLOW_COFBUCKET_H
+#define ROFL_COMMON_OPENFLOW_COFBUCKET_H 1
 
 #include <string>
 #include <vector>
@@ -337,4 +337,4 @@ private:
 }; // end of namespace
 }; // end of namespace
 
-#endif
+#endif /* ROFL_COMMON_OPENFLOW_COFBUCKET_H */
