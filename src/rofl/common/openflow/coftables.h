@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 /*
  * coftables.h
  *
@@ -5,17 +9,16 @@
  *      Author: andreas
  */
 
-#ifndef COFTABLES_H_
-#define COFTABLES_H_
+#ifndef ROFL_COMMON_OPENFLOW_COFTABLES_H
+#define ROFL_COMMON_OPENFLOW_COFTABLES_H 1
 
 #include <inttypes.h>
-
 #include <map>
 
+#include "rofl/common/openflow/coftablestatsarray.h"
 #include "rofl/common/openflow/coftablefeatures.h"
 #include "rofl/common/exception.hpp"
-
-#include "rofl/common/openflow/coftablestatsarray.h"
+#include "rofl/common/locking.hpp"
 
 namespace rofl {
 namespace openflow {
@@ -40,133 +43,203 @@ public:
 };
 
 
-class coftables
-{
-	uint8_t 									ofp_version;
-	std::map<uint8_t, coftable_features>		tables;
-
+class coftables {
 public:
 
 	/**
 	 *
 	 */
-	coftables(
-			uint8_t ofp_version = rofl::openflow::OFP_VERSION_UNKNOWN);
-
-	/**
-	 *
-	 */
 	virtual
-	~coftables();
+	~coftables()
+	{};
 
 	/**
 	 *
 	 */
 	coftables(
-			coftables const& tables);
+			uint8_t ofp_version = rofl::openflow::OFP_VERSION_UNKNOWN) :
+				ofp_version(ofp_version)
+	{};
+
+	/**
+	 *
+	 */
+	coftables(
+			const coftables& tables)
+	{ *this = tables; };
 
 	/**
 	 *
 	 */
 	coftables&
 	operator= (
-			coftables const& tables);
+			const coftables& tables) {
+		if (this == &tables)
+			return *this;
+
+		ofp_version = tables.ofp_version;
+
+		this->tables.clear();
+		for (std::map<uint8_t, coftable_features>::const_iterator
+				it = tables.tables.begin(); it != tables.tables.end(); ++it) {
+			this->tables[it->first] = it->second;
+		}
+
+		return *this;
+	};
 
 	/**
 	 *
 	 */
 	coftables&
 	operator+= (
-			coftables const& tables);
+			const coftables& tables) {
+		/*
+		 * this operation may replace tables, if they use the same table-id
+		 */
+		for (std::map<uint8_t, coftable_features>::const_iterator
+				it = tables.tables.begin(); it != tables.tables.end(); ++it) {
+			this->tables[it->first] = it->second;
+		}
 
+		return *this;
+	};
 
 public:
-
-	/** reset packet content
-	 *
-	 */
-	virtual void
-	clear();
-
-
-	/** returns length of packet in packed state
-	 *
-	 */
-	virtual size_t
-	length() const;
-
 
 	/**
 	 *
 	 */
-	virtual void
-	pack(
-			uint8_t *buf, size_t buflen);
-
-
-	/**
-	 *
-	 */
-	virtual void
-	unpack(
-			uint8_t *buf, size_t buflen);
-
-
-public:
+	coftables&
+	set_version(
+			uint8_t ofp_version)
+	{
+		this->ofp_version = ofp_version;
+		AcquireReadWriteLock lock(tables_lock);
+		for (auto it : tables) {
+			it.second.set_version(ofp_version);
+		}
+		return *this;
+	};
 
 	/**
 	 *
 	 */
 	uint8_t
-	get_version() const { return ofp_version; };
+	get_version() const
+	{ return ofp_version; };
+
+public:
+
+	/**
+	 *
+	 */
+	size_t
+	length() const;
 
 	/**
 	 *
 	 */
 	void
-	set_version(uint8_t ofp_version) { this->ofp_version = ofp_version; };
+	pack(
+			uint8_t *buf, size_t buflen);
 
 	/**
 	 *
 	 */
-	std::map<uint8_t, coftable_features> const&
-	get_tables() const { return tables; };
+	void
+	unpack(
+			uint8_t *buf, size_t buflen);
+
+public:
 
 	/**
 	 *
 	 */
-	std::map<uint8_t, coftable_features>&
-	set_tables() { return tables; };
+	std::list<uint8_t>
+	keys() const {
+		AcquireReadLock lock(tables_lock);
+		std::list<uint8_t> ids;
+		for (auto it : tables) {
+			ids.push_back(it.first);
+		}
+		return ids;
+	};
+
+	/**
+	 *
+	 */
+	virtual void
+	clear() {
+		AcquireReadWriteLock lock(tables_lock);
+		tables.clear();
+	};
 
 	/**
 	 *
 	 */
 	coftable_features&
-	add_table(uint8_t table_id);
+	add_table(
+			uint8_t table_id) {
+		AcquireReadWriteLock lock(tables_lock);
+		if (tables.find(table_id) != tables.end()) {
+			tables.erase(table_id);
+		}
+		tables[table_id] = coftable_features(ofp_version);
+		tables[table_id].set_table_id(table_id);
+		return tables[table_id];
+	};
 
 	/**
 	 *
 	 */
-	void
-	drop_table(uint8_t table_id);
+	coftable_features&
+	set_table(
+			uint8_t table_id) {
+		AcquireReadWriteLock lock(tables_lock);
+		if (tables.find(table_id) == tables.end()) {
+			tables[table_id] = coftable_features(ofp_version);
+			tables[table_id].set_table_id(table_id);
+		}
+		return tables[table_id];
+	};
 
 	/**
 	 *
 	 */
 	const coftable_features&
-	get_table(uint8_t table_id) const;
-
-	/**
-	 *
-	 */
-	coftable_features&
-	set_table(uint8_t table_id);
+	get_table(
+			uint8_t table_id) const {
+		AcquireReadLock lock(tables_lock);
+		if (tables.find(table_id) == tables.end()) {
+			throw eTablesNotFound();
+		}
+		return tables.at(table_id);
+	};
 
 	/**
 	 *
 	 */
 	bool
-	has_table(uint8_t table_id) const;
+	drop_table(
+			uint8_t table_id) {
+		AcquireReadWriteLock lock(tables_lock);
+		if (tables.find(table_id) == tables.end()) {
+			return false;
+		}
+		tables.erase(table_id);
+		return true;
+	};
+
+	/**
+	 *
+	 */
+	bool
+	has_table(
+			uint8_t table_id) const {
+		AcquireReadLock lock(tables_lock);
+		return (tables.find(table_id) != tables.end());
+	};
 
 public:
 
@@ -238,12 +311,17 @@ public:
 		}
 		return os;
 	};
+
+private:
+
+	uint8_t 									ofp_version;
+	std::map<uint8_t, coftable_features>		tables;
+	rofl::crwlock                               tables_lock;
 };
 
 }; // end of namespace openflow
 }; // end of namespace rofl
 
+#endif /* ROFL_COMMON_OPENFLOW_COFTABLES_H */
 
 
-
-#endif /* COFTABLES_H_ */

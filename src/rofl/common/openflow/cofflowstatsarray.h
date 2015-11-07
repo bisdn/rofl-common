@@ -161,11 +161,11 @@ public:
 	/**
 	 *
 	 */
-	std::vector<uint32_t>
+	std::list<uint32_t>
 	keys() const
 	{
 		AcquireReadLock rwlock(array_lock);
-		std::vector<uint32_t> ids;
+		std::list<uint32_t> ids;
 		for (auto it : array) {
 			ids.push_back(it.first);
 		}
@@ -190,6 +190,18 @@ public:
 	{
 		AcquireReadWriteLock rwlock(array_lock);
 		array.clear();
+	};
+
+	/**
+	 *
+	 */
+	cofflow_stats_reply&
+	add_flow_stats() {
+		uint32_t flow_id = 0;
+		AcquireReadWriteLock rwlock(array_lock);
+		while (array.find(++flow_id) != array.end())
+		{}
+		return (array[flow_id] = cofflow_stats_reply(ofp_version));
 	};
 
 	/**
