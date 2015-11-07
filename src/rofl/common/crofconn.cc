@@ -1598,26 +1598,18 @@ unsigned int
 crofconn::segment_flow_stats_reply(
 		rofl::openflow::cofmsg_flow_stats_reply *msg)
 {
-	rofl::openflow::cofflowstatsarray flowstats;
 	std::vector<rofl::openflow::cofmsg_flow_stats_reply*> segments;
 
-	for (std::map<uint32_t, rofl::openflow::cofflow_stats_reply>::const_iterator
-			it = msg->get_flow_stats_array().get_flow_stats().begin(); it != msg->get_flow_stats_array().get_flow_stats().end(); ++it) {
-
-		flowstats.set_flow_stats(it->first) = it->second;
-
-		/*
-		 * TODO: put more cofflow_stats_reply elements in flowstats per round
-		 */
-
+	for (auto flow_id : msg->get_flow_stats_array().keys()) {
+		rofl::openflow::cofflowstatsarray flowstatsarray;
+		flowstatsarray.add_flow_stats(0) =
+				msg->get_flow_stats_array().get_flow_stats(flow_id);
 		segments.push_back(
 				new rofl::openflow::cofmsg_flow_stats_reply(
 						msg->get_version(),
 						msg->get_xid(),
 						msg->get_stats_flags() | rofl::openflow13::OFPMPF_REPLY_MORE,
-						flowstats));
-
-		flowstats.clear();
+						flowstatsarray));
 	}
 
 	// clear MORE flag on last segment
