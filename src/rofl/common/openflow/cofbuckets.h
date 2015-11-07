@@ -111,7 +111,7 @@ public:
 	 */
 	bool
 	operator== (
-			const cofbuckets& buckets) {
+			const cofbuckets& buckets) const {
 		if (ofp_version != buckets.ofp_version)
 			return false;
 
@@ -120,7 +120,7 @@ public:
 
 		for (std::map<uint32_t, cofbucket>::const_iterator
 				it = buckets.buckets.begin(); it != buckets.buckets.end(); ++it) {
-			if (not (this->buckets[it->first] == it->second))
+			if (not (this->buckets.at(it->first) == it->second))
 				return false;
 		}
 

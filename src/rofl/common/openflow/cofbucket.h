@@ -126,7 +126,7 @@ public:
 	 */
 	bool
 	operator== (
-			const cofbucket& b) {
+			const cofbucket& b) const {
 		return ((ofp_version 	== b.ofp_version) &&
 				(actions 		== b.actions) &&
 				(packet_count 	== b.packet_count) &&
