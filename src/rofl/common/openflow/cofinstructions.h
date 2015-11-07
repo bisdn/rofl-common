@@ -87,7 +87,7 @@ public:
  	 */
 	bool
 	operator== (
-			cofinstructions const& instructions);
+			cofinstructions const& instructions) const;
 
 
 public:

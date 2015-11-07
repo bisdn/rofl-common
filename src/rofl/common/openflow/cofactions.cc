@@ -157,7 +157,7 @@ cofactions::operator= (
 
 bool
 cofactions::operator== (
-		cofactions const& actions)
+		cofactions const& actions) const
 {
 #if 0
 	if (ofp_version != actions.ofp_version) {

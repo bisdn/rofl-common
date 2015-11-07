@@ -60,8 +60,8 @@ public:
 			uint8_t of_version,
 			const cofmatch& match,
 			uint8_t table_id = 0xff,
-			uint32_t out_port = rofl::openflow::OFPP_ALL,
-			uint32_t out_group = rofl::openflow::OFPG_ALL,
+			uint32_t out_port = rofl::openflow::OFPP_ANY,
+			uint32_t out_group = rofl::openflow::OFPG_ANY,
 			uint64_t cookie = 0,
 			uint64_t cookie_mask = 0) :
 				of_version(of_version),
