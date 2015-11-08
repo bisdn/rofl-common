@@ -2172,7 +2172,7 @@ public:
 	length() const
 	{
 		return sizeof(struct rofl::openflow::ofp_oxm_hdr) +
-			(get_oxm_hasmask() ? 2*6*sizeof(uint8_t) : 1*6*sizeof(uint8_t));
+			(get_oxm_hasmask() ? 2*16*sizeof(uint8_t) : 1*16*sizeof(uint8_t));
 	};
 
 	/**
