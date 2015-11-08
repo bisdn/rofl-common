@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 /*
  * cofgroups.cc
  *
@@ -8,80 +12,6 @@
 #include "rofl/common/openflow/cofgroupstatsarray.h"
 
 using namespace rofl::openflow;
-
-
-cofgroupstatsarray::cofgroupstatsarray(uint8_t ofp_version) :
-		ofp_version(ofp_version)
-{
-
-}
-
-
-cofgroupstatsarray::~cofgroupstatsarray()
-{
-
-}
-
-
-cofgroupstatsarray::cofgroupstatsarray(cofgroupstatsarray const& groups)
-{
-	*this = groups;
-}
-
-
-cofgroupstatsarray&
-cofgroupstatsarray::operator= (cofgroupstatsarray const& groups)
-{
-	if (this == &groups)
-		return *this;
-
-	this->array.clear();
-
-	ofp_version = groups.ofp_version;
-	for (std::map<uint32_t, cofgroup_stats_reply>::const_iterator
-			it = groups.array.begin(); it != groups.array.end(); ++it) {
-		this->array[it->first] = it->second;
-	}
-
-	return *this;
-}
-
-
-
-bool
-cofgroupstatsarray::operator== (cofgroupstatsarray const& groups)
-{
-	if (ofp_version != groups.ofp_version)
-		return false;
-
-	if (array.size() != groups.array.size())
-		return false;
-
-	for (std::map<uint32_t, cofgroup_stats_reply>::const_iterator
-				it = groups.array.begin(); it != groups.array.end(); ++it) {
-		if (not (array[it->first] == it->second))
-			return false;
-	}
-
-	return true;
-}
-
-
-
-cofgroupstatsarray&
-cofgroupstatsarray::operator+= (cofgroupstatsarray const& groups)
-{
-	/*
-	 * this may replace existing group descriptions
-	 */
-	for (std::map<uint32_t, cofgroup_stats_reply>::const_iterator
-			it = groups.array.begin(); it != groups.array.end(); ++it) {
-		this->array[it->first] = it->second;
-	}
-
-	return *this;
-}
-
 
 
 size_t
@@ -168,60 +98,5 @@ cofgroupstatsarray::unpack(uint8_t *buf, size_t buflen)
 		throw eBadRequestBadVersion("eBadRequestBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
-
-
-
-cofgroup_stats_reply&
-cofgroupstatsarray::add_group_stats(uint32_t group_id)
-{
-	if (array.find(group_id) != array.end()) {
-		array.erase(group_id);
-	}
-	return (array[group_id] = cofgroup_stats_reply(ofp_version));
-}
-
-
-
-void
-cofgroupstatsarray::drop_group_stats(uint32_t group_id)
-{
-	if (array.find(group_id) == array.end()) {
-		return;
-	}
-	array.erase(group_id);
-}
-
-
-
-cofgroup_stats_reply&
-cofgroupstatsarray::set_group_stats(uint32_t group_id)
-{
-	if (array.find(group_id) == array.end()) {
-		array[group_id] = cofgroup_stats_reply(ofp_version);
-	}
-	return array[group_id];
-}
-
-
-
-cofgroup_stats_reply const&
-cofgroupstatsarray::get_group_stats(uint32_t group_id) const
-{
-	if (array.find(group_id) == array.end()) {
-		throw eGroupStatsNotFound();
-	}
-	return array.at(group_id);
-}
-
-
-
-bool
-cofgroupstatsarray::has_group_stats(uint32_t group_id)
-{
-	return (not (array.find(group_id) == array.end()));
-}
-
-
-
 
 

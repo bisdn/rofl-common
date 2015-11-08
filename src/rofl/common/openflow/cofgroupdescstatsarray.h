@@ -91,7 +91,14 @@ public:
 	cofgroupdescstatsarray&
 	set_version(
 			uint8_t ofp_version)
-	{ this->ofp_version = ofp_version; return *this; };
+	{
+		this->ofp_version = ofp_version;
+		AcquireReadLock lock(array_lock);
+		for (auto it : array) {
+			it.second.set_version(ofp_version);
+		}
+		return *this;
+	};
 
 	/**
 	 *

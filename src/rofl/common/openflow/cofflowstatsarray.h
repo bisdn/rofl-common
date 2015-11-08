@@ -115,28 +115,6 @@ public:
 	/**
 	 *
 	 */
-	size_t
-	length() const;
-
-	/**
-	 *
-	 */
-	void
-	pack(
-			uint8_t *buf = (uint8_t*)0, size_t buflen = 0);
-
-	/**
-	 *
-	 */
-	void
-	unpack(
-			uint8_t *buf, size_t buflen);
-
-public:
-
-	/**
-	 *
-	 */
 	cofflowstatsarray&
 	set_version(
 			uint8_t ofp_version)
@@ -268,6 +246,28 @@ public:
 		AcquireReadLock rwlock(array_lock);
 		return (not (array.find(flow_id) == array.end()));
 	};
+
+public:
+
+	/**
+	 *
+	 */
+	size_t
+	length() const;
+
+	/**
+	 *
+	 */
+	void
+	pack(
+			uint8_t *buf = (uint8_t*)0, size_t buflen = 0);
+
+	/**
+	 *
+	 */
+	void
+	unpack(
+			uint8_t *buf, size_t buflen);
 
 public:
 
