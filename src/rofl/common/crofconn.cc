@@ -1829,43 +1829,44 @@ unsigned int
 crofconn::segment_port_stats_reply(
 		rofl::openflow::cofmsg_port_stats_reply *msg)
 {
-	rofl::openflow::cofportstatsarray portstats;
-	std::vector<rofl::openflow::cofmsg_port_stats_reply*> segments;
+	std::list<rofl::openflow::cofmsg_port_stats_reply*> segments;
+	const int MAX_LENGTH = 64000/*bytes*/;
+	auto portids = msg->get_port_stats_array().keys();
 
-	for (std::map<uint32_t, rofl::openflow::cofport_stats_reply>::const_iterator
-			it = msg->get_port_stats_array().get_port_stats().begin(); it != msg->get_port_stats_array().get_port_stats().end(); ++it) {
+	/* create fragments */
+	while (not portids.empty()) {
+		rofl::openflow::cofportstatsarray array(msg->get_version());
 
-		portstats.set_port_stats(it->first) = it->second;
-
-		/*
-		 * TODO: put more rofl::openflow::cofport_stats_reply elements in portstats per round
-		 */
+		while ((not portids.empty()) && (array.length() < MAX_LENGTH)) {
+			uint32_t portid = portids.front(); portids.pop_front();
+			array.add_port_stats(portid) =
+					msg->get_port_stats_array().get_port_stats(portid);
+		}
 
 		segments.push_back(
 				new rofl::openflow::cofmsg_port_stats_reply(
 						msg->get_version(),
 						msg->get_xid(),
-						msg->get_stats_flags() | rofl::openflow13::OFPMPF_REPLY_MORE,
-						portstats));
-
-		portstats.clear();
+						msg->get_stats_flags(),
+						array));
 	}
 
-	// clear MORE flag on last segment
-	if (not segments.empty()) {
-		segments.back()->set_stats_flags(segments.back()->get_stats_flags() & ~rofl::openflow13::OFPMPF_REPLY_MORE);
-	}
-
-	unsigned int cwnd_size = 0;
-
-	for (std::vector<rofl::openflow::cofmsg_port_stats_reply*>::iterator
-			it = segments.begin(); it != segments.end(); ++it) {
-		 rofsock.send_message(*it);
-	}
-
+	/* delete original message */
 	delete msg;
 
-	return cwnd_size;
+	/* send fragments */
+	while (not segments.empty()) {
+		rofl::openflow::cofmsg_port_stats_reply* msg = segments.front();
+		segments.pop_front();
+		// set MORE flag on all segments except last one
+		if (not segments.empty()) {
+			msg->set_stats_flags(
+					msg->get_stats_flags() | rofl::openflow13::OFPMPF_REPLY_MORE);
+		}
+		rofsock.send_message(msg);
+	}
+
+	return 0;
 }
 
 
