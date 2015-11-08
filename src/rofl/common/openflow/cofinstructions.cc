@@ -88,7 +88,7 @@ cofinstructions::operator= (
 
 bool
 cofinstructions::operator== (
-		cofinstructions const& instructions)
+		cofinstructions const& instructions) const
 {
 	if (instmap.size() != instructions.instmap.size()) {
 		return false;
@@ -96,7 +96,7 @@ cofinstructions::operator== (
 
 	for (std::map<uint16_t, cofinstruction*>::const_iterator
 			it = instructions.instmap.begin(); it != instructions.instmap.end(); ++it) {
-		if (not (*(instmap[it->first]) == *(it->second))) {
+		if (not (*(instmap.at(it->first)) == *(it->second))) {
 			return false;
 		}
 	}

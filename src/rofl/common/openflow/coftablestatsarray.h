@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 /*
  * coftables.h
  *
@@ -5,77 +9,231 @@
  *      Author: andreas
  */
 
-#ifndef COFTABLESTATSARRAY_H_
-#define COFTABLESTATSARRAY_H_
+#ifndef ROFL_COMMON_OPENFLOW_COFTABLESTATSARRAY_H
+#define ROFL_COMMON_OPENFLOW_COFTABLESTATSARRAY_H 1
 
 #include <iostream>
+#include <list>
 #include <map>
 
 #include "rofl/common/openflow/coftablestats.h"
+#include "rofl/common/locking.hpp"
 
 namespace rofl {
 namespace openflow {
 
 class coftablestatsarray {
-
-	uint8_t										ofp_version;
-	std::map<uint8_t, coftable_stats_reply>		array;
-
 public:
 
 	/**
 	 *
 	 */
-	coftablestatsarray(uint8_t ofp_version = OFP_VERSION_UNKNOWN);
+	~coftablestatsarray()
+	{};
 
 	/**
 	 *
 	 */
-	virtual
-	~coftablestatsarray();
+	coftablestatsarray(
+			uint8_t ofp_version = OFP_VERSION_UNKNOWN) :
+				ofp_version(ofp_version)
+	{};
 
 	/**
 	 *
 	 */
-	coftablestatsarray(coftablestatsarray const& tables);
+	coftablestatsarray(
+			const coftablestatsarray& tables)
+	{ *this = tables; };
 
 	/**
 	 *
 	 */
 	coftablestatsarray&
-	operator= (coftablestatsarray const& tables);
+	operator= (
+			const coftablestatsarray& tables) {
+		if (this == &tables)
+			return *this;
+
+		AcquireReadWriteLock lock(array_lock);
+
+		this->array.clear();
+
+		ofp_version = tables.ofp_version;
+		for (std::map<uint8_t, coftable_stats_reply>::const_iterator
+				it = tables.array.begin(); it != tables.array.end(); ++it) {
+			this->array[it->first] = it->second;
+		}
+
+		return *this;
+	};
 
 	/**
 	 *
 	 */
 	bool
-	operator== (coftablestatsarray const& tables) const;
+	operator== (
+			const coftablestatsarray& tables) const {
+		AcquireReadLock lock(array_lock);
+
+		if (ofp_version != tables.ofp_version)
+			return false;
+
+		if (array.size() != tables.array.size())
+			return false;
+
+		for (std::map<uint8_t, coftable_stats_reply>::const_iterator
+				it = tables.array.begin(); it != tables.array.end(); ++it) {
+			if (not (array.at(it->first) == it->second))
+				return false;
+		}
+
+		return true;
+	};
 
 	/**
 	 *
 	 */
 	coftablestatsarray&
-	operator+= (coftablestatsarray const& tables);
+	operator+= (
+			const coftablestatsarray& tables) {
+		/*
+		 * this may replace existing table descriptions
+		 */
+		AcquireReadWriteLock lock(array_lock);
+		for (std::map<uint8_t, coftable_stats_reply>::const_iterator
+				it = tables.array.begin(); it != tables.array.end(); ++it) {
+			this->array[it->first] = it->second;
+		}
+
+		return *this;
+	};
 
 public:
 
-	/** returns length of packet in packed state
+	/**
 	 *
 	 */
-	virtual size_t
-	length() const;
+	coftablestatsarray&
+	set_version(
+			uint8_t ofp_version)
+	{
+		this->ofp_version = ofp_version;
+		AcquireReadLock lock(array_lock);
+		for (auto it : array) {
+			it.second.set_version(ofp_version);
+		}
+		return *this;
+	};
 
 	/**
 	 *
 	 */
-	virtual void
-	pack(uint8_t *buf = (uint8_t*)0, size_t buflen = 0);
+	uint8_t
+	get_version() const
+	{ return ofp_version; };
+
+public:
 
 	/**
 	 *
 	 */
-	virtual void
-	unpack(uint8_t *buf, size_t buflen);
+	std::list<uint32_t>
+	keys() const
+	{
+		AcquireReadLock rwlock(array_lock);
+		std::list<uint32_t> ids;
+		for (auto it : array) {
+			ids.push_back(it.first);
+		}
+		return ids;
+	};
+
+	/**
+	 *
+	 */
+	size_t
+	size() const
+	{
+		AcquireReadLock lock(array_lock);
+		return array.size();
+	};
+
+	/**
+	 *
+	 */
+	coftablestatsarray&
+	clear()
+	{
+		AcquireReadWriteLock lock(array_lock);
+		array.clear();
+		return *this;
+	};
+
+public:
+
+	/**
+	 *
+	 */
+	coftable_stats_reply&
+	add_table_stats(
+			uint8_t table_id) {
+		AcquireReadWriteLock lock(array_lock);
+		if (array.find(table_id) != array.end()) {
+			array.erase(table_id);
+		}
+		return (array[table_id] = coftable_stats_reply(ofp_version));
+	};
+
+	/**
+	 *
+	 */
+	coftable_stats_reply&
+	set_table_stats(
+			uint8_t table_id) {
+		AcquireReadWriteLock lock(array_lock);
+		if (array.find(table_id) == array.end()) {
+			array[table_id] = coftable_stats_reply(ofp_version);
+		}
+		return array[table_id];
+	};
+
+	/**
+	 *
+	 */
+	const coftable_stats_reply&
+	get_table_stats(
+			uint8_t table_id) const {
+		AcquireReadLock lock(array_lock);
+		if (array.find(table_id) == array.end()) {
+			throw eTableStatsNotFound();
+		}
+		return array.at(table_id);
+	};
+
+	/**
+	 *
+	 */
+	bool
+	drop_table_stats(
+			uint8_t table_id) {
+		AcquireReadWriteLock lock(array_lock);
+		if (array.find(table_id) == array.end()) {
+			return false;
+		}
+		array.erase(table_id);
+		return true;
+	};
+
+	/**
+	 *
+	 */
+	bool
+	has_table_stats(
+			uint8_t table_id) const {
+		AcquireReadLock lock(array_lock);
+		return (not (array.find(table_id) == array.end()));
+	};
 
 public:
 
@@ -83,69 +241,21 @@ public:
 	 *
 	 */
 	size_t
-	size() const { return array.size(); };
+	length() const;
 
 	/**
 	 *
 	 */
 	void
-	clear() { array.clear(); };
-
-	/**
-	 *
-	 */
-	uint8_t
-	get_version() const { return ofp_version; };
+	pack(
+			uint8_t *buf = (uint8_t*)0, size_t buflen = 0);
 
 	/**
 	 *
 	 */
 	void
-	set_version(uint8_t ofp_version) { this->ofp_version = ofp_version; };
-
-	/**
-	 *
-	 */
-	std::map<uint8_t, coftable_stats_reply> const&
-	get_table_stats() const { return array; };
-
-	/**
-	 *
-	 */
-	std::map<uint8_t, coftable_stats_reply>&
-	set_table_stats() { return array; };
-
-public:
-
-	/**
-	 *
-	 */
-	coftable_stats_reply&
-	add_table_stats(uint8_t table_id);
-
-	/**
-	 *
-	 */
-	void
-	drop_table_stats(uint8_t table_id);
-
-	/**
-	 *
-	 */
-	coftable_stats_reply&
-	set_table_stats(uint8_t table_id);
-
-	/**
-	 *
-	 */
-	coftable_stats_reply const&
-	get_table_stats(uint8_t table_id) const;
-
-	/**
-	 *
-	 */
-	bool
-	has_table_stats(uint8_t table_id);
+	unpack(
+			uint8_t *buf, size_t buflen);
 
 public:
 
@@ -159,11 +269,15 @@ public:
 		}
 		return os;
 	}
+
+private:
+
+	uint8_t										ofp_version;
+	std::map<uint8_t, coftable_stats_reply>		array;
+	rofl::crwlock                               array_lock;
 };
 
 }; // end of openflow
 }; // end of rofl
 
-
-
-#endif /* COFGROUPS_H_ */
+#endif /* ROFL_COMMON_OPENFLOW_COFTABLESTATSARRAY_H */

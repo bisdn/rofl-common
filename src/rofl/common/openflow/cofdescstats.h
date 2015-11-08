@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 /*
  * cofdescstats.h
  *
@@ -5,8 +9,8 @@
  *      Author: andi
  */
 
-#ifndef COFDESCSTATS_H_
-#define COFDESCSTATS_H_ 1
+#ifndef ROFL_COMMON_COFDESCSTATS_H_
+#define ROFL_COMMON_COFDESCSTATS_H_ 1
 
 #include "rofl/common/cmemory.h"
 #include "rofl/common/openflow/openflow.h"
@@ -15,53 +19,174 @@
 namespace rofl {
 namespace openflow {
 
-class cofdesc_stats_reply
-{
-private: // data structures
-
-	uint8_t 		of_version;
-	std::string 	mfr_desc;
-	std::string		hw_desc;
-	std::string		sw_desc;
-	std::string		serial_num;
-	std::string		dp_desc;
-
-public: // data structures
-
-
+class cofdesc_stats_reply {
 public:
 
 	/**
 	 *
 	 */
-	cofdesc_stats_reply(
-			uint8_t of_version = rofl::openflow::OFP_VERSION_UNKNOWN,
-			std::string const& mfr_desc 	= std::string(""),
-			std::string const& hw_desc 		= std::string(""),
-			std::string const& sw_desc 		= std::string(""),
-			std::string const& serial_num 	= std::string(""),
-			std::string const& dp_desc 		= std::string(""));
-
-	/**
-	 *
-	 */
 	virtual
-	~cofdesc_stats_reply();
-
+	~cofdesc_stats_reply()
+	{};
 
 	/**
 	 *
 	 */
 	cofdesc_stats_reply(
-			cofdesc_stats_reply const& descstats);
+			uint8_t of_version = rofl::openflow::OFP_VERSION_UNKNOWN) :
+				of_version(of_version)
+	{};
+
+	/**
+	 *
+	 */
+	cofdesc_stats_reply(
+			uint8_t of_version,
+			const std::string& mfr_desc,
+			const std::string& hw_desc,
+			const std::string& sw_desc,
+			const std::string& serial_num,
+			const std::string& dp_desc) :
+				of_version(of_version),
+				mfr_desc(mfr_desc),
+				hw_desc(hw_desc),
+				sw_desc(sw_desc),
+				serial_num(serial_num),
+				dp_desc(dp_desc)
+	{};
+
+	/**
+	 *
+	 */
+	cofdesc_stats_reply(
+			const cofdesc_stats_reply& descstats)
+	{ *this = descstats; };
 
 	/**
 	 *
 	 */
 	cofdesc_stats_reply&
 	operator= (
-			cofdesc_stats_reply const& descstats);
+			const cofdesc_stats_reply& descstats) {
+		if (this == &descstats)
+			return *this;
 
+		of_version 	= descstats.of_version;
+		mfr_desc	= descstats.mfr_desc;
+		hw_desc		= descstats.hw_desc;
+		sw_desc		= descstats.sw_desc;
+		serial_num	= descstats.serial_num;
+		dp_desc		= descstats.dp_desc;
+
+		return *this;
+	};
+
+public:
+
+	/**
+	 *
+	 */
+	cofdesc_stats_reply&
+	clear() {
+		mfr_desc.clear();
+		hw_desc.clear();
+		sw_desc.clear();
+		serial_num.clear();
+		dp_desc.clear();
+		return *this;
+	};
+
+	/**
+	 *
+	 */
+	cofdesc_stats_reply&
+	set_version(
+			uint8_t of_version)
+	{ this->of_version = of_version; return *this; };
+
+	/**
+	 *
+	 */
+	uint8_t
+	get_version() const
+	{ return of_version; };
+
+	/**
+	 *
+	 */
+	cofdesc_stats_reply&
+	set_mfr_desc(
+			const std::string& mfr_desc)
+	{ this->mfr_desc = mfr_desc; return *this; };
+
+	/**
+	 *
+	 */
+	const std::string&
+	get_mfr_desc() const
+	{ return mfr_desc; };
+
+	/**
+	 *
+	 */
+	cofdesc_stats_reply&
+	set_hw_desc(
+			const std::string& hw_desc)
+	{ this->hw_desc = hw_desc; return *this; };
+
+	/**
+	 *
+	 */
+	const std::string&
+	get_hw_desc() const
+	{ return hw_desc; };
+
+	/**
+	 *
+	 */
+	cofdesc_stats_reply&
+	set_sw_desc(
+			const std::string& sw_desc)
+	{ this->sw_desc = sw_desc; return *this; };
+
+	/**
+	 *
+	 */
+	const std::string&
+	get_sw_desc() const
+	{ return sw_desc; };
+
+	/**
+	 *
+	 */
+	cofdesc_stats_reply&
+	set_serial_num(
+			const std::string& serial_num)
+	{ this->serial_num = serial_num; return *this; };
+
+	/**
+	 *
+	 */
+	const std::string&
+	get_serial_num() const
+	{ return serial_num; };
+
+	/**
+	 *
+	 */
+	cofdesc_stats_reply&
+	set_dp_desc(
+			const std::string& dp_desc)
+	{ this->dp_desc = dp_desc; return *this; };
+
+	/**
+	 *
+	 */
+	const std::string&
+	get_dp_desc() const
+	{ return dp_desc; };
+
+public:
 
 	/**
 	 *
@@ -69,69 +194,19 @@ public:
 	size_t
 	length() const;
 
+	/**
+	 *
+	 */
+	void
+	pack(
+			uint8_t *buf, size_t buflen) const;
 
 	/**
 	 *
 	 */
 	void
-	clear();
-
-
-	/**
-	 *
-	 */
-	void
-	set_version(uint8_t of_version);
-
-
-	/**
-	 *
-	 */
-	uint8_t
-	get_version() const;
-
-
-	/**
-	 *
-	 */
-	std::string
-	get_mfr_desc() const;
-
-	/**
-	 *
-	 */
-	std::string
-	get_hw_desc() const;
-
-	/**
-	 *
-	 */
-	std::string
-	get_sw_desc() const;
-
-	/**
-	 *
-	 */
-	std::string
-	get_serial_num() const;
-
-	/**
-	 *
-	 */
-	std::string
-	get_dp_desc() const;
-
-	/**
-	 *
-	 */
-	void
-	pack(uint8_t *buf, size_t buflen) const;
-
-	/**
-	 *
-	 */
-	void
-	unpack(uint8_t *buf, size_t buflen);
+	unpack(
+			uint8_t *buf, size_t buflen);
 
 public:
 
@@ -167,9 +242,18 @@ public:
 		}
 		return os;
 	};
+
+private:
+
+	uint8_t 		of_version;
+	std::string 	mfr_desc;
+	std::string		hw_desc;
+	std::string		sw_desc;
+	std::string		serial_num;
+	std::string		dp_desc;
 };
 
 } // end of namespace openflow
 } // end of namespace rofl
 
-#endif /* COFDESCSTATS_H_ */
+#endif /* ROFL_COMMON_COFDESCSTATS_H_ */

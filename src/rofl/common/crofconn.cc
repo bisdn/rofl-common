@@ -1551,45 +1551,92 @@ crofconn::segment_and_send_message(
 
 unsigned int
 crofconn::segment_table_features_stats_request(
-		rofl::openflow::cofmsg_table_features_stats_request *msg)
+		rofl::openflow::cofmsg_table_features_stats_request* msg)
 {
-	rofl::openflow::coftables tables;
-	std::vector<rofl::openflow::cofmsg_table_features_stats_request*> segments;
+	std::list<rofl::openflow::cofmsg_table_features_stats_request*> segments;
+	const int MAX_LENGTH = 64000/*bytes*/;
+	auto tableids = msg->get_tables().keys();
 
-	for (std::map<uint8_t, rofl::openflow::coftable_features>::const_iterator
-			it = msg->get_tables().get_tables().begin(); it != msg->get_tables().get_tables().end(); ++it) {
+	/* create fragments */
+	while (not tableids.empty()) {
+		rofl::openflow::coftables array(msg->get_version());
 
-		tables.set_table(it->first) = it->second;
-
-		/*
-		 * TODO: put more rofl::openflow::coftable_features elements in tables per round
-		 */
+		while ((not tableids.empty()) && (array.length() < MAX_LENGTH)) {
+			uint8_t tableid = tableids.front(); tableids.pop_front();
+			array.add_table(tableid) =
+					msg->get_tables().get_table(tableid);
+		}
 
 		segments.push_back(
 				new rofl::openflow::cofmsg_table_features_stats_request(
 						msg->get_version(),
 						msg->get_xid(),
-						msg->get_stats_flags() | rofl::openflow13::OFPMPF_REQ_MORE,
-						tables));
-
-		tables.clear();
+						msg->get_stats_flags(),
+						array));
 	}
 
-	// clear MORE flag on last segment
-	if (not segments.empty()) {
-		segments.back()->set_stats_flags(segments.back()->get_stats_flags() & ~rofl::openflow13::OFPMPF_REQ_MORE);
-	}
-
-	unsigned int cwnd_size = 0;
-
-	for (std::vector<rofl::openflow::cofmsg_table_features_stats_request*>::iterator
-			it = segments.begin(); it != segments.end(); ++it) {
-		 rofsock.send_message(*it);
-	}
-
+	/* delete original message */
 	delete msg;
 
-	return cwnd_size;
+	/* send fragments */
+	while (not segments.empty()) {
+		rofl::openflow::cofmsg_table_features_stats_request* msg = segments.front();
+		segments.pop_front();
+		// set MORE flag on all segments except last one
+		if (not segments.empty()) {
+			msg->set_stats_flags(
+					msg->get_stats_flags() | rofl::openflow13::OFPMPF_REQ_MORE);
+		}
+		rofsock.send_message(msg);
+	}
+
+	return 0;
+}
+
+
+
+unsigned int
+crofconn::segment_table_features_stats_reply(
+		rofl::openflow::cofmsg_table_features_stats_reply* msg)
+{
+	std::list<rofl::openflow::cofmsg_table_features_stats_reply*> segments;
+	const int MAX_LENGTH = 64000/*bytes*/;
+	auto tableids = msg->get_tables().keys();
+
+	/* create fragments */
+	while (not tableids.empty()) {
+		rofl::openflow::coftables array(msg->get_version());
+
+		while ((not tableids.empty()) && (array.length() < MAX_LENGTH)) {
+			uint8_t tableid = tableids.front(); tableids.pop_front();
+			array.add_table(tableid) =
+					msg->get_tables().get_table(tableid);
+		}
+
+		segments.push_back(
+				new rofl::openflow::cofmsg_table_features_stats_reply(
+						msg->get_version(),
+						msg->get_xid(),
+						msg->get_stats_flags(),
+						array));
+	}
+
+	/* delete original message */
+	delete msg;
+
+	/* send fragments */
+	while (not segments.empty()) {
+		rofl::openflow::cofmsg_table_features_stats_reply* msg = segments.front();
+		segments.pop_front();
+		// set MORE flag on all segments except last one
+		if (not segments.empty()) {
+			msg->set_stats_flags(
+					msg->get_stats_flags() | rofl::openflow13::OFPMPF_REPLY_MORE);
+		}
+		rofsock.send_message(msg);
+	}
+
+	return 0;
 }
 
 
@@ -1598,43 +1645,136 @@ unsigned int
 crofconn::segment_flow_stats_reply(
 		rofl::openflow::cofmsg_flow_stats_reply *msg)
 {
-	rofl::openflow::cofflowstatsarray flowstats;
-	std::vector<rofl::openflow::cofmsg_flow_stats_reply*> segments;
+	std::list<rofl::openflow::cofmsg_flow_stats_reply*> segments;
+	const int MAX_LENGTH = 64000/*bytes*/;
+	auto flowids = msg->get_flow_stats_array().keys();
 
-	for (std::map<uint32_t, rofl::openflow::cofflow_stats_reply>::const_iterator
-			it = msg->get_flow_stats_array().get_flow_stats().begin(); it != msg->get_flow_stats_array().get_flow_stats().end(); ++it) {
+	/* create fragments */
+	while (not flowids.empty()) {
+		rofl::openflow::cofflowstatsarray array(msg->get_version());
 
-		flowstats.set_flow_stats(it->first) = it->second;
-
-		/*
-		 * TODO: put more cofflow_stats_reply elements in flowstats per round
-		 */
+		while ((not flowids.empty()) && (array.length() < MAX_LENGTH)) {
+			uint32_t flowid = flowids.front(); flowids.pop_front();
+			array.add_flow_stats(flowid) =
+					msg->get_flow_stats_array().get_flow_stats(flowid);
+		}
 
 		segments.push_back(
 				new rofl::openflow::cofmsg_flow_stats_reply(
 						msg->get_version(),
 						msg->get_xid(),
-						msg->get_stats_flags() | rofl::openflow13::OFPMPF_REPLY_MORE,
-						flowstats));
-
-		flowstats.clear();
+						msg->get_stats_flags(),
+						array));
 	}
 
-	// clear MORE flag on last segment
-	if (not segments.empty()) {
-		segments.back()->set_stats_flags(segments.back()->get_stats_flags() & ~rofl::openflow13::OFPMPF_REPLY_MORE);
-	}
-
-	unsigned int cwnd_size = 0;
-
-	for (std::vector<rofl::openflow::cofmsg_flow_stats_reply*>::iterator
-			it = segments.begin(); it != segments.end(); ++it) {
-		 rofsock.send_message(*it);
-	}
-
+	/* delete original message */
 	delete msg;
 
-	return cwnd_size;
+	/* send fragments */
+	while (not segments.empty()) {
+		rofl::openflow::cofmsg_flow_stats_reply* msg = segments.front();
+		segments.pop_front();
+		// set MORE flag on all segments except last one
+		if (not segments.empty()) {
+			msg->set_stats_flags(
+					msg->get_stats_flags() | rofl::openflow13::OFPMPF_REPLY_MORE);
+		}
+		rofsock.send_message(msg);
+	}
+
+	return 0;
+}
+
+
+
+unsigned int
+crofconn::segment_group_desc_stats_reply(
+		rofl::openflow::cofmsg_group_desc_stats_reply *msg)
+{
+	std::list<rofl::openflow::cofmsg_group_desc_stats_reply*> segments;
+	const int MAX_LENGTH = 64000/*bytes*/;
+	auto groupids = msg->get_group_desc_stats_array().keys();
+
+	/* create fragments */
+	while (not groupids.empty()) {
+		rofl::openflow::cofgroupdescstatsarray array(msg->get_version());
+
+		while ((not groupids.empty()) && (array.length() < MAX_LENGTH)) {
+			uint32_t groupid = groupids.front(); groupids.pop_front();
+			array.add_group_desc_stats(groupid) =
+					msg->get_group_desc_stats_array().get_group_desc_stats(groupid);
+		}
+
+		segments.push_back(
+				new rofl::openflow::cofmsg_group_desc_stats_reply(
+						msg->get_version(),
+						msg->get_xid(),
+						msg->get_stats_flags(),
+						array));
+	}
+
+	/* delete original message */
+	delete msg;
+
+	/* send fragments */
+	while (not segments.empty()) {
+		rofl::openflow::cofmsg_group_desc_stats_reply* msg = segments.front();
+		segments.pop_front();
+		// set MORE flag on all segments except last one
+		if (not segments.empty()) {
+			msg->set_stats_flags(
+					msg->get_stats_flags() | rofl::openflow13::OFPMPF_REPLY_MORE);
+		}
+		rofsock.send_message(msg);
+	}
+
+	return 0;
+}
+
+
+
+unsigned int
+crofconn::segment_group_stats_reply(
+		rofl::openflow::cofmsg_group_stats_reply *msg)
+{
+	std::list<rofl::openflow::cofmsg_group_stats_reply*> segments;
+	const int MAX_LENGTH = 64000/*bytes*/;
+	auto groupids = msg->get_group_stats_array().keys();
+
+	/* create fragments */
+	while (not groupids.empty()) {
+		rofl::openflow::cofgroupstatsarray array(msg->get_version());
+
+		while ((not groupids.empty()) && (array.length() < MAX_LENGTH)) {
+			uint32_t groupid = groupids.front(); groupids.pop_front();
+			array.add_group_stats(groupid) =
+					msg->get_group_stats_array().get_group_stats(groupid);
+		}
+
+		segments.push_back(
+				new rofl::openflow::cofmsg_group_stats_reply(
+						msg->get_version(),
+						msg->get_xid(),
+						msg->get_stats_flags(),
+						array));
+	}
+
+	/* delete original message */
+	delete msg;
+
+	/* send fragments */
+	while (not segments.empty()) {
+		rofl::openflow::cofmsg_group_stats_reply* msg = segments.front();
+		segments.pop_front();
+		// set MORE flag on all segments except last one
+		if (not segments.empty()) {
+			msg->set_stats_flags(
+					msg->get_stats_flags() | rofl::openflow13::OFPMPF_REPLY_MORE);
+		}
+		rofsock.send_message(msg);
+	}
+
+	return 0;
 }
 
 
@@ -1643,43 +1783,44 @@ unsigned int
 crofconn::segment_table_stats_reply(
 		rofl::openflow::cofmsg_table_stats_reply *msg)
 {
-	rofl::openflow::coftablestatsarray tablestats;
-	std::vector<rofl::openflow::cofmsg_table_stats_reply*> segments;
+	std::list<rofl::openflow::cofmsg_table_stats_reply*> segments;
+	const int MAX_LENGTH = 64000/*bytes*/;
+	auto tableids = msg->get_table_stats_array().keys();
 
-	for (std::map<uint8_t, rofl::openflow::coftable_stats_reply>::const_iterator
-			it = msg->get_table_stats_array().get_table_stats().begin(); it != msg->get_table_stats_array().get_table_stats().end(); ++it) {
+	/* create fragments */
+	while (not tableids.empty()) {
+		rofl::openflow::coftablestatsarray array(msg->get_version());
 
-		tablestats.set_table_stats(it->first) = it->second;
-
-		/*
-		 * TODO: put more rofl::openflow::coftable_stats_reply elements in tablestats per round
-		 */
+		while ((not tableids.empty()) && (array.length() < MAX_LENGTH)) {
+			uint32_t tableid = tableids.front(); tableids.pop_front();
+			array.add_table_stats(tableid) =
+					msg->get_table_stats_array().get_table_stats(tableid);
+		}
 
 		segments.push_back(
 				new rofl::openflow::cofmsg_table_stats_reply(
 						msg->get_version(),
 						msg->get_xid(),
-						msg->get_stats_flags() | rofl::openflow13::OFPMPF_REPLY_MORE,
-						tablestats));
-
-		tablestats.clear();
+						msg->get_stats_flags(),
+						array));
 	}
 
-	// clear MORE flag on last segment
-	if (not segments.empty()) {
-		segments.back()->set_stats_flags(segments.back()->get_stats_flags() & ~rofl::openflow13::OFPMPF_REPLY_MORE);
-	}
-
-	unsigned int cwnd_size = 0;
-
-	for (std::vector<rofl::openflow::cofmsg_table_stats_reply*>::iterator
-			it = segments.begin(); it != segments.end(); ++it) {
-		 rofsock.send_message(*it);
-	}
-
+	/* delete original message */
 	delete msg;
 
-	return cwnd_size;
+	/* send fragments */
+	while (not segments.empty()) {
+		rofl::openflow::cofmsg_table_stats_reply* msg = segments.front();
+		segments.pop_front();
+		// set MORE flag on all segments except last one
+		if (not segments.empty()) {
+			msg->set_stats_flags(
+					msg->get_stats_flags() | rofl::openflow13::OFPMPF_REPLY_MORE);
+		}
+		rofsock.send_message(msg);
+	}
+
+	return 0;
 }
 
 
@@ -1688,43 +1829,44 @@ unsigned int
 crofconn::segment_port_stats_reply(
 		rofl::openflow::cofmsg_port_stats_reply *msg)
 {
-	rofl::openflow::cofportstatsarray portstats;
-	std::vector<rofl::openflow::cofmsg_port_stats_reply*> segments;
+	std::list<rofl::openflow::cofmsg_port_stats_reply*> segments;
+	const int MAX_LENGTH = 64000/*bytes*/;
+	auto portids = msg->get_port_stats_array().keys();
 
-	for (std::map<uint32_t, rofl::openflow::cofport_stats_reply>::const_iterator
-			it = msg->get_port_stats_array().get_port_stats().begin(); it != msg->get_port_stats_array().get_port_stats().end(); ++it) {
+	/* create fragments */
+	while (not portids.empty()) {
+		rofl::openflow::cofportstatsarray array(msg->get_version());
 
-		portstats.set_port_stats(it->first) = it->second;
-
-		/*
-		 * TODO: put more rofl::openflow::cofport_stats_reply elements in portstats per round
-		 */
+		while ((not portids.empty()) && (array.length() < MAX_LENGTH)) {
+			uint32_t portid = portids.front(); portids.pop_front();
+			array.add_port_stats(portid) =
+					msg->get_port_stats_array().get_port_stats(portid);
+		}
 
 		segments.push_back(
 				new rofl::openflow::cofmsg_port_stats_reply(
 						msg->get_version(),
 						msg->get_xid(),
-						msg->get_stats_flags() | rofl::openflow13::OFPMPF_REPLY_MORE,
-						portstats));
-
-		portstats.clear();
+						msg->get_stats_flags(),
+						array));
 	}
 
-	// clear MORE flag on last segment
-	if (not segments.empty()) {
-		segments.back()->set_stats_flags(segments.back()->get_stats_flags() & ~rofl::openflow13::OFPMPF_REPLY_MORE);
-	}
-
-	unsigned int cwnd_size = 0;
-
-	for (std::vector<rofl::openflow::cofmsg_port_stats_reply*>::iterator
-			it = segments.begin(); it != segments.end(); ++it) {
-		 rofsock.send_message(*it);
-	}
-
+	/* delete original message */
 	delete msg;
 
-	return cwnd_size;
+	/* send fragments */
+	while (not segments.empty()) {
+		rofl::openflow::cofmsg_port_stats_reply* msg = segments.front();
+		segments.pop_front();
+		// set MORE flag on all segments except last one
+		if (not segments.empty()) {
+			msg->set_stats_flags(
+					msg->get_stats_flags() | rofl::openflow13::OFPMPF_REPLY_MORE);
+		}
+		rofsock.send_message(msg);
+	}
+
+	return 0;
 }
 
 
@@ -1766,141 +1908,6 @@ crofconn::segment_queue_stats_reply(
 	unsigned int cwnd_size = 0;
 
 	for (std::vector<rofl::openflow::cofmsg_queue_stats_reply*>::iterator
-			it = segments.begin(); it != segments.end(); ++it) {
-		 rofsock.send_message(*it);
-	}
-
-	delete msg;
-
-	return cwnd_size;
-}
-
-
-
-unsigned int
-crofconn::segment_group_stats_reply(
-		rofl::openflow::cofmsg_group_stats_reply *msg)
-{
-	rofl::openflow::cofgroupstatsarray groupstats;
-	std::vector<rofl::openflow::cofmsg_group_stats_reply*> segments;
-
-	for (std::map<uint32_t, rofl::openflow::cofgroup_stats_reply>::const_iterator
-			it = msg->get_group_stats_array().get_group_stats().begin(); it != msg->get_group_stats_array().get_group_stats().end(); ++it) {
-
-		groupstats.set_group_stats(it->first) = it->second;
-
-		/*
-		 * TODO: put more cofgroup_stats_reply elements in groupstats per round
-		 */
-
-		segments.push_back(
-				new rofl::openflow::cofmsg_group_stats_reply(
-						msg->get_version(),
-						msg->get_xid(),
-						msg->get_stats_flags() | rofl::openflow13::OFPMPF_REPLY_MORE,
-						groupstats));
-
-		groupstats.clear();
-	}
-
-	// clear MORE flag on last segment
-	if (not segments.empty()) {
-		segments.back()->set_stats_flags(segments.back()->get_stats_flags() & ~rofl::openflow13::OFPMPF_REPLY_MORE);
-	}
-
-	unsigned int cwnd_size = 0;
-
-	for (std::vector<rofl::openflow::cofmsg_group_stats_reply*>::iterator
-			it = segments.begin(); it != segments.end(); ++it) {
-		 rofsock.send_message(*it);
-	}
-
-	delete msg;
-
-	return cwnd_size;
-}
-
-
-
-unsigned int
-crofconn::segment_group_desc_stats_reply(
-		rofl::openflow::cofmsg_group_desc_stats_reply *msg)
-{
-	rofl::openflow::cofgroupdescstatsarray groupdescstats;
-	std::vector<rofl::openflow::cofmsg_group_desc_stats_reply*> segments;
-
-	for (std::map<uint32_t, rofl::openflow::cofgroup_desc_stats_reply>::const_iterator
-			it = msg->get_group_desc_stats_array().get_group_desc_stats().begin(); it != msg->get_group_desc_stats_array().get_group_desc_stats().end(); ++it) {
-
-		groupdescstats.set_group_desc_stats(it->first) = it->second;
-
-		/*
-		 * TODO: put more cofgroup_desc_stats_reply elements in group_descstats per round
-		 */
-
-		segments.push_back(
-				new rofl::openflow::cofmsg_group_desc_stats_reply(
-						msg->get_version(),
-						msg->get_xid(),
-						msg->get_stats_flags() | rofl::openflow13::OFPMPF_REPLY_MORE,
-						groupdescstats));
-
-		groupdescstats.clear();
-	}
-
-	// clear MORE flag on last segment
-	if (not segments.empty()) {
-		segments.back()->set_stats_flags(segments.back()->get_stats_flags() & ~rofl::openflow13::OFPMPF_REPLY_MORE);
-	}
-
-	unsigned int cwnd_size = 0;
-
-	for (std::vector<rofl::openflow::cofmsg_group_desc_stats_reply*>::iterator
-			it = segments.begin(); it != segments.end(); ++it) {
-		 rofsock.send_message(*it);
-	}
-
-	delete msg;
-
-	return cwnd_size;
-}
-
-
-
-unsigned int
-crofconn::segment_table_features_stats_reply(
-		rofl::openflow::cofmsg_table_features_stats_reply *msg)
-{
-	rofl::openflow::coftables tables;
-	std::vector<rofl::openflow::cofmsg_table_features_stats_reply*> segments;
-
-	for (std::map<uint8_t, rofl::openflow::coftable_features>::const_iterator
-			it = msg->get_tables().get_tables().begin(); it != msg->get_tables().get_tables().end(); ++it) {
-
-		tables.set_table(it->first) = it->second;
-
-		/*
-		 * TODO: put more rofl::openflow::coftable_features elements in tables per round
-		 */
-
-		segments.push_back(
-				new rofl::openflow::cofmsg_table_features_stats_reply(
-						msg->get_version(),
-						msg->get_xid(),
-						msg->get_stats_flags() | rofl::openflow13::OFPMPF_REPLY_MORE,
-						tables));
-
-		tables.clear();
-	}
-
-	// clear MORE flag on last segment
-	if (not segments.empty()) {
-		segments.back()->set_stats_flags(segments.back()->get_stats_flags() & ~rofl::openflow13::OFPMPF_REPLY_MORE);
-	}
-
-	unsigned int cwnd_size = 0;
-
-	for (std::vector<rofl::openflow::cofmsg_table_features_stats_reply*>::iterator
 			it = segments.begin(); it != segments.end(); ++it) {
 		 rofsock.send_message(*it);
 	}

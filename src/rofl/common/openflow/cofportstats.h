@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 /*
  * cofportstatsrequest.h
  *
@@ -5,10 +9,9 @@
  *      Author: andi
  */
 
-#ifndef COFPORTSTATS_H_
-#define COFPORTSTATS_H_ 1
+#ifndef ROFL_COMMON_OPENFLOW_COFPORTSTATS_H
+#define ROFL_COMMON_OPENFLOW_COFPORTSTATS_H 1
 
-#include "rofl/common/cmemory.h"
 #include "rofl/common/openflow/cofactions.h"
 #include "rofl/common/openflow/cofinstructions.h"
 #include "rofl/common/openflow/openflow.h"
@@ -36,67 +39,97 @@ public:
 	};
 };
 
-class cofport_stats_request
-{
-private: // data structures
-
-	uint8_t 	of_version;
-	uint32_t	port_no;
-
-public: // data structures
-
-
+class cofport_stats_request {
 public:
+
+	/**
+	 *
+	 */
+	~cofport_stats_request()
+	{};
+
 	/**
 	 *
 	 */
 	cofport_stats_request(
-			uint8_t of_version = 0,
+			uint8_t of_version = rofl::openflow::OFP_VERSION_UNKNOWN,
 			uint8_t *buf = (uint8_t*)0,
-			size_t buflen = 0);
+			size_t buflen = 0) :
+				of_version(of_version),
+				port_no(rofl::openflow13::OFPP_ALL)
+	{
+		if ((buflen == 0) || (nullptr == buf)) {
+			return;
+		}
+		unpack(buf, buflen);
+	};
 
 	/**
 	 *
 	 */
 	cofport_stats_request(
 			uint8_t of_version,
-			uint32_t port_no);
-
-
-	/**
-	 *
-	 */
-	virtual
-	~cofport_stats_request();
-
+			uint32_t port_no)  :
+				of_version(of_version),
+				port_no(port_no)
+	{};
 
 	/**
 	 *
 	 */
 	cofport_stats_request(
-			cofport_stats_request const& port_stats_request);
+			const cofport_stats_request& req)
+	{ *this = req; };
 
 	/**
 	 *
 	 */
 	cofport_stats_request&
 	operator= (
-			cofport_stats_request const& port_stats_request);
+			const cofport_stats_request& req)
+	{
+		if (this == &req)
+			return *this;
 
+		of_version 	= req.of_version;
+		port_no		= req.port_no;
+
+		return *this;
+	};
+
+public:
 
 	/**
 	 *
 	 */
-	void
-	pack(uint8_t *buf, size_t buflen) const;
-
+	cofport_stats_request&
+	set_version(
+			uint8_t of_version)
+	{ this->of_version = of_version; return *this; };
 
 	/**
 	 *
 	 */
-	void
-	unpack(uint8_t *buf, size_t buflen);
+	uint8_t
+	get_version() const
+	{ return of_version; };
 
+	/**
+	 *
+	 */
+	cofport_stats_request&
+	set_port_no(
+			uint32_t port_no)
+	{ this->port_no = port_no; return *this; };
+
+	/**
+	 *
+	 */
+	uint32_t
+	get_port_no() const
+	{ return port_no; }
+
+public:
 
 	/**
 	 *
@@ -104,73 +137,75 @@ public:
 	size_t
 	length() const;
 
+	/**
+	 *
+	 */
+	void
+	pack(
+			uint8_t *buf, size_t buflen) const;
 
 	/**
 	 *
 	 */
 	void
-	set_version(uint8_t of_version);
-
-
-	/**
-	 *
-	 */
-	uint8_t
-	get_version() const;
-
-
-	/**
-	 *
-	 */
-	uint32_t
-	get_portno() const;
+	unpack(
+			uint8_t *buf, size_t buflen);
 
 public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, cofport_stats_request const& r) {
 		os  << "<cofport_stats_request >" << std::endl;
-		os << "<port-no: 0x" << std::hex << (int)r.get_portno() << std::dec << " >" << std::endl;
+		os << "<port-no: 0x" << std::hex << (int)r.get_port_no() << std::dec << " >" << std::endl;
 		return os;
 	};
+
+private:
+
+	uint8_t 	of_version;
+	uint32_t	port_no;
 };
 
 
 
-class cofport_stats_reply
-{
-private: // data structures
-
-	uint8_t 	of_version;
-	uint32_t	port_no;
-	uint64_t	rx_packets;
-	uint64_t	tx_packets;
-	uint64_t	rx_bytes;
-	uint64_t	tx_bytes;
-	uint64_t	rx_dropped;
-	uint64_t 	tx_dropped;
-	uint64_t	rx_errors;
-	uint64_t	tx_errors;
-	uint64_t	rx_frame_err;
-	uint64_t	rx_over_err;
-	uint64_t	rx_crc_err;
-	uint64_t	collisions;
-	uint32_t	duration_sec;	// since OF1.3
-	uint32_t	duration_nsec;	// since OF1.3
-
-
-public: // data structures
-
-
+class cofport_stats_reply {
 public:
+
+	/**
+	 *
+	 */
+	~cofport_stats_reply()
+	{};
+
 	/**
 	 *
 	 */
 	cofport_stats_reply(
-			uint8_t of_version = 0,
+			uint8_t of_version = rofl::openflow::OFP_VERSION_UNKNOWN,
 			uint8_t *buf = (uint8_t*)0,
-			size_t buflen = 0);
-
+			size_t buflen = 0) :
+				of_version(of_version),
+				port_no(0),
+				rx_packets(0),
+				tx_packets(0),
+				rx_bytes(0),
+				tx_bytes(0),
+				rx_dropped(0),
+				tx_dropped(0),
+				rx_errors(0),
+				tx_errors(0),
+				rx_frame_err(0),
+				rx_over_err(0),
+				rx_crc_err(0),
+				collisions(0),
+				duration_sec(0),
+				duration_nsec(0)
+	{
+		if ((buflen == 0) || (nullptr == buf)) {
+			return;
+		}
+		unpack(buf, buflen);
+	};
 
 	/**
 	 *
@@ -190,51 +225,329 @@ public:
 			uint64_t rx_over_err,
 			uint64_t rx_crc_err,
 			uint64_t collisions,
-			uint32_t durarion_sec,
-			uint32_t duration_nsec);
-
-
-
-	/**
-	 *
-	 */
-	virtual
-	~cofport_stats_reply();
-
+			uint32_t duration_sec,
+			uint32_t duration_nsec) :
+				of_version(of_version),
+				port_no(port_no),
+				rx_packets(rx_packets),
+				tx_packets(tx_packets),
+				rx_bytes(rx_bytes),
+				tx_bytes(tx_bytes),
+				rx_dropped(rx_dropped),
+				tx_dropped(tx_dropped),
+				rx_errors(rx_errors),
+				tx_errors(tx_errors),
+				rx_frame_err(rx_frame_err),
+				rx_over_err(rx_over_err),
+				rx_crc_err(rx_crc_err),
+				collisions(collisions),
+				duration_sec(duration_sec),
+				duration_nsec(duration_nsec)
+	{};
 
 	/**
 	 *
 	 */
 	cofport_stats_reply(
-			cofport_stats_reply const& port_stats_reply);
+			const cofport_stats_reply& rep)
+	{ *this = rep; };
 
 	/**
 	 *
 	 */
 	cofport_stats_reply&
 	operator= (
-			cofport_stats_reply const& port_stats_reply);
+			const cofport_stats_reply& rep) {
+		if (this == &rep)
+			return *this;
+
+		of_version 		= rep.of_version;
+		port_no			= rep.port_no;
+		rx_packets		= rep.rx_packets;
+		tx_packets		= rep.tx_packets;
+		rx_bytes		= rep.rx_bytes;
+		tx_bytes		= rep.tx_bytes;
+		rx_dropped		= rep.rx_dropped;
+		tx_dropped		= rep.tx_dropped;
+		rx_errors		= rep.rx_errors;
+		tx_errors		= rep.tx_errors;
+		rx_frame_err	= rep.rx_frame_err;
+		rx_over_err		= rep.rx_over_err;
+		rx_crc_err		= rep.rx_crc_err;
+		collisions		= rep.collisions;
+		duration_sec	= rep.duration_sec;
+		duration_nsec	= rep.duration_nsec;
+
+		return *this;
+	};
 
 	/**
 	 *
 	 */
 	bool
 	operator== (
-			cofport_stats_reply const& port_stats_reply);
+			const cofport_stats_reply& rep) const {
+		return ((of_version		== rep.of_version) &&
+				(port_no		== rep.port_no) &&
+				(rx_packets 	== rep.rx_packets) &&
+				(tx_packets 	== rep.tx_packets) &&
+				(rx_bytes 		== rep.rx_bytes) &&
+				(tx_bytes 		== rep.tx_bytes) &&
+				(rx_dropped 	== rep.rx_dropped) &&
+				(tx_dropped 	== rep.tx_dropped) &&
+				(rx_errors 		== rep.rx_errors) &&
+				(tx_errors 		== rep.tx_errors) &&
+				(rx_frame_err 	== rep.rx_frame_err) &&
+				(rx_over_err 	== rep.rx_over_err) &&
+				(rx_crc_err 	== rep.rx_crc_err) &&
+				(collisions 	== rep.collisions) &&
+				(duration_sec 	== rep.duration_sec) &&
+				(duration_nsec 	== rep.duration_nsec));
+	};
+
+public:
 
 	/**
 	 *
 	 */
-	void
-	pack(uint8_t *buf, size_t buflen) const;
-
+	cofport_stats_reply&
+	set_version(
+			uint8_t of_version)
+	{ this->of_version = of_version; return *this; };
 
 	/**
 	 *
 	 */
-	void
-	unpack(uint8_t *buf, size_t buflen);
+	uint8_t
+	get_version() const
+	{ return of_version; };
 
+	/**
+	 *
+	 */
+	cofport_stats_reply&
+	set_port_no(
+			uint32_t port_no)
+	{ this->port_no = port_no; return *this; };
+
+	/**
+	 *
+	 */
+	uint32_t
+	get_port_no() const
+	{ return port_no; };
+
+	/**
+	 *
+	 */
+	cofport_stats_reply&
+	set_rx_packets(
+			uint64_t rx_packets)
+	{ this->rx_packets = rx_packets; return *this; };
+
+	/**
+	 *
+	 */
+	uint64_t
+	get_rx_packets() const
+	{ return rx_packets; };
+
+	/**
+	 *
+	 */
+	cofport_stats_reply&
+	set_tx_packets(
+			uint64_t tx_packets)
+	{ this->tx_packets = tx_packets; return *this; };
+
+	/**
+	 *
+	 */
+	uint64_t
+	get_tx_packets() const
+	{ return tx_packets; };
+
+	/**
+	 *
+	 */
+	cofport_stats_reply&
+	set_rx_bytes(
+			uint64_t rx_bytes)
+	{ this->rx_bytes = rx_bytes; return *this; };
+
+	/**
+	 *
+	 */
+	uint64_t
+	get_rx_bytes() const
+	{ return rx_bytes; };
+
+	/**
+	 *
+	 */
+	cofport_stats_reply&
+	set_tx_bytes(
+			uint64_t tx_bytes)
+	{ this->tx_bytes = tx_bytes; return *this; };
+
+	/**
+	 *
+	 */
+	uint64_t
+	get_tx_bytes() const
+	{ return tx_bytes; };
+
+	/**
+	 *
+	 */
+	cofport_stats_reply&
+	set_rx_dropped(
+			uint64_t rx_dropped)
+	{ this->rx_dropped = rx_dropped; return *this; };
+
+	/**
+	 *
+	 */
+	uint64_t
+	get_rx_dropped() const
+	{ return rx_dropped; };
+
+	/**
+	 *
+	 */
+	cofport_stats_reply&
+	set_tx_dropped(
+			uint64_t tx_dropped)
+	{ this->tx_dropped = tx_dropped; return *this; };
+
+	/**
+	 *
+	 */
+	uint64_t
+	get_tx_dropped() const
+	{ return tx_dropped; };
+
+	/**
+	 *
+	 */
+	cofport_stats_reply&
+	set_rx_errors(
+			uint64_t rx_errors)
+	{ this->rx_errors = rx_errors; return *this; };
+
+	/**
+	 *
+	 */
+	uint64_t
+	get_rx_errors() const
+	{ return rx_errors; };
+
+	/**
+	 *
+	 */
+	cofport_stats_reply&
+	set_tx_errors(
+			uint64_t tx_errors)
+	{ this->tx_errors = tx_errors; return *this; };
+
+	/**
+	 *
+	 */
+	uint64_t
+	get_tx_errors() const
+	{ return tx_errors; };
+
+	/**
+	 *
+	 */
+	cofport_stats_reply&
+	set_rx_frame_err(
+			uint64_t rx_frame_err)
+	{ this->rx_frame_err = rx_frame_err; return *this; };
+
+	/**
+	 *
+	 */
+	uint64_t
+	get_rx_frame_err() const
+	{ return rx_frame_err; };
+
+	/**
+	 *
+	 */
+	cofport_stats_reply&
+	set_rx_over_err(
+			uint64_t rx_over_err)
+	{ this->rx_over_err = rx_over_err; return *this; };
+
+	/**
+	 *
+	 */
+	uint64_t
+	get_rx_over_err() const
+	{ return rx_over_err; };
+
+	/**
+	 *
+	 */
+	cofport_stats_reply&
+	set_rx_crc_err(
+			uint64_t rx_crc_err)
+	{ this->rx_crc_err = rx_crc_err; return *this; };
+
+	/**
+	 *
+	 */
+	uint64_t
+	get_rx_crc_err() const
+	{ return rx_crc_err; };
+
+	/**
+	 *
+	 */
+	cofport_stats_reply&
+	set_collisions(
+			uint64_t collisions)
+	{ this->collisions = collisions; return *this; };
+
+	/**
+	 *
+	 */
+	uint64_t
+	get_collisions() const
+	{ return collisions; };
+
+	/**
+	 *
+	 */
+	cofport_stats_reply&
+	set_duration_sec(
+			uint32_t duration_sec)
+	{ this->duration_sec = duration_sec; return *this; };
+
+	/**
+	 *
+	 */
+	uint32_t
+	get_duration_sec() const
+	{ return duration_sec; };
+
+	/**
+	 *
+	 */
+	cofport_stats_reply&
+	set_duration_nsec(
+			uint32_t duration_nsec)
+	{ this->duration_nsec = duration_nsec; return *this; };
+
+	/**
+	 *
+	 */
+	uint32_t
+	get_duration_nsec() const
+	{ return duration_nsec; };
+
+public:
 
 	/**
 	 *
@@ -242,207 +555,19 @@ public:
 	size_t
 	length() const;
 
+	/**
+	 *
+	 */
+	void
+	pack(
+			uint8_t *buf, size_t buflen) const;
 
 	/**
 	 *
 	 */
 	void
-	reset();
-
-
-	/**
-	 *
-	 */
-	void
-	set_version(uint8_t of_version);
-
-
-	/**
-	 *
-	 */
-	uint8_t
-	get_version() const;
-
-
-	/**
-	 *
-	 */
-	uint32_t
-	get_port_no() const;
-
-	/**
-	 *
-	 */
-	uint64_t
-	get_rx_packets() const;
-
-	/**
-	 *
-	 */
-	uint64_t
-	get_tx_packets() const;
-
-	/**
-	 *
-	 */
-	uint64_t
-	get_rx_bytes() const;
-
-	/**
-	 *
-	 */
-	uint64_t
-	get_tx_bytes() const;
-
-	/**
-	 *
-	 */
-	uint64_t
-	get_rx_dropped() const;
-
-	/**
-	 *
-	 */
-	uint64_t
-	get_tx_dropped() const;
-
-	/**
-	 *
-	 */
-	uint64_t
-	get_rx_errors() const;
-
-	/**
-	 *
-	 */
-	uint64_t
-	get_tx_errors() const;
-
-	/**
-	 *
-	 */
-	uint64_t
-	get_rx_frame_err() const;
-
-	/**
-	 *
-	 */
-	uint64_t
-	get_rx_over_err() const;
-
-	/**
-	 *
-	 */
-	uint64_t
-	get_rx_crc_err() const;
-
-	/**
-	 *
-	 */
-	uint64_t
-	get_collisions() const;
-
-	/**
-	 *
-	 */
-	uint32_t
-	get_duration_sec() const;
-
-	/**
-	 *
-	 */
-	uint32_t
-	get_duration_nsec() const;
-
-	/**
-	 *
-	 */
-	void
-	set_port_no(uint32_t port_no);
-
-	/**
-	 *
-	 */
-	void
-	set_rx_packets(uint64_t rx_packets);
-
-	/**
-	 *
-	 */
-	void
-	set_tx_packets(uint64_t tx_packets);
-
-	/**
-	 *
-	 */
-	void
-	set_rx_bytes(uint64_t rx_bytes);
-
-	/**
-	 *
-	 */
-	void
-	set_tx_bytes(uint64_t tx_bytes);
-
-	/**
-	 *
-	 */
-	void
-	set_rx_dropped(uint64_t rx_dropped);
-
-	/**
-	 *
-	 */
-	void
-	set_tx_dropped(uint64_t tx_dropped);
-
-	/**
-	 *
-	 */
-	void
-	set_rx_errors(uint64_t rx_errors);
-
-	/**
-	 *
-	 */
-	void
-	set_tx_errors(uint64_t tx_errors);
-
-	/**
-	 *
-	 */
-	void
-	set_rx_frame_err(uint64_t rx_frame_err);
-
-	/**
-	 *
-	 */
-	void
-	set_rx_over_err(uint64_t rx_over_err);
-
-	/**
-	 *
-	 */
-	void
-	set_rx_crc_err(uint64_t rx_crc_err);
-
-	/**
-	 *
-	 */
-	void
-	set_collisions(uint64_t collisions);
-
-	/**
-	 *
-	 */
-	void
-	set_duration_sec(uint32_t duration_sec);
-
-	/**
-	 *
-	 */
-	void
-	set_duration_nsec(uint32_t duration_nsec);
+	unpack(
+			uint8_t *buf, size_t buflen);
 
 public:
 
@@ -474,9 +599,28 @@ public:
 		}
 		return os;
 	};
+
+private:
+
+	uint8_t 	of_version;
+	uint32_t	port_no;
+	uint64_t	rx_packets;
+	uint64_t	tx_packets;
+	uint64_t	rx_bytes;
+	uint64_t	tx_bytes;
+	uint64_t	rx_dropped;
+	uint64_t 	tx_dropped;
+	uint64_t	rx_errors;
+	uint64_t	tx_errors;
+	uint64_t	rx_frame_err;
+	uint64_t	rx_over_err;
+	uint64_t	rx_crc_err;
+	uint64_t	collisions;
+	uint32_t	duration_sec;	// since OF1.3
+	uint32_t	duration_nsec;	// since OF1.3
 };
 
 } /* end of namespace */
 } /* end of namespace */
 
-#endif /* COFFLOWSTATS_H_ */
+#endif /* ROFL_COMMON_OPENFLOW_COFPORTSTATS_H */

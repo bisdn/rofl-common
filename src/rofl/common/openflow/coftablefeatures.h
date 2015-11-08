@@ -1,16 +1,20 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 /*
  * coftablestats.h
  *
  *  Created on: 14.03.2013
+ *  Revised on: 07.11.2015
  *      Author: andi
  */
 
-#ifndef COFTABLEFEATURES_H_
-#define COFTABLEFEATURES_H_ 1
+#ifndef ROFL_COMMON_OPENFLOW_COFTABLEFEATURES_H
+#define ROFL_COMMON_OPENFLOW_COFTABLEFEATURES_H 1
 
 #include <inttypes.h>
 
-#include "rofl/common/cmemory.h"
 #include "rofl/common/exception.hpp"
 #include "rofl/common/openflow/openflow.h"
 #include "rofl/common/openflow/openflow_rofl_exceptions.h"
@@ -39,53 +43,59 @@ public:
 };
 
 
-class coftable_features :
-		public rofl::cmemory
-{
-private:
-
-	uint8_t												ofp_version;
-	rofl::openflow::coftable_feature_props				table_feature_props;
-
-	union {
-		uint8_t*										ofhu_table_features_generic;
-		struct rofl::openflow13::ofp_table_features*	ofhu_table_features;
-	} ofh_ofhu;
-
-#define ofh_tf_generic   		ofh_ofhu.ofhu_table_features_generic
-#define ofh_table_features 		ofh_ofhu.ofhu_table_features
-
-
+class coftable_features {
 public:
 
 	/**
 	 *
 	 */
-	coftable_features(
-			uint8_t of_version = rofl::openflow::OFP_VERSION_UNKNOWN);
-
-
-	/**
-	 *
-	 */
 	virtual
-	~coftable_features();
-
+	~coftable_features()
+	{};
 
 	/**
 	 *
 	 */
 	coftable_features(
-			coftable_features const& table_features);
+			uint8_t ofp_version = rofl::openflow::OFP_VERSION_UNKNOWN) :
+				ofp_version(ofp_version),
+				table_id(0),
+				metadata_match(0),
+				metadata_write(0),
+				config(0),
+				max_entries(0),
+				properties(ofp_version)
+	{};
+
+	/**
+	 *
+	 */
+	coftable_features(
+			const coftable_features& table_features)
+	{ *this = table_features; }
 
 	/**
 	 *
 	 */
 	coftable_features&
 	operator= (
-			coftable_features const& table_features);
+			const coftable_features& table_features) {
+		if (this == &table_features)
+			return *this;
 
+		ofp_version    = table_features.ofp_version;
+		table_id       = table_features.table_id;
+		name           = table_features.name;
+		metadata_match = table_features.metadata_match;
+		metadata_write = table_features.metadata_write;
+		config         = table_features.config;
+		max_entries    = table_features.max_entries;
+		properties     = table_features.properties;
 
+		return *this;
+	};
+
+public:
 
 	/**
 	 *
@@ -97,128 +107,148 @@ public:
 	 *
 	 */
 	void
-	pack(uint8_t* buf, size_t buflen);
+	pack(
+			uint8_t* buf, size_t buflen);
 
 	/**
 	 *
 	 */
 	void
-	unpack(uint8_t* buf, size_t buflen);
+	unpack(
+			uint8_t* buf, size_t buflen);
 
 public:
 
 	/**
 	 *
 	 */
-	uint8_t
-	get_version() const { return ofp_version; };
-
-	/**
-	 *
-	 */
-	void
-	set_version(uint8_t ofp_version) { this->ofp_version = ofp_version; };
-
-	/**
-	 *
-	 */
-	uint16_t
-	get_length() const { return be16toh(ofh_table_features->length); };
-
-	/**
-	 *
-	 */
-	void
-	set_length(uint16_t length) { ofh_table_features->length = htobe16(length); };
-
-	/**
-	 *
-	 */
-	uint8_t
-	get_table_id() const { return ofh_table_features->table_id; };
-
-	/**
-	 *
-	 */
-	void
-	set_table_id(uint8_t table_id) { ofh_table_features->table_id = table_id; };
-
-	/**
-	 *
-	 */
-	std::string
-	get_name() const {
-		return std::string(ofh_table_features->name, strnlen(ofh_table_features->name, OFP_MAX_TABLE_NAME_LEN));
+	coftable_features&
+	set_version(
+			uint8_t ofp_version)
+	{
+		this->ofp_version = ofp_version;
+		properties.set_version(ofp_version);
+		return *this;
 	};
 
 	/**
 	 *
 	 */
-	void
-	set_name(std::string const& name) {
-		memset(ofh_table_features->name, 0, OFP_MAX_TABLE_NAME_LEN);
-		strncpy(ofh_table_features->name, name.c_str(), OFP_MAX_TABLE_NAME_LEN);
-	};
+	uint8_t
+	get_version() const
+	{ return ofp_version; };
+
+	/**
+	 *
+	 */
+	coftable_features&
+	set_table_id(
+			uint8_t table_id)
+	{ this->table_id = table_id; return *this; };
+
+	/**
+	 *
+	 */
+	uint8_t
+	get_table_id() const
+	{ return table_id; };
+
+	/**
+	 *
+	 */
+	coftable_features&
+	set_name(
+			const std::string& name)
+	{ this->name = name; return *this; };
+
+	/**
+	 *
+	 */
+	const std::string&
+	get_name() const
+	{ return name; };
+
+	/**
+	 *
+	 */
+	coftable_features&
+	set_metadata_match(
+			uint64_t metadata_match)
+	{ this->metadata_match = metadata_match; return *this; };
 
 	/**
 	 *
 	 */
 	uint64_t
-	get_metadata_match() const { return be64toh(ofh_table_features->metadata_match); };
+	get_metadata_match() const
+	{ return metadata_match; };
 
 	/**
 	 *
 	 */
-	void
-	set_metadata_match(uint64_t metadata_match) { ofh_table_features->metadata_match = htobe64(metadata_match); };
+	coftable_features&
+	set_metadata_write(
+			uint64_t metadata_write)
+	{ this->metadata_write = metadata_write; return *this; };
 
 	/**
 	 *
 	 */
 	uint64_t
-	get_metadata_write() const { return be64toh(ofh_table_features->metadata_write); };
+	get_metadata_write() const
+	{ return metadata_write; };
 
 	/**
 	 *
 	 */
-	void
-	set_metadata_write(uint64_t metadata_write) { ofh_table_features->metadata_write = htobe64(metadata_write); };
-
-	/**
-	 *
-	 */
-	uint32_t
-	get_config() const { return be32toh(ofh_table_features->config); };
-
-	/**
-	 *
-	 */
-	void
-	set_config(uint32_t config) { ofh_table_features->config = htobe32(config); };
+	coftable_features&
+	set_config(
+			uint32_t config)
+	{ this->config = config; return *this; };
 
 	/**
 	 *
 	 */
 	uint32_t
-	get_max_entries() const { return be32toh(ofh_table_features->max_entries); };
+	get_config() const
+	{ return config; };
 
 	/**
 	 *
 	 */
-	void
-	set_max_entries(uint32_t max_entries) { ofh_table_features->max_entries = htobe32(max_entries); };
+	coftable_features&
+	set_max_entries(
+			uint32_t max_entries)
+	{ this->max_entries = max_entries; return *this; };
 
 	/**
 	 *
 	 */
-	rofl::openflow::coftable_feature_props const&
-	get_properties() const { return table_feature_props; };
+	uint32_t
+	get_max_entries() const
+	{ return max_entries; };
+
+	/**
+	 *
+	 */
+	coftable_features&
+	set_properties(
+			const rofl::openflow::coftable_feature_props& properties)
+	{ (this->properties = properties).set_version(ofp_version); return *this; };
 
 	/**
 	 *
 	 */
 	rofl::openflow::coftable_feature_props&
-	set_properties() { return table_feature_props; };
+	set_properties()
+	{ return properties; };
+
+	/**
+	 *
+	 */
+	const rofl::openflow::coftable_feature_props&
+	get_properties() const
+	{ return properties; };
 
 public:
 
@@ -238,9 +268,19 @@ public:
 		return os;
 	};
 
+private:
+
+	uint8_t         ofp_version;
+	uint8_t         table_id;
+	std::string     name;
+	uint64_t        metadata_match;
+	uint64_t        metadata_write;
+	uint32_t        config;
+	uint32_t        max_entries;
+	rofl::openflow::coftable_feature_props properties;
 };
 
 }; // end of namespace openflow
 }; // end of namespace rofl
 
-#endif /* COFTABLEFEATURES_H_ */
+#endif /* ROFL_COMMON_OPENFLOW_COFTABLEFEATURES_H */

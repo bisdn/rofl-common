@@ -52,7 +52,7 @@ public:
 	 */
 	bool
 	operator== (
-			const cofactions& actions);
+			const cofactions& actions) const;
 
 public:
 

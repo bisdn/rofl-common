@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 /*
  * coftables.cc
  *
@@ -8,74 +12,6 @@
 #include "rofl/common/openflow/coftables.h"
 
 using namespace rofl::openflow;
-
-coftables::coftables(
-			uint8_t ofp_version) :
-					ofp_version(ofp_version)
-{
-
-}
-
-
-
-coftables::~coftables()
-{
-
-}
-
-
-
-coftables::coftables(
-			coftables const& tables)
-{
-	*this = tables;
-}
-
-
-
-coftables&
-coftables::operator= (
-			coftables const& tables)
-{
-	if (this == &tables)
-		return *this;
-
-	ofp_version = tables.ofp_version;
-
-	this->tables.clear();
-	for (std::map<uint8_t, coftable_features>::const_iterator
-			it = tables.tables.begin(); it != tables.tables.end(); ++it) {
-		this->tables[it->first] = it->second;
-	}
-
-	return *this;
-}
-
-
-
-coftables&
-coftables::operator+= (
-		coftables const& tables)
-{
-	/*
-	 * this operation may replace tables, if they use the same table-id
-	 */
-	for (std::map<uint8_t, coftable_features>::const_iterator
-			it = tables.tables.begin(); it != tables.tables.end(); ++it) {
-		this->tables[it->first] = it->second;
-	}
-
-	return *this;
-}
-
-
-
-void
-coftables::clear()
-{
-	tables.clear();
-}
-
 
 
 size_t
@@ -139,61 +75,6 @@ coftables::unpack(
 
 
 
-coftable_features&
-coftables::add_table(uint8_t table_id)
-{
-	if (tables.find(table_id) != tables.end()) {
-		tables.erase(table_id);
-	}
-	tables[table_id] = coftable_features(get_version());
-	tables[table_id].set_table_id(table_id);
-	return tables[table_id];
-}
-
-
-
-void
-coftables::drop_table(uint8_t table_id)
-{
-	if (tables.find(table_id) == tables.end()) {
-		return;
-	}
-	tables.erase(table_id);
-}
-
-
-
-const coftable_features&
-coftables::get_table(uint8_t table_id) const
-{
-	if (tables.find(table_id) == tables.end()) {
-		throw eTablesNotFound();
-	}
-	return tables.at(table_id);
-}
-
-
-
-coftable_features&
-coftables::set_table(uint8_t table_id)
-{
-	if (tables.find(table_id) == tables.end()) {
-		tables[table_id] = coftable_features(get_version());
-		tables[table_id].set_table_id(table_id);
-	}
-	return tables[table_id];
-}
-
-
-
-bool
-coftables::has_table(uint8_t table_id) const
-{
-	return (tables.find(table_id) != tables.end());
-}
-
-
-
 /*static*/void
 coftables::map_tablestatsarray_to_tables(
 		rofl::openflow::coftablestatsarray& tablestatsarray, rofl::openflow::coftables& tables)
@@ -201,11 +82,9 @@ coftables::map_tablestatsarray_to_tables(
 	tables.clear();
 	tables.set_version(rofl::openflow13::OFP_VERSION); // yes, OF13
 
-	for (std::map<uint8_t, rofl::openflow::coftable_stats_reply>::const_iterator
-			it = tablestatsarray.get_table_stats().begin();
-					it != tablestatsarray.get_table_stats().end(); ++it) {
-		uint8_t table_id = it->first;
-		rofl::openflow::coftable_stats_reply const& table_stats = it->second;
+	for (auto table_id : tablestatsarray.keys()) {
+		rofl::openflow::coftable_stats_reply const& table_stats =
+				tablestatsarray.get_table_stats(table_id);
 
 		// add or reset table
 		rofl::openflow::coftable_features& table = tables.add_table(table_id);
@@ -266,7 +145,7 @@ coftables::map_tables_to_tablestatsarray(
 	tablestatsarray.set_version(rofl::openflow12::OFP_VERSION);
 
 	for (std::map<uint8_t, rofl::openflow::coftable_features>::iterator
-			it = tables.set_tables().begin(); it != tables.set_tables().end(); ++it) {
+			it = tables.tables.begin(); it != tables.tables.end(); ++it) {
 		uint8_t table_id = it->first;
 		rofl::openflow::coftable_features& table_features = it->second;
 

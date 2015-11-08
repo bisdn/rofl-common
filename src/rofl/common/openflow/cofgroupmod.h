@@ -2,8 +2,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#ifndef COFGROUPMOD_H_
-#define COFGROUPMOD_H_ 1
+#ifndef ROFL_COMMON_OPENFLOW_COFGROUPMOD_H
+#define ROFL_COMMON_OPENFLOW_COFGROUPMOD_H 1
 
 #include <string>
 #include <vector>
@@ -267,4 +267,4 @@ private:
 }; // end of namespace openflow
 }; // end of namespace rofl
 
-#endif
+#endif /* ROFL_COMMON_OPENFLOW_COFGROUPMOD_H */

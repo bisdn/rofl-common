@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 /*
  * cofgroupdescs.h
  *
@@ -5,72 +9,216 @@
  *      Author: andreas
  */
 
-#ifndef COFGROUPDESCSTATSARRAY_H_
-#define COFGROUPDESCSTATSARRAY_H_
+#ifndef ROFL_COMMON_OPENFLOW_COFGROUPDESCSTATSARRAY_H
+#define ROFL_COMMON_OPENFLOW_COFGROUPDESCSTATSARRAY_H 1
 
 #include <iostream>
 #include <map>
 
 #include "rofl/common/openflow/cofgroupdescstats.h"
-
+#include "rofl/common/locking.hpp"
 
 namespace rofl {
 namespace openflow {
 
 class cofgroupdescstatsarray {
-
-	uint8_t 										ofp_version;
-	std::map<uint32_t, cofgroup_desc_stats_reply> 	array;
-
 public:
-
-	/**
-	 *
-	 */
-	cofgroupdescstatsarray(uint8_t ofp_version = rofl::openflow::OFP_VERSION_UNKNOWN);
 
 	/**
 	 *
 	 */
 	virtual
-	~cofgroupdescstatsarray();
+	~cofgroupdescstatsarray()
+	{};
 
 	/**
 	 *
 	 */
-	cofgroupdescstatsarray(cofgroupdescstatsarray const& groupdescs);
+	cofgroupdescstatsarray(
+			uint8_t ofp_version = rofl::openflow::OFP_VERSION_UNKNOWN) :
+				ofp_version(ofp_version)
+	{};
+
+	/**
+	 *
+	 */
+	cofgroupdescstatsarray(
+			const cofgroupdescstatsarray& groupdescs)
+	{ *this = groupdescs; };
 
 	/**
 	 *
 	 */
 	cofgroupdescstatsarray&
-	operator= (cofgroupdescstatsarray const& groupdescs);
+	operator= (
+			const cofgroupdescstatsarray& groupdescs) {
+		if (this == &groupdescs)
+			return *this;
+
+		this->array.clear();
+
+		ofp_version = groupdescs.ofp_version;
+		for (std::map<uint32_t, cofgroup_desc_stats_reply>::const_iterator
+				it = groupdescs.array.begin(); it != groupdescs.array.end(); ++it) {
+			this->array[it->first] = it->second;
+		}
+
+		return *this;
+	};
 
 	/**
 	 *
 	 */
 	cofgroupdescstatsarray&
-	operator+= (cofgroupdescstatsarray const& groupdescs);
+	operator+= (
+			const cofgroupdescstatsarray& groupdescs) {
+		/*
+		 * this may replace existing group descriptions
+		 */
+		for (std::map<uint32_t, cofgroup_desc_stats_reply>::const_iterator
+				it = groupdescs.array.begin(); it != groupdescs.array.end(); ++it) {
+			this->array[it->first] = it->second;
+		}
+
+		return *this;
+	};
 
 public:
 
-	/** returns length of packet in packed state
+	/**
 	 *
 	 */
-	virtual size_t
-	length() const;
+	cofgroupdescstatsarray&
+	set_version(
+			uint8_t ofp_version)
+	{
+		this->ofp_version = ofp_version;
+		AcquireReadLock lock(array_lock);
+		for (auto it : array) {
+			it.second.set_version(ofp_version);
+		}
+		return *this;
+	};
 
 	/**
 	 *
 	 */
-	virtual void
-	pack(uint8_t *buf = (uint8_t*)0, size_t buflen = 0);
+	uint8_t
+	get_version() const
+	{ return ofp_version; };
+
+public:
 
 	/**
 	 *
 	 */
-	virtual void
-	unpack(uint8_t *buf, size_t buflen);
+	std::list<uint32_t>
+	keys() const
+	{
+		AcquireReadLock lock(array_lock);
+		std::list<uint32_t> ids;
+		for (auto it : array) {
+			ids.push_back(it.first);
+		}
+		return ids;
+	};
+
+	/**
+	 *
+	 */
+	size_t
+	size() const
+	{
+		AcquireReadLock lock(array_lock);
+		return array.size();
+	};
+
+	/**
+	 *
+	 */
+	cofgroupdescstatsarray&
+	clear()
+	{
+		AcquireReadWriteLock lock(array_lock);
+		array.clear();
+		return *this;
+	};
+
+public:
+
+	/**
+	 *
+	 */
+	cofgroup_desc_stats_reply&
+	add_group_desc_stats() {
+		uint32_t group_id = 0;
+		AcquireReadWriteLock rwlock(array_lock);
+		while (array.find(++group_id) != array.end())
+		{}
+		return (array[group_id] = cofgroup_desc_stats_reply(ofp_version));
+	};
+
+	/**
+	 *
+	 */
+	cofgroup_desc_stats_reply&
+	add_group_desc_stats(
+			uint32_t group_id) {
+		AcquireReadWriteLock lock(array_lock);
+		if (array.find(group_id) != array.end()) {
+			array.erase(group_id);
+		}
+		return (array[group_id] = cofgroup_desc_stats_reply(ofp_version));
+	};
+
+	/**
+	 *
+	 */
+	cofgroup_desc_stats_reply&
+	set_group_desc_stats(
+			uint32_t group_id) {
+		AcquireReadWriteLock lock(array_lock);
+		if (array.find(group_id) == array.end()) {
+			array[group_id] = cofgroup_desc_stats_reply(ofp_version);
+		}
+		return array[group_id];
+	};
+
+	/**
+	 *
+	 */
+	const cofgroup_desc_stats_reply&
+	get_group_desc_stats(
+			uint32_t group_id) const {
+		AcquireReadLock lock(array_lock);
+		if (array.find(group_id) == array.end()) {
+			throw eGroupDescStatsNotFound();
+		}
+		return array.at(group_id);
+	};
+
+	/**
+	 *
+	 */
+	void
+	drop_group_desc_stats(
+			uint32_t group_id) {
+		AcquireReadWriteLock lock(array_lock);
+		if (array.find(group_id) == array.end()) {
+			return;
+		}
+		array.erase(group_id);
+	};
+
+	/**
+	 *
+	 */
+	bool
+	has_group_desc_stats(
+			uint32_t group_id) const {
+		AcquireReadLock lock(array_lock);
+		return (not (array.find(group_id) == array.end()));
+	};
 
 public:
 
@@ -78,71 +226,21 @@ public:
 	 *
 	 */
 	size_t
-	size() const { return array.size(); };
+	length() const;
 
 	/**
 	 *
 	 */
 	void
-	clear() { array.clear(); };
-
-	/**
-	 *
-	 */
-	std::map<uint32_t, cofgroup_desc_stats_reply> const&
-	get_group_desc_stats() const { return array; };
-
-	/**
-	 *
-	 */
-	std::map<uint32_t, cofgroup_desc_stats_reply>&
-	set_group_desc_stats() { return array; };
-
-public:
-
-	/**
-	 *
-	 */
-	cofgroup_desc_stats_reply&
-	add_group_desc_stats(uint32_t group_id);
+	pack(
+			uint8_t *buf = (uint8_t*)0, size_t buflen = 0);
 
 	/**
 	 *
 	 */
 	void
-	drop_group_desc_stats(uint32_t group_id);
-
-	/**
-	 *
-	 */
-	cofgroup_desc_stats_reply&
-	set_group_desc_stats(uint32_t group_id);
-
-	/**
-	 *
-	 */
-	cofgroup_desc_stats_reply const&
-	get_group_desc_stats(uint32_t group_id) const;
-
-	/**
-	 *
-	 */
-	bool
-	has_group_desc_stats(uint32_t group_id);
-
-public:
-
-	/**
-	 *
-	 */
-	uint8_t
-	get_version() const { return ofp_version; };
-
-	/**
-	 *
-	 */
-	void
-	set_version(uint8_t ofp_version) { this->ofp_version = ofp_version; };
+	unpack(
+			uint8_t *buf, size_t buflen);
 
 public:
 
@@ -156,12 +254,15 @@ public:
 		}
 		return os;
 	}
+
+private:
+
+	uint8_t 										ofp_version;
+	std::map<uint32_t, cofgroup_desc_stats_reply> 	array;
+	rofl::crwlock                                   array_lock;
 };
 
 }; // end of openflow
 }; // end of rofl
 
-
-
-
-#endif /* COFGROUPDESCS_H_ */
+#endif /* ROFL_COMMON_OPENFLOW_COFGROUPDESCSTATSARRAY_H */

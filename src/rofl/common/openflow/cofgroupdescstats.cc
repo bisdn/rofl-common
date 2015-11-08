@@ -1,71 +1,26 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 #include "rofl/common/openflow/cofgroupdescstats.h"
 
 using namespace rofl::openflow;
 
 
-
-
-cofgroup_desc_stats_reply::cofgroup_desc_stats_reply(
-		uint8_t of_version) :
-				of_version(of_version),
-				type(0),
-				group_id(0),
-				buckets(of_version)
-{}
-
-
-
-cofgroup_desc_stats_reply::cofgroup_desc_stats_reply(
-		uint8_t of_version,
-		uint8_t type,
-		uint32_t group_id,
-		cofbuckets const& buckets) :
-				of_version(of_version),
-				type(type),
-				group_id(group_id),
-				buckets(buckets)
-{}
-
-
-
-cofgroup_desc_stats_reply::~cofgroup_desc_stats_reply()
-{}
-
-
-
-cofgroup_desc_stats_reply::cofgroup_desc_stats_reply(
-		cofgroup_desc_stats_reply const& stats_reply)
+size_t
+cofgroup_desc_stats_reply::length() const
 {
-	*this = stats_reply;
-}
-
-
-
-cofgroup_desc_stats_reply&
-cofgroup_desc_stats_reply::operator= (
-		cofgroup_desc_stats_reply const& stats_reply)
-{
-	if (this == &stats_reply)
-		return *this;
-
-	of_version 		= stats_reply.of_version;
-	type			= stats_reply.type;
-	group_id		= stats_reply.group_id;
-	buckets			= stats_reply.buckets;
-
-	return *this;
-}
-
-
-
-bool
-cofgroup_desc_stats_reply::operator== (
-		cofgroup_desc_stats_reply const& stats)
-{
-	return ((of_version == stats.of_version) &&
-			(type 		== stats.type) &&
-			(group_id 	== stats.group_id) &&
-			(buckets 	== stats.buckets));
+	switch (of_version) {
+	case rofl::openflow12::OFP_VERSION: {
+		return (sizeof(struct rofl::openflow12::ofp_group_desc_stats) + buckets.length());
+	} break;
+	case rofl::openflow13::OFP_VERSION: {
+		return (sizeof(struct rofl::openflow13::ofp_group_desc) + buckets.length());
+	} break;
+	default:
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+	}
+	return 0;
 }
 
 
@@ -145,25 +100,6 @@ cofgroup_desc_stats_reply::unpack(uint8_t *buf, size_t buflen)
 		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
-
-
-
-size_t
-cofgroup_desc_stats_reply::length() const
-{
-	switch (of_version) {
-	case rofl::openflow12::OFP_VERSION: {
-		return (sizeof(struct rofl::openflow12::ofp_group_desc_stats) + buckets.length());
-	} break;
-	case rofl::openflow13::OFP_VERSION: {
-		return (sizeof(struct rofl::openflow13::ofp_group_desc) + buckets.length());
-	} break;
-	default:
-		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
-	}
-	return 0;
-}
-
 
 
 

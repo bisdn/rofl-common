@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 /*
  * cofports.cc
  *
@@ -8,80 +12,6 @@
 #include "rofl/common/openflow/cofportstatsarray.h"
 
 using namespace rofl::openflow;
-
-
-cofportstatsarray::cofportstatsarray(uint8_t ofp_version) :
-		ofp_version(ofp_version)
-{
-
-}
-
-
-cofportstatsarray::~cofportstatsarray()
-{
-
-}
-
-
-cofportstatsarray::cofportstatsarray(cofportstatsarray const& ports)
-{
-	*this = ports;
-}
-
-
-cofportstatsarray&
-cofportstatsarray::operator= (cofportstatsarray const& ports)
-{
-	if (this == &ports)
-		return *this;
-
-	this->array.clear();
-
-	ofp_version = ports.ofp_version;
-	for (std::map<uint32_t, cofport_stats_reply>::const_iterator
-			it = ports.array.begin(); it != ports.array.end(); ++it) {
-		this->array[it->first] = it->second;
-	}
-
-	return *this;
-}
-
-
-
-bool
-cofportstatsarray::operator== (cofportstatsarray const& ports)
-{
-	if (ofp_version != ports.ofp_version)
-		return false;
-
-	if (array.size() != ports.array.size())
-		return false;
-
-	for (std::map<uint32_t, cofport_stats_reply>::const_iterator
-				it = ports.array.begin(); it != ports.array.end(); ++it) {
-		if (not (array[it->first] == it->second))
-			return false;
-	}
-
-	return true;
-}
-
-
-
-cofportstatsarray&
-cofportstatsarray::operator+= (cofportstatsarray const& ports)
-{
-	/*
-	 * this may replace existing port descriptions
-	 */
-	for (std::map<uint32_t, cofport_stats_reply>::const_iterator
-			it = ports.array.begin(); it != ports.array.end(); ++it) {
-		this->array[it->first] = it->second;
-	}
-
-	return *this;
-}
-
 
 
 size_t
@@ -160,60 +90,5 @@ cofportstatsarray::unpack(uint8_t *buf, size_t buflen)
 		throw eBadRequestBadVersion("eBadRequestBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
-
-
-
-cofport_stats_reply&
-cofportstatsarray::add_port_stats(uint32_t port_id)
-{
-	if (array.find(port_id) != array.end()) {
-		array.erase(port_id);
-	}
-	return (array[port_id] = cofport_stats_reply(ofp_version));
-}
-
-
-
-void
-cofportstatsarray::drop_port_stats(uint32_t port_id)
-{
-	if (array.find(port_id) == array.end()) {
-		return;
-	}
-	array.erase(port_id);
-}
-
-
-
-cofport_stats_reply&
-cofportstatsarray::set_port_stats(uint32_t port_id)
-{
-	if (array.find(port_id) == array.end()) {
-		array[port_id] = cofport_stats_reply(ofp_version);
-	}
-	return array[port_id];
-}
-
-
-
-cofport_stats_reply const&
-cofportstatsarray::get_port_stats(uint32_t port_id) const
-{
-	if (array.find(port_id) == array.end()) {
-		throw ePortStatsNotFound();
-	}
-	return array.at(port_id);
-}
-
-
-
-bool
-cofportstatsarray::has_port_stats(uint32_t port_id)
-{
-	return (not (array.find(port_id) == array.end()));
-}
-
-
-
 
 

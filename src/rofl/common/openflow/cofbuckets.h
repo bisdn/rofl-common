@@ -2,8 +2,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#ifndef COFBUCKETLIST_H
-#define COFBUCKETLIST_H 1
+#ifndef ROFL_COMMON_OPENFLOW_COFBUCKETS_H
+#define ROFL_COMMON_OPENFLOW_COFBUCKETS_H 1
 
 #include <map>
 #include <string>
@@ -15,6 +15,7 @@
 
 #include "rofl/common/openflow/openflow.h"
 #include "rofl/common/openflow/cofbucket.h"
+#include "rofl/common/locking.hpp"
 
 namespace rofl {
 namespace openflow {
@@ -59,107 +60,179 @@ public:
 
 class cofbuckets
 {
-	uint8_t 							ofp_version;
-	std::map<uint32_t, cofbucket>		buckets;
-
-public: // methods
-
-	/**
-	 *
-	 */
-	cofbuckets(
-			uint8_t ofp_version = openflow::OFP_VERSION_UNKNOWN);
+public:
 
 	/**
 	 *
 	 */
 	virtual
-	~cofbuckets();
+	~cofbuckets()
+	{ clear(); };
 
 	/**
 	 *
 	 */
 	cofbuckets(
-			cofbuckets const& buckets);
+			uint8_t ofp_version = openflow::OFP_VERSION_UNKNOWN) :
+				ofp_version(ofp_version)
+	{};
+
+	/**
+	 *
+	 */
+	cofbuckets(
+			const cofbuckets& buckets)
+	{ *this = buckets; };
 
 	/**
 	 *
 	 */
 	cofbuckets&
 	operator= (
-			cofbuckets const& buckets);
+			const cofbuckets& buckets)
+	{
+		if (this == &buckets)
+			return *this;
+
+		this->ofp_version = buckets.ofp_version;
+
+		clear();
+
+		for (std::map<uint32_t, cofbucket>::const_iterator
+				it = buckets.buckets.begin(); it != buckets.buckets.end(); ++it) {
+			this->buckets[it->first] = it->second;
+		}
+
+		return *this;
+	};
 
 	/**
 	 *
 	 */
 	bool
 	operator== (
-			cofbuckets const& buckets);
+			const cofbuckets& buckets) const {
+		if (ofp_version != buckets.ofp_version)
+			return false;
+
+		if (this->buckets.size() != buckets.buckets.size())
+			return false;
+
+		for (std::map<uint32_t, cofbucket>::const_iterator
+				it = buckets.buckets.begin(); it != buckets.buckets.end(); ++it) {
+			if (not (this->buckets.at(it->first) == it->second))
+				return false;
+		}
+
+		return true;
+	};
+
+public:
+
+	/**
+	 *
+	 */
+	cofbuckets&
+	set_version(
+			uint8_t ofp_version)
+	{ this->ofp_version = ofp_version; return *this; };
 
 	/**
 	 *
 	 */
 	uint8_t
-	get_version() const { return ofp_version; };
-
-	/**
-	 *
-	 */
-	void
-	set_version(uint8_t ofp_version) { this->ofp_version = ofp_version; };
-
-	/**
-	 *
-	 */
-	std::map<uint32_t, cofbucket>&
-	set_buckets() { return buckets; };
-
-	/**
-	 *
-	 */
-	std::map<uint32_t, cofbucket> const&
-	get_buckets() const { return buckets; };
+	get_version() const
+	{ return ofp_version; };
 
 public:
 
 	/**
 	 *
 	 */
-	cofbucket&
-	add_bucket(uint32_t bucket_id);
+	std::list<uint32_t>
+	keys() const
+	{
+		AcquireReadLock rwlock(bcs_lock);
+		std::list<uint32_t> ids;
+		for (auto it : buckets) {
+			ids.push_back(it.first);
+		}
+		return ids;
+	};
 
 	/**
 	 *
 	 */
 	void
-	drop_bucket(uint32_t bucket_id);
+	clear() {
+		AcquireReadWriteLock rwlock(bcs_lock);
+		buckets.clear();
+	};
 
 	/**
 	 *
 	 */
 	cofbucket&
-	set_bucket(uint32_t bucket_id);
+	add_bucket(
+			uint32_t bucket_id) {
+		AcquireReadWriteLock rwlock(bcs_lock);
+		if (buckets.find(bucket_id) != buckets.end()) {
+			buckets.erase(bucket_id);
+		}
+		return (buckets[bucket_id] = cofbucket(ofp_version));
+	};
 
 	/**
 	 *
 	 */
-	cofbucket const&
-	get_bucket(uint32_t bucket_id) const;
+	cofbucket&
+	set_bucket(
+			uint32_t bucket_id) {
+		AcquireReadWriteLock rwlock(bcs_lock);
+		if (buckets.find(bucket_id) == buckets.end()) {
+			buckets[bucket_id] = cofbucket(ofp_version);
+		}
+		return buckets[bucket_id];
+	};
+
+	/**
+	 *
+	 */
+	const cofbucket&
+	get_bucket(
+			uint32_t bucket_id) const {
+		AcquireReadLock rwlock(bcs_lock);
+		if (buckets.find(bucket_id) == buckets.end()) {
+			throw eBucketsNotFound();
+		}
+		return buckets.at(bucket_id);
+	};
 
 	/**
 	 *
 	 */
 	bool
-	has_bucket(uint32_t bucket_id);
-
-public:
+	drop_bucket(
+			uint32_t bucket_id) {
+		AcquireReadWriteLock rwlock(bcs_lock);
+		if (buckets.find(bucket_id) == buckets.end()) {
+			return false;
+		}
+		buckets.erase(bucket_id);
+		return true;
+	};
 
 	/**
 	 *
 	 */
-	void
-	clear()
-	{ buckets.clear(); };
+	bool
+	has_bucket(
+			uint32_t bucket_id) const {
+		AcquireReadLock rwlock(bcs_lock);
+		return (not (buckets.find(bucket_id) == buckets.end()));
+	};
+
+public:
 
 	/**
 	 *
@@ -186,19 +259,6 @@ public:
 	 */
 	void
 	unpack(uint8_t* buf, size_t buflen);
-
-
-private:
-
-	/**
-	 */
-	void
-	unpack_of13(uint8_t* buf, size_t buflen);
-
-	/**
-	 */
-	uint8_t*
-	pack_of13(uint8_t* buf, size_t buflen);
 
 public:
 
@@ -227,9 +287,25 @@ public:
 		}
 		return os;
 	};
+
+private:
+
+	void
+	unpack_of13(
+			uint8_t* buf, size_t buflen);
+
+	uint8_t*
+	pack_of13(
+			uint8_t* buf, size_t buflen);
+
+private:
+
+	uint8_t 							ofp_version;
+	std::map<uint32_t, cofbucket>		buckets;
+	rofl::crwlock                       bcs_lock;
 };
 
 }; // end of namespace
 }; // end of namespace
 
-#endif
+#endif /* ROFL_COMMON_OPENFLOW_COFBUCKETS_H */

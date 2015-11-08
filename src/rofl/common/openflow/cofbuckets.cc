@@ -6,69 +6,6 @@
 
 using namespace rofl::openflow;
 
-cofbuckets::cofbuckets(
-		uint8_t ofp_version) :
-				ofp_version(ofp_version)
-{
-
-}
-
-
-
-cofbuckets::~cofbuckets()
-{
-	clear();
-}
-
-
-
-cofbuckets::cofbuckets(cofbuckets const& buckets)
-{
-	*this = buckets;
-}
-
-
-
-cofbuckets&
-cofbuckets::operator= (cofbuckets const& bc)
-{
-	if (this == &bc)
-		return *this;
-
-	this->ofp_version = bc.ofp_version;
-
-	clear();
-
-	for (std::map<uint32_t, cofbucket>::const_iterator
-			it = bc.buckets.begin(); it != bc.buckets.end(); ++it) {
-		buckets[it->first] = it->second;
-	}
-
-	return *this;
-}
-
-
-
-bool
-cofbuckets::operator== (
-		cofbuckets const& bc)
-{
-	if (ofp_version != bc.ofp_version)
-		return false;
-
-	if (buckets.size() != bc.buckets.size())
-		return false;
-
-	for (std::map<uint32_t, cofbucket>::const_iterator
-			it = bc.buckets.begin(); it != bc.buckets.end(); ++it) {
-		if (not (buckets[it->first] == it->second))
-			return false;
-	}
-
-	return true;
-}
-
-
 
 void
 cofbuckets::check_prerequisites() const
@@ -168,56 +105,5 @@ cofbuckets::unpack_of13(
 	}
 }
 
-
-
-cofbucket&
-cofbuckets::add_bucket(uint32_t bucket_id)
-{
-	if (buckets.find(bucket_id) != buckets.end()) {
-		buckets.erase(bucket_id);
-	}
-	return (buckets[bucket_id] = cofbucket(ofp_version));
-}
-
-
-
-void
-cofbuckets::drop_bucket(uint32_t bucket_id)
-{
-	if (buckets.find(bucket_id) == buckets.end()) {
-		return;
-	}
-	buckets.erase(bucket_id);
-}
-
-
-
-cofbucket&
-cofbuckets::set_bucket(uint32_t bucket_id)
-{
-	if (buckets.find(bucket_id) == buckets.end()) {
-		buckets[bucket_id] = cofbucket(ofp_version);
-	}
-	return buckets[bucket_id];
-}
-
-
-
-cofbucket const&
-cofbuckets::get_bucket(uint32_t bucket_id) const
-{
-	if (buckets.find(bucket_id) == buckets.end()) {
-		throw eBucketsNotFound();
-	}
-	return buckets.at(bucket_id);
-}
-
-
-
-bool
-cofbuckets::has_bucket(uint32_t bucket_id)
-{
-	return (not (buckets.find(bucket_id) == buckets.end()));
-}
 
 

@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 /*
  * cofbucketcounters.cc
  *
@@ -8,64 +12,6 @@
 #include "rofl/common/openflow/cofbucketcounters.h"
 
 using namespace rofl::openflow;
-
-
-cofbucket_counters::cofbucket_counters(
-		uint8_t ofp_version) :
-				ofp_version(ofp_version)
-{
-
-}
-
-
-cofbucket_counters::~cofbucket_counters()
-{
-
-}
-
-
-cofbucket_counters::cofbucket_counters(
-		cofbucket_counters const& bcs)
-{
-	*this = bcs;
-}
-
-
-cofbucket_counters&
-cofbucket_counters::operator= (
-		cofbucket_counters const& bcs)
-{
-	if (this == &bcs)
-		return *this;
-
-	clear();
-
-	ofp_version = bcs.ofp_version;
-
-	for (std::map<uint32_t, cofbucket_counter>::const_iterator
-			it = bcs.bucketcounters.begin(); it != bcs.bucketcounters.end(); ++it) {
-		add_bucket_counter(it->first) = it->second;
-	}
-
-	return *this;
-}
-
-
-bool
-cofbucket_counters::operator== (
-		cofbucket_counters const& bcs)
-{
-	if (bucketcounters.size() != bcs.bucketcounters.size())
-		return false;
-
-	for (std::map<uint32_t, cofbucket_counter>::const_iterator
-			it = bcs.bucketcounters.begin(); it != bcs.bucketcounters.end(); ++it) {
-		if (not (bucketcounters[it->first] == it->second))
-			return false;
-	}
-
-	return true;
-}
 
 
 size_t
@@ -142,52 +88,6 @@ cofbucket_counters::unpack(uint8_t* buf, size_t buflen)
 
 }
 
-
-cofbucket_counter&
-cofbucket_counters::add_bucket_counter(uint32_t bucket_counter_id)
-{
-	if (bucketcounters.find(bucket_counter_id) != bucketcounters.end()) {
-		bucketcounters.erase(bucket_counter_id);
-	}
-	return (bucketcounters[bucket_counter_id] = cofbucket_counter(ofp_version));
-}
-
-
-void
-cofbucket_counters::drop_bucket_counter(uint32_t bucket_counter_id)
-{
-	if (bucketcounters.find(bucket_counter_id) == bucketcounters.end()) {
-		return;
-	}
-	bucketcounters.erase(bucket_counter_id);
-}
-
-
-cofbucket_counter&
-cofbucket_counters::set_bucket_counter(uint32_t bucket_counter_id)
-{
-	if (bucketcounters.find(bucket_counter_id) == bucketcounters.end()) {
-		bucketcounters[bucket_counter_id] = cofbucket_counter(ofp_version);
-	}
-	return bucketcounters[bucket_counter_id];
-}
-
-
-cofbucket_counter const&
-cofbucket_counters::get_bucket_counter(uint32_t bucket_counter_id) const
-{
-	if (bucketcounters.find(bucket_counter_id) == bucketcounters.end()) {
-		throw eBucketCounterNotFound();
-	}
-	return bucketcounters.at(bucket_counter_id);
-}
-
-
-bool
-cofbucket_counters::has_bucket_counter(uint32_t bucket_counter_id)
-{
-	return (not (bucketcounters.find(bucket_counter_id) == bucketcounters.end()));
-}
 
 
 

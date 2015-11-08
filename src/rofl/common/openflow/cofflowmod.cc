@@ -6,79 +6,6 @@
 
 using namespace rofl::openflow;
 
-cofflowmod::cofflowmod(uint8_t ofp_version) :
-		ofp_version(ofp_version),
-		match(ofp_version),
-		actions(ofp_version),
-		instructions(ofp_version),
-		command(0),
-		table_id(0),
-		idle_timeout(0),
-		hard_timeout(0),
-		cookie(0),
-		cookie_mask(0),
-		priority(0),
-		buffer_id(OFP_NO_BUFFER),
-		out_port(OFPP_ANY),
-		out_group(OFPG_ANY),
-		flags(0)
-{
-
-}
-
-
-
-cofflowmod::~cofflowmod()
-{
-
-}
-
-
-
-cofflowmod::cofflowmod(const cofflowmod& fe)
-{
-	*this = fe;
-}
-
-
-
-cofflowmod&
-cofflowmod::operator= (const cofflowmod& fe)
-{
-	if (this == &fe)
-		return *this;
-
-	ofp_version		= fe.ofp_version;
-
-	match 			= fe.match;
-	actions			= fe.actions;
-	instructions 	= fe.instructions;
-
-	command			= fe.command;
-	table_id		= fe.table_id;
-	idle_timeout	= fe.idle_timeout;
-	hard_timeout	= fe.hard_timeout;
-	cookie			= fe.cookie;
-	cookie_mask		= fe.cookie_mask;
-	priority		= fe.priority;
-	buffer_id		= fe.buffer_id;
-	out_port		= fe.out_port;
-	out_group		= fe.out_group;
-	flags			= fe.flags;
-
-	return *this;
-}
-
-
-
-void
-cofflowmod::clear()
-{
-	match.clear();
-	actions.clear();
-	instructions.clear();
-}
-
 
 
 void
@@ -95,7 +22,7 @@ cofflowmod::check_prerequisites() const
 		instructions.check_prerequisites();
 	} break;
 	default:
-		throw eBadVersion("cofflowmod::check_prerequisites() no version defined");
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -113,7 +40,7 @@ cofflowmod::length() const
 		return (sizeof(struct ofp13_flow_mod) + match.length() + instructions.length());
 	} break;
 	default:
-		throw eBadVersion("cofflowmod::length() no version defined");
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -171,7 +98,7 @@ cofflowmod::pack(
 
 	} break;
 	default:
-		throw eBadVersion("cofflowmod::pack() no version defined");
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 
@@ -253,7 +180,7 @@ cofflowmod::unpack(
 
 	} break;
 	default:
-		throw eBadVersion("cofflowmod::unpack() no version defined");
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
 

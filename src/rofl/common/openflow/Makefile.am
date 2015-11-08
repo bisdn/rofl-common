@@ -18,8 +18,6 @@ libopenflow_la_SOURCES= \
 	cofaction.cc \
 	cofactions.h \
 	cofactions.cc \
-	cofactionset.h \
-	cofactionset.cc \
 	cofbucket.h \
 	cofbucket.cc \
 	cofbuckets.h \
@@ -144,7 +142,6 @@ library_include_HEADERS = \
 	openflow_rofl_exceptions.h \
 	cofaction.h \
 	cofactions.h \
-	cofactionset.h \
 	cofbucket.h \
 	cofbuckets.h \
 	cofbucketcounter.h \

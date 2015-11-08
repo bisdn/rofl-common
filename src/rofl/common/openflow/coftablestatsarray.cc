@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 /*
  * coftables.cc
  *
@@ -8,80 +12,6 @@
 #include "rofl/common/openflow/coftablestatsarray.h"
 
 using namespace rofl::openflow;
-
-
-coftablestatsarray::coftablestatsarray(uint8_t ofp_version) :
-		ofp_version(ofp_version)
-{
-
-}
-
-
-coftablestatsarray::~coftablestatsarray()
-{
-
-}
-
-
-coftablestatsarray::coftablestatsarray(coftablestatsarray const& tables)
-{
-	*this = tables;
-}
-
-
-coftablestatsarray&
-coftablestatsarray::operator= (coftablestatsarray const& tables)
-{
-	if (this == &tables)
-		return *this;
-
-	this->array.clear();
-
-	ofp_version = tables.ofp_version;
-	for (std::map<uint8_t, coftable_stats_reply>::const_iterator
-			it = tables.array.begin(); it != tables.array.end(); ++it) {
-		this->array[it->first] = it->second;
-	}
-
-	return *this;
-}
-
-
-
-bool
-coftablestatsarray::operator== (coftablestatsarray const& tables) const
-{
-	if (ofp_version != tables.ofp_version)
-		return false;
-
-	if (array.size() != tables.array.size())
-		return false;
-
-	for (std::map<uint8_t, coftable_stats_reply>::const_iterator
-			it = tables.array.begin(); it != tables.array.end(); ++it) {
-		if (not (array.at(it->first) == it->second))
-			return false;
-	}
-
-	return true;
-}
-
-
-
-coftablestatsarray&
-coftablestatsarray::operator+= (coftablestatsarray const& tables)
-{
-	/*
-	 * this may replace existing table descriptions
-	 */
-	for (std::map<uint8_t, coftable_stats_reply>::const_iterator
-			it = tables.array.begin(); it != tables.array.end(); ++it) {
-		this->array[it->first] = it->second;
-	}
-
-	return *this;
-}
-
 
 
 size_t
@@ -171,60 +101,5 @@ coftablestatsarray::unpack(uint8_t *buf, size_t buflen)
 		throw eBadRequestBadVersion("eBadRequestBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
-
-
-
-coftable_stats_reply&
-coftablestatsarray::add_table_stats(uint8_t table_id)
-{
-	if (array.find(table_id) != array.end()) {
-		array.erase(table_id);
-	}
-	return (array[table_id] = coftable_stats_reply(ofp_version));
-}
-
-
-
-void
-coftablestatsarray::drop_table_stats(uint8_t table_id)
-{
-	if (array.find(table_id) == array.end()) {
-		return;
-	}
-	array.erase(table_id);
-}
-
-
-
-coftable_stats_reply&
-coftablestatsarray::set_table_stats(uint8_t table_id)
-{
-	if (array.find(table_id) == array.end()) {
-		array[table_id] = coftable_stats_reply(ofp_version);
-	}
-	return array[table_id];
-}
-
-
-
-coftable_stats_reply const&
-coftablestatsarray::get_table_stats(uint8_t table_id) const
-{
-	if (array.find(table_id) == array.end()) {
-		throw eTableStatsNotFound();
-	}
-	return array.at(table_id);
-}
-
-
-
-bool
-coftablestatsarray::has_table_stats(uint8_t table_id)
-{
-	return (not (array.find(table_id) == array.end()));
-}
-
-
-
 
 
