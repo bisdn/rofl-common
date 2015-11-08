@@ -1783,43 +1783,44 @@ unsigned int
 crofconn::segment_table_stats_reply(
 		rofl::openflow::cofmsg_table_stats_reply *msg)
 {
-	rofl::openflow::coftablestatsarray tablestats;
-	std::vector<rofl::openflow::cofmsg_table_stats_reply*> segments;
+	std::list<rofl::openflow::cofmsg_table_stats_reply*> segments;
+	const int MAX_LENGTH = 64000/*bytes*/;
+	auto tableids = msg->get_table_stats_array().keys();
 
-	for (std::map<uint8_t, rofl::openflow::coftable_stats_reply>::const_iterator
-			it = msg->get_table_stats_array().get_table_stats().begin(); it != msg->get_table_stats_array().get_table_stats().end(); ++it) {
+	/* create fragments */
+	while (not tableids.empty()) {
+		rofl::openflow::coftablestatsarray array(msg->get_version());
 
-		tablestats.set_table_stats(it->first) = it->second;
-
-		/*
-		 * TODO: put more rofl::openflow::coftable_stats_reply elements in tablestats per round
-		 */
+		while ((not tableids.empty()) && (array.length() < MAX_LENGTH)) {
+			uint32_t tableid = tableids.front(); tableids.pop_front();
+			array.add_table_stats(tableid) =
+					msg->get_table_stats_array().get_table_stats(tableid);
+		}
 
 		segments.push_back(
 				new rofl::openflow::cofmsg_table_stats_reply(
 						msg->get_version(),
 						msg->get_xid(),
-						msg->get_stats_flags() | rofl::openflow13::OFPMPF_REPLY_MORE,
-						tablestats));
-
-		tablestats.clear();
+						msg->get_stats_flags(),
+						array));
 	}
 
-	// clear MORE flag on last segment
-	if (not segments.empty()) {
-		segments.back()->set_stats_flags(segments.back()->get_stats_flags() & ~rofl::openflow13::OFPMPF_REPLY_MORE);
-	}
-
-	unsigned int cwnd_size = 0;
-
-	for (std::vector<rofl::openflow::cofmsg_table_stats_reply*>::iterator
-			it = segments.begin(); it != segments.end(); ++it) {
-		 rofsock.send_message(*it);
-	}
-
+	/* delete original message */
 	delete msg;
 
-	return cwnd_size;
+	/* send fragments */
+	while (not segments.empty()) {
+		rofl::openflow::cofmsg_table_stats_reply* msg = segments.front();
+		segments.pop_front();
+		// set MORE flag on all segments except last one
+		if (not segments.empty()) {
+			msg->set_stats_flags(
+					msg->get_stats_flags() | rofl::openflow13::OFPMPF_REPLY_MORE);
+		}
+		rofsock.send_message(msg);
+	}
+
+	return 0;
 }
 
 

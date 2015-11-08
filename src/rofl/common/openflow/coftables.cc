@@ -82,11 +82,9 @@ coftables::map_tablestatsarray_to_tables(
 	tables.clear();
 	tables.set_version(rofl::openflow13::OFP_VERSION); // yes, OF13
 
-	for (std::map<uint8_t, rofl::openflow::coftable_stats_reply>::const_iterator
-			it = tablestatsarray.get_table_stats().begin();
-					it != tablestatsarray.get_table_stats().end(); ++it) {
-		uint8_t table_id = it->first;
-		rofl::openflow::coftable_stats_reply const& table_stats = it->second;
+	for (auto table_id : tablestatsarray.keys()) {
+		rofl::openflow::coftable_stats_reply const& table_stats =
+				tablestatsarray.get_table_stats(table_id);
 
 		// add or reset table
 		rofl::openflow::coftable_features& table = tables.add_table(table_id);

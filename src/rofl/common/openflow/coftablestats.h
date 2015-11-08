@@ -12,7 +12,6 @@
 #ifndef ROFL_COMMON_OPENFLOW_COFTABLESTATS_H
 #define ROFL_COMMON_OPENFLOW_COFTABLESTATS_H 1
 
-#include "rofl/common/cmemory.h"
 #include "rofl/common/openflow/openflow.h"
 #include "rofl/common/openflow/openflow_rofl_exceptions.h"
 
