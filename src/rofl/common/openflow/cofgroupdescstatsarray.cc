@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 /*
  * cofgroupdescs.cc
  *
@@ -8,59 +12,6 @@
 #include "rofl/common/openflow/cofgroupdescstatsarray.h"
 
 using namespace rofl::openflow;
-
-cofgroupdescstatsarray::cofgroupdescstatsarray(uint8_t ofp_version) :
-		ofp_version(ofp_version)
-{
-
-}
-
-
-cofgroupdescstatsarray::~cofgroupdescstatsarray()
-{
-
-}
-
-
-cofgroupdescstatsarray::cofgroupdescstatsarray(cofgroupdescstatsarray const& groupdescs)
-{
-	*this = groupdescs;
-}
-
-
-cofgroupdescstatsarray&
-cofgroupdescstatsarray::operator= (cofgroupdescstatsarray const& groupdescs)
-{
-	if (this == &groupdescs)
-		return *this;
-
-	this->array.clear();
-
-	ofp_version = groupdescs.ofp_version;
-	for (std::map<uint32_t, cofgroup_desc_stats_reply>::const_iterator
-			it = groupdescs.array.begin(); it != groupdescs.array.end(); ++it) {
-		this->array[it->first] = it->second;
-	}
-
-	return *this;
-}
-
-
-
-cofgroupdescstatsarray&
-cofgroupdescstatsarray::operator+= (cofgroupdescstatsarray const& groupdescs)
-{
-	/*
-	 * this may replace existing group descriptions
-	 */
-	for (std::map<uint32_t, cofgroup_desc_stats_reply>::const_iterator
-			it = groupdescs.array.begin(); it != groupdescs.array.end(); ++it) {
-		this->array[it->first] = it->second;
-	}
-
-	return *this;
-}
-
 
 
 size_t
@@ -148,56 +99,5 @@ cofgroupdescstatsarray::unpack(uint8_t *buf, size_t buflen)
 	}
 }
 
-
-
-cofgroup_desc_stats_reply&
-cofgroupdescstatsarray::add_group_desc_stats(uint32_t group_id)
-{
-	if (array.find(group_id) != array.end()) {
-		array.erase(group_id);
-	}
-	return (array[group_id] = cofgroup_desc_stats_reply(ofp_version));
-}
-
-
-
-void
-cofgroupdescstatsarray::drop_group_desc_stats(uint32_t group_id)
-{
-	if (array.find(group_id) == array.end()) {
-		return;
-	}
-	array.erase(group_id);
-}
-
-
-
-cofgroup_desc_stats_reply&
-cofgroupdescstatsarray::set_group_desc_stats(uint32_t group_id)
-{
-	if (array.find(group_id) == array.end()) {
-		array[group_id] = cofgroup_desc_stats_reply(ofp_version);
-	}
-	return array[group_id];
-}
-
-
-
-cofgroup_desc_stats_reply const&
-cofgroupdescstatsarray::get_group_desc_stats(uint32_t group_id) const
-{
-	if (array.find(group_id) == array.end()) {
-		throw eGroupDescStatsNotFound();
-	}
-	return array.at(group_id);
-}
-
-
-
-bool
-cofgroupdescstatsarray::has_group_desc_stats(uint32_t group_id)
-{
-	return (not (array.find(group_id) == array.end()));
-}
 
 

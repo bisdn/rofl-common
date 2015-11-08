@@ -192,6 +192,8 @@ public:
 		array.clear();
 	};
 
+public:
+
 	/**
 	 *
 	 */
