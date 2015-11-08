@@ -1,73 +1,24 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 #include "rofl/common/openflow/cofgroupfeaturesstats.h"
 
 using namespace rofl::openflow;
 
 
-
-cofgroup_features_stats_reply::cofgroup_features_stats_reply(
-		uint8_t of_version,
-		uint8_t *buf,
-		size_t buflen) :
-				of_version(of_version),
-				types(0),
-				capabilities(0)
+size_t
+cofgroup_features_stats_reply::length() const
 {
-	max_groups.resize(4);
-	actions.resize(4);
-	if ((buflen > 0) && (0 != buf)) {
-		unpack(buf, buflen);
+	switch (of_version) {
+	case rofl::openflow12::OFP_VERSION:
+	case rofl::openflow13::OFP_VERSION: {
+		return (sizeof(struct rofl::openflow12::ofp_group_features_stats));
+	} break;
+	default:
+		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
-}
-
-
-
-cofgroup_features_stats_reply::cofgroup_features_stats_reply(
-		uint8_t of_version,
-		uint32_t types,
-		uint32_t capabilities,
-		std::vector<uint32_t> const& max_groups,
-		std::vector<uint32_t> const& actions) :
-				of_version(of_version),
-				types(types),
-				capabilities(capabilities),
-				max_groups(max_groups),
-				actions(actions)
-{
-	if (max_groups.size() < 4)
-		throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
-	if (actions.size() < 4)
-		throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
-}
-
-
-
-cofgroup_features_stats_reply::~cofgroup_features_stats_reply()
-{}
-
-
-
-cofgroup_features_stats_reply::cofgroup_features_stats_reply(
-		cofgroup_features_stats_reply const& flowstats)
-{
-	*this = flowstats;
-}
-
-
-
-cofgroup_features_stats_reply&
-cofgroup_features_stats_reply::operator= (
-		cofgroup_features_stats_reply const& fs)
-{
-	if (this == &fs)
-		return *this;
-
-	of_version 		= fs.of_version;
-	types			= fs.types;
-	capabilities	= fs.capabilities;
-	max_groups		= fs.max_groups;
-	actions			= fs.actions;
-
-	return *this;
+	return 0;
 }
 
 
@@ -119,96 +70,5 @@ cofgroup_features_stats_reply::unpack(uint8_t *buf, size_t buflen)
 
 
 
-size_t
-cofgroup_features_stats_reply::length() const
-{
-	switch (of_version) {
-	case rofl::openflow12::OFP_VERSION:
-	case rofl::openflow13::OFP_VERSION: {
-		return (sizeof(struct rofl::openflow12::ofp_group_features_stats));
-	} break;
-	default:
-		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
-	}
-	return 0;
-}
-
-
-
-uint8_t
-cofgroup_features_stats_reply::get_version() const
-{
-	return of_version;
-}
-
-
-
-void
-cofgroup_features_stats_reply::set_version(uint8_t of_version)
-{
-	this->of_version = of_version;
-}
-
-
-
-uint32_t
-cofgroup_features_stats_reply::get_types() const
-{
-	return types;
-}
-
-
-
-void
-cofgroup_features_stats_reply::set_types(uint32_t types)
-{
-	this->types = types;
-}
-
-
-
-uint32_t
-cofgroup_features_stats_reply::get_capabilities() const
-{
-	return capabilities;
-}
-
-
-
-void
-cofgroup_features_stats_reply::set_capabilities(uint32_t capabilities)
-{
-	this->capabilities = capabilities;
-}
-
-
-
-std::vector<uint32_t>&
-cofgroup_features_stats_reply::set_max_groups()
-{
-	return max_groups;
-}
-
-
-
-std::vector<uint32_t> const&
-cofgroup_features_stats_reply::get_max_groups() const
-{
-	return max_groups;
-}
-
-
-std::vector<uint32_t>&
-cofgroup_features_stats_reply::set_actions()
-{
-	return actions;
-}
-
-
-std::vector<uint32_t> const&
-cofgroup_features_stats_reply::get_actions() const
-{
-	return actions;
-}
 
 

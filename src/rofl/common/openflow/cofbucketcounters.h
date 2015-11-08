@@ -75,14 +75,14 @@ public:
 	 */
 	bool
 	operator== (
-			const cofbucket_counters& bcs)
+			const cofbucket_counters& bcs) const
 	{
 		if (bucketcounters.size() != bcs.bucketcounters.size())
 			return false;
 
 		for (std::map<uint32_t, cofbucket_counter>::const_iterator
 				it = bcs.bucketcounters.begin(); it != bcs.bucketcounters.end(); ++it) {
-			if (not (bucketcounters[it->first] == it->second))
+			if (not (bucketcounters.at(it->first) == it->second))
 				return false;
 		}
 
