@@ -149,6 +149,20 @@ public:
 	/**
 	 *
 	 */
+	std::list<uint32_t>
+	keys() const
+	{
+		AcquireReadLock rwlock(bcs_lock);
+		std::list<uint32_t> ids;
+		for (auto it : buckets) {
+			ids.push_back(it.first);
+		}
+		return ids;
+	};
+
+	/**
+	 *
+	 */
 	void
 	clear() {
 		AcquireReadWriteLock rwlock(bcs_lock);
