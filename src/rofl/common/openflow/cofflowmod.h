@@ -442,7 +442,19 @@ public:
 	std::string
 	str() const {
 		std::stringstream ss;
-		ss << "command: " << " ";
+		ss << "command: " << (int)command << ", ";
+		ss << "table_id: " << (int)table_id << ", ";
+		ss << "idle_timeout: " << (int)idle_timeout << ", ";
+		ss << "hard_timeout: " << (int)hard_timeout << ", ";
+		ss << "cookie: " << (unsigned long long)cookie << ", ";
+		ss << "cookie_mask: " << (unsigned long long)cookie_mask << ", ";
+		ss << "priority: " << (int)priority << ", ";
+		ss << "buffer_id: " << (int)buffer_id << ", ";
+		ss << "out_port: " << (int)out_port << ", ";
+		ss << "out_group: " << (int)out_group << ", ";
+		ss << "flags: " << (int)flags << ", ";
+		ss << "match: " << match << ", ";
+		ss << "instructions: " << instructions << ", ";
 		return ss.str();
 	};
 
