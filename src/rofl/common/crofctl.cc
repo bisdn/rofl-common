@@ -629,7 +629,11 @@ crofctl::handle_recv(
 
 	} catch (eRofCtlNotFound& e) {
 
+		journal.log(e);
+
 	} catch (eBadVersion& e) {
+
+		journal.log(e.set_key("message", msg->str()));
 
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
@@ -641,6 +645,8 @@ crofctl::handle_recv(
 
 	} catch (eBadRequestBadVersion& e) {
 
+		journal.log(e.set_key("message", msg->str()));
+
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
@@ -650,6 +656,8 @@ crofctl::handle_recv(
 						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadRequestBadType& e) {
+
+		journal.log(e.set_key("message", msg->str()));
 
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
@@ -661,6 +669,8 @@ crofctl::handle_recv(
 
 	} catch (eBadRequestBadStat& e) {
 
+		journal.log(e.set_key("message", msg->str()));
+
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
@@ -670,6 +680,8 @@ crofctl::handle_recv(
 						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadRequestBadExperimenter& e) {
+
+		journal.log(e.set_key("message", msg->str()));
 
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
@@ -681,6 +693,8 @@ crofctl::handle_recv(
 
 	} catch (eBadRequestBadExpType& e) {
 
+		journal.log(e.set_key("message", msg->str()));
+
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
@@ -690,6 +704,8 @@ crofctl::handle_recv(
 						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadRequestEperm& e) {
+
+		journal.log(e.set_key("message", msg->str()));
 
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
@@ -701,6 +717,8 @@ crofctl::handle_recv(
 
 	} catch (eBadRequestBadLen& e) {
 
+		journal.log(e.set_key("message", msg->str()));
+
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
@@ -710,6 +728,8 @@ crofctl::handle_recv(
 						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadRequestBufferEmpty& e) {
+
+		journal.log(e.set_key("message", msg->str()));
 
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
@@ -721,6 +741,8 @@ crofctl::handle_recv(
 
 	} catch (eBadRequestBufferUnknown& e) {
 
+		journal.log(e.set_key("message", msg->str()));
+
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
@@ -730,6 +752,8 @@ crofctl::handle_recv(
 						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadRequestBadTableId& e) {
+
+		journal.log(e.set_key("message", msg->str()));
 
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
@@ -741,6 +765,8 @@ crofctl::handle_recv(
 
 	} catch (eBadRequestIsSlave& e) {
 
+		journal.log(e.set_key("message", msg->str()));
+
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
@@ -750,6 +776,8 @@ crofctl::handle_recv(
 						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadRequestBadPort& e) {
+
+		journal.log(e.set_key("message", msg->str()));
 
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
@@ -761,6 +789,8 @@ crofctl::handle_recv(
 
 	} catch (eBadRequestBadPacket& e) {
 
+		journal.log(e.set_key("message", msg->str()));
+
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
@@ -770,6 +800,8 @@ crofctl::handle_recv(
 						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadRequestMultipartBufferOverflow& e) {
+
+		journal.log(e.set_key("message", msg->str()));
 
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
@@ -781,8 +813,11 @@ crofctl::handle_recv(
 
 	} catch (eBadRequestBase& e) {
 
+		journal.log(e.set_key("message", msg->str()));
 
 	} catch (eSwitchConfigBadFlags& e) {
+
+		journal.log(e.set_key("message", msg->str()));
 
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
@@ -794,6 +829,8 @@ crofctl::handle_recv(
 
 	} catch (eSwitchConfigBadLen& e) {
 
+		journal.log(e.set_key("message", msg->str()));
+
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
@@ -803,6 +840,8 @@ crofctl::handle_recv(
 						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eSwitchConfigEPerm& e) {
+
+		journal.log(e.set_key("message", msg->str()));
 
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
@@ -814,8 +853,11 @@ crofctl::handle_recv(
 
 	} catch (eSwitchConfigBase& e) {
 
+		journal.log(e.set_key("message", msg->str()));
 
 	} catch (eFlowModUnknown& e) {
+
+		journal.log(e.set_key("message", msg->str()));
 
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
@@ -827,6 +869,8 @@ crofctl::handle_recv(
 
 	} catch (eFlowModTableFull& e) {
 
+		journal.log(e.set_key("message", msg->str()));
+
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
@@ -836,6 +880,8 @@ crofctl::handle_recv(
 						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eFlowModBadTableId& e) {
+
+		journal.log(e.set_key("message", msg->str()));
 
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
@@ -847,6 +893,8 @@ crofctl::handle_recv(
 
 	} catch (eFlowModOverlap& e) {
 
+		journal.log(e.set_key("message", msg->str()));
+
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
@@ -856,6 +904,8 @@ crofctl::handle_recv(
 						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eFlowModEperm& e) {
+
+		journal.log(e.set_key("message", msg->str()));
 
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
@@ -867,6 +917,8 @@ crofctl::handle_recv(
 
 	} catch (eFlowModBadTimeout& e) {
 
+		journal.log(e.set_key("message", msg->str()));
+
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
@@ -876,6 +928,8 @@ crofctl::handle_recv(
 						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eFlowModBadCommand& e) {
+
+		journal.log(e.set_key("message", msg->str()));
 
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
@@ -887,6 +941,8 @@ crofctl::handle_recv(
 
 	} catch (eFlowModBadFlags& e) {
 
+		journal.log(e.set_key("message", msg->str()));
+
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
@@ -897,8 +953,11 @@ crofctl::handle_recv(
 
 	} catch (eFlowModBase& e) {
 
+		journal.log(e.set_key("message", msg->str()));
 
 	} catch (eGroupModExists& e) {
+
+		journal.log(e.set_key("message", msg->str()));
 
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
@@ -910,6 +969,8 @@ crofctl::handle_recv(
 
 	} catch (eGroupModInvalGroup& e) {
 
+		journal.log(e.set_key("message", msg->str()));
+
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
@@ -919,6 +980,8 @@ crofctl::handle_recv(
 						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eGroupModWeightUnsupported& e) {
+
+		journal.log(e.set_key("message", msg->str()));
 
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
@@ -930,6 +993,8 @@ crofctl::handle_recv(
 
 	} catch (eGroupModOutOfGroups& e) {
 
+		journal.log(e.set_key("message", msg->str()));
+
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
@@ -939,6 +1004,8 @@ crofctl::handle_recv(
 						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eGroupModOutOfBuckets& e) {
+
+		journal.log(e.set_key("message", msg->str()));
 
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
@@ -950,6 +1017,8 @@ crofctl::handle_recv(
 
 	} catch (eGroupModChainingUnsupported& e) {
 
+		journal.log(e.set_key("message", msg->str()));
+
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
@@ -959,6 +1028,8 @@ crofctl::handle_recv(
 						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eGroupModWatchUnsupported& e) {
+
+		journal.log(e.set_key("message", msg->str()));
 
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
@@ -970,6 +1041,8 @@ crofctl::handle_recv(
 
 	} catch (eGroupModLoop& e) {
 
+		journal.log(e.set_key("message", msg->str()));
+
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
@@ -979,6 +1052,8 @@ crofctl::handle_recv(
 						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eGroupModUnknownGroup& e) {
+
+		journal.log(e.set_key("message", msg->str()));
 
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
@@ -990,6 +1065,8 @@ crofctl::handle_recv(
 
 	} catch (eGroupModChainedGroup& e) {
 
+		journal.log(e.set_key("message", msg->str()));
+
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
@@ -999,6 +1076,8 @@ crofctl::handle_recv(
 						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eGroupModBadType& e) {
+
+		journal.log(e.set_key("message", msg->str()));
 
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
@@ -1010,6 +1089,8 @@ crofctl::handle_recv(
 
 	} catch (eGroupModBadCommand& e) {
 
+		journal.log(e.set_key("message", msg->str()));
+
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
@@ -1019,6 +1100,8 @@ crofctl::handle_recv(
 						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eGroupModBadBucket& e) {
+
+		journal.log(e.set_key("message", msg->str()));
 
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
@@ -1030,6 +1113,8 @@ crofctl::handle_recv(
 
 	} catch (eGroupModBadWatch& e) {
 
+		journal.log(e.set_key("message", msg->str()));
+
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
@@ -1039,6 +1124,8 @@ crofctl::handle_recv(
 						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eGroupModEperm& e) {
+
+		journal.log(e.set_key("message", msg->str()));
 
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
@@ -1050,8 +1137,11 @@ crofctl::handle_recv(
 
 	} catch (eGroupModBase& e) {
 
+		journal.log(e.set_key("message", msg->str()));
 
 	} catch (ePortModBadPort& e) {
+
+		journal.log(e.set_key("message", msg->str()));
 
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
@@ -1063,6 +1153,8 @@ crofctl::handle_recv(
 
 	} catch (ePortModBadHwAddr& e) {
 
+		journal.log(e.set_key("message", msg->str()));
+
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
@@ -1072,6 +1164,8 @@ crofctl::handle_recv(
 						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (ePortModBadConfig& e) {
+
+		journal.log(e.set_key("message", msg->str()));
 
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
@@ -1083,6 +1177,8 @@ crofctl::handle_recv(
 
 	} catch (ePortModBadAdvertise& e) {
 
+		journal.log(e.set_key("message", msg->str()));
+
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
@@ -1092,6 +1188,8 @@ crofctl::handle_recv(
 						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (ePortModEperm& e) {
+
+		journal.log(e.set_key("message", msg->str()));
 
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
@@ -1103,8 +1201,11 @@ crofctl::handle_recv(
 
 	} catch (ePortModBase& e) {
 
+		journal.log(e.set_key("message", msg->str()));
 
 	} catch (eTableModBadTable& e) {
+
+		journal.log(e.set_key("message", msg->str()));
 
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
@@ -1116,6 +1217,8 @@ crofctl::handle_recv(
 
 	} catch (eTableModBadConfig& e) {
 
+		journal.log(e.set_key("message", msg->str()));
+
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
@@ -1125,6 +1228,8 @@ crofctl::handle_recv(
 						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eTableModEperm& e) {
+
+		journal.log(e.set_key("message", msg->str()));
 
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
@@ -1136,6 +1241,7 @@ crofctl::handle_recv(
 
 	} catch (eTableModBase& e) {
 
+		journal.log(e.set_key("message", msg->str()));
 
 #if 0
 	} catch (rofl::openflow::eInstructionInvalType& e) {
@@ -1163,6 +1269,8 @@ crofctl::handle_recv(
 
 	} catch (eBadActionBadType& e) {
 
+		journal.log(e.set_key("message", msg->str()));
+
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
@@ -1172,6 +1280,8 @@ crofctl::handle_recv(
 						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadActionBadLen& e) {
+
+		journal.log(e.set_key("message", msg->str()));
 
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
@@ -1183,6 +1293,8 @@ crofctl::handle_recv(
 
 	} catch (eBadActionBadExperimenter& e) {
 
+		journal.log(e.set_key("message", msg->str()));
+
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
@@ -1192,6 +1304,8 @@ crofctl::handle_recv(
 						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadActionBadExperimenterType& e) {
+
+		journal.log(e.set_key("message", msg->str()));
 
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
@@ -1203,6 +1317,8 @@ crofctl::handle_recv(
 
 	} catch (eBadActionBadOutPort& e) {
 
+		journal.log(e.set_key("message", msg->str()));
+
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
@@ -1212,6 +1328,8 @@ crofctl::handle_recv(
 						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadActionBadArgument& e) {
+
+		journal.log(e.set_key("message", msg->str()));
 
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
@@ -1223,6 +1341,8 @@ crofctl::handle_recv(
 
 	} catch (eBadActionEperm& e) {
 
+		journal.log(e.set_key("message", msg->str()));
+
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
@@ -1232,6 +1352,8 @@ crofctl::handle_recv(
 						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadActionTooMany& e) {
+
+		journal.log(e.set_key("message", msg->str()));
 
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
@@ -1243,6 +1365,8 @@ crofctl::handle_recv(
 
 	} catch (eBadActionBadQueue& e) {
 
+		journal.log(e.set_key("message", msg->str()));
+
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
@@ -1252,6 +1376,8 @@ crofctl::handle_recv(
 						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadActionBadOutGroup& e) {
+
+		journal.log(e.set_key("message", msg->str()));
 
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
@@ -1263,6 +1389,8 @@ crofctl::handle_recv(
 
 	} catch (eBadActionMatchInconsistent& e) {
 
+		journal.log(e.set_key("message", msg->str()));
+
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
@@ -1272,6 +1400,8 @@ crofctl::handle_recv(
 						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadActionUnsupportedOrder& e) {
+
+		journal.log(e.set_key("message", msg->str()));
 
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
@@ -1283,6 +1413,8 @@ crofctl::handle_recv(
 
 	} catch (eBadActionBadTag& e) {
 
+		journal.log(e.set_key("message", msg->str()));
+
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
@@ -1292,6 +1424,8 @@ crofctl::handle_recv(
 						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadActionBadSetType& e) {
+
+		journal.log(e.set_key("message", msg->str()));
 
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
@@ -1303,6 +1437,8 @@ crofctl::handle_recv(
 
 	} catch (eBadActionBadSetLen& e) {
 
+		journal.log(e.set_key("message", msg->str()));
+
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
@@ -1312,6 +1448,8 @@ crofctl::handle_recv(
 						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadActionBadSetArgument& e) {
+
+		journal.log(e.set_key("message", msg->str()));
 
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
@@ -1323,8 +1461,11 @@ crofctl::handle_recv(
 
 	} catch (eBadActionBase& e) {
 
+		journal.log(e.set_key("message", msg->str()));
 
 	} catch (eBadInstUnknownInst& e) {
+
+		journal.log(e.set_key("message", msg->str()));
 
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
@@ -1336,6 +1477,8 @@ crofctl::handle_recv(
 
 	} catch (eBadInstUnsupInst& e) {
 
+		journal.log(e.set_key("message", msg->str()));
+
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
@@ -1345,6 +1488,8 @@ crofctl::handle_recv(
 						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadInstBadTableId& e) {
+
+		journal.log(e.set_key("message", msg->str()));
 
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
@@ -1356,6 +1501,8 @@ crofctl::handle_recv(
 
 	} catch (eBadInstUnsupMetadata& e) {
 
+		journal.log(e.set_key("message", msg->str()));
+
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
@@ -1365,6 +1512,8 @@ crofctl::handle_recv(
 						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadInstUnsupMetadataMask& e) {
+
+		journal.log(e.set_key("message", msg->str()));
 
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
@@ -1376,6 +1525,8 @@ crofctl::handle_recv(
 
 	} catch (eBadInstBadExperimenter& e) {
 
+		journal.log(e.set_key("message", msg->str()));
+
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
@@ -1385,6 +1536,8 @@ crofctl::handle_recv(
 						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadInstBadExpType& e) {
+
+		journal.log(e.set_key("message", msg->str()));
 
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
@@ -1396,6 +1549,8 @@ crofctl::handle_recv(
 
 	} catch (eBadInstBadLen& e) {
 
+		journal.log(e.set_key("message", msg->str()));
+
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
@@ -1405,6 +1560,8 @@ crofctl::handle_recv(
 						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadInstEperm& e) {
+
+		journal.log(e.set_key("message", msg->str()));
 
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
@@ -1416,8 +1573,11 @@ crofctl::handle_recv(
 
 	} catch (eBadInstBase& e) {
 
+		journal.log(e.set_key("message", msg->str()));
 
 	} catch (eBadMatchBadType& e) {
+
+		journal.log(e.set_key("message", msg->str()));
 
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
@@ -1429,6 +1589,8 @@ crofctl::handle_recv(
 
 	} catch (eBadMatchBadLen& e) {
 
+		journal.log(e.set_key("message", msg->str()));
+
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
@@ -1438,6 +1600,8 @@ crofctl::handle_recv(
 						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadMatchBadTag& e) {
+
+		journal.log(e.set_key("message", msg->str()));
 
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
@@ -1449,6 +1613,8 @@ crofctl::handle_recv(
 
 	} catch (eBadMatchBadDlAddrMask& e) {
 
+		journal.log(e.set_key("message", msg->str()));
+
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
@@ -1458,6 +1624,8 @@ crofctl::handle_recv(
 						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadMatchBadNwAddrMask& e) {
+
+		journal.log(e.set_key("message", msg->str()));
 
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
@@ -1469,6 +1637,8 @@ crofctl::handle_recv(
 
 	} catch (eBadMatchBadWildcards& e) {
 
+		journal.log(e.set_key("message", msg->str()));
+
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
@@ -1478,6 +1648,8 @@ crofctl::handle_recv(
 						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadMatchBadField& e) {
+
+		journal.log(e.set_key("message", msg->str()));
 
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
@@ -1489,6 +1661,8 @@ crofctl::handle_recv(
 
 	} catch (eBadMatchBadValue& e) {
 
+		journal.log(e.set_key("message", msg->str()));
+
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
@@ -1498,6 +1672,8 @@ crofctl::handle_recv(
 						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadMatchBadMask& e) {
+
+		journal.log(e.set_key("message", msg->str()));
 
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
@@ -1509,6 +1685,8 @@ crofctl::handle_recv(
 
 	} catch (eBadMatchBadPrereq& e) {
 
+		journal.log(e.set_key("message", msg->str()));
+
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
@@ -1518,6 +1696,8 @@ crofctl::handle_recv(
 						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadMatchDupField& e) {
+
+		journal.log(e.set_key("message", msg->str()));
 
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
@@ -1529,6 +1709,8 @@ crofctl::handle_recv(
 
 	} catch (eBadMatchEperm& e) {
 
+		journal.log(e.set_key("message", msg->str()));
+
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
@@ -1539,8 +1721,11 @@ crofctl::handle_recv(
 
 	} catch (eBadMatchBase& e) {
 
+		journal.log(e.set_key("message", msg->str()));
 
 	} catch (eRoleRequestStale& e) {
+
+		journal.log(e.set_key("message", msg->str()));
 
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
@@ -1552,6 +1737,8 @@ crofctl::handle_recv(
 
 	} catch (eRoleRequestUnsupported& e) {
 
+		journal.log(e.set_key("message", msg->str()));
+
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
@@ -1561,6 +1748,8 @@ crofctl::handle_recv(
 						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eRoleRequestBadRole& e) {
+
+		journal.log(e.set_key("message", msg->str()));
 
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
@@ -1572,8 +1761,11 @@ crofctl::handle_recv(
 
 	} catch (eRoleRequestBase& e) {
 
+		journal.log(e.set_key("message", msg->str()));
 
 	} catch (eMeterModUnknown& e) {
+
+		journal.log(e.set_key("message", msg->str()));
 
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
@@ -1585,6 +1777,8 @@ crofctl::handle_recv(
 
 	} catch (eMeterModMeterExists& e) {
 
+		journal.log(e.set_key("message", msg->str()));
+
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
@@ -1594,6 +1788,8 @@ crofctl::handle_recv(
 						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eMeterModInvalidMeter& e) {
+
+		journal.log(e.set_key("message", msg->str()));
 
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
@@ -1605,6 +1801,8 @@ crofctl::handle_recv(
 
 	} catch (eMeterModUnknownMeter& e) {
 
+		journal.log(e.set_key("message", msg->str()));
+
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
@@ -1614,6 +1812,8 @@ crofctl::handle_recv(
 						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eMeterModBadCommand& e) {
+
+		journal.log(e.set_key("message", msg->str()));
 
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
@@ -1625,6 +1825,8 @@ crofctl::handle_recv(
 
 	} catch (eMeterModBadFlags& e) {
 
+		journal.log(e.set_key("message", msg->str()));
+
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
@@ -1634,6 +1836,8 @@ crofctl::handle_recv(
 						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eMeterModBadRate& e) {
+
+		journal.log(e.set_key("message", msg->str()));
 
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
@@ -1645,6 +1849,8 @@ crofctl::handle_recv(
 
 	} catch (eMeterModBadBurst& e) {
 
+		journal.log(e.set_key("message", msg->str()));
+
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
@@ -1654,6 +1860,8 @@ crofctl::handle_recv(
 						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eMeterModBadBand& e) {
+
+		journal.log(e.set_key("message", msg->str()));
 
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
@@ -1665,6 +1873,8 @@ crofctl::handle_recv(
 
 	} catch (eMeterModBadBandValue& e) {
 
+		journal.log(e.set_key("message", msg->str()));
+
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
@@ -1674,6 +1884,8 @@ crofctl::handle_recv(
 						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eMeterModOutOfMeters& e) {
+
+		journal.log(e.set_key("message", msg->str()));
 
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
@@ -1685,6 +1897,8 @@ crofctl::handle_recv(
 
 	} catch (eMeterModOutOfBands& e) {
 
+		journal.log(e.set_key("message", msg->str()));
+
 		size_t len = msg->length() < 64 ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
@@ -1695,9 +1909,15 @@ crofctl::handle_recv(
 
 	} catch (eMeterModBase& e) {
 
+		journal.log(e.set_key("message", msg->str()));
+
 	} catch (exception& e) {
 
+		journal.log(e.set_key("message", msg->str()));
+
 	} catch (std::runtime_error& e) {
+
+		journal.log(LOG_EXCEPTION, "exception: %s", e.what());
 
 	}
 
