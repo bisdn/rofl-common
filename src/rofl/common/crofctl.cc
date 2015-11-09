@@ -631,459 +631,508 @@ crofctl::handle_recv(
 
 	} catch (eBadVersion& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_bad_request_bad_version(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadRequestBadVersion& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_bad_request_bad_version(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadRequestBadType& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_bad_request_bad_type(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadRequestBadStat& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_bad_request_bad_stat(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadRequestBadExperimenter& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_bad_request_bad_experimenter(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadRequestBadExpType& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_bad_request_bad_exp_type(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadRequestEperm& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_bad_request_eperm(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadRequestBadLen& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_bad_request_bad_len(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadRequestBufferEmpty& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_bad_request_buffer_empty(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadRequestBufferUnknown& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_bad_request_buffer_unknown(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadRequestBadTableId& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_bad_request_bad_table_id(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadRequestIsSlave& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_bad_request_is_slave(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadRequestBadPort& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_bad_request_bad_port(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadRequestBadPacket& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_bad_request_bad_packet(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadRequestMultipartBufferOverflow& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_bad_request_multipart_buffer_overflow(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadRequestBase& e) {
 
 
 	} catch (eSwitchConfigBadFlags& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_switch_config_failed_bad_flags(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eSwitchConfigBadLen& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_switch_config_failed_bad_len(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eSwitchConfigEPerm& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_switch_config_failed_eperm(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eSwitchConfigBase& e) {
 
 
 	} catch (eFlowModUnknown& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_flow_mod_failed_unknown(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eFlowModTableFull& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_flow_mod_failed_table_full(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eFlowModBadTableId& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_flow_mod_failed_bad_table_id(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eFlowModOverlap& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_flow_mod_failed_overlap(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eFlowModEperm& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_flow_mod_failed_eperm(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eFlowModBadTimeout& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_flow_mod_failed_bad_timeout(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eFlowModBadCommand& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_flow_mod_failed_bad_command(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eFlowModBadFlags& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_flow_mod_failed_bad_flags(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eFlowModBase& e) {
 
 
 	} catch (eGroupModExists& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_group_mod_failed_group_exists(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eGroupModInvalGroup& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_group_mod_failed_inval_group(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eGroupModWeightUnsupported& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_group_mod_failed_weight_unsupported(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eGroupModOutOfGroups& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_group_mod_failed_out_of_groups(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eGroupModOutOfBuckets& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_group_mod_failed_out_of_buckets(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eGroupModChainingUnsupported& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_group_mod_failed_chaining_unsupported(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eGroupModWatchUnsupported& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_group_mod_failed_watch_unsupported(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eGroupModLoop& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_group_mod_failed_loop(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eGroupModUnknownGroup& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_group_mod_failed_unknown_group(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eGroupModChainedGroup& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_group_mod_failed_chained_group(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eGroupModBadType& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_group_mod_failed_bad_type(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eGroupModBadCommand& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_group_mod_failed_bad_command(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eGroupModBadBucket& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_group_mod_failed_bad_bucket(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eGroupModBadWatch& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_group_mod_failed_bad_watch(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eGroupModEperm& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_group_mod_failed_eperm(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eGroupModBase& e) {
 
 
 	} catch (ePortModBadPort& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_port_mod_failed_bad_port(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (ePortModBadHwAddr& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_port_mod_failed_bad_hwaddr(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (ePortModBadConfig& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_port_mod_failed_bad_config(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (ePortModBadAdvertise& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_port_mod_failed_bad_advertise(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (ePortModEperm& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_port_mod_failed_eperm(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (ePortModBase& e) {
 
 
 	} catch (eTableModBadTable& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_table_mod_failed_bad_table(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eTableModBadConfig& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_table_mod_failed_bad_config(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eTableModEperm& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_table_mod_failed_eperm(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eTableModBase& e) {
 
@@ -1114,483 +1163,535 @@ crofctl::handle_recv(
 
 	} catch (eBadActionBadType& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_bad_action_bad_type(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadActionBadLen& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_bad_action_bad_len(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadActionBadExperimenter& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_bad_action_bad_experimenter(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadActionBadExperimenterType& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_bad_action_bad_experimenter_type(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadActionBadOutPort& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_bad_action_bad_out_port(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadActionBadArgument& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_bad_action_bad_argument(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadActionEperm& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_bad_action_eperm(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadActionTooMany& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_bad_action_too_many(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadActionBadQueue& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_bad_action_bad_queue(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadActionBadOutGroup& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_bad_action_bad_out_group(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadActionMatchInconsistent& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_bad_action_match_inconsistent(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadActionUnsupportedOrder& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_bad_action_unsupported_order(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadActionBadTag& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_bad_action_bad_tag(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadActionBadSetType& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_bad_action_bad_set_type(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadActionBadSetLen& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_bad_action_bad_set_len(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadActionBadSetArgument& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_bad_action_bad_set_argument(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadActionBase& e) {
 
 
 	} catch (eBadInstUnknownInst& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_bad_inst_unknown_inst(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadInstUnsupInst& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_bad_inst_unsup_inst(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadInstBadTableId& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_bad_inst_bad_table_id(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadInstUnsupMetadata& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_bad_inst_unsup_metadata(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadInstUnsupMetadataMask& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_bad_inst_unsup_metadata_mask(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadInstBadExperimenter& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_bad_inst_bad_experimenter(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadInstBadExpType& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_bad_inst_bad_exp_type(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadInstBadLen& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_bad_inst_bad_len(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadInstEperm& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_bad_inst_eperm(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadInstBase& e) {
 
 
 	} catch (eBadMatchBadType& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_bad_match_bad_type(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadMatchBadLen& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_bad_match_bad_len(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadMatchBadTag& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_bad_match_bad_tag(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadMatchBadDlAddrMask& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_bad_match_bad_dladdr_mask(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadMatchBadNwAddrMask& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_bad_match_bad_nwaddr_mask(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadMatchBadWildcards& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_bad_match_bad_wildcards(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadMatchBadField& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_bad_match_bad_field(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadMatchBadValue& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_bad_match_bad_value(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadMatchBadMask& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_bad_match_bad_mask(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadMatchBadPrereq& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_bad_match_bad_prereq(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadMatchDupField& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_bad_match_dup_field(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadMatchEperm& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_bad_match_eperm(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eBadMatchBase& e) {
 
 
 	} catch (eRoleRequestStale& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_role_request_failed_stale(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eRoleRequestUnsupported& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_role_request_failed_unsupported(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eRoleRequestBadRole& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_role_request_failed_bad_role(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eRoleRequestBase& e) {
 
 
 	} catch (eMeterModUnknown& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_meter_mod_unknown(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eMeterModMeterExists& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_meter_mod_meter_exists(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eMeterModInvalidMeter& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_meter_mod_invalid_meter(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eMeterModUnknownMeter& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_meter_mod_unknown_meter(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eMeterModBadCommand& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_meter_mod_bad_command(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eMeterModBadFlags& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_meter_mod_bad_flags(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eMeterModBadRate& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_meter_mod_bad_rate(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eMeterModBadBurst& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_meter_mod_bad_burst(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eMeterModBadBand& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_meter_mod_bad_band(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eMeterModBadBandValue& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_meter_mod_bad_band_value(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eMeterModOutOfMeters& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_meter_mod_out_of_meters(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eMeterModOutOfBands& e) {
 
-		rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+		size_t len = msg->length() < 64 ? msg->length() : 64;
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofchan.send_message(conn.get_auxid(),
 				new rofl::openflow::cofmsg_error_meter_mod_out_of_bands(
-						rofchan.get_version(), msg->get_xid(), mem.somem(), mem.length()));
+						rofchan.get_version(), msg->get_xid(), mem.somem(), len));
 
 	} catch (eMeterModBase& e) {
 
