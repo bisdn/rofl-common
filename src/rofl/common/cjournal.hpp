@@ -357,6 +357,7 @@ public:
 	 */
 	friend std::ostream&
 	operator<< (std::ostream& os, const cjournal& journal) {
+		AcquireReadLock rlock(journal.entries_rwlock);
 		for (auto it : journal.entries) {
 			os << *(it.second) << std::endl;
 		}
