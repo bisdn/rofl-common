@@ -56,7 +56,8 @@ crofconn::crofconn(
 				xid_features_request_last(random.uint32()),
 				xid_echo_request_last(random.uint32()),
 				timeout_segments(DEFAULT_SEGMENTS_TIMEOUT),
-				pending_segments_max(DEFAULT_PENDING_SEGMENTS_MAX)
+				pending_segments_max(DEFAULT_PENDING_SEGMENTS_MAX),
+				trace(false)
 {
 	/* scheduler weights for transmission */
 	rxweights[QUEUE_OAM ] = 16;
@@ -892,6 +893,10 @@ crofconn::handle_recv(
 	 * are stored in the appropriate rxqueue and crofconn's internal
 	 * thread is called for handling these messages. */
 
+	if (trace) {
+		journal.log(LOG_TRACE, "message rcvd: %s", msg->str().c_str());
+	}
+
 	switch (get_state()) {
 	case STATE_NEGOTIATING: {
 
@@ -1453,6 +1458,10 @@ crofconn::segment_and_send_message(
 		rofl::openflow::cofmsg *msg)
 {
 	unsigned int cwnd_size = 0;
+
+	if (trace) {
+		journal.log(LOG_TRACE, "message sent: %s", msg->str().c_str());
+	}
 
 	if (msg->length() <= segmentation_threshold) {
 		rofsock.send_message(msg); // default behaviour for now: send message directly to rofsock

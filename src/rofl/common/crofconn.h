@@ -719,6 +719,23 @@ public:
 
 public:
 
+	/**
+	 *
+	 */
+	bool
+	get_trace() const
+	{ return trace; };
+
+	/**
+	 *
+	 */
+	crofconn&
+	set_trace(
+			bool trace)
+	{ this->trace = trace; return *this; };
+
+public:
+
 	friend std::ostream&
 	operator<< (std::ostream& os, const crofconn& conn) {
 		os  << "<crofconn ofp-version:" << (int)conn.ofp_version << " "
@@ -1436,6 +1453,9 @@ private:
 	// maximum number of pending segments in parallel
 	unsigned int                    pending_segments_max;
 	static const unsigned int       DEFAULT_PENDING_SEGMENTS_MAX;
+
+	// enable message tracing
+	bool                            trace;
 };
 
 }; /* namespace rofl */
