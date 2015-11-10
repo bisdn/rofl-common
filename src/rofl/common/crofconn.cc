@@ -353,6 +353,9 @@ crofconn::send_hello_message()
 						versionbitmap.get_highest_ofp_version(),
 						++xid_hello_last,
 						helloIEs);
+		if (trace) {
+			journal.log(LOG_TRACE, "message sent: %s", msg->str().c_str());
+		}
 
 		rofsock.send_message(msg);
 
@@ -529,6 +532,10 @@ crofconn::send_features_request()
 						ofp_version,
 						++xid_features_request_last);
 
+		if (trace) {
+			journal.log(LOG_TRACE, "message sent: %s", msg->str().c_str());
+		}
+
 		rofsock.send_message(msg);
 
 	} catch (rofl::exception& e) {
@@ -595,6 +602,10 @@ crofconn::send_echo_request()
 						ofp_version,
 						++xid_echo_request_last);
 
+		if (trace) {
+			journal.log(LOG_TRACE, "message sent: %s", msg->str().c_str());
+		}
+
 		rofsock.send_message(msg);
 
 	} catch (rofl::exception& e) {
@@ -654,6 +665,10 @@ crofconn::echo_request_rcvd(
 				new rofl::openflow::cofmsg_echo_reply(
 						msg->get_version(), msg->get_xid(),
 						msg->get_body().somem(), msg->get_body().memlen());
+
+		if (trace) {
+			journal.log(LOG_TRACE, "message sent: %s", msg->str().c_str());
+		}
 
 		rofsock.send_message(reply);
 
