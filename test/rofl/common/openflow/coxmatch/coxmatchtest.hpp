@@ -23,11 +23,13 @@ class coxmatchtest :
 	CPPUNIT_TEST( test_eth_dst_mask );
 	CPPUNIT_TEST( test1Byte );
 	CPPUNIT_TEST( test2Bytes );
+	CPPUNIT_TEST( test3Bytes );
 	CPPUNIT_TEST( test4Bytes );
 	CPPUNIT_TEST( test6Bytes );
 	CPPUNIT_TEST( test8Bytes );
 	CPPUNIT_TEST( test1ByteHasMask );
 	CPPUNIT_TEST( test2BytesHasMask );
+	CPPUNIT_TEST( test3BytesHasMask );
 	CPPUNIT_TEST( test4BytesHasMask );
 	CPPUNIT_TEST( test6BytesHasMask );
 	CPPUNIT_TEST( test8BytesHasMask );
@@ -53,11 +55,13 @@ public:
 
 	void test1Byte();
 	void test2Bytes();
+	void test3Bytes();
 	void test4Bytes();
 	void test6Bytes();
 	void test8Bytes();
 	void test1ByteHasMask();
 	void test2BytesHasMask();
+	void test3BytesHasMask();
 	void test4BytesHasMask();
 	void test6BytesHasMask();
 	void test8BytesHasMask();

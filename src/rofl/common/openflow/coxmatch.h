@@ -1321,13 +1321,13 @@ public:
 		}
 		coxmatch::pack(buf, buflen);
 		struct rofl::openflow::ofp_oxm_ofb_uint24_t* oxm = (struct rofl::openflow::ofp_oxm_ofb_uint24_t*)buf;
-		oxm->word[2] = (uint8_t)((value >>  0) & 0x000000ff);
-		oxm->word[1] = (uint8_t)((value >>  8) & 0x000000ff);
-		oxm->word[0] = (uint8_t)((value >> 16) & 0x000000ff);
+		oxm->word[2] = (uint8_t)((value & 0x000000ff) >>  0);
+		oxm->word[1] = (uint8_t)((value & 0x0000ff00) >>  8);
+		oxm->word[0] = (uint8_t)((value & 0x00ff0000) >> 16);
 		if (get_oxm_hasmask()) {
-			oxm->mask[2] = (uint8_t)((mask >>  0) & 0x000000ff);
-			oxm->mask[1] = (uint8_t)((mask >>  8) & 0x000000ff);
-			oxm->mask[0] = (uint8_t)((mask >> 16) & 0x000000ff);
+			oxm->mask[2] = (uint8_t)((mask & 0x000000ff) >>  0);
+			oxm->mask[1] = (uint8_t)((mask & 0x0000ff00) >>  8);
+			oxm->mask[0] = (uint8_t)((mask & 0x00ff0000) >> 16);
 		}
 	};
 
@@ -1358,9 +1358,9 @@ public:
 	friend std::ostream&
 	operator<< (std::ostream& os, const coxmatch_24& oxm) {
 		os  << "<coxmatch_24 ";
-		os << "value: 0x" << std::hex << oxm.get_u24value() << std::dec << " ";
+		os << "value: 0x" << std::hex << (unsigned int)oxm.get_u24value() << std::dec << " ";
 		if (oxm.get_oxm_hasmask()) {
-			os << "/ mask: 0x" << std::hex << oxm.get_u24mask() << std::dec << " ";
+			os << "/ mask: 0x" << std::hex << (unsigned int)oxm.get_u24mask() << std::dec << " ";
 		}
 		os << " >" << std::endl;
 		
