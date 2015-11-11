@@ -1240,7 +1240,7 @@ crofconn::handle_rx_messages()
 
 	thread.drop_timer(TIMER_ID_NEED_LIFE_CHECK);
 
-	bool keep_running = false;
+	unsigned int keep_running = 10;
 
 	do {
 		try {
@@ -1286,8 +1286,8 @@ crofconn::handle_rx_messages()
 					}
 				}
 
+				/* reschedule this method */
 				if (not rxqueues[queue_id].empty()) {
-					//keep_running = true; // return control to thread once in a round for timers
 					thread.wakeup();
 				}
 			}
@@ -1295,8 +1295,8 @@ crofconn::handle_rx_messages()
 			/* not connected any more, stop running working thread */
 			if (STATE_ESTABLISHED != state) {
 				keep_running = false;
-
 			}
+
 		} catch (eRofConnNotFound& e) {
 			/* environment not found */
 			journal.log(e).set_caller(__PRETTY_FUNCTION__);
@@ -1306,7 +1306,7 @@ crofconn::handle_rx_messages()
 			journal.log(LOG_RUNTIME_ERROR, "runtime error: %s", e.what()).set_caller(__PRETTY_FUNCTION__);
 		}
 
-	} while (keep_running);
+	} while (keep_running--);
 
 	rx_thread_working = false;
 
