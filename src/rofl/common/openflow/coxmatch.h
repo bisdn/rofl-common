@@ -1345,7 +1345,7 @@ public:
 		struct rofl::openflow::ofp_oxm_ofb_uint24_t* oxm = (struct rofl::openflow::ofp_oxm_ofb_uint24_t*)buf;
 		value = (((uint32_t)oxm->word[0] << 16) | ((uint32_t)oxm->word[1] << 8) | ((uint32_t)oxm->word[2] << 0));
 		if (get_oxm_hasmask())
-			mask = (((uint32_t)oxm->word[0] << 16) | ((uint32_t)oxm->word[1] << 8) | ((uint32_t)oxm->word[2] << 0));
+			mask = (((uint32_t)oxm->mask[0] << 16) | ((uint32_t)oxm->mask[1] << 8) | ((uint32_t)oxm->mask[2] << 0));
 		else
 			mask = 0xffffff;
 	};
