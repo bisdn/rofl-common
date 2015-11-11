@@ -1240,7 +1240,7 @@ crofconn::handle_rx_messages()
 
 	thread.drop_timer(TIMER_ID_NEED_LIFE_CHECK);
 
-	unsigned int keep_running = 10;
+	unsigned int keep_running = 1;
 
 	do {
 		try {
