@@ -56,7 +56,8 @@ crofconn::crofconn(
 				xid_features_request_last(random.uint32()),
 				xid_echo_request_last(random.uint32()),
 				timeout_segments(DEFAULT_SEGMENTS_TIMEOUT),
-				pending_segments_max(DEFAULT_PENDING_SEGMENTS_MAX)
+				pending_segments_max(DEFAULT_PENDING_SEGMENTS_MAX),
+				trace(false)
 {
 	/* scheduler weights for transmission */
 	rxweights[QUEUE_OAM ] = 16;
@@ -352,6 +353,9 @@ crofconn::send_hello_message()
 						versionbitmap.get_highest_ofp_version(),
 						++xid_hello_last,
 						helloIEs);
+		if (trace) {
+			journal.log(LOG_TRACE, "message sent: %s", msg->str().c_str());
+		}
 
 		rofsock.send_message(msg);
 
@@ -528,6 +532,10 @@ crofconn::send_features_request()
 						ofp_version,
 						++xid_features_request_last);
 
+		if (trace) {
+			journal.log(LOG_TRACE, "message sent: %s", msg->str().c_str());
+		}
+
 		rofsock.send_message(msg);
 
 	} catch (rofl::exception& e) {
@@ -594,6 +602,10 @@ crofconn::send_echo_request()
 						ofp_version,
 						++xid_echo_request_last);
 
+		if (trace) {
+			journal.log(LOG_TRACE, "message sent: %s", msg->str().c_str());
+		}
+
 		rofsock.send_message(msg);
 
 	} catch (rofl::exception& e) {
@@ -653,6 +665,10 @@ crofconn::echo_request_rcvd(
 				new rofl::openflow::cofmsg_echo_reply(
 						msg->get_version(), msg->get_xid(),
 						msg->get_body().somem(), msg->get_body().memlen());
+
+		if (trace) {
+			journal.log(LOG_TRACE, "message sent: %s", msg->str().c_str());
+		}
 
 		rofsock.send_message(reply);
 
@@ -891,6 +907,10 @@ crofconn::handle_recv(
 	 * and handles incoming Echo-Requests directly. All other messages
 	 * are stored in the appropriate rxqueue and crofconn's internal
 	 * thread is called for handling these messages. */
+
+	if (trace) {
+		journal.log(LOG_TRACE, "message rcvd: %s", msg->str().c_str());
+	}
 
 	switch (get_state()) {
 	case STATE_NEGOTIATING: {
@@ -1220,7 +1240,7 @@ crofconn::handle_rx_messages()
 
 	thread.drop_timer(TIMER_ID_NEED_LIFE_CHECK);
 
-	bool keep_running = false;
+	unsigned int keep_running = 1;
 
 	do {
 		try {
@@ -1266,8 +1286,8 @@ crofconn::handle_rx_messages()
 					}
 				}
 
+				/* reschedule this method */
 				if (not rxqueues[queue_id].empty()) {
-					//keep_running = true; // return control to thread once in a round for timers
 					thread.wakeup();
 				}
 			}
@@ -1275,8 +1295,8 @@ crofconn::handle_rx_messages()
 			/* not connected any more, stop running working thread */
 			if (STATE_ESTABLISHED != state) {
 				keep_running = false;
-
 			}
+
 		} catch (eRofConnNotFound& e) {
 			/* environment not found */
 			journal.log(e).set_caller(__PRETTY_FUNCTION__);
@@ -1286,7 +1306,7 @@ crofconn::handle_rx_messages()
 			journal.log(LOG_RUNTIME_ERROR, "runtime error: %s", e.what()).set_caller(__PRETTY_FUNCTION__);
 		}
 
-	} while (keep_running);
+	} while (keep_running--);
 
 	rx_thread_working = false;
 
@@ -1453,6 +1473,10 @@ crofconn::segment_and_send_message(
 		rofl::openflow::cofmsg *msg)
 {
 	unsigned int cwnd_size = 0;
+
+	if (trace) {
+		journal.log(LOG_TRACE, "message sent: %s", msg->str().c_str());
+	}
 
 	if (msg->length() <= segmentation_threshold) {
 		rofsock.send_message(msg); // default behaviour for now: send message directly to rofsock

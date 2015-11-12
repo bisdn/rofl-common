@@ -264,6 +264,84 @@ coxmatchtest::test2BytesHasMask()
 
 
 void
+coxmatchtest::test3Bytes()
+{
+	uint32_t oxm_id = 0xa1a2a3a4 & ~HAS_MASK_FLAG;
+
+	rofl::openflow::coxmatch_24 oxm(oxm_id, (uint32_t)0xb1b2b3);
+
+	CPPUNIT_ASSERT(oxm.length() == 7);
+	CPPUNIT_ASSERT(oxm.get_oxm_class() == 0xa1a2);
+	CPPUNIT_ASSERT(oxm.get_oxm_field() == ((0xa3 & ~0x01) >> 1));
+	CPPUNIT_ASSERT(oxm.get_oxm_length() == 0xa4);
+
+	rofl::cmemory mem(oxm.length());
+	oxm.pack(mem.somem(), mem.memlen());
+
+	rofl::cmemory test(7);
+	test[0] = 0xa1;
+	test[1] = 0xa2;
+	test[2] = 0xa3 & ~0x01;
+	test[3] = 0x03;
+	test[4] = 0xb1;
+	test[5] = 0xb2;
+	test[6] = 0xb3;
+
+	CPPUNIT_ASSERT(mem == test);
+	CPPUNIT_ASSERT(oxm.get_u24value() == 0xb1b2b3);
+	CPPUNIT_ASSERT(oxm.get_u24mask() == 0xffffff);
+	CPPUNIT_ASSERT(oxm.get_u24masked_value() == 0xb1b2b3);
+
+	oxm.set_u24value(0xd1d2d3);
+
+	CPPUNIT_ASSERT(oxm.get_u24value() == 0xd1d2d3);
+}
+
+
+
+void
+coxmatchtest::test3BytesHasMask()
+{
+	uint32_t oxm_id = 0xa1a2a3a4 | HAS_MASK_FLAG;
+
+	rofl::openflow::coxmatch_24 oxm(oxm_id, (uint32_t)0xb1b2b3, (uint32_t)0xc1c2c3);
+
+	CPPUNIT_ASSERT(oxm.length() == 10);
+	CPPUNIT_ASSERT(oxm.get_oxm_class() == 0xa1a2);
+	CPPUNIT_ASSERT(oxm.get_oxm_field() == ((0xa3 | 0x01) >> 1));
+	CPPUNIT_ASSERT(oxm.get_oxm_length() == 0xa4);
+
+	rofl::cmemory mem(oxm.length());
+	oxm.pack(mem.somem(), mem.memlen());
+
+	rofl::cmemory test(10);
+	test[0] = 0xa1;
+	test[1] = 0xa2;
+	test[2] = 0xa3 | 0x01;
+	test[3] = 0x06;
+	test[4] = 0xb1;
+	test[5] = 0xb2;
+	test[6] = 0xb3;
+	test[7] = 0xc1;
+	test[8] = 0xc2;
+	test[9] = 0xc3;
+
+	CPPUNIT_ASSERT(mem == test);
+	CPPUNIT_ASSERT(oxm.get_u24value() == 0xb1b2b3);
+	CPPUNIT_ASSERT(oxm.get_u24mask() == 0xc1c2c3);
+	CPPUNIT_ASSERT(oxm.get_u24masked_value() == (0xb1b2b3 & 0xc1c2c3));
+
+	oxm.set_u24value(0xd1d2d3);
+	oxm.set_u24mask(0xe1e2e3);
+
+	CPPUNIT_ASSERT(oxm.get_u24value() == 0xd1d2d3);
+	CPPUNIT_ASSERT(oxm.get_u24mask() == 0xe1e2e3);
+	CPPUNIT_ASSERT(oxm.get_u24masked_value() == (0xd1d2d3 & 0xe1e2e3));
+}
+
+
+
+void
 coxmatchtest::test4Bytes()
 {
 	uint32_t oxm_id = 0xa1a2a3a4 & ~HAS_MASK_FLAG;

@@ -31,6 +31,7 @@ enum cjournal_level_t {
 	LOG_RUNTIME_ERROR = 2,
 	LOG_NOTICE        = 3,
 	LOG_INFO          = 4,
+	LOG_TRACE         = 5,
 };
 
 class cjrnentry

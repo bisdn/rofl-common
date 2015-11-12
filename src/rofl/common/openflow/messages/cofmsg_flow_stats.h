@@ -107,6 +107,13 @@ public:
 		return os;
 	};
 
+	virtual std::string
+	str() const {
+		std::stringstream ss;
+		ss << cofmsg::str() << "-Flow-Stats-Request- " << " ";
+		return ss.str();
+	};
+
 private:
 
 	cofflow_stats_request 		flow_stats;
@@ -202,7 +209,7 @@ public:
 	virtual std::string
 	str() const {
 		std::stringstream ss;
-		ss << cofmsg::str() << "-Flow-Stats-Request- " << " ";
+		ss << cofmsg::str() << "-Flow-Stats-Reply- " << " ";
 		return ss.str();
 	};
 

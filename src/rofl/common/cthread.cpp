@@ -404,10 +404,9 @@ cthread::run_loop()
 							char c;
 							int rcode = read(pipefd[PIPE_READ_FD], &c, sizeof(c));
 							(void)rcode;
+							wakeup_pending = false;
 							cthread_env::call_env(env).handle_wakeup(*this);
 						}
-
-						wakeup_pending = false;
 
 					} else {
 						if (events[i].events & EPOLLIN)
