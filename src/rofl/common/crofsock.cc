@@ -445,10 +445,12 @@ crofsock::tcp_connect(
 		/* connect did not succeed, handle error */
 		switch (errno) {
 		case EINPROGRESS: {
+			journal.log(LOG_INFO, "EINPROGRESS");
 			/* register socket descriptor for write operations */
 			rxthread.add_write_fd(sd);
 		} break;
 		case ECONNREFUSED: {
+			journal.log(LOG_INFO, "ECONNREFUSED");
 			if (flags.test(FLAG_RECONNECT_ON_FAILURE)) {
 				backoff_reconnect(false);
 				::close(sd); sd = -1;
@@ -458,6 +460,7 @@ crofsock::tcp_connect(
 			crofsock_env::call_env(env).handle_tcp_connect_refused(*this);
 		} break;
 		default: {
+			journal.log(LOG_INFO, "connect error: %d(%s)", errno, strerror(errno));
 			if (flags.test(FLAG_RECONNECT_ON_FAILURE)) {
 				backoff_reconnect(false);
 				::close(sd); sd = -1;
@@ -1466,8 +1469,10 @@ crofsock::handle_read_event_rxthread(
 			} break;
 			case EINPROGRESS: {
 				/* connect still pending, just wait */
+				journal.log(LOG_INFO, "EINPROGRESS");
 			} break;
 			case ECONNREFUSED: {
+				journal.log(LOG_INFO, "ECONNREFUSED");
 				if (flags.test(FLAG_RECONNECT_ON_FAILURE)) {
 					backoff_reconnect(false);
 					::close(sd); sd = -1;
@@ -1477,6 +1482,7 @@ crofsock::handle_read_event_rxthread(
 				crofsock_env::call_env(env).handle_tcp_connect_refused(*this);
 			} break;
 			default: {
+				journal.log(LOG_INFO, "connect error: %d(%s)", errno, strerror(errno));
 				if (flags.test(FLAG_RECONNECT_ON_FAILURE)) {
 					backoff_reconnect(false);
 					::close(sd); sd = -1;
