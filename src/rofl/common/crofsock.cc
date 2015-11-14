@@ -1602,11 +1602,14 @@ on_error:
 	close();
 
 	if (flags.test(FLAG_RECONNECT_ON_FAILURE)) {
+#if 0
 		if (flags.test(FLAG_TLS_IN_USE)) {
 			tls_connect(true);
 		} else {
 			tcp_connect(true);
 		}
+#endif
+		backoff_reconnect(true);
 	}
 }
 
