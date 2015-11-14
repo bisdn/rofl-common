@@ -185,7 +185,6 @@ crofconn::set_state(
 		case STATE_CLOSING: {
 			journal.log(LOG_INFO, "STATE_CLOSING").
 					set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
-			set_mode(MODE_UNKNOWN);
 			rofsock.close();
 			set_state(STATE_DISCONNECTED);
 
