@@ -1603,6 +1603,8 @@ on_error:
 	journal.log(LOG_INFO, "peer shutdown");
 	close();
 
+	crofsock_env::call_env(env).handle_closed(*this);
+
 	if (flags.test(FLAG_RECONNECT_ON_FAILURE)) {
 #if 0
 		if (flags.test(FLAG_TLS_IN_USE)) {
@@ -1611,6 +1613,8 @@ on_error:
 			tcp_connect(true);
 		}
 #endif
+		rxthread.start();
+
 		backoff_reconnect(true);
 	}
 }
