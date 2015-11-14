@@ -1466,7 +1466,7 @@ crofsock::handle_read_event_rxthread(
 
 				state = STATE_TCP_ESTABLISHED;
 
-				journal.log(LOG_INFO, "connected");
+				journal.log(LOG_INFO, "TCP: connected");
 
 				/* register socket descriptor for read operations */
 				rxthread.add_read_fd(sd);
