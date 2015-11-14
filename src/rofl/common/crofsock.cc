@@ -92,8 +92,6 @@ crofsock::close()
 		rx_disabled = false;
 		tx_disabled = false;
 
-		crofsock_env::call_env(env).handle_closed(*this);
-
 		if (flags.test(FLAG_RECONNECT_ON_FAILURE)) {
 			backoff_reconnect(true);
 		}
@@ -1201,6 +1199,7 @@ crofsock::handle_timeout(
 	} break;
 	case TIMER_ID_PEER_SHUTDOWN: {
 		close();
+		crofsock_env::call_env(env).handle_closed(*this);
 	} break;
 	default: {
 		/* do nothing */
