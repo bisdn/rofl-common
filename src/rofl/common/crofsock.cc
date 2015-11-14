@@ -86,12 +86,16 @@ crofsock::close()
 	switch (state) {
 	case STATE_IDLE: {
 
+		journal.log(LOG_INFO, "TCP: state -IDLE-");
+
 		/* TLS down, TCP down => set rx_disabled flag back to false */
 		rx_disabled = false;
 		tx_disabled = false;
 
 	} break;
 	case STATE_CLOSED: {
+
+		journal.log(LOG_INFO, "TCP: state -CLOSED-");
 
 		/* stop threads */
 		rxthread.stop();
@@ -113,6 +117,8 @@ crofsock::close()
 	} break;
 	case STATE_LISTENING: {
 
+		journal.log(LOG_INFO, "TCP: state -LISTENING-");
+
 		if (sd > 0) {
 			rxthread.drop_read_fd(sd);
 			::close(sd); sd = -1;
@@ -124,6 +130,8 @@ crofsock::close()
 
 	} break;
 	case STATE_TCP_CONNECTING: {
+
+		journal.log(LOG_INFO, "TCP: state -CONNECTING-");
 
 		txthread.drop_timer(TIMER_ID_RECONNECT);
 
@@ -137,6 +145,8 @@ crofsock::close()
 	} break;
 	case STATE_TCP_ACCEPTING: {
 
+		journal.log(LOG_INFO, "TCP: state -ACCEPTING-");
+
 		rxthread.drop_read_fd(sd, false);
 		if (flags.test(FLAG_CONGESTED)) {
 			txthread.drop_write_fd(sd);
@@ -149,6 +159,8 @@ crofsock::close()
 
 	} break;
 	case STATE_TCP_ESTABLISHED: {
+
+		journal.log(LOG_INFO, "TCP: state -ESTABLISHED-");
 
 		/* block reception of any further data from remote side */
 		rx_disable();
@@ -288,6 +300,8 @@ crofsock::listen()
 
 	state = STATE_LISTENING;
 
+	journal.log(LOG_INFO, "TCP: state -LISTENING-");
+
 	/* instruct rxthread to read from socket descriptor */
 	rxthread.add_read_fd(sd);
 }
@@ -318,7 +332,7 @@ crofsock::tcp_accept(
 	/* new state */
 	state = STATE_TCP_ACCEPTING;
 
-	journal.log(LOG_INFO, "TCP: accepting");
+	journal.log(LOG_INFO, "TCP: state -ACCEPTING-");
 
 	/* extract new connection from listening queue */
 	if ((sd = ::accept(sockfd, laddr.ca_saddr, &(laddr.salen))) < 0) {
@@ -367,7 +381,7 @@ crofsock::tcp_accept(
 
 	state = STATE_TCP_ESTABLISHED;
 
-	journal.log(LOG_INFO, "TCP: accepted");
+	journal.log(LOG_INFO, "TCP: state -ESTABLISHED-");
 
 	/* instruct rxthread to read from socket descriptor */
 	rxthread.add_read_fd(sd);
@@ -407,7 +421,7 @@ crofsock::tcp_connect(
 	/* new state */
 	state = STATE_TCP_CONNECTING;
 
-	journal.log(LOG_INFO, "TCP: connecting");
+	journal.log(LOG_INFO, "TCP: state -CONNECTING-");
 
 	/* open socket */
 	if ((sd = ::socket(raddr.get_family(), type, protocol)) < 0) {
@@ -457,21 +471,21 @@ crofsock::tcp_connect(
 		} break;
 		case ECONNREFUSED: {
 			journal.log(LOG_INFO, "TCP: ECONNREFUSED");
+
+			close();
+
 			if (flags.test(FLAG_RECONNECT_ON_FAILURE)) {
 				backoff_reconnect(false);
-				::close(sd); sd = -1;
-			} else {
-				close();
 			}
 			crofsock_env::call_env(env).handle_tcp_connect_refused(*this);
 		} break;
 		default: {
-			journal.log(LOG_INFO, "connect error: %d(%s)", errno, strerror(errno));
+			journal.log(LOG_INFO, "TCP: connect error: %d(%s)", errno, strerror(errno));
+
+			close();
+
 			if (flags.test(FLAG_RECONNECT_ON_FAILURE)) {
 				backoff_reconnect(false);
-				::close(sd); sd = -1;
-			} else {
-				close();
 			}
 			crofsock_env::call_env(env).handle_tcp_connect_failed(*this);
 		};
@@ -489,7 +503,7 @@ crofsock::tcp_connect(
 
 		state = STATE_TCP_ESTABLISHED;
 
-		journal.log(LOG_INFO, "TCP: connected");
+		journal.log(LOG_INFO, "TCP: state -ESTABLISHED-");
 
 		/* register socket descriptor for read operations */
 		rxthread.add_read_fd(sd);
@@ -1047,6 +1061,9 @@ void
 crofsock::backoff_reconnect(
 		bool reset_timeout)
 {
+	/* restart rxthread as it was stopped in close() */
+	rxthread.start();
+
 	if (rxthread.has_timer(TIMER_ID_RECONNECT)) {
 		return;
 	}
@@ -1170,7 +1187,7 @@ crofsock::handle_timeout(
 {
 	switch (timer_id) {
 	case TIMER_ID_RECONNECT: {
-		journal.log(LOG_INFO, "reconnecting");
+		journal.log(LOG_INFO, "TCP: reconnecting");
 		if (flags.test(FLAG_TLS_IN_USE)) {
 			tls_connect(true);
 		} else {
@@ -1466,7 +1483,7 @@ crofsock::handle_read_event_rxthread(
 
 				state = STATE_TCP_ESTABLISHED;
 
-				journal.log(LOG_INFO, "TCP: connected");
+				journal.log(LOG_INFO, "TCP: state -ESTABLISHED-");
 
 				/* register socket descriptor for read operations */
 				rxthread.add_read_fd(sd);
@@ -1479,25 +1496,25 @@ crofsock::handle_read_event_rxthread(
 			} break;
 			case EINPROGRESS: {
 				/* connect still pending, just wait */
-				journal.log(LOG_INFO, "EINPROGRESS");
+				journal.log(LOG_INFO, "TCP: EINPROGRESS");
 			} break;
 			case ECONNREFUSED: {
-				journal.log(LOG_INFO, "ECONNREFUSED");
+				journal.log(LOG_INFO, "TCP: ECONNREFUSED");
+
+				close();
+
 				if (flags.test(FLAG_RECONNECT_ON_FAILURE)) {
 					backoff_reconnect(false);
-					::close(sd); sd = -1;
-				} else {
-					close();
 				}
 				crofsock_env::call_env(env).handle_tcp_connect_refused(*this);
 			} break;
 			default: {
-				journal.log(LOG_INFO, "connect error: %d(%s)", errno, strerror(errno));
+				journal.log(LOG_INFO, "TCP: connect error: %d(%s)", errno, strerror(errno));
+
+				close();
+
 				if (flags.test(FLAG_RECONNECT_ON_FAILURE)) {
 					backoff_reconnect(false);
-					::close(sd); sd = -1;
-				} else {
-					close();
 				}
 				crofsock_env::call_env(env).handle_tcp_connect_failed(*this);
 			};
@@ -1620,8 +1637,6 @@ on_error:
 	close();
 
 	if (flags.test(FLAG_RECONNECT_ON_FAILURE)) {
-		/* restart rxthread as it was stopped in close() */
-		rxthread.start();
 		backoff_reconnect(true);
 	}
 
