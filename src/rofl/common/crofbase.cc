@@ -541,7 +541,7 @@ crofbase::handle_closed(
 {
 	journal.log(LOG_INFO, "controller detached: ctlid=%s",
 			ctl.get_ctlid().str().c_str());
-	handle_ctl_close(ctl.get_ctlid());
+	handle_ctl_close(rofl::cctlid(ctl.get_ctlid()));
 	/* if main connection is passive, delete crofctl instance */
 	if (ctl.get_conn(rofl::cauxid(0)).is_passive()) {
 		/* mark dpt for deletion */
@@ -652,7 +652,7 @@ crofbase::handle_closed(
 {
 	journal.log(LOG_INFO, "datapath detached: dptid=%s, dpid=%s",
 			dpt.get_dptid().str().c_str(), dpt.get_dpid().str().c_str());
-	handle_dpt_close(dpt.get_dptid());
+	handle_dpt_close(rofl::cdptid(dpt.get_dptid()));
 	/* if main connection is passive, delete crofdpt instance */
 	if (dpt.get_conn(rofl::cauxid(0)).is_passive()) {
 		/* mark dpt for deletion */
