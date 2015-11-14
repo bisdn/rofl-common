@@ -1619,13 +1619,13 @@ on_error:
 	journal.log(LOG_INFO, "TCP: peer shutdown");
 	close();
 
-	crofsock_env::call_env(env).handle_closed(*this);
-
 	if (flags.test(FLAG_RECONNECT_ON_FAILURE)) {
 		/* restart rxthread as it was stopped in close() */
 		rxthread.start();
 		backoff_reconnect(true);
 	}
+
+	crofsock_env::call_env(env).handle_closed(*this);
 }
 
 
