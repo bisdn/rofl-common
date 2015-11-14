@@ -92,13 +92,18 @@ crofsock::close()
 		rx_disabled = false;
 		tx_disabled = false;
 
+		crofsock_env::call_env(env).handle_closed(*this);
+
+		if (flags.test(FLAG_RECONNECT_ON_FAILURE)) {
+			backoff_reconnect(true);
+		}
+
 	} break;
 	case STATE_CLOSED: {
 
 		journal.log(LOG_INFO, "TCP: state -CLOSED-");
 
 		/* stop threads */
-		rxthread.stop();
 		txthread.stop();
 
 		sleep(1);
@@ -1194,6 +1199,9 @@ crofsock::handle_timeout(
 			tcp_connect(true);
 		}
 	} break;
+	case TIMER_ID_PEER_SHUTDOWN: {
+		close();
+	} break;
 	default: {
 		/* do nothing */
 	};
@@ -1634,13 +1642,8 @@ crofsock::recv_message()
 on_error:
 
 	journal.log(LOG_INFO, "TCP: peer shutdown");
-	close();
-
-	crofsock_env::call_env(env).handle_closed(*this);
-
-	if (flags.test(FLAG_RECONNECT_ON_FAILURE)) {
-		backoff_reconnect(true);
-	}
+	rx_disable();
+	rxthread.add_timer(TIMER_ID_PEER_SHUTDOWN, ctimespec().expire_in(0));
 }
 
 
