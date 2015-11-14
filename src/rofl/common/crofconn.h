@@ -240,6 +240,22 @@ public:
 	/**
 	 *
 	 */
+	const cjournal&
+	get_tcp_journal() const
+	{ return rofsock.get_journal(); };
+
+	/**
+	 *
+	 */
+	cjournal&
+	set_tcp_journal()
+	{ return rofsock.set_journal(); };
+
+public:
+
+	/**
+	 *
+	 */
 	virtual void
 	close();
 

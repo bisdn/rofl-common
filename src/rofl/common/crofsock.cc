@@ -1159,6 +1159,7 @@ crofsock::handle_timeout(
 {
 	switch (timer_id) {
 	case TIMER_ID_RECONNECT: {
+		journal.log(LOG_INFO, "reconnecting");
 		if (flags.test(FLAG_TLS_IN_USE)) {
 			tls_connect(true);
 		} else {
@@ -1599,6 +1600,7 @@ crofsock::recv_message()
 
 on_error:
 
+	journal.log(LOG_INFO, "peer shutdown");
 	close();
 
 	if (flags.test(FLAG_RECONNECT_ON_FAILURE)) {
