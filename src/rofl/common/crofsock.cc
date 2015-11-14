@@ -1054,7 +1054,7 @@ crofsock::backoff_reconnect(
 		}
 	}
 
-	journal.log(LOG_NOTICE, " scheduled reconnect in: %d secs", reconnect_backoff_current);
+	journal.log(LOG_NOTICE, "scheduled reconnect in: %d secs", reconnect_backoff_current);
 
 	rxthread.add_timer(TIMER_ID_RECONNECT, ctimespec().expire_in(reconnect_backoff_current, 0));
 
@@ -1606,15 +1606,8 @@ on_error:
 	crofsock_env::call_env(env).handle_closed(*this);
 
 	if (flags.test(FLAG_RECONNECT_ON_FAILURE)) {
-#if 0
-		if (flags.test(FLAG_TLS_IN_USE)) {
-			tls_connect(true);
-		} else {
-			tcp_connect(true);
-		}
-#endif
+		/* restart rxthread as it was stopped in close() */
 		rxthread.start();
-
 		backoff_reconnect(true);
 	}
 }
