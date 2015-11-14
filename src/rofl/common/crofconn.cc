@@ -185,8 +185,6 @@ crofconn::set_state(
 		case STATE_CLOSING: {
 			journal.log(LOG_INFO, "STATE_CLOSING").
 					set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
-			versionbitmap_peer.clear();
-			set_version(rofl::openflow::OFP_VERSION_UNKNOWN);
 			set_mode(MODE_UNKNOWN);
 			rofsock.close();
 			set_state(STATE_DISCONNECTED);
@@ -195,8 +193,6 @@ crofconn::set_state(
 		case STATE_DISCONNECTED: {
 			journal.log(LOG_INFO, "STATE_DISCONNECTED").
 					set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
-
-			rofsock.close();
 
 			clear_pending_requests();
 			clear_pending_segments();
@@ -207,6 +203,9 @@ crofconn::set_state(
 			for (auto rxqueue : rxqueues) {
 				rxqueue.clear();
 			}
+
+			versionbitmap_peer.clear();
+			set_version(rofl::openflow::OFP_VERSION_UNKNOWN);
 
 		} break;
 		case STATE_CONNECT_PENDING: {

@@ -92,16 +92,12 @@ crofsock::close()
 		rx_disabled = false;
 		tx_disabled = false;
 
-		if (flags.test(FLAG_RECONNECT_ON_FAILURE)) {
-			backoff_reconnect(true);
-		}
-
 	} break;
 	case STATE_CLOSED: {
 
 		journal.log(LOG_INFO, "TCP: state -CLOSED-");
 
-		/* stop threads */
+		/* stop thread first for purging txqueues */
 		txthread.stop();
 
 		sleep(1);
@@ -110,8 +106,6 @@ crofsock::close()
 		for (auto queue : txqueues) {
 			queue.clear();
 		}
-
-		sleep(1);
 
 		state = STATE_IDLE;
 
@@ -174,6 +168,8 @@ crofsock::close()
 			txthread.drop_write_fd(sd);
 		}
 		shutdown(sd, O_RDWR);
+
+		/* allow socket to send shutdown notification to peer */
 		sleep(1);
 		::close(sd); sd = -1;
 
@@ -1142,6 +1138,7 @@ crofsock::rx_disable()
 	case STATE_TCP_ESTABLISHED:
 	case STATE_TLS_ESTABLISHED:{
 		rxthread.drop_read_fd(sd, false);
+		journal.log(LOG_INFO, "TCP: disable reception");
 	} break;
 	default: {
 
@@ -1159,6 +1156,7 @@ crofsock::rx_enable()
 	case STATE_TCP_ESTABLISHED:
 	case STATE_TLS_ESTABLISHED: {
 		rxthread.add_read_fd(sd, false);
+		journal.log(LOG_INFO, "TCP: enable reception");
 	} break;
 	default: {
 
@@ -1172,6 +1170,7 @@ void
 crofsock::tx_disable()
 {
 	tx_disabled = true;
+	journal.log(LOG_INFO, "TCP: disable transmission");
 }
 
 
@@ -1180,6 +1179,7 @@ void
 crofsock::tx_enable()
 {
 	tx_disabled = false;
+	journal.log(LOG_INFO, "TCP: enable transmission");
 }
 
 
@@ -1196,10 +1196,6 @@ crofsock::handle_timeout(
 		} else {
 			tcp_connect(true);
 		}
-	} break;
-	case TIMER_ID_PEER_SHUTDOWN: {
-		close();
-		crofsock_env::call_env(env).handle_closed(*this);
 	} break;
 	default: {
 		/* do nothing */
@@ -1641,8 +1637,11 @@ crofsock::recv_message()
 on_error:
 
 	journal.log(LOG_INFO, "TCP: peer shutdown");
-	rx_disable();
-	rxthread.add_timer(TIMER_ID_PEER_SHUTDOWN, ctimespec().expire_in(0));
+	close();
+	crofsock_env::call_env(env).handle_closed(*this);
+	if (flags.test(FLAG_RECONNECT_ON_FAILURE)) {
+		backoff_reconnect(true);
+	}
 }
 
 
