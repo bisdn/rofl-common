@@ -318,6 +318,8 @@ crofsock::tcp_accept(
 	/* new state */
 	state = STATE_TCP_ACCEPTING;
 
+	journal.log(LOG_INFO, "TCP: accepting");
+
 	/* extract new connection from listening queue */
 	if ((sd = ::accept(sockfd, laddr.ca_saddr, &(laddr.salen))) < 0) {
 		throw eSysCall("eSysCall", "accept", __FILE__, __PRETTY_FUNCTION__, __LINE__);
@@ -365,6 +367,8 @@ crofsock::tcp_accept(
 
 	state = STATE_TCP_ESTABLISHED;
 
+	journal.log(LOG_INFO, "TCP: accepted");
+
 	/* instruct rxthread to read from socket descriptor */
 	rxthread.add_read_fd(sd);
 
@@ -402,6 +406,8 @@ crofsock::tcp_connect(
 
 	/* new state */
 	state = STATE_TCP_CONNECTING;
+
+	journal.log(LOG_INFO, "TCP: connecting");
 
 	/* open socket */
 	if ((sd = ::socket(raddr.get_family(), type, protocol)) < 0) {
@@ -445,12 +451,12 @@ crofsock::tcp_connect(
 		/* connect did not succeed, handle error */
 		switch (errno) {
 		case EINPROGRESS: {
-			journal.log(LOG_INFO, "EINPROGRESS");
+			journal.log(LOG_INFO, "TCP: EINPROGRESS");
 			/* register socket descriptor for write operations */
 			rxthread.add_write_fd(sd);
 		} break;
 		case ECONNREFUSED: {
-			journal.log(LOG_INFO, "ECONNREFUSED");
+			journal.log(LOG_INFO, "TCP: ECONNREFUSED");
 			if (flags.test(FLAG_RECONNECT_ON_FAILURE)) {
 				backoff_reconnect(false);
 				::close(sd); sd = -1;
@@ -482,6 +488,8 @@ crofsock::tcp_connect(
 		}
 
 		state = STATE_TCP_ESTABLISHED;
+
+		journal.log(LOG_INFO, "TCP: connected");
 
 		/* register socket descriptor for read operations */
 		rxthread.add_read_fd(sd);
@@ -1458,6 +1466,8 @@ crofsock::handle_read_event_rxthread(
 
 				state = STATE_TCP_ESTABLISHED;
 
+				journal.log(LOG_INFO, "connected");
+
 				/* register socket descriptor for read operations */
 				rxthread.add_read_fd(sd);
 
@@ -1606,7 +1616,7 @@ crofsock::recv_message()
 
 on_error:
 
-	journal.log(LOG_INFO, "peer shutdown");
+	journal.log(LOG_INFO, "TCP: peer shutdown");
 	close();
 
 	crofsock_env::call_env(env).handle_closed(*this);
