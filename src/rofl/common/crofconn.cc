@@ -446,8 +446,10 @@ crofconn::hello_rcvd(
 
 			} break;
 			default: {
-
-			};
+				journal.log(LOG_CRIT_ERROR, "unable to handle undefined mode").
+						set_func(__PRETTY_FUNCTION__);
+				set_state(STATE_CLOSING);
+			} return;
 			}
 		}
 
@@ -457,7 +459,7 @@ crofconn::hello_rcvd(
 				set_func(__PRETTY_FUNCTION__);
 
 		size_t len = (msg->length() < 64) ? msg->length() : 64;
-		rofl::cmemory mem(len);
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofsock.send_message(
@@ -474,7 +476,7 @@ crofconn::hello_rcvd(
 				set_func(__PRETTY_FUNCTION__);
 
 		size_t len = (msg->length() < 64) ? msg->length() : 64;
-		rofl::cmemory mem(len);
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofsock.send_message(
@@ -491,7 +493,7 @@ crofconn::hello_rcvd(
 				set_func(__PRETTY_FUNCTION__);
 
 		size_t len = (msg->length() < 64) ? msg->length() : 64;
-		rofl::cmemory mem(len);
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofsock.send_message(
@@ -920,12 +922,13 @@ crofconn::handle_recv(
 							set_key("rcvd version", msg->get_version()).
 								set_key("negotiated version", ofp_version);
 
-			rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+			size_t len = msg->length() < 64 ? msg->length() : 64;
+			rofl::cmemory mem(msg->length());
 			msg->pack(mem.somem(), mem.length());
 
 			send_message(
 					new rofl::openflow::cofmsg_error_bad_request_bad_version(
-							ofp_version, msg->get_xid(), mem.somem(), mem.length()));
+							ofp_version, msg->get_xid(), mem.somem(), len));
 
 			delete msg; return;
 		}
@@ -950,12 +953,13 @@ crofconn::handle_recv(
 							set_key("rcvd version", msg->get_version()).
 								set_key("negotiated version", ofp_version);
 
-			rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+			size_t len = msg->length() < 64 ? msg->length() : 64;
+			rofl::cmemory mem(msg->length());
 			msg->pack(mem.somem(), mem.length());
 
 			send_message(
 					new rofl::openflow::cofmsg_error_bad_request_bad_version(
-							ofp_version, msg->get_xid(), mem.somem(), mem.length()));
+							ofp_version, msg->get_xid(), mem.somem(), len));
 
 			delete msg; return;
 		}
