@@ -471,23 +471,23 @@ crofsock::tcp_connect(
 		} break;
 		case ECONNREFUSED: {
 			journal.log(LOG_INFO, "TCP: ECONNREFUSED");
-
 			close();
+
+			crofsock_env::call_env(env).handle_tcp_connect_refused(*this);
 
 			if (flags.test(FLAG_RECONNECT_ON_FAILURE)) {
 				backoff_reconnect(false);
 			}
-			crofsock_env::call_env(env).handle_tcp_connect_refused(*this);
 		} break;
 		default: {
 			journal.log(LOG_INFO, "TCP: connect error: %d(%s)", errno, strerror(errno));
-
 			close();
+
+			crofsock_env::call_env(env).handle_tcp_connect_failed(*this);
 
 			if (flags.test(FLAG_RECONNECT_ON_FAILURE)) {
 				backoff_reconnect(false);
 			}
-			crofsock_env::call_env(env).handle_tcp_connect_failed(*this);
 		};
 		}
 	} else {
@@ -1500,23 +1500,23 @@ crofsock::handle_read_event_rxthread(
 			} break;
 			case ECONNREFUSED: {
 				journal.log(LOG_INFO, "TCP: ECONNREFUSED");
-
 				close();
+
+				crofsock_env::call_env(env).handle_tcp_connect_refused(*this);
 
 				if (flags.test(FLAG_RECONNECT_ON_FAILURE)) {
 					backoff_reconnect(false);
 				}
-				crofsock_env::call_env(env).handle_tcp_connect_refused(*this);
 			} break;
 			default: {
 				journal.log(LOG_INFO, "TCP: connect error: %d(%s)", errno, strerror(errno));
-
 				close();
+
+				crofsock_env::call_env(env).handle_tcp_connect_failed(*this);
 
 				if (flags.test(FLAG_RECONNECT_ON_FAILURE)) {
 					backoff_reconnect(false);
 				}
-				crofsock_env::call_env(env).handle_tcp_connect_failed(*this);
 			};
 			}
 
