@@ -28,6 +28,8 @@ using namespace rofl;
 
 crofconn::~crofconn()
 {
+	/* stop worker thread */
+	thread.stop();
 	set_state(STATE_CLOSING);
 }
 
@@ -68,6 +70,8 @@ crofconn::crofconn(
 	for (unsigned int queue_id = 0; queue_id < QUEUE_MAX; queue_id++) {
 		rxqueues[queue_id].set_queue_max_size(rxqueue_max_size);
 	}
+	/* start worker thread */
+	thread.start();
 }
 
 
@@ -196,11 +200,6 @@ crofconn::set_state(
 			clear_pending_requests();
 			clear_pending_segments();
 
-			/* stop working thread */
-			thread.stop();
-
-			sleep(1);
-
 			versionbitmap_peer.clear();
 			set_version(rofl::openflow::OFP_VERSION_UNKNOWN);
 
@@ -232,9 +231,6 @@ crofconn::set_state(
 					set_func(__PRETTY_FUNCTION__).set_line(__LINE__).
 						set_key("offered versions", versionbitmap.str());
 			send_hello_message();
-
-			/* start working thread */
-			thread.start();
 
 		} break;
 		case STATE_NEGOTIATING2: {
@@ -1301,7 +1297,8 @@ crofconn::handle_rx_messages()
 
 			/* not connected any more, stop running working thread */
 			if (STATE_ESTABLISHED != state) {
-				keep_running = false;
+				rx_thread_working = false;
+				return;
 			}
 
 		} catch (eRofConnNotFound& e) {

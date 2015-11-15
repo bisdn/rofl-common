@@ -21,6 +21,7 @@ using namespace rofl;
 
 crofsock::~crofsock()
 {
+	txthread.stop();
 	rxthread.stop();
 	close();
 }
@@ -79,6 +80,7 @@ crofsock::crofsock(
 	txweights[QUEUE_PKT ] =  8;
 
 	rxthread.start();
+	txthread.start();
 }
 
 
@@ -99,11 +101,6 @@ crofsock::close()
 	case STATE_CLOSED: {
 
 		journal.log(LOG_INFO, "TCP: state -CLOSED-");
-
-		/* stop thread first for purging txqueues */
-		txthread.stop();
-
-		sleep(1);
 
 		state = STATE_IDLE;
 
@@ -328,9 +325,6 @@ crofsock::tcp_accept(
 		queue.clear();
 	}
 
-	/* start thread */
-	txthread.start();
-
 	/* cancel potentially pending reconnect timer */
 	rxthread.drop_timer(TIMER_ID_RECONNECT);
 
@@ -420,9 +414,6 @@ crofsock::tcp_connect(
 	for (auto queue : txqueues) {
 		queue.clear();
 	}
-
-	/* start thread */
-	txthread.start();
 
 	/* cancel potentially pending reconnect timer */
 	rxthread.drop_timer(TIMER_ID_RECONNECT);
