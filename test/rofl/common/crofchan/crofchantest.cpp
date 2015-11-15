@@ -66,11 +66,13 @@ crofchantest::test1()
 		std::cerr << ".";
 	}
 
-	for (unsigned int i = 0; i < num_of_conns; i++) {
+	for (unsigned int i = 1; i < (num_of_conns-1); i++) {
 		std::cerr << ">>> drop_conn() i=" << i << " <<<" << std::endl;
 		channel1->drop_conn(rofl::cauxid(i));
 		channel2->drop_conn(rofl::cauxid(i));
 	}
+	channel1->drop_conn(rofl::cauxid(0));
+	channel2->drop_conn(rofl::cauxid(0));
 }
 
 

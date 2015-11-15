@@ -375,6 +375,9 @@ cthread::run_loop()
 
 			rc = epoll_pwait(epfd, events, 64, timeout, &sigmask);
 
+			if (not run_thread)
+				goto out;
+
 			/* handle expired timers */
 			std::list<unsigned int> ttypes;
 			uint32_t timer_id = 0;
@@ -391,6 +394,10 @@ cthread::run_loop()
 					}
 					ordered_timers.erase(ordered_timers.begin());
 				} // release lock here
+
+				if (not run_thread)
+					goto out;
+
 				timer_id = ts.get_timer_id();
 				if (has_timer(timer_id)) {
 					ttypes = get_timer(timer_id).get_timer_types();
@@ -399,9 +406,16 @@ cthread::run_loop()
 				cthread_env::call_env(env).handle_timeout(*this, timer_id, ttypes);
 			}
 
+			if (not run_thread)
+				goto out;
+
 			/* handle file descriptors */
 			if (rc > 0) {
 				for (int i = 0; i < rc; i++) {
+
+					if (not run_thread)
+						goto out;
+
 					if (events[i].data.fd == pipefd[PIPE_READ_FD]) {
 
 						if (not run_thread) {
