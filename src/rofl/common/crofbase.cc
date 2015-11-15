@@ -472,13 +472,17 @@ crofbase::handle_established(
 
 		/* indicate channel up to higher layers */
 		if (conn.get_auxid() == rofl::cauxid(0)) {
-			journal.log(LOG_INFO, "datapath attached: dptid=%s, laddr=%s, raddr=%s, dpid=%s",
-					dptid.str().c_str(),
-					set_dpt(dptid).get_conn(rofl::cauxid(0)).get_laddr().str().c_str(),
-					set_dpt(dptid).get_conn(rofl::cauxid(0)).get_raddr().str().c_str(),
-					set_dpt(dptid).get_dpid().str().c_str());
+			journal.log(LOG_INFO, "datapath attached").
+						set_key("dptid", dptid.str()).
+						set_key("version", get_dpt(dptid).get_version());
 			handle_dpt_open(set_dpt(dptid));
 		}
+		journal.log(LOG_INFO, "connection established").
+					set_key("dptid", dptid.str()).
+					set_key("auxid", conn.get_auxid().str()).
+					set_key("laddr", conn.get_laddr().str()).
+					set_key("raddr", conn.get_raddr().str()).
+					set_key("version", conn.get_version());
 	} break;
 	case crofconn::MODE_DATAPATH: {
 		/* add a new controller instance and add connection there
@@ -490,12 +494,17 @@ crofbase::handle_established(
 
 		/* indicate channel up to higher layers */
 		if (conn.get_auxid() == rofl::cauxid(0)) {
-			journal.log(LOG_INFO, "controller attached: ctlid=%s, laddr=%s, raddr=%s",
-					ctlid.str().c_str(),
-					set_ctl(ctlid).get_conn(rofl::cauxid(0)).get_laddr().str().c_str(),
-					set_ctl(ctlid).get_conn(rofl::cauxid(0)).get_raddr().str().c_str());
+			journal.log(LOG_INFO, "controller attached").
+						set_key("ctlid", ctlid.str()).
+						set_key("version", get_ctl(ctlid).get_version());
 			handle_ctl_open(set_ctl(ctlid));
 		}
+		journal.log(LOG_INFO, "connection established").
+					set_key("ctlid", ctlid.str()).
+					set_key("auxid", conn.get_auxid().str()).
+					set_key("laddr", conn.get_laddr().str()).
+					set_key("raddr", conn.get_raddr().str()).
+					set_key("version", conn.get_version());
 	} break;
 	default: {
 		delete &conn;
@@ -536,10 +545,9 @@ void
 crofbase::handle_established(
 		crofctl& ctl, uint8_t ofp_version)
 {
-	journal.log(LOG_INFO, "controller attached: ctlid=%s, laddr=%s, raddr=%s",
-			ctl.get_ctlid().str().c_str(),
-			ctl.get_conn(rofl::cauxid(0)).get_laddr().str().c_str(),
-			ctl.get_conn(rofl::cauxid(0)).get_raddr().str().c_str());
+	journal.log(LOG_INFO, "controller attached").
+				set_key("ctlid", ctl.get_ctlid().str()).
+				set_key("version", ctl.get_version());
 	handle_ctl_open(ctl);
 }
 
@@ -549,8 +557,8 @@ void
 crofbase::handle_closed(
 		crofctl& ctl)
 {
-	journal.log(LOG_INFO, "controller detached: ctlid=%s",
-			ctl.get_ctlid().str().c_str());
+	journal.log(LOG_INFO, "controller detached").
+				set_key("ctlid", ctl.get_ctlid().str());
 	handle_ctl_close(rofl::cctlid(ctl.get_ctlid()));
 	/* if main connection is passive, delete crofctl instance */
 	if (ctl.get_conn(rofl::cauxid(0)).is_passive()) {
@@ -565,8 +573,12 @@ void
 crofbase::handle_established(
 		crofctl& ctl, crofconn& conn, uint8_t ofp_version)
 {
-	journal.log(LOG_INFO, "connection established: ctlid=%s, auxid=%s, raddr=%s",
-			ctl.get_ctlid().str().c_str(), conn.get_auxid().str().c_str(), conn.get_raddr().str().c_str());
+	journal.log(LOG_INFO, "connection established").
+				set_key("ctlid", ctl.get_ctlid().str()).
+				set_key("auxid", conn.get_auxid().str()).
+				set_key("laddr", conn.get_laddr().str()).
+				set_key("raddr", conn.get_raddr().str()).
+				set_key("version", conn.get_version());
 	handle_conn_established(ctl, conn.get_auxid());
 }
 
@@ -576,8 +588,12 @@ void
 crofbase::handle_closed(
 		crofctl& ctl, crofconn& conn)
 {
-	journal.log(LOG_INFO, "connection closed: ctlid=%s, auxid=%s, raddr=%s",
-			ctl.get_ctlid().str().c_str(), conn.get_auxid().str().c_str(), conn.get_raddr().str().c_str());
+	journal.log(LOG_INFO, "connection terminated").
+				set_key("ctlid", ctl.get_ctlid().str()).
+				set_key("auxid", conn.get_auxid().str()).
+				set_key("laddr", conn.get_laddr().str()).
+				set_key("raddr", conn.get_raddr().str()).
+				set_key("version", conn.get_version());
 	handle_conn_terminated(ctl, conn.get_auxid());
 }
 
@@ -649,11 +665,10 @@ void
 crofbase::handle_established(
 		crofdpt& dpt, uint8_t ofp_version)
 {
-	journal.log(LOG_INFO, "datapath attached: dptid=%s, laddr=%s, raddr=%s, dpid=%s",
-			dpt.get_dptid().str().c_str(),
-			dpt.get_conn(rofl::cauxid(0)).get_laddr().str().c_str(),
-			dpt.get_conn(rofl::cauxid(0)).get_raddr().str().c_str(),
-			dpt.get_dpid().str().c_str());
+	journal.log(LOG_INFO, "datapath attached").
+				set_key("dptid", dpt.get_dptid().str()).
+				set_key("dpid", dpt.get_dpid().str()).
+				set_key("version", dpt.get_version());
 	handle_dpt_open(dpt);
 }
 
@@ -663,8 +678,9 @@ void
 crofbase::handle_closed(
 		crofdpt& dpt)
 {
-	journal.log(LOG_INFO, "datapath detached: dptid=%s, dpid=%s",
-			dpt.get_dptid().str().c_str(), dpt.get_dpid().str().c_str());
+	journal.log(LOG_INFO, "datapath detached").
+				set_key("dptid", dpt.get_dptid().str()).
+				set_key("dpid", dpt.get_dpid().str());
 	handle_dpt_close(rofl::cdptid(dpt.get_dptid()));
 	/* if main connection is passive, delete crofdpt instance */
 	if (dpt.get_conn(rofl::cauxid(0)).is_passive()) {
@@ -679,8 +695,12 @@ void
 crofbase::handle_established(
 		crofdpt& dpt, crofconn& conn, uint8_t ofp_version)
 {
-	journal.log(LOG_INFO, "connection established: dptid=%s, auxid=%s, raddr=%s",
-			dpt.get_dptid().str().c_str(), conn.get_auxid().str().c_str(), conn.get_raddr().str().c_str());
+	journal.log(LOG_INFO, "connection established").
+				set_key("dptid", dpt.get_dptid().str()).
+				set_key("auxid", conn.get_auxid().str()).
+				set_key("laddr", conn.get_laddr().str()).
+				set_key("raddr", conn.get_raddr().str()).
+				set_key("version", conn.get_version());
 	handle_conn_established(dpt, conn.get_auxid());
 }
 
@@ -690,8 +710,12 @@ void
 crofbase::handle_closed(
 		crofdpt& dpt, crofconn& conn)
 {
-	journal.log(LOG_INFO, "connection closed: dptid=%s, auxid=%s, raddr=%s",
-			dpt.get_dptid().str().c_str(), conn.get_auxid().str().c_str(), conn.get_raddr().str().c_str());
+	journal.log(LOG_INFO, "connection terminated").
+				set_key("dptid", dpt.get_dptid().str()).
+				set_key("auxid", conn.get_auxid().str()).
+				set_key("laddr", conn.get_laddr().str()).
+				set_key("raddr", conn.get_raddr().str()).
+				set_key("version", conn.get_version());
 	handle_conn_terminated(dpt, conn.get_auxid());
 }
 

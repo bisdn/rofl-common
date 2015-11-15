@@ -45,6 +45,7 @@ crofconn::crofconn(
 				ofp_version(rofl::openflow::OFP_VERSION_UNKNOWN),
 				mode(MODE_UNKNOWN),
 				state(STATE_DISCONNECTED),
+				flag_hello_rcvd(false),
 				rxweights(QUEUE_MAX),
 				rxqueues(QUEUE_MAX),
 				rx_thread_working(false),
@@ -202,6 +203,7 @@ crofconn::set_state(
 
 			versionbitmap_peer.clear();
 			set_version(rofl::openflow::OFP_VERSION_UNKNOWN);
+			flag_hello_rcvd = false;
 
 		} break;
 		case STATE_CONNECT_PENDING: {
@@ -342,7 +344,9 @@ crofconn::send_hello_message()
 {
 	try {
 
-		thread.add_timer(TIMER_ID_WAIT_FOR_HELLO, ctimespec().expire_in(timeout_hello));
+		if (not flag_hello_rcvd) {
+			thread.add_timer(TIMER_ID_WAIT_FOR_HELLO, ctimespec().expire_in(timeout_hello));
+		}
 
 		rofl::openflow::cofhelloelems helloIEs;
 		helloIEs.add_hello_elem_versionbitmap() = versionbitmap;
@@ -377,6 +381,8 @@ crofconn::hello_rcvd(
 				set_func(__PRETTY_FUNCTION__);
 		return;
 	}
+
+	flag_hello_rcvd = true;
 
 	thread.drop_timer(TIMER_ID_WAIT_FOR_HELLO);
 

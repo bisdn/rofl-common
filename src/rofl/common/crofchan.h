@@ -424,9 +424,8 @@ private:
 		if (conn.get_auxid() == cauxid(0)) {
 			this->ofp_version = ofp_version;
 			crofchan_env::call_env(env).handle_established(*this, ofp_version);
-		} else {
-			crofchan_env::call_env(env).handle_established(*this, conn, ofp_version);
 		}
+		crofchan_env::call_env(env).handle_established(*this, conn, ofp_version);
 	};
 
 	virtual void

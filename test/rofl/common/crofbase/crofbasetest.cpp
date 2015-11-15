@@ -34,7 +34,7 @@ crofbasetest::tearDown()
 void
 crofbasetest::test()
 {
-	unsigned int seconds = 60;
+	unsigned int seconds = 10;
 	datapath.test_start();
 
 	while (controller.keep_running() && (seconds-- > 0)) {
@@ -44,13 +44,33 @@ crofbasetest::test()
 		pselect(0, NULL, NULL, NULL, &ts, NULL);
 		std::cerr << "#";
 	}
+	std::cerr << std::endl;
 
-	std::cerr << "controller: " << std::endl;
-	std::cerr << "==========" << std::endl;
-	std::cerr << controller.get_journal() << std::endl;
-	std::cerr << "datapath: " << std::endl;
-	std::cerr << "========" << std::endl;
-	std::cerr << datapath.get_journal() << std::endl;
+	try {
+		std::cerr << "controller: " << std::endl;
+		std::cerr << "==========" << std::endl;
+		std::cerr << controller.get_journal() << std::endl;
+		std::cerr << controller.get_dpt(controller.get_dptid()).get_journal() << std::endl;
+		std::cerr << controller.get_dpt(controller.get_dptid()).get_conn(0).get_journal() << std::endl;
+		std::cerr << controller.get_dpt(controller.get_dptid()).get_conn(0).get_tcp_journal() << std::endl;
+	} catch (rofl::eRofBaseNotFound& e) {
+
+	}
+
+	datapath.set_ctl(datapath.get_ctlid()).set_conn(0).close();
+
+	sleep(2);
+
+	try {
+		std::cerr << "datapath: " << std::endl;
+		std::cerr << "========" << std::endl;
+		std::cerr << datapath.get_journal() << std::endl;
+		std::cerr << datapath.get_ctl(datapath.get_ctlid()).get_journal() << std::endl;
+		std::cerr << datapath.get_ctl(datapath.get_ctlid()).get_conn(0).get_journal() << std::endl;
+		std::cerr << datapath.get_ctl(datapath.get_ctlid()).get_conn(0).get_tcp_journal() << std::endl;
+	} catch (rofl::eRofBaseNotFound& e) {
+
+	}
 }
 
 
@@ -144,6 +164,8 @@ ccontroller::handle_dpt_open(
 		rofl::crofdpt& dpt)
 {
 	std::cerr << ">>> XXX dpt connected: " << std::endl;
+
+	dptid = dpt.get_dptid();
 
 	dpt.send_get_config_request(rofl::cauxid(0));
 }
