@@ -14,6 +14,7 @@
 #define CROFCHAN_H_
 
 #include <map>
+#include <list>
 #include <bitset>
 #include <inttypes.h>
 
@@ -171,6 +172,10 @@ class crofchan :
 		public cthread_env,
 		public rofl::crofconn_env
 {
+	enum crofchan_timer_t {
+		TIMER_ID_ROFCONN_DESTROY = 1,
+	};
+
 public:
 
 	/**
@@ -178,7 +183,10 @@ public:
 	 */
 	virtual
 	~crofchan()
-	{ clear(); };
+	{
+		thread.stop();
+		clear();
+	};
 
 	/**
 	 *
@@ -186,9 +194,12 @@ public:
 	crofchan(
 			crofchan_env *env) :
 				env(env),
+				thread(this),
 				last_auxid(0),
 				ofp_version(rofl::openflow::OFP_VERSION_UNKNOWN)
-	{};
+	{
+		thread.start();
+	};
 
 public:
 
@@ -367,6 +378,43 @@ public:
 		return (not (conns.find(auxid) == conns.end()));
 	};
 
+public:
+
+	friend std::ostream&
+	operator<< (std::ostream& os, crofchan const& chan) {
+		AcquireReadLock rwlock(chan.conns_rwlock);
+		os  << "<crofchan established:" << chan.is_established()
+				<< " ofp-version: " << (int)chan.ofp_version << " >" << std::endl;
+
+		for (std::map<cauxid, crofconn*>::const_iterator
+				it = chan.conns.begin(); it != chan.conns.end(); ++it) {
+			os << *(it->second);
+		}
+		return os;
+	};
+
+
+	std::string
+	str() const {
+		AcquireReadLock rwlock(conns_rwlock);
+		std::stringstream ss;
+		ss << "OFP version: " << (int)get_version() << " ";
+		if (conns.empty() ||
+				(conns.find(rofl::cauxid(0)) == conns.end()) ||
+					(not (conns.at(rofl::cauxid(0))->is_established()))) {
+			ss << " state: -disconnected- ";
+		} else {
+			ss << " state: -established- ";
+		}
+		ss << "auxids: ";
+		for (std::map<cauxid, crofconn*>::const_iterator
+				it = conns.begin(); it != conns.end(); ++it) {
+			ss << "{" << (int)it->first.get_id() << ":"
+					<< (it->second->is_established() ? "-established-" : "-disconnected-") << "} ";
+		}
+		return ss.str();
+	};
+
 private:
 
 	virtual void
@@ -388,14 +436,24 @@ private:
 		if (conn.get_auxid().get_id() == 0) {
 			{ /* acquire rwlock */
 				AcquireReadLock rwlock(conns_rwlock);
-				if (conn.get_auxid().get_id() == 0) {
-					for (auto it : conns) {
-						it.second->close();
+				for (auto it : conns) {
+					it.second->close();
+					/* if connection is passive, schedule its deletion */
+					if (it.second->is_passive()) {
+						AcquireReadWriteLock lock(conns_deletion_rwlock);
+						conns_deletion.push_back(it.first);
+						thread.add_timer(TIMER_ID_ROFCONN_DESTROY, ctimespec().expire_in(0));
 					}
 				}
 			} /* release rwlock */
 			crofchan_env::call_env(env).handle_closed(*this);
 		} else {
+			/* if connection is passive, schedule its deletion */
+			if (conn.is_passive()) {
+				AcquireReadWriteLock lock(conns_deletion_rwlock);
+				conns_deletion.push_back(conn.get_auxid());
+				thread.add_timer(TIMER_ID_ROFCONN_DESTROY, ctimespec().expire_in(0));
+			}
 			crofchan_env::call_env(env).handle_closed(*this, conn);
 		}
 	};
@@ -440,47 +498,56 @@ private:
 			crofconn& conn, uint32_t xid, uint8_t type, uint16_t sub_type = 0)
 	{ crofchan_env::call_env(env).handle_transaction_timeout(*this, conn, xid, type, sub_type); };
 
-public:
+private:
 
-	friend std::ostream&
-	operator<< (std::ostream& os, crofchan const& chan) {
-		AcquireReadLock rwlock(chan.conns_rwlock);
-		os  << "<crofchan established:" << chan.is_established()
-				<< " ofp-version: " << (int)chan.ofp_version << " >" << std::endl;
-		
-		for (std::map<cauxid, crofconn*>::const_iterator
-				it = chan.conns.begin(); it != chan.conns.end(); ++it) {
-			os << *(it->second);
+	virtual void
+	handle_wakeup(
+			cthread& thread)
+	{};
+
+	virtual void
+	handle_timeout(
+			cthread& thread, uint32_t timer_id, const std::list<unsigned int>& ttypes)
+	{
+		switch (timer_id) {
+		case TIMER_ID_ROFCONN_DESTROY: {
+
+			while (true) {
+				rofl::cauxid auxid(0);
+				{
+					AcquireReadWriteLock lock(conns_deletion_rwlock);
+					if (conns_deletion.empty()) {
+						return;
+					}
+					auxid = conns_deletion.front();
+					conns_deletion.pop_front();
+				} /* release lock */
+				drop_conn(auxid);
+			}
+		} break;
+		default: {
+
+		};
 		}
-		return os;
 	};
 
+	virtual void
+	handle_read_event(
+			cthread& thread, int fd)
+	{};
 
-	std::string
-	str() const {
-		AcquireReadLock rwlock(conns_rwlock);
-		std::stringstream ss;
-		ss << "OFP version: " << (int)get_version() << " ";
-		if (conns.empty() ||
-				(conns.find(rofl::cauxid(0)) == conns.end()) ||
-					(not (conns.at(rofl::cauxid(0))->is_established()))) {
-			ss << " state: -disconnected- ";
-		} else {
-			ss << " state: -established- ";
-		}
-		ss << "auxids: ";
-		for (std::map<cauxid, crofconn*>::const_iterator
-				it = conns.begin(); it != conns.end(); ++it) {
-			ss << "{" << (int)it->first.get_id() << ":"
-					<< (it->second->is_established() ? "-established-" : "-disconnected-") << "} ";
-		}
-		return ss.str();
-	};
+	virtual void
+	handle_write_event(
+			cthread& thread, int fd)
+	{};
 
 private:
 
 	// owner of this crofchan instance
 	crofchan_env*                       env;
+
+	// management thread
+	cthread                             thread;
 
 	// main and auxiliary connections
 	std::map<cauxid, crofconn*>         conns;
@@ -496,6 +563,12 @@ private:
 
 	// state related flags
 	std::bitset<32>                     flags;
+
+	// connections scheduled for deletion
+	std::list<rofl::cauxid>             conns_deletion;
+
+	// ... and associated rwlock
+	rofl::crwlock                       conns_deletion_rwlock;
 };
 
 }; /* namespace rofl */

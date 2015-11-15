@@ -30,6 +30,9 @@ crofbase::~crofbase()
 	/* close all crofctl instances */
 	drop_ctls();
 
+	/* stop background management thread */
+	thread.stop();
+
 	AcquireReadWriteLock rwlock(rofbases_rwlock);
 	crofbase::rofbases.erase(this);
 	if (crofbase::rofbases.empty()) {
@@ -469,8 +472,11 @@ crofbase::handle_established(
 
 		/* indicate channel up to higher layers */
 		if (conn.get_auxid() == rofl::cauxid(0)) {
-			journal.log(LOG_INFO, "datapath attached: dptid=%s, raddr=%s, dpid=%s",
-					dptid.str().c_str(), set_dpt(dptid).get_conn(rofl::cauxid(0)).get_raddr().str().c_str(), set_dpt(dptid).get_dpid().str().c_str());
+			journal.log(LOG_INFO, "datapath attached: dptid=%s, laddr=%s, raddr=%s, dpid=%s",
+					dptid.str().c_str(),
+					set_dpt(dptid).get_conn(rofl::cauxid(0)).get_laddr().str().c_str(),
+					set_dpt(dptid).get_conn(rofl::cauxid(0)).get_raddr().str().c_str(),
+					set_dpt(dptid).get_dpid().str().c_str());
 			handle_dpt_open(set_dpt(dptid));
 		}
 	} break;
@@ -484,8 +490,10 @@ crofbase::handle_established(
 
 		/* indicate channel up to higher layers */
 		if (conn.get_auxid() == rofl::cauxid(0)) {
-			journal.log(LOG_INFO, "controller attached: ctlid=%s, raddr=%s",
-					ctlid.str().c_str(), set_ctl(ctlid).get_conn(rofl::cauxid(0)).get_raddr().str().c_str());
+			journal.log(LOG_INFO, "controller attached: ctlid=%s, laddr=%s, raddr=%s",
+					ctlid.str().c_str(),
+					set_ctl(ctlid).get_conn(rofl::cauxid(0)).get_laddr().str().c_str(),
+					set_ctl(ctlid).get_conn(rofl::cauxid(0)).get_raddr().str().c_str());
 			handle_ctl_open(set_ctl(ctlid));
 		}
 	} break;
@@ -528,8 +536,10 @@ void
 crofbase::handle_established(
 		crofctl& ctl, uint8_t ofp_version)
 {
-	journal.log(LOG_INFO, "controller attached: ctlid=%s",
-			ctl.get_ctlid().str().c_str());
+	journal.log(LOG_INFO, "controller attached: ctlid=%s, laddr=%s, raddr=%s",
+			ctl.get_ctlid().str().c_str(),
+			ctl.get_conn(rofl::cauxid(0)).get_laddr().str().c_str(),
+			ctl.get_conn(rofl::cauxid(0)).get_raddr().str().c_str());
 	handle_ctl_open(ctl);
 }
 
@@ -639,8 +649,11 @@ void
 crofbase::handle_established(
 		crofdpt& dpt, uint8_t ofp_version)
 {
-	journal.log(LOG_INFO, "datapath attached: dptid=%s, dpid=%s",
-			dpt.get_dptid().str().c_str(), dpt.get_dpid().str().c_str());
+	journal.log(LOG_INFO, "datapath attached: dptid=%s, laddr=%s, raddr=%s, dpid=%s",
+			dpt.get_dptid().str().c_str(),
+			dpt.get_conn(rofl::cauxid(0)).get_laddr().str().c_str(),
+			dpt.get_conn(rofl::cauxid(0)).get_raddr().str().c_str(),
+			dpt.get_dpid().str().c_str());
 	handle_dpt_open(dpt);
 }
 

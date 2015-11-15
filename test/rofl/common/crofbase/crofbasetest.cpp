@@ -34,15 +34,23 @@ crofbasetest::tearDown()
 void
 crofbasetest::test()
 {
+	unsigned int seconds = 60;
 	datapath.test_start();
 
-	while (controller.keep_running()) {
+	while (controller.keep_running() && (seconds-- > 0)) {
 		struct timespec ts;
 		ts.tv_sec = 1;
 		ts.tv_nsec = 0;
 		pselect(0, NULL, NULL, NULL, &ts, NULL);
 		std::cerr << "#";
 	}
+
+	std::cerr << "controller: " << std::endl;
+	std::cerr << "==========" << std::endl;
+	std::cerr << controller.get_journal() << std::endl;
+	std::cerr << "datapath: " << std::endl;
+	std::cerr << "========" << std::endl;
+	std::cerr << datapath.get_journal() << std::endl;
 }
 
 
@@ -125,7 +133,8 @@ cdatapath::test_start()
 	crofbase::set_ctl(ctlid).
 			add_conn(rofl::cauxid(0)).
 				set_raddr(raddr).
-					tcp_connect(vbitmap, rofl::crofconn::MODE_DATAPATH, false);
+					set_trace(true).
+						tcp_connect(vbitmap, rofl::crofconn::MODE_DATAPATH, false);
 }
 
 
@@ -177,6 +186,8 @@ ccontroller::handle_features_reply(
 		rofl::openflow::cofmsg_features_reply& msg)
 {
 	std::cerr << ">>> XXX -Features-Reply- rcvd" << std::endl;
+
+	dpt.set_conn(auxid).set_trace(true);
 
 	dpt.send_get_config_request(auxid);
 }
