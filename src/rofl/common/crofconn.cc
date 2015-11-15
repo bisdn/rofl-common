@@ -199,9 +199,7 @@ crofconn::set_state(
 			/* stop working thread */
 			thread.stop();
 
-			for (auto rxqueue : rxqueues) {
-				rxqueue.clear();
-			}
+			sleep(1);
 
 			versionbitmap_peer.clear();
 			set_version(rofl::openflow::OFP_VERSION_UNKNOWN);
@@ -213,12 +211,20 @@ crofconn::set_state(
 			versionbitmap_peer.clear();
 			set_version(rofl::openflow::OFP_VERSION_UNKNOWN);
 
+			for (auto rxqueue : rxqueues) {
+				rxqueue.clear();
+			}
+
 		} break;
 		case STATE_ACCEPT_PENDING: {
 			journal.log(LOG_INFO, "STATE_ACCEPT_PENDING").
 					set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 			versionbitmap_peer.clear();
 			set_version(rofl::openflow::OFP_VERSION_UNKNOWN);
+
+			for (auto rxqueue : rxqueues) {
+				rxqueue.clear();
+			}
 
 		} break;
 		case STATE_NEGOTIATING: {

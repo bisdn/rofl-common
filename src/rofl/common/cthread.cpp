@@ -10,6 +10,7 @@
  */
 
 #include "cthread.hpp"
+#include <iostream>
 
 using namespace rofl;
 
@@ -294,19 +295,26 @@ cthread::stop()
 	switch (state) {
 	case STATE_RUNNING: {
 
-		state = STATE_IDLE;
+		/* deletion of thread not initiated within this thread */
+		if (pthread_self() == tid) {
+			std::cerr << "pthread_exit" << std::endl;
+			return;
+		}
 
 		run_thread = false;
 
-		/* deletion of thread not initiated within this thread */
-		if (not (pthread_self() == tid)) {
+		wakeup();
 
-			wakeup();
-
-			if (pthread_join(tid, NULL) < 0) {
-				pthread_cancel(tid);
-			}
+		struct timespec ts;
+		ts.tv_nsec = 0;
+		ts.tv_sec = 1;
+		std::cerr << "pthread_join" << std::endl;
+		if (pthread_timedjoin_np(tid, NULL, &ts) < 0) {
+			std::cerr << "pthread_cancel" << std::endl;
+			pthread_cancel(tid);
 		}
+
+		state = STATE_IDLE;
 
 	} break;
 	default: {

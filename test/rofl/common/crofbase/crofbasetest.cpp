@@ -125,7 +125,7 @@ cdatapath::test_start()
 	crofbase::set_ctl(ctlid).
 			add_conn(rofl::cauxid(0)).
 				set_raddr(raddr).
-					tcp_connect(vbitmap, rofl::crofconn::MODE_DATAPATH);
+					tcp_connect(vbitmap, rofl::crofconn::MODE_DATAPATH, false);
 }
 
 

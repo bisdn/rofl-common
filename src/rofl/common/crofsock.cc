@@ -21,6 +21,7 @@ using namespace rofl;
 
 crofsock::~crofsock()
 {
+	rxthread.stop();
 	close();
 }
 
@@ -76,6 +77,8 @@ crofsock::crofsock(
 	txweights[QUEUE_MGMT] = 32;
 	txweights[QUEUE_FLOW] = 16;
 	txweights[QUEUE_PKT ] =  8;
+
+	rxthread.start();
 }
 
 
@@ -102,11 +105,6 @@ crofsock::close()
 
 		sleep(1);
 
-		/* remove all pending messages from tx queues */
-		for (auto queue : txqueues) {
-			queue.clear();
-		}
-
 		state = STATE_IDLE;
 
 		crofsock::close();
@@ -132,8 +130,11 @@ crofsock::close()
 
 		txthread.drop_timer(TIMER_ID_RECONNECT);
 
-		rxthread.drop_write_fd(sd);
-		::close(sd); sd = -1;
+		if (sd > 0) {
+			rxthread.drop_write_fd(sd);
+			::close(sd);
+			sd = -1;
+		}
 
 		state = STATE_CLOSED;
 
@@ -144,11 +145,14 @@ crofsock::close()
 
 		journal.log(LOG_INFO, "TCP: state -ACCEPTING-");
 
-		rxthread.drop_read_fd(sd, false);
-		if (flags.test(FLAG_CONGESTED)) {
-			txthread.drop_write_fd(sd);
+		if (sd > 0) {
+			rxthread.drop_read_fd(sd, false);
+			if (flags.test(FLAG_CONGESTED)) {
+				txthread.drop_write_fd(sd);
+			}
+			::close(sd);
+			sd = -1;
 		}
-		::close(sd); sd = -1;
 
 		state = STATE_CLOSED;
 
@@ -171,7 +175,9 @@ crofsock::close()
 
 		/* allow socket to send shutdown notification to peer */
 		sleep(1);
-		::close(sd); sd = -1;
+		if (sd > 0)
+			::close(sd);
+		sd = -1;
 
 		state = STATE_CLOSED;
 
@@ -227,8 +233,10 @@ crofsock::listen()
 		close();
 	}
 
-	/* start thread */
-	rxthread.start();
+	/* remove all pending messages from tx queues */
+	for (auto queue : txqueues) {
+		queue.clear();
+	}
 
 	/* cancel potentially pending reconnect timer */
 	rxthread.drop_timer(TIMER_ID_RECONNECT);
@@ -315,8 +323,12 @@ crofsock::tcp_accept(
 		close();
 	}
 
+	/* remove all pending messages from tx queues */
+	for (auto queue : txqueues) {
+		queue.clear();
+	}
+
 	/* start thread */
-	rxthread.start();
 	txthread.start();
 
 	/* cancel potentially pending reconnect timer */
@@ -404,8 +416,12 @@ crofsock::tcp_connect(
 		close();
 	}
 
+	/* remove all pending messages from tx queues */
+	for (auto queue : txqueues) {
+		queue.clear();
+	}
+
 	/* start thread */
-	rxthread.start();
 	txthread.start();
 
 	/* cancel potentially pending reconnect timer */
@@ -1060,9 +1076,6 @@ void
 crofsock::backoff_reconnect(
 		bool reset_timeout)
 {
-	/* restart rxthread as it was stopped in close() */
-	rxthread.start();
-
 	if (rxthread.has_timer(TIMER_ID_RECONNECT)) {
 		return;
 	}
