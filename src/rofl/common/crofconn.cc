@@ -198,6 +198,9 @@ crofconn::set_state(
 			journal.log(LOG_INFO, "STATE_DISCONNECTED").
 					set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 
+			/* stop periodic checks for connection state (OAM) */
+			thread.drop_timer(TIMER_ID_NEED_LIFE_CHECK);
+
 			clear_pending_requests();
 			clear_pending_segments();
 
