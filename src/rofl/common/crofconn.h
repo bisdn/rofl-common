@@ -240,6 +240,22 @@ public:
 	/**
 	 *
 	 */
+	const cjournal&
+	get_tcp_journal() const
+	{ return rofsock.get_journal(); };
+
+	/**
+	 *
+	 */
+	cjournal&
+	set_tcp_journal()
+	{ return rofsock.set_journal(); };
+
+public:
+
+	/**
+	 *
+	 */
 	virtual void
 	close();
 
@@ -1381,14 +1397,14 @@ private:
 	// random number generator
 	rofl::crandom                   random;
 
-	// internal flags
-	std::bitset<32>                 flags;
-
 	// acts in controller or datapath mode (orthogonal to TCP client/server mode)
 	enum crofconn_mode_t            mode;
 
 	// internal state of finite state machine
 	enum crofconn_state_t           state;
+
+	// hello message from peer rcvd
+	bool                            flag_hello_rcvd;
 
 	// relative scheduling weights for rxqueues
 	std::vector<unsigned int>       rxweights;

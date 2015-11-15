@@ -102,9 +102,15 @@ public:
 	 */
 	void
 	clear() {
-		AcquireReadWriteLock rwlock(queue_lock);
-		while (not queue.empty()) {
-			rofl::openflow::cofmsg* msg = queue.front(); queue.pop_front();
+		while (true) {
+			rofl::openflow::cofmsg* msg = nullptr;
+			{
+				AcquireReadWriteLock rwlock(queue_lock);
+				if (queue.empty()) {
+					return;
+				}
+				msg = queue.front(); queue.pop_front();
+			}
 			delete msg;
 		}
 	};

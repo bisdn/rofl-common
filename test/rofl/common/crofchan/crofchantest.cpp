@@ -49,13 +49,14 @@ crofchantest::test1()
 
 	keep_running = true;
 	num_of_conns = 8;
+	num_of_accepts = 0;
 	int seconds = 10 * num_of_conns;
 
 	for (unsigned int i = 0; i < num_of_conns; i++) {
 		channel1->add_conn(rofl::cauxid(i)).
-				  set_raddr(baddr).
-				  tcp_connect(versionbitmap, rofl::crofconn::MODE_CONTROLLER, 0);
-		sleep(1);
+				  	  set_raddr(baddr).
+					  	  tcp_connect(versionbitmap, rofl::crofconn::MODE_CONTROLLER, false);
+		//sleep(2);
 	}
 
 	while (keep_running && (seconds-- > 0)) {
@@ -66,11 +67,13 @@ crofchantest::test1()
 		std::cerr << ".";
 	}
 
-	for (unsigned int i = 0; i < num_of_conns; i++) {
+	for (unsigned int i = 1; i < num_of_conns; i++) {
 		std::cerr << ">>> drop_conn() i=" << i << " <<<" << std::endl;
 		channel1->drop_conn(rofl::cauxid(i));
 		channel2->drop_conn(rofl::cauxid(i));
 	}
+	channel1->drop_conn(rofl::cauxid(0));
+	channel2->drop_conn(rofl::cauxid(0));
 }
 
 
@@ -87,24 +90,25 @@ void
 crofchantest::handle_listen(
 		rofl::crofsock& socket, int sd)
 {
+	num_of_accepts++;
+
 	rofl::crofconn& conn = channel2->add_conn();
 	conn.tcp_accept(sd, versionbitmap, rofl::crofconn::MODE_DATAPATH);
 
 	std::cerr << std::endl;
 	std::cerr << ">>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<" << std::endl;
 	std::cerr << ">>> crofchantest::handle_listen() <<<" << std::endl;
+	std::cerr << "num_of_accepts = " << num_of_accepts << std::endl;
 	std::cerr << "channel2.size() = " << channel2->size() << std::endl;
 	std::cerr << "conn.get_auxid() = " << conn.get_auxid() << std::endl;
 	std::cerr << ">>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<" << std::endl;
 	std::cerr << std::endl;
 
-	if (channel2->size() == num_of_conns) {
+	if (num_of_accepts == num_of_conns) {
 
 		std::cerr << ">>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<" << std::endl;
 		std::cerr << ">>>          TERMINATING          <<<" << std::endl;
 		std::cerr << ">>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<" << std::endl;
-
-		sleep(5);
 
 		keep_running = false;
 	}

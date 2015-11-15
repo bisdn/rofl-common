@@ -40,6 +40,7 @@ private:
 	uint32_t            xid;
 
 	unsigned int        num_of_conns;
+	unsigned int        num_of_accepts;
 
 	rofl::csockaddr     baddr;
 	rofl::crofsock*		rofsock;

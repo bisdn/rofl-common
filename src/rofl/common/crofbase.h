@@ -2586,6 +2586,7 @@ private:
 		if (rofdpts.find(dptid) == rofdpts.end()) {
 			return;
 		}
+		journal.log(LOG_INFO, "datapath removed").set_key("dptid", dptid.str());
 		delete rofdpts[dptid];
 		rofdpts.erase(dptid);
 	};
@@ -2602,6 +2603,7 @@ private:
 		if (rofctls.find(ctlid) == rofctls.end()) {
 			return;
 		}
+		journal.log(LOG_INFO, "controller removed").set_key("ctlid", ctlid.str());
 		delete rofctls[ctlid];
 		rofctls.erase(ctlid);
 	};

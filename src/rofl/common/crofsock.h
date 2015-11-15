@@ -310,6 +310,7 @@ class crofsock :
 	enum crofsockimer_t {
 		TIMER_ID_UNKNOWN        = 0,
 		TIMER_ID_RECONNECT      = 1,
+		TIMER_ID_PEER_SHUTDOWN  = 2,
 	};
 
 public:

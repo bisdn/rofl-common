@@ -10,6 +10,7 @@
  */
 
 #include "cthread.hpp"
+#include <iostream>
 
 using namespace rofl;
 
@@ -294,19 +295,26 @@ cthread::stop()
 	switch (state) {
 	case STATE_RUNNING: {
 
-		state = STATE_IDLE;
+		/* deletion of thread not initiated within this thread */
+		if (pthread_self() == tid) {
+			//std::cerr << "pthread_exit" << std::endl;
+			return;
+		}
 
 		run_thread = false;
 
-		/* deletion of thread not initiated within this thread */
-		if (not (pthread_self() == tid)) {
+		wakeup();
 
-			wakeup();
-
-			if (pthread_join(tid, NULL) < 0) {
-				pthread_cancel(tid);
-			}
+		struct timespec ts;
+		ts.tv_nsec = 0;
+		ts.tv_sec = 1;
+		//std::cerr << "pthread_join" << std::endl;
+		if (pthread_timedjoin_np(tid, NULL, &ts) < 0) {
+			//std::cerr << "pthread_cancel" << std::endl;
+			pthread_cancel(tid);
 		}
+
+		state = STATE_IDLE;
 
 	} break;
 	default: {
@@ -367,6 +375,9 @@ cthread::run_loop()
 
 			rc = epoll_pwait(epfd, events, 64, timeout, &sigmask);
 
+			if (not run_thread)
+				goto out;
+
 			/* handle expired timers */
 			std::list<unsigned int> ttypes;
 			uint32_t timer_id = 0;
@@ -383,6 +394,10 @@ cthread::run_loop()
 					}
 					ordered_timers.erase(ordered_timers.begin());
 				} // release lock here
+
+				if (not run_thread)
+					goto out;
+
 				timer_id = ts.get_timer_id();
 				if (has_timer(timer_id)) {
 					ttypes = get_timer(timer_id).get_timer_types();
@@ -391,9 +406,16 @@ cthread::run_loop()
 				cthread_env::call_env(env).handle_timeout(*this, timer_id, ttypes);
 			}
 
+			if (not run_thread)
+				goto out;
+
 			/* handle file descriptors */
 			if (rc > 0) {
 				for (int i = 0; i < rc; i++) {
+
+					if (not run_thread)
+						goto out;
+
 					if (events[i].data.fd == pipefd[PIPE_READ_FD]) {
 
 						if (not run_thread) {

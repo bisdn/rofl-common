@@ -21,6 +21,8 @@ using namespace rofl;
 
 crofsock::~crofsock()
 {
+	txthread.stop();
+	rxthread.stop();
 	close();
 }
 
@@ -76,6 +78,9 @@ crofsock::crofsock(
 	txweights[QUEUE_MGMT] = 32;
 	txweights[QUEUE_FLOW] = 16;
 	txweights[QUEUE_PKT ] =  8;
+
+	rxthread.start();
+	txthread.start();
 }
 
 
@@ -86,6 +91,8 @@ crofsock::close()
 	switch (state) {
 	case STATE_IDLE: {
 
+		journal.log(LOG_INFO, "TCP: state -IDLE-");
+
 		/* TLS down, TCP down => set rx_disabled flag back to false */
 		rx_disabled = false;
 		tx_disabled = false;
@@ -93,18 +100,7 @@ crofsock::close()
 	} break;
 	case STATE_CLOSED: {
 
-		/* stop threads */
-		rxthread.stop();
-		txthread.stop();
-
-		sleep(1);
-
-		/* remove all pending messages from tx queues */
-		for (auto queue : txqueues) {
-			queue.clear();
-		}
-
-		sleep(1);
+		journal.log(LOG_INFO, "TCP: state -CLOSED-");
 
 		state = STATE_IDLE;
 
@@ -112,6 +108,8 @@ crofsock::close()
 
 	} break;
 	case STATE_LISTENING: {
+
+		journal.log(LOG_INFO, "TCP: state -LISTENING-");
 
 		if (sd > 0) {
 			rxthread.drop_read_fd(sd);
@@ -125,10 +123,15 @@ crofsock::close()
 	} break;
 	case STATE_TCP_CONNECTING: {
 
+		journal.log(LOG_INFO, "TCP: state -CONNECTING-");
+
 		txthread.drop_timer(TIMER_ID_RECONNECT);
 
-		rxthread.drop_write_fd(sd);
-		::close(sd); sd = -1;
+		if (sd > 0) {
+			rxthread.drop_write_fd(sd);
+			::close(sd);
+			sd = -1;
+		}
 
 		state = STATE_CLOSED;
 
@@ -137,11 +140,16 @@ crofsock::close()
 	} break;
 	case STATE_TCP_ACCEPTING: {
 
-		rxthread.drop_read_fd(sd, false);
-		if (flags.test(FLAG_CONGESTED)) {
-			txthread.drop_write_fd(sd);
+		journal.log(LOG_INFO, "TCP: state -ACCEPTING-");
+
+		if (sd > 0) {
+			rxthread.drop_read_fd(sd, false);
+			if (flags.test(FLAG_CONGESTED)) {
+				txthread.drop_write_fd(sd);
+			}
+			::close(sd);
+			sd = -1;
 		}
-		::close(sd); sd = -1;
 
 		state = STATE_CLOSED;
 
@@ -149,6 +157,8 @@ crofsock::close()
 
 	} break;
 	case STATE_TCP_ESTABLISHED: {
+
+		journal.log(LOG_INFO, "TCP: state -ESTABLISHED-");
 
 		/* block reception of any further data from remote side */
 		rx_disable();
@@ -159,8 +169,12 @@ crofsock::close()
 			txthread.drop_write_fd(sd);
 		}
 		shutdown(sd, O_RDWR);
+
+		/* allow socket to send shutdown notification to peer */
 		sleep(1);
-		::close(sd); sd = -1;
+		if (sd > 0)
+			::close(sd);
+		sd = -1;
 
 		state = STATE_CLOSED;
 
@@ -216,8 +230,10 @@ crofsock::listen()
 		close();
 	}
 
-	/* start thread */
-	rxthread.start();
+	/* remove all pending messages from tx queues */
+	for (auto queue : txqueues) {
+		queue.clear();
+	}
 
 	/* cancel potentially pending reconnect timer */
 	rxthread.drop_timer(TIMER_ID_RECONNECT);
@@ -288,6 +304,8 @@ crofsock::listen()
 
 	state = STATE_LISTENING;
 
+	journal.log(LOG_INFO, "TCP: state -LISTENING-");
+
 	/* instruct rxthread to read from socket descriptor */
 	rxthread.add_read_fd(sd);
 }
@@ -302,9 +320,10 @@ crofsock::tcp_accept(
 		close();
 	}
 
-	/* start thread */
-	rxthread.start();
-	txthread.start();
+	/* remove all pending messages from tx queues */
+	for (auto queue : txqueues) {
+		queue.clear();
+	}
 
 	/* cancel potentially pending reconnect timer */
 	rxthread.drop_timer(TIMER_ID_RECONNECT);
@@ -317,6 +336,8 @@ crofsock::tcp_accept(
 
 	/* new state */
 	state = STATE_TCP_ACCEPTING;
+
+	journal.log(LOG_INFO, "TCP: state -ACCEPTING-");
 
 	/* extract new connection from listening queue */
 	if ((sd = ::accept(sockfd, laddr.ca_saddr, &(laddr.salen))) < 0) {
@@ -365,6 +386,8 @@ crofsock::tcp_accept(
 
 	state = STATE_TCP_ESTABLISHED;
 
+	journal.log(LOG_INFO, "TCP: state -ESTABLISHED-");
+
 	/* instruct rxthread to read from socket descriptor */
 	rxthread.add_read_fd(sd);
 
@@ -387,9 +410,10 @@ crofsock::tcp_connect(
 		close();
 	}
 
-	/* start thread */
-	rxthread.start();
-	txthread.start();
+	/* remove all pending messages from tx queues */
+	for (auto queue : txqueues) {
+		queue.clear();
+	}
 
 	/* cancel potentially pending reconnect timer */
 	rxthread.drop_timer(TIMER_ID_RECONNECT);
@@ -402,6 +426,8 @@ crofsock::tcp_connect(
 
 	/* new state */
 	state = STATE_TCP_CONNECTING;
+
+	journal.log(LOG_INFO, "TCP: state -CONNECTING-");
 
 	/* open socket */
 	if ((sd = ::socket(raddr.get_family(), type, protocol)) < 0) {
@@ -445,26 +471,29 @@ crofsock::tcp_connect(
 		/* connect did not succeed, handle error */
 		switch (errno) {
 		case EINPROGRESS: {
+			journal.log(LOG_INFO, "TCP: EINPROGRESS");
 			/* register socket descriptor for write operations */
 			rxthread.add_write_fd(sd);
 		} break;
 		case ECONNREFUSED: {
+			journal.log(LOG_INFO, "TCP: ECONNREFUSED");
+			close();
+
+			crofsock_env::call_env(env).handle_tcp_connect_refused(*this);
+
 			if (flags.test(FLAG_RECONNECT_ON_FAILURE)) {
 				backoff_reconnect(false);
-				::close(sd); sd = -1;
-			} else {
-				close();
 			}
-			crofsock_env::call_env(env).handle_tcp_connect_refused(*this);
 		} break;
 		default: {
+			journal.log(LOG_INFO, "TCP: connect error: %d(%s)", errno, strerror(errno));
+			close();
+
+			crofsock_env::call_env(env).handle_tcp_connect_failed(*this);
+
 			if (flags.test(FLAG_RECONNECT_ON_FAILURE)) {
 				backoff_reconnect(false);
-				::close(sd); sd = -1;
-			} else {
-				close();
 			}
-			crofsock_env::call_env(env).handle_tcp_connect_failed(*this);
 		};
 		}
 	} else {
@@ -479,6 +508,8 @@ crofsock::tcp_connect(
 		}
 
 		state = STATE_TCP_ESTABLISHED;
+
+		journal.log(LOG_INFO, "TCP: state -ESTABLISHED-");
 
 		/* register socket descriptor for read operations */
 		rxthread.add_read_fd(sd);
@@ -1054,7 +1085,7 @@ crofsock::backoff_reconnect(
 		}
 	}
 
-	journal.log(LOG_NOTICE, " scheduled reconnect in: %d secs", reconnect_backoff_current);
+	journal.log(LOG_NOTICE, "scheduled reconnect in: %d secs", reconnect_backoff_current);
 
 	rxthread.add_timer(TIMER_ID_RECONNECT, ctimespec().expire_in(reconnect_backoff_current, 0));
 
@@ -1111,6 +1142,7 @@ crofsock::rx_disable()
 	case STATE_TCP_ESTABLISHED:
 	case STATE_TLS_ESTABLISHED:{
 		rxthread.drop_read_fd(sd, false);
+		journal.log(LOG_INFO, "TCP: disable reception");
 	} break;
 	default: {
 
@@ -1128,6 +1160,7 @@ crofsock::rx_enable()
 	case STATE_TCP_ESTABLISHED:
 	case STATE_TLS_ESTABLISHED: {
 		rxthread.add_read_fd(sd, false);
+		journal.log(LOG_INFO, "TCP: enable reception");
 	} break;
 	default: {
 
@@ -1141,6 +1174,7 @@ void
 crofsock::tx_disable()
 {
 	tx_disabled = true;
+	journal.log(LOG_INFO, "TCP: disable transmission");
 }
 
 
@@ -1149,6 +1183,7 @@ void
 crofsock::tx_enable()
 {
 	tx_disabled = false;
+	journal.log(LOG_INFO, "TCP: enable transmission");
 }
 
 
@@ -1159,6 +1194,7 @@ crofsock::handle_timeout(
 {
 	switch (timer_id) {
 	case TIMER_ID_RECONNECT: {
+		journal.log(LOG_INFO, "TCP: reconnecting");
 		if (flags.test(FLAG_TLS_IN_USE)) {
 			tls_connect(true);
 		} else {
@@ -1454,6 +1490,8 @@ crofsock::handle_read_event_rxthread(
 
 				state = STATE_TCP_ESTABLISHED;
 
+				journal.log(LOG_INFO, "TCP: state -ESTABLISHED-");
+
 				/* register socket descriptor for read operations */
 				rxthread.add_read_fd(sd);
 
@@ -1465,24 +1503,27 @@ crofsock::handle_read_event_rxthread(
 			} break;
 			case EINPROGRESS: {
 				/* connect still pending, just wait */
+				journal.log(LOG_INFO, "TCP: EINPROGRESS");
 			} break;
 			case ECONNREFUSED: {
+				journal.log(LOG_INFO, "TCP: ECONNREFUSED");
+				close();
+
+				crofsock_env::call_env(env).handle_tcp_connect_refused(*this);
+
 				if (flags.test(FLAG_RECONNECT_ON_FAILURE)) {
 					backoff_reconnect(false);
-					::close(sd); sd = -1;
-				} else {
-					close();
 				}
-				crofsock_env::call_env(env).handle_tcp_connect_refused(*this);
 			} break;
 			default: {
+				journal.log(LOG_INFO, "TCP: connect error: %d(%s)", errno, strerror(errno));
+				close();
+
+				crofsock_env::call_env(env).handle_tcp_connect_failed(*this);
+
 				if (flags.test(FLAG_RECONNECT_ON_FAILURE)) {
 					backoff_reconnect(false);
-					::close(sd); sd = -1;
-				} else {
-					close();
 				}
-				crofsock_env::call_env(env).handle_tcp_connect_failed(*this);
 			};
 			}
 
@@ -1599,14 +1640,11 @@ crofsock::recv_message()
 
 on_error:
 
+	journal.log(LOG_INFO, "TCP: peer shutdown");
 	close();
-
+	crofsock_env::call_env(env).handle_closed(*this);
 	if (flags.test(FLAG_RECONNECT_ON_FAILURE)) {
-		if (flags.test(FLAG_TLS_IN_USE)) {
-			tls_connect(true);
-		} else {
-			tcp_connect(true);
-		}
+		backoff_reconnect(true);
 	}
 }
 

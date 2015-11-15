@@ -34,14 +34,42 @@ crofbasetest::tearDown()
 void
 crofbasetest::test()
 {
+	unsigned int seconds = 10;
 	datapath.test_start();
 
-	while (controller.keep_running()) {
+	while (controller.keep_running() && (seconds-- > 0)) {
 		struct timespec ts;
 		ts.tv_sec = 1;
 		ts.tv_nsec = 0;
 		pselect(0, NULL, NULL, NULL, &ts, NULL);
 		std::cerr << "#";
+	}
+	std::cerr << std::endl;
+
+	try {
+		std::cerr << "controller: " << std::endl;
+		std::cerr << "==========" << std::endl;
+		std::cerr << controller.get_journal() << std::endl;
+		std::cerr << controller.get_dpt(controller.get_dptid()).get_journal() << std::endl;
+		std::cerr << controller.get_dpt(controller.get_dptid()).get_conn(0).get_journal() << std::endl;
+		std::cerr << controller.get_dpt(controller.get_dptid()).get_conn(0).get_tcp_journal() << std::endl;
+	} catch (rofl::eRofBaseNotFound& e) {
+
+	}
+
+	datapath.set_ctl(datapath.get_ctlid()).set_conn(0).close();
+
+	sleep(2);
+
+	try {
+		std::cerr << "datapath: " << std::endl;
+		std::cerr << "========" << std::endl;
+		std::cerr << datapath.get_journal() << std::endl;
+		std::cerr << datapath.get_ctl(datapath.get_ctlid()).get_journal() << std::endl;
+		std::cerr << datapath.get_ctl(datapath.get_ctlid()).get_conn(0).get_journal() << std::endl;
+		std::cerr << datapath.get_ctl(datapath.get_ctlid()).get_conn(0).get_tcp_journal() << std::endl;
+	} catch (rofl::eRofBaseNotFound& e) {
+
 	}
 }
 
@@ -125,7 +153,8 @@ cdatapath::test_start()
 	crofbase::set_ctl(ctlid).
 			add_conn(rofl::cauxid(0)).
 				set_raddr(raddr).
-					tcp_connect(vbitmap, rofl::crofconn::MODE_DATAPATH);
+					set_trace(true).
+						tcp_connect(vbitmap, rofl::crofconn::MODE_DATAPATH, false);
 }
 
 
@@ -135,6 +164,8 @@ ccontroller::handle_dpt_open(
 		rofl::crofdpt& dpt)
 {
 	std::cerr << ">>> XXX dpt connected: " << std::endl;
+
+	dptid = dpt.get_dptid();
 
 	dpt.send_get_config_request(rofl::cauxid(0));
 }
@@ -177,6 +208,8 @@ ccontroller::handle_features_reply(
 		rofl::openflow::cofmsg_features_reply& msg)
 {
 	std::cerr << ">>> XXX -Features-Reply- rcvd" << std::endl;
+
+	dpt.set_conn(auxid).set_trace(true);
 
 	dpt.send_get_config_request(auxid);
 }

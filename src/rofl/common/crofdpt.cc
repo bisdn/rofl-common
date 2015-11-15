@@ -192,8 +192,9 @@ void
 crofdpt::handle_transaction_timeout(
 		crofchan& chan, crofconn& conn, uint32_t xid, uint8_t type, uint16_t sub_type)
 {
-	journal.log(LOG_NOTICE, "transaction expired, xid: 0x%x", (unsigned int)xid).
-			set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+	journal.log(LOG_NOTICE, "transaction ").
+			set_key("xid", (unsigned int)xid).
+				set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 
 	try {
 		switch (get_version()) {

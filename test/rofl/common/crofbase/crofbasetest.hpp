@@ -39,6 +39,13 @@ public:
 	keep_running() const
 	{ return __keep_running; };
 
+	/**
+	 *
+	 */
+	const rofl::cdptid&
+	get_dptid() const
+	{ return dptid; };
+
 private:
 
 	virtual void
@@ -87,6 +94,9 @@ private:
 	// bind address
 	rofl::csockaddr         baddr;
 
+	// dptid
+	rofl::cdptid            dptid;
+
 	// keep test running
 	bool                    __keep_running;
 };
@@ -115,6 +125,15 @@ public:
 	 */
 	void
 	test_start();
+
+public:
+
+	/**
+	 *
+	 */
+	const rofl::cctlid&
+	get_ctlid() const
+	{ return ctlid; };
 
 private:
 

@@ -28,6 +28,8 @@ using namespace rofl;
 
 crofconn::~crofconn()
 {
+	/* stop worker thread */
+	thread.stop();
 	set_state(STATE_CLOSING);
 }
 
@@ -43,6 +45,7 @@ crofconn::crofconn(
 				ofp_version(rofl::openflow::OFP_VERSION_UNKNOWN),
 				mode(MODE_UNKNOWN),
 				state(STATE_DISCONNECTED),
+				flag_hello_rcvd(false),
 				rxweights(QUEUE_MAX),
 				rxqueues(QUEUE_MAX),
 				rx_thread_working(false),
@@ -68,6 +71,8 @@ crofconn::crofconn(
 	for (unsigned int queue_id = 0; queue_id < QUEUE_MAX; queue_id++) {
 		rxqueues[queue_id].set_queue_max_size(rxqueue_max_size);
 	}
+	/* start worker thread */
+	thread.start();
 }
 
 
@@ -185,10 +190,6 @@ crofconn::set_state(
 		case STATE_CLOSING: {
 			journal.log(LOG_INFO, "STATE_CLOSING").
 					set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
-			versionbitmap.clear();
-			versionbitmap_peer.clear();
-			set_version(rofl::openflow::OFP_VERSION_UNKNOWN);
-			set_mode(MODE_UNKNOWN);
 			rofsock.close();
 			set_state(STATE_DISCONNECTED);
 
@@ -197,17 +198,15 @@ crofconn::set_state(
 			journal.log(LOG_INFO, "STATE_DISCONNECTED").
 					set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 
-			rofsock.close();
+			/* stop periodic checks for connection state (OAM) */
+			thread.drop_timer(TIMER_ID_NEED_LIFE_CHECK);
 
 			clear_pending_requests();
 			clear_pending_segments();
 
-			/* stop working thread */
-			thread.stop();
-
-			for (auto rxqueue : rxqueues) {
-				rxqueue.clear();
-			}
+			versionbitmap_peer.clear();
+			set_version(rofl::openflow::OFP_VERSION_UNKNOWN);
+			flag_hello_rcvd = false;
 
 		} break;
 		case STATE_CONNECT_PENDING: {
@@ -216,6 +215,10 @@ crofconn::set_state(
 			versionbitmap_peer.clear();
 			set_version(rofl::openflow::OFP_VERSION_UNKNOWN);
 
+			for (auto rxqueue : rxqueues) {
+				rxqueue.clear();
+			}
+
 		} break;
 		case STATE_ACCEPT_PENDING: {
 			journal.log(LOG_INFO, "STATE_ACCEPT_PENDING").
@@ -223,15 +226,16 @@ crofconn::set_state(
 			versionbitmap_peer.clear();
 			set_version(rofl::openflow::OFP_VERSION_UNKNOWN);
 
+			for (auto rxqueue : rxqueues) {
+				rxqueue.clear();
+			}
+
 		} break;
 		case STATE_NEGOTIATING: {
 			journal.log(LOG_INFO, "STATE_NEGOTIATING").
 					set_func(__PRETTY_FUNCTION__).set_line(__LINE__).
 						set_key("offered versions", versionbitmap.str());
 			send_hello_message();
-
-			/* start working thread */
-			thread.start();
 
 		} break;
 		case STATE_NEGOTIATING2: {
@@ -343,7 +347,9 @@ crofconn::send_hello_message()
 {
 	try {
 
-		thread.add_timer(TIMER_ID_WAIT_FOR_HELLO, ctimespec().expire_in(timeout_hello));
+		if (not flag_hello_rcvd) {
+			thread.add_timer(TIMER_ID_WAIT_FOR_HELLO, ctimespec().expire_in(timeout_hello));
+		}
 
 		rofl::openflow::cofhelloelems helloIEs;
 		helloIEs.add_hello_elem_versionbitmap() = versionbitmap;
@@ -378,6 +384,8 @@ crofconn::hello_rcvd(
 				set_func(__PRETTY_FUNCTION__);
 		return;
 	}
+
+	flag_hello_rcvd = true;
 
 	thread.drop_timer(TIMER_ID_WAIT_FOR_HELLO);
 
@@ -448,8 +456,10 @@ crofconn::hello_rcvd(
 
 			} break;
 			default: {
-
-			};
+				journal.log(LOG_CRIT_ERROR, "unable to handle undefined mode").
+						set_func(__PRETTY_FUNCTION__);
+				set_state(STATE_CLOSING);
+			} return;
 			}
 		}
 
@@ -459,7 +469,7 @@ crofconn::hello_rcvd(
 				set_func(__PRETTY_FUNCTION__);
 
 		size_t len = (msg->length() < 64) ? msg->length() : 64;
-		rofl::cmemory mem(len);
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofsock.send_message(
@@ -476,7 +486,7 @@ crofconn::hello_rcvd(
 				set_func(__PRETTY_FUNCTION__);
 
 		size_t len = (msg->length() < 64) ? msg->length() : 64;
-		rofl::cmemory mem(len);
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofsock.send_message(
@@ -493,7 +503,7 @@ crofconn::hello_rcvd(
 				set_func(__PRETTY_FUNCTION__);
 
 		size_t len = (msg->length() < 64) ? msg->length() : 64;
-		rofl::cmemory mem(len);
+		rofl::cmemory mem(msg->length());
 		msg->pack(mem.somem(), mem.length());
 
 		rofsock.send_message(
@@ -922,12 +932,13 @@ crofconn::handle_recv(
 							set_key("rcvd version", msg->get_version()).
 								set_key("negotiated version", ofp_version);
 
-			rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+			size_t len = msg->length() < 64 ? msg->length() : 64;
+			rofl::cmemory mem(msg->length());
 			msg->pack(mem.somem(), mem.length());
 
 			send_message(
 					new rofl::openflow::cofmsg_error_bad_request_bad_version(
-							ofp_version, msg->get_xid(), mem.somem(), mem.length()));
+							ofp_version, msg->get_xid(), mem.somem(), len));
 
 			delete msg; return;
 		}
@@ -952,12 +963,13 @@ crofconn::handle_recv(
 							set_key("rcvd version", msg->get_version()).
 								set_key("negotiated version", ofp_version);
 
-			rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
+			size_t len = msg->length() < 64 ? msg->length() : 64;
+			rofl::cmemory mem(msg->length());
 			msg->pack(mem.somem(), mem.length());
 
 			send_message(
 					new rofl::openflow::cofmsg_error_bad_request_bad_version(
-							ofp_version, msg->get_xid(), mem.somem(), mem.length()));
+							ofp_version, msg->get_xid(), mem.somem(), len));
 
 			delete msg; return;
 		}
@@ -1294,7 +1306,8 @@ crofconn::handle_rx_messages()
 
 			/* not connected any more, stop running working thread */
 			if (STATE_ESTABLISHED != state) {
-				keep_running = false;
+				rx_thread_working = false;
+				return;
 			}
 
 		} catch (eRofConnNotFound& e) {
