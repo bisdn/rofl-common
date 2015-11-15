@@ -297,7 +297,7 @@ cthread::stop()
 
 		/* deletion of thread not initiated within this thread */
 		if (pthread_self() == tid) {
-			std::cerr << "pthread_exit" << std::endl;
+			//std::cerr << "pthread_exit" << std::endl;
 			return;
 		}
 
@@ -308,9 +308,9 @@ cthread::stop()
 		struct timespec ts;
 		ts.tv_nsec = 0;
 		ts.tv_sec = 1;
-		std::cerr << "pthread_join" << std::endl;
+		//std::cerr << "pthread_join" << std::endl;
 		if (pthread_timedjoin_np(tid, NULL, &ts) < 0) {
-			std::cerr << "pthread_cancel" << std::endl;
+			//std::cerr << "pthread_cancel" << std::endl;
 			pthread_cancel(tid);
 		}
 
