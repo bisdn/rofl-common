@@ -261,7 +261,7 @@ public:
 	friend std::ostream&
 	operator<< (std::ostream& os, cofportstatsarray const& portstatsarray) {
 		os  << "<cofportstatsarray #ports:" << (int)portstatsarray.array.size() << " >" << std::endl;
-		
+		AcquireReadLock lock(portstatsarray.array_lock);
 		for (std::map<uint32_t, cofport_stats_reply>::const_iterator
 				it = portstatsarray.array.begin(); it != portstatsarray.array.end(); ++it) {
 			os << it->second;
@@ -273,7 +273,7 @@ private:
 
 	uint8_t										ofp_version;
 	std::map<uint32_t, cofport_stats_reply>		array;
-	rofl::crwlock                               array_lock;
+	mutable rofl::crwlock                       array_lock;
 };
 
 }; // end of openflow
