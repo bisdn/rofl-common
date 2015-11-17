@@ -6,87 +6,6 @@
 
 using namespace rofl::openflow;
 
-cofports::cofports(
-		uint8_t ofp_version) :
-				ofp_version(ofp_version)
-{
-
-}
-
-
-
-cofports::~cofports()
-{
-	clear();
-}
-
-
-
-cofports::cofports(
-		uint8_t ofp_version, uint8_t *buf, size_t buflen) :
-				ofp_version(ofp_version)
-{
-	unpack(buf, buflen);
-}
-
-
-
-cofports::cofports(
-		cofports const& ports)
-{
-	*this = ports;
-}
-
-
-cofports&
-cofports::operator= (
-		cofports const& ports)
-{
-	if (this == &ports)
-		return *this;
-
-	clear();
-
-	ofp_version = ports.ofp_version;
-
-	for (std::map<uint32_t, cofport*>::const_iterator
-			it = ports.ports.begin(); it != ports.ports.end(); ++it) {
-		this->ports[it->first] = new cofport(*it->second);
-	}
-
-	return *this;
-}
-
-
-
-cofports&
-cofports::operator+= (
-		cofports const& ports)
-{
-	/*
-	 * this may replace existing ports in this cofports instance
-	 */
-	for (std::map<uint32_t, cofport*>::const_iterator
-			it = ports.ports.begin(); it != ports.ports.end(); ++it) {
-		if (this->ports.find(it->first) != this->ports.end()) {
-			delete this->ports[it->first];
-		}
-		this->ports[it->first] = new cofport(*it->second);
-	}
-
-	return *this;
-}
-
-
-
-void
-cofports::clear()
-{
-	for (std::map<uint32_t, cofport*>::iterator it = ports.begin(); it != ports.end(); ++it) {
-		delete it->second;
-	}
-	ports.clear();
-}
 
 
 
@@ -94,8 +13,9 @@ size_t
 cofports::length() const
 {
 	size_t len = 0;
-	for (std::map<uint32_t, cofport*>::const_iterator it = ports.begin(); it != ports.end(); ++it) {
-		len += (*(it->second)).length();
+	AcquireReadLock lock(ports_lock);
+	for (auto it : ports) {
+		len += (*(it.second)).length();
 	}
 	return len;
 }
@@ -104,8 +24,7 @@ cofports::length() const
 
 void
 cofports::pack(
-	uint8_t *buf,
-	size_t buflen)
+		uint8_t *buf, size_t buflen)
 {
 	if (buflen < length()) {
 		throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
@@ -142,8 +61,7 @@ cofports::pack(
 
 void
 cofports::unpack(
-		uint8_t *buf,
-		size_t buflen)
+		uint8_t *buf, size_t buflen)
 {
 	clear();
 
@@ -198,167 +116,6 @@ cofports::unpack(
 	}
 }
 
-
-
-cofport&
-cofports::add_port(uint32_t portno)
-{
-	if (ports.find(portno) != ports.end()) {
-		ports.erase(portno);
-	}
-	ports[portno] = new cofport(ofp_version);
-	ports[portno]->set_port_no(portno);
-	return *(ports[portno]);
-}
-
-
-
-cofport&
-cofports::set_port(uint32_t portno)
-{
-	if (ports.find(portno) == ports.end()) {
-		ports[portno] = new cofport(ofp_version);
-		ports[portno]->set_port_no(portno);
-	}
-	return *(ports[portno]);
-}
-
-
-
-cofport&
-cofports::set_port(const std::string& devname)
-{
-	std::map<uint32_t, cofport*>::iterator it;
-	if ((it = find_if(ports.begin(), ports.end(),
-			cofport_find_by_port_name(devname))) == ports.end()) {
-		throw ePortsNotFound("ePortsNotFound");
-	}
-	return *(it->second);
-}
-
-
-
-cofport&
-cofports::set_port(const rofl::caddress_ll& hwaddr)
-{
-	std::map<uint32_t, cofport*>::iterator it;
-	if ((it = find_if(ports.begin(), ports.end(),
-			cofport_find_by_maddr(hwaddr))) == ports.end()) {
-		throw ePortsNotFound("ePortsNotFound");
-	}
-	return *(it->second);
-}
-
-
-
-cofport const&
-cofports::get_port(uint32_t portno) const
-{
-	if (ports.find(portno) == ports.end()) {
-		throw ePortsNotFound("ePortsNotFound");
-	}
-	return *(ports.at(portno));
-}
-
-
-
-cofport const&
-cofports::get_port(const std::string& devname) const
-{
-	std::map<uint32_t, cofport*>::const_iterator it;
-	if ((it = find_if(ports.begin(), ports.end(),
-			cofport_find_by_port_name(devname))) == ports.end()) {
-		throw ePortsNotFound("ePortsNotFound");
-	}
-	return *(it->second);
-}
-
-
-
-cofport const&
-cofports::get_port(const rofl::caddress_ll& hwaddr) const
-{
-	std::map<uint32_t, cofport*>::const_iterator it;
-	if ((it = find_if(ports.begin(), ports.end(),
-			cofport_find_by_maddr(hwaddr))) == ports.end()) {
-		throw ePortsNotFound("ePortsNotFound");
-	}
-	return *(it->second);
-}
-
-
-
-void
-cofports::drop_port(uint32_t portno)
-{
-	if (ports.find(portno) == ports.end()) {
-		return;
-	}
-	delete ports[portno];
-	ports.erase(portno);
-}
-
-
-
-void
-cofports::drop_port(const std::string& devname)
-{
-	std::map<uint32_t, cofport*>::const_iterator it;
-	if ((it = find_if(ports.begin(), ports.end(),
-			cofport_find_by_port_name(devname))) == ports.end()) {
-		return;
-	}
-	delete it->second;
-	ports.erase(it->first);
-}
-
-
-
-void
-cofports::drop_port(const rofl::caddress_ll& hwaddr)
-{
-	std::map<uint32_t, cofport*>::const_iterator it;
-	if ((it = find_if(ports.begin(), ports.end(),
-			cofport_find_by_maddr(hwaddr))) == ports.end()) {
-		return;
-	}
-	delete it->second;
-	ports.erase(it->first);
-}
-
-
-
-bool
-cofports::has_port(uint32_t portno) const
-{
-	return (ports.find(portno) != ports.end());
-}
-
-
-
-bool
-cofports::has_port(const std::string& devname) const
-{
-	std::map<uint32_t, cofport*>::const_iterator it;
-	if ((it = find_if(ports.begin(), ports.end(),
-			cofport_find_by_port_name(devname))) == ports.end()) {
-		return false;
-	}
-	return true;
-}
-
-
-
-bool
-cofports::has_port(const rofl::caddress_ll& hwaddr) const
-{
-	std::map<uint32_t, cofport*>::const_iterator it;
-	if ((it = find_if(ports.begin(), ports.end(),
-			cofport_find_by_maddr(hwaddr))) == ports.end()) {
-		return false;
-	}
-	return true;
-}
 
 
 
