@@ -205,36 +205,6 @@ public:
 	/**
 	 *
 	 */
-	cofport&
-	set_port(
-			const std::string& devname) {
-		AcquireReadWriteLock lock(ports_lock);
-		std::map<uint32_t, cofport*>::iterator it;
-		if ((it = find_if(ports.begin(), ports.end(),
-				cofport_find_by_port_name(devname))) == ports.end()) {
-			throw ePortsNotFound("ePortsNotFound");
-		}
-		return *(it->second);
-	};
-
-	/**
-	 *
-	 */
-	cofport&
-	set_port(
-			const rofl::caddress_ll& hwaddr) {
-		AcquireReadWriteLock lock(ports_lock);
-		std::map<uint32_t, cofport*>::iterator it;
-		if ((it = find_if(ports.begin(), ports.end(),
-				cofport_find_by_maddr(hwaddr))) == ports.end()) {
-			throw ePortsNotFound("ePortsNotFound");
-		}
-		return *(it->second);
-	};
-
-	/**
-	 *
-	 */
 	const cofport&
 	get_port(
 			uint32_t portno) const {
@@ -271,6 +241,21 @@ public:
 	};
 
 public:
+
+	/**
+	 *
+	 */
+	cofport&
+	set_port(
+			const std::string& devname) {
+		AcquireReadWriteLock lock(ports_lock);
+		std::map<uint32_t, cofport*>::iterator it;
+		if ((it = find_if(ports.begin(), ports.end(),
+				cofport_find_by_port_name(devname))) == ports.end()) {
+			throw ePortsNotFound("ePortsNotFound");
+		}
+		return *(it->second);
+	};
 
 	/**
 	 *
@@ -320,6 +305,21 @@ public:
 	};
 
 public:
+
+	/**
+	 *
+	 */
+	cofport&
+	set_port(
+			const rofl::caddress_ll& hwaddr) {
+		AcquireReadWriteLock lock(ports_lock);
+		std::map<uint32_t, cofport*>::iterator it;
+		if ((it = find_if(ports.begin(), ports.end(),
+				cofport_find_by_maddr(hwaddr))) == ports.end()) {
+			throw ePortsNotFound("ePortsNotFound");
+		}
+		return *(it->second);
+	};
 
 	/**
 	 *
