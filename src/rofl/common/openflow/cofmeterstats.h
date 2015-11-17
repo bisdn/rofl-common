@@ -284,7 +284,7 @@ public:
 	cofmeter_stats_reply&
 	set_meter_band_stats(
 			const rofl::openflow::cofmeter_band_stats_array& mbstats)
-	{ this->mbstats = mbstats; return *this; };
+	{ (this->mbstats = mbstats).set_version(of_version); return *this; };
 
 	/**
 	 *

@@ -58,9 +58,8 @@ public:
 		this->array.clear();
 
 		ofp_version = array.ofp_version;
-		for (std::map<unsigned int, cofmeter_stats_reply>::const_iterator
-				it = array.array.begin(); it != array.array.end(); ++it) {
-			this->array[it->first] = it->second;
+		for (auto it : array.array) {
+			add_meter_stats(it.first) = array.get_meter_stats(it.first);
 		}
 
 		return *this;

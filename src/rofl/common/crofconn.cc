@@ -2053,45 +2053,44 @@ unsigned int
 crofconn::segment_meter_config_stats_reply(
 		rofl::openflow::cofmsg_meter_config_stats_reply *msg)
 {
-	unsigned int index = 0;
-	rofl::openflow::cofmeterconfigarray array;
-	std::vector<rofl::openflow::cofmsg_meter_config_stats_reply*> segments;
+	std::list<rofl::openflow::cofmsg_meter_config_stats_reply*> segments;
+	const int MAX_LENGTH = 64000/*bytes*/;
+	auto meterids = msg->get_meter_config_array().keys();
 
-	for (std::map<unsigned int, rofl::openflow::cofmeter_config_reply>::const_iterator
-			it = msg->get_meter_config_array().get_mconfig().begin();
-					it != msg->get_meter_config_array().get_mconfig().end(); ++it) {
+	/* create fragments */
+	while (not meterids.empty()) {
+		rofl::openflow::cofmeterconfigarray array(msg->get_version());
 
-		array.add_meter_config(index++) = it->second;
-
-		/*
-		 * TODO: put more rofl::openflow::cofmeter_config_reply elements in array per round
-		 */
+		while ((not meterids.empty()) && (array.length() < MAX_LENGTH)) {
+			uint32_t meterid = meterids.front(); meterids.pop_front();
+			array.add_meter_config(meterid) =
+					msg->get_meter_config_array().get_meter_config(meterid);
+		}
 
 		segments.push_back(
 				new rofl::openflow::cofmsg_meter_config_stats_reply(
 						msg->get_version(),
 						msg->get_xid(),
-						msg->get_stats_flags() | rofl::openflow13::OFPMPF_REPLY_MORE,
+						msg->get_stats_flags(),
 						array));
-
-		array.clear();
 	}
 
-	// clear MORE flag on last segment
-	if (not segments.empty()) {
-		segments.back()->set_stats_flags(segments.back()->get_stats_flags() & ~rofl::openflow13::OFPMPF_REPLY_MORE);
-	}
-
-	unsigned int cwnd_size = 0;
-
-	for (std::vector<rofl::openflow::cofmsg_meter_config_stats_reply*>::iterator
-			it = segments.begin(); it != segments.end(); ++it) {
-		 rofsock.send_message(*it);
-	}
-
+	/* delete original message */
 	delete msg;
 
-	return cwnd_size;
+	/* send fragments */
+	while (not segments.empty()) {
+		rofl::openflow::cofmsg_meter_config_stats_reply* msg = segments.front();
+		segments.pop_front();
+		// set MORE flag on all segments except last one
+		if (not segments.empty()) {
+			msg->set_stats_flags(
+					msg->get_stats_flags() | rofl::openflow13::OFPMPF_REPLY_MORE);
+		}
+		rofsock.send_message(msg);
+	}
+
+	return 0;
 }
 
 
