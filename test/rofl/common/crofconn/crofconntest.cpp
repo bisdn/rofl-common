@@ -40,6 +40,7 @@ crofconntest::test()
 			server_established = 0;
 			client_established = 0;
 			num_of_packets = 256;
+			num_of_packets = 4;
 
 			slisten = new rofl::crofsock(this);
 			sclient = new rofl::crofconn(this);
@@ -154,9 +155,9 @@ crofconntest::handle_listen(
 
 	switch (test_mode) {
 	case TEST_MODE_TCP: {
-		//versionbitmap_ctl.add_ofp_version(rofl::openflow10::OFP_VERSION);
+		versionbitmap_ctl.add_ofp_version(rofl::openflow10::OFP_VERSION);
 		versionbitmap_ctl.add_ofp_version(rofl::openflow12::OFP_VERSION);
-		//versionbitmap_ctl.add_ofp_version(rofl::openflow13::OFP_VERSION);
+		versionbitmap_ctl.add_ofp_version(rofl::openflow13::OFP_VERSION);
 
 		(sserver = new rofl::crofconn(this))->tcp_accept(sd, versionbitmap_ctl, rofl::crofconn::MODE_CONTROLLER);
 
@@ -292,6 +293,34 @@ crofconntest::handle_recv(
 		client_established++;
 		std::cerr << "c:" << client_established << "(" << server_established << "), ";
 	} break;
+	case rofl::openflow::OFPT_MULTIPART_REQUEST: {
+
+		rofl::openflow::cofmsg_stats_request* req =
+				dynamic_cast<rofl::openflow::cofmsg_stats_request*>( pmsg );
+
+		CPPUNIT_ASSERT(nullptr != req);
+		CPPUNIT_ASSERT(req->get_stats_type() == rofl::openflow::OFPMP_PORT_DESC);
+
+		rofl::openflow::cofports ports(pmsg->get_version());
+
+		for (unsigned int i = 0; i < 10000; i++) {
+			ports.add_port(i);
+		}
+		std::cerr << "UUUUUUUUUUUUUU: " << ports.size() << std::endl;
+		std::cerr << "UUUUUUUUUUUUUU: " << ports.length() << std::endl;
+
+
+		sclient->send_message(
+				new rofl::openflow::cofmsg_port_desc_stats_reply(
+						pmsg->get_version(),
+						pmsg->get_xid(),
+						0,
+						ports));
+
+	} break;
+	case rofl::openflow::OFPT_MULTIPART_REPLY: {
+
+	} break;
 	default: {
 
 	};
@@ -327,6 +356,19 @@ crofconntest::send_packet_out(
 		uint8_t version)
 {
 	xid_server = 0;
+
+	for (unsigned int i = 0; i < 1; i++) {
+		try {
+		sserver->send_message(
+				new rofl::openflow::cofmsg_port_desc_stats_request(
+						version,
+						++xid_server));
+		} catch (rofl::exception& e) {
+			std::cerr << "RRRRRRRRRRRRRRRRR: " << e << std::endl;
+			std::cerr << "FFFFFFFFFFFFFFFFF: " << (int)version << std::endl;
+		}
+	}
+
 	for (unsigned int i = 0; i < num_of_packets; i++) {
 		sserver->send_message(
 				new rofl::openflow::cofmsg_packet_out(
