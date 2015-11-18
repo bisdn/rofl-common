@@ -347,10 +347,6 @@ crofconn::send_hello_message()
 {
 	try {
 
-		if (not flag_hello_rcvd) {
-			thread.add_timer(TIMER_ID_WAIT_FOR_HELLO, ctimespec().expire_in(timeout_hello));
-		}
-
 		rofl::openflow::cofhelloelems helloIEs;
 		helloIEs.add_hello_elem_versionbitmap() = versionbitmap;
 
@@ -364,6 +360,10 @@ crofconn::send_hello_message()
 		}
 
 		rofsock.send_message(msg);
+
+		if (not flag_hello_rcvd) {
+			thread.add_timer(TIMER_ID_WAIT_FOR_HELLO, ctimespec().expire_in(timeout_hello));
+		}
 
 	} catch (rofl::exception& e) {
 		journal.log(e).set_caller(__PRETTY_FUNCTION__);
@@ -386,8 +386,6 @@ crofconn::hello_rcvd(
 	}
 
 	flag_hello_rcvd = true;
-
-	thread.drop_timer(TIMER_ID_WAIT_FOR_HELLO);
 
 	try {
 
@@ -514,6 +512,8 @@ crofconn::hello_rcvd(
 
 		set_state(STATE_NEGOTIATION_FAILED);
 	}
+
+	thread.drop_timer(TIMER_ID_WAIT_FOR_HELLO);
 
 	delete msg;
 }
