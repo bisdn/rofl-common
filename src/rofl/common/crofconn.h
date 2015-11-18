@@ -1425,6 +1425,9 @@ private:
 	// hello message from peer rcvd
 	bool                            flag_hello_rcvd;
 
+	// hello lock
+	rofl::crwlock                   hello_lock;
+
 	// relative scheduling weights for rxqueues
 	std::vector<unsigned int>       rxweights;
 

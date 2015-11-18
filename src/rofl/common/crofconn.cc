@@ -345,6 +345,7 @@ crofconn::error_rcvd(
 void
 crofconn::send_hello_message()
 {
+	AcquireReadWriteLock lock(hello_lock);
 	try {
 
 		rofl::openflow::cofhelloelems helloIEs;
@@ -377,6 +378,7 @@ void
 crofconn::hello_rcvd(
 		rofl::openflow::cofmsg* pmsg)
 {
+	AcquireReadWriteLock lock(hello_lock);
 	rofl::openflow::cofmsg_hello* msg = dynamic_cast<rofl::openflow::cofmsg_hello*>( pmsg );
 
 	if (nullptr == msg) {
