@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 /*
  * cofqueuestats.h
  *
@@ -5,8 +9,8 @@
  *      Author: andi
  */
 
-#ifndef COFQUEUESTATS_H_
-#define COFQUEUESTATS_H_ 1
+#ifndef ROFL_COMMON_OPENFLOW_COFQUEUESTATS_H
+#define ROFL_COMMON_OPENFLOW_COFQUEUESTATS_H 1
 
 #include "rofl/common/cmemory.h"
 #include "rofl/common/openflow/openflow.h"
@@ -34,23 +38,24 @@ public:
 	};
 };
 
-class cofqueue_stats_request
-{
-private: // data structures
-
-	uint8_t 		of_version;
-	uint32_t 		port_no;
-	uint32_t		queue_id;
-
-public: // data structures
-
-
+class cofqueue_stats_request {
 public:
+
+	/**
+	 *
+	 */
+	~cofqueue_stats_request()
+	{};
+
 	/**
 	 *
 	 */
 	cofqueue_stats_request(
-			uint8_t of_version = 0);
+			uint8_t of_version = rofl::openflow::OFP_VERSION_UNKNOWN) :
+				of_version(of_version),
+				port_no(0),
+				queue_id(0)
+	{};
 
 	/**
 	 *
@@ -58,41 +63,36 @@ public:
 	cofqueue_stats_request(
 			uint8_t of_version,
 			uint32_t port_no,
-			uint32_t queue_id);
-
-	/**
-	 *
-	 */
-	virtual
-	~cofqueue_stats_request();
-
+			uint32_t queue_id) :
+				of_version(of_version),
+				port_no(port_no),
+				queue_id(queue_id)
+	{};
 
 	/**
 	 *
 	 */
 	cofqueue_stats_request(
-			cofqueue_stats_request const& stats);
+			const cofqueue_stats_request& req)
+	{ *this = req; };
 
 	/**
 	 *
 	 */
 	cofqueue_stats_request&
 	operator= (
-			cofqueue_stats_request const& stats);
+			const cofqueue_stats_request& req) {
+		if (this == &req)
+			return *this;
 
+		of_version 	= req.of_version;
+		port_no		= req.port_no;
+		queue_id	= req.queue_id;
 
-	/**
-	 *
-	 */
-	void
-	pack(uint8_t *buf, size_t buflen) const;
+		return *this;
+	};
 
-	/**
-	 *
-	 */
-	void
-	unpack(uint8_t *buf, size_t buflen);
-
+public:
 
 	/**
 	 *
@@ -100,6 +100,19 @@ public:
 	size_t
 	length() const;
 
+	/**
+	 *
+	 */
+	void
+	pack(
+			uint8_t *buf, size_t buflen) const;
+
+	/**
+	 *
+	 */
+	void
+	unpack(
+			uint8_t *buf, size_t buflen);
 
 public:
 
@@ -107,43 +120,47 @@ public:
 	/**
 	 *
 	 */
-	void
-	set_version(uint8_t of_version) { this->of_version = of_version; };
-
+	cofqueue_stats_request&
+	set_version(
+			uint8_t of_version)
+	{ this->of_version = of_version; return *this; };
 
 	/**
 	 *
 	 */
 	uint8_t
-	get_version() const { return of_version; };
+	get_version() const
+	{ return of_version; };
 
+	/**
+	 *
+	 */
+	cofqueue_stats_request&
+	set_port_no(
+			uint32_t port_no)
+	{ this->port_no = port_no; return *this; };
 
 	/**
 	 *
 	 */
 	uint32_t
-	get_port_no() const { return port_no; };
+	get_port_no() const
+	{ return port_no; };
 
+	/**
+	 *
+	 */
+	cofqueue_stats_request&
+	set_queue_id(
+			uint32_t queue_id)
+	{ this->queue_id = queue_id; return *this; };
 
 	/**
 	 *
 	 */
 	uint32_t
-	get_queue_id() const { return queue_id; };
-
-
-	/**
-	 *
-	 */
-	void
-	set_port_no(uint32_t port_no) { this->port_no = port_no; };
-
-
-	/**
-	 *
-	 */
-	void
-	set_queue_id(uint32_t queue_id) { this->queue_id = queue_id; };
+	get_queue_id() const
+	{ return queue_id; };
 
 public:
 
@@ -154,32 +171,39 @@ public:
 		os << "<queue-id: " << (int)r.get_queue_id() << " >" << std::endl;
 		return os;
 	};
+
+private:
+
+	uint8_t 		of_version;
+	uint32_t 		port_no;
+	uint32_t		queue_id;
 };
 
 
 
-class cofqueue_stats_reply
-{
-private: // data structures
-
-	uint8_t 		of_version;
-	uint32_t		port_no;
-	uint32_t		queue_id;
-	uint64_t		tx_bytes;
-	uint64_t		tx_packets;
-	uint64_t		tx_errors;
-	uint32_t	 	duration_sec;
-	uint32_t	 	duration_nsec;
-
-public: // data structures
-
-
+class cofqueue_stats_reply {
 public:
+
+	/**
+	 *
+	 */
+	~cofqueue_stats_reply()
+	{};
+
 	/**
 	 *
 	 */
 	cofqueue_stats_reply(
-			uint8_t of_version = 0);
+			uint8_t of_version = rofl::openflow::OFP_VERSION_UNKNOWN) :
+					of_version(of_version),
+					port_no(0),
+					queue_id(0),
+					tx_bytes(0),
+					tx_packets(0),
+					tx_errors(0),
+					duration_sec(0),
+					duration_nsec(0)
+	{};
 
 	/**
 	 *
@@ -192,48 +216,184 @@ public:
 			uint64_t tx_packets,
 			uint64_t tx_errors,
 			uint32_t duration_sec,
-			uint32_t duration_nsec);
-
-	/**
-	 *
-	 */
-	virtual
-	~cofqueue_stats_reply();
-
+			uint32_t duration_nsec) :
+				of_version(of_version),
+				port_no(port_no),
+				queue_id(queue_id),
+				tx_bytes(tx_bytes),
+				tx_packets(tx_packets),
+				tx_errors(tx_errors),
+				duration_sec(duration_sec),
+				duration_nsec(duration_nsec)
+	{};
 
 	/**
 	 *
 	 */
 	cofqueue_stats_reply(
-			cofqueue_stats_reply const& stats);
+			const cofqueue_stats_reply& rep)
+	{ *this = rep; };
 
 	/**
 	 *
 	 */
 	cofqueue_stats_reply&
 	operator= (
-			cofqueue_stats_reply const& stats);
+			const cofqueue_stats_reply& rep) {
+		if (this == &rep)
+			return *this;
 
+		of_version 		= rep.of_version;
+		port_no			= rep.port_no;
+		queue_id		= rep.queue_id;
+		tx_bytes		= rep.tx_bytes;
+		tx_packets		= rep.tx_packets;
+		tx_errors		= rep.tx_errors;
+		duration_sec 	= rep.duration_sec;
+		duration_nsec	= rep.duration_nsec;
+
+		return *this;
+	};
 
 	/**
 	 *
 	 */
 	bool
 	operator== (
-			cofqueue_stats_reply const& stats);
+			const cofqueue_stats_reply& rep) {
+		return ((of_version 	== rep.of_version) &&
+				(port_no 		== rep.port_no) &&
+				(queue_id 		== rep.queue_id) &&
+				(tx_bytes 		== rep.tx_bytes) &&
+				(tx_packets 	== rep.tx_packets) &&
+				(tx_errors 		== rep.tx_errors) &&
+				(duration_sec 	== rep.duration_sec) &&
+				(duration_nsec 	== rep.duration_nsec));
+	};
+
+public:
 
 	/**
 	 *
 	 */
-	void
-	pack(uint8_t *buf, size_t buflen) const;
+	cofqueue_stats_reply&
+	set_version(
+			uint8_t of_version)
+	{ this->of_version = of_version; return *this; };
 
 	/**
 	 *
 	 */
-	void
-	unpack(uint8_t *buf, size_t buflen);
+	uint8_t
+	get_version() const
+	{ return of_version; };
 
+	/**
+	 *
+	 */
+	cofqueue_stats_reply&
+	set_port_no(
+			uint32_t port_no)
+	{ this->port_no = port_no; return *this; };
+
+	/**
+	 *
+	 */
+	uint32_t
+	get_port_no() const
+	{ return port_no; };
+
+	/**
+	 *
+	 */
+	cofqueue_stats_reply&
+	set_queue_id(
+			uint32_t queue_id)
+	{ this->queue_id = queue_id; return *this; };
+
+	/**
+	 *
+	 */
+	uint32_t
+	get_queue_id() const
+	{ return queue_id; };
+
+	/**
+	 *
+	 */
+	cofqueue_stats_reply&
+	set_tx_bytes(
+			uint64_t tx_bytes)
+	{ this->tx_bytes = tx_bytes; return *this; };
+
+	/**
+	 *
+	 */
+	uint64_t
+	get_tx_bytes() const
+	{ return tx_bytes; };
+
+	/**
+	 *
+	 */
+	cofqueue_stats_reply&
+	set_tx_packets(
+			uint64_t tx_packets)
+	{ this->tx_packets = tx_packets; return *this; };
+
+	/**
+	 *
+	 */
+	uint64_t
+	get_tx_packets() const
+	{ return tx_packets; };
+
+	/**
+	 *
+	 */
+	cofqueue_stats_reply&
+	set_tx_errors(
+			uint64_t tx_errors)
+	{ this->tx_errors = tx_errors; return *this; };
+
+	/**
+	 *
+	 */
+	uint64_t
+	get_tx_errors() const
+	{ return tx_errors; };
+
+	/**
+	 *
+	 */
+	cofqueue_stats_reply&
+	set_duration_sec(
+			uint32_t duration_sec)
+	{ this->duration_sec = duration_sec; return *this; };
+
+	/**
+	 *
+	 */
+	uint32_t
+	get_duration_sec() const
+	{ return duration_sec; };
+
+	/**
+	 *
+	 */
+	cofqueue_stats_reply&
+	set_duration_nsec(
+			uint32_t duration_nsec)
+	{ this->duration_nsec = duration_nsec; return *this; };
+
+	/**
+	 *
+	 */
+	uint32_t
+	get_duration_nsec() const
+	{ return duration_nsec; };
+
+public:
 
 	/**
 	 *
@@ -241,107 +401,19 @@ public:
 	size_t
 	length() const;
 
-
-public:
-
+	/**
+	 *
+	 */
+	void
+	pack(
+			uint8_t *buf, size_t buflen) const;
 
 	/**
 	 *
 	 */
 	void
-	set_version(uint8_t of_version) { this->of_version = of_version; };
-
-
-	/**
-	 *
-	 */
-	uint8_t
-	get_version() const { return of_version; };
-
-
-	/**
-	 *
-	 */
-	uint32_t
-	get_port_no() const { return port_no; };
-
-	/**
-	 *
-	 */
-	uint32_t
-	get_queue_id() const { return queue_id; };
-
-	/**
-	 *
-	 */
-	uint64_t
-	get_tx_bytes() const { return tx_bytes; };
-
-	/**
-	 *
-	 */
-	uint64_t
-	get_tx_packets() const { return tx_packets; };
-
-	/**
-	 *
-	 */
-	uint64_t
-	get_tx_errors() const { return tx_errors; };
-
-	/**
-	 *
-	 */
-	uint32_t
-	get_duration_sec() const { return duration_sec; };
-
-	/**
-	 *
-	 */
-	uint32_t
-	get_duration_nsec() const { return duration_nsec; };
-
-	/**
-	 *
-	 */
-	void
-	set_port_no(uint32_t port_no) { this->port_no = port_no; };
-
-	/**
-	 *
-	 */
-	void
-	set_queue_id(uint32_t queue_id) { this->queue_id = queue_id; };
-
-	/**
-	 *
-	 */
-	void
-	set_tx_bytes(uint64_t tx_bytes) { this->tx_bytes = tx_bytes; };
-
-	/**
-	 *
-	 */
-	void
-	set_tx_packets(uint64_t tx_packets) { this->tx_packets = tx_packets; };
-
-	/**
-	 *
-	 */
-	void
-	set_tx_errors(uint64_t tx_errors) { this->tx_errors = tx_errors; };
-
-	/**
-	 *
-	 */
-	void
-	set_duration_sec(uint32_t duration_sec) { this->duration_sec = duration_sec; };
-
-	/**
-	 *
-	 */
-	void
-	set_duration_nsec(uint32_t duration_nsec) { this->duration_nsec = duration_nsec; };
+	unpack(
+			uint8_t *buf, size_t buflen);
 
 public:
 
@@ -365,9 +437,20 @@ public:
 		}
 		return os;
 	};
+
+private:
+
+	uint8_t 		of_version;
+	uint32_t		port_no;
+	uint32_t		queue_id;
+	uint64_t		tx_bytes;
+	uint64_t		tx_packets;
+	uint64_t		tx_errors;
+	uint32_t	 	duration_sec;
+	uint32_t	 	duration_nsec;
 };
 
 }
 }
 
-#endif /* COFQUEUESTATS_H_ */
+#endif /* ROFL_COMMON_OPENFLOW_COFQUEUESTATS_H */

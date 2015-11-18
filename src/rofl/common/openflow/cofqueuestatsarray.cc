@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 /*
  * cofqueues.cc
  *
@@ -8,93 +12,6 @@
 #include "rofl/common/openflow/cofqueuestatsarray.h"
 
 using namespace rofl::openflow;
-
-
-cofqueuestatsarray::cofqueuestatsarray(uint8_t ofp_version) :
-		ofp_version(ofp_version)
-{
-
-}
-
-
-cofqueuestatsarray::~cofqueuestatsarray()
-{
-
-}
-
-
-cofqueuestatsarray::cofqueuestatsarray(cofqueuestatsarray const& queues)
-{
-	*this = queues;
-}
-
-
-cofqueuestatsarray&
-cofqueuestatsarray::operator= (cofqueuestatsarray const& queues)
-{
-	if (this == &queues)
-		return *this;
-
-	this->array.clear();
-
-	ofp_version = queues.ofp_version;
-	for (std::map<uint32_t, std::map<uint32_t, cofqueue_stats_reply> >::const_iterator
-			it = queues.array.begin(); it != queues.array.end(); ++it) {
-		for (std::map<uint32_t, cofqueue_stats_reply>::const_iterator
-					jt = it->second.begin(); jt != it->second.end(); ++jt) {
-			this->array[it->first][jt->first] = jt->second;
-		}
-	}
-
-	return *this;
-}
-
-
-
-bool
-cofqueuestatsarray::operator== (cofqueuestatsarray const& queues)
-{
-	if (ofp_version != queues.ofp_version)
-		return false;
-
-	if (array.size() != queues.array.size())
-		return false;
-
-	for (std::map<uint32_t, std::map<uint32_t, cofqueue_stats_reply> >::const_iterator
-				it = queues.array.begin(); it != queues.array.end(); ++it) {
-
-		if (array[it->first].size() != it->second.size())
-			return false;
-
-		for (std::map<uint32_t, cofqueue_stats_reply>::const_iterator
-					jt = it->second.begin(); jt != it->second.end(); ++jt) {
-			if (not (array[it->first][jt->first] == jt->second))
-				return false;
-		}
-	}
-
-	return true;
-}
-
-
-
-cofqueuestatsarray&
-cofqueuestatsarray::operator+= (cofqueuestatsarray const& queues)
-{
-	/*
-	 * this may replace existing queue descriptions
-	 */
-	for (std::map<uint32_t, std::map<uint32_t, cofqueue_stats_reply> >::const_iterator
-			it = queues.array.begin(); it != queues.array.end(); ++it) {
-		for (std::map<uint32_t, cofqueue_stats_reply>::const_iterator
-					jt = it->second.begin(); jt != it->second.end(); ++jt) {
-			this->array[it->first][jt->first] = jt->second;
-		}
-	}
-
-	return *this;
-}
-
 
 
 size_t
@@ -114,7 +31,8 @@ cofqueuestatsarray::length() const
 
 
 void
-cofqueuestatsarray::pack(uint8_t *buf, size_t buflen)
+cofqueuestatsarray::pack(
+		uint8_t *buf, size_t buflen)
 {
 	if ((0 == buf) || (0 == buflen))
 		return;
@@ -145,7 +63,8 @@ cofqueuestatsarray::pack(uint8_t *buf, size_t buflen)
 
 
 void
-cofqueuestatsarray::unpack(uint8_t *buf, size_t buflen)
+cofqueuestatsarray::unpack(
+		uint8_t *buf, size_t buflen)
 {
 	array.clear();
 
@@ -181,62 +100,6 @@ cofqueuestatsarray::unpack(uint8_t *buf, size_t buflen)
 		throw eBadRequestBadVersion("eBadRequestBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 }
-
-
-
-cofqueue_stats_reply&
-cofqueuestatsarray::add_queue_stats(uint32_t port_no, uint32_t queue_id)
-{
-	if (array[port_no].find(queue_id) != array[port_no].end()) {
-		array[port_no].erase(queue_id);
-	}
-	return (array[port_no][queue_id] = cofqueue_stats_reply(ofp_version));
-}
-
-
-
-void
-cofqueuestatsarray::drop_queue_stats(uint32_t port_no, uint32_t queue_id)
-{
-	if (array[port_no].find(queue_id) == array[port_no].end()) {
-		return;
-	}
-	array[port_no].erase(queue_id);
-}
-
-
-
-cofqueue_stats_reply&
-cofqueuestatsarray::set_queue_stats(uint32_t port_no, uint32_t queue_id)
-{
-	if (array[port_no].find(queue_id) == array[port_no].end()) {
-		array[port_no][queue_id] = cofqueue_stats_reply(ofp_version);
-	}
-	return array[port_no][queue_id];
-}
-
-
-
-cofqueue_stats_reply const&
-cofqueuestatsarray::get_queue_stats(uint32_t port_no, uint32_t queue_id) const
-{
-	if (array.find(port_no) == array.end()) {
-		throw eQueueStatsNotFound();
-	}
-	if (array.at(port_no).find(queue_id) == array.at(port_no).end()) {
-		throw eQueueStatsNotFound();
-	}
-	return array.at(port_no).at(queue_id);
-}
-
-
-
-bool
-cofqueuestatsarray::has_queue_stats(uint32_t port_no, uint32_t queue_id)
-{
-	return (not (array[port_no].find(queue_id) == array[port_no].end()));
-}
-
 
 
 

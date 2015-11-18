@@ -155,9 +155,9 @@ cofmsgfeaturestest::testReply(
 			CPPUNIT_ASSERT(msg2.get_auxid() == auxid);
 		CPPUNIT_ASSERT(msg2.get_capabilities() == capabilities);
 		if (version < rofl::openflow13::OFP_VERSION)
-			CPPUNIT_ASSERT(msg2.get_ports().get_ports().size() == ports.get_ports().size());
+			CPPUNIT_ASSERT(msg2.get_ports().size() == ports.size());
 		else
-			CPPUNIT_ASSERT(msg2.get_ports().get_ports().size() == 0);
+			CPPUNIT_ASSERT(msg2.get_ports().size() == 0);
 
 	} catch (...) {
 		std::cerr << ">>> request <<<" << std::endl << msg1;
