@@ -185,6 +185,7 @@ private:
 	uint8_t             auxid;
 	uint32_t            n_buffers;
 	uint8_t             n_tables;
+	rofl::openflow::cofports ports;
 
 	unsigned int        num_of_packets;
 	unsigned int        server_established;

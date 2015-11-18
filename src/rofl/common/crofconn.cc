@@ -1356,7 +1356,7 @@ crofconn::handle_rx_multipart_message(
 		// start new or continue pending transaction
 		if (stats->get_stats_flags() & rofl::openflow13::OFPMPF_REQ_MORE) {
 
-			set_pending_segment(msg->get_xid()).store_and_merge_msg(*msg);
+			set_pending_segment(msg->get_xid(), stats->get_type(), stats->get_stats_type()).store_and_merge_msg(*msg);
 			delete msg; // delete msg here, we store a copy in the transaction
 
 		// end pending transaction or multipart message with single message only
@@ -1364,7 +1364,7 @@ crofconn::handle_rx_multipart_message(
 
 			if (has_pending_segment(msg->get_xid())) {
 
-				set_pending_segment(msg->get_xid()).store_and_merge_msg(*msg);
+				set_pending_segment(msg->get_xid(), stats->get_type(), stats->get_stats_type()).store_and_merge_msg(*msg);
 
 				rofl::openflow::cofmsg* reassembled_msg = set_pending_segment(msg->get_xid()).retrieve_and_detach_msg();
 
@@ -1394,7 +1394,7 @@ crofconn::handle_rx_multipart_message(
 		// start new or continue pending transaction
 		if (stats->get_stats_flags() & rofl::openflow13::OFPMPF_REQ_MORE) {
 
-			set_pending_segment(msg->get_xid()).store_and_merge_msg(*msg);
+			set_pending_segment(msg->get_xid(), stats->get_type(), stats->get_stats_type()).store_and_merge_msg(*msg);
 			delete msg; // delete msg here, we store a copy in the transaction
 
 		// end pending transaction or multipart message with single message only
@@ -1402,7 +1402,7 @@ crofconn::handle_rx_multipart_message(
 
 			if (has_pending_segment(msg->get_xid())) {
 
-				set_pending_segment(msg->get_xid()).store_and_merge_msg(*msg);
+				set_pending_segment(msg->get_xid(), stats->get_type(), stats->get_stats_type()).store_and_merge_msg(*msg);
 
 				rofl::openflow::cofmsg* reassembled_msg = set_pending_segment(msg->get_xid()).retrieve_and_detach_msg();
 

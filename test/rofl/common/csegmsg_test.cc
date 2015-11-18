@@ -29,7 +29,8 @@ csegment_test::tearDown()
 void
 csegment_test::testStoreAndMerge()
 {
-	rofl::csegment segmsg(0x11121314, rofl::ctimespec().expire_in(8));
+	rofl::csegment segmsg(0x11121314, rofl::ctimespec().expire_in(8),
+			rofl::openflow::OFPT_MULTIPART_REPLY, rofl::openflow::OFPMP_TABLE);
 
 	/*
 	 * first message
@@ -116,7 +117,8 @@ csegment_test::testStoreAndMerge()
 void
 csegment_test::testRetrieveAndDetach()
 {
-	rofl::csegment segmsg(0x11121314, rofl::ctimespec().expire_in(8));
+	rofl::csegment segmsg(0x11121314, rofl::ctimespec().expire_in(8),
+			rofl::openflow::OFPT_MULTIPART_REPLY, rofl::openflow::OFPMP_TABLE);
 
 	/*
 	 * first message

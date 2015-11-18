@@ -1281,12 +1281,31 @@ private:
 	 */
 	csegment&
 	add_pending_segment(
-			uint32_t xid) {
+			uint32_t xid, uint8_t msg_type, uint16_t msg_multipart_type) {
 		AcquireReadWriteLock rwlock(pending_segments_rwlock);
 		if (not (pending_segments.size() < pending_segments_max)) {
 			throw eRofConnInvalid("crofconn::add_pending_segment() too many segments in transit, dropping");
 		}
-		pending_segments[xid] = csegment(xid, ctimespec().expire_in(timeout_segments));
+		pending_segments[xid] = csegment(xid, ctimespec().expire_in(timeout_segments), msg_type, msg_multipart_type);
+		if (not thread.has_timer(TIMER_ID_PENDING_SEGMENTS)) {
+			thread.add_timer(TIMER_ID_PENDING_SEGMENTS, ctimespec().expire_in(timeout_segments));
+		}
+		return pending_segments[xid];
+	};
+
+	/**
+	 *
+	 */
+	csegment&
+	set_pending_segment(
+			uint32_t xid, uint8_t msg_type, uint16_t msg_multipart_type) {
+		AcquireReadWriteLock rwlock(pending_segments_rwlock);
+		if (not (pending_segments.size() < pending_segments_max)) {
+			throw eRofConnInvalid("crofconn::set_pending_segment() too many segments in transit, dropping");
+		}
+		if (pending_segments.find(xid) == pending_segments.end()) {
+			pending_segments[xid] = csegment(xid, ctimespec().expire_in(timeout_segments), msg_type, msg_multipart_type);
+		}
 		if (not thread.has_timer(TIMER_ID_PENDING_SEGMENTS)) {
 			thread.add_timer(TIMER_ID_PENDING_SEGMENTS, ctimespec().expire_in(timeout_segments));
 		}
@@ -1304,7 +1323,7 @@ private:
 			throw eRofConnInvalid("crofconn::set_pending_segment() too many segments in transit, dropping");
 		}
 		if (pending_segments.find(xid) == pending_segments.end()) {
-			pending_segments[xid] = csegment(xid, ctimespec().expire_in(timeout_segments));
+			throw eRofConnNotFound("crofconn::set_pending_segment() xid not found");
 		}
 		if (not thread.has_timer(TIMER_ID_PENDING_SEGMENTS)) {
 			thread.add_timer(TIMER_ID_PENDING_SEGMENTS, ctimespec().expire_in(timeout_segments));

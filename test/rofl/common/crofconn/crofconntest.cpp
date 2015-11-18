@@ -53,7 +53,8 @@ crofconntest::test()
 			versionbitmap_dpt.add_ofp_version(rofl::openflow10::OFP_VERSION);
 			versionbitmap_dpt.add_ofp_version(rofl::openflow12::OFP_VERSION);
 			versionbitmap_dpt.add_ofp_version(rofl::openflow13::OFP_VERSION);
-			sclient->set_raddr(baddr).tcp_connect(versionbitmap_dpt, rofl::crofconn::MODE_DATAPATH, /*reconnect=*/false);
+			sclient->set_raddr(baddr).set_trace(true).
+					tcp_connect(versionbitmap_dpt, rofl::crofconn::MODE_DATAPATH, /*reconnect=*/false);
 
 
 			while (keep_running) {
@@ -159,7 +160,8 @@ crofconntest::handle_listen(
 		versionbitmap_ctl.add_ofp_version(rofl::openflow12::OFP_VERSION);
 		versionbitmap_ctl.add_ofp_version(rofl::openflow13::OFP_VERSION);
 
-		(sserver = new rofl::crofconn(this))->tcp_accept(sd, versionbitmap_ctl, rofl::crofconn::MODE_CONTROLLER);
+		(sserver = new rofl::crofconn(this))->set_trace(true).
+				tcp_accept(sd, versionbitmap_ctl, rofl::crofconn::MODE_CONTROLLER);
 
 	} break;
 	case TEST_MODE_TLS: {
@@ -273,6 +275,8 @@ crofconntest::handle_recv(
 	n_buffers = 0xe1e2e3e4;
 	n_tables = 0xff;
 
+
+
 	switch (pmsg->get_type()) {
 	case rofl::openflow::OFPT_FEATURES_REQUEST: {
 		rofl::openflow::cofmsg_features_reply* msg =
@@ -301,13 +305,13 @@ crofconntest::handle_recv(
 		CPPUNIT_ASSERT(nullptr != req);
 		CPPUNIT_ASSERT(req->get_stats_type() == rofl::openflow::OFPMP_PORT_DESC);
 
-		rofl::openflow::cofports ports(pmsg->get_version());
+		ports.set_version(pmsg->get_version());
 
 		for (unsigned int i = 0; i < 10000; i++) {
 			ports.add_port(i);
 		}
-		std::cerr << "UUUUUUUUUUUUUU: " << ports.size() << std::endl;
-		std::cerr << "UUUUUUUUUUUUUU: " << ports.length() << std::endl;
+		std::cerr << "#ports sent: " << ports.size() << std::endl;
+		std::cerr << "length of ports sent: " << ports.length() << std::endl;
 
 
 		sclient->send_message(
@@ -320,6 +324,25 @@ crofconntest::handle_recv(
 	} break;
 	case rofl::openflow::OFPT_MULTIPART_REPLY: {
 
+		rofl::openflow::cofmsg_stats_reply* rep =
+				dynamic_cast<rofl::openflow::cofmsg_stats_reply*>( pmsg );
+
+		CPPUNIT_ASSERT(rep != nullptr);
+		CPPUNIT_ASSERT(rep->get_stats_type() == rofl::openflow::OFPMP_PORT_DESC);
+
+		rofl::openflow::cofmsg_port_desc_stats_reply* port_desc =
+				dynamic_cast<rofl::openflow::cofmsg_port_desc_stats_reply*>( rep );
+
+		CPPUNIT_ASSERT(port_desc != nullptr);
+
+		std::cerr << "#ports rcvd: " << port_desc->get_ports().size() << std::endl;
+		std::cerr << "length of ports rcvd: " << port_desc->get_ports().length() << std::endl;
+
+		CPPUNIT_ASSERT(port_desc->get_ports().size() == ports.size());
+		CPPUNIT_ASSERT(port_desc->get_ports().length() == ports.length());
+
+		keep_running = false;
+
 	} break;
 	default: {
 
@@ -328,7 +351,6 @@ crofconntest::handle_recv(
 
 	if ((server_established == num_of_packets) && (client_established == num_of_packets)) {
 		std::cerr << "[E] " << std::endl;
-		keep_running = false;
 	}
 
 	delete pmsg;
@@ -357,23 +379,23 @@ crofconntest::send_packet_out(
 {
 	xid_server = 0;
 
-	for (unsigned int i = 0; i < 1; i++) {
-		try {
-		sserver->send_message(
-				new rofl::openflow::cofmsg_port_desc_stats_request(
-						version,
-						++xid_server));
-		} catch (rofl::exception& e) {
-			std::cerr << "RRRRRRRRRRRRRRRRR: " << e << std::endl;
-			std::cerr << "FFFFFFFFFFFFFFFFF: " << (int)version << std::endl;
-		}
-	}
-
 	for (unsigned int i = 0; i < num_of_packets; i++) {
 		sserver->send_message(
 				new rofl::openflow::cofmsg_packet_out(
 						version,
 						++xid_server));
+
+		for (unsigned int i = 0; i < 1; i++) {
+			try {
+				sserver->send_message(
+						new rofl::openflow::cofmsg_port_desc_stats_request(
+								version,
+								++xid_server));
+			} catch (rofl::exception& e) {
+				CPPUNIT_ASSERT(false);
+			}
+		}
+
 	}
 }
 
