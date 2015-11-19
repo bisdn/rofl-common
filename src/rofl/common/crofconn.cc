@@ -891,6 +891,8 @@ crofconn::handle_closed(
 		/* work on packets in reception queue first, then signal shutdown */
 		unsigned int waiting = 60/*seconds*/;
 		while ((--waiting > 0) && (rx_thread_scheduled || rx_thread_working)) {
+			journal.log(LOG_NOTICE, "socket indicates close, waiting for pending rx packets").
+					set_func(__PRETTY_FUNCTION__);
 			sleep(1);
 		}
 
