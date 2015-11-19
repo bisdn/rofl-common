@@ -54,7 +54,7 @@ crofchantest::test1()
 
 	for (unsigned int i = 0; i < num_of_conns; i++) {
 		channel1->add_conn(rofl::cauxid(i)).
-				  	  set_raddr(baddr).
+				  	  set_raddr(baddr).set_trace(true).
 					  	  tcp_connect(versionbitmap, rofl::crofconn::MODE_CONTROLLER, false);
 		//sleep(2);
 	}
@@ -92,8 +92,13 @@ crofchantest::handle_listen(
 {
 	num_of_accepts++;
 
+	std::cerr << rofsock->get_journal() << std::endl;
+
 	rofl::crofconn& conn = channel2->add_conn();
-	conn.tcp_accept(sd, versionbitmap, rofl::crofconn::MODE_DATAPATH);
+	conn.set_trace(true).tcp_accept(sd, versionbitmap, rofl::crofconn::MODE_DATAPATH);
+
+	std::cerr << conn.get_journal() << std::endl;
+	std::cerr << conn.get_tcp_journal() << std::endl;
 
 	std::cerr << std::endl;
 	std::cerr << ">>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<" << std::endl;
