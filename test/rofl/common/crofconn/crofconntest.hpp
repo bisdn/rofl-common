@@ -179,6 +179,9 @@ private:
 	rofl::crofconn*     sserver;
 	uint32_t            xid_server;
 	uint32_t            xid_client;
+	uint16_t            listening_port;
+	rofl::crandom       rand;
+	rofl::csockaddr     baddr;
 
 	uint32_t            xid;
 	uint64_t            dpid;

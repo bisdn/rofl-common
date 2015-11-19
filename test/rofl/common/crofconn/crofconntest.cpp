@@ -45,9 +45,28 @@ crofconntest::test()
 			slisten = new rofl::crofsock(this);
 			sclient = new rofl::crofconn(this);
 
-			/* open listening socket in crofsock instance */
-			rofl::csockaddr baddr(rofl::caddress_in4("127.0.0.1"), 33996);
-			slisten->set_baddr(baddr).listen();
+			listening_port = 0;
+
+			/* try to find idle port for test */
+			bool lookup_idle_port = true;
+			while (lookup_idle_port) {
+				do {
+					listening_port = rand.uint16();
+					std::cerr << "trying listening port=" << (int)listening_port << std::endl;
+				} while ((listening_port < 10000) || (listening_port > 49000));
+				try {
+					baddr = rofl::csockaddr(rofl::caddress_in4("127.0.0.1"), listening_port);
+					/* try to bind address first */
+					slisten->set_baddr(baddr).listen();
+					std::cerr << "binding to " << baddr.str() << std::endl;
+					lookup_idle_port = false;
+				} catch (rofl::eSysCall& e) {
+					/* port in use, try another one */
+				}
+			}
+
+
+
 
 			/* create new crofconn instance and connect to peer */
 			versionbitmap_dpt.add_ofp_version(rofl::openflow10::OFP_VERSION);
@@ -68,9 +87,14 @@ crofconntest::test()
 			sclient->close();
 			sserver->close();
 
+			std::cerr << ">>>>>>>>>>>>> listen <<<<<<<<<<<<<<" << std::endl;
 			std::cerr << slisten->get_journal() << std::endl;
+			std::cerr << ">>>>>>>>>>>>> client <<<<<<<<<<<<<<" << std::endl;
 			std::cerr << sclient->get_journal() << std::endl;
+			std::cerr << sclient->get_tcp_journal() << std::endl;
+			std::cerr << ">>>>>>>>>>>>> server <<<<<<<<<<<<<<" << std::endl;
 			std::cerr << sserver->get_journal() << std::endl;
+			std::cerr << sserver->get_tcp_journal() << std::endl;
 
 			delete slisten;
 			delete sclient;
