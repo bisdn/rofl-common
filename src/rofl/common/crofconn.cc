@@ -49,6 +49,7 @@ crofconn::crofconn(
 				rxweights(QUEUE_MAX),
 				rxqueues(QUEUE_MAX),
 				rx_thread_working(false),
+				rx_thread_scheduled(false),
 				rxqueue_max_size(RXQUEUE_MAX_SIZE_DEFAULT),
 				segmentation_threshold(DEFAULT_SEGMENTATION_THRESHOLD),
 				timeout_hello(DEFAULT_HELLO_TIMEOUT),
@@ -249,6 +250,7 @@ crofconn::set_state(
 			journal.log(LOG_INFO, "STATE_ESTABLISHED").
 					set_func(__PRETTY_FUNCTION__).set_line(__LINE__).
 						set_key("negotiated version", (int)ofp_version);
+			thread.drop_timer(TIMER_ID_WAIT_FOR_HELLO);
 			/* start periodic checks for connection state (OAM) */
 			thread.add_timer(TIMER_ID_NEED_LIFE_CHECK, ctimespec().expire_in(timeout_lifecheck));
 			crofconn_env::call_env(env).handle_established(*this, ofp_version);
@@ -528,7 +530,16 @@ crofconn::hello_expired()
 	journal.log(LOG_CRIT_ERROR, "HELLO expired").
 			set_func(__PRETTY_FUNCTION__);
 
-	set_state(STATE_NEGOTIATION_FAILED);
+	switch (state) {
+	case STATE_ESTABLISHED: {
+		/* ignore event */
+		journal.log(LOG_CRIT_ERROR, "HELLO expired, ignoring event, already established").
+				set_func(__PRETTY_FUNCTION__);
+	} break;
+	default: {
+		set_state(STATE_NEGOTIATION_FAILED);
+	};
+	}
 }
 
 
@@ -876,6 +887,13 @@ crofconn::handle_closed(
 	try {
 		journal.log(LOG_NOTICE, "socket indicates close").
 				set_func(__PRETTY_FUNCTION__);
+
+		/* work on packets in reception queue first, then signal shutdown */
+		unsigned int waiting = 60/*seconds*/;
+		while ((--waiting > 0) && (rx_thread_scheduled || rx_thread_working)) {
+			sleep(1);
+		}
+
 		set_state(STATE_DISCONNECTED);
 		crofconn_env::call_env(env).handle_closed(*this);
 
@@ -1251,6 +1269,7 @@ crofconn::handle_rx_messages()
 {
 	/* we start with handling incoming messages */
 	rx_thread_working = true;
+	rx_thread_scheduled = false;
 
 	thread.drop_timer(TIMER_ID_NEED_LIFE_CHECK);
 
@@ -1309,6 +1328,7 @@ crofconn::handle_rx_messages()
 			/* not connected any more, stop running working thread */
 			if (STATE_ESTABLISHED != state) {
 				rx_thread_working = false;
+				rx_thread_scheduled = true;
 				return;
 			}
 

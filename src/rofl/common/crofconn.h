@@ -1437,6 +1437,9 @@ private:
 	// internal thread is working on pending messages
 	bool                            rx_thread_working;
 
+	// internal thread is scheduled for working on pending messages
+	bool                            rx_thread_scheduled;
+
     // max size of rx queue
     size_t                          rxqueue_max_size;
 	static const int                RXQUEUE_MAX_SIZE_DEFAULT;
