@@ -1304,6 +1304,9 @@ crofconn::handle_rx_messages()
 					switch (ofp_version) {
 					case rofl::openflow10::OFP_VERSION:
 					case rofl::openflow12::OFP_VERSION: {
+						if (trace) {
+							journal.log(LOG_TRACE, "call application: %s", msg->str().c_str());
+						}
 						// no segmentation and reassembly below OFP1.3, so hand over message directly to higher layers
 						crofconn_env::call_env(env).handle_recv(*this, msg);
 					} break;
@@ -1314,6 +1317,9 @@ crofconn::handle_rx_messages()
 							handle_rx_multipart_message(msg);
 						} break;
 						default: {
+							if (trace) {
+								journal.log(LOG_TRACE, "call application: %s", msg->str().c_str());
+							}
 							crofconn_env::call_env(env).handle_recv(*this, msg);
 						};
 						}
