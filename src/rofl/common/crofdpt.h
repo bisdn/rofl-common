@@ -1049,6 +1049,16 @@ public:
 public:
 
 	/**
+	 * @brief	Reset environment.
+	 */
+	crofdpt&
+	set_env(
+			crofdpt_env* env)
+	{ this->env = env; return *this; };
+
+public:
+
+	/**
 	 *
 	 */
 	const cjournal&

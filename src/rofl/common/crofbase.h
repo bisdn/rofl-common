@@ -399,9 +399,12 @@ public:
 	drop_dpts() {
 		AcquireReadWriteLock rwlock(rofdpts_rwlock);
 		for (auto it : rofdpts) {
-			delete it.second;
+			rofdpts_deletion.insert(it.second);
 		}
 		rofdpts.clear();
+		if (not thread.has_timer(TIMER_ID_ROFDPT_DESTROY)) {
+			thread.add_timer(TIMER_ID_ROFDPT_DESTROY, ctimespec().expire_in(8));
+		}
 	};
 
 	/**
@@ -492,6 +495,66 @@ public:
 	};
 
 	/**
+	 * @brief	Returns const reference to existing rofl::crofdpt instance.
+	 *
+	 * Returns existing rofl::crofdpt instance specified by identifier dptid.
+	 * If the identifier does not exist, throws an exception eRofBaseNotFound.
+	 *
+	 * @param dptid internal datapath handle (not DPID)
+	 * @result reference to existing rofl::crofdpt instance
+	 * @throws eRofBaseNotFound
+	 */
+	const rofl::crofdpt&
+	get_dpt(
+			const rofl::cdptid& dptid) const {
+		AcquireReadLock rlock(rofdpts_rwlock);
+		if (rofdpts.find(dptid) == rofdpts.end()) {
+			throw eRofBaseNotFound("rofl::crofbase::get_dpt() dptid not found");
+		}
+		return *(rofdpts.at(dptid));
+	};
+
+	/**
+	 * @brief	Deletes a rofl::crofdpt instance given by identifier.
+	 *
+	 * If the identifier is non-existing, the method does nothing and returns.
+	 */
+	bool
+	drop_dpt(
+		rofl::cdptid dptid) { // make a copy here, do not use a const reference
+		AcquireReadLock rlock(rofdpts_rwlock);
+		if (rofdpts.find(dptid) == rofdpts.end()) {
+			return false;
+		}
+		/* redirect environment */
+		rofdpts[dptid]->set_env(nullptr);
+		/* add pointer to crofdpt instance on heap to rofdpts_deletion */
+		rofdpts_deletion.insert(rofdpts[dptid]);
+		/* mark its dptid as free */
+		rofdpts.erase(dptid);
+		/* trigger management thread for doing the clean-up work */
+		if (not thread.has_timer(TIMER_ID_ROFDPT_DESTROY)) {
+			thread.add_timer(TIMER_ID_ROFDPT_DESTROY, ctimespec().expire_in(8));
+		}
+		return true;
+	};
+
+	/**
+	 * @brief	Checks for existence of rofl::crofdpt instance with given identifier
+	 *
+	 * @param dptid internal datapath handle (not DPID)
+	 * @result bool value
+	 */
+	bool
+	has_dpt(
+		const rofl::cdptid& dptid) const {
+		AcquireReadLock rlock(rofdpts_rwlock);
+		return (not (rofdpts.find(dptid) == rofdpts.end()));
+	};
+
+public:
+
+	/**
 	 * @brief	Returns existing or creates new rofl::crofdpt instance for given identifier
 	 *
 	 * Returns rofl::crofdpt instance specified by identifier dptid. If none exists,
@@ -522,50 +585,6 @@ public:
 		}
 		rofdpts[cdptid(id)] = new crofdpt(this, cdptid(id));
 		return *(rofdpts[cdptid(id)]);
-	};
-
-	/**
-	 * @brief	Returns const reference to existing rofl::crofdpt instance.
-	 *
-	 * Returns existing rofl::crofdpt instance specified by identifier dptid.
-	 * If the identifier does not exist, throws an exception eRofBaseNotFound.
-	 *
-	 * @param dptid internal datapath handle (not DPID)
-	 * @result reference to existing rofl::crofdpt instance
-	 * @throws eRofBaseNotFound
-	 */
-	const rofl::crofdpt&
-	get_dpt(
-			const rofl::cdptid& dptid) const {
-		AcquireReadLock rlock(rofdpts_rwlock);
-		if (rofdpts.find(dptid) == rofdpts.end()) {
-			throw eRofBaseNotFound("rofl::crofbase::get_dpt() dptid not found");
-		}
-		return *(rofdpts.at(dptid));
-	};
-
-	/**
-	 * @brief	Deletes a rofl::crofdpt instance given by identifier.
-	 *
-	 * If the identifier is non-existing, the method does nothing and returns.
-	 */
-	void
-	drop_dpt(
-		rofl::cdptid dptid) { // make a copy here, do not use a const reference
-		rofdpt_schedule_for_delete(dptid);
-	};
-
-	/**
-	 * @brief	Checks for existence of rofl::crofdpt instance with given identifier
-	 *
-	 * @param dptid internal datapath handle (not DPID)
-	 * @result bool value
-	 */
-	bool
-	has_dpt(
-		const rofl::cdptid& dptid) const {
-		AcquireReadLock rlock(rofdpts_rwlock);
-		return (not (rofdpts.find(dptid) == rofdpts.end()));
 	};
 
 	/**
@@ -603,9 +622,12 @@ public:
 	drop_ctls() {
 		AcquireReadWriteLock rwlock(rofctls_rwlock);
 		for (auto it : rofctls) {
-			delete it.second;
+			rofctls_deletion.insert(it.second);
 		}
 		rofctls.clear();
+		if (not thread.has_timer(TIMER_ID_ROFCTL_DESTROY)) {
+			thread.add_timer(TIMER_ID_ROFCTL_DESTROY, ctimespec().expire_in(1));
+		}
 	};
 
 	/**
@@ -717,10 +739,24 @@ public:
 	 *
 	 * If the identifier is non-existing, the method does nothing and returns.
 	 */
-	void
+	bool
 	drop_ctl(
 		rofl::cctlid ctlid) { // make a copy here, do not use a const reference
-		rofctl_schedule_for_delete(ctlid);
+		AcquireReadLock rlock(rofctls_rwlock);
+		if (rofctls.find(ctlid) == rofctls.end()) {
+			return false;
+		}
+		/* redirect environment */
+		rofctls[ctlid]->set_env(nullptr);
+		/* add pointer to crofctl instance on heap to rofctls_deletion */
+		rofctls_deletion.insert(rofctls[ctlid]);
+		/* mark its dptid as free */
+		rofctls.erase(ctlid);
+		/* trigger management thread for doing the clean-up work */
+		if (not thread.has_timer(TIMER_ID_ROFCTL_DESTROY)) {
+			thread.add_timer(TIMER_ID_ROFCTL_DESTROY, ctimespec().expire_in(1));
+		}
+		return true;
 	};
 
 	/**
@@ -2558,54 +2594,30 @@ private:
 	listen(
 			const csockaddr& baddr);
 
-	/**
-	 *
-	 */
-	void
-	rofctl_schedule_for_delete(
-			const cctlid& ctlid);
-
-	/**
-	 *
-	 */
-	void
-	rofdpt_schedule_for_delete(
-			const cdptid& dptid);
-
 private:
 
 	/**
-	 * @brief	Deletes a rofl::crofdpt instance given by identifier.
-	 *
-	 * If the identifier is non-existing, the method does nothing and returns.
+	 * @brief	Deletes all existing rofl::crofdpt instances
 	 */
 	void
-	__drop_dpt(
-		rofl::cdptid dptid) { // make a copy here, do not use a const reference
+	__drop_dpts() {
 		AcquireReadWriteLock rwlock(rofdpts_rwlock);
-		if (rofdpts.find(dptid) == rofdpts.end()) {
-			return;
+		for (auto it : rofdpts) {
+			delete it.second;
 		}
-		journal.log(LOG_INFO, "datapath removed").set_key("dptid", dptid.str());
-		delete rofdpts[dptid];
-		rofdpts.erase(dptid);
+		rofdpts.clear();
 	};
 
 	/**
-	 * @brief	Deletes a rofl::crofctl instance given by identifier.
-	 *
-	 * If the identifier is non-existing, the method does nothing and returns.
+	 * @brief	Deletes all existing rofl::crofctl instances
 	 */
 	void
-	__drop_ctl(
-		rofl::cctlid ctlid) { // make a copy here, do not use a const reference
+	__drop_ctls() {
 		AcquireReadWriteLock rwlock(rofctls_rwlock);
-		if (rofctls.find(ctlid) == rofctls.end()) {
-			return;
+		for (auto it : rofctls) {
+			delete it.second;
 		}
-		journal.log(LOG_INFO, "controller removed").set_key("ctlid", ctlid.str());
-		delete rofctls[ctlid];
-		rofctls.erase(ctlid);
+		rofctls.clear();
 	};
 
 private:
@@ -2638,16 +2650,10 @@ private:
 	 */
 
 	// set of crofctl ids scheduled for deletion
-	std::set<cctlid>                rofctls_deletion;
-
-	// ... and associated rwlock
-	mutable crwlock                 rofctls_deletion_rwlock;
+	std::set<crofctl*>              rofctls_deletion;
 
 	// set of crofdpt ids scheduled for deletion
-	std::set<cdptid>                rofdpts_deletion;
-
-	// ... and associated rwlock
-	mutable crwlock                 rofdpts_deletion_rwlock;
+	std::set<crofdpt*>              rofdpts_deletion;
 
 	/*
 	 *
