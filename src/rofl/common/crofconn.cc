@@ -887,7 +887,7 @@ crofconn::handle_closed(
 	try {
 		journal.log(LOG_NOTICE, "socket indicates close").
 				set_func(__PRETTY_FUNCTION__);
-
+#if 0
 		/* work on packets in reception queue first, then signal shutdown */
 		unsigned int waiting = 60/*seconds*/;
 		while ((--waiting > 0) && (rx_thread_scheduled || rx_thread_working)) {
@@ -895,7 +895,7 @@ crofconn::handle_closed(
 					set_func(__PRETTY_FUNCTION__);
 			sleep(1);
 		}
-
+#endif
 		set_state(STATE_DISCONNECTED);
 		crofconn_env::call_env(env).handle_closed(*this);
 
