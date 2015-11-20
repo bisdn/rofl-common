@@ -1404,6 +1404,9 @@ crofconn::handle_rx_multipart_message(
 
 				crofconn_env::call_env(env).handle_recv(*this, reassembled_msg);
 			} else {
+				if (trace) {
+					journal.log(LOG_TRACE, "call application: %s", msg->str().c_str());
+				}
 				// do not delete msg here, will be done by higher layers
 				crofconn_env::call_env(env).handle_recv(*this, msg);
 			}
@@ -1442,6 +1445,9 @@ crofconn::handle_rx_multipart_message(
 
 				crofconn_env::call_env(env).handle_recv(*this, reassembled_msg);
 			} else {
+				if (trace) {
+					journal.log(LOG_TRACE, "call application: %s", msg->str().c_str());
+				}
 				// do not delete msg here, will be done by higher layers
 				crofconn_env::call_env(env).handle_recv(*this, msg);
 			}
