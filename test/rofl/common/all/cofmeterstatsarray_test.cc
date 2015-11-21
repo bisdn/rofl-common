@@ -31,7 +31,7 @@ cofmeterstatsarray_test::testDefaultConstructor()
 {
 	rofl::openflow::cofmeterstatsarray mstats;
 	CPPUNIT_ASSERT(rofl::openflow::OFP_VERSION_UNKNOWN == mstats.get_version());
-	CPPUNIT_ASSERT(0 == mstats.get_mstats().size());
+	CPPUNIT_ASSERT(0 == mstats.size());
 }
 
 
@@ -210,42 +210,42 @@ cofmeterstatsarray_test::testAddDropSetGetHas()
 	rofl::openflow::cofmeterstatsarray mstats(rofl::openflow13::OFP_VERSION);
 
 	try {
-		mstats.get_meter_stats();
+		mstats.get_meter_stats(0);
 		CPPUNIT_ASSERT(false);
 	} catch (rofl::openflow::eRofMeterStatsNotFound& e) {};
 
-	if (mstats.has_meter_stats()) {
+	if (mstats.has_meter_stats(0)) {
 		CPPUNIT_ASSERT(false);
 	}
-	mstats.set_meter_stats();
+	mstats.set_meter_stats(0);
 
 	try {
-		mstats.get_meter_stats();
+		mstats.get_meter_stats(0);
 	} catch (rofl::openflow::eRofMeterStatsNotFound& e) {
 		CPPUNIT_ASSERT(false);
 	}
 
 	try {
-		mstats.set_meter_stats();
+		mstats.set_meter_stats(0);
 	} catch (rofl::openflow::eRofMeterStatsNotFound& e) {
 		CPPUNIT_ASSERT(false);
 	}
 
-	if (not mstats.has_meter_stats()) {
+	if (not mstats.has_meter_stats(0)) {
 		CPPUNIT_ASSERT(false);
 	}
 
-	mstats.drop_meter_stats();
+	mstats.drop_meter_stats(0);
 
 	try {
-		mstats.get_meter_stats();
+		mstats.get_meter_stats(0);
 		CPPUNIT_ASSERT(false);
 	} catch (rofl::openflow::eRofMeterStatsNotFound& e) {};
 
-	if (mstats.has_meter_stats()) {
+	if (mstats.has_meter_stats(0)) {
 		CPPUNIT_ASSERT(false);
 	}
-	mstats.set_meter_stats();
+	mstats.set_meter_stats(0);
 }
 
 

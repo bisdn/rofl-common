@@ -11,6 +11,7 @@ CPPUNIT_TEST_SUITE_REGISTRATION( cofgroupstatsarray_test );
 #if defined DEBUG
 #undef DEBUG
 #endif
+#define DEBUG 1
 
 void
 cofgroupstatsarray_test::setUp()
@@ -60,8 +61,19 @@ cofgroupstatsarray_test::testCopyConstructor()
 	array.set_group_stats(1).set_duration_sec(0xaaaaaaaa);
 	array.set_group_stats(1).set_duration_nsec(0xbbbbbbbb);
 
+	try {
+		std::cerr << "UUUU: " << (int)array.get_version() << std::endl;
+		std::cerr << "UUUU: " << (int)array.get_group_stats(0).get_version() << std::endl;
+		std::cerr << "UUUU: " << (int)array.get_group_stats(1).get_version() << std::endl;
+		std::cerr << "UUUU: " << (int)array.length() << std::endl;
+	} catch (rofl::eBadVersion& e) {
+		std::cerr << "EEEE" << std::endl;
+	}
 
 	rofl::cmemory marray(array.length());
+
+	return;
+
 	array.pack(marray.somem(), marray.memlen());
 
 #ifdef DEBUG

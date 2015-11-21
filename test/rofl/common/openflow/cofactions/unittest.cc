@@ -1,9 +1,6 @@
 #include <cppunit/extensions/TestFactoryRegistry.h>
 #include <cppunit/ui/text/TestRunner.h>
-//#include "fipv6frametest.h"
 #include <stdlib.h>
-
-//using namespace rofl;
 
 int main( int argc, char **argv)
 {

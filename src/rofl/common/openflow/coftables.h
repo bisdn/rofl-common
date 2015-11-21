@@ -169,6 +169,15 @@ public:
 	/**
 	 *
 	 */
+	size_t
+	size() {
+		AcquireReadLock lock(tables_lock);
+		return tables.size();
+	};
+
+	/**
+	 *
+	 */
 	virtual void
 	clear() {
 		AcquireReadWriteLock lock(tables_lock);

@@ -31,7 +31,7 @@ cofmeterconfigarray_test::testDefaultConstructor()
 {
 	rofl::openflow::cofmeterconfigarray mstats;
 	CPPUNIT_ASSERT(rofl::openflow::OFP_VERSION_UNKNOWN == mstats.get_version());
-	CPPUNIT_ASSERT(0 == mstats.get_mconfig().size());
+	CPPUNIT_ASSERT(0 == mstats.size());
 }
 
 

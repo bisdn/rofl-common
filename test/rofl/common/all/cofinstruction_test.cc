@@ -32,12 +32,7 @@ cofinstruction_test::test_cofinstruction()
 	rofl::openflow::cofinstruction inst;
 	CPPUNIT_ASSERT(rofl::openflow::OFP_VERSION_UNKNOWN == inst.get_version());
 
-	rofl::cmemory body(12);
-	for (unsigned int i = 0; i < body.memlen(); i++) {
-		body[i] = i;
-	}
-
-	inst = rofl::openflow::cofinstruction(rofl::openflow13::OFP_VERSION, 0xa1a2, body);
+	inst = rofl::openflow::cofinstruction(rofl::openflow13::OFP_VERSION, 0xa1a2);
 
 	//std::cerr << "inst:" << std::endl << inst;
 
@@ -46,18 +41,17 @@ cofinstruction_test::test_cofinstruction()
 
 	//std::cerr << "packed:" << std::endl << packed;
 
-	CPPUNIT_ASSERT(packed.memlen() == 16);
+	CPPUNIT_ASSERT(packed.memlen() == sizeof(struct rofl::openflow::ofp_instruction));
 	CPPUNIT_ASSERT(packed[0] == 0xa1);
 	CPPUNIT_ASSERT(packed[1] == 0xa2);
 	CPPUNIT_ASSERT(packed[2] == 0x00);
-	CPPUNIT_ASSERT(packed[3] == 0x10);
+	CPPUNIT_ASSERT(packed[3] == sizeof(struct rofl::openflow::ofp_instruction));
 
 	rofl::openflow::cofinstruction clone(rofl::openflow13::OFP_VERSION);
 	clone.unpack(packed.somem(), packed.memlen());
 
-	CPPUNIT_ASSERT(clone.get_body() == body);
 	CPPUNIT_ASSERT(clone.get_type() == 0xa1a2);
-	CPPUNIT_ASSERT(clone.get_length() == 16);
+	CPPUNIT_ASSERT(clone.length() == sizeof(struct rofl::openflow::ofp_instruction));
 }
 
 
@@ -90,7 +84,7 @@ cofinstruction_test::test_cofinstruction_goto_table()
 	clone.unpack(packed.somem(), packed.memlen());
 
 	CPPUNIT_ASSERT(clone.get_type() == rofl::openflow13::OFPIT_GOTO_TABLE);
-	CPPUNIT_ASSERT(clone.get_length() == sizeof(struct rofl::openflow13::ofp_instruction_goto_table));
+	CPPUNIT_ASSERT(clone.length() == sizeof(struct rofl::openflow13::ofp_instruction_goto_table));
 	CPPUNIT_ASSERT(clone.get_table_id() == table_id);
 }
 
@@ -127,7 +121,7 @@ cofinstruction_test::test_cofinstruction_apply_actions()
 	clone.unpack(packed.somem(), packed.memlen());
 
 	CPPUNIT_ASSERT(clone.get_type() == rofl::openflow13::OFPIT_APPLY_ACTIONS);
-	CPPUNIT_ASSERT(clone.get_length() == sizeof(struct rofl::openflow13::ofp_instruction_actions) + actions.length());
+	CPPUNIT_ASSERT(clone.length() == sizeof(struct rofl::openflow13::ofp_instruction_actions) + actions.length());
 	CPPUNIT_ASSERT(actions == clone.get_actions());
 }
 
@@ -164,7 +158,7 @@ cofinstruction_test::test_cofinstruction_write_actions()
 	clone.unpack(packed.somem(), packed.memlen());
 
 	CPPUNIT_ASSERT(clone.get_type() == rofl::openflow13::OFPIT_WRITE_ACTIONS);
-	CPPUNIT_ASSERT(clone.get_length() == sizeof(struct rofl::openflow13::ofp_instruction_actions) + actions.length());
+	CPPUNIT_ASSERT(clone.length() == sizeof(struct rofl::openflow13::ofp_instruction_actions) + actions.length());
 	CPPUNIT_ASSERT(actions == clone.get_actions());
 }
 
@@ -195,7 +189,7 @@ cofinstruction_test::test_cofinstruction_clear_actions()
 	clone.unpack(packed.somem(), packed.memlen());
 
 	CPPUNIT_ASSERT(clone.get_type() == rofl::openflow13::OFPIT_CLEAR_ACTIONS);
-	CPPUNIT_ASSERT(clone.get_length() == sizeof(struct rofl::openflow13::ofp_instruction_actions));
+	CPPUNIT_ASSERT(clone.length() == sizeof(struct rofl::openflow13::ofp_instruction_actions));
 }
 
 
@@ -244,7 +238,7 @@ cofinstruction_test::test_cofinstruction_write_metadata()
 	clone.unpack(packed.somem(), packed.memlen());
 
 	CPPUNIT_ASSERT(clone.get_type() == rofl::openflow13::OFPIT_WRITE_METADATA);
-	CPPUNIT_ASSERT(clone.get_length() == sizeof(struct rofl::openflow13::ofp_instruction_write_metadata));
+	CPPUNIT_ASSERT(clone.length() == sizeof(struct rofl::openflow13::ofp_instruction_write_metadata));
 	CPPUNIT_ASSERT(clone.get_metadata() == metadata);
 	CPPUNIT_ASSERT(clone.get_metadata_mask() == metadata_mask);
 }
@@ -282,7 +276,7 @@ cofinstruction_test::test_cofinstruction_meter()
 	clone.unpack(packed.somem(), packed.memlen());
 
 	CPPUNIT_ASSERT(clone.get_type() == rofl::openflow13::OFPIT_METER);
-	CPPUNIT_ASSERT(clone.get_length() == sizeof(struct rofl::openflow13::ofp_instruction_meter));
+	CPPUNIT_ASSERT(clone.length() == sizeof(struct rofl::openflow13::ofp_instruction_meter));
 	CPPUNIT_ASSERT(clone.get_meter_id() == meter_id);
 }
 
@@ -324,7 +318,7 @@ cofinstruction_test::test_cofinstruction_experimenter()
 	clone.unpack(packed.somem(), packed.memlen());
 
 	CPPUNIT_ASSERT(clone.get_type() == rofl::openflow13::OFPIT_EXPERIMENTER);
-	CPPUNIT_ASSERT(clone.get_length() == sizeof(struct rofl::openflow13::ofp_instruction_experimenter) + body.memlen());
+	CPPUNIT_ASSERT(clone.length() == sizeof(struct rofl::openflow13::ofp_instruction_experimenter) + body.memlen());
 	CPPUNIT_ASSERT(clone.get_exp_id() == exp_id);
 	CPPUNIT_ASSERT(clone.get_body() == body);
 }

@@ -178,7 +178,7 @@ public:
 				byte_count(byte_count),
 				duration_sec(duration_sec),
 				duration_nsec(duration_nsec)
-	{};
+	{ this->bucket_counters.set_version(of_version); };
 
 	/**
 	 *
@@ -232,7 +232,7 @@ public:
 	cofgroup_stats_reply&
 	set_version(
 			uint8_t of_version)
-	{ this->of_version = of_version; return *this; };
+	{ this->of_version = of_version; this->bucket_counters.set_version(of_version); return *this; };
 
 	/**
 	 *
@@ -253,7 +253,8 @@ public:
 	 *
 	 */
 	uint32_t
-	get_group_id() const { return group_id; };
+	get_group_id() const
+	{ return group_id; };
 
 	/**
 	 *

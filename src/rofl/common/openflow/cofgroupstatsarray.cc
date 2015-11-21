@@ -18,9 +18,8 @@ size_t
 cofgroupstatsarray::length() const
 {
 	size_t len = 0;
-	for (std::map<uint32_t, cofgroup_stats_reply>::const_iterator
-			it = array.begin(); it != array.end(); ++it) {
-		len += it->second.length();
+	for (auto it : array) {
+		len += it.second.length();
 	}
 	return len;
 }

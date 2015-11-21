@@ -1,6 +1,6 @@
 MAINTAINERCLEANFILES = Makefile.in
 
-SUBDIRS = messages
+SUBDIRS = 
 
 unittest_SOURCES= \
 	unittest.cc \
@@ -12,24 +12,18 @@ unittest_SOURCES= \
 	coftablefeatures_test.h \
 	coftables_test.cc \
 	coftables_test.h \
-	cofhelloelemstest.cc \
-	cofhelloelemstest.h \
 	cofhelloelemversionbitmaptest.cc \
 	cofhelloelemversionbitmaptest.h \
 	cofflowstatsarray_test.cc \
 	cofflowstatsarray_test.h \
 	cofgroupdescstatsarray_test.cc \
 	cofgroupdescstatsarray_test.h \
-	cofgroupstatsarray_test.cc \
-	cofgroupstatsarray_test.h \
 	cofbucketcounter_test.cc \
 	cofbucketcounter_test.h \
 	cofbucketcounters_test.cc \
 	cofbucketcounters_test.h \
 	cofportstatsarray_test.cc \
 	cofportstatsarray_test.h \
-	cofqueuestatsarray_test.cc \
-	cofqueuestatsarray_test.h \
 	coftablestatsarray_test.cc \
 	coftablestatsarray_test.h \
 	cofasyncconfig_test.cc \
@@ -64,10 +58,6 @@ unittest_SOURCES= \
 	cofpacketqueue_test.h \
 	cofpacketqueues_test.cc \
 	cofpacketqueues_test.h \
-	cofaction_test.cc \
-	cofaction_test.h \
-	cofactions_test.cc \
-	cofactions_test.h \
 	cofflowmod_test.cc \
 	cofflowmod_test.h \
 	cofgroupmod_test.cc \

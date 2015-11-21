@@ -5,6 +5,10 @@ MAINTAINERCLEANFILES = Makefile.in
 SUBDIRS = \
 	exceptions \
 	messages \
+	cofaction \
+	cofactions \
 	coxmatch \
-	coxmatches
+	coxmatches \
+	cofgroupstatsarray \
+	cofqueuestatsarray
 
