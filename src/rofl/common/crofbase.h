@@ -399,6 +399,11 @@ public:
 	drop_dpts() {
 		AcquireReadWriteLock rwlock(rofdpts_rwlock);
 		for (auto it : rofdpts) {
+			/* redirect environment */
+			it.second->set_env(nullptr);
+			/* close control channel */
+			it.second->clear();
+
 			rofdpts_deletion.insert(it.second);
 		}
 		rofdpts.clear();
@@ -528,6 +533,8 @@ public:
 		}
 		/* redirect environment */
 		rofdpts[dptid]->set_env(nullptr);
+		/* close control channel */
+		rofdpts[dptid]->clear();
 		/* add pointer to crofdpt instance on heap to rofdpts_deletion */
 		rofdpts_deletion.insert(rofdpts[dptid]);
 		/* mark its dptid as free */
@@ -622,11 +629,16 @@ public:
 	drop_ctls() {
 		AcquireReadWriteLock rwlock(rofctls_rwlock);
 		for (auto it : rofctls) {
+			/* redirect environment */
+			it.second->set_env(nullptr);
+			/* close control channel */
+			it.second->clear();
+
 			rofctls_deletion.insert(it.second);
 		}
 		rofctls.clear();
 		if (not thread.has_timer(TIMER_ID_ROFCTL_DESTROY)) {
-			thread.add_timer(TIMER_ID_ROFCTL_DESTROY, ctimespec().expire_in(1));
+			thread.add_timer(TIMER_ID_ROFCTL_DESTROY, ctimespec().expire_in(8));
 		}
 	};
 
@@ -748,13 +760,15 @@ public:
 		}
 		/* redirect environment */
 		rofctls[ctlid]->set_env(nullptr);
+		/* close control channel */
+		rofctls[ctlid]->clear();
 		/* add pointer to crofctl instance on heap to rofctls_deletion */
 		rofctls_deletion.insert(rofctls[ctlid]);
-		/* mark its dptid as free */
+		/* mark its ctlid as free */
 		rofctls.erase(ctlid);
 		/* trigger management thread for doing the clean-up work */
 		if (not thread.has_timer(TIMER_ID_ROFCTL_DESTROY)) {
-			thread.add_timer(TIMER_ID_ROFCTL_DESTROY, ctimespec().expire_in(1));
+			thread.add_timer(TIMER_ID_ROFCTL_DESTROY, ctimespec().expire_in(8));
 		}
 		return true;
 	};

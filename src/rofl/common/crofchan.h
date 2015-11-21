@@ -187,9 +187,9 @@ public:
 		/* stop management thread */
 		thread.stop();
 		/* drop active connections */
-		clear();
-		/* drop connections scheduled for removal */
 		__drop_conns();
+		/* drop connections scheduled for removal */
+		__drop_conns_deletion();
 	};
 
 	/**
@@ -267,9 +267,17 @@ public:
 	clear() {
 		AcquireReadWriteLock rwlock(conns_rwlock);
 		for (auto it : conns) {
-			delete it.second;
+			/* redirect environment */
+			it.second->set_env(nullptr);
+			/* close connection */
+			it.second->close();
+			AcquireReadWriteLock lock(conns_deletion_rwlock);
+			conns_deletion.insert(it.second);
 		}
 		conns.clear();
+		if (not thread.has_timer(TIMER_ID_ROFCONN_DESTROY)) {
+			thread.add_timer(TIMER_ID_ROFCONN_DESTROY, ctimespec().expire_in(8));
+		}
 	};
 
 	/**
@@ -361,6 +369,8 @@ public:
 			for (auto it : conns) {
 				/* redirect environment */
 				it.second->set_env(nullptr);
+				/* close connection */
+				it.second->close();
 				{
 					AcquireReadWriteLock rwlock(conns_deletion_rwlock);
 					/* add pointer to crofconn instance on heap to conns_deletion */
@@ -376,6 +386,8 @@ public:
 			AcquireReadWriteLock rwlock(conns_deletion_rwlock);
 			/* redirect environment */
 			conns[auxid]->set_env(nullptr);
+			/* close connection */
+			conns[auxid]->close();
 			/* add pointer to crofconn instance on heap to conns_deletion */
 			conns_deletion.insert(conns[auxid]);
 			/* mark its auxid as free */
@@ -427,6 +439,18 @@ private:
 	 */
 	void
 	__drop_conns() {
+		AcquireReadWriteLock rwlock(conns_rwlock);
+		for (auto it : conns) {
+			delete it.second;
+		}
+		conns.clear();
+	};
+
+	/**
+	 *
+	 */
+	void
+	__drop_conns_deletion() {
 		AcquireReadWriteLock lock(conns_deletion_rwlock);
 		for (auto conn : conns_deletion) {
 			delete conn;
@@ -575,7 +599,7 @@ private:
 	{
 		switch (timer_id) {
 		case TIMER_ID_ROFCONN_DESTROY: {
-			__drop_conns();
+			__drop_conns_deletion();
 		} break;
 		default: {
 
