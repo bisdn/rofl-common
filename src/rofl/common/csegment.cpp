@@ -169,39 +169,36 @@ csegment::store_and_merge_msg(
 
 	} else {
 
-		uint16_t stats_type = 0;
-		if (dynamic_cast<const rofl::openflow::cofmsg_stats_request*>( &msg_stats )) {
-			stats_type = dynamic_cast<const rofl::openflow::cofmsg_stats_request&>( msg_stats ).get_stats_type();
-		} else
-		if (dynamic_cast<const rofl::openflow::cofmsg_stats_reply*>( &msg_stats )) {
-			stats_type = dynamic_cast<const rofl::openflow::cofmsg_stats_reply&>( msg_stats ).get_stats_type();
-		}
+		/* sanity checks */
 
-
-		if (msg->get_type() != msg_stats.get_type()) { // message types must match
-			throw eSegmentedMessageInvalid("csegment::store_and_merge_msg()").
+		/* message type must match */
+		if (msg_type != msg_stats.get_type()) {
+			throw eSegmentedMessageInvalid("csegment::store_and_merge_msg(), invalid msg type").
 					set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 		}
 
-
-		uint16_t a_stats_type = 0;
-		if (dynamic_cast<const rofl::openflow::cofmsg_stats_request*>( msg )) {
-			stats_type = dynamic_cast<const rofl::openflow::cofmsg_stats_request&>( *msg ).get_stats_type();
-		} else
-		if (dynamic_cast<const rofl::openflow::cofmsg_stats_reply*>( msg )) {
-			stats_type = dynamic_cast<const rofl::openflow::cofmsg_stats_reply&>( *msg ).get_stats_type();
+		/* message multpart type must match */
+		const rofl::openflow::cofmsg_stats_request* mp_req = nullptr;
+		if ((mp_req = dynamic_cast<const rofl::openflow::cofmsg_stats_request*>( &msg_stats )) != nullptr) {
+			if (msg_multipart_type != mp_req->get_stats_type()) {
+				throw eSegmentedMessageInvalid("csegment::store_and_merge_msg(), invalid msg multipart type (REQ)").
+						set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+			}
 		}
 
-
-		if (a_stats_type != stats_type) { // stats types must match
-			throw eSegmentedMessageInvalid("csegment::store_and_merge_msg()").
-					set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+		/* message multpart type must match */
+		const rofl::openflow::cofmsg_stats_reply* mp_rep = nullptr;
+		if ((mp_rep = dynamic_cast<const rofl::openflow::cofmsg_stats_reply*>( &msg_stats )) != nullptr) {
+			if (msg_multipart_type != mp_rep->get_stats_type()) {
+				throw eSegmentedMessageInvalid("csegment::store_and_merge_msg(), invalid msg multipart type (REP)").
+						set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+			}
 		}
 
-		switch (msg_stats.get_type()) {
+		switch (msg_type) {
 		case rofl::openflow13::OFPT_MULTIPART_REQUEST: {
 
-			switch (stats_type) {
+			switch (msg_multipart_type) {
 			case rofl::openflow13::OFPMP_TABLE_FEATURES: {
 
 				rofl::openflow::cofmsg_table_features_stats_request* msg_table =
@@ -221,7 +218,7 @@ csegment::store_and_merge_msg(
 		} break;
 		case rofl::openflow13::OFPT_MULTIPART_REPLY: {
 
-			switch (stats_type) {
+			switch (msg_multipart_type) {
 			case rofl::openflow13::OFPMP_FLOW: {
 
 				rofl::openflow::cofmsg_flow_stats_reply* msg_flow =

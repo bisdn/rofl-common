@@ -786,6 +786,16 @@ public:
 public:
 
 	/**
+	 * @brief	Reset environment.
+	 */
+	crofctl&
+	set_env(
+			crofctl_env* env)
+	{ this->env = env; return *this; };
+
+public:
+
+	/**
 	 *
 	 */
 	const cjournal&

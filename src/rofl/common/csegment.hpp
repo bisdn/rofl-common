@@ -76,7 +76,9 @@ public:
 	 */
 	csegment() :
 		xid(0),
-		msg(nullptr)
+		msg(nullptr),
+		msg_type(0),
+		msg_multipart_type(0)
 	{};
 
 	/**
@@ -84,10 +86,14 @@ public:
 	 */
 	csegment(
 			uint32_t xid,
-			const ctimespec& tspec) :
+			const ctimespec& tspec,
+			uint8_t msg_type,
+			uint16_t msg_multipart_type = 0) :
 				tspec(tspec),
 				xid(xid),
-				msg(nullptr)
+				msg(nullptr),
+				msg_type(msg_type),
+				msg_multipart_type(msg_multipart_type)
 	{};
 
 	/**
@@ -113,6 +119,8 @@ public:
 		} else {
 			msg 	= NULL;
 		}
+		msg_type    = segment.msg_type;
+		msg_multipart_type = segment.msg_multipart_type;
 		return *this;
 	};
 
@@ -309,6 +317,12 @@ private:
 
 	// stitched multipart message, allocated on heap
 	rofl::openflow::cofmsg* msg;
+
+	// openflow message type
+	uint8_t                 msg_type;
+
+	// openflow multipart message subtype (or 0, if no multipart message)
+	uint16_t                msg_multipart_type;
 };
 
 }; // end of namespace rofl

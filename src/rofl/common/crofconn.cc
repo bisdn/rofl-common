@@ -49,6 +49,7 @@ crofconn::crofconn(
 				rxweights(QUEUE_MAX),
 				rxqueues(QUEUE_MAX),
 				rx_thread_working(false),
+				rx_thread_scheduled(false),
 				rxqueue_max_size(RXQUEUE_MAX_SIZE_DEFAULT),
 				segmentation_threshold(DEFAULT_SEGMENTATION_THRESHOLD),
 				timeout_hello(DEFAULT_HELLO_TIMEOUT),
@@ -249,6 +250,7 @@ crofconn::set_state(
 			journal.log(LOG_INFO, "STATE_ESTABLISHED").
 					set_func(__PRETTY_FUNCTION__).set_line(__LINE__).
 						set_key("negotiated version", (int)ofp_version);
+			thread.drop_timer(TIMER_ID_WAIT_FOR_HELLO);
 			/* start periodic checks for connection state (OAM) */
 			thread.add_timer(TIMER_ID_NEED_LIFE_CHECK, ctimespec().expire_in(timeout_lifecheck));
 			crofconn_env::call_env(env).handle_established(*this, ofp_version);
@@ -345,11 +347,8 @@ crofconn::error_rcvd(
 void
 crofconn::send_hello_message()
 {
+	AcquireReadWriteLock lock(hello_lock);
 	try {
-
-		if (not flag_hello_rcvd) {
-			thread.add_timer(TIMER_ID_WAIT_FOR_HELLO, ctimespec().expire_in(timeout_hello));
-		}
 
 		rofl::openflow::cofhelloelems helloIEs;
 		helloIEs.add_hello_elem_versionbitmap() = versionbitmap;
@@ -365,6 +364,10 @@ crofconn::send_hello_message()
 
 		rofsock.send_message(msg);
 
+		if (not flag_hello_rcvd) {
+			thread.add_timer(TIMER_ID_WAIT_FOR_HELLO, ctimespec().expire_in(timeout_hello));
+		}
+
 	} catch (rofl::exception& e) {
 		journal.log(e).set_caller(__PRETTY_FUNCTION__);
 		set_state(STATE_NEGOTIATION_FAILED);
@@ -377,6 +380,7 @@ void
 crofconn::hello_rcvd(
 		rofl::openflow::cofmsg* pmsg)
 {
+	AcquireReadWriteLock lock(hello_lock);
 	rofl::openflow::cofmsg_hello* msg = dynamic_cast<rofl::openflow::cofmsg_hello*>( pmsg );
 
 	if (nullptr == msg) {
@@ -386,8 +390,6 @@ crofconn::hello_rcvd(
 	}
 
 	flag_hello_rcvd = true;
-
-	thread.drop_timer(TIMER_ID_WAIT_FOR_HELLO);
 
 	try {
 
@@ -515,6 +517,8 @@ crofconn::hello_rcvd(
 		set_state(STATE_NEGOTIATION_FAILED);
 	}
 
+	thread.drop_timer(TIMER_ID_WAIT_FOR_HELLO);
+
 	delete msg;
 }
 
@@ -526,7 +530,16 @@ crofconn::hello_expired()
 	journal.log(LOG_CRIT_ERROR, "HELLO expired").
 			set_func(__PRETTY_FUNCTION__);
 
-	set_state(STATE_NEGOTIATION_FAILED);
+	switch (state) {
+	case STATE_ESTABLISHED: {
+		/* ignore event */
+		journal.log(LOG_CRIT_ERROR, "HELLO expired, ignoring event, already established").
+				set_func(__PRETTY_FUNCTION__);
+	} break;
+	default: {
+		set_state(STATE_NEGOTIATION_FAILED);
+	};
+	}
 }
 
 
@@ -874,6 +887,15 @@ crofconn::handle_closed(
 	try {
 		journal.log(LOG_NOTICE, "socket indicates close").
 				set_func(__PRETTY_FUNCTION__);
+
+		/* work on packets in reception queue first, then signal shutdown */
+		unsigned int waiting = 60/*seconds*/;
+		while ((--waiting > 0) && (rx_thread_scheduled || rx_thread_working)) {
+			journal.log(LOG_NOTICE, "socket indicates close, waiting for pending rx packets").
+					set_func(__PRETTY_FUNCTION__);
+			sleep(1);
+		}
+
 		set_state(STATE_DISCONNECTED);
 		crofconn_env::call_env(env).handle_closed(*this);
 
@@ -1249,6 +1271,7 @@ crofconn::handle_rx_messages()
 {
 	/* we start with handling incoming messages */
 	rx_thread_working = true;
+	rx_thread_scheduled = false;
 
 	thread.drop_timer(TIMER_ID_NEED_LIFE_CHECK);
 
@@ -1281,6 +1304,9 @@ crofconn::handle_rx_messages()
 					switch (ofp_version) {
 					case rofl::openflow10::OFP_VERSION:
 					case rofl::openflow12::OFP_VERSION: {
+						if (trace) {
+							journal.log(LOG_TRACE, "call application: %s", msg->str().c_str());
+						}
 						// no segmentation and reassembly below OFP1.3, so hand over message directly to higher layers
 						crofconn_env::call_env(env).handle_recv(*this, msg);
 					} break;
@@ -1291,6 +1317,9 @@ crofconn::handle_rx_messages()
 							handle_rx_multipart_message(msg);
 						} break;
 						default: {
+							if (trace) {
+								journal.log(LOG_TRACE, "call application: %s", msg->str().c_str());
+							}
 							crofconn_env::call_env(env).handle_recv(*this, msg);
 						};
 						}
@@ -1307,6 +1336,7 @@ crofconn::handle_rx_messages()
 			/* not connected any more, stop running working thread */
 			if (STATE_ESTABLISHED != state) {
 				rx_thread_working = false;
+				rx_thread_scheduled = true;
 				return;
 			}
 
@@ -1356,7 +1386,7 @@ crofconn::handle_rx_multipart_message(
 		// start new or continue pending transaction
 		if (stats->get_stats_flags() & rofl::openflow13::OFPMPF_REQ_MORE) {
 
-			set_pending_segment(msg->get_xid()).store_and_merge_msg(*msg);
+			set_pending_segment(msg->get_xid(), stats->get_type(), stats->get_stats_type()).store_and_merge_msg(*msg);
 			delete msg; // delete msg here, we store a copy in the transaction
 
 		// end pending transaction or multipart message with single message only
@@ -1364,7 +1394,7 @@ crofconn::handle_rx_multipart_message(
 
 			if (has_pending_segment(msg->get_xid())) {
 
-				set_pending_segment(msg->get_xid()).store_and_merge_msg(*msg);
+				set_pending_segment(msg->get_xid(), stats->get_type(), stats->get_stats_type()).store_and_merge_msg(*msg);
 
 				rofl::openflow::cofmsg* reassembled_msg = set_pending_segment(msg->get_xid()).retrieve_and_detach_msg();
 
@@ -1374,6 +1404,9 @@ crofconn::handle_rx_multipart_message(
 
 				crofconn_env::call_env(env).handle_recv(*this, reassembled_msg);
 			} else {
+				if (trace) {
+					journal.log(LOG_TRACE, "call application: %s", msg->str().c_str());
+				}
 				// do not delete msg here, will be done by higher layers
 				crofconn_env::call_env(env).handle_recv(*this, msg);
 			}
@@ -1394,7 +1427,7 @@ crofconn::handle_rx_multipart_message(
 		// start new or continue pending transaction
 		if (stats->get_stats_flags() & rofl::openflow13::OFPMPF_REQ_MORE) {
 
-			set_pending_segment(msg->get_xid()).store_and_merge_msg(*msg);
+			set_pending_segment(msg->get_xid(), stats->get_type(), stats->get_stats_type()).store_and_merge_msg(*msg);
 			delete msg; // delete msg here, we store a copy in the transaction
 
 		// end pending transaction or multipart message with single message only
@@ -1402,7 +1435,7 @@ crofconn::handle_rx_multipart_message(
 
 			if (has_pending_segment(msg->get_xid())) {
 
-				set_pending_segment(msg->get_xid()).store_and_merge_msg(*msg);
+				set_pending_segment(msg->get_xid(), stats->get_type(), stats->get_stats_type()).store_and_merge_msg(*msg);
 
 				rofl::openflow::cofmsg* reassembled_msg = set_pending_segment(msg->get_xid()).retrieve_and_detach_msg();
 
@@ -1412,6 +1445,9 @@ crofconn::handle_rx_multipart_message(
 
 				crofconn_env::call_env(env).handle_recv(*this, reassembled_msg);
 			} else {
+				if (trace) {
+					journal.log(LOG_TRACE, "call application: %s", msg->str().c_str());
+				}
 				// do not delete msg here, will be done by higher layers
 				crofconn_env::call_env(env).handle_recv(*this, msg);
 			}

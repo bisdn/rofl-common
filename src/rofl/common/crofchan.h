@@ -184,8 +184,12 @@ public:
 	virtual
 	~crofchan()
 	{
+		/* stop management thread */
 		thread.stop();
-		clear();
+		/* drop active connections */
+		__drop_conns();
+		/* drop connections scheduled for removal */
+		__drop_conns_deletion();
 	};
 
 	/**
@@ -263,9 +267,17 @@ public:
 	clear() {
 		AcquireReadWriteLock rwlock(conns_rwlock);
 		for (auto it : conns) {
-			delete it.second;
+			/* redirect environment */
+			it.second->set_env(nullptr);
+			/* close connection */
+			it.second->close();
+			AcquireReadWriteLock lock(conns_deletion_rwlock);
+			conns_deletion.insert(it.second);
 		}
 		conns.clear();
+		if (not thread.has_timer(TIMER_ID_ROFCONN_DESTROY)) {
+			thread.add_timer(TIMER_ID_ROFCONN_DESTROY, ctimespec().expire_in(8));
+		}
 	};
 
 	/**
@@ -355,6 +367,60 @@ public:
 		AcquireReadWriteLock rwlock(conns_rwlock);
 		if (auxid.get_id() == 0) {
 			for (auto it : conns) {
+				/* redirect environment */
+				it.second->set_env(nullptr);
+				/* close connection */
+				it.second->close();
+				{
+					AcquireReadWriteLock rwlock(conns_deletion_rwlock);
+					/* add pointer to crofconn instance on heap to conns_deletion */
+					conns_deletion.insert(it.second);
+				}
+			}
+			/* mark all auxids as free */
+			conns.clear();
+		} else {
+			if (conns.find(auxid) == conns.end()) {
+				return false;
+			}
+			AcquireReadWriteLock rwlock(conns_deletion_rwlock);
+			/* redirect environment */
+			conns[auxid]->set_env(nullptr);
+			/* close connection */
+			conns[auxid]->close();
+			/* add pointer to crofconn instance on heap to conns_deletion */
+			conns_deletion.insert(conns[auxid]);
+			/* mark its auxid as free */
+			conns.erase(auxid);
+		}
+		/* trigger management thread for doing the clean-up work */
+		if (not thread.has_timer(TIMER_ID_ROFCONN_DESTROY)) {
+			thread.add_timer(TIMER_ID_ROFCONN_DESTROY, ctimespec().expire_in(8));
+		}
+		return true;
+	};
+
+	/**
+	 *
+	 */
+	bool
+	has_conn(
+			const cauxid& auxid) const {
+		AcquireReadLock rwlock(conns_rwlock);
+		return (not (conns.find(auxid) == conns.end()));
+	};
+
+private:
+
+	/**
+	 *
+	 */
+	bool
+	__drop_conn(
+			const cauxid& auxid) {
+		AcquireReadWriteLock rwlock(conns_rwlock);
+		if (auxid.get_id() == 0) {
+			for (auto it : conns) {
 				delete it.second;
 			}
 			conns.clear();
@@ -371,11 +437,25 @@ public:
 	/**
 	 *
 	 */
-	bool
-	has_conn(
-			const cauxid& auxid) const {
-		AcquireReadLock rwlock(conns_rwlock);
-		return (not (conns.find(auxid) == conns.end()));
+	void
+	__drop_conns() {
+		AcquireReadWriteLock rwlock(conns_rwlock);
+		for (auto it : conns) {
+			delete it.second;
+		}
+		conns.clear();
+	};
+
+	/**
+	 *
+	 */
+	void
+	__drop_conns_deletion() {
+		AcquireReadWriteLock lock(conns_deletion_rwlock);
+		for (auto conn : conns_deletion) {
+			delete conn;
+		}
+		conns_deletion.clear();
 	};
 
 public:
@@ -440,8 +520,11 @@ private:
 					/* if connection is passive, schedule its deletion */
 					if (it.second->is_passive()) {
 						AcquireReadWriteLock lock(conns_deletion_rwlock);
-						conns_deletion.push_back(it.first);
-						thread.add_timer(TIMER_ID_ROFCONN_DESTROY, ctimespec().expire_in(0));
+						it.second->set_env(nullptr);
+						conns_deletion.insert(it.second);
+						if (not thread.has_timer(TIMER_ID_ROFCONN_DESTROY)) {
+							thread.add_timer(TIMER_ID_ROFCONN_DESTROY, ctimespec().expire_in(8));
+						}
 					}
 				}
 			} /* release rwlock */
@@ -450,8 +533,14 @@ private:
 			/* if connection is passive, schedule its deletion */
 			if (conn.is_passive()) {
 				AcquireReadWriteLock lock(conns_deletion_rwlock);
-				conns_deletion.push_back(conn.get_auxid());
-				thread.add_timer(TIMER_ID_ROFCONN_DESTROY, ctimespec().expire_in(0));
+				if (conns.find(conn.get_auxid()) == conns.end()) {
+					return;
+				}
+				conn.set_env(nullptr);
+				conns_deletion.insert(&conn);
+				if (not thread.has_timer(TIMER_ID_ROFCONN_DESTROY)) {
+					thread.add_timer(TIMER_ID_ROFCONN_DESTROY, ctimespec().expire_in(8));
+				}
 			}
 			crofchan_env::call_env(env).handle_closed(*this, conn);
 		}
@@ -510,19 +599,7 @@ private:
 	{
 		switch (timer_id) {
 		case TIMER_ID_ROFCONN_DESTROY: {
-
-			while (true) {
-				rofl::cauxid auxid(0);
-				{
-					AcquireReadWriteLock lock(conns_deletion_rwlock);
-					if (conns_deletion.empty()) {
-						return;
-					}
-					auxid = conns_deletion.front();
-					conns_deletion.pop_front();
-				} /* release lock */
-				drop_conn(auxid);
-			}
+			__drop_conns_deletion();
 		} break;
 		default: {
 
@@ -564,10 +641,10 @@ private:
 	std::bitset<32>                     flags;
 
 	// connections scheduled for deletion
-	std::list<rofl::cauxid>             conns_deletion;
+	std::set<crofconn*>                 conns_deletion;
 
-	// ... and associated rwlock
-	rofl::crwlock                       conns_deletion_rwlock;
+	// ... and the associated lock
+	mutable rofl::crwlock               conns_deletion_rwlock;
 };
 
 }; /* namespace rofl */

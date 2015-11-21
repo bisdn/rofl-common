@@ -25,10 +25,10 @@ crofbase::~crofbase()
 	close_ctl_socks();
 
 	/* close all crofdpt instances */
-	drop_dpts();
+	__drop_dpts();
 
 	/* close all crofctl instances */
-	drop_ctls();
+	__drop_ctls();
 
 	/* stop background management thread */
 	thread.stop();
@@ -338,28 +338,6 @@ crofbase::listen(
 
 
 void
-crofbase::rofctl_schedule_for_delete(
-		const cctlid& ctlid)
-{
-	AcquireReadWriteLock rwlock(rofctls_deletion_rwlock);
-	rofctls_deletion.insert(ctlid);
-	thread.add_timer(TIMER_ID_ROFCTL_DESTROY, ctimespec().expire_in(1));
-}
-
-
-
-void
-crofbase::rofdpt_schedule_for_delete(
-		const cdptid& dptid)
-{
-	AcquireReadWriteLock rwlock(rofdpts_deletion_rwlock);
-	rofdpts_deletion.insert(dptid);
-	thread.add_timer(TIMER_ID_ROFDPT_DESTROY, ctimespec().expire_in(1));
-}
-
-
-
-void
 crofbase::handle_wakeup(
 		cthread& thread)
 {
@@ -374,16 +352,18 @@ crofbase::handle_timeout(
 {
 	switch (timer_id) {
 	case TIMER_ID_ROFCTL_DESTROY: {
-		AcquireReadWriteLock rwlock(rofctls_deletion_rwlock);
-		for (auto ctlid : rofctls_deletion) {
-			__drop_ctl(ctlid);
+		AcquireReadWriteLock rwlock(rofctls_rwlock);
+		/* iterate over all crofctl pointers on the heap marked for destruction */
+		for (auto ctl : rofctls_deletion) {
+			delete ctl;
 		}
 		rofctls_deletion.clear();
 	} break;
 	case TIMER_ID_ROFDPT_DESTROY: {
-		AcquireReadWriteLock rwlock(rofdpts_deletion_rwlock);
-		for (auto dptid : rofdpts_deletion) {
-			__drop_dpt(dptid);
+		AcquireReadWriteLock rwlock(rofdpts_rwlock);
+		/* iterate over all crofdpt pointers on the heap marked for destruction */
+		for (auto dpt : rofdpts_deletion) {
+			delete dpt;
 		}
 		rofdpts_deletion.clear();
 	} break;
@@ -563,7 +543,7 @@ crofbase::handle_closed(
 	/* if main connection is passive, delete crofctl instance */
 	if (ctl.get_conn(rofl::cauxid(0)).is_passive()) {
 		/* mark dpt for deletion */
-		rofctl_schedule_for_delete(ctl.get_ctlid());
+		drop_ctl(ctl.get_ctlid());
 	}
 }
 
@@ -685,7 +665,7 @@ crofbase::handle_closed(
 	/* if main connection is passive, delete crofdpt instance */
 	if (dpt.get_conn(rofl::cauxid(0)).is_passive()) {
 		/* mark dpt for deletion */
-		rofdpt_schedule_for_delete(dpt.get_dptid());
+		drop_dpt(dpt.get_dptid());
 	}
 }
 

@@ -179,12 +179,16 @@ private:
 	rofl::crofconn*     sserver;
 	uint32_t            xid_server;
 	uint32_t            xid_client;
+	uint16_t            listening_port;
+	rofl::crandom       rand;
+	rofl::csockaddr     baddr;
 
 	uint32_t            xid;
 	uint64_t            dpid;
 	uint8_t             auxid;
 	uint32_t            n_buffers;
 	uint8_t             n_tables;
+	rofl::openflow::cofports ports;
 
 	unsigned int        num_of_packets;
 	unsigned int        server_established;

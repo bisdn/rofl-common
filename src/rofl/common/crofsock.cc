@@ -91,7 +91,7 @@ crofsock::close()
 	switch (state) {
 	case STATE_IDLE: {
 
-		journal.log(LOG_INFO, "TCP: state -IDLE-");
+		journal.log(LOG_INFO, "STATE_IDLE");
 
 		/* TLS down, TCP down => set rx_disabled flag back to false */
 		rx_disabled = false;
@@ -100,7 +100,7 @@ crofsock::close()
 	} break;
 	case STATE_CLOSED: {
 
-		journal.log(LOG_INFO, "TCP: state -CLOSED-");
+		journal.log(LOG_INFO, "STATE_CLOSED");
 
 		state = STATE_IDLE;
 
@@ -109,7 +109,7 @@ crofsock::close()
 	} break;
 	case STATE_LISTENING: {
 
-		journal.log(LOG_INFO, "TCP: state -LISTENING-");
+		journal.log(LOG_INFO, "STATE_LISTENING");
 
 		if (sd > 0) {
 			rxthread.drop_read_fd(sd);
@@ -123,7 +123,7 @@ crofsock::close()
 	} break;
 	case STATE_TCP_CONNECTING: {
 
-		journal.log(LOG_INFO, "TCP: state -CONNECTING-");
+		journal.log(LOG_INFO, "STATE_TCP_CONNECTING");
 
 		txthread.drop_timer(TIMER_ID_RECONNECT);
 
@@ -140,7 +140,7 @@ crofsock::close()
 	} break;
 	case STATE_TCP_ACCEPTING: {
 
-		journal.log(LOG_INFO, "TCP: state -ACCEPTING-");
+		journal.log(LOG_INFO, "STATE_TCP_ACCEPTING");
 
 		if (sd > 0) {
 			rxthread.drop_read_fd(sd, false);
@@ -158,7 +158,7 @@ crofsock::close()
 	} break;
 	case STATE_TCP_ESTABLISHED: {
 
-		journal.log(LOG_INFO, "TCP: state -ESTABLISHED-");
+		journal.log(LOG_INFO, "STATE_TCP_ESTABLISHED");
 
 		/* block reception of any further data from remote side */
 		rx_disable();
@@ -181,8 +181,24 @@ crofsock::close()
 		crofsock::close();
 
 	} break;
- 	case STATE_TLS_CONNECTING:
+ 	case STATE_TLS_CONNECTING: {
+
+ 		journal.log(LOG_INFO, "STATE_TLS_CONNECTING");
+
+		if (ssl) {
+			SSL_free(ssl); ssl = NULL;
+		}
+		tls_destroy_context();
+		flags.reset(FLAG_TLS_IN_USE);
+
+		state = STATE_TCP_ESTABLISHED;
+
+		crofsock::close();
+
+ 	} break;
 	case STATE_TLS_ACCEPTING: {
+
+		journal.log(LOG_INFO, "STATE_TLS_ACCEPTING");
 
 		if (ssl) {
 			SSL_free(ssl); ssl = NULL;
@@ -196,6 +212,8 @@ crofsock::close()
 
 	} break;
 	case STATE_TLS_ESTABLISHED: {
+
+		journal.log(LOG_INFO, "STATE_TLS_ESTABLISHED");
 
 		/* block reception of any further data from remote side */
 		rx_disable();
@@ -304,7 +322,7 @@ crofsock::listen()
 
 	state = STATE_LISTENING;
 
-	journal.log(LOG_INFO, "TCP: state -LISTENING-");
+	journal.log(LOG_INFO, "STATE_LISTENING");
 
 	/* instruct rxthread to read from socket descriptor */
 	rxthread.add_read_fd(sd);
@@ -337,7 +355,7 @@ crofsock::tcp_accept(
 	/* new state */
 	state = STATE_TCP_ACCEPTING;
 
-	journal.log(LOG_INFO, "TCP: state -ACCEPTING-");
+	journal.log(LOG_INFO, "STATE_TCP_ACCEPTING");
 
 	/* extract new connection from listening queue */
 	if ((sd = ::accept(sockfd, laddr.ca_saddr, &(laddr.salen))) < 0) {
@@ -386,7 +404,7 @@ crofsock::tcp_accept(
 
 	state = STATE_TCP_ESTABLISHED;
 
-	journal.log(LOG_INFO, "TCP: state -ESTABLISHED-");
+	journal.log(LOG_INFO, "STATE_TCP_ESTABLISHED");
 
 	/* instruct rxthread to read from socket descriptor */
 	rxthread.add_read_fd(sd);
@@ -427,7 +445,7 @@ crofsock::tcp_connect(
 	/* new state */
 	state = STATE_TCP_CONNECTING;
 
-	journal.log(LOG_INFO, "TCP: state -CONNECTING-");
+	journal.log(LOG_INFO, "STATE_TCP_CONNECTING");
 
 	/* open socket */
 	if ((sd = ::socket(raddr.get_family(), type, protocol)) < 0) {
@@ -509,7 +527,7 @@ crofsock::tcp_connect(
 
 		state = STATE_TCP_ESTABLISHED;
 
-		journal.log(LOG_INFO, "TCP: state -ESTABLISHED-");
+		journal.log(LOG_INFO, "STATE_TCP_ESTABLISHED");
 
 		/* register socket descriptor for read operations */
 		rxthread.add_read_fd(sd);
@@ -1142,7 +1160,7 @@ crofsock::rx_disable()
 	case STATE_TCP_ESTABLISHED:
 	case STATE_TLS_ESTABLISHED:{
 		rxthread.drop_read_fd(sd, false);
-		journal.log(LOG_INFO, "TCP: disable reception");
+		journal.log(LOG_INFO, "disable reception");
 	} break;
 	default: {
 
@@ -1160,7 +1178,7 @@ crofsock::rx_enable()
 	case STATE_TCP_ESTABLISHED:
 	case STATE_TLS_ESTABLISHED: {
 		rxthread.add_read_fd(sd, false);
-		journal.log(LOG_INFO, "TCP: enable reception");
+		journal.log(LOG_INFO, "enable reception");
 	} break;
 	default: {
 
@@ -1174,7 +1192,7 @@ void
 crofsock::tx_disable()
 {
 	tx_disabled = true;
-	journal.log(LOG_INFO, "TCP: disable transmission");
+	journal.log(LOG_INFO, "disable transmission");
 }
 
 
@@ -1183,7 +1201,7 @@ void
 crofsock::tx_enable()
 {
 	tx_disabled = false;
-	journal.log(LOG_INFO, "TCP: enable transmission");
+	journal.log(LOG_INFO, "enable transmission");
 }
 
 
@@ -1462,6 +1480,8 @@ crofsock::handle_read_event_rxthread(
 		switch (state) {
 		case STATE_LISTENING: {
 
+			journal.log(LOG_INFO, "STATE_LISTENING, new incoming connection on sd=%d", sd);
+
 			crofsock_env::call_env(env).handle_listen(*this, sd);
 
 		} break;
@@ -1490,7 +1510,7 @@ crofsock::handle_read_event_rxthread(
 
 				state = STATE_TCP_ESTABLISHED;
 
-				journal.log(LOG_INFO, "TCP: state -ESTABLISHED-");
+				journal.log(LOG_INFO, "STATE_TCP_ESTABLISHED");
 
 				/* register socket descriptor for read operations */
 				rxthread.add_read_fd(sd);

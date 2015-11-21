@@ -7,55 +7,6 @@
 using namespace rofl::openflow;
 
 
-cofinstruction::cofinstruction(
-		uint8_t ofp_version, uint16_t type, const rofl::cmemory& body) :
-				ofp_version(ofp_version),
-				type(type),
-				len(sizeof(struct ofp_instruction) + body.memlen()),
-				body(body)
-{
-
-}
-
-
-
-cofinstruction::cofinstruction(cofinstruction const& inst)
-{
-	*this = inst;
-}
-
-
-
-cofinstruction::~cofinstruction()
-{
-
-}
-
-
-
-cofinstruction&
-cofinstruction::operator= (const cofinstruction& inst)
-{
-	if (this == &inst)
-		return *this;
-
-	ofp_version 	= inst.ofp_version;
-	type			= inst.type;
-	len				= inst.len;
-	body			= inst.body;
-
-	return *this;
-}
-
-
-
-bool
-cofinstruction::operator== (const cofinstruction& inst)
-{
-	return ((ofp_version == inst.ofp_version) && (type == inst.type) && (body == inst.body));
-}
-
-
 
 size_t
 cofinstruction::length() const
@@ -63,7 +14,7 @@ cofinstruction::length() const
 	switch (ofp_version) {
 	case rofl::openflow12::OFP_VERSION:
 	case rofl::openflow13::OFP_VERSION: {
-		return (len = sizeof(struct ofp_instruction) + body.memlen());
+		return (sizeof(struct ofp_instruction));
 	} break;
 	default:
 		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
@@ -83,19 +34,13 @@ cofinstruction::pack(
 		throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 	switch (ofp_version) {
-	case openflow12::OFP_VERSION:
-	case openflow13::OFP_VERSION: {
+	case rofl::openflow12::OFP_VERSION:
+	case rofl::openflow13::OFP_VERSION: {
 
 		struct ofp_instruction* hdr = (struct ofp_instruction*)buf;
 
-		len = length(); // take virtual length()
-
 		hdr->type = htobe16(type);
-		hdr->len  = htobe16(len);
-
-		if (body.memlen() > 0) {
-			body.pack(hdr->body, body.memlen());
-		}
+		hdr->len  = htobe16(length()); // take virtual length()
 
 	} break;
 	default:
@@ -106,31 +51,25 @@ cofinstruction::pack(
 
 
 void
-cofinstruction::unpack(uint8_t* buf, size_t buflen)
+cofinstruction::unpack(
+		uint8_t* buf, size_t buflen)
 {
 	if ((0 == buf) || (0 == buflen))
 		return;
 
-	if (buflen < sizeof(struct ofp_instruction))
+	if (buflen < cofinstruction::length())
 		throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
-	body = rofl::cmemory(0);
-	type = len = 0;
-
 	switch (ofp_version) {
-	case openflow12::OFP_VERSION:
-	case openflow13::OFP_VERSION: {
+	case rofl::openflow12::OFP_VERSION:
+	case rofl::openflow13::OFP_VERSION: {
 
 		struct ofp_instruction* hdr = (struct ofp_instruction*)buf;
 
 		type = be16toh(hdr->type);
-		len	= be16toh(hdr->len);
 
-		if (buflen > sizeof(struct ofp_instruction)) {
-			if (buflen < be16toh(hdr->len))
-				throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
-			body.unpack(hdr->body, len - sizeof(struct ofp_instruction));
-		}
+		if (be16toh(hdr->len) < cofinstruction::length())
+			throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 	} break;
 	default:
@@ -169,7 +108,7 @@ cofinstruction_actions::pack(
 	case rofl::openflow12::OFP_VERSION:
 	case rofl::openflow13::OFP_VERSION: {
 
-		cofinstruction::pack(buf, sizeof(struct ofp_instruction));
+		cofinstruction::pack(buf, buflen);
 
 		struct rofl::openflow13::ofp_instruction_actions* hdr =
 				(struct rofl::openflow13::ofp_instruction_actions*)buf;
@@ -191,24 +130,24 @@ cofinstruction_actions::unpack(
 	if ((0 == buf) || (0 == buflen))
 		return;
 
-	if (buflen < sizeof(struct rofl::openflow13::ofp_instruction_actions))
-		throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
-
 	actions.clear();
+
+	if (buflen < cofinstruction_actions::length())
+		throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 	switch (get_version()) {
 	case rofl::openflow12::OFP_VERSION:
 	case rofl::openflow13::OFP_VERSION: {
 
-		cofinstruction::unpack(buf, sizeof(struct ofp_instruction));
+		cofinstruction::unpack(buf, buflen);
 
 		struct rofl::openflow13::ofp_instruction_actions* hdr =
 				(struct rofl::openflow13::ofp_instruction_actions*)buf;
 
-		if (buflen < get_length())
+		if (be16toh(hdr->len) < cofinstruction_actions::length())
 			throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
-		actions.unpack((uint8_t*)hdr->actions, get_length() - sizeof(struct rofl::openflow13::ofp_instruction_actions));
+		actions.unpack((uint8_t*)hdr->actions, be16toh(hdr->len) - sizeof(struct rofl::openflow13::ofp_instruction_actions));
 
 	} break;
 	default:
@@ -247,7 +186,7 @@ cofinstruction_goto_table::pack(
 	case rofl::openflow12::OFP_VERSION:
 	case rofl::openflow13::OFP_VERSION: {
 
-		cofinstruction::pack(buf, sizeof(struct ofp_instruction));
+		cofinstruction::pack(buf, buflen);
 
 		struct rofl::openflow13::ofp_instruction_goto_table* hdr =
 				(struct rofl::openflow13::ofp_instruction_goto_table*)buf;
@@ -276,12 +215,12 @@ cofinstruction_goto_table::unpack(
 	case rofl::openflow12::OFP_VERSION:
 	case rofl::openflow13::OFP_VERSION: {
 
-		cofinstruction::unpack(buf, sizeof(struct ofp_instruction));
+		cofinstruction::unpack(buf, buflen);
 
 		struct rofl::openflow13::ofp_instruction_goto_table* hdr =
 				(struct rofl::openflow13::ofp_instruction_goto_table*)buf;
 
-		if (buflen < get_length())
+		if (be16toh(hdr->len) < cofinstruction_goto_table::length())
 			throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		table_id	= hdr->table_id;
@@ -341,7 +280,7 @@ cofinstruction_write_metadata::pack(
 	case rofl::openflow12::OFP_VERSION:
 	case rofl::openflow13::OFP_VERSION: {
 
-		cofinstruction::pack(buf, sizeof(struct ofp_instruction));
+		cofinstruction::pack(buf, buflen);
 
 		struct rofl::openflow13::ofp_instruction_write_metadata* hdr =
 				(struct rofl::openflow13::ofp_instruction_write_metadata*)buf;
@@ -364,19 +303,19 @@ cofinstruction_write_metadata::unpack(
 	if ((0 == buf) || (0 == buflen))
 		return;
 
-	if (buflen < sizeof(struct rofl::openflow13::ofp_instruction_write_metadata))
+	if (buflen < cofinstruction_write_metadata::length())
 		throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 	switch (get_version()) {
 	case rofl::openflow12::OFP_VERSION:
 	case rofl::openflow13::OFP_VERSION: {
 
-		cofinstruction::unpack(buf, sizeof(struct ofp_instruction));
+		cofinstruction::unpack(buf, buflen);
 
 		struct rofl::openflow13::ofp_instruction_write_metadata* hdr =
 				(struct rofl::openflow13::ofp_instruction_write_metadata*)buf;
 
-		if (buflen < get_length())
+		if (be16toh(hdr->len) < cofinstruction_write_metadata::length())
 			throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		metadata		= be64toh(hdr->metadata);
@@ -417,7 +356,7 @@ cofinstruction_meter::pack(
 	switch (get_version()) {
 	case rofl::openflow13::OFP_VERSION: {
 
-		cofinstruction::pack(buf, sizeof(struct ofp_instruction));
+		cofinstruction::pack(buf, buflen);
 
 		struct rofl::openflow13::ofp_instruction_meter* hdr =
 				(struct rofl::openflow13::ofp_instruction_meter*)buf;
@@ -439,18 +378,18 @@ cofinstruction_meter::unpack(
 	if ((0 == buf) || (0 == buflen))
 		return;
 
-	if (buflen < sizeof(struct rofl::openflow13::ofp_instruction_meter))
+	if (buflen < cofinstruction_meter::length())
 		throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 	switch (get_version()) {
 	case rofl::openflow13::OFP_VERSION: {
 
-		cofinstruction::unpack(buf, sizeof(struct ofp_instruction));
+		cofinstruction::unpack(buf, buflen);
 
 		struct rofl::openflow13::ofp_instruction_meter* hdr =
 				(struct rofl::openflow13::ofp_instruction_meter*)buf;
 
-		if (buflen < get_length())
+		if (be16toh(hdr->len) < cofinstruction_meter::length())
 			throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		meter_id	= be32toh(hdr->meter_id);
@@ -493,7 +432,7 @@ cofinstruction_experimenter::pack(
 	case rofl::openflow12::OFP_VERSION:
 	case rofl::openflow13::OFP_VERSION: {
 
-		cofinstruction::pack(buf, sizeof(struct ofp_instruction));
+		cofinstruction::pack(buf, buflen);
 
 		struct rofl::openflow13::ofp_instruction_experimenter* hdr =
 				(struct rofl::openflow13::ofp_instruction_experimenter*)buf;
@@ -517,7 +456,9 @@ cofinstruction_experimenter::unpack(
 	if ((0 == buf) || (0 == buflen))
 		return;
 
-	if (buflen < sizeof(struct rofl::openflow13::ofp_instruction_experimenter))
+	exp_body.clear();
+
+	if (buflen < cofinstruction_experimenter::length())
 		throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 	switch (get_version()) {
@@ -529,12 +470,12 @@ cofinstruction_experimenter::unpack(
 		struct rofl::openflow13::ofp_instruction_experimenter* hdr =
 				(struct rofl::openflow13::ofp_instruction_experimenter*)buf;
 
-		if (buflen < get_length())
+		if (be16toh(hdr->len) < cofinstruction_experimenter::length())
 			throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 		exp_id			= be32toh(hdr->experimenter);
 
-		exp_body.unpack(hdr->body, get_length() - sizeof(struct rofl::openflow13::ofp_instruction_experimenter));
+		exp_body.unpack(hdr->body, be16toh(hdr->len) - sizeof(struct rofl::openflow13::ofp_instruction_experimenter));
 
 	} break;
 	default:
