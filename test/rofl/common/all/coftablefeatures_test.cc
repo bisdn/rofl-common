@@ -74,13 +74,15 @@ coftablefeaturesTest::testPackUnpack()
 {
 	rofl::openflow::coftable_features table(rofl::openflow13::OFP_VERSION);
 
-	rofl::cmemory mem(sizeof(struct rofl::openflow13::ofp_table_features));
-	mem[1] = 0x50;
+	rofl::cmemory mem(2);
+	mem[0] = 0;
+	mem[1] = 1;
 
 	try {
 		table.unpack(mem.somem(), mem.memlen());
+		std::cerr << "table: " << table << std::endl;
 		CPPUNIT_ASSERT(false);
-	} catch (rofl::eTableFeaturesReqBadLen& e) {}
+	} catch (rofl::eInvalid& e) {}
 
 #ifdef DEBUG
 	std::cerr << "table:" << std::endl << table;

@@ -1,6 +1,6 @@
 MAINTAINERCLEANFILES = Makefile.in
 
-SUBDIRS = rofl unit
+SUBDIRS = rofl 
 
 export INCLUDES += -I$(abs_srcdir)/../src/
 

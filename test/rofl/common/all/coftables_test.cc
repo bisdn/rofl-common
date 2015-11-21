@@ -263,7 +263,7 @@ coftablesTest::testMappingTableStatsArray()
 #ifdef DEBUG
 	std::cerr << tables;
 #endif
-	CPPUNIT_ASSERT(tables.get_tables().size() == 2);
+	CPPUNIT_ASSERT(tables.size() == 2);
 
 	rofl::openflow::coftablestatsarray clone(rofl::openflow12::OFP_VERSION);
 

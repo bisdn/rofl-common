@@ -257,6 +257,9 @@ public:
 	has_queue_stats(
 			uint32_t port_no, uint32_t queue_id) const {
 		AcquireReadLock lock(array_lock);
+		if (array.find(port_no) == array.end()) {
+			return false;
+		}
 		return (not (array.at(port_no).find(queue_id) == array.at(port_no).end()));
 	};
 
