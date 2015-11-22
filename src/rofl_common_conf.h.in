@@ -41,7 +41,4 @@
 /* Experimental */
 @ROFL_EXPERIMENTAL@
 
-/* Have OPENSSL */
-@ROFL_HAVE_OPENSSL@
-
 #endif //__ROFL_COMMON_CONFIG_H__
