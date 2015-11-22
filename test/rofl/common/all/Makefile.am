@@ -12,22 +12,10 @@ unittest_SOURCES= \
 	coftablefeatures_test.h \
 	coftables_test.cc \
 	coftables_test.h \
-	cofhelloelemversionbitmaptest.cc \
-	cofhelloelemversionbitmaptest.h \
-	cofflowstatsarray_test.cc \
-	cofflowstatsarray_test.h \
-	cofgroupdescstatsarray_test.cc \
-	cofgroupdescstatsarray_test.h \
-	cofbucketcounter_test.cc \
-	cofbucketcounter_test.h \
-	cofbucketcounters_test.cc \
-	cofbucketcounters_test.h \
 	cofportstatsarray_test.cc \
 	cofportstatsarray_test.h \
 	coftablestatsarray_test.cc \
 	coftablestatsarray_test.h \
-	cofasyncconfig_test.cc \
-	cofasyncconfig_test.h \
 	cofrole_test.cc \
 	cofrole_test.h \
 	cofmeterband_test.cc \
@@ -48,8 +36,6 @@ unittest_SOURCES= \
 	cofmeterconfigarray_test.h \
 	cofmeterfeatures_test.cc \
 	cofmeterfeatures_test.h \
-	cofinstruction_test.cc \
-	cofinstruction_test.h \
 	cofqueueprop_test.cc \
 	cofqueueprop_test.h \
 	cofqueueprops_test.cc \
@@ -57,11 +43,7 @@ unittest_SOURCES= \
 	cofpacketqueue_test.cc \
 	cofpacketqueue_test.h \
 	cofpacketqueues_test.cc \
-	cofpacketqueues_test.h \
-	cofflowmod_test.cc \
-	cofflowmod_test.h \
-	cofgroupmod_test.cc \
-	cofgroupmod_test.h
+	cofpacketqueues_test.h
 
 unittest_LDADD=$(top_builddir)/src/rofl/librofl_common.la -lcppunit
 

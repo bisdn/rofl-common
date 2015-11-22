@@ -72,6 +72,12 @@ AC_CONFIG_FILES([
 	test/Makefile
 	test/rofl/Makefile
 	test/rofl/common/Makefile
+	test/rofl/common/caddress/Makefile
+	test/rofl/common/caddrinfo/Makefile
+	test/rofl/common/caddrinfos/Makefile
+	test/rofl/common/cpacket/Makefile
+	test/rofl/common/csegmsg/Makefile
+	test/rofl/common/csockaddr/Makefile
 	test/rofl/common/crofqueue/Makefile
 	test/rofl/common/crofchan/Makefile
 	test/rofl/common/crofconn/Makefile
@@ -80,10 +86,19 @@ AC_CONFIG_FILES([
 	test/rofl/common/openflow/exceptions/Makefile
 	test/rofl/common/openflow/cofaction/Makefile
 	test/rofl/common/openflow/cofactions/Makefile
+	test/rofl/common/openflow/cofasyncconfig/Makefile
+	test/rofl/common/openflow/cofbucketcounter/Makefile
+	test/rofl/common/openflow/cofbucketcounters/Makefile
+	test/rofl/common/openflow/cofflowmod/Makefile
+	test/rofl/common/openflow/cofflowstatsarray/Makefile
+	test/rofl/common/openflow/cofgroupdescstatsarray/Makefile
+	test/rofl/common/openflow/cofgroupmod/Makefile
+	test/rofl/common/openflow/cofgroupstatsarray/Makefile
+	test/rofl/common/openflow/cofhelloelemversionbitmap/Makefile
+	test/rofl/common/openflow/cofinstruction/Makefile
+	test/rofl/common/openflow/cofqueuestatsarray/Makefile
 	test/rofl/common/openflow/coxmatch/Makefile
 	test/rofl/common/openflow/coxmatches/Makefile
-	test/rofl/common/openflow/cofgroupstatsarray/Makefile
-	test/rofl/common/openflow/cofqueuestatsarray/Makefile
 	test/rofl/common/openflow/messages/Makefile
 	test/rofl/common/openflow/messages/cofmsgaggrstats/Makefile
 	test/rofl/common/openflow/messages/cofmsgdescstats/Makefile
