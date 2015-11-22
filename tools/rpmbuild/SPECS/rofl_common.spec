@@ -1,20 +1,20 @@
-Name:		rofl
-Version:	0.4.1
+Name:		rofl-common
+Version:	0.10.0
 Release:	0%{?dist}
 Summary:	revised openflow library
 Epoch:		0
 
 Group:		System Environment/Libraries
 License:	Mozilla Public License Version 2.0, http://www.mozilla.org/MPL/2.0
-URL:		https://github.com/bisdn/rofl-core
-Source0:	rofl-%{version}.tar.gz
+URL:		https://github.com/bisdn/rofl-common
+Source0:	rofl-common-%{version}.tar.gz
 
 BuildRequires:	libconfig-devel openssl-devel
 Buildroot: 	%{_tmppath}/%{name}-%{version}-root 
 Requires:	libconfig openssl
 
 %description
-Revised OpenFlow Library (ROFL) version v0.4.1
+Revised OpenFlow Library (ROFL) version v0.10.0
 
 %package        devel
 Summary:        Header files and libraries for revised openflow library
@@ -22,7 +22,7 @@ Group:          Development/Libraries
 Requires:       %{name} = %{version}-%{release}
 
 %description    devel
-Revised OpenFlow Library (ROFL) version v0.4.1 development files
+Revised OpenFlow Library (ROFL) version v0.10.0 development files
 
 
 %prep
@@ -58,25 +58,19 @@ make install DESTDIR=$RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root,-)
-/usr/local/lib/librofl.so.0.1.1
-/usr/local/lib/librofl_hal.so.0.0.0
-/usr/local/lib/librofl_pipeline.so.0.0.0
-/usr/local/lib/librofl.a
-/usr/local/lib/librofl.la
-/usr/local/lib/librofl_hal.a
-/usr/local/lib/librofl_hal.la
-/usr/local/lib/librofl_pipeline.a
-/usr/local/lib/librofl_pipeline.la
+/usr/local/lib/librofl_common.so.0.1.1
+/usr/local/lib/librofl_common.a
+/usr/local/lib/librofl_common.la
 /usr/local/sbin/ethswctld
 %doc
 
 
 %files devel
 %defattr(-,root,root,-)
-/usr/local/include/rofl.h
-/usr/local/include/rofl_config.h
+/usr/local/include/rofl_common.h
+/usr/local/include/rofl_common_conf.h
 /usr/local/include/rofl
-/usr/local/lib/pkgconfig/rofl.pc
+/usr/local/lib/pkgconfig/rofl_common.pc
 %doc
 
 
@@ -84,8 +78,6 @@ make install DESTDIR=$RPM_BUILD_ROOT
 rm -rf $RPM_BUILD_ROOT 
 
 %changelog
-* Mon May 26 2014 Andreas Koepsel <andreas.koepsel@bisdn.de>
-- build package for rofl-0.4.0
-* Fri Apr 25 2014 Andreas Koepsel <andreas.koepsel@bisdn.de>
-- build package for rofl-0.4rc2
+* Sun Nov 22 2015 Andreas Koepsel <andreas.koepsel@bisdn.de>
+- build package for rofl-common-0.10.0
 
