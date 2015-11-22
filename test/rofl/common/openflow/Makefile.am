@@ -15,7 +15,27 @@ SUBDIRS = \
 	cofgroupmod \
 	cofgroupstatsarray \
 	cofhelloelemversionbitmap \
+	cofmeterband \
+	cofmeterbands \
+	cofmeterbandstats \
+	cofmeterbandstatsarray \
+	cofmeterconfig \
+	cofmeterconfigarray \
+	cofmeterfeatures \
+	cofmeterstats \
+	cofmeterstatsarray \
+	cofqueueprop \
+	cofqueueprops \
 	cofqueuestatsarray \
+	cofpacketqueue \
+	cofpacketqueues \
+	cofportstatsarray \
+	cofrole \
+	coftablefeatureprop \
+	coftablefeatureprops \
+	coftablefeatures \
+	coftablestatsarray \
+	coftables \
 	coxmatch \
 	coxmatches \
 	exceptions \

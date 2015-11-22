@@ -78,9 +78,10 @@ AC_CONFIG_FILES([
 	test/rofl/common/cpacket/Makefile
 	test/rofl/common/csegmsg/Makefile
 	test/rofl/common/csockaddr/Makefile
-	test/rofl/common/crofqueue/Makefile
+	test/rofl/common/crofbase/Makefile
 	test/rofl/common/crofchan/Makefile
 	test/rofl/common/crofconn/Makefile
+	test/rofl/common/crofqueue/Makefile
 	test/rofl/common/crofsock/Makefile
 	test/rofl/common/openflow/Makefile
 	test/rofl/common/openflow/exceptions/Makefile
@@ -96,7 +97,27 @@ AC_CONFIG_FILES([
 	test/rofl/common/openflow/cofgroupstatsarray/Makefile
 	test/rofl/common/openflow/cofhelloelemversionbitmap/Makefile
 	test/rofl/common/openflow/cofinstruction/Makefile
+	test/rofl/common/openflow/cofmeterband/Makefile
+	test/rofl/common/openflow/cofmeterbands/Makefile
+	test/rofl/common/openflow/cofmeterbandstats/Makefile
+	test/rofl/common/openflow/cofmeterbandstatsarray/Makefile
+	test/rofl/common/openflow/cofmeterconfig/Makefile
+	test/rofl/common/openflow/cofmeterconfigarray/Makefile
+	test/rofl/common/openflow/cofmeterfeatures/Makefile
+	test/rofl/common/openflow/cofmeterstats/Makefile
+	test/rofl/common/openflow/cofmeterstatsarray/Makefile
+	test/rofl/common/openflow/cofqueueprop/Makefile
+	test/rofl/common/openflow/cofqueueprops/Makefile
 	test/rofl/common/openflow/cofqueuestatsarray/Makefile
+	test/rofl/common/openflow/cofpacketqueue/Makefile
+	test/rofl/common/openflow/cofpacketqueues/Makefile
+	test/rofl/common/openflow/cofportstatsarray/Makefile
+	test/rofl/common/openflow/cofrole/Makefile
+	test/rofl/common/openflow/coftablefeatureprop/Makefile
+	test/rofl/common/openflow/coftablefeatureprops/Makefile
+	test/rofl/common/openflow/coftablefeatures/Makefile
+	test/rofl/common/openflow/coftablestatsarray/Makefile
+	test/rofl/common/openflow/coftables/Makefile
 	test/rofl/common/openflow/coxmatch/Makefile
 	test/rofl/common/openflow/coxmatches/Makefile
 	test/rofl/common/openflow/messages/Makefile
@@ -134,8 +155,6 @@ AC_CONFIG_FILES([
 	test/rofl/common/openflow/messages/cofmsgqueueconfig/Makefile
 	test/rofl/common/openflow/messages/cofmsgrole/Makefile
 	test/rofl/common/openflow/messages/cofmsgtablemod/Makefile
-	test/rofl/common/crofbase/Makefile
-	test/rofl/common/all/Makefile
 	
 	src/rofl_common_conf.h])
 

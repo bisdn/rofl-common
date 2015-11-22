@@ -1,5 +1,5 @@
 MAINTAINERCLEANFILES = Makefile.in
 
-SUBDIRS = openflow all caddress caddrinfos caddrinfo cpacket crofqueue crofsock crofconn crofchan crofbase
+SUBDIRS = openflow caddress caddrinfos caddrinfo cpacket csegmsg csockaddr crofqueue crofsock crofconn crofchan crofbase
 
 
