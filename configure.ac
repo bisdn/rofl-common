@@ -84,7 +84,6 @@ AC_CONFIG_FILES([
 	test/rofl/common/crofqueue/Makefile
 	test/rofl/common/crofsock/Makefile
 	test/rofl/common/openflow/Makefile
-	test/rofl/common/openflow/exceptions/Makefile
 	test/rofl/common/openflow/cofaction/Makefile
 	test/rofl/common/openflow/cofactions/Makefile
 	test/rofl/common/openflow/cofasyncconfig/Makefile
@@ -120,6 +119,7 @@ AC_CONFIG_FILES([
 	test/rofl/common/openflow/coftables/Makefile
 	test/rofl/common/openflow/coxmatch/Makefile
 	test/rofl/common/openflow/coxmatches/Makefile
+	test/rofl/common/openflow/exceptions/Makefile
 	test/rofl/common/openflow/messages/Makefile
 	test/rofl/common/openflow/messages/cofmsgaggrstats/Makefile
 	test/rofl/common/openflow/messages/cofmsgdescstats/Makefile
