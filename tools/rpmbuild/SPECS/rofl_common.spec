@@ -32,8 +32,8 @@ Revised OpenFlow Library (ROFL) version v0.10.0 development files
 %build
 sh autogen.sh
 cd build/
-../configure --prefix=/usr/local --disable-silent-rules
-make %{?_smp_mflags}
+../configure --prefix=/usr --disable-silent-rules --libdir=%{_libdir}
+make %{?_smp_mflags} 
 
 
 %install
@@ -43,34 +43,30 @@ make install DESTDIR=$RPM_BUILD_ROOT
 
 
 %post
+cd %{_libdir}
 /sbin/ldconfig
-/bin/ln -s /usr/local/lib/librofl.so.0 /usr/local/lib/librofl.so
-/bin/ln -s /usr/local/lib/librofl_hal.so.0 /usr/local/lib/librofl_hal.so
-/bin/ln -s /usr/local/lib/librofl_pipeline.so.0 /usr/local/lib/librofl_pipeline.so
+/bin/ln -s librofl_common.so.0 librofl_common.so
 %postun
 /sbin/ldconfig
-/bin/rm /usr/local/lib/librofl.so
-/bin/rm /usr/local/lib/librofl_hal.so
-/bin/rm /usr/local/lib/librofl_pipeline.so
+/bin/rm %{_libdir}/librofl_common.so
 
 
 %define _unpackaged_files_terminate_build 0 
 
 %files
 %defattr(-,root,root,-)
-/usr/local/lib/librofl_common.so.0.1.1
-/usr/local/lib/librofl_common.a
-/usr/local/lib/librofl_common.la
-/usr/local/sbin/ethswctld
+%{_libdir}/librofl_common.so.0.1.1
+%{_libdir}/librofl_common.a
+%{_libdir}/librofl_common.la
 %doc
 
 
 %files devel
 %defattr(-,root,root,-)
-/usr/local/include/rofl_common.h
-/usr/local/include/rofl_common_conf.h
-/usr/local/include/rofl
-/usr/local/lib/pkgconfig/rofl_common.pc
+%{_includedir}/rofl_common.h
+%{_includedir}/rofl_common_conf.h
+%{_includedir}/rofl
+%{_libdir}/pkgconfig/rofl_common.pc
 %doc
 
 

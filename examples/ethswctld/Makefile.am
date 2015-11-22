@@ -2,7 +2,7 @@ MAINTAINERCLEANFILES = Makefile.in
 
 SUBDIRS = 
 
-sbin_PROGRAMS = ethswctld
+noinst_PROGRAMS = ethswctld
 
 ethswctld_SOURCES = \
 	ethswctld.cc \
