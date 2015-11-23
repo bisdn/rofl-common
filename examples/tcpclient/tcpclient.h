@@ -212,6 +212,63 @@ private:
 		stop();
 	};
 
+	/**
+	 * @brief	OpenFlow Table-Features-Stats-Request message received.
+	 *
+	 * @param ctl controller instance
+	 * @param auxid control connection identifier
+	 * @param msg OpenFlow message instance
+	 */
+	virtual void
+	handle_table_features_stats_request(
+			rofl::crofctl& ctl,
+			const rofl::cauxid& auxid,
+			rofl::openflow::cofmsg_table_features_stats_request& msg)
+	{
+		rofl::openflow::coftables tables(msg.get_version());
+		//rofl::openflow::coftables tables;
+
+		tables.add_table(0).set_max_entries(1024);
+		tables.set_table(0).set_name("table#0");
+		tables.add_table(1).set_max_entries(1024);
+		tables.set_table(1).set_name("table#1");
+		tables.add_table(2).set_max_entries(1024);
+		tables.set_table(2).set_name("table#2");
+
+		ctl.send_table_features_stats_reply(
+				auxid,
+				msg.get_xid(),
+				tables);
+	};
+
+	/**
+	 * @brief	OpenFlow Table-Stats-Request message received.
+	 *
+	 * @param ctl controller instance
+	 * @param auxid control connection identifier
+	 * @param msg OpenFlow message instance
+	 */
+	virtual void
+	handle_table_stats_request(
+			rofl::crofctl& ctl,
+			const rofl::cauxid& auxid,
+			rofl::openflow::cofmsg_table_stats_request& msg)
+	{
+		rofl::openflow::coftablestatsarray tablestatsarray;
+
+		tablestatsarray.add_table_stats(0).set_name("table#0");
+		tablestatsarray.set_table_stats(0).set_max_entries(1024);
+		tablestatsarray.add_table_stats(1).set_name("table#1");
+		tablestatsarray.set_table_stats(1).set_max_entries(1024);
+		tablestatsarray.add_table_stats(2).set_name("table#2");
+		tablestatsarray.set_table_stats(2).set_max_entries(1024);
+
+		ctl.send_table_stats_reply(
+				auxid,
+				msg.get_xid(),
+				tablestatsarray);
+	};
+
 	/** @endcond */
 
 public:
