@@ -921,6 +921,13 @@ public:
 	/**
 	 *
 	 */
+	std::list<cauxid>
+	keys() const
+	{ return rofchan.keys(); };
+
+	/**
+	 *
+	 */
 	void
 	clear()
 	{ rofchan.clear(); };

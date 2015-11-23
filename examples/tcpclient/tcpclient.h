@@ -68,6 +68,24 @@ public:
 			pselect(0, NULL, NULL, NULL, &ts, NULL);
 		}
 
+		for (auto auxid : crofbase::get_ctl(ctlid).keys()) {
+			std::cerr << ">>> journal for auxid: " << auxid << std::endl;
+			std::cerr << crofbase::get_ctl(ctlid).get_conn(auxid).get_journal() << std::endl;
+			std::cerr << crofbase::get_ctl(ctlid).get_conn(auxid).get_tcp_journal() << std::endl;
+		}
+
+		crofbase::set_ctl(ctlid).clear();
+
+		std::cerr << crofbase::get_ctl(ctlid).get_journal() << std::endl;
+
+		crofbase::drop_ctl(ctlid);
+
+		unsigned int shutdown = 10;
+		while (--shutdown > 0)
+		{ std::cerr << "."; sleep(1); } std::cerr << std::endl;
+
+		std::cerr << crofbase::get_journal() << std::endl;
+
 		return 0;
 	};
 
@@ -83,7 +101,6 @@ public:
 	start()
 	{
 		rofl::openflow::cofhello_elem_versionbitmap vbitmap;
-		vbitmap.add_ofp_version(rofl::openflow12::OFP_VERSION);
 		vbitmap.add_ofp_version(rofl::openflow13::OFP_VERSION);
 
 		crofbase::
@@ -92,7 +109,7 @@ public:
 					set_laddr(rofl::csockaddr(AF_INET, "0.0.0.0",   0)).
 					set_raddr(rofl::csockaddr(AF_INET, "127.0.0.1", 6653)).
 					set_trace(true).
-					tcp_connect(vbitmap, rofl::crofconn::MODE_DATAPATH, true);
+					tcp_connect(vbitmap, rofl::crofconn::MODE_DATAPATH, false);
 	};
 
 	/**
@@ -118,7 +135,7 @@ private:
 	handle_ctl_open(
 			rofl::crofctl& ctl)
 	{
-
+		std::cerr << "controller attached dptid=" << ctl.get_ctlid() << std::endl;
 	};
 
 	/**
@@ -136,7 +153,7 @@ private:
 	handle_ctl_close(
 			const rofl::cctlid& ctlid)
 	{
-
+		std::cerr << "controller detached dptid=" << ctlid << std::endl;
 	};
 
 	/**
@@ -152,6 +169,8 @@ private:
 			const rofl::cauxid& auxid,
 			rofl::openflow::cofmsg_features_request& msg)
 	{
+		std::cerr << "received Features-Request" << std::endl;
+
 		ctl.send_features_reply(
 				auxid,
 				msg.get_xid(),
@@ -160,6 +179,35 @@ private:
 				n_tables,
 				capabilities,
 				auxid.get_id());
+	};
+
+	/**
+	 *
+	 */
+	virtual void
+	handle_port_desc_stats_request(
+			rofl::crofctl& ctl,
+			const rofl::cauxid& auxid,
+			rofl::openflow::cofmsg_port_desc_stats_request& msg)
+	{
+		std::cerr << "received Port-Desc-Stats-Request" << std::endl;
+
+		ports.set_version(ctl.get_version());
+
+		ports.add_port(0).set_hwaddr(rofl::caddress_ll("00:11:11:11:11:11"));
+		ports.set_port(0).set_name("port#0");
+		ports.set_port(0).set_ethernet().set_advertised(0xa1a2a3a4);
+		ports.set_port(0).set_ethernet().set_max_speed(0xb1b2b3b4);
+
+		ports.add_port(1).set_hwaddr(rofl::caddress_ll("00:22:22:22:22:22"));
+		ports.set_port(1).set_name("port#1");
+		ports.set_port(1).set_ethernet().set_advertised(0xa1a2a3a4);
+		ports.set_port(1).set_ethernet().set_max_speed(0xb1b2b3b4);
+
+		ctl.send_port_desc_stats_reply(
+				auxid,
+				msg.get_xid(),
+				ports);
 
 		stop();
 	};
@@ -189,6 +237,8 @@ private:
 	uint8_t                     n_tables;
 
 	uint32_t                    capabilities;
+
+	rofl::openflow::cofports    ports;
 };
 
 }; // namespace examples

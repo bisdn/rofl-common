@@ -393,6 +393,19 @@ public:
 	/**@{*/
 
 	/**
+	 * @brief	Returns list of all active dptids
+	 */
+	std::list<rofl::cdptid>
+	dpt_keys() const {
+		AcquireReadLock rwlock(rofdpts_rwlock);
+		std::list<rofl::cdptid> ids;
+		for (auto it : rofdpts) {
+			ids.push_back(it.first);
+		}
+		return ids;
+	};
+
+	/**
 	 * @brief	Deletes all existing rofl::crofdpt instances
 	 */
 	void
@@ -403,6 +416,9 @@ public:
 			it.second->set_env(nullptr);
 			/* close control channel */
 			it.second->clear();
+			/* create journal entry */
+			journal.log(LOG_INFO, "datapath detached").
+						set_key("dptid", it.second->get_dptid().str());
 
 			rofdpts_deletion.insert(it.second);
 		}
@@ -531,6 +547,8 @@ public:
 		if (rofdpts.find(dptid) == rofdpts.end()) {
 			return false;
 		}
+		journal.log(LOG_INFO, "datapath detached").
+					set_key("dptid", dptid.str());
 		/* redirect environment */
 		rofdpts[dptid]->set_env(nullptr);
 		/* close control channel */
@@ -623,6 +641,19 @@ public:
 	/**@{*/
 
 	/**
+	 * @brief	Returns list of all active ctlids
+	 */
+	std::list<rofl::cctlid>
+	ctl_keys() const {
+		AcquireReadLock rwlock(rofctls_rwlock);
+		std::list<rofl::cctlid> ids;
+		for (auto it : rofctls) {
+			ids.push_back(it.first);
+		}
+		return ids;
+	};
+
+	/**
 	 * @brief	Deletes all existing rofl::crofctl instances
 	 */
 	void
@@ -633,6 +664,9 @@ public:
 			it.second->set_env(nullptr);
 			/* close control channel */
 			it.second->clear();
+			/* create journal entry */
+			journal.log(LOG_INFO, "controller detached").
+						set_key("ctlid", it.second->get_ctlid().str());
 
 			rofctls_deletion.insert(it.second);
 		}
@@ -758,6 +792,8 @@ public:
 		if (rofctls.find(ctlid) == rofctls.end()) {
 			return false;
 		}
+		journal.log(LOG_INFO, "controller detached").
+					set_key("ctlid", ctlid.str());
 		/* redirect environment */
 		rofctls[ctlid]->set_env(nullptr);
 		/* close control channel */
