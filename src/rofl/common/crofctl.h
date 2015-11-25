@@ -935,6 +935,13 @@ public:
 	/**
 	 *
 	 */
+	void
+	close()
+	{ rofchan.close(); };
+
+	/**
+	 *
+	 */
 	crofconn&
 	add_conn()
 	{ return rofchan.add_conn(); };

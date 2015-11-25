@@ -272,6 +272,14 @@ public:
 	 *
 	 */
 	void
+	close() {
+		clear();
+	};
+
+	/**
+	 *
+	 */
+	void
 	clear() {
 		AcquireReadWriteLock rwlock(conns_rwlock);
 		for (auto it : conns) {
