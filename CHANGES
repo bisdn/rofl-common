@@ -8,6 +8,10 @@ Legend:
 Change log
 ==========
 
+v0.10.1
+
+[B] fixed a race condition in crofsock::send_from_queue()
+
 v0.10.0
 
 [+] revised workflow
