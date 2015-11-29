@@ -45,7 +45,7 @@ void
 crofchantest::test1()
 {
 	keep_running = true;
-	num_of_conns = 8;
+	num_of_conns = 16;
 	num_of_accepts = 0;
 	int seconds = 10 * num_of_conns;
 
@@ -84,6 +84,11 @@ crofchantest::test1()
 		pselect(0, NULL, NULL, NULL, &ts, NULL);
 		std::cerr << ".";
 	}
+
+
+	std::cerr << ">>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<" << std::endl;
+	std::cerr << ">>>          TERMINATING          <<<" << std::endl;
+	std::cerr << ">>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<" << std::endl;
 }
 
 
@@ -109,7 +114,7 @@ crofchantest::handle_listen(
 
 	std::cerr << ">>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<" << std::endl;
 	std::cerr << ">>> crofchantest::handle_listen()" << std::endl;
-	std::cerr << ">>> conn.get_auxid() = " << conn.get_auxid();
+	std::cerr << ">>> conn.get_auxid() = " << (int)conn.get_auxid().get_id() << std::endl;
 	std::cerr << ">>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<" << std::endl;
 
 	std::cerr << conn.get_journal() << std::endl;
@@ -131,16 +136,11 @@ crofchantest::handle_established(
 	std::cerr << ">>> num_of_conns   = " << num_of_conns << std::endl;
 	std::cerr << ">>> channel1.size() = " << channel1->size() << std::endl;
 	std::cerr << ">>> channel2.size() = " << channel2->size() << std::endl;
-	std::cerr << ">>> conn.get_auxid() = " << conn.get_auxid();
+	std::cerr << ">>> conn.get_auxid() = " << (int)conn.get_auxid().get_id() << std::endl;
 	std::cerr << ">>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<" << std::endl;
 	std::cerr << std::endl;
 
 	if (num_of_accepts == num_of_conns) {
-
-		std::cerr << ">>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<" << std::endl;
-		std::cerr << ">>>          TERMINATING          <<<" << std::endl;
-		std::cerr << ">>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<" << std::endl;
-
 		keep_running = false;
 	}
 }
