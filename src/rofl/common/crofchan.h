@@ -252,12 +252,28 @@ public:
 	 */
 	std::list<cauxid>
 	get_conn_ids() const {
+		return keys();
+	};
+
+	/**
+	 *
+	 */
+	std::list<cauxid>
+	keys() const {
 		AcquireReadLock rwlock(conns_rwlock);
 		std::list<cauxid> ids;
 		for (auto it : conns) {
 			ids.push_back(it.first);
 		}
 		return ids;
+	};
+
+	/**
+	 *
+	 */
+	void
+	close() {
+		clear();
 	};
 
 	/**

@@ -71,7 +71,8 @@ crofsock::crofsock(
 				tx_fragment_pending(false),
 				txbuffer((size_t)65536),
 				msg_bytes_sent(0),
-				txlen(0)
+				txlen(0),
+				trace(false)
 {
 	/* scheduler weights for transmission */
 	txweights[QUEUE_OAM ] = 16;
@@ -401,6 +402,21 @@ crofsock::tcp_accept(
 		throw eSysCall("eSysCall", "getsockopt (SO_PROTOCOL)", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 #endif
+
+	/* set REUSEADDR and TCP_NODELAY options (for TCP sockets only) */
+	if ((SOCK_STREAM == type) && (IPPROTO_TCP == protocol)) {
+		int optval = 1;
+
+		/* set SO_REUSEADDR option */
+		if (::setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) < 0) {
+			throw eSysCall("eSysCall", "setsockopt (SO_REUSEADDR)", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+		}
+
+		/* set TCP_NODELAY option */
+		if (::setsockopt(sd, IPPROTO_TCP, TCP_NODELAY, &optval, sizeof(optval)) < 0) {
+			throw eSysCall("eSysCall", "setsockopt (TCP_NODELAY)", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+		}
+	}
 
 	state = STATE_TCP_ESTABLISHED;
 
@@ -1393,6 +1409,10 @@ crofsock::send_from_queue()
 					/* pack message into txbuffer */
 					msg->pack(txbuffer.somem(), txlen);
 
+					if (trace) {
+						journal.log(LOG_TRACE, "message sent: %s", msg->str().c_str());
+					}
+
 					/* remove C++ message object from heap */
 					delete msg;
 				}
@@ -1457,6 +1477,10 @@ crofsock::send_from_queue()
 	} while (reschedule);
 
 	tx_is_running = false;
+
+	if (txqueue_pending_pkts > 0) {
+		txthread.wakeup();
+	}
 }
 
 
@@ -1696,6 +1720,10 @@ crofsock::parse_message()
 		default: {
 			throw eBadRequestBadVersion("eBadRequestBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		};
+		}
+
+		if (trace) {
+			journal.log(LOG_TRACE, "message rcvd: %s", msg->str().c_str());
 		}
 
 		crofsock_env::call_env(env).handle_recv(*this, msg);
