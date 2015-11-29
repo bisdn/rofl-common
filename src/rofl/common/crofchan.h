@@ -186,10 +186,10 @@ public:
 	{
 		/* stop management thread */
 		thread.stop();
-		/* drop active connections */
-		__drop_conns();
 		/* drop connections scheduled for removal */
 		__drop_conns_deletion();
+		/* drop active connections */
+		__drop_conns();
 	};
 
 	/**
@@ -399,13 +399,15 @@ public:
 			if (conns.find(auxid) == conns.end()) {
 				return false;
 			}
-			AcquireReadWriteLock rwlock(conns_deletion_rwlock);
 			/* redirect environment */
 			conns[auxid]->set_env(nullptr);
 			/* close connection */
 			conns[auxid]->close();
-			/* add pointer to crofconn instance on heap to conns_deletion */
-			conns_deletion.insert(conns[auxid]);
+			{
+				AcquireReadWriteLock rwlock(conns_deletion_rwlock);
+				/* add pointer to crofconn instance on heap to conns_deletion */
+				conns_deletion.insert(conns[auxid]);
+			}
 			/* mark its auxid as free */
 			conns.erase(auxid);
 		}
@@ -457,6 +459,7 @@ private:
 	__drop_conns() {
 		AcquireReadWriteLock rwlock(conns_rwlock);
 		for (auto it : conns) {
+			//std::cerr << "__drop_conns: deleting conn (" << (int)it.second->get_auxid().get_id() << ") 0x" << it.second << std::endl;
 			delete it.second;
 		}
 		conns.clear();
@@ -469,6 +472,7 @@ private:
 	__drop_conns_deletion() {
 		AcquireReadWriteLock lock(conns_deletion_rwlock);
 		for (auto conn : conns_deletion) {
+			//std::cerr << "__drop_conns_deletion: deleting conn (" << (int)conn->get_auxid().get_id() << ") 0x" << conn << std::endl;
 			delete conn;
 		}
 		conns_deletion.clear();

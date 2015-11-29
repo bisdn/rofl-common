@@ -295,15 +295,15 @@ cthread::stop()
 	switch (state) {
 	case STATE_RUNNING: {
 
+		run_thread = false;
+
+		wakeup();
+
 		/* deletion of thread not initiated within this thread */
 		if (pthread_self() == tid) {
 			//std::cerr << "pthread_exit" << std::endl;
 			return;
 		}
-
-		run_thread = false;
-
-		wakeup();
 
 		struct timespec ts;
 		ts.tv_nsec = 0;
