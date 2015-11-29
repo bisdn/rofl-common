@@ -656,6 +656,23 @@ public:
 
 public:
 
+	/**
+	 *
+	 */
+	bool
+	get_trace() const
+	{ return trace; };
+
+	/**
+	 *
+	 */
+	crofsock&
+	set_trace(
+			bool trace)
+	{ this->trace = trace; return *this; };
+
+public:
+
 	friend std::ostream&
 	operator<< (std::ostream& os, crofsock const& rofsock) {
 		os  << "<crofsock: transport-connection-established: " << rofsock.is_established() << ">" << std::endl;
@@ -942,6 +959,9 @@ private:
 
 	// message length of current tx-fragment
 	size_t                      txlen;
+
+	// enable message tracing
+	bool                        trace;
 };
 
 } /* namespace rofl */

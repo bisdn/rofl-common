@@ -748,7 +748,7 @@ public:
 	crofconn&
 	set_trace(
 			bool trace)
-	{ this->trace = trace; return *this; };
+	{ rofsock.set_trace(this->trace = trace); return *this; };
 
 public:
 
