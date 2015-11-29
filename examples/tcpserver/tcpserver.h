@@ -163,17 +163,104 @@ private:
 			rofl::openflow::cofmsg_port_desc_stats_reply& msg)
 	{
 		std::cerr << "port description received; " << dpt.get_ports() << std::endl;
+
+		switch (dpt.get_version()) {
+		case rofl::openflow13::OFP_VERSION: {
+			dpt.send_table_features_stats_request(auxid, 0, 5);
+		} break;
+		case rofl::openflow12::OFP_VERSION: {
+			dpt.send_table_stats_request(auxid, 0, 5);
+		} break;
+		default: {
+			/* never occurs */
+		};
+		}
+	};
+
+	/**
+	 * @brief	Timer expired while waiting for OpenFlow Port-Desc-Stats-Reply message.
+	 *
+	 * No Port-Desc-Stats-Reply message was received in the specified time interval
+	 * for the given OpenFlow transaction identifier.
+	 *
+	 * @param dpt datapath instance
+	 * @param xid OpenFlow transaction identifier
+	 */
+	virtual void
+	handle_port_desc_stats_reply_timeout(
+			rofl::crofdpt& dpt,
+			uint32_t xid)
+	{
+		std::cerr << "Port-Desc-Stats timeout occured, xid: " << (unsigned int)xid << std::endl;
+	};
+
+	/**
+	 * @brief	OpenFlow Table-Features-Stats-Reply message received.
+	 *
+	 * @param dpt datapath instance
+	 * @param auxid control connection identifier
+	 * @param msg OpenFlow message instance
+	 */
+	virtual void
+	handle_table_features_stats_reply(
+			rofl::crofdpt& dpt,
+			const rofl::cauxid& auxid,
+			rofl::openflow::cofmsg_table_features_stats_reply& msg)
+	{
+		std::cerr << "Table-Features-Stats received; " << dpt.get_tables() << std::endl;
+	};
+
+	/**
+	 * @brief	Timer expired while waiting for OpenFlow Table-Features-Stats-Reply message.
+	 *
+	 * No Table-Features-Stats-Reply message was received in the specified time interval
+	 * for the given OpenFlow transaction identifier.
+	 *
+	 * @param dpt datapath instance
+	 * @param xid OpenFlow transaction identifier
+	 */
+	virtual void
+	handle_table_features_stats_reply_timeout(
+			rofl::crofdpt& dpt,
+			uint32_t xid)
+	{
+		std::cerr << "Table-Features-Stats timeout occured, xid: " << (unsigned int)xid << std::endl;
+	};
+
+	/**
+	 * @brief	OpenFlow Table-Stats-Reply message received.
+	 *
+	 * @param dpt datapath instance
+	 * @param auxid control connection identifier
+	 * @param msg OpenFlow message instance
+	 */
+	virtual void
+	handle_table_stats_reply(
+			rofl::crofdpt& dpt,
+			const rofl::cauxid& auxid,
+			rofl::openflow::cofmsg_table_stats_reply& msg)
+	{
+		std::cerr << "Table-Stats received; " << dpt.get_tables() << std::endl;
+	};
+
+	/**
+	 * @brief	Timer expired while waiting for OpenFlow Table-Stats-Reply message.
+	 *
+	 * No Table-Stats-Reply message was received in the specified time interval
+	 * for the given OpenFlow transaction identifier.
+	 *
+	 * @param dpt datapath instance
+	 * @param xid OpenFlow transaction identifier
+	 */
+	virtual void
+	handle_table_stats_reply_timeout(
+			rofl::crofdpt& dpt,
+			uint32_t xid)
+	{
+		std::cerr << "Table-Stats timeout occured, xid: " << (unsigned int)xid << std::endl;
 	};
 
 	/** @endcond */
-
-public:
-
-	friend std::ostream&
-	operator<< (std::ostream& os, const tcpserver& server) {
-
-		return os;
-	};
 
 private:
 

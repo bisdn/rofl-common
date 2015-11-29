@@ -74,13 +74,13 @@ public:
 			std::cerr << crofbase::get_ctl(ctlid).get_conn(auxid).get_tcp_journal() << std::endl;
 		}
 
-		crofbase::set_ctl(ctlid).clear();
+		crofbase::set_ctl(ctlid).close();
 
 		std::cerr << crofbase::get_ctl(ctlid).get_journal() << std::endl;
 
 		crofbase::drop_ctl(ctlid);
 
-		unsigned int shutdown = 10;
+		unsigned int shutdown = 4;
 		while (--shutdown > 0)
 		{ std::cerr << "."; sleep(1); } std::cerr << std::endl;
 
@@ -109,7 +109,7 @@ public:
 					set_laddr(rofl::csockaddr(AF_INET, "0.0.0.0",   0)).
 					set_raddr(rofl::csockaddr(AF_INET, "127.0.0.1", 6653)).
 					set_trace(true).
-					tcp_connect(vbitmap, rofl::crofconn::MODE_DATAPATH, false);
+					tcp_connect(vbitmap, rofl::crofconn::MODE_DATAPATH, true);
 	};
 
 	/**
@@ -135,7 +135,7 @@ private:
 	handle_ctl_open(
 			rofl::crofctl& ctl)
 	{
-		std::cerr << "controller attached dptid=" << ctl.get_ctlid() << std::endl;
+		std::cerr << "controller attached ctlid=" << ctl.get_ctlid() << std::endl;
 	};
 
 	/**
@@ -153,7 +153,113 @@ private:
 	handle_ctl_close(
 			const rofl::cctlid& ctlid)
 	{
-		std::cerr << "controller detached dptid=" << ctlid << std::endl;
+		std::cerr << "controller detached ctlid=" << ctlid << std::endl;
+	};
+
+	/**
+	 * @brief 	Called when a control connection (main or auxiliary) has been established.
+	 *
+	 * @param ctl controller instance
+	 * @param auxid connection identifier (main: 0)
+	 */
+	virtual void
+	handle_conn_established(
+			rofl::crofctl& ctl,
+			const rofl::cauxid& auxid)
+	{
+		std::cerr << "channel established ctlid=" << ctlid << std::endl;
+	};
+
+	/**
+	 * @brief 	Called when a control connection (main or auxiliary) has been terminated by the peer entity.
+	 *
+	 * @param ctl controller instance
+	 * @param auxid connection identifier (main: 0)
+	 */
+	virtual void
+	handle_conn_terminated(
+			rofl::crofctl& ctl,
+			const rofl::cauxid& auxid)
+	{
+		std::cerr << "channel terminated ctlid=" << ctlid << std::endl;
+	};
+
+	/**
+	 * @brief 	Called when an attempt to establish a control connection has been refused.
+	 *
+	 * This event occurs when the C-library's connect() system call fails
+	 * with the ECONNREFUSED error code. This indicates typically a problem on
+	 * the remote site.
+	 *
+	 * @param ctl controller instance
+	 * @param auxid connection identifier (main: 0)
+	 */
+	virtual void
+	handle_conn_refused(
+			rofl::crofctl& ctl,
+			const rofl::cauxid& auxid)
+	{
+		std::cerr << "channel connect refused ctlid=" << ctlid << std::endl;
+	};
+
+	/**
+	 * @brief 	Called when an attempt to establish a control connection has been failed.
+	 *
+	 * This event occurs when some failure occures while calling the underlying
+	 * C-library connect() system call, e.g., no route to destination, etc. This may
+	 * indicate a local configuration problem inside or outside of the application.
+	 *
+	 * @param ctl controller instance
+	 * @param auxid connection identifier (main: 0)
+	 */
+	virtual void
+	handle_conn_failed(
+			rofl::crofctl& ctl,
+			const rofl::cauxid& auxid)
+	{
+		std::cerr << "channel connect failed ctlid=" << ctlid << std::endl;
+	};
+
+	/**
+	 * @brief	Called when a negotiation failed with a peer controller entity
+	 *
+	 * @param ctl controller instance
+	 * @param auxid control connection identifier (main: 0)
+	 */
+	virtual void
+	handle_conn_negotiation_failed(
+			rofl::crofctl& ctl,
+			const rofl::cauxid& auxid)
+	{
+		std::cerr << "channel failed ctlid=" << ctlid << std::endl;
+	};
+
+	/**
+	 * @brief	Called when a congestion situation on the control connection occurs
+	 *
+	 * @param ctl controller instance
+	 * @param auxid control connection identifier (main: 0)
+	 */
+	virtual void
+	handle_conn_congestion_occured(
+			rofl::crofctl& ctl,
+			const rofl::cauxid& auxid)
+	{
+		std::cerr << "channel congestion occured, ctlid=" << ctlid << std::endl;
+	};
+
+	/**
+	 * @brief	Called when a congestion situation on the control connection has been solved
+	 *
+	 * @param ctl controller instance
+	 * @param auxid control connection identifier (main: 0)
+	 */
+	virtual void
+	handle_conn_congestion_solved(
+			rofl::crofctl& ctl,
+			const rofl::cauxid& auxid)
+	{
+		std::cerr << "channel congestion solved, ctlid=" << ctlid << std::endl;
 	};
 
 	/**
@@ -208,6 +314,64 @@ private:
 				auxid,
 				msg.get_xid(),
 				ports);
+	};
+
+	/**
+	 * @brief	OpenFlow Table-Features-Stats-Request message received.
+	 *
+	 * @param ctl controller instance
+	 * @param auxid control connection identifier
+	 * @param msg OpenFlow message instance
+	 */
+	virtual void
+	handle_table_features_stats_request(
+			rofl::crofctl& ctl,
+			const rofl::cauxid& auxid,
+			rofl::openflow::cofmsg_table_features_stats_request& msg)
+	{
+		rofl::openflow::coftables tables;
+
+		tables.add_table(0).set_max_entries(1024);
+		tables.set_table(0).set_name("table#0");
+		tables.add_table(1).set_max_entries(1024);
+		tables.set_table(1).set_name("table#1");
+		tables.add_table(2).set_max_entries(1024);
+		tables.set_table(2).set_name("table#2");
+
+		ctl.send_table_features_stats_reply(
+				auxid,
+				msg.get_xid(),
+				tables);
+
+		stop();
+	};
+
+	/**
+	 * @brief	OpenFlow Table-Stats-Request message received.
+	 *
+	 * @param ctl controller instance
+	 * @param auxid control connection identifier
+	 * @param msg OpenFlow message instance
+	 */
+	virtual void
+	handle_table_stats_request(
+			rofl::crofctl& ctl,
+			const rofl::cauxid& auxid,
+			rofl::openflow::cofmsg_table_stats_request& msg)
+	{
+		rofl::openflow::coftablestatsarray tablestatsarray;
+
+		tablestatsarray.add_table_stats(0).set_name("table#0");
+		tablestatsarray.set_table_stats(0).set_max_entries(1024);
+		tablestatsarray.add_table_stats(1).set_name("table#1");
+		tablestatsarray.set_table_stats(1).set_max_entries(1024);
+		tablestatsarray.add_table_stats(2).set_name("table#2");
+		tablestatsarray.set_table_stats(2).set_max_entries(1024);
+
+		ctl.send_table_stats_reply(
+				auxid,
+				msg.get_xid(),
+				tablestatsarray);
 
 		stop();
 	};
