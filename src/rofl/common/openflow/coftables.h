@@ -115,9 +115,10 @@ public:
 			uint8_t ofp_version)
 	{
 		this->ofp_version = ofp_version;
-		AcquireReadWriteLock lock(tables_lock);
-		for (auto it : tables) {
-			it.second.set_version(ofp_version);
+		AcquireReadLock lock(tables_lock);
+		for (std::map<uint8_t, coftable_features>::iterator
+				it = tables.begin(); it != tables.end(); ++it) {
+			it->second.set_version(ofp_version);
 		}
 		return *this;
 	};

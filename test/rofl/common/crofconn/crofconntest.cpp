@@ -34,7 +34,7 @@ crofconntest::test()
 	try {
 		for (unsigned int i = 0; i < 2; i++) {
 			test_mode = TEST_MODE_TCP;
-			keep_running = true;
+			keep_running = 60;
 			msg_counter = 0;
 			xid = 0xa1a2a3a4;
 			server_established = 0;
@@ -76,12 +76,14 @@ crofconntest::test()
 					tcp_connect(versionbitmap_dpt, rofl::crofconn::MODE_DATAPATH, /*reconnect=*/false);
 
 
-			while (keep_running) {
+			while (--keep_running > 0) {
 				struct timespec ts;
 				ts.tv_sec = 1;
 				ts.tv_nsec = 0;
 				pselect(0, NULL, NULL, NULL, &ts, NULL);
+				std::cerr << ".";
 			}
+			std::cerr << std::endl;
 
 			slisten->close();
 			sclient->close();
@@ -121,7 +123,7 @@ crofconntest::test_tls()
 
 	try {
 		test_mode = TEST_MODE_TLS;
-		keep_running = true;
+		keep_running = 10;
 		msg_counter = 0;
 		xid = 0xa1a2a3a4;
 		server_established = 0;
@@ -365,7 +367,7 @@ crofconntest::handle_recv(
 		CPPUNIT_ASSERT(port_desc->get_ports().size() == ports.size());
 		CPPUNIT_ASSERT(port_desc->get_ports().length() == ports.length());
 
-		keep_running = false;
+		keep_running = 1;
 
 	} break;
 	default: {

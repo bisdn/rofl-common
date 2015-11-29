@@ -66,6 +66,8 @@ AC_CONFIG_FILES([
 
 	examples/Makefile
 	examples/ethswctld/Makefile
+	examples/tcpclient/Makefile
+	examples/tcpserver/Makefile
 
 	tools/Makefile
 
