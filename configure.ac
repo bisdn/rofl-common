@@ -74,6 +74,7 @@ AC_CONFIG_FILES([
 	test/Makefile
 	test/rofl/Makefile
 	test/rofl/common/Makefile
+	test/rofl/common/cthread/Makefile
 	test/rofl/common/caddress/Makefile
 	test/rofl/common/caddrinfo/Makefile
 	test/rofl/common/caddrinfos/Makefile
