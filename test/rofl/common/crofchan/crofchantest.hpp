@@ -21,7 +21,6 @@ class crofchantest :
 {
 	CPPUNIT_TEST_SUITE( crofchantest );
 	CPPUNIT_TEST( test1 );
-	CPPUNIT_TEST( test2 );
 	CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -30,10 +29,10 @@ public:
 
 public:
 	void test1();
-	void test2();
 
 private:
 
+	uint16_t            listening_port;
 	bool                keep_running;
 	rofl::openflow::cofhello_elem_versionbitmap versionbitmap;
 	uint64_t            dpid;
@@ -42,6 +41,7 @@ private:
 	unsigned int        num_of_conns;
 	unsigned int        num_of_accepts;
 
+	rofl::crandom       rand;
 	rofl::csockaddr     baddr;
 	rofl::crofsock*		rofsock;
 	rofl::crofchan*     channel1;
@@ -61,8 +61,7 @@ private:
 
 	virtual void
 	handle_established(
-			rofl::crofchan& chan, rofl::crofconn& conn, uint8_t ofp_version)
-	{};
+			rofl::crofchan& chan, rofl::crofconn& conn, uint8_t ofp_version);
 
 	virtual void
 	handle_closed(

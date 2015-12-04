@@ -49,9 +49,9 @@ crofsocktest::test()
 			while (lookup_idle_port) {
 				do {
 					listening_port = rand.uint16();
-					std::cerr << "trying listening port=" << (int)listening_port << std::endl;
 				} while ((listening_port < 10000) || (listening_port > 49000));
 				try {
+					std::cerr << "trying listening port=" << (int)listening_port << std::endl;
 					baddr = rofl::csockaddr(rofl::caddress_in4("127.0.0.1"), listening_port);
 					/* try to bind address first */
 					slisten->set_baddr(baddr).listen();
@@ -125,9 +125,9 @@ crofsocktest::test_tls()
 		while (lookup_idle_port) {
 			do {
 				listening_port = rand.uint16();
-				std::cerr << "trying listening port=" << (int)listening_port << std::endl;
 			} while ((listening_port < 10000) || (listening_port > 49000));
 			try {
+				std::cerr << "trying listening port=" << (int)listening_port << std::endl;
 				baddr = rofl::csockaddr(rofl::caddress_in4("127.0.0.1"), listening_port);
 				/* try to bind address first */
 				slisten->set_baddr(baddr).listen();

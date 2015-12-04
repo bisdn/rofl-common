@@ -128,6 +128,30 @@ public:
 	get_thread_id() const
 	{ return tid; };
 
+	/**
+	 *
+	 */
+	cthread&
+	set_run_thread(
+			bool run_thread)
+	{
+		AcquireReadWriteLock rwlock(run_thread_lock);
+		this->cthread::run_thread[this] = run_thread;
+		return *this;
+	};
+
+	/**
+	 *
+	 */
+	bool
+	get_run_thread() const
+	{
+		AcquireReadLock rwlock(run_thread_lock);
+		if (cthread::run_thread.find(this) == cthread::run_thread.end())
+			return false;
+		return run_thread.at(this);
+	};
+
 public:
 
 	/**
@@ -282,6 +306,14 @@ private:
 
 private:
 
+	// true: continue to run worker thread
+	static std::map<const cthread*, bool> run_thread;
+
+	// rwlock for run_thread
+	static rofl::crwlock            run_thread_lock;
+
+private:
+
 	// thread environment
 	cthread_env*        env;
 
@@ -290,7 +322,7 @@ private:
 	static const int 	PIPE_WRITE_FD;
 	int 				pipefd[2];	// pipe descriptors for worker thread
 	pthread_t			tid;		// pthread_t for worker thread
-	bool				run_thread;	// true: continue to run worker thread
+	//bool				run_thread;	// true: continue to run worker thread
 	bool				wakeup_pending;	// true: wakeup already scheduled for worker thread
 	int 				retval;		// worker thread return value
 	int					epfd;		// worker thread epoll fd
