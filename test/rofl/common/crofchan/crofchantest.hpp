@@ -21,7 +21,6 @@ class crofchantest :
 {
 	CPPUNIT_TEST_SUITE( crofchantest );
 	CPPUNIT_TEST( test1 );
-	CPPUNIT_TEST( test2 );
 	CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -30,7 +29,6 @@ public:
 
 public:
 	void test1();
-	void test2();
 
 private:
 
