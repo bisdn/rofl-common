@@ -8,6 +8,12 @@ Legend:
 Change log
 ==========
 
+v0.10.2
+
+[+] more verbose exception handling
+[+] asserts to thread handlers
+[+] cthread: ignore signals in event loop
+
 v0.10.1
 
 [B] fixed a race condition in crofsock::send_from_queue()
