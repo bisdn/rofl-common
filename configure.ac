@@ -72,6 +72,7 @@ AC_CONFIG_FILES([
 	examples/tcpserver/Makefile
 
 	tools/Makefile
+	tools/rpmbuild/SPECS/rofl_common.spec
 
 	test/Makefile
 	test/rofl/Makefile
