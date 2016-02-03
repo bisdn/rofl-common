@@ -329,6 +329,18 @@ public:
 	};
 
 public:
+	virtual const char*
+	what() const _GLIBCXX_USE_NOEXCEPT {
+		static std::string msg;
+		std::stringstream ss;
+		ss << runtime_error::what();
+		for (const auto it : kvmap) {
+			ss << it.first << ":" << it.second << ", ";
+		}
+
+		msg.assign(ss.str());
+		return msg.c_str();
+	}
 
 	friend std::ostream&
 	operator<< (std::ostream& os, const exception& e) {
@@ -452,10 +464,12 @@ public:
 
     virtual
 	const char*
-    what() const noexcept {
+    what() const _GLIBCXX_USE_NOEXCEPT {
+	static std::string msg;
     	std::stringstream ss;
     	ss << exception::what() <<  " errno: " << __errno << " (" << strerror(__errno) << ")";
-    	return ss.str().c_str();
+    	msg.assign(ss.str());
+    	return msg.c_str();
     }
 private:
     int __errno;

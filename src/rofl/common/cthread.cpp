@@ -352,10 +352,8 @@ void*
 cthread::run_loop()
 {
 	retval = 0;
-
-	// make valgrind happy, as using NULL indicates a problem
-	sigset_t sigmask;
-	pthread_sigmask(0, NULL, &sigmask);
+	sigset_t signal_set;
+	sigfillset(&signal_set); // ignore all signals
 
 	while (run_thread) {
 		try {
@@ -373,7 +371,7 @@ cthread::run_loop()
 				}
 			}
 
-			rc = epoll_pwait(epfd, events, 64, timeout, &sigmask);
+			rc = epoll_pwait(epfd, events, 64, timeout, &signal_set);
 
 			if (not run_thread)
 				goto out;

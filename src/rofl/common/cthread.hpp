@@ -28,6 +28,7 @@
 #include <list>
 #include <map>
 #include <set>
+#include <cassert>
 
 #include "rofl/common/exception.hpp"
 #include "rofl/common/locking.hpp"
@@ -77,22 +78,24 @@ public:
 		cthread_env::thread_envs.insert(this);
 	};
 protected:
-	virtual void
-	handle_wakeup(
-			cthread& thread)
-	{};
-	virtual void
-	handle_timeout(
-			cthread& thread, uint32_t timer_id, const std::list<unsigned int>& ttypes)
-	{};
-	virtual void
-	handle_read_event(
-			cthread& thread, int fd)
-	{};
-	virtual void
-	handle_write_event(
-			cthread& thread, int fd)
-	{};
+	virtual void handle_wakeup(cthread& thread)
+	{}
+
+	virtual void handle_timeout(cthread& thread, uint32_t timer_id,
+			const std::list<unsigned int>& ttypes)
+	{
+		assert(0 && "handle_timeout not overridden");
+	}
+
+	virtual void handle_read_event(cthread& thread, int fd)
+	{
+		assert(0 && "handle_read_event not overridden");
+	}
+
+	virtual void handle_write_event(cthread& thread, int fd)
+	{
+		assert(0 && "handle_write_event not overridden");
+	}
 private:
 	static std::set<cthread_env*>  thread_envs;
 	static crwlock                 thread_envs_lock;
