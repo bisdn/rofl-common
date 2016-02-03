@@ -1,4 +1,2 @@
 MAINTAINERCLEANFILES = Makefile.in
 
-SUBDIRS = 
-
