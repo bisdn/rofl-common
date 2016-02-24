@@ -1,3 +1,5 @@
+sudo: required
+dist: trusty
 language: cpp
 compiler:
   - gcc
@@ -5,14 +7,10 @@ compiler:
 before_install:
   - sudo apt-get update -qq
   - sudo apt-get install -y -qq libssl-dev libcunit1-dev libcppunit-dev
-  - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
-  - sudo apt-get update -qq
-  - if [ "$CXX" = "g++" ]; then sudo apt-get install -qq g++-4.8; fi
-  - if [ "$CXX" = "g++" ]; then export CXX="g++-4.8" CC="gcc-4.8"; fi
 install:
   - ./autogen.sh
 env:
-  - FLAGS=--enable-debug --disable-silent-rules
+  - FLAGS="--enable-debug --disable-silent-rules"
   - FLAGS=
 script:
   - mkdir -p build

@@ -49,6 +49,8 @@ m4_include([config/versioning.m4])
 # Checking OpenSSL
 m4_include([config/openssl.m4])
 
+AC_SEARCH_LIBS([pthread_rwlock_wrlock], [pthread], [], [AC_MSG_ERROR([lib pthread not found])])
+
 # Output files
 AC_CONFIG_FILES([
 
@@ -70,6 +72,7 @@ AC_CONFIG_FILES([
 	examples/tcpserver/Makefile
 
 	tools/Makefile
+	tools/rpmbuild/SPECS/rofl_common.spec
 
 	test/Makefile
 	test/rofl/Makefile

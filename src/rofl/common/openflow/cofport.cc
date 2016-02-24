@@ -102,7 +102,7 @@ cofport::unpack(
 
 		portno = be16toh(hdr->port_no);
 		memcpy(hwaddr.somem(), hdr->hw_addr, OFP_ETH_ALEN);
-		name.assign(hdr->name, OFP_MAX_PORT_NAME_LEN);
+		name.assign(hdr->name, strnlen(hdr->name, OFP_MAX_PORT_NAME_LEN));
 
 		config = be32toh(hdr->config);
 		state  = be32toh(hdr->state);
@@ -120,7 +120,7 @@ cofport::unpack(
 
 		portno = be32toh(hdr->port_no);
 		memcpy(hwaddr.somem(), hdr->hw_addr, OFP_ETH_ALEN);
-		name.assign(hdr->name, OFP_MAX_PORT_NAME_LEN);
+		name.assign(hdr->name, strnlen(hdr->name, OFP_MAX_PORT_NAME_LEN));
 
 		config = be32toh(hdr->config);
 		state  = be32toh(hdr->state);
@@ -139,7 +139,7 @@ cofport::unpack(
 
 		portno = be32toh(hdr->port_no);
 		memcpy(hwaddr.somem(), hdr->hw_addr, OFP_ETH_ALEN);
-		name.assign(hdr->name, OFP_MAX_PORT_NAME_LEN);
+		name.assign(hdr->name, strnlen(hdr->name, OFP_MAX_PORT_NAME_LEN));
 
 		config = be32toh(hdr->config);
 		state  = be32toh(hdr->state);

@@ -4,8 +4,16 @@ MAINTAINERCLEANFILES = \
 	$(top_srcdir)/Makefile.in
 
 export INCLUDES += -I$(abs_srcdir)/src/ -I$(abs_builddir)/src/
-SUBDIRS = src test examples # tools doc 
+SUBDIRS = src test examples tools doc 
 export LIBROFL=$(PWD)/src/rofl/librofl_common.la
+
+EXTRA_DIST = \
+	autogen.sh \
+	AUTHORS \
+	CHANGES \
+	COPYRIGHT \
+	README \
+	VERSION
 
 #Could be improved.. 
 .PHONY: doc
