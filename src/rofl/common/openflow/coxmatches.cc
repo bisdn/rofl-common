@@ -552,7 +552,7 @@ coxmatches::copy_matches(
 		default: {
 			if (OXM_ROFL_CLASS(*it) == ((uint64_t)rofl::openflow::OFPXMC_EXPERIMENTER << 16)) {
 				uint32_t exp_id = (*it & 0xffffffff00000000) >> 32;
-				uint32_t oxm_id = (*it & 0x00000000fffffe00) >>  0);
+				uint32_t oxm_id = (*it & 0x00000000fffffe00) >>  0;
 				add_exp_match(exp_id, oxm_id) = oxmatches.get_exp_match(exp_id, oxm_id);
 			}
 		};

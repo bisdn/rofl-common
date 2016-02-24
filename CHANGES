@@ -13,6 +13,7 @@ v0.10.2
 [+] more verbose exception handling
 [+] asserts to thread handlers
 [+] cthread: ignore signals in event loop
+[B] coxmatches::copy_matches(): copy experimental matches properly
 
 v0.10.1
 
