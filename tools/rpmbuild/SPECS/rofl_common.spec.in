@@ -22,6 +22,7 @@ Revised OpenFlow Library (ROFL) version @ROFL_VERSION@
 Summary:	Header files and libraries for revised openflow library
 Group:		Development/Libraries
 Requires:	%{name} = %{version}-%{release}
+Requires:	openssl-devel
 
 %description    devel
 Revised OpenFlow Library (ROFL) version @ROFL_VERSION@ development files
@@ -63,6 +64,12 @@ make install DESTDIR=$RPM_BUILD_ROOT
 rm -rf $RPM_BUILD_ROOT 
 
 %changelog
+* Thu Feb 25 2016 Tobias Jungel <tobias.jungel@bisdn.de> - v0.10.2
+- [+] more verbose exception handling
+- [+] asserts to thread handlers
+- [+] cthread: ignore signals in event loop
+- [B] coxmatches::copy_matches(): copy experimental matches properly
+
 * Fri Jan 29 2016 xxx - v0.10.1-0
 - todo
 
