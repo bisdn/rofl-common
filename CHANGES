@@ -8,6 +8,10 @@ Legend:
 Change log
 ==========
 
+v0.10.3
+
+[O] added cclockid class to prevent invalid use of class ctimespec
+
 v0.10.2
 
 [+] more verbose exception handling
