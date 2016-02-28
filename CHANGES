@@ -11,6 +11,7 @@ Change log
 v0.10.3
 
 [O] added cclockid class to prevent invalid use of class ctimespec
+[B] crofconn: fixed potential race condition causing a Hello expiration
 
 v0.10.2
 
