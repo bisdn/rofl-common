@@ -172,7 +172,7 @@ private:
 	rofl::openflow::cofhello_elem_versionbitmap versionbitmap_ctl;
 	rofl::openflow::cofhello_elem_versionbitmap versionbitmap_dpt;
 	enum crofconn_test_mode_t test_mode;
-	unsigned int        keep_running;
+	int                 keep_running;
 	int                 msg_counter;
 	rofl::crofsock*		slisten;
 	rofl::crofconn*     sclient;
@@ -191,8 +191,10 @@ private:
 	rofl::openflow::cofports ports;
 
 	unsigned int        num_of_packets;
-	unsigned int        server_established;
-	unsigned int        client_established;
+	int                 srv_pkts_rcvd;
+	int                 srv_pkts_sent;
+	int                 cli_pkts_rcvd;
+	int                 cli_pkts_sent;
 };
 
 #endif /* TEST_SRC_ROFL_COMMON_OPENFLOW_MESSAGES_COFMSGAGGRSTATS_TEST_HPP_ */

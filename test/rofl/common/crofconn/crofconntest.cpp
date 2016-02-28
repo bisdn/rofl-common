@@ -37,10 +37,11 @@ crofconntest::test()
 			keep_running = 60;
 			msg_counter = 0;
 			xid = 0xa1a2a3a4;
-			server_established = 0;
-			client_established = 0;
 			num_of_packets = 256;
-			num_of_packets = 4;
+			srv_pkts_rcvd = 0;
+			srv_pkts_sent = 0;
+			cli_pkts_rcvd = 0;
+			cli_pkts_sent = 0;
 
 			slisten = new rofl::crofsock(this);
 			sclient = new rofl::crofconn(this);
@@ -66,12 +67,12 @@ crofconntest::test()
 			}
 
 
-
-
 			/* create new crofconn instance and connect to peer */
 			versionbitmap_dpt.add_ofp_version(rofl::openflow10::OFP_VERSION);
 			versionbitmap_dpt.add_ofp_version(rofl::openflow12::OFP_VERSION);
 			versionbitmap_dpt.add_ofp_version(rofl::openflow13::OFP_VERSION);
+			sclient->set_journal().log_on_stderr(true);
+			sclient->set_tcp_journal().log_on_stderr(true);
 			sclient->set_raddr(baddr).set_trace(true).
 					tcp_connect(versionbitmap_dpt, rofl::crofconn::MODE_DATAPATH, /*reconnect=*/false);
 
@@ -84,6 +85,13 @@ crofconntest::test()
 				std::cerr << ".";
 			}
 			std::cerr << std::endl;
+
+					std::cerr << "s:" << srv_pkts_rcvd << "(" << cli_pkts_sent << "), ";
+
+					std::cerr << "c:" << cli_pkts_rcvd << "(" << srv_pkts_sent << "), ";
+
+			CPPUNIT_ASSERT(srv_pkts_rcvd == cli_pkts_sent);
+			CPPUNIT_ASSERT(srv_pkts_sent == cli_pkts_rcvd);
 
 			slisten->close();
 			sclient->close();
@@ -126,8 +134,6 @@ crofconntest::test_tls()
 		keep_running = 10;
 		msg_counter = 0;
 		xid = 0xa1a2a3a4;
-		server_established = 0;
-		client_established = 0;
 		num_of_packets = 256;
 
 		slisten = new rofl::crofsock(this);
@@ -145,7 +151,7 @@ crofconntest::test_tls()
 #endif
 		slisten->set_baddr(baddr).listen();
 
-		while (keep_running) {
+		while (--keep_running > 0) {
 			struct timespec ts;
 			ts.tv_sec = 0;
 			ts.tv_nsec = 1000;
@@ -188,6 +194,8 @@ crofconntest::handle_listen(
 
 		(sserver = new rofl::crofconn(this))->set_trace(true).
 				tcp_accept(sd, versionbitmap_ctl, rofl::crofconn::MODE_CONTROLLER);
+		sserver->set_journal().log_on_stderr(true);
+		sserver->set_tcp_journal().log_on_stderr(true);
 
 	} break;
 	case TEST_MODE_TLS: {
@@ -215,12 +223,10 @@ crofconntest::handle_established(
 
 	if (&conn == sserver) {
 		std::cerr << "[Ss], ";
-		server_established = 0;
 		send_packet_out(ofp_version);
 	} else
 	if (&conn == sclient) {
 		std::cerr << "[Sc], ";
-		client_established = 0;
 		send_packet_in(ofp_version);
 	}
 }
@@ -232,6 +238,7 @@ crofconntest::handle_connect_refused(
 		rofl::crofconn& conn)
 {
 	std::cerr << "crofconntest::handle_connect_refused()" << std::endl << conn;
+	CPPUNIT_ASSERT(false);
 }
 
 
@@ -241,6 +248,7 @@ crofconntest::handle_connect_failed(
 		rofl::crofconn& conn)
 {
 	std::cerr << "crofconntest::handle_connect_failed()" << std::endl << conn;
+	CPPUNIT_ASSERT(false);
 }
 
 
@@ -250,6 +258,7 @@ crofconntest::handle_accept_failed(
 		rofl::crofconn& conn)
 {
 	std::cerr << "crofconntest::handle_accept_failed()" << std::endl << conn;
+	CPPUNIT_ASSERT(false);
 }
 
 
@@ -259,6 +268,7 @@ crofconntest::handle_negotiation_failed(
 		rofl::crofconn& conn)
 {
 	std::cerr << "crofconntest::handle_negotiation_failed()" << std::endl << conn;
+	CPPUNIT_ASSERT(false);
 }
 
 
@@ -294,6 +304,8 @@ void
 crofconntest::handle_recv(
 		rofl::crofconn& conn, rofl::openflow::cofmsg* pmsg)
 {
+	CPPUNIT_ASSERT(pmsg != nullptr);
+
 	std::cerr << "crofconntest::handle_recv() " << std::endl << *pmsg;
 
 	dpid = 0xc1c2c3c4c5c6c7c8;
@@ -316,14 +328,19 @@ crofconntest::handle_recv(
 		conn.send_message(msg);
 	} break;
 	case rofl::openflow::OFPT_PACKET_IN: {
-		server_established++;
-		std::cerr << "s:" << server_established << "(" << client_established << "), ";
+		srv_pkts_rcvd++;
+		std::cerr << "s:" << srv_pkts_rcvd << "(" << cli_pkts_sent << "), ";
+
 	} break;
 	case rofl::openflow::OFPT_PACKET_OUT: {
-		client_established++;
-		std::cerr << "c:" << client_established << "(" << server_established << "), ";
+		cli_pkts_rcvd++;
+		std::cerr << "c:" << cli_pkts_rcvd << "(" << srv_pkts_sent << "), ";
+
 	} break;
 	case rofl::openflow::OFPT_MULTIPART_REQUEST: {
+
+		cli_pkts_rcvd++;
+		std::cerr << "c:" << cli_pkts_rcvd << "(" << srv_pkts_sent << "), ";
 
 		rofl::openflow::cofmsg_stats_request* req =
 				dynamic_cast<rofl::openflow::cofmsg_stats_request*>( pmsg );
@@ -333,7 +350,7 @@ crofconntest::handle_recv(
 
 		ports.set_version(pmsg->get_version());
 
-		for (unsigned int i = 0; i < 10000; i++) {
+		for (unsigned int i = 0; i < 10; i++) {
 			ports.add_port(i);
 		}
 		std::cerr << "#ports sent: " << ports.size() << std::endl;
@@ -347,8 +364,13 @@ crofconntest::handle_recv(
 						0,
 						ports));
 
+		cli_pkts_sent++;
+
 	} break;
 	case rofl::openflow::OFPT_MULTIPART_REPLY: {
+
+		srv_pkts_rcvd++;
+		std::cerr << "s:" << srv_pkts_rcvd << "(" << cli_pkts_sent << "), ";
 
 		rofl::openflow::cofmsg_stats_reply* rep =
 				dynamic_cast<rofl::openflow::cofmsg_stats_reply*>( pmsg );
@@ -367,19 +389,18 @@ crofconntest::handle_recv(
 		CPPUNIT_ASSERT(port_desc->get_ports().size() == ports.size());
 		CPPUNIT_ASSERT(port_desc->get_ports().length() == ports.length());
 
-		keep_running = 1;
-
 	} break;
 	default: {
-
+		CPPUNIT_ASSERT(false);
 	};
 	}
 
-	if ((server_established == num_of_packets) && (client_established == num_of_packets)) {
-		std::cerr << "[E] " << std::endl;
-	}
-
 	delete pmsg;
+
+	if ((cli_pkts_rcvd >= num_of_packets) && (srv_pkts_rcvd >= num_of_packets)) {
+		std::cerr << "[E] " << std::endl;
+		keep_running = 0;
+	}
 }
 
 
@@ -394,6 +415,7 @@ crofconntest::send_packet_in(
 				new rofl::openflow::cofmsg_packet_in(
 						version,
 						++xid_client));
+		cli_pkts_sent++;
 	}
 }
 
@@ -410,6 +432,7 @@ crofconntest::send_packet_out(
 				new rofl::openflow::cofmsg_packet_out(
 						version,
 						++xid_server));
+		srv_pkts_sent++;
 
 		for (unsigned int i = 0; i < 1; i++) {
 			try {
@@ -420,8 +443,9 @@ crofconntest::send_packet_out(
 			} catch (rofl::exception& e) {
 				CPPUNIT_ASSERT(false);
 			}
-		}
 
+			srv_pkts_sent++;
+		}
 	}
 }
 
