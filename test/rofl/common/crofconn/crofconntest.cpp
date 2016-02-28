@@ -405,7 +405,7 @@ crofconntest::handle_recv(
 
 	delete pmsg;
 
-	if (cli_pkts_rcvd >= num_of_packets) {
+	if (cli_pkts_rcvd >= (int)num_of_packets) {
 		if ((cli_pkts_rcvd == srv_pkts_sent) && (srv_pkts_sent == cli_pkts_rcvd)) {
 			std::cerr << "[E] " << std::endl;
 			keep_running = 0;
