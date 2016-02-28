@@ -1621,6 +1621,10 @@ crofsock::recv_message()
 {
 	while (not rx_disabled) {
 
+		if ((state != STATE_TCP_ESTABLISHED) && (state != STATE_TLS_ESTABLISHED)) {
+			return;
+		}
+
 		if (not rx_fragment_pending) {
 			msg_bytes_read = 0;
 		}
@@ -1638,6 +1642,7 @@ crofsock::recv_message()
 		/* sanity check: 8 <= msg_len <= 2^16 */
 		if (msg_len < sizeof(struct openflow::ofp_header)) {
 			/* out-of-sync => enforce reconnect in client mode */
+			journal.log(LOG_NOTICE, "TCP: openflow out-of-sync");
 			goto on_error;
 		}
 
@@ -1652,12 +1657,14 @@ crofsock::recv_message()
 			} break;
 			default: {
 				/* oops, error */
+				journal.log(LOG_NOTICE, "TCP: error occured %d (%s)", errno, strerror(errno));
 				goto on_error;
 			};
 			}
 		} else
 		if (rc == 0) {
 			/* shutdown from peer */
+			journal.log(LOG_INFO, "TCP: peer shutdown");
 			goto on_error;
 		}
 
@@ -1728,6 +1735,10 @@ crofsock::parse_message()
 		default: {
 			throw eBadRequestBadVersion("eBadRequestBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		};
+		}
+
+		if ((state != STATE_TCP_ESTABLISHED) && (state != STATE_TLS_ESTABLISHED)) {
+			return;
 		}
 
 		if (trace) {

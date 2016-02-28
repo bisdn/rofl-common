@@ -236,6 +236,7 @@ crofconn::set_state(
 			journal.log(LOG_INFO, "STATE_NEGOTIATING").
 					set_func(__PRETTY_FUNCTION__).set_line(__LINE__).
 						set_key("offered versions", versionbitmap.str());
+			thread.add_timer(TIMER_ID_WAIT_FOR_HELLO, ctimespec().expire_in(timeout_hello));
 			send_hello_message();
 
 		} break;
@@ -243,6 +244,7 @@ crofconn::set_state(
 			journal.log(LOG_INFO, "STATE_NEGOTIATING2").
 					set_func(__PRETTY_FUNCTION__).set_line(__LINE__).
 						set_key("peer versions", versionbitmap_peer.str());
+			thread.drop_timer(TIMER_ID_WAIT_FOR_HELLO);
 			send_features_request();
 
 		} break;
@@ -364,10 +366,6 @@ crofconn::send_hello_message()
 
 		rofsock.send_message(msg);
 
-		if (not flag_hello_rcvd) {
-			thread.add_timer(TIMER_ID_WAIT_FOR_HELLO, ctimespec().expire_in(timeout_hello));
-		}
-
 	} catch (rofl::exception& e) {
 		journal.log(e).set_caller(__PRETTY_FUNCTION__);
 		set_state(STATE_NEGOTIATION_FAILED);
@@ -390,6 +388,8 @@ crofconn::hello_rcvd(
 	}
 
 	flag_hello_rcvd = true;
+
+	thread.drop_timer(TIMER_ID_WAIT_FOR_HELLO);
 
 	try {
 
@@ -517,8 +517,6 @@ crofconn::hello_rcvd(
 		set_state(STATE_NEGOTIATION_FAILED);
 	}
 
-	thread.drop_timer(TIMER_ID_WAIT_FOR_HELLO);
-
 	delete msg;
 }
 
@@ -537,6 +535,11 @@ crofconn::hello_expired()
 				set_func(__PRETTY_FUNCTION__);
 	} break;
 	default: {
+		if (flag_hello_rcvd) {
+			journal.log(LOG_CRIT_ERROR, "HELLO expired, ignoring event, HELLO from peer received").
+					set_func(__PRETTY_FUNCTION__);
+			return;
+		}
 		set_state(STATE_NEGOTIATION_FAILED);
 	};
 	}
@@ -972,6 +975,10 @@ crofconn::handle_recv(
 			error_rcvd(msg);
 		} else {
 			/* drop all non-HELLO messages in this state */
+			journal.log(LOG_NOTICE, "invalid message type received while negotiating").
+					set_func(__PRETTY_FUNCTION__).set_line(__LINE__).
+						set_key("state", "STATE_NEGOTIATING").
+							set_key("msgtype", msg->get_type());
 			delete msg;
 		}
 
