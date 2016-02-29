@@ -525,8 +525,9 @@ crofconn::hello_rcvd(
 void
 crofconn::hello_expired()
 {
-	journal.log(LOG_CRIT_ERROR, "HELLO expired").
-			set_func(__PRETTY_FUNCTION__);
+	journal.log(LOG_CRIT_ERROR, "HELLO expired state=%d", state).
+			set_func(__PRETTY_FUNCTION__).
+				set_key("state", state);
 
 	switch (state) {
 	case STATE_ESTABLISHED: {
