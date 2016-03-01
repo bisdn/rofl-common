@@ -1315,6 +1315,11 @@ crofconn::handle_rx_messages()
 			/* iterate over all rxqueues */
 			for (unsigned int queue_id = 0; queue_id < QUEUE_MAX; ++queue_id) {
 
+				if (STATE_ESTABLISHED != state) {
+					rx_thread_working = false;
+					return;
+				}
+
 				if (rxqueues[queue_id].empty()) {
 					continue; // no messages at all in this queue
 				}
