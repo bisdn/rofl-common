@@ -188,7 +188,7 @@ private:
 	uint8_t             n_tables;
 	rofl::openflow::cofports ports;
 
-	unsigned int        num_of_packets;
+	int                 num_of_packets;
 	int                 srv_pkts_rcvd;
 	int                 srv_pkts_sent;
 	int                 cli_pkts_rcvd;
