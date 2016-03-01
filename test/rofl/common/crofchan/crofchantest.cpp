@@ -47,7 +47,7 @@ crofchantest::test1()
 	keep_running = true;
 	num_of_conns = 16;
 	num_of_accepts = 0;
-	int seconds = 10 * num_of_conns;
+	int seconds = 20;
 
 	listening_port = 0;
 

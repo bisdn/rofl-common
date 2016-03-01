@@ -239,7 +239,9 @@ crofconn::set_state(
 					set_func(__PRETTY_FUNCTION__).set_line(__LINE__).
 						set_key("offered versions", versionbitmap.str());
 			thread.add_timer(TIMER_ID_WAIT_FOR_HELLO, ctimespec().expire_in(timeout_hello));
-			send_hello_message();
+			if (not flag_hello_sent) {
+				send_hello_message();
+			}
 
 		} break;
 		case STATE_NEGOTIATING2: {
@@ -447,11 +449,11 @@ crofconn::hello_rcvd(
 		} else {
 			switch (mode) {
 			case MODE_CONTROLLER: {
+				if (not flag_hello_sent) {
+					send_hello_message();
+				}
 				/* get auxid via FEATURES.request for OFP1.3 and above */
 				if (ofp_version >= rofl::openflow13::OFP_VERSION) {
-					if (not flag_hello_sent) {
-						send_hello_message();
-					}
 					set_state(STATE_NEGOTIATING2);
 				/* otherwise: connection establishment succeeded */
 				} else {
@@ -460,6 +462,9 @@ crofconn::hello_rcvd(
 
 			} break;
 			case MODE_DATAPATH: {
+				if (not flag_hello_sent) {
+					send_hello_message();
+				}
 				/* connection establishment succeeded */
 				set_state(STATE_ESTABLISHED);
 
@@ -956,6 +961,7 @@ crofconn::handle_recv(
 	}
 
 	switch (get_state()) {
+	case STATE_CONNECT_PENDING:
 	case STATE_ACCEPT_PENDING:
 	case STATE_NEGOTIATING: {
 		/* Include state STATE_ACCEPT_PENDING here, as the kernel might interrupt
