@@ -16,6 +16,8 @@ v0.10.3
 [+] crofsock: use SO_LINGER option for coordinated shutdown
 [A] crofchan: send CLOSE notification to application when replacing
     an existing connection object (restart)
+[+] crofsock: make backlog for listening mode configurable, defaults to 
+    64 established TCP connections
 
 v0.10.2
 

@@ -44,7 +44,7 @@ crofsock::crofsock(
 				domain(AF_INET),
 				type(SOCK_STREAM),
 				protocol(IPPROTO_TCP),
-				backlog(10),
+				backlog(64),
 				ctx(NULL),
 				ssl(NULL),
 				bio(NULL),

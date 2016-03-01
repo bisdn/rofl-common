@@ -61,6 +61,7 @@ crofchantest::test1()
 			std::cerr << "trying listening port=" << (int)listening_port << std::endl;
 			baddr = rofl::csockaddr(rofl::caddress_in4("127.0.0.1"), listening_port);
 			/* try to bind address first */
+			rofsock->set_backlog(num_of_conns);
 			rofsock->set_baddr(baddr).listen();
 			std::cerr << "binding to " << baddr.str() << std::endl;
 			lookup_idle_port = false;
