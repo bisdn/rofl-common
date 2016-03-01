@@ -339,7 +339,15 @@ public:
 		AcquireReadWriteLock rwlock(conns_rwlock);
 		cauxid auxid(conn->get_auxid());
 		if (conns.find(auxid) != conns.end()) {
-			delete conns[auxid];
+
+			crofchan_env::call_env(env).handle_closed(*this, *conns[auxid]);
+
+			AcquireReadWriteLock lock(conns_deletion_rwlock);
+			conns[auxid]->set_env(nullptr);
+			conns_deletion.insert(conns[auxid]);
+			if (not thread.has_timer(TIMER_ID_ROFCONN_DESTROY)) {
+				thread.add_timer(TIMER_ID_ROFCONN_DESTROY, ctimespec().expire_in(8));
+			}
 		}
 		(conns[auxid] = conn)->set_env(this);
 		if (auxid == cauxid(0)) {
