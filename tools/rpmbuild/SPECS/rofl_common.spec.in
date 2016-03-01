@@ -64,6 +64,14 @@ make install DESTDIR=$RPM_BUILD_ROOT
 rm -rf $RPM_BUILD_ROOT 
 
 %changelog
+* Tue Mar 01 2016 Andreas Koepsel <andreas.koepsel@bisdn.de> - v0.10.3
+- added cclockid class to prevent invalid use of class ctimespec
+- crofsock: use SO_LINGER option for coordinated shutdown
+- crofsock: make backlog for listening mode configurable, defaults to 64 established TCP connections
+- crofconn: fixed potential race condition causing a Hello expiration
+- crofchan: send CLOSE notification to application when replacing an existing connection object (restart)
+- crofchan: fixed bug in handle_closed(): conn was not removed from crofchan::conns map leading to a double free
+
 * Thu Feb 25 2016 Tobias Jungel <tobias.jungel@bisdn.de> - v0.10.2
 - [+] more verbose exception handling
 - [+] asserts to thread handlers
