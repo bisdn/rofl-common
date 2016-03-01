@@ -41,6 +41,7 @@ private:
 	unsigned int        num_of_conns;
 	unsigned int        num_of_accepts;
 
+	bool                trace;
 	rofl::crandom       rand;
 	rofl::csockaddr     baddr;
 	rofl::crofsock*		rofsock;

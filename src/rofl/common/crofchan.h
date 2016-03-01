@@ -555,20 +555,28 @@ private:
 						}
 					}
 				}
+				conns.clear();
 			} /* release rwlock */
 			crofchan_env::call_env(env).handle_closed(*this);
 		} else {
 			/* if connection is passive, schedule its deletion */
 			if (conn.is_passive()) {
-				AcquireReadWriteLock lock(conns_deletion_rwlock);
-				if (conns.find(conn.get_auxid()) == conns.end()) {
-					return;
+				{
+					AcquireReadWriteLock lock(conns_rwlock);
+					if (conns.find(conn.get_auxid()) == conns.end()) {
+						return;
+					}
+					conns.erase(conn.get_auxid());
 				}
 				conn.set_env(nullptr);
-				conns_deletion.insert(&conn);
+				{
+					AcquireReadWriteLock lock(conns_deletion_rwlock);
+					conns_deletion.insert(&conn);
+				}
 				if (not thread.has_timer(TIMER_ID_ROFCONN_DESTROY)) {
 					thread.add_timer(TIMER_ID_ROFCONN_DESTROY, ctimespec().expire_in(8));
 				}
+
 			}
 			crofchan_env::call_env(env).handle_closed(*this, conn);
 		}
