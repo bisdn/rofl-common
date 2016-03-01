@@ -189,7 +189,8 @@ const cofinstruction&
 cofinstructions::get_inst(uint16_t type) const
 {
 	if (instmap.find(type) == instmap.end()) {
-		throw eInstructionsNotFound();
+		throw eInstructionsNotFound().
+				set_func(__PRETTY_FUNCTION__).set_file(__FILE__).set_line(__LINE__);
 	}
 	return *(dynamic_cast<const cofinstruction*>( instmap.at(type) ));
 }
@@ -243,7 +244,8 @@ const cofinstruction_goto_table&
 cofinstructions::get_inst_goto_table() const
 {
 	if (instmap.find(rofl::openflow::OFPIT_GOTO_TABLE) == instmap.end()) {
-		throw eInstructionsNotFound();
+		throw eInstructionsNotFound().
+				set_func(__PRETTY_FUNCTION__).set_file(__FILE__).set_line(__LINE__);
 	}
 	return *(dynamic_cast<const cofinstruction_goto_table*>( instmap.at(rofl::openflow::OFPIT_GOTO_TABLE) ));
 }
@@ -297,7 +299,8 @@ const cofinstruction_write_metadata&
 cofinstructions::get_inst_write_metadata() const
 {
 	if (instmap.find(rofl::openflow::OFPIT_WRITE_METADATA) == instmap.end()) {
-		throw eInstructionsNotFound();
+		throw eInstructionsNotFound().
+				set_func(__PRETTY_FUNCTION__).set_file(__FILE__).set_line(__LINE__);
 	}
 	return *(dynamic_cast<const cofinstruction_write_metadata*>( instmap.at(rofl::openflow::OFPIT_WRITE_METADATA) ));
 }
@@ -351,7 +354,8 @@ const cofinstruction_write_actions&
 cofinstructions::get_inst_write_actions() const
 {
 	if (instmap.find(rofl::openflow::OFPIT_WRITE_ACTIONS) == instmap.end()) {
-		throw eInstructionsNotFound();
+		throw eInstructionsNotFound().
+				set_func(__PRETTY_FUNCTION__).set_file(__FILE__).set_line(__LINE__);
 	}
 	return *(dynamic_cast<const cofinstruction_write_actions*>( instmap.at(rofl::openflow::OFPIT_WRITE_ACTIONS) ));
 }
@@ -405,7 +409,8 @@ const cofinstruction_apply_actions&
 cofinstructions::get_inst_apply_actions() const
 {
 	if (instmap.find(rofl::openflow::OFPIT_APPLY_ACTIONS) == instmap.end()) {
-		throw eInstructionsNotFound();
+		throw eInstructionsNotFound().
+				set_func(__PRETTY_FUNCTION__).set_file(__FILE__).set_line(__LINE__);
 	}
 	return *(dynamic_cast<const cofinstruction_apply_actions*>( instmap.at(rofl::openflow::OFPIT_APPLY_ACTIONS) ));
 }
@@ -459,7 +464,8 @@ const cofinstruction_clear_actions&
 cofinstructions::get_inst_clear_actions() const
 {
 	if (instmap.find(rofl::openflow::OFPIT_CLEAR_ACTIONS) == instmap.end()) {
-		throw eInstructionsNotFound();
+		throw eInstructionsNotFound().
+				set_func(__PRETTY_FUNCTION__).set_file(__FILE__).set_line(__LINE__);
 	}
 	return *(dynamic_cast<const cofinstruction_clear_actions*>( instmap.at(rofl::openflow::OFPIT_CLEAR_ACTIONS) ));
 }
@@ -513,7 +519,8 @@ const cofinstruction_experimenter&
 cofinstructions::get_inst_experimenter() const
 {
 	if (instmap.find(rofl::openflow::OFPIT_EXPERIMENTER) == instmap.end()) {
-		throw eInstructionsNotFound();
+		throw eInstructionsNotFound().
+				set_func(__PRETTY_FUNCTION__).set_file(__FILE__).set_line(__LINE__);
 	}
 	return *(dynamic_cast<const cofinstruction_experimenter*>( instmap.at(rofl::openflow::OFPIT_EXPERIMENTER) ));
 }
@@ -567,7 +574,8 @@ const cofinstruction_meter&
 cofinstructions::get_inst_meter() const
 {
 	if (instmap.find(rofl::openflow::OFPIT_METER) == instmap.end()) {
-		throw eInstructionsNotFound();
+		throw eInstructionsNotFound().
+				set_func(__PRETTY_FUNCTION__).set_file(__FILE__).set_line(__LINE__);
 	}
 	return *(dynamic_cast<const cofinstruction_meter*>( instmap.at(rofl::openflow::OFPIT_METER) ));
 }
@@ -613,7 +621,8 @@ cofinstructions::pack(
 		uint8_t* buf, size_t buflen)
 {
 	if (buflen < length())
-		throw eInstructionsInval();
+		throw eInstructionsInval().
+				set_func(__PRETTY_FUNCTION__).set_file(__FILE__).set_line(__LINE__);
 
 	for (std::map<uint16_t, cofinstruction*>::iterator
 			it = instmap.begin(); it != instmap.end(); ++it) {
@@ -646,7 +655,8 @@ cofinstructions::unpack(
 			return;
 
 		if (len > buflen)
-			throw eInstructionsBadLen();
+			throw eInstructionsBadLen().
+					set_func(__PRETTY_FUNCTION__).set_file(__FILE__).set_line(__LINE__);
 
 
 		switch (type) {
