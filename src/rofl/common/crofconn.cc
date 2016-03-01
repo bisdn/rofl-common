@@ -45,6 +45,7 @@ crofconn::crofconn(
 				ofp_version(rofl::openflow::OFP_VERSION_UNKNOWN),
 				mode(MODE_UNKNOWN),
 				state(STATE_DISCONNECTED),
+				flag_hello_sent(false),
 				flag_hello_rcvd(false),
 				rxweights(QUEUE_MAX),
 				rxqueues(QUEUE_MAX),
@@ -207,6 +208,7 @@ crofconn::set_state(
 
 			versionbitmap_peer.clear();
 			set_version(rofl::openflow::OFP_VERSION_UNKNOWN);
+			flag_hello_sent = false;
 			flag_hello_rcvd = false;
 
 		} break;
@@ -366,6 +368,8 @@ crofconn::send_hello_message()
 
 		rofsock.send_message(msg);
 
+		flag_hello_sent = true;
+
 	} catch (rofl::exception& e) {
 		journal.log(e).set_caller(__PRETTY_FUNCTION__);
 		set_state(STATE_NEGOTIATION_FAILED);
@@ -445,6 +449,9 @@ crofconn::hello_rcvd(
 			case MODE_CONTROLLER: {
 				/* get auxid via FEATURES.request for OFP1.3 and above */
 				if (ofp_version >= rofl::openflow13::OFP_VERSION) {
+					if (not flag_hello_sent) {
+						send_hello_message();
+					}
 					set_state(STATE_NEGOTIATING2);
 				/* otherwise: connection establishment succeeded */
 				} else {

@@ -1422,6 +1422,9 @@ private:
 	// internal state of finite state machine
 	enum crofconn_state_t           state;
 
+	// hello message sent to peer
+	bool                            flag_hello_sent;
+
 	// hello message from peer rcvd
 	bool                            flag_hello_rcvd;
 

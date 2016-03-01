@@ -75,6 +75,7 @@ crofchantest::test1()
 		channel1->add_conn(rofl::cauxid(i)).
 				  	  set_raddr(baddr).set_trace(true).
 					  	  tcp_connect(versionbitmap, rofl::crofconn::MODE_CONTROLLER, false);
+		std::cerr << "auxid(" << i << "): connecting to " << baddr.str() << std::endl;
 		//sleep(2);
 	}
 

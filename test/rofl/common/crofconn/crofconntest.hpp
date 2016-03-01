@@ -22,7 +22,6 @@ class crofconntest :
 {
 	CPPUNIT_TEST_SUITE( crofconntest );
 	CPPUNIT_TEST( test );
-	//CPPUNIT_TEST( test_tls );
 	CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -31,7 +30,6 @@ public:
 
 public:
 	void test();
-	void test_tls();
 
 private:
 
@@ -166,12 +164,12 @@ private:
 
 	enum crofconn_test_mode_t {
 		TEST_MODE_TCP = 1,
-		TEST_MODE_TLS = 2,
 	};
 
 	rofl::openflow::cofhello_elem_versionbitmap versionbitmap_ctl;
 	rofl::openflow::cofhello_elem_versionbitmap versionbitmap_dpt;
 	enum crofconn_test_mode_t test_mode;
+	bool                trace;
 	int                 keep_running;
 	int                 msg_counter;
 	rofl::crofsock*		slisten;
