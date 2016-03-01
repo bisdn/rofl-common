@@ -436,14 +436,14 @@ crofsock::tcp_accept(
 
 	journal.log(LOG_INFO, "STATE_TCP_ESTABLISHED");
 
-	/* instruct rxthread to read from socket descriptor */
-	rxthread.add_read_fd(sd);
-
 	if (flags.test(FLAG_TLS_IN_USE)) {
 		crofsock::tls_accept(sockfd);
 	} else {
 		crofsock_env::call_env(env).handle_tcp_accepted(*this);
 	}
+
+	/* instruct rxthread to read from socket descriptor */
+	rxthread.add_read_fd(sd);
 }
 
 

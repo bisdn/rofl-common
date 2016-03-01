@@ -956,7 +956,14 @@ crofconn::handle_recv(
 	}
 
 	switch (get_state()) {
+	case STATE_ACCEPT_PENDING:
 	case STATE_NEGOTIATING: {
+		/* Include state STATE_ACCEPT_PENDING here, as the kernel might interrupt
+		 * the thread calling crofconn::tcp_accept() and schedule
+		 * crofsock's RX-thread before we have entered STATE_NEOGTIATING. If this
+		 * is happening, we may receive a Hello message before entering
+		 * STATE_NEGOTIATING and thus dropping the message. Method hello_rcvd()
+		 * will enter STATE_NEGOTIATING2 directly under these circumstances. */
 
 		if (msg->get_version() == rofl::openflow::OFP_VERSION_UNKNOWN) {
 			journal.log(LOG_NOTICE, "message with invalid version received").
@@ -1058,6 +1065,11 @@ crofconn::handle_recv(
 
 	} break;
 	default: {
+
+		journal.log(LOG_NOTICE, "message received in invalid state, dropping").
+				set_func(__PRETTY_FUNCTION__).set_line(__LINE__).
+					set_key("state", state).
+					set_key("message", msg->str());
 
 		/* drop messages in any other state */
 		delete msg; return;
