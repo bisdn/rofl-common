@@ -50,7 +50,7 @@ public:
 	static
 	const ctimespec&
 	now(
-			clockid_t clk_id = CLOCK_MONOTONIC) {
+			cclockid clk_id = cclockid(CLOCK_MONOTONIC)) {
 		return ctimespec::now(clk_id);
 	};
 

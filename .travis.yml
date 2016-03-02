@@ -10,8 +10,8 @@ before_install:
 install:
   - ./autogen.sh
 env:
-  - FLAGS="--enable-debug --disable-silent-rules"
-  - FLAGS=
+  - FLAGS="--disable-silent-rules --enable-debug"
+  - FLAGS="--disable-silent-rules"
 script:
   - mkdir -p build
   - cd build

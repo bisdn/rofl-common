@@ -4,9 +4,22 @@ Legend:
 [B] Bug fixed
 [K] Known issue
 [O] Other
+[A] API semantics
 
 Change log
 ==========
+
+v0.10.3
+
+[O] added cclockid class to prevent invalid use of class ctimespec
+[+] crofsock: use SO_LINGER option for coordinated shutdown
+[+] crofsock: make backlog for listening mode configurable, defaults to 
+    64 established TCP connections
+[B] crofconn: fixed potential race condition causing a Hello expiration
+[A] crofchan: send CLOSE notification to application when replacing
+    an existing connection object (restart)
+[B] crofchan: fixed bug in handle_closed(): conn was not removed from
+    crofchan::conns map leading to a double free
 
 v0.10.2
 
