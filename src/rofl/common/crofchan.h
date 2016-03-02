@@ -91,7 +91,8 @@ public:
 	call_env(crofchan_env* env) {
 		AcquireReadLock lock(crofchan_env::channel_envs_lock);
 		if (crofchan_env::channel_envs.find(env) == crofchan_env::channel_envs.end()) {
-			throw eRofChanNotFound("crofchan_env::call_env() crofchan_env instance not found");
+			throw eRofChanNotFound("crofchan_env::call_env() crofchan_env instance not found").
+					set_func(__PRETTY_FUNCTION__).set_file(__FILE__).set_line(__LINE__);
 		}
 		return *(env);
 	};
@@ -307,7 +308,8 @@ public:
 			last_auxid = (last_auxid == 255) ? 0 : last_auxid + 1;
 		}
 		if (cnt == 0) {
-			throw eRofChanExhausted("crofchan::add_conn() cauxid namespace exhausted");
+			throw eRofChanExhausted("crofchan::add_conn() cauxid namespace exhausted").
+					set_func(__PRETTY_FUNCTION__).set_file(__FILE__).set_line(__LINE__);
 		}
 		(conns[last_auxid] = new crofconn(this))->set_auxid(cauxid(last_auxid));
 		return *(conns[last_auxid]);
@@ -334,7 +336,8 @@ public:
 	add_conn(
 			crofconn* conn) {
 		if (nullptr == conn) {
-			throw eRofChanInval("crofchan::add_conn() null pointer");
+			throw eRofChanInval("crofchan::add_conn() null pointer").
+					set_func(__PRETTY_FUNCTION__).set_file(__FILE__).set_line(__LINE__);
 		}
 		AcquireReadWriteLock rwlock(conns_rwlock);
 		cauxid auxid(conn->get_auxid());
@@ -377,7 +380,9 @@ public:
 			const cauxid& auxid) const {
 		AcquireReadLock rwlock(conns_rwlock);
 		if (conns.find(auxid) == conns.end()) {
-			throw eRofChanNotFound("crofchan::get_conn() auxid not found");
+			throw eRofChanNotFound("crofchan::get_conn() auxid not found").
+					set_func(__PRETTY_FUNCTION__).set_file(__FILE__).set_line(__LINE__).
+					set_key("auxid", auxid.get_id());
 		}
 		return *(conns.at(auxid));
 	};

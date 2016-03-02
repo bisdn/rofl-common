@@ -83,7 +83,8 @@ public:
 	call_env(crofconn_env* env) {
 		AcquireReadLock lock(crofconn_env::connection_envs_lock);
 		if (crofconn_env::connection_envs.find(env) == crofconn_env::connection_envs.end()) {
-			throw eRofConnNotFound("crofconn_env::call_env() crofconn_env instance not found");
+			throw eRofConnNotFound("crofconn_env::call_env() crofconn_env instance not found").
+					set_func(__PRETTY_FUNCTION__).set_file(__FILE__).set_line(__LINE__);
 		}
 		return *(env);
 	};
@@ -432,7 +433,8 @@ public:
 			unsigned int queue_id) const
 	{
 		if (rxqueues.size() <= queue_id) {
-			throw eRofConnInvalid("crofconn::get_rxqueue_max_size() invalid queue_id");
+			throw eRofConnInvalid("crofconn::get_rxqueue_max_size() invalid queue_id").
+					set_func(__PRETTY_FUNCTION__).set_file(__FILE__).set_line(__LINE__);
 		}
 		return rxqueues[queue_id].get_queue_max_size();
 	};
@@ -445,7 +447,8 @@ public:
 			unsigned int queue_id, size_t rxqueue_max_size)
 	{
 		if (rxqueues.size() <= queue_id) {
-			throw eRofConnInvalid("crofconn::set_rxqueue_max_size() invalid queue_id");
+			throw eRofConnInvalid("crofconn::set_rxqueue_max_size() invalid queue_id").
+					set_func(__PRETTY_FUNCTION__).set_file(__FILE__).set_line(__LINE__);
 		}
 		rxqueues[queue_id].set_queue_max_size(rxqueue_max_size);
 		return *this;
@@ -836,7 +839,8 @@ private:
 			const rofl::openflow::cofhello_elem_versionbitmap& versionbitmap)
 	{
 		if (versionbitmap.get_highest_ofp_version() == rofl::openflow::OFP_VERSION_UNKNOWN) {
-			throw eRofConnInvalid("crofconn::set_versionbitmap() versionbitmap invalid");
+			throw eRofConnInvalid("crofconn::set_versionbitmap() versionbitmap invalid").
+					set_func(__PRETTY_FUNCTION__).set_file(__FILE__).set_line(__LINE__);
 		}
 		this->versionbitmap = versionbitmap;
 	};
@@ -1284,7 +1288,8 @@ private:
 			uint32_t xid, uint8_t msg_type, uint16_t msg_multipart_type) {
 		AcquireReadWriteLock rwlock(pending_segments_rwlock);
 		if (not (pending_segments.size() < pending_segments_max)) {
-			throw eRofConnInvalid("crofconn::add_pending_segment() too many segments in transit, dropping");
+			throw eRofConnInvalid("crofconn::add_pending_segment() too many segments in transit, dropping").
+					set_func(__PRETTY_FUNCTION__).set_file(__FILE__).set_line(__LINE__);
 		}
 		pending_segments[xid] = csegment(xid, ctimespec().expire_in(timeout_segments), msg_type, msg_multipart_type);
 		if (not thread.has_timer(TIMER_ID_PENDING_SEGMENTS)) {
@@ -1301,7 +1306,8 @@ private:
 			uint32_t xid, uint8_t msg_type, uint16_t msg_multipart_type) {
 		AcquireReadWriteLock rwlock(pending_segments_rwlock);
 		if (not (pending_segments.size() < pending_segments_max)) {
-			throw eRofConnInvalid("crofconn::set_pending_segment() too many segments in transit, dropping");
+			throw eRofConnInvalid("crofconn::set_pending_segment() too many segments in transit, dropping").
+					set_func(__PRETTY_FUNCTION__).set_file(__FILE__).set_line(__LINE__);
 		}
 		if (pending_segments.find(xid) == pending_segments.end()) {
 			pending_segments[xid] = csegment(xid, ctimespec().expire_in(timeout_segments), msg_type, msg_multipart_type);
@@ -1320,10 +1326,12 @@ private:
 			uint32_t xid) {
 		AcquireReadWriteLock rwlock(pending_segments_rwlock);
 		if (not (pending_segments.size() < pending_segments_max)) {
-			throw eRofConnInvalid("crofconn::set_pending_segment() too many segments in transit, dropping");
+			throw eRofConnInvalid("crofconn::set_pending_segment() too many segments in transit, dropping").
+					set_func(__PRETTY_FUNCTION__).set_file(__FILE__).set_line(__LINE__);
 		}
 		if (pending_segments.find(xid) == pending_segments.end()) {
-			throw eRofConnNotFound("crofconn::set_pending_segment() xid not found");
+			throw eRofConnNotFound("crofconn::set_pending_segment() xid not found").
+					set_func(__PRETTY_FUNCTION__).set_file(__FILE__).set_line(__LINE__);
 		}
 		if (not thread.has_timer(TIMER_ID_PENDING_SEGMENTS)) {
 			thread.add_timer(TIMER_ID_PENDING_SEGMENTS, ctimespec().expire_in(timeout_segments));
@@ -1339,7 +1347,8 @@ private:
 			uint32_t xid) const {
 		AcquireReadLock rlock(pending_segments_rwlock);
 		if (pending_segments.find(xid) == pending_segments.end()) {
-			throw eRofConnNotFound("crofconn::get_pending_segment() xid not found");
+			throw eRofConnNotFound("crofconn::get_pending_segment() xid not found").
+					set_func(__PRETTY_FUNCTION__).set_file(__FILE__).set_line(__LINE__);
 		}
 		return pending_segments.at(xid);
 	};

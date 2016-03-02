@@ -181,7 +181,8 @@ public:
 	call_env(crofsock_env* env) {
 		AcquireReadLock lock(crofsock_env::socket_envs_lock);
 		if (crofsock_env::socket_envs.find(env) == crofsock_env::socket_envs.end()) {
-			throw eRofSockNotFound("crofsock_env::call_env() crofsock_env instance not found");
+			throw eRofSockNotFound("crofsock_env::call_env() crofsock_env instance not found").
+					set_func(__PRETTY_FUNCTION__).set_file(__FILE__).set_line(__LINE__);
 		}
 		return *(env);
 	};
