@@ -44,7 +44,7 @@ crofsock::crofsock(
 				domain(AF_INET),
 				type(SOCK_STREAM),
 				protocol(IPPROTO_TCP),
-				backlog(10),
+				backlog(64),
 				ctx(NULL),
 				ssl(NULL),
 				bio(NULL),
@@ -172,7 +172,7 @@ crofsock::close()
 		shutdown(sd, O_RDWR);
 
 		/* allow socket to send shutdown notification to peer */
-		sleep(1);
+		/* sleep(1); // use SO_LINGER option instead */
 		if (sd > 0)
 			::close(sd);
 		sd = -1;
@@ -418,18 +418,32 @@ crofsock::tcp_accept(
 		}
 	}
 
+	/* get SO_LINGER option */
+	struct linger l;
+	socklen_t l_len = sizeof(l);
+	if ((::getsockopt(sd, SOL_SOCKET, SO_LINGER, &l, &l_len)) < 0) {
+		throw eSysCall("eSysCall", "getsockopt (SO_LINGER)", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+	}
+
+	/* set SO_LINGER option */
+	l.l_onoff = 1; /* activate SO_LINGER option */
+	l.l_linger = 1; /* second(s) */
+	if ((::setsockopt(sd, SOL_SOCKET, SO_LINGER, &l, l_len)) < 0) {
+		throw eSysCall("eSysCall", "setsockopt (SO_LINGER)", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+	}
+
 	state = STATE_TCP_ESTABLISHED;
 
 	journal.log(LOG_INFO, "STATE_TCP_ESTABLISHED");
-
-	/* instruct rxthread to read from socket descriptor */
-	rxthread.add_read_fd(sd);
 
 	if (flags.test(FLAG_TLS_IN_USE)) {
 		crofsock::tls_accept(sockfd);
 	} else {
 		crofsock_env::call_env(env).handle_tcp_accepted(*this);
 	}
+
+	/* instruct rxthread to read from socket descriptor */
+	rxthread.add_read_fd(sd);
 }
 
 
@@ -491,6 +505,20 @@ crofsock::tcp_connect(
 		if ((rc = ::setsockopt(sd, IPPROTO_TCP, TCP_NODELAY, &optval, sizeof(optval))) < 0) {
 			throw eSysCall("eSysCall", "setsockopt (TCP_NODELAY)", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		}
+	}
+
+	/* get SO_LINGER option */
+	struct linger l;
+	socklen_t l_len = sizeof(l);
+	if ((rc = ::getsockopt(sd, SOL_SOCKET, SO_LINGER, &l, &l_len)) < 0) {
+		throw eSysCall("eSysCall", "getsockopt (SO_LINGER)", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+	}
+
+	/* set SO_LINGER option */
+	l.l_onoff = 1; /* activate SO_LINGER option */
+	l.l_linger = 1; /* second(s) */
+	if ((rc = ::setsockopt(sd, SOL_SOCKET, SO_LINGER, &l, l_len)) < 0) {
+		throw eSysCall("eSysCall", "setsockopt (SO_LINGER)", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 
 	/* bind to local address */
@@ -1621,6 +1649,10 @@ crofsock::recv_message()
 {
 	while (not rx_disabled) {
 
+		if ((state != STATE_TCP_ESTABLISHED) && (state != STATE_TLS_ESTABLISHED)) {
+			return;
+		}
+
 		if (not rx_fragment_pending) {
 			msg_bytes_read = 0;
 		}
@@ -1638,6 +1670,7 @@ crofsock::recv_message()
 		/* sanity check: 8 <= msg_len <= 2^16 */
 		if (msg_len < sizeof(struct openflow::ofp_header)) {
 			/* out-of-sync => enforce reconnect in client mode */
+			journal.log(LOG_NOTICE, "TCP: openflow out-of-sync");
 			goto on_error;
 		}
 
@@ -1652,12 +1685,14 @@ crofsock::recv_message()
 			} break;
 			default: {
 				/* oops, error */
+				journal.log(LOG_NOTICE, "TCP: error occured %d (%s)", errno, strerror(errno));
 				goto on_error;
 			};
 			}
 		} else
 		if (rc == 0) {
 			/* shutdown from peer */
+			journal.log(LOG_INFO, "TCP: peer shutdown");
 			goto on_error;
 		}
 
@@ -1728,6 +1763,10 @@ crofsock::parse_message()
 		default: {
 			throw eBadRequestBadVersion("eBadRequestBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 		};
+		}
+
+		if ((state != STATE_TCP_ESTABLISHED) && (state != STATE_TLS_ESTABLISHED)) {
+			return;
 		}
 
 		if (trace) {

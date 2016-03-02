@@ -41,6 +41,67 @@ public:
 };
 
 
+class cclockid {
+public:
+
+	/**
+	 *
+	 */
+	~cclockid()
+	{};
+
+	/**
+	 *
+	 */
+	explicit cclockid(
+			clockid_t clkid = CLOCK_MONOTONIC) :
+				clkid(clkid)
+	{};
+
+	/**
+	 *
+	 */
+	cclockid(
+			const cclockid& clockid)
+	{ *this = clockid; };
+
+	/**
+	 *
+	 */
+	cclockid&
+	operator= (
+			const cclockid& clockid)
+	{
+		if (this == &clockid)
+			return *this;
+		clkid = clockid.clkid;
+		return *this;
+	};
+
+public:
+
+	/**
+	 *
+	 */
+	clockid_t
+	get_clkid() const
+	{ return clkid; };
+
+	/**
+	 *
+	 */
+	cclockid&
+	set_clkid(
+			clockid_t clkid)
+	{ this->clkid = clkid; return *this; };
+
+private:
+
+	clockid_t clkid;
+};
+
+
+
 class ctimespec {
 public:
 
@@ -50,7 +111,7 @@ public:
 	static
 	const ctimespec&
 	now(
-			clockid_t clk_id = CLOCK_MONOTONIC) {
+			const cclockid& clk_id = cclockid(CLOCK_MONOTONIC)) {
 		ctimespec::current_time.get_time(clk_id);
 		return ctimespec::current_time;
 	};
@@ -67,7 +128,7 @@ public:
 	 *
 	 */
 	ctimespec(
-			clockid_t clk_id = CLOCK_MONOTONIC) :
+			const cclockid& clk_id = cclockid(CLOCK_MONOTONIC)) :
 				timer_id(0),
 				clk_id(clk_id)
 	{ get_time(clk_id); };
@@ -78,7 +139,7 @@ public:
 	ctimespec(
 			time_t tv_sec,
 			long tv_nsec,
-			clockid_t clk_id = CLOCK_MONOTONIC) :
+			const cclockid& clk_id = cclockid(CLOCK_MONOTONIC)) :
 				timer_id(0),
 				clk_id(clk_id)
 	{ get_time(clk_id); expire_in(tv_sec, tv_nsec); };
@@ -215,7 +276,7 @@ public:
 	get_time()
 	{
 		// get current time
-		if (clock_gettime(clk_id, &tspec) < 0) {
+		if (clock_gettime(clk_id.get_clkid(), &tspec) < 0) {
 			switch (errno) {
 			case EFAULT: {
 				throw eTimeSpecSysCall("ctimespec::now() invalid struct timespec");
@@ -237,10 +298,10 @@ public:
 	 */
 	ctimespec&
 	get_time(
-			clockid_t clk_id = CLOCK_MONOTONIC)
+			const cclockid& clk_id = cclockid(CLOCK_MONOTONIC))
 	{
 		// get current time
-		if (clock_gettime(clk_id, &tspec) < 0) {
+		if (clock_gettime(clk_id.get_clkid(), &tspec) < 0) {
 			switch (errno) {
 			case EFAULT: {
 				throw eTimeSpecSysCall("ctimespec::now() invalid struct timespec");
@@ -348,7 +409,7 @@ private:
 
 	uint32_t                timer_id;
 	crwlock                 tlock;
-	clockid_t               clk_id;
+	cclockid                clk_id;
 	struct timespec         tspec;
 };
 

@@ -160,14 +160,14 @@ public:
 	 */
 	void
 	start()
-	{ starttime = ctimespec::now(CLOCK_REALTIME); };
+	{ starttime = ctimespec::now(cclockid(CLOCK_REALTIME)); };
 
 	/**
 	 *
 	 */
 	void
 	stop()
-	{ stoptime = ctimespec::now(CLOCK_REALTIME); };
+	{ stoptime = ctimespec::now(cclockid(CLOCK_REALTIME)); };
 
 public:
 

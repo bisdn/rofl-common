@@ -448,6 +448,21 @@ public:
 	void
 	tx_enable();
 
+	/**
+	 * @brief	Return backlog for listening mode
+	 */
+	int
+	get_backlog() const
+	{ return backlog; };
+
+	/**
+	 * @brief	Set backlog for listening mode
+	 */
+	crofsock&
+	set_backlog(
+			int backlog)
+	{ this->backlog = backlog; return *this; };
+
 public:
 
 	/**

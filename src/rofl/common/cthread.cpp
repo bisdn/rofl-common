@@ -342,21 +342,28 @@ cthread::stop()
 void
 cthread::wakeup()
 {
-	if (wakeup_pending)
-		return;
-	char c = 1;
-	if (write(pipefd[PIPE_WRITE_FD], &c, sizeof(c)) < 0) {
-		switch (errno) {
-		case EAGAIN: {
-			// do nothing
-		} break;
-		case EINTR: {
-			// signal received
-		} break;
-		default: {
-			throw eSysCall("eSysCall", "write", __FILE__, __PRETTY_FUNCTION__, __LINE__);
-		};
+	switch (state) {
+	case STATE_RUNNING: {
+		if (wakeup_pending)
+				return;
+		char c = 1;
+		if (write(pipefd[PIPE_WRITE_FD], &c, sizeof(c)) < 0) {
+			switch (errno) {
+			case EAGAIN: {
+				// do nothing
+			} break;
+			case EINTR: {
+				// signal received
+			} break;
+			default: {
+				throw eSysCall("eSysCall", "write", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+			};
+			}
 		}
+	} break;
+	default: {
+
+	};
 	}
 }
 

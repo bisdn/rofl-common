@@ -45,6 +45,7 @@ crofconn::crofconn(
 				ofp_version(rofl::openflow::OFP_VERSION_UNKNOWN),
 				mode(MODE_UNKNOWN),
 				state(STATE_DISCONNECTED),
+				flag_hello_sent(false),
 				flag_hello_rcvd(false),
 				rxweights(QUEUE_MAX),
 				rxqueues(QUEUE_MAX),
@@ -207,6 +208,7 @@ crofconn::set_state(
 
 			versionbitmap_peer.clear();
 			set_version(rofl::openflow::OFP_VERSION_UNKNOWN);
+			flag_hello_sent = false;
 			flag_hello_rcvd = false;
 
 		} break;
@@ -236,13 +238,17 @@ crofconn::set_state(
 			journal.log(LOG_INFO, "STATE_NEGOTIATING").
 					set_func(__PRETTY_FUNCTION__).set_line(__LINE__).
 						set_key("offered versions", versionbitmap.str());
-			send_hello_message();
+			thread.add_timer(TIMER_ID_WAIT_FOR_HELLO, ctimespec().expire_in(timeout_hello));
+			if (not flag_hello_sent) {
+				send_hello_message();
+			}
 
 		} break;
 		case STATE_NEGOTIATING2: {
 			journal.log(LOG_INFO, "STATE_NEGOTIATING2").
 					set_func(__PRETTY_FUNCTION__).set_line(__LINE__).
 						set_key("peer versions", versionbitmap_peer.str());
+			thread.drop_timer(TIMER_ID_WAIT_FOR_HELLO);
 			send_features_request();
 
 		} break;
@@ -364,9 +370,7 @@ crofconn::send_hello_message()
 
 		rofsock.send_message(msg);
 
-		if (not flag_hello_rcvd) {
-			thread.add_timer(TIMER_ID_WAIT_FOR_HELLO, ctimespec().expire_in(timeout_hello));
-		}
+		flag_hello_sent = true;
 
 	} catch (rofl::exception& e) {
 		journal.log(e).set_caller(__PRETTY_FUNCTION__);
@@ -390,6 +394,8 @@ crofconn::hello_rcvd(
 	}
 
 	flag_hello_rcvd = true;
+
+	thread.drop_timer(TIMER_ID_WAIT_FOR_HELLO);
 
 	try {
 
@@ -443,6 +449,9 @@ crofconn::hello_rcvd(
 		} else {
 			switch (mode) {
 			case MODE_CONTROLLER: {
+				if (not flag_hello_sent) {
+					send_hello_message();
+				}
 				/* get auxid via FEATURES.request for OFP1.3 and above */
 				if (ofp_version >= rofl::openflow13::OFP_VERSION) {
 					set_state(STATE_NEGOTIATING2);
@@ -453,6 +462,9 @@ crofconn::hello_rcvd(
 
 			} break;
 			case MODE_DATAPATH: {
+				if (not flag_hello_sent) {
+					send_hello_message();
+				}
 				/* connection establishment succeeded */
 				set_state(STATE_ESTABLISHED);
 
@@ -517,8 +529,6 @@ crofconn::hello_rcvd(
 		set_state(STATE_NEGOTIATION_FAILED);
 	}
 
-	thread.drop_timer(TIMER_ID_WAIT_FOR_HELLO);
-
 	delete msg;
 }
 
@@ -527,8 +537,9 @@ crofconn::hello_rcvd(
 void
 crofconn::hello_expired()
 {
-	journal.log(LOG_CRIT_ERROR, "HELLO expired").
-			set_func(__PRETTY_FUNCTION__);
+	journal.log(LOG_CRIT_ERROR, "HELLO expired state=%d", state).
+			set_func(__PRETTY_FUNCTION__).
+				set_key("state", state);
 
 	switch (state) {
 	case STATE_ESTABLISHED: {
@@ -537,6 +548,11 @@ crofconn::hello_expired()
 				set_func(__PRETTY_FUNCTION__);
 	} break;
 	default: {
+		if (flag_hello_rcvd) {
+			journal.log(LOG_CRIT_ERROR, "HELLO expired, ignoring event, HELLO from peer received").
+					set_func(__PRETTY_FUNCTION__);
+			return;
+		}
 		set_state(STATE_NEGOTIATION_FAILED);
 	};
 	}
@@ -945,7 +961,15 @@ crofconn::handle_recv(
 	}
 
 	switch (get_state()) {
+	case STATE_CONNECT_PENDING:
+	case STATE_ACCEPT_PENDING:
 	case STATE_NEGOTIATING: {
+		/* Include state STATE_ACCEPT_PENDING here, as the kernel might interrupt
+		 * the thread calling crofconn::tcp_accept() and schedule
+		 * crofsock's RX-thread before we have entered STATE_NEOGTIATING. If this
+		 * is happening, we may receive a Hello message before entering
+		 * STATE_NEGOTIATING and thus dropping the message. Method hello_rcvd()
+		 * will enter STATE_NEGOTIATING2 directly under these circumstances. */
 
 		if (msg->get_version() == rofl::openflow::OFP_VERSION_UNKNOWN) {
 			journal.log(LOG_NOTICE, "message with invalid version received").
@@ -972,6 +996,10 @@ crofconn::handle_recv(
 			error_rcvd(msg);
 		} else {
 			/* drop all non-HELLO messages in this state */
+			journal.log(LOG_NOTICE, "invalid message type received while negotiating").
+					set_func(__PRETTY_FUNCTION__).set_line(__LINE__).
+						set_key("state", "STATE_NEGOTIATING").
+							set_key("msgtype", msg->get_type());
 			delete msg;
 		}
 
@@ -1043,6 +1071,11 @@ crofconn::handle_recv(
 
 	} break;
 	default: {
+
+		journal.log(LOG_NOTICE, "message received in invalid state, dropping").
+				set_func(__PRETTY_FUNCTION__).set_line(__LINE__).
+					set_key("state", state).
+					set_key("message", msg->str());
 
 		/* drop messages in any other state */
 		delete msg; return;
@@ -1281,6 +1314,11 @@ crofconn::handle_rx_messages()
 		try {
 			/* iterate over all rxqueues */
 			for (unsigned int queue_id = 0; queue_id < QUEUE_MAX; ++queue_id) {
+
+				if (STATE_ESTABLISHED != state) {
+					rx_thread_working = false;
+					return;
+				}
 
 				if (rxqueues[queue_id].empty()) {
 					continue; // no messages at all in this queue
