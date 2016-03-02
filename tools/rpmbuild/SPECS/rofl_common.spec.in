@@ -64,6 +64,9 @@ make install DESTDIR=$RPM_BUILD_ROOT
 rm -rf $RPM_BUILD_ROOT 
 
 %changelog
+* Tue Mar 02 2016 Andreas Koepsel <andreas.koepsel@bisdn.de> - v0.10.4
+- crofchan: corrected bugfix from v0.10.3 in handle_closed()
+
 * Tue Mar 01 2016 Andreas Koepsel <andreas.koepsel@bisdn.de> - v0.10.3
 - added cclockid class to prevent invalid use of class ctimespec
 - crofsock: use SO_LINGER option for coordinated shutdown

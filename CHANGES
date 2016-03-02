@@ -11,7 +11,9 @@ Change log
 
 v0.10.4
 
-[B] crofbase: catch eRofChanNotFound in handle_closed()
+[B] crofchan: fixed a bug introduced in v0.10.3 while fixing
+    the other bug: actively established connections must not be
+    removed upon handle_closed()
 
 v0.10.3
 
