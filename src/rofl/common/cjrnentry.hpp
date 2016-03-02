@@ -50,7 +50,7 @@ public:
 	cjrnentry(
 			uint32_t id) :
 				id(id),
-				logtime(ctimespec::now(CLOCK_REALTIME))
+				logtime(ctimespec::now(cclockid(CLOCK_REALTIME)))
 	{};
 
 	/**
