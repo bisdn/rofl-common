@@ -548,6 +548,8 @@ private:
 		if (conn.get_auxid().get_id() == 0) {
 			{ /* acquire rwlock */
 				AcquireReadLock rwlock(conns_rwlock);
+
+				std::list<cauxid> to_be_removed;
 				for (auto it : conns) {
 					it.second->close();
 					/* if connection is passive, schedule its deletion */
@@ -555,11 +557,16 @@ private:
 						AcquireReadWriteLock lock(conns_deletion_rwlock);
 						it.second->set_env(nullptr);
 						conns_deletion.insert(it.second);
-						conns.erase(it.first);
-						if (not thread.has_timer(TIMER_ID_ROFCONN_DESTROY)) {
-							thread.add_timer(TIMER_ID_ROFCONN_DESTROY, ctimespec().expire_in(8));
-						}
+						to_be_removed.push_back(it.first);
 					}
+				}
+				if (not to_be_removed.empty()) {
+					if (not thread.has_timer(TIMER_ID_ROFCONN_DESTROY)) {
+						thread.add_timer(TIMER_ID_ROFCONN_DESTROY, ctimespec().expire_in(8));
+					}
+				}
+				for (auto auxid : to_be_removed) {
+					conns.erase(auxid);
 				}
 			} /* release rwlock */
 			crofchan_env::call_env(env).handle_closed(*this);
