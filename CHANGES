@@ -9,6 +9,10 @@ Legend:
 Change log
 ==========
 
+v0.10.4
+
+[B] crofbase: catch eRofChanNotFound in handle_closed()
+
 v0.10.3
 
 [O] added cclockid class to prevent invalid use of class ctimespec
