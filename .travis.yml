@@ -18,6 +18,10 @@ script:
   - ../configure $FLAGS 
   - make -j 2
   - make -j 2 check
+branches:
+  only:
+    - master
+    - stable
 notifications:
   email:
     - andreas.koepsel@bisdn.de
