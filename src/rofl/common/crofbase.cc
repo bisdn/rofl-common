@@ -541,12 +541,10 @@ crofbase::handle_closed(
 				set_key("ctlid", ctl.get_ctlid().str());
 	handle_ctl_close(rofl::cctlid(ctl.get_ctlid()));
 	/* if main connection is passive, delete crofctl instance */
-	try {
-		if (ctl.get_conn(rofl::cauxid(0)).is_passive()) {
-			/* mark dpt for deletion */
-			drop_ctl(ctl.get_ctlid());
-		}
-	} catch(eRofChanNotFound& e) {}
+	if (ctl.get_conn(rofl::cauxid(0)).is_passive()) {
+		/* mark dpt for deletion */
+		drop_ctl(ctl.get_ctlid());
+	}
 }
 
 
