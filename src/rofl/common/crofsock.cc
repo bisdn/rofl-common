@@ -1723,7 +1723,11 @@ on_error:
 	case STATE_TCP_ESTABLISHED: {
 		journal.log(LOG_INFO, "TCP: peer shutdown");
 		close();
-		crofsock_env::call_env(env).handle_closed(*this);
+		try {
+			crofsock_env::call_env(env).handle_closed(*this);
+		} catch(std::runtime_error& e) {
+			journal.log(LOG_NOTICE, "crofsock::recv_message() caught runtime error, what: %s", e.what());
+		}
 		if (flags.test(FLAG_RECONNECT_ON_FAILURE)) {
 			backoff_reconnect(true);
 		}
