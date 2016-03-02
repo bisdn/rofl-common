@@ -555,12 +555,12 @@ private:
 						AcquireReadWriteLock lock(conns_deletion_rwlock);
 						it.second->set_env(nullptr);
 						conns_deletion.insert(it.second);
+						conns.erase(it.first);
 						if (not thread.has_timer(TIMER_ID_ROFCONN_DESTROY)) {
 							thread.add_timer(TIMER_ID_ROFCONN_DESTROY, ctimespec().expire_in(8));
 						}
 					}
 				}
-				conns.clear();
 			} /* release rwlock */
 			crofchan_env::call_env(env).handle_closed(*this);
 		} else {
