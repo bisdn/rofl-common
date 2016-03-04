@@ -238,7 +238,9 @@ crofconn::set_state(
 			journal.log(LOG_INFO, "STATE_NEGOTIATING").
 					set_func(__PRETTY_FUNCTION__).set_line(__LINE__).
 						set_key("offered versions", versionbitmap.str());
-			thread.add_timer(TIMER_ID_WAIT_FOR_HELLO, ctimespec().expire_in(timeout_hello));
+			if (not flag_hello_rcvd) {
+				thread.add_timer(TIMER_ID_WAIT_FOR_HELLO, ctimespec().expire_in(timeout_hello));
+			}
 			if (not flag_hello_sent) {
 				send_hello_message();
 			}
@@ -365,7 +367,7 @@ crofconn::send_hello_message()
 						++xid_hello_last,
 						helloIEs);
 		if (trace) {
-			journal.log(LOG_TRACE, "message sent: %s", msg->str().c_str());
+			journal.log(LOG_TRACE, "state: %d message sent: %s", state, msg->str().c_str());
 		}
 
 		rofsock.send_message(msg);
@@ -572,7 +574,7 @@ crofconn::send_features_request()
 						++xid_features_request_last);
 
 		if (trace) {
-			journal.log(LOG_TRACE, "message sent: %s", msg->str().c_str());
+			journal.log(LOG_TRACE, "state: %d message sent: %s", state, msg->str().c_str());
 		}
 
 		rofsock.send_message(msg);
@@ -642,7 +644,7 @@ crofconn::send_echo_request()
 						++xid_echo_request_last);
 
 		if (trace) {
-			journal.log(LOG_TRACE, "message sent: %s", msg->str().c_str());
+			journal.log(LOG_TRACE, "state: %d message sent: %s", state, msg->str().c_str());
 		}
 
 		rofsock.send_message(msg);
@@ -706,7 +708,7 @@ crofconn::echo_request_rcvd(
 						msg->get_body().somem(), msg->get_body().memlen());
 
 		if (trace) {
-			journal.log(LOG_TRACE, "message sent: %s", msg->str().c_str());
+			journal.log(LOG_TRACE, "state: %d message sent: %s", state, msg->str().c_str());
 		}
 
 		rofsock.send_message(reply);
@@ -957,7 +959,7 @@ crofconn::handle_recv(
 	 * thread is called for handling these messages. */
 
 	if (trace) {
-		journal.log(LOG_TRACE, "message rcvd: %s", msg->str().c_str());
+		journal.log(LOG_TRACE, "state: %d message rcvd: %s", state, msg->str().c_str());
 	}
 
 	switch (get_state()) {
@@ -1562,7 +1564,7 @@ crofconn::segment_and_send_message(
 	unsigned int cwnd_size = 0;
 
 	if (trace) {
-		journal.log(LOG_TRACE, "message sent: %s", msg->str().c_str());
+		journal.log(LOG_TRACE, "state: %d message sent: %s", state, msg->str().c_str());
 	}
 
 	if (msg->length() <= segmentation_threshold) {

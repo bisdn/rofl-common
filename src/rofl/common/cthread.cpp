@@ -397,11 +397,11 @@ cthread::run_loop()
 			if (not get_run_thread())
 				goto out;
 
-			/* handle expired timers */
-			std::list<unsigned int> ttypes;
-			uint32_t timer_id = 0;
-			ctimespec ts;
 			while (true) {
+				/* handle expired timers */
+				std::list<unsigned int> ttypes;
+				uint32_t timer_id = 0;
+				ctimespec ts;
 				{
 					AcquireReadLock lock(tlock);
 					if (ordered_timers.empty()) {
@@ -413,16 +413,18 @@ cthread::run_loop()
 					}
 					ordered_timers.erase(ordered_timers.begin());
 				} // release lock here
-
 				if (not get_run_thread())
 					goto out;
 
-				timer_id = ts.get_timer_id();
-				if (has_timer(timer_id)) {
-					ttypes = get_timer(timer_id).get_timer_types();
+				if (ts.is_expired()) // optimization problem?
+				{
+					timer_id = ts.get_timer_id();
+					if (has_timer(timer_id)) {
+						ttypes = get_timer(timer_id).get_timer_types();
+					}
+					drop_timer(timer_id);
+					cthread_env::call_env(env).handle_timeout(*this, timer_id, ttypes);
 				}
-				drop_timer(timer_id);
-				cthread_env::call_env(env).handle_timeout(*this, timer_id, ttypes);
 			}
 
 			if (not get_run_thread())

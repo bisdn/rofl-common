@@ -162,7 +162,7 @@ public:
 
 		timer_id = ts.timer_id;
 		clk_id = ts.clk_id;
-		tspec = ts.tspec;
+		memcpy(&tspec, &(ts.tspec), sizeof(struct timespec));
 
 		return *this;
 	};

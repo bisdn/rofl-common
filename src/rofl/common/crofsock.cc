@@ -1469,6 +1469,8 @@ crofsock::send_from_queue()
 					} return;
 					case SIGPIPE:
 					default: {
+						journal.log(LOG_NOTICE, "::send() syscall failed, error: %d (%s)", errno, strerror(errno)).
+								set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 						tx_is_running = false;
 					} return;
 					}
@@ -1684,6 +1686,8 @@ crofsock::recv_message()
 				return;
 			} break;
 			default: {
+				journal.log(LOG_NOTICE, "::recv() syscall failed, error: %d (%s)", errno, strerror(errno)).
+						set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
 				/* oops, error */
 				journal.log(LOG_NOTICE, "TCP: error occured %d (%s)", errno, strerror(errno));
 				goto on_error;
