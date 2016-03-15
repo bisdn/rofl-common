@@ -708,7 +708,7 @@ crofconn::echo_request_rcvd(
 						msg->get_body().somem(), msg->get_body().memlen());
 
 		if (trace) {
-			journal.log(LOG_TRACE, "state: %d message sent: %s", state, msg->str().c_str());
+			journal.log(LOG_TRACE, "state: %d message sent: %s", state, reply->str().c_str());
 		}
 
 		rofsock.send_message(reply);

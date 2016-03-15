@@ -16,6 +16,9 @@ v0.10.4
     removed upon handle_closed()
 [B] cthread: check timer for expiration again before calling 
     handle_timeout()
+[B] crofsock: allow transmission of Echo-Request/Reply messages
+    even when flow-control is blocking transmission of other 
+    messages received from the application layer
 
 v0.10.3
 

@@ -1279,7 +1279,9 @@ crofsock::send_message(
 		delete msg; return;
 	}
 
-	if (flags.test(FLAG_TX_BLOCK_QUEUEING)) {
+	if (flags.test(FLAG_TX_BLOCK_QUEUEING) &&
+			(msg->get_type() != rofl::openflow::OFPT_ECHO_REQUEST) &&
+			(msg->get_type() != rofl::openflow::OFPT_ECHO_REPLY)) {
 		throw eRofQueueFull("crofsock::send_message() transmission blocked, congestion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 
