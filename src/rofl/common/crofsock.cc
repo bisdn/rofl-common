@@ -1500,7 +1500,7 @@ crofsock::send_from_queue()
 		}
 
 		if ((not flags.test(FLAG_CONGESTED)) && flags.test(FLAG_TX_BLOCK_QUEUEING)) {
-			if (txqueue_pending_pkts < txqueue_size_tx_threshold) {
+			if (txqueue_pending_pkts <= txqueue_size_tx_threshold) {
 				flags.reset(FLAG_TX_BLOCK_QUEUEING);
 				crofsock_env::call_env(env).congestion_solved_indication(*this);
 			}
