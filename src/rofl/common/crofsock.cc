@@ -1407,11 +1407,10 @@ crofsock::send_from_queue()
 	if (state < STATE_TCP_ESTABLISHED)
 		return;
 
-	bool reschedule = false;
-
 	tx_is_running = true;
-
+	bool reschedule;
 	do {
+		reschedule = false;
 		for (unsigned int queue_id = 0; queue_id < QUEUE_MAX; ++queue_id) {
 
 			for (unsigned int num = 0; num < txweights[queue_id]; ++num) {
