@@ -1454,6 +1454,7 @@ crofsock::send_from_queue()
 					switch (errno) {
 					case EAGAIN: /* socket would block */ {
 						tx_is_running = false;
+						tx_fragment_pending = true;
 						flags.set(FLAG_CONGESTED);
 						txthread.add_write_fd(sd);
 
