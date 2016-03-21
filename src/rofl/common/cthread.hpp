@@ -25,6 +25,7 @@
 
 #include <inttypes.h>
 #include <ostream>
+#include <iostream>
 #include <list>
 #include <map>
 #include <set>
@@ -110,8 +111,13 @@ public:
 	 *
 	 */
 	virtual
-	~cthread()
-	{ release(); };
+	~cthread() {
+		try { // don't throw in dtor
+			release();
+		} catch(exception &e) {
+			std::cerr << __FUNCTION__ << "(): failed with " << e.what() << std::endl;
+		}
+	}
 
 	/**
 	 *
