@@ -174,28 +174,28 @@ public:
 	 */
 	void
 	add_read_fd(
-			int fd, bool exception = true);
+			int fd, bool exception = true, uint32_t events = EPOLLIN|EPOLLET);
 
 	/**
 	 * @brief	Drop file descriptor from set of observed fds
 	 */
 	void
 	drop_read_fd(
-			int fd, bool exception = true);
+			int fd, bool exception = true, uint32_t events = EPOLLIN|EPOLLET);
 
 	/**
 	 * @brief	Add file descriptor to set of observed fds
 	 */
 	void
 	add_write_fd(
-			int fd);
+			int fd, uint32_t events = EPOLLOUT|EPOLLET);
 
 	/**
 	 * @brief	Drop file descriptor from set of observed fds
 	 */
 	void
 	drop_write_fd(
-			int fd);
+			int fd, uint32_t events = EPOLLOUT|EPOLLET);
 
 public:
 
