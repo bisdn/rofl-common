@@ -325,8 +325,9 @@ crofsock::listen()
 
 	journal.log(LOG_INFO, "STATE_LISTENING");
 
-	/* instruct rxthread to read from socket descriptor */
-	rxthread.add_read_fd(sd);
+	/* instruct rxthread to read from socket descriptor
+	 * since we only accept once per event, this goes level triggered */
+	rxthread.add_read_fd(sd, false, EPOLLIN);
 }
 
 
