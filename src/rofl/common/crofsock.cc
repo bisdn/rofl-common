@@ -1509,12 +1509,11 @@ crofsock::send_from_queue()
 				crofsock_env::call_env(env).congestion_solved_indication(*this);
 			}
 		}
-
 	} while (reschedule);
 
 	tx_is_running = false;
 
-	if (txqueue_pending_pkts > 0) {
+	if (txqueue_pending_pkts > 0 && not flags.test(FLAG_TX_BLOCK_QUEUEING)) {
 		txthread.wakeup();
 	}
 }
