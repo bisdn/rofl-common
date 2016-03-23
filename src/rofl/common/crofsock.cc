@@ -443,8 +443,9 @@ crofsock::tcp_accept(
 		crofsock_env::call_env(env).handle_tcp_accepted(*this);
 	}
 
-	/* instruct rxthread to read from socket descriptor */
+	/* instruct rxthread to read and txthread to write from/to socket descriptor */
 	rxthread.add_read_fd(sd);
+	txthread.add_write_fd(sd);
 }
 
 
@@ -576,8 +577,9 @@ crofsock::tcp_connect(
 
 		journal.log(LOG_INFO, "STATE_TCP_ESTABLISHED");
 
-		/* register socket descriptor for read operations */
+		/* register socket descriptor for read and write operations */
 		rxthread.add_read_fd(sd);
+		txthread.add_write_fd(sd);
 
 		if (flags.test(FLAG_TLS_IN_USE)) {
 			crofsock::tls_connect(flags.test(FLAG_RECONNECT_ON_FAILURE));
@@ -1522,7 +1524,6 @@ crofsock::send_from_queue()
 						tx_is_running = false;
 						tx_fragment_pending = true;
 						flags.set(FLAG_CONGESTED);
-						txthread.add_write_fd(sd);
 
 						if (not flags.test(FLAG_TX_BLOCK_QUEUEING)) {
 							/* block transmission of further packets */
@@ -1619,8 +1620,6 @@ crofsock::handle_read_event_rxthread(
 			switch (optval) {
 			case 0:
 			case EISCONN: {
-				rxthread.drop_write_fd(sd);
-
 				if ((getsockname(sd, laddr.ca_saddr, &(laddr.salen))) < 0) {
 					throw eSysCall("eSysCall", "getsockname", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 				}
@@ -1632,9 +1631,6 @@ crofsock::handle_read_event_rxthread(
 				state = STATE_TCP_ESTABLISHED;
 
 				journal.log(LOG_INFO, "STATE_TCP_ESTABLISHED");
-
-				/* register socket descriptor for read operations */
-				rxthread.add_read_fd(sd);
 
 				if (flags.test(FLAG_TLS_IN_USE)) {
 					crofsock::tls_connect(flags.test(FLAG_RECONNECT_ON_FAILURE));

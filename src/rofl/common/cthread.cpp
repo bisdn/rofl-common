@@ -97,8 +97,6 @@ cthread::add_read_fd(
 		};
 		}
 	}
-
-	wakeup();
 }
 
 
@@ -128,8 +126,6 @@ cthread::drop_read_fd(
 		};
 		}
 	}
-
-	wakeup();
 }
 
 
@@ -151,8 +147,6 @@ cthread::add_write_fd(
 	if (epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &epev) < 0) {
 		throw eSysCall("eSysCall", "epoll_ctl (EPOLL_CTL_ADD)", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
-
-	wakeup();
 }
 
 
@@ -174,8 +168,6 @@ cthread::drop_write_fd(
 	if (epoll_ctl(epfd, EPOLL_CTL_DEL, fd, &epev) < 0) {
 		throw eSysCall("eSysCall", "epoll_ctl (EPOLL_CTL_DEL)", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
-
-	wakeup();
 }
 
 
