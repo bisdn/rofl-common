@@ -535,8 +535,10 @@ crofsock::tcp_connect(
 		switch (errno) {
 		case EINPROGRESS: {
 			journal.log(LOG_INFO, "TCP: EINPROGRESS");
-			/* register socket descriptor for write operations */
-			rxthread.add_write_fd(sd);
+			/* register socket descriptor for write operations; for completion
+			 * of connect getsockopt have to be queried after wfd indicates
+			 * writability (see man connect(2) for details) */
+			txthread.add_write_fd(sd);
 		} break;
 		case ECONNREFUSED: {
 			journal.log(LOG_INFO, "TCP: ECONNREFUSED");
@@ -1395,7 +1397,66 @@ crofsock::handle_write_event(
 	if (&thread == &txthread) {
 		assert(fd == sd);
 		flags.reset(FLAG_CONGESTED);
-		txthread.drop_write_fd(sd);
+		journal.log(LOG_INFO, "start sending again state=%d", state);
+
+		if (state == STATE_TLS_CONNECTING || state == STATE_TCP_CONNECTING) {
+			/* check if connect succeeded: use getsockopt to read SO_ERROR
+			 * option at level SOL_SOCKET */
+
+			// TODO maybe call handle_read_event_rxthread
+			int rc;
+			int optval = 0;
+			int optlen = sizeof(optval);
+			if ((rc = getsockopt(sd, SOL_SOCKET, SO_ERROR,
+					(void*)&optval, (socklen_t*)&optlen)) < 0) {
+				throw eSysCall("eSysCall", "getsockopt (SO_ERROR)", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+			}
+
+			journal.log(LOG_INFO, "recheck SOL_SOCKET, SO_ERROR optval=%d", optval);
+
+			switch (optval) {
+			case 0:
+			case EISCONN: {
+				/* connected */
+
+				state = STATE_TCP_ESTABLISHED;
+
+				journal.log(LOG_INFO, "STATE_TCP_ESTABLISHED");
+
+				if (flags.test(FLAG_TLS_IN_USE)) {
+					// TODO check when implement tls
+					crofsock::tls_connect(flags.test(FLAG_RECONNECT_ON_FAILURE));
+				} else {
+					crofsock_env::call_env(env).handle_tcp_connected(*this);
+				}
+
+				/* add read fd */
+				rxthread.add_read_fd(sd, false);
+			} break;
+			case ECONNREFUSED: {
+				journal.log(LOG_INFO, "TCP: ECONNREFUSED");
+				close();
+
+				crofsock_env::call_env(env).handle_tcp_connect_refused(*this);
+
+				if (flags.test(FLAG_RECONNECT_ON_FAILURE)) {
+					backoff_reconnect(false);
+				}
+			} break;
+			default: {
+				journal.log(LOG_INFO, "TCP: connect error: %d(%s)", errno, strerror(errno));
+				close();
+
+				crofsock_env::call_env(env).handle_tcp_connect_failed(*this);
+
+				if (flags.test(FLAG_RECONNECT_ON_FAILURE)) {
+					backoff_reconnect(false);
+				}
+			}
+			}
+			return;
+		}
+
 		send_from_queue();
 	} else
 	if (&thread == &rxthread) {

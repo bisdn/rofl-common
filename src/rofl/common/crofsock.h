@@ -14,7 +14,7 @@
 #define CROFSOCK_H_
 
 #include <string.h>
-#include <assert.h>
+#include <cassert>
 #include <inttypes.h>
 #include <unistd.h>
 #include <fcntl.h>
