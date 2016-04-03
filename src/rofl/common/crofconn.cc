@@ -386,7 +386,7 @@ void
 crofconn::hello_rcvd(
 		rofl::openflow::cofmsg* pmsg)
 {
-	AcquireReadWriteLock lock(hello_lock);
+//	AcquireReadWriteLock lock(hello_lock);
 	rofl::openflow::cofmsg_hello* msg = dynamic_cast<rofl::openflow::cofmsg_hello*>( pmsg );
 
 	if (nullptr == msg) {
