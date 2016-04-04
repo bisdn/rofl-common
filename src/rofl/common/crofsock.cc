@@ -89,7 +89,10 @@ crofsock::crofsock(
 void
 crofsock::close()
 {
-	switch (state) {
+	enum socket_state_t tmp = state;
+	state = STATE_CLOSING;
+
+	switch (tmp) {
 	case STATE_IDLE: {
 
 		journal.log(LOG_INFO, "STATE_IDLE");
@@ -99,6 +102,9 @@ crofsock::close()
 		tx_disabled = false;
 
 	} break;
+	case STATE_CLOSING:
+		journal.log(LOG_INFO, "STATE_CLOSING");
+	break;
 	case STATE_CLOSED: {
 
 		journal.log(LOG_INFO, "STATE_CLOSED");
@@ -717,6 +723,7 @@ crofsock::tls_accept(
 {
 	switch (state) {
 	case STATE_IDLE:
+	case STATE_CLOSING:
 	case STATE_CLOSED:
 	case STATE_TCP_ACCEPTING: {
 
@@ -842,6 +849,7 @@ crofsock::tls_connect(
 {
 	switch (state) {
 	case STATE_IDLE:
+	case STATE_CLOSING:
 	case STATE_CLOSED:
 	case STATE_TCP_CONNECTING: {
 
@@ -1392,7 +1400,7 @@ void
 crofsock::handle_write_event(
 		cthread& thread, int fd)
 {
-	if (state <= STATE_CLOSED) {
+	if (state <= STATE_CLOSING) {
 		return;
 	}
 
