@@ -97,7 +97,7 @@ private:
 		std::cerr << ">>>>>>>>>>>>> auxid=" << (int)conn.get_auxid().get_id() << " <<<<<<<<<<<<<<" << std::endl;
 		std::cerr << conn.get_journal() << std::endl;
 		std::cerr << conn.get_tcp_journal() << std::endl;
-		CPPUNIT_ASSERT(false);
+		CPPUNIT_ASSERT(false && "handle_negotiation_failed chan,conn");
 	};
 
 	virtual void
@@ -163,7 +163,7 @@ private:
 		std::cerr << ">>>>>>>>>>>>> auxid=" << (int)conn.get_auxid().get_id() << " <<<<<<<<<<<<<<" << std::endl;
 		std::cerr << conn.get_journal() << std::endl;
 		std::cerr << conn.get_tcp_journal() << std::endl;
-		CPPUNIT_ASSERT(false);
+		CPPUNIT_ASSERT(false && "handle_negotiation_failed conn");
 	};
 
 	virtual void
@@ -174,7 +174,7 @@ private:
 		std::cerr << ">>>>>>>>>>>>> auxid=" << (int)conn.get_auxid().get_id() << " <<<<<<<<<<<<<<" << std::endl;
 		std::cerr << conn.get_journal() << std::endl;
 		std::cerr << conn.get_tcp_journal() << std::endl;
-		CPPUNIT_ASSERT(false);
+		CPPUNIT_ASSERT(false && "handle_closed");
 	};
 
 	virtual void
