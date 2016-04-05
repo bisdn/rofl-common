@@ -8,6 +8,7 @@
 #ifndef TEST_SRC_ROFL_COMMON_OPENFLOW_MESSAGES_COFMSGAGGRSTATS_TEST_HPP_
 #define TEST_SRC_ROFL_COMMON_OPENFLOW_MESSAGES_COFMSGAGGRSTATS_TEST_HPP_
 
+#include <atomic>
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 
@@ -40,9 +41,9 @@ private:
 	uint32_t            xid;
 
 	unsigned int        num_of_conns;
-	unsigned int        num_of_accepts;
+	std::atomic_uint    num_of_accepts;
 	unsigned int        num_of_dpt_established;
-	unsigned int        num_of_ctl_established;
+	std::atomic_uint    num_of_ctl_established;
 
 	bool                trace;
 	rofl::crandom       rand;
@@ -96,7 +97,7 @@ private:
 		std::cerr << ">>>>>>>>>>>>> auxid=" << (int)conn.get_auxid().get_id() << " <<<<<<<<<<<<<<" << std::endl;
 		std::cerr << conn.get_journal() << std::endl;
 		std::cerr << conn.get_tcp_journal() << std::endl;
-		CPPUNIT_ASSERT(false);
+		CPPUNIT_ASSERT(false && "handle_negotiation_failed chan,conn");
 	};
 
 	virtual void
@@ -162,7 +163,7 @@ private:
 		std::cerr << ">>>>>>>>>>>>> auxid=" << (int)conn.get_auxid().get_id() << " <<<<<<<<<<<<<<" << std::endl;
 		std::cerr << conn.get_journal() << std::endl;
 		std::cerr << conn.get_tcp_journal() << std::endl;
-		CPPUNIT_ASSERT(false);
+		CPPUNIT_ASSERT(false && "handle_negotiation_failed conn");
 	};
 
 	virtual void
@@ -173,7 +174,7 @@ private:
 		std::cerr << ">>>>>>>>>>>>> auxid=" << (int)conn.get_auxid().get_id() << " <<<<<<<<<<<<<<" << std::endl;
 		std::cerr << conn.get_journal() << std::endl;
 		std::cerr << conn.get_tcp_journal() << std::endl;
-		CPPUNIT_ASSERT(false);
+		CPPUNIT_ASSERT(false && "handle_closed");
 	};
 
 	virtual void

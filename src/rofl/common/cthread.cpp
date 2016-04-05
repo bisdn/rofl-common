@@ -46,12 +46,8 @@ cthread::initialize()
 		throw eSysCall("eSysCall", "pipe2", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 
-	add_read_fd(pipefd[PIPE_READ_FD]);
-
-	//start_thread();
+	add_read_fd(pipefd[PIPE_READ_FD], true, EPOLLIN);
 }
-
-
 
 void
 cthread::release()
@@ -60,7 +56,7 @@ cthread::release()
 
 	stop();
 
-	drop_read_fd(pipefd[PIPE_READ_FD]);
+	drop_read_fd(pipefd[PIPE_READ_FD], true, EPOLLIN);
 
 	::close(epfd);
 
@@ -78,14 +74,17 @@ cthread::release()
 
 void
 cthread::add_read_fd(
-		int fd, bool exception)
+		int fd, bool exception, uint32_t events)
 {
+	// check events
+	assert(events & (EPOLLIN|EPOLLPRI|EPOLLOUT|EPOLLRDNORM|EPOLLRDBAND|EPOLLWRNORM|EPOLLWRBAND|EPOLLMSG|EPOLLERR|EPOLLHUP|EPOLLRDHUP|EPOLLWAKEUP|EPOLLONESHOT|EPOLLET) && "invalid event add rfd");
+
 	AcquireReadWriteLock lock(tlock);
 	rfds.insert(fd);
 
 	struct epoll_event epev;
 	memset((uint8_t*)&epev, 0, sizeof(struct epoll_event));
-	epev.events = EPOLLIN;
+	epev.events = events;
 	epev.data.fd = fd;
 	if (epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &epev) < 0) {
 		switch (errno) {
@@ -98,22 +97,23 @@ cthread::add_read_fd(
 		};
 		}
 	}
-
-	wakeup();
 }
 
 
 
 void
 cthread::drop_read_fd(
-		int fd, bool exception)
+		int fd, bool exception, uint32_t events)
 {
+	// check events
+	assert(events & (EPOLLIN|EPOLLPRI|EPOLLOUT|EPOLLRDNORM|EPOLLRDBAND|EPOLLWRNORM|EPOLLWRBAND|EPOLLMSG|EPOLLERR|EPOLLHUP|EPOLLRDHUP|EPOLLWAKEUP|EPOLLONESHOT|EPOLLET) && "invalid event drop rfd");
+
 	AcquireReadWriteLock lock(tlock);
 	rfds.erase(fd);
 
 	struct epoll_event epev;
 	memset((uint8_t*)&epev, 0, sizeof(struct epoll_event));
-	epev.events = EPOLLIN;
+	epev.events = events;
 	epev.data.fd = fd;
 	if (epoll_ctl(epfd, EPOLL_CTL_DEL, fd, &epev) < 0) {
 		switch (errno) {
@@ -126,48 +126,48 @@ cthread::drop_read_fd(
 		};
 		}
 	}
-
-	wakeup();
 }
 
 
 
 void
 cthread::add_write_fd(
-		int fd)
+		int fd, uint32_t events)
 {
+	// check events
+	assert(events & (EPOLLIN|EPOLLPRI|EPOLLOUT|EPOLLRDNORM|EPOLLRDBAND|EPOLLWRNORM|EPOLLWRBAND|EPOLLMSG|EPOLLERR|EPOLLHUP|EPOLLRDHUP|EPOLLWAKEUP|EPOLLONESHOT|EPOLLET) && "invalid event add wfd");
+
 	AcquireReadWriteLock lock(tlock);
 	wfds.insert(fd);
 
 	struct epoll_event epev;
 	memset((uint8_t*)&epev, 0, sizeof(struct epoll_event));
-	epev.events = EPOLLOUT;
+	epev.events = events;
 	epev.data.fd = fd;
 	if (epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &epev) < 0) {
 		throw eSysCall("eSysCall", "epoll_ctl (EPOLL_CTL_ADD)", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
-
-	wakeup();
 }
 
 
 
 void
 cthread::drop_write_fd(
-		int fd)
+		int fd, uint32_t events)
 {
+	// check events
+	assert(events & (EPOLLIN|EPOLLPRI|EPOLLOUT|EPOLLRDNORM|EPOLLRDBAND|EPOLLWRNORM|EPOLLWRBAND|EPOLLMSG|EPOLLERR|EPOLLHUP|EPOLLRDHUP|EPOLLWAKEUP|EPOLLONESHOT|EPOLLET) && "invalid event drop wfd");
+
 	AcquireReadWriteLock lock(tlock);
 	wfds.erase(fd);
 
 	struct epoll_event epev;
 	memset((uint8_t*)&epev, 0, sizeof(struct epoll_event));
-	epev.events = EPOLLOUT;
+	epev.events = events;
 	epev.data.fd = fd;
 	if (epoll_ctl(epfd, EPOLL_CTL_DEL, fd, &epev) < 0) {
 		throw eSysCall("eSysCall", "epoll_ctl (EPOLL_CTL_DEL)", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
-
-	wakeup();
 }
 
 

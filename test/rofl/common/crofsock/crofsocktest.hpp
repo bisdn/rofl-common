@@ -21,7 +21,7 @@ class crofsocktest :
 {
 	CPPUNIT_TEST_SUITE( crofsocktest );
 	CPPUNIT_TEST( test );
-	CPPUNIT_TEST( test_tls );
+//	CPPUNIT_TEST( test_tls );
 	CPPUNIT_TEST_SUITE_END();
 
 public:

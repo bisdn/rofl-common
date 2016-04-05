@@ -9,6 +9,11 @@ Legend:
 Change log
 ==========
 
+v0.10.5
+
+[K] TLS does not work
+
+
 v0.10.4
 
 [B] crofchan: fixed a bug introduced in v0.10.3 while fixing

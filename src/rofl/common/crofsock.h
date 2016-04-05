@@ -14,7 +14,7 @@
 #define CROFSOCK_H_
 
 #include <string.h>
-#include <assert.h>
+#include <cassert>
 #include <inttypes.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -297,15 +297,16 @@ class crofsock :
 	};
 
 	enum socket_state_t {
-		STATE_IDLE              = 0,
-		STATE_CLOSED			= 1,
-		STATE_LISTENING         = 2,
-		STATE_TCP_CONNECTING	= 3,
-		STATE_TLS_CONNECTING	= 4,
-		STATE_TCP_ACCEPTING 	= 5,
-		STATE_TLS_ACCEPTING 	= 6,
-		STATE_TCP_ESTABLISHED	= 7,
-		STATE_TLS_ESTABLISHED	= 8,
+		STATE_IDLE,
+		STATE_CLOSED,
+		STATE_CLOSING,
+		STATE_LISTENING,
+		STATE_TCP_CONNECTING,
+		STATE_TLS_CONNECTING,
+		STATE_TCP_ACCEPTING,
+		STATE_TLS_ACCEPTING,
+		STATE_TCP_ESTABLISHED,
+		STATE_TLS_ESTABLISHED,
 	};
 
 	enum crofsockimer_t {
