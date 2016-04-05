@@ -12,7 +12,24 @@ Change log
 v0.10.5
 
 [K] TLS does not work
-
+[B] crofsock: prevent infinit loop
+[B] crofsock: set tx_fragment_pending in tx saturation
+[B] crofsock: txqueue_size_tx_threshold checking fixed
+[B] cthread: don't throw in dtor
+[B] crofchantest: fix increments done in threads
+[B] crofsocktest: fix timeout
+[B] disable crofsocktest and update CHANGES
+[B] cthread: default to EPOLLET
+[B] crofsock: don't let handle_write_event run at state STATE_CLOSED
+[B] crofsock: do not wakeup tx in case its blocked (you will be informed
+    afterwards)
+[B] crofsock: use listening fd level triggered
+[B] crofsock: handle delayed connects proper
+[B] crofsock: update read/write- file descriptor usage to conform with
+    EPOLLET
+[B] remove rwlock in hello_rcvd to prevent double free of hello_lock
+[B] adding closing state to crofsock
+[+] more verbose asserts
 
 v0.10.4
 
