@@ -64,6 +64,25 @@ make install DESTDIR=$RPM_BUILD_ROOT
 rm -rf $RPM_BUILD_ROOT 
 
 %changelog
+* Tue Apr 06 2016 Andreas Koepsel <andreas.koepsel@bisdn.de> - v0.10.5
+- [K] TLS does not work
+- crofsock: prevent infinit loop
+- crofsock: set tx_fragment_pending in tx saturation
+- crofsock: txqueue_size_tx_threshold checking fixed
+- cthread: don't throw in dtor
+- crofchantest: fix increments done in threads
+- crofsocktest: fix timeout
+- disable crofsocktest and update CHANGES
+- cthread: default to EPOLLET
+- crofsock: don't let handle_write_event run at state STATE_CLOSED
+- crofsock: do not wakeup tx in case its blocked (you will be informed afterwards)
+- crofsock: use listening fd level triggered
+- crofsock: handle delayed connects proper
+- crofsock: update read/write- file descriptor usage to conform with EPOLLET
+- remove rwlock in hello_rcvd to prevent double free of hello_lock
+- adding closing state to crofsock
+- more verbose asserts
+
 * Tue Mar 02 2016 Andreas Koepsel <andreas.koepsel@bisdn.de> - v0.10.4
 - crofchan: corrected bugfix from v0.10.3 in handle_closed()
 
