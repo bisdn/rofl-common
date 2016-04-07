@@ -355,8 +355,11 @@ crofconn::error_rcvd(
 void
 crofconn::send_hello_message()
 {
-	AcquireReadWriteLock lock(hello_lock);
 	try {
+		AcquireReadWriteLock lock(hello_lock);
+		if (flag_hello_sent)
+			return;
+		flag_hello_sent = true;
 
 		rofl::openflow::cofhelloelems helloIEs;
 		helloIEs.add_hello_elem_versionbitmap() = versionbitmap;
@@ -372,8 +375,6 @@ crofconn::send_hello_message()
 
 		rofsock.send_message(msg);
 
-		flag_hello_sent = true;
-
 	} catch (rofl::exception& e) {
 		journal.log(e).set_caller(__PRETTY_FUNCTION__);
 		set_state(STATE_NEGOTIATION_FAILED);
@@ -386,13 +387,16 @@ void
 crofconn::hello_rcvd(
 		rofl::openflow::cofmsg* pmsg)
 {
-//	AcquireReadWriteLock lock(hello_lock);
 	rofl::openflow::cofmsg_hello* msg = dynamic_cast<rofl::openflow::cofmsg_hello*>( pmsg );
 
 	if (nullptr == msg) {
 		journal.log(LOG_CRIT_ERROR, "msg is not of type cofmsg_hello").
 				set_func(__PRETTY_FUNCTION__);
 		return;
+	}
+
+	if (not flag_hello_sent) {
+		send_hello_message();
 	}
 
 	flag_hello_rcvd = true;
@@ -451,9 +455,6 @@ crofconn::hello_rcvd(
 		} else {
 			switch (mode) {
 			case MODE_CONTROLLER: {
-				if (not flag_hello_sent) {
-					send_hello_message();
-				}
 				/* get auxid via FEATURES.request for OFP1.3 and above */
 				if (ofp_version >= rofl::openflow13::OFP_VERSION) {
 					set_state(STATE_NEGOTIATING2);
@@ -464,9 +465,6 @@ crofconn::hello_rcvd(
 
 			} break;
 			case MODE_DATAPATH: {
-				if (not flag_hello_sent) {
-					send_hello_message();
-				}
 				/* connection establishment succeeded */
 				set_state(STATE_ESTABLISHED);
 

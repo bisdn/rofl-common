@@ -24,7 +24,6 @@
 #include <string.h>
 
 #include <inttypes.h>
-#include <ostream>
 #include <iostream>
 #include <list>
 #include <map>
@@ -111,13 +110,14 @@ public:
 	 *
 	 */
 	virtual
-	~cthread() {
-		try { // don't throw in dtor
+	~cthread()
+	{
+		try { // don't throw in destructor
 			release();
-		} catch(exception &e) {
+		} catch(std::exception &e) {
 			std::cerr << __FUNCTION__ << "(): failed with " << e.what() << std::endl;
 		}
-	}
+	};
 
 	/**
 	 *
@@ -174,28 +174,28 @@ public:
 	 */
 	void
 	add_read_fd(
-			int fd, bool exception = true, uint32_t events = EPOLLIN|EPOLLET);
+			int fd, bool exception = true);
 
 	/**
 	 * @brief	Drop file descriptor from set of observed fds
 	 */
 	void
 	drop_read_fd(
-			int fd, bool exception = true, uint32_t events = EPOLLIN|EPOLLET);
+			int fd, bool exception = true);
 
 	/**
 	 * @brief	Add file descriptor to set of observed fds
 	 */
 	void
 	add_write_fd(
-			int fd, uint32_t events = EPOLLOUT|EPOLLET);
+			int fd, bool exception = true);
 
 	/**
 	 * @brief	Drop file descriptor from set of observed fds
 	 */
 	void
 	drop_write_fd(
-			int fd, uint32_t events = EPOLLOUT|EPOLLET);
+			int fd, bool exception = true);
 
 public:
 
@@ -312,6 +312,13 @@ private:
 	 */
 	void*
 	run_loop();
+
+	/**
+	 *
+	 */
+	void
+	update_fd(
+			int fd, bool exception = true);
 
 private:
 

@@ -64,6 +64,8 @@ crofsocktest::test()
 
 			sclient->set_raddr(baddr).tcp_connect(true);
 
+			sleep(1);
+
 			while (keep_running && (--timeout > 0)) {
 				struct timespec ts;
 				ts.tv_sec = 1;
