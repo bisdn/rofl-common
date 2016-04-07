@@ -327,13 +327,6 @@ private:
 	void*
 	run_loop();
 
-	/**
-	 *
-	 */
-	void
-	update_fd(
-			int fd, bool exception = true);
-
 private:
 
 	// true: continue to run worker thread
@@ -359,10 +352,7 @@ private:
 
 	crwlock				tlock;		// thread lock
 
-	std::set<int>       fds;        // set of registered file descriptors
-	std::set<int>		rfds;		// set of file descriptors observed for reading
-	std::set<int>		wfds;		// set of file descriptors observed for writing
-
+	std::map<int, uint32_t>     fds;        // set of registered file descriptors
 	std::set<ctimespec> ordered_timers;     // ordered set of timers
 	std::map<uint32_t, ctimer*> timers;     // map of timers
 

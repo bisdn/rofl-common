@@ -1395,9 +1395,11 @@ crofsock::handle_wakeup(
 		cthread& thread)
 {
 	if (&thread == &rxthread) {
+		std::cerr << "HANDLE_WAKEUP RX" << std::endl;
 		recv_message();
 	} else
 	if (&thread == &txthread) {
+		std::cerr << "HANDLE_WAKEUP TX" << std::endl;
 		send_from_queue();
 	}
 }
@@ -1596,6 +1598,7 @@ crofsock::handle_read_event_rxthread(
 
 				/* register socket descriptor for read operations */
 				rxthread.add_fd(sd);
+				txthread.add_fd(sd);
 				rxthread.add_read_fd(sd);
 
 				if (flags.test(FLAG_TLS_IN_USE)) {
