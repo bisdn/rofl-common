@@ -1515,7 +1515,7 @@ crofsock::send_from_queue()
 
 	tx_is_running = false;
 
-	if (txqueue_pending_pkts > 0) {
+	if ((txqueue_pending_pkts > 0) && (not flags.test(FLAG_TX_BLOCK_QUEUEING))) {
 		txthread.wakeup();
 	}
 }

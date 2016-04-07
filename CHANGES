@@ -35,6 +35,7 @@ v0.10.6
 [B] cthread: fix edge-triggered behaviour of epoll
     pipe still uses level-triggered scheme
 [B] crofsock: don't let handle_write_event run at state STATE_CLOSED 
+[B] crofsock: do not wakeup tx in case its blocked
 
 v0.10.4
 
