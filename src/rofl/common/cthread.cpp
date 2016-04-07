@@ -164,11 +164,11 @@ cthread::update_fd(
 	uint32_t events = 0;
 
 	if (rfds.find(fd) != rfds.end()) {
-		events |= (EPOLLET | EPOLLIN);
+		events |= (/*EPOLLET | */EPOLLIN); // level-triggered
 	}
 
 	if (wfds.find(fd) != wfds.end()) {
-		events |= (EPOLLET | EPOLLOUT);
+		events |= (/*EPOLLET | */EPOLLOUT); // level-triggered
 	}
 
 	struct epoll_event epev;

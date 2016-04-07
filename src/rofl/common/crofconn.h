@@ -16,6 +16,7 @@
 #include <inttypes.h>
 #include <bitset>
 #include <set>
+#include <atomic>
 
 #include "rofl/common/cthread.hpp"
 #include "rofl/common/crofsock.h"
@@ -1432,10 +1433,10 @@ private:
 	enum crofconn_state_t           state;
 
 	// hello message sent to peer
-	bool                            flag_hello_sent;
+	std::atomic_bool                flag_hello_sent;
 
 	// hello message from peer rcvd
-	bool                            flag_hello_rcvd;
+	std::atomic_bool                flag_hello_rcvd;
 
 	// hello lock
 	rofl::crwlock                   hello_lock;

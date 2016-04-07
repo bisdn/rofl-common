@@ -444,6 +444,8 @@ crofsock::tcp_accept(
 
 	/* instruct rxthread to read from socket descriptor */
 	rxthread.add_read_fd(sd);
+
+	rxthread.wakeup();
 }
 
 
@@ -575,6 +577,8 @@ crofsock::tcp_connect(
 
 		/* register socket descriptor for read operations */
 		rxthread.add_read_fd(sd);
+
+		rxthread.wakeup();
 
 		if (flags.test(FLAG_TLS_IN_USE)) {
 			crofsock::tls_connect(flags.test(FLAG_RECONNECT_ON_FAILURE));
@@ -1376,6 +1380,9 @@ void
 crofsock::handle_wakeup(
 		cthread& thread)
 {
+	if (&thread == &rxthread) {
+		recv_message();
+	} else
 	if (&thread == &txthread) {
 		send_from_queue();
 	}
@@ -1581,6 +1588,9 @@ crofsock::handle_read_event_rxthread(
 				} else {
 					crofsock_env::call_env(env).handle_tcp_connected(*this);
 				}
+
+				recv_message();
+
 			} break;
 			case EINPROGRESS: {
 				/* connect still pending, just wait */
