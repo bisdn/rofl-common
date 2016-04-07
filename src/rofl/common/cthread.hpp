@@ -188,14 +188,14 @@ public:
 	 */
 	void
 	add_write_fd(
-			int fd);
+			int fd, bool exception = true);
 
 	/**
 	 * @brief	Drop file descriptor from set of observed fds
 	 */
 	void
 	drop_write_fd(
-			int fd);
+			int fd, bool exception = true);
 
 public:
 
@@ -312,6 +312,13 @@ private:
 	 */
 	void*
 	run_loop();
+
+	/**
+	 *
+	 */
+	void
+	update_fd(
+			int fd, bool exception = true);
 
 private:
 
