@@ -64,24 +64,40 @@ make install DESTDIR=$RPM_BUILD_ROOT
 rm -rf $RPM_BUILD_ROOT 
 
 %changelog
-* Tue Apr 06 2016 Andreas Koepsel <andreas.koepsel@bisdn.de> - v0.10.5
-- [K] TLS does not work
-- crofsock: prevent infinit loop
-- crofsock: set tx_fragment_pending in tx saturation
-- crofsock: txqueue_size_tx_threshold checking fixed
-- cthread: don't throw in dtor
-- crofchantest: fix increments done in threads
-- crofsocktest: fix timeout
-- disable crofsocktest and update CHANGES
-- cthread: default to EPOLLET
-- crofsock: don't let handle_write_event run at state STATE_CLOSED
-- crofsock: do not wakeup tx in case its blocked (you will be informed afterwards)
-- crofsock: use listening fd level triggered
-- crofsock: handle delayed connects proper
-- crofsock: update read/write- file descriptor usage to conform with EPOLLET
-- remove rwlock in hello_rcvd to prevent double free of hello_lock
-- adding closing state to crofsock
-- more verbose asserts
+* Thu Apr 07 2016 Andreas Koepsel <andreas.koepsel@bisdn.de> - v0.10.6
+- [B] crofsock: prevent infinite loop
+      In case txqueues are not empty tx is rescheduled. The
+      flag to do so was not cleared and this would cause an
+      infinite loop. Reset the flag to prevent this.
+- [B] crofsock: crofsock: set tx_fragment_pending in tx saturation
+      A packet in the txbuffer would not be sent in case tx
+      was saturated tx_fragment_pending is set to resend the
+      packet, that was already cleared from the txqueues.
+- [B] crofsock: txqueue_size_tx_threshold checking fixed
+      If txqueue_pending_pkts == 1, the calculation of
+      txqueue_size_tx_threshold might lead to a never cleared
+      FLAG_TX_BLOCK_QUEUEING flag.
+- [B] cthread: don't throw in destructor
+- [B] crofchantest: fix increments done in threads
+      num_of_ctl_established and num_of_accepts are incremented
+      from diffrent threads, hence the test randomly fails or
+      succeeds.
+- [B] crofsocktest: fix timeout
+      timeout was already -1 in CPPUNIT_ASSERT
+- [K] TLS support broken
+      crofsocktest: disabling TLS test
+- [B] cthread: fix edge-triggered behaviour of epoll
+      pipe still uses level-triggered scheme
+- [B] crofsock: don't let handle_write_event run at state STATE_CLOSED
+- [B] crofsock: do not wakeup tx in case its blocked
+- [B] crofconn: fixed potential race condition during connection
+      establishment (HELLO negotiation)
+- [B] crofsock: add rxthread wakeup handler
+      call recv_message() after connect/EINPROGRESS continuation
+      in state STATE_TCP_CONNECTING
+
+* Wed Apr 06 2016 Andreas Koepsel <andreas.koepsel@bisdn.de> - v0.10.5
+- [B] version is broken, do not use
 
 * Tue Mar 02 2016 Andreas Koepsel <andreas.koepsel@bisdn.de> - v0.10.4
 - crofchan: corrected bugfix from v0.10.3 in handle_closed()

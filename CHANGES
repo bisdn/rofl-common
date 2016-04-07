@@ -9,27 +9,42 @@ Legend:
 Change log
 ==========
 
+v0.10.6
+
+[B] crofsock: prevent infinite loop
+    In case txqueues are not empty tx is rescheduled. The 
+    flag to do so was not cleared and this would cause an 
+    infinite loop. Reset the flag to prevent this.
+[B] crofsock: crofsock: set tx_fragment_pending in tx saturation
+    A packet in the txbuffer would not be sent in case tx 
+    was saturated tx_fragment_pending is set to resend the 
+    packet, that was already cleared from the txqueues.
+[B] crofsock: txqueue_size_tx_threshold checking fixed
+    If txqueue_pending_pkts == 1, the calculation of
+    txqueue_size_tx_threshold might lead to a never cleared
+    FLAG_TX_BLOCK_QUEUEING flag.
+[B] cthread: don't throw in destructor 
+[B] crofchantest: fix increments done in threads
+    num_of_ctl_established and num_of_accepts are incremented 
+    from diffrent threads, hence the test randomly fails or 
+    succeeds.
+[B] crofsocktest: fix timeout
+    timeout was already -1 in CPPUNIT_ASSERT
+[K] TLS support broken
+    crofsocktest: disabling TLS test
+[B] cthread: fix edge-triggered behaviour of epoll
+    pipe still uses level-triggered scheme
+[B] crofsock: don't let handle_write_event run at state STATE_CLOSED 
+[B] crofsock: do not wakeup tx in case its blocked
+[B] crofconn: fixed potential race condition during connection 
+    establishment (HELLO negotiation)
+[B] crofsock: add rxthread wakeup handler
+    call recv_message() after connect/EINPROGRESS continuation
+    in state STATE_TCP_CONNECTING
+
 v0.10.5
 
-[K] TLS does not work
-[B] crofsock: prevent infinit loop
-[B] crofsock: set tx_fragment_pending in tx saturation
-[B] crofsock: txqueue_size_tx_threshold checking fixed
-[B] cthread: don't throw in dtor
-[B] crofchantest: fix increments done in threads
-[B] crofsocktest: fix timeout
-[B] disable crofsocktest and update CHANGES
-[B] cthread: default to EPOLLET
-[B] crofsock: don't let handle_write_event run at state STATE_CLOSED
-[B] crofsock: do not wakeup tx in case its blocked (you will be informed
-    afterwards)
-[B] crofsock: use listening fd level triggered
-[B] crofsock: handle delayed connects proper
-[B] crofsock: update read/write- file descriptor usage to conform with
-    EPOLLET
-[B] remove rwlock in hello_rcvd to prevent double free of hello_lock
-[B] adding closing state to crofsock
-[+] more verbose asserts
+[B] version is broken, do not use
 
 v0.10.4
 
