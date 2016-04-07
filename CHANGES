@@ -34,6 +34,7 @@ v0.10.6
     crofsocktest: disabling TLS test
 [B] cthread: fix edge-triggered behaviour of epoll
     pipe still uses level-triggered scheme
+[B] crofsock: don't let handle_write_event run at state STATE_CLOSED 
 
 v0.10.4
 

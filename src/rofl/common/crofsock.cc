@@ -1387,7 +1387,11 @@ void
 crofsock::handle_write_event(
 		cthread& thread, int fd)
 {
-	if (&thread == &txthread) {
+ 	if (state <= STATE_CLOSED) {
+		return;
+	}
+
+ 	if (&thread == &txthread) {
 		assert(fd == sd);
 		flags.reset(FLAG_CONGESTED);
 		txthread.drop_write_fd(sd);
