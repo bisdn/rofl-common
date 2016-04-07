@@ -42,6 +42,10 @@ v0.10.6
     call recv_message() after connect/EINPROGRESS continuation
     in state STATE_TCP_CONNECTING
 
+v0.10.5
+
+[B] version is broken, do not use
+
 v0.10.4
 
 [B] crofchan: fixed a bug introduced in v0.10.3 while fixing
