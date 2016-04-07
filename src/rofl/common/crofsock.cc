@@ -1407,11 +1407,11 @@ crofsock::send_from_queue()
 	if (state < STATE_TCP_ESTABLISHED)
 		return;
 
-	bool reschedule = false;
-
 	tx_is_running = true;
 
+	bool reschedule;
 	do {
+		reschedule = false;
 		for (unsigned int queue_id = 0; queue_id < QUEUE_MAX; ++queue_id) {
 
 			for (unsigned int num = 0; num < txweights[queue_id]; ++num) {
@@ -1455,6 +1455,7 @@ crofsock::send_from_queue()
 					switch (errno) {
 					case EAGAIN: /* socket would block */ {
 						tx_is_running = false;
+						tx_fragment_pending = true;
 						flags.set(FLAG_CONGESTED);
 						txthread.add_write_fd(sd);
 
@@ -1500,7 +1501,7 @@ crofsock::send_from_queue()
 		}
 
 		if ((not flags.test(FLAG_CONGESTED)) && flags.test(FLAG_TX_BLOCK_QUEUEING)) {
-			if (txqueue_pending_pkts < txqueue_size_tx_threshold) {
+			if (txqueue_pending_pkts <= txqueue_size_tx_threshold) {
 				flags.reset(FLAG_TX_BLOCK_QUEUEING);
 				crofsock_env::call_env(env).congestion_solved_indication(*this);
 			}
