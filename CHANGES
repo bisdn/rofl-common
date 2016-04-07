@@ -39,6 +39,8 @@ v0.10.6
 [B] crofconn: fixed potential race condition during connection 
     establishment (HELLO negotiation)
 [B] crofsock: add rxthread wakeup handler
+    call recv_message() after connect/EINPROGRESS continuation
+    in state STATE_TCP_CONNECTING
 
 v0.10.4
 

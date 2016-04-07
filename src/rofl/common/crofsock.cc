@@ -945,6 +945,7 @@ crofsock::tls_connect(
 			state = STATE_TLS_ESTABLISHED;
 
 			crofsock_env::call_env(env).handle_tls_connected(*this);
+
 		}
 
 	} break;
@@ -1227,6 +1228,7 @@ crofsock::rx_enable()
 	case STATE_TLS_ESTABLISHED: {
 		rxthread.add_read_fd(sd, false);
 		journal.log(LOG_INFO, "enable reception");
+		rxthread.wakeup();
 	} break;
 	default: {
 
@@ -1250,6 +1252,7 @@ crofsock::tx_enable()
 {
 	tx_disabled = false;
 	journal.log(LOG_INFO, "enable transmission");
+	txthread.wakeup();
 }
 
 
@@ -1625,11 +1628,17 @@ crofsock::handle_read_event_rxthread(
 		case STATE_TLS_CONNECTING: {
 
 			tls_connect(flags.test(FLAG_RECONNECT_ON_FAILURE));
+			if (STATE_TLS_ESTABLISHED == state) {
+				recv_message();
+			}
 
 		} break;
 		case STATE_TLS_ACCEPTING: {
 
 			tls_accept(fd);
+			if (STATE_TLS_ESTABLISHED == state) {
+				recv_message();
+			}
 
 		} break;
 		case STATE_TCP_ESTABLISHED: {
@@ -1668,7 +1677,11 @@ crofsock::recv_message()
 {
 	while (not rx_disabled) {
 
-		if ((state != STATE_TCP_ESTABLISHED) && (state != STATE_TLS_ESTABLISHED)) {
+		if ((state != STATE_TCP_CONNECTING)  &&
+			(state != STATE_TCP_ESTABLISHED) &&
+			(state != STATE_TLS_CONNECTING)  &&
+			(state != STATE_TLS_ACCEPTING)   &&
+			(state != STATE_TLS_ESTABLISHED)) {
 			return;
 		}
 
