@@ -23,6 +23,15 @@ v0.10.6
     If txqueue_pending_pkts == 1, the calculation of
     txqueue_size_tx_threshold might lead to a never cleared
     FLAG_TX_BLOCK_QUEUEING flag.
+[B] cthread: don't throw in destructor 
+[B] crofchantest: fix increments done in threads
+    num_of_ctl_established and num_of_accepts are incremented 
+    from diffrent threads, hence the test randomly fails or 
+    succeeds.
+[B] crofsocktest: fix timeout
+    timeout was already -1 in CPPUNIT_ASSERT
+[K] TLS support broken
+    crofsocktest: disabling TLS test
 
 v0.10.4
 

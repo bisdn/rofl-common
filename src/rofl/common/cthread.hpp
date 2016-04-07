@@ -24,7 +24,7 @@
 #include <string.h>
 
 #include <inttypes.h>
-#include <ostream>
+#include <iostream>
 #include <list>
 #include <map>
 #include <set>
@@ -111,7 +111,13 @@ public:
 	 */
 	virtual
 	~cthread()
-	{ release(); };
+	{
+		try { // don't throw in destructor
+			release();
+		} catch(std::exception &e) {
+			std::cerr << __FUNCTION__ << "(): failed with " << e.what() << std::endl;
+		}
+	};
 
 	/**
 	 *

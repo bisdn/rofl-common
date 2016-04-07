@@ -66,16 +66,14 @@ crofsocktest::test()
 
 			sleep(1);
 
-			while (keep_running && (timeout-- > 0)) {
+			while (keep_running && (--timeout > 0)) {
 				struct timespec ts;
 				ts.tv_sec = 1;
 				ts.tv_nsec = 0;
 				pselect(0, NULL, NULL, NULL, &ts, NULL);
 			}
 
-			if (timeout == 0) {
-				CPPUNIT_ASSERT(false);
-			}
+			CPPUNIT_ASSERT(timeout > 0);
 
 			std::cerr << "listen log:" << std::endl;
 			std::cerr << slisten->get_journal() << std::endl;
@@ -144,16 +142,14 @@ crofsocktest::test_tls()
 					set_tls_keyfile("../../../../../tools/xca/client.key.pem").
 						tls_connect(true);
 
-		while (keep_running && (timeout-- > 0)) {
+		while (keep_running && (--timeout > 0)) {
 			struct timespec ts;
 			ts.tv_sec = 1;
 			ts.tv_nsec = 0;
 			pselect(0, NULL, NULL, NULL, &ts, NULL);
 		}
 
-		if (timeout == 0) {
-			CPPUNIT_ASSERT(false);
-		}
+		CPPUNIT_ASSERT(timeout > 0);
 
 		std::cerr << "listen log:" << std::endl;
 		std::cerr << slisten->get_journal() << std::endl;
