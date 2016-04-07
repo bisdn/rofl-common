@@ -134,8 +134,7 @@ crofsock::close()
 			rxthread.drop_write_fd(sd);
 			rxthread.drop_fd(sd);
 			txthread.drop_fd(sd);
-			::close(sd);
-			sd = -1;
+			::close(sd); sd = -1;
 		}
 
 		state = STATE_CLOSED;
@@ -151,11 +150,10 @@ crofsock::close()
 			rxthread.drop_read_fd(sd, false);
 			if (flags.test(FLAG_CONGESTED)) {
 				txthread.drop_write_fd(sd);
-				rxthread.drop_fd(sd);
-				txthread.drop_fd(sd);
 			}
-			::close(sd);
-			sd = -1;
+			rxthread.drop_fd(sd);
+			txthread.drop_fd(sd);
+			::close(sd); sd = -1;
 		}
 
 		state = STATE_CLOSED;
@@ -179,8 +177,11 @@ crofsock::close()
 
 		/* allow socket to send shutdown notification to peer */
 		/* sleep(1); // use SO_LINGER option instead */
-		if (sd > 0)
+		if (sd > 0) {
+			rxthread.drop_fd(sd);
+			txthread.drop_fd(sd);
 			::close(sd);
+		}
 		sd = -1;
 
 		state = STATE_CLOSED;
@@ -1395,11 +1396,9 @@ crofsock::handle_wakeup(
 		cthread& thread)
 {
 	if (&thread == &rxthread) {
-		std::cerr << "HANDLE_WAKEUP RX" << std::endl;
 		recv_message();
 	} else
 	if (&thread == &txthread) {
-		std::cerr << "HANDLE_WAKEUP TX" << std::endl;
 		send_from_queue();
 	}
 }

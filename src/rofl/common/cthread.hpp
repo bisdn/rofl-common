@@ -174,14 +174,14 @@ public:
 	 */
 	void
 	add_fd(
-			int fd);
+			int fd, bool exception = false);
 
 	/**
 	 * @brief	Deregister file descriptor
 	 */
 	void
 	drop_fd(
-			int fd);
+			int fd, bool exception = false);
 
 	/**
 	 * @brief	Add file descriptor to set of observed fds
