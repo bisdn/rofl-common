@@ -114,6 +114,8 @@ crofsock::close()
 
 		if (sd > 0) {
 			rxthread.drop_read_fd(sd);
+			rxthread.drop_fd(sd);
+			txthread.drop_fd(sd);
 			::close(sd); sd = -1;
 		}
 
@@ -130,6 +132,8 @@ crofsock::close()
 
 		if (sd > 0) {
 			rxthread.drop_write_fd(sd);
+			rxthread.drop_fd(sd);
+			txthread.drop_fd(sd);
 			::close(sd);
 			sd = -1;
 		}
@@ -147,6 +151,8 @@ crofsock::close()
 			rxthread.drop_read_fd(sd, false);
 			if (flags.test(FLAG_CONGESTED)) {
 				txthread.drop_write_fd(sd);
+				rxthread.drop_fd(sd);
+				txthread.drop_fd(sd);
 			}
 			::close(sd);
 			sd = -1;
@@ -326,6 +332,7 @@ crofsock::listen()
 	journal.log(LOG_INFO, "STATE_LISTENING");
 
 	/* instruct rxthread to read from socket descriptor */
+	rxthread.add_fd(sd);
 	rxthread.add_read_fd(sd);
 }
 
@@ -443,6 +450,8 @@ crofsock::tcp_accept(
 	}
 
 	/* instruct rxthread to read from socket descriptor */
+	txthread.add_fd(sd);
+	rxthread.add_fd(sd);
 	rxthread.add_read_fd(sd);
 
 	rxthread.wakeup();
@@ -576,6 +585,8 @@ crofsock::tcp_connect(
 		journal.log(LOG_INFO, "STATE_TCP_ESTABLISHED");
 
 		/* register socket descriptor for read operations */
+		txthread.add_fd(sd);
+		rxthread.add_fd(sd);
 		rxthread.add_read_fd(sd);
 
 		rxthread.wakeup();
@@ -1584,6 +1595,7 @@ crofsock::handle_read_event_rxthread(
 				journal.log(LOG_INFO, "STATE_TCP_ESTABLISHED");
 
 				/* register socket descriptor for read operations */
+				rxthread.add_fd(sd);
 				rxthread.add_read_fd(sd);
 
 				if (flags.test(FLAG_TLS_IN_USE)) {

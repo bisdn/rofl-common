@@ -277,6 +277,7 @@ public:
 		dpt_sockets[baddr] = listen(baddr);
 
 		/* instruct thread to read from socket descriptor */
+		thread.add_fd(dpt_sockets[baddr]);
 		thread.add_read_fd(dpt_sockets[baddr], false);
 	};
 
@@ -349,6 +350,7 @@ public:
 		ctl_sockets[baddr] = listen(baddr);
 
 		/* instruct thread to read from socket descriptor */
+		thread.add_fd(ctl_sockets[baddr]);
 		thread.add_read_fd(ctl_sockets[baddr], false);
 	};
 

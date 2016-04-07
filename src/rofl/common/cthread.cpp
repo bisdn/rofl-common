@@ -73,6 +73,18 @@ cthread::release()
 
 	stop();
 
+	{
+		AcquireReadWriteLock lock(tlock);
+		for (auto fd : fds) {
+			struct epoll_event epev;
+			memset((uint8_t*)&epev, 0, sizeof(struct epoll_event));
+			epev.events = 0;
+			epev.data.fd = fd;
+			epoll_ctl(epfd, EPOLL_CTL_DEL, fd, &epev);
+		}
+		fds.clear();
+	}
+
 	// deregister pipe read-fd from kernel
 	struct epoll_event epev;
 	memset((uint8_t*)&epev, 0, sizeof(struct epoll_event));
@@ -105,9 +117,62 @@ cthread::release()
 
 
 void
+cthread::add_fd(
+		int fd)
+{
+	AcquireReadWriteLock lock(tlock);
+	if (fds.find(fd) == fds.end()) {
+		struct epoll_event epev;
+		memset((uint8_t*)&epev, 0, sizeof(struct epoll_event));
+		epev.events = 0; // EPOLLET | EPOLLIN | EPOLLOUT
+		epev.data.fd = fd;
+		if (epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &epev) < 0) {
+			switch (errno) {
+			case EEXIST: {
+				/* do nothing */
+			} break;
+			default: {
+				throw eSysCall("eSysCall", "epoll_ctl (EPOLL_CTL_ADD)", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+			};
+			}
+		}
+		fds.insert(fd);
+	}
+}
+
+
+
+void
+cthread::drop_fd(
+		int fd)
+{
+	AcquireReadWriteLock lock(tlock);
+	if (fds.find(fd) == fds.end()) {
+		struct epoll_event epev;
+		memset((uint8_t*)&epev, 0, sizeof(struct epoll_event));
+		epev.events = 0; // EPOLLET | EPOLLIN | EPOLLOUT
+		epev.data.fd = fd;
+		if (epoll_ctl(epfd, EPOLL_CTL_DEL, fd, &epev) < 0) {
+			switch (errno) {
+			case ENOENT: {
+				/* do nothing */
+			} break;
+			default: {
+				throw eSysCall("eSysCall", "epoll_ctl (EPOLL_CTL_DEL)", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+			};
+			}
+		}
+		fds.erase(fd);
+	}
+}
+
+
+
+void
 cthread::add_read_fd(
 		int fd, bool exception)
 {
+	add_fd(fd);
 	{
 		AcquireReadWriteLock lock(tlock);
 		rfds.insert(fd);
@@ -134,6 +199,7 @@ void
 cthread::add_write_fd(
 		int fd, bool exception)
 {
+	add_fd(fd);
 	{
 		AcquireReadWriteLock lock(tlock);
 		wfds.insert(fd);
@@ -164,11 +230,11 @@ cthread::update_fd(
 	uint32_t events = 0;
 
 	if (rfds.find(fd) != rfds.end()) {
-		events |= (/*EPOLLET | */EPOLLIN); // level-triggered
+		events |= (EPOLLET | EPOLLIN);
 	}
 
 	if (wfds.find(fd) != wfds.end()) {
-		events |= (/*EPOLLET | */EPOLLOUT); // level-triggered
+		events |= (EPOLLET | EPOLLOUT);
 	}
 
 	struct epoll_event epev;
@@ -176,35 +242,8 @@ cthread::update_fd(
 	epev.events = events;
 	epev.data.fd = fd;
 
-	if ((events & EPOLLIN) || (events & EPOLLOUT)) {
-		if (epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &epev) < 0) {
-			switch (errno) {
-			case EEXIST: {
-				/* fd already registered => modify */
-				if (epoll_ctl(epfd, EPOLL_CTL_MOD, fd, &epev) < 0) {
-					if (exception)
-						throw eSysCall("eSysCall", "epoll_ctl (EPOLL_CTL_MOD)", __FILE__, __PRETTY_FUNCTION__, __LINE__);
-				}
-			} break;
-			default: {
-				if (exception)
-					throw eSysCall("eSysCall", "epoll_ctl (EPOLL_CTL_ADD)", __FILE__, __PRETTY_FUNCTION__, __LINE__);
-			};
-			}
-		}
-
-	} else {
-		if (epoll_ctl(epfd, EPOLL_CTL_DEL, fd, &epev) < 0) {
-			switch (errno) {
-			case ENOENT: {
-				/* do nothing */
-			} break;
-			default: {
-				if (exception)
-					throw eSysCall("eSysCall", "epoll_ctl (EPOLL_CTL_DEL)", __FILE__, __PRETTY_FUNCTION__, __LINE__);
-			};
-			}
-		}
+	if (epoll_ctl(epfd, EPOLL_CTL_MOD, fd, &epev) < 0) {
+		throw eSysCall("eSysCall", "epoll_ctl (EPOLL_CTL_MOD)", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 
 	wakeup();

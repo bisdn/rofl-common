@@ -170,6 +170,20 @@ public:
 	wakeup();
 
 	/**
+	 * @brief	Register file descriptor
+	 */
+	void
+	add_fd(
+			int fd);
+
+	/**
+	 * @brief	Deregister file descriptor
+	 */
+	void
+	drop_fd(
+			int fd);
+
+	/**
 	 * @brief	Add file descriptor to set of observed fds
 	 */
 	void
@@ -345,6 +359,7 @@ private:
 
 	crwlock				tlock;		// thread lock
 
+	std::set<int>       fds;        // set of registered file descriptors
 	std::set<int>		rfds;		// set of file descriptors observed for reading
 	std::set<int>		wfds;		// set of file descriptors observed for writing
 
