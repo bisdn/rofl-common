@@ -46,9 +46,22 @@ cthread::initialize()
 		throw eSysCall("eSysCall", "pipe2", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 
-	add_read_fd(pipefd[PIPE_READ_FD]);
+	// register pipe read-fd to kernel
+	struct epoll_event epev;
+	memset((uint8_t*)&epev, 0, sizeof(struct epoll_event));
+	epev.events = EPOLLIN; // level-triggered
+	epev.data.fd = pipefd[PIPE_READ_FD];
 
-	//start_thread();
+	if (epoll_ctl(epfd, EPOLL_CTL_ADD, pipefd[PIPE_READ_FD], &epev) < 0) {
+		switch (errno) {
+		case EEXIST: {
+			/* do nothing */
+		} break;
+		default: {
+			throw eSysCall("eSysCall", "epoll_ctl (EPOLL_CTL_ADD)", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+		};
+		}
+	}
 }
 
 
@@ -60,7 +73,22 @@ cthread::release()
 
 	stop();
 
-	drop_read_fd(pipefd[PIPE_READ_FD]);
+	// deregister pipe read-fd from kernel
+	struct epoll_event epev;
+	memset((uint8_t*)&epev, 0, sizeof(struct epoll_event));
+	epev.events = 0;
+	epev.data.fd = pipefd[PIPE_READ_FD];
+
+	if (epoll_ctl(epfd, EPOLL_CTL_DEL, pipefd[PIPE_READ_FD], &epev) < 0) {
+		switch (errno) {
+		case ENOENT: {
+			/* do nothing */
+		} break;
+		default: {
+			throw eSysCall("eSysCall", "epoll_ctl (EPOLL_CTL_DEL)", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+		};
+		}
+	}
 
 	::close(epfd);
 

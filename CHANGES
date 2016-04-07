@@ -32,6 +32,8 @@ v0.10.6
     timeout was already -1 in CPPUNIT_ASSERT
 [K] TLS support broken
     crofsocktest: disabling TLS test
+[B] cthread: fix edge-triggered behaviour of epoll
+    pipe still uses level-triggered scheme
 
 v0.10.4
 
