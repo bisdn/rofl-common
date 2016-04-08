@@ -865,7 +865,7 @@ private:
 
 	virtual void
 	handle_listen(
-			crofsock& socket, int sd)
+			crofsock& socket)
 	{ /* not used */ };
 
 	virtual void

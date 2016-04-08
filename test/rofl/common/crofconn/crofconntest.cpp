@@ -127,26 +127,31 @@ crofconntest::test()
 
 void
 crofconntest::handle_listen(
-		rofl::crofsock& socket, int sd)
+		rofl::crofsock& socket)
 {
-	std::cerr << "crofconntest::handle_listen()" << std::endl;
 
-	switch (test_mode) {
-	case TEST_MODE_TCP: {
-		versionbitmap_ctl.add_ofp_version(rofl::openflow10::OFP_VERSION);
-		versionbitmap_ctl.add_ofp_version(rofl::openflow12::OFP_VERSION);
-		versionbitmap_ctl.add_ofp_version(rofl::openflow13::OFP_VERSION);
 
-		(sserver = new rofl::crofconn(this))->set_trace(trace);
-		sserver->set_journal().log_on_stderr(trace);
-		sserver->set_tcp_journal().log_on_stderr(trace);
-		sserver->set_trace(trace).
-				tcp_accept(sd, versionbitmap_ctl, rofl::crofconn::MODE_CONTROLLER);
+	for (auto sd : socket.accept()) {
 
-	} break;
-	default: {
+		std::cerr << "crofconntest::handle_listen() sd=" << sd << std::endl;
 
-	};
+		switch (test_mode) {
+		case TEST_MODE_TCP: {
+			versionbitmap_ctl.add_ofp_version(rofl::openflow10::OFP_VERSION);
+			versionbitmap_ctl.add_ofp_version(rofl::openflow12::OFP_VERSION);
+			versionbitmap_ctl.add_ofp_version(rofl::openflow13::OFP_VERSION);
+
+			(sserver = new rofl::crofconn(this))->set_trace(trace);
+			sserver->set_journal().log_on_stderr(trace);
+			sserver->set_tcp_journal().log_on_stderr(trace);
+			sserver->set_trace(trace).
+					tcp_accept(sd, versionbitmap_ctl, rofl::crofconn::MODE_CONTROLLER);
+
+		} break;
+		default: {
+
+		};
+		}
 	}
 }
 

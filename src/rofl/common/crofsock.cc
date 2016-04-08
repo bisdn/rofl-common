@@ -339,13 +339,43 @@ crofsock::listen()
 
 
 
+std::list<int>
+crofsock::accept()
+{
+	std::list<int> sockfds;
+
+	bool read_more = true;
+	while (read_more) {
+		int sockfd;
+
+		/* extract new connection from listening queue */
+		if ((sockfd = ::accept(this->sd, raddr.ca_saddr, &(raddr.salen))) < 0) {
+			switch (errno) {
+			case EAGAIN: {
+				read_more = false;
+			} break;
+			default: {
+				throw eSysCall("eSysCall", "accept", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+			};
+			}
+		} else {
+			sockfds.push_back(sockfd);
+		}
+	}
+
+	return sockfds;
+}
+
+
+
 void
 crofsock::tcp_accept(
-		int sockfd)
+		int sd)
 {
-	if (sd >= 0) {
+	if (this->sd >= 0) {
 		close();
 	}
+	this->sd = sd;
 
 	/* remove all pending messages from tx queues */
 	for (auto queue : txqueues) {
@@ -363,11 +393,6 @@ crofsock::tcp_accept(
 
 	/* new state */
 	state = STATE_TCP_ACCEPTING;
-
-	/* extract new connection from listening queue */
-	if ((sd = ::accept(sockfd, raddr.ca_saddr, &(raddr.salen))) < 0) {
-		throw eSysCall("eSysCall", "accept", __FILE__, __PRETTY_FUNCTION__, __LINE__);
-	}
 
 	journal.log(LOG_INFO, "STATE_TCP_ACCEPTING").set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
 
@@ -445,12 +470,10 @@ crofsock::tcp_accept(
 	journal.log(LOG_INFO, "STATE_TCP_ESTABLISHED").set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
 
 	if (flags.test(FLAG_TLS_IN_USE)) {
-		crofsock::tls_accept(sockfd);
+		crofsock::tls_accept(sd);
 	} else {
 		crofsock_env::call_env(env).handle_tcp_accepted(*this);
 	}
-
-	std::cerr << "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF sd=" << sd << std::endl;
 
 	/* instruct rxthread to read from socket descriptor */
 	rxthread.add_fd(sd);
@@ -1596,8 +1619,6 @@ void
 crofsock::handle_read_event_rxthread(
 		cthread& thread, int fd)
 {
-	journal.log(LOG_INFO, "crofsock::handle_read_event_rxthread() Punkt 1").set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
-
 	try {
 		switch (state) {
 		case STATE_LISTENING: {
@@ -1605,7 +1626,7 @@ crofsock::handle_read_event_rxthread(
 			journal.log(LOG_INFO, "STATE_LISTENING, new incoming connection on sd=%d", sd).
 					set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
 
-			crofsock_env::call_env(env).handle_listen(*this, sd);
+			crofsock_env::call_env(env).handle_listen(*this);
 
 		} break;
 		case STATE_TCP_CONNECTING: {
@@ -1645,15 +1666,12 @@ crofsock::handle_read_event_rxthread(
 					crofsock_env::call_env(env).handle_tcp_connected(*this);
 				}
 
-				journal.log(LOG_INFO, "crofsock::handle_read_event_rxthread() Punkt 2").set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
-
-				//recv_message();
 				rxthread.wakeup();
 
 			} break;
 			case EINPROGRESS: {
 				/* connect still pending, just wait */
-				journal.log(LOG_INFO, "TCP: EINPROGRESS [2]").set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
+				journal.log(LOG_INFO, "TCP: EINPROGRESS").set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
 			} break;
 			case ECONNREFUSED: {
 				journal.log(LOG_INFO, "TCP: ECONNREFUSED").set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
@@ -1731,20 +1749,14 @@ crofsock::handle_read_event_rxthread(
 void
 crofsock::recv_message()
 {
-	journal.log(LOG_INFO, "crofsock::recv_message()").set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
-
 	while (not rx_disabled) {
 
-		journal.log(LOG_INFO, "crofsock::recv_message() Punkt 1").set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
-
 		if ((state <= STATE_CLOSED)) {
-			journal.log(LOG_TRACE, "crofsock::recv_message() EEEEEEEEEEEEEEEEEEEE MIST 2").
+			journal.log(LOG_TRACE, "crofsock::recv_message() ignoring message").
 					set_key("laddr", laddr.str()).set_key("raddr", raddr.str()).
 					set_key("state", state);
 			return;
 		}
-
-		journal.log(LOG_INFO, "crofsock::recv_message() Punkt 2").set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
 
 		if (not rx_fragment_pending) {
 			msg_bytes_read = 0;

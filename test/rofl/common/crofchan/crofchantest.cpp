@@ -159,28 +159,12 @@ crofchantest::test1()
 
 void
 crofchantest::handle_listen(
-		rofl::crofsock& socket, int sd)
+		rofl::crofsock& socket)
 {
 	num_of_accepts++;
 	std::cerr << "num_of_accepts = " << num_of_accepts << std::endl;
 
-
-	while (true) {
-		rofl::csockaddr raddr;
-		int newsd = 0;
-		if ((newsd = ::accept(sd, raddr.ca_saddr, &(raddr.salen))) < 0) {
-			switch (errno) {
-			case EAGAIN: {
-				/* do nothing */
-				std::cerr << "GGGGGGGGGGGGGGGGGGGGGGGGGGGG EAGAIN" << std::endl;
-			} break;
-			default: {
-				throw rofl::eSysCall("eSysCall", "accept", __FILE__, __PRETTY_FUNCTION__, __LINE__);
-			};
-			}
-		}
-		std::cerr << "GGGGGGGGGGGGGGGGGGGGGGGGGGGG newsd=" << newsd << std::endl;
-
+	for (auto sd : socket.accept()) {
 		rofl::crofconn* conn = new rofl::crofconn(this);
 		{
 			rofl::AcquireReadWriteLock lock(plock);

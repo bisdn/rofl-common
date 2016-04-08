@@ -213,7 +213,7 @@ private:
 
 	virtual void
 	handle_listen(
-			rofl::crofsock& socket, int sd);
+			rofl::crofsock& socket);
 
 	virtual void
 	handle_tcp_connect_refused(

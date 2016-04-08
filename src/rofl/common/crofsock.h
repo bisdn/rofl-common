@@ -29,6 +29,7 @@
 #include <strings.h>
 #include <map>
 #include <set>
+#include <list>
 #include <deque>
 #include <bitset>
 #include <iostream>
@@ -201,7 +202,7 @@ protected:
 
 	virtual void
 	handle_listen(
-			crofsock& socket, int sd) = 0;
+			crofsock& socket) = 0;
 
 	virtual void
 	handle_tcp_connect_refused(
@@ -357,6 +358,9 @@ public:
 	 */
 	virtual void
 	listen();
+
+	std::list<int>
+	accept();
 
 	/**
 	 *

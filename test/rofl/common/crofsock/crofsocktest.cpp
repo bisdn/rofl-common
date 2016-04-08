@@ -174,28 +174,33 @@ crofsocktest::test_tls()
 
 void
 crofsocktest::handle_listen(
-		rofl::crofsock& socket, int sd)
+		rofl::crofsock& socket)
 {
-	std::cerr << "handle listen" << std::endl;
+	std::cerr << "crofsocktest::handle_listen()" << std::endl;
 
-	sserver = new rofl::crofsock(this);
+	for (auto sd : socket.accept()) {
 
-	sserver->set_journal().log_on_stderr(true);
+		std::cerr << "crofsocktest::handle_listen() sd=" << sd << std::endl;
 
-	switch (test_mode) {
-	case TEST_MODE_TCP: {
-		sserver->tcp_accept(sd);
+		sserver = new rofl::crofsock(this);
 
-	} break;
-	case TEST_MODE_TLS: {
-		sserver->set_tls_cafile("../../../../../tools/xca/ca.rofl-core.crt.pem").
-					set_tls_certfile("../../../../../tools/xca/server.crt.pem").
-					set_tls_keyfile("../../../../../tools/xca/server.key.pem").
-						tls_accept(sd);
-	} break;
-	default: {
+		sserver->set_journal().log_on_stderr(true);
 
-	};
+		switch (test_mode) {
+		case TEST_MODE_TCP: {
+			sserver->tcp_accept(sd);
+
+		} break;
+		case TEST_MODE_TLS: {
+			sserver->set_tls_cafile("../../../../../tools/xca/ca.rofl-core.crt.pem").
+						set_tls_certfile("../../../../../tools/xca/server.crt.pem").
+						set_tls_keyfile("../../../../../tools/xca/server.key.pem").
+							tls_accept(sd);
+		} break;
+		default: {
+
+		};
+		}
 	}
 }
 
