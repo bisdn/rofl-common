@@ -169,7 +169,8 @@ crofconn::handle_timeout(
 	} break;
 	default: {
 		journal.log(LOG_RUNTIME_ERROR, "crofconn::handle_timeout() unknown timer type: %d", (unsigned int)timer_id).
-				set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+				set_func(__PRETTY_FUNCTION__).set_line(__LINE__).
+				set_key("laddr", rofsock.get_laddr().str()).set_key("raddr", rofsock.get_raddr().str());
 	};
 	}
 }
@@ -184,21 +185,24 @@ crofconn::set_state(
 		switch (state = new_state) {
 		case STATE_NEGOTIATION_FAILED: {
 			journal.log(LOG_INFO, "STATE_NEGOTIATION_FAILED").
-					set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+					set_func(__PRETTY_FUNCTION__).set_line(__LINE__).
+					set_key("laddr", rofsock.get_laddr().str()).set_key("raddr", rofsock.get_raddr().str());
 			set_state(STATE_CLOSING);
 			crofconn_env::call_env(env).handle_negotiation_failed(*this);
 
 		} break;
 		case STATE_CLOSING: {
 			journal.log(LOG_INFO, "STATE_CLOSING").
-					set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+					set_func(__PRETTY_FUNCTION__).set_line(__LINE__).
+					set_key("laddr", rofsock.get_laddr().str()).set_key("raddr", rofsock.get_raddr().str());
 			rofsock.close();
 			set_state(STATE_DISCONNECTED);
 
 		} break;
 		case STATE_DISCONNECTED: {
 			journal.log(LOG_INFO, "STATE_DISCONNECTED").
-					set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+					set_func(__PRETTY_FUNCTION__).set_line(__LINE__).
+					set_key("laddr", rofsock.get_laddr().str()).set_key("raddr", rofsock.get_raddr().str());
 
 			/* stop periodic checks for connection state (OAM) */
 			thread.drop_timer(TIMER_ID_NEED_LIFE_CHECK);
@@ -214,7 +218,8 @@ crofconn::set_state(
 		} break;
 		case STATE_CONNECT_PENDING: {
 			journal.log(LOG_INFO, "STATE_CONNECT_PENDING").
-					set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+					set_func(__PRETTY_FUNCTION__).set_line(__LINE__).
+					set_key("laddr", rofsock.get_laddr().str()).set_key("raddr", rofsock.get_raddr().str());
 			versionbitmap_peer.clear();
 			set_version(rofl::openflow::OFP_VERSION_UNKNOWN);
 
@@ -225,7 +230,8 @@ crofconn::set_state(
 		} break;
 		case STATE_ACCEPT_PENDING: {
 			journal.log(LOG_INFO, "STATE_ACCEPT_PENDING").
-					set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+					set_func(__PRETTY_FUNCTION__).set_line(__LINE__).
+					set_key("laddr", rofsock.get_laddr().str()).set_key("raddr", rofsock.get_raddr().str());
 			versionbitmap_peer.clear();
 			set_version(rofl::openflow::OFP_VERSION_UNKNOWN);
 
@@ -237,7 +243,8 @@ crofconn::set_state(
 		case STATE_NEGOTIATING: {
 			journal.log(LOG_INFO, "STATE_NEGOTIATING").
 					set_func(__PRETTY_FUNCTION__).set_line(__LINE__).
-						set_key("offered versions", versionbitmap.str());
+						set_key("offered versions", versionbitmap.str()).
+						set_key("laddr", rofsock.get_laddr().str()).set_key("raddr", rofsock.get_raddr().str());
 			if (not flag_hello_rcvd) {
 				thread.add_timer(TIMER_ID_WAIT_FOR_HELLO, ctimespec().expire_in(timeout_hello));
 			}
@@ -249,7 +256,8 @@ crofconn::set_state(
 		case STATE_NEGOTIATING2: {
 			journal.log(LOG_INFO, "STATE_NEGOTIATING2").
 					set_func(__PRETTY_FUNCTION__).set_line(__LINE__).
-						set_key("peer versions", versionbitmap_peer.str());
+						set_key("peer versions", versionbitmap_peer.str()).
+						set_key("laddr", rofsock.get_laddr().str()).set_key("raddr", rofsock.get_raddr().str());
 			thread.drop_timer(TIMER_ID_WAIT_FOR_HELLO);
 			send_features_request();
 
@@ -257,7 +265,8 @@ crofconn::set_state(
 		case STATE_ESTABLISHED: {
 			journal.log(LOG_INFO, "STATE_ESTABLISHED").
 					set_func(__PRETTY_FUNCTION__).set_line(__LINE__).
-						set_key("negotiated version", (int)ofp_version);
+						set_key("negotiated version", (int)ofp_version).
+						set_key("laddr", rofsock.get_laddr().str()).set_key("raddr", rofsock.get_raddr().str());
 			thread.drop_timer(TIMER_ID_WAIT_FOR_HELLO);
 			/* start periodic checks for connection state (OAM) */
 			thread.add_timer(TIMER_ID_NEED_LIFE_CHECK, ctimespec().expire_in(timeout_lifecheck));
@@ -282,7 +291,8 @@ crofconn::error_rcvd(
 
 	if (nullptr == msg) {
 		journal.log(LOG_CRIT_ERROR, "msg is not of type cofmsg_error").
-				set_func(__PRETTY_FUNCTION__);
+				set_func(__PRETTY_FUNCTION__).
+				set_key("laddr", rofsock.get_laddr().str()).set_key("raddr", rofsock.get_raddr().str());
 		return;
 	}
 
@@ -299,15 +309,18 @@ crofconn::error_rcvd(
 				switch (msg->get_err_code()) {
 				case rofl::openflow13::OFPHFC_INCOMPATIBLE: {
 					journal.log(LOG_RUNTIME_ERROR, "HELLO-INCOMPATIBLE.error rcvd in state NEGOTIATING, closing connection").
-							set_func(__PRETTY_FUNCTION__);
+							set_func(__PRETTY_FUNCTION__).
+							set_key("laddr", rofsock.get_laddr().str()).set_key("raddr", rofsock.get_raddr().str());
 				} break;
 				case rofl::openflow13::OFPHFC_EPERM: {
 					journal.log(LOG_RUNTIME_ERROR, "HELLO-EPERM.error rcvd in state NEGOTIATING, closing connection").
-							set_func(__PRETTY_FUNCTION__);
+							set_func(__PRETTY_FUNCTION__).
+							set_key("laddr", rofsock.get_laddr().str()).set_key("raddr", rofsock.get_raddr().str());
 				} break;
 				default: {
 					journal.log(LOG_RUNTIME_ERROR, "HELLO.error rcvd in state NEGOTIATING, closing connection").
-							set_func(__PRETTY_FUNCTION__);
+							set_func(__PRETTY_FUNCTION__).
+							set_key("laddr", rofsock.get_laddr().str()).set_key("raddr", rofsock.get_raddr().str());
 				};
 				}
 
@@ -326,7 +339,8 @@ crofconn::error_rcvd(
 			case rofl::openflow13::OFPET_BAD_REQUEST: {
 
 				journal.log(LOG_RUNTIME_ERROR, "BAD-REQUEST.error rcvd in state NEGOTIATING2, closing connection").
-						set_func(__PRETTY_FUNCTION__);
+						set_func(__PRETTY_FUNCTION__).
+						set_key("laddr", rofsock.get_laddr().str()).set_key("raddr", rofsock.get_raddr().str());
 
 				set_state(STATE_NEGOTIATION_FAILED);
 
@@ -344,7 +358,8 @@ crofconn::error_rcvd(
 
 	} catch (std::runtime_error& e) {
 
-		journal.log(LOG_RUNTIME_ERROR, "runtime error: %s", e.what()).set_caller(__PRETTY_FUNCTION__);
+		journal.log(LOG_RUNTIME_ERROR, "runtime error: %s", e.what()).set_caller(__PRETTY_FUNCTION__).
+				set_key("laddr", rofsock.get_laddr().str()).set_key("raddr", rofsock.get_raddr().str());
 	}
 
 	delete msg;
@@ -370,7 +385,8 @@ crofconn::send_hello_message()
 						++xid_hello_last,
 						helloIEs);
 		if (trace) {
-			journal.log(LOG_TRACE, "state: %d message sent: %s", state, msg->str().c_str());
+			journal.log(LOG_TRACE, "state: %d message sent: %s", state, msg->str().c_str()).
+					set_key("laddr", rofsock.get_laddr().str()).set_key("raddr", rofsock.get_raddr().str());
 		}
 
 		rofsock.send_message(msg);
@@ -391,7 +407,8 @@ crofconn::hello_rcvd(
 
 	if (nullptr == msg) {
 		journal.log(LOG_CRIT_ERROR, "msg is not of type cofmsg_hello").
-				set_func(__PRETTY_FUNCTION__);
+				set_func(__PRETTY_FUNCTION__).
+				set_key("laddr", rofsock.get_laddr().str()).set_key("raddr", rofsock.get_raddr().str());
 		return;
 	}
 
@@ -422,7 +439,8 @@ crofconn::hello_rcvd(
 
 			if (not helloIEs.has_hello_elem_versionbitmap()) {
 				journal.log(LOG_CRIT_ERROR, "HELLO message rcvd without HelloIE -VersionBitmap-").
-							set_func(__PRETTY_FUNCTION__);
+							set_func(__PRETTY_FUNCTION__).
+							set_key("laddr", rofsock.get_laddr().str()).set_key("raddr", rofsock.get_raddr().str());
 				versionbitmap_peer.add_ofp_version(msg->get_version());
 
 			} else {
@@ -431,7 +449,8 @@ crofconn::hello_rcvd(
 				if (not versionbitmap_peer.has_ofp_version(msg->get_version())) {
 					journal.log(LOG_CRIT_ERROR, "malformed HelloIE -VersionBitmap- => "
 							"does not contain version defined in OFP message header: %d", (int)msg->get_version()).
-									set_func(__PRETTY_FUNCTION__);
+									set_func(__PRETTY_FUNCTION__).
+									set_key("laddr", rofsock.get_laddr().str()).set_key("raddr", rofsock.get_raddr().str());
 				}
 			}
 		};
@@ -449,7 +468,8 @@ crofconn::hello_rcvd(
 		/* move on finite state machine */
 		if (ofp_version == rofl::openflow::OFP_VERSION_UNKNOWN) {
 			journal.log(LOG_NOTICE, "no common OFP version supported, closing connection").
-					set_func(__PRETTY_FUNCTION__);
+					set_func(__PRETTY_FUNCTION__).
+					set_key("laddr", rofsock.get_laddr().str()).set_key("raddr", rofsock.get_raddr().str());
 			set_state(STATE_DISCONNECTED);
 
 		} else {
@@ -471,7 +491,8 @@ crofconn::hello_rcvd(
 			} break;
 			default: {
 				journal.log(LOG_CRIT_ERROR, "unable to handle undefined mode").
-						set_func(__PRETTY_FUNCTION__);
+						set_func(__PRETTY_FUNCTION__).
+						set_key("laddr", rofsock.get_laddr().str()).set_key("raddr", rofsock.get_raddr().str());
 				set_state(STATE_CLOSING);
 			} return;
 			}
@@ -480,7 +501,8 @@ crofconn::hello_rcvd(
 	} catch (eHelloIncompatible& e) {
 
 		journal.log(LOG_NOTICE, "sending -HelloIncompatible- error message to peer").
-				set_func(__PRETTY_FUNCTION__);
+				set_func(__PRETTY_FUNCTION__).
+				set_key("laddr", rofsock.get_laddr().str()).set_key("raddr", rofsock.get_raddr().str());
 
 		size_t len = (msg->length() < 64) ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
@@ -497,7 +519,8 @@ crofconn::hello_rcvd(
 	} catch (eHelloEperm& e) {
 
 		journal.log(LOG_NOTICE, "sending -HelloEperm- error message to peer").
-				set_func(__PRETTY_FUNCTION__);
+				set_func(__PRETTY_FUNCTION__).
+				set_key("laddr", rofsock.get_laddr().str()).set_key("raddr", rofsock.get_raddr().str());
 
 		size_t len = (msg->length() < 64) ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
@@ -514,7 +537,8 @@ crofconn::hello_rcvd(
 	} catch (std::runtime_error& e) {
 
 		journal.log(LOG_NOTICE, "sending -HelloIncompatible- error message to peer").
-				set_func(__PRETTY_FUNCTION__);
+				set_func(__PRETTY_FUNCTION__).
+				set_key("laddr", rofsock.get_laddr().str()).set_key("raddr", rofsock.get_raddr().str());
 
 		size_t len = (msg->length() < 64) ? msg->length() : 64;
 		rofl::cmemory mem(msg->length());
@@ -539,18 +563,21 @@ crofconn::hello_expired()
 {
 	journal.log(LOG_CRIT_ERROR, "HELLO expired state=%d", state).
 			set_func(__PRETTY_FUNCTION__).
-				set_key("state", state);
+				set_key("state", state).
+				set_key("laddr", rofsock.get_laddr().str()).set_key("raddr", rofsock.get_raddr().str());
 
 	switch (state) {
 	case STATE_ESTABLISHED: {
 		/* ignore event */
 		journal.log(LOG_CRIT_ERROR, "HELLO expired, ignoring event, already established").
-				set_func(__PRETTY_FUNCTION__);
+				set_func(__PRETTY_FUNCTION__).
+				set_key("laddr", rofsock.get_laddr().str()).set_key("raddr", rofsock.get_raddr().str());
 	} break;
 	default: {
 		if (flag_hello_rcvd) {
 			journal.log(LOG_CRIT_ERROR, "HELLO expired, ignoring event, HELLO from peer received").
-					set_func(__PRETTY_FUNCTION__);
+					set_func(__PRETTY_FUNCTION__).
+					set_key("laddr", rofsock.get_laddr().str()).set_key("raddr", rofsock.get_raddr().str());
 			return;
 		}
 		set_state(STATE_NEGOTIATION_FAILED);
@@ -572,7 +599,8 @@ crofconn::send_features_request()
 						++xid_features_request_last);
 
 		if (trace) {
-			journal.log(LOG_TRACE, "state: %d message sent: %s", state, msg->str().c_str());
+			journal.log(LOG_TRACE, "state: %d message sent: %s", state, msg->str().c_str()).
+					set_key("laddr", rofsock.get_laddr().str()).set_key("raddr", rofsock.get_raddr().str());
 		}
 
 		rofsock.send_message(msg);
@@ -593,7 +621,8 @@ crofconn::features_reply_rcvd(
 
 	if (nullptr == msg) {
 		journal.log(LOG_CRIT_ERROR, "msg is not of type cofmsg_features_reply").
-				set_func(__PRETTY_FUNCTION__);
+				set_func(__PRETTY_FUNCTION__).
+				set_key("laddr", rofsock.get_laddr().str()).set_key("raddr", rofsock.get_raddr().str());
 		return;
 	}
 
@@ -611,7 +640,8 @@ crofconn::features_reply_rcvd(
 		set_state(STATE_ESTABLISHED);
 
 	} catch (std::runtime_error& e) {
-		journal.log(LOG_RUNTIME_ERROR, "runtime error: %s", e.what()).set_caller(__PRETTY_FUNCTION__);
+		journal.log(LOG_RUNTIME_ERROR, "runtime error: %s", e.what()).set_caller(__PRETTY_FUNCTION__).
+				set_key("laddr", rofsock.get_laddr().str()).set_key("raddr", rofsock.get_raddr().str());
 	}
 
 	delete msg;
@@ -623,7 +653,8 @@ void
 crofconn::features_request_expired()
 {
 	journal.log(LOG_CRIT_ERROR, "Features Request expired").
-			set_func(__PRETTY_FUNCTION__);
+			set_func(__PRETTY_FUNCTION__).
+			set_key("laddr", rofsock.get_laddr().str()).set_key("raddr", rofsock.get_raddr().str());
 
 	set_state(STATE_NEGOTIATION_FAILED);
 }
@@ -642,13 +673,15 @@ crofconn::send_echo_request()
 						++xid_echo_request_last);
 
 		if (trace) {
-			journal.log(LOG_TRACE, "state: %d message sent: %s", state, msg->str().c_str());
+			journal.log(LOG_TRACE, "state: %d message sent: %s", state, msg->str().c_str()).
+					set_key("laddr", rofsock.get_laddr().str()).set_key("raddr", rofsock.get_raddr().str());
 		}
 
 		rofsock.send_message(msg);
 
 	} catch (rofl::exception& e) {
-		journal.log(e).set_caller(__PRETTY_FUNCTION__);
+		journal.log(e).set_caller(__PRETTY_FUNCTION__).
+				set_key("laddr", rofsock.get_laddr().str()).set_key("raddr", rofsock.get_raddr().str());
 	}
 }
 
@@ -670,7 +703,8 @@ crofconn::echo_reply_rcvd(
 		thread.add_timer(TIMER_ID_NEED_LIFE_CHECK, ctimespec().expire_in(timeout_lifecheck));
 
 	} catch (std::runtime_error& e) {
-		journal.log(LOG_RUNTIME_ERROR, "runtime error: %s", e.what()).set_caller(__PRETTY_FUNCTION__);
+		journal.log(LOG_RUNTIME_ERROR, "runtime error: %s", e.what()).set_caller(__PRETTY_FUNCTION__).
+				set_key("laddr", rofsock.get_laddr().str()).set_key("raddr", rofsock.get_raddr().str());
 	}
 }
 
@@ -680,7 +714,8 @@ void
 crofconn::echo_request_expired()
 {
 	journal.log(LOG_CRIT_ERROR, "Echo Request expired").
-			set_func(__PRETTY_FUNCTION__);
+			set_func(__PRETTY_FUNCTION__).
+			set_key("laddr", rofsock.get_laddr().str()).set_key("raddr", rofsock.get_raddr().str());
 
 	set_state(STATE_CLOSING);
 }
@@ -695,7 +730,8 @@ crofconn::echo_request_rcvd(
 
 	if (nullptr == msg) {
 		journal.log(LOG_CRIT_ERROR, "msg is not of type cofmsg_echo_request").
-				set_func(__PRETTY_FUNCTION__);
+				set_func(__PRETTY_FUNCTION__).
+				set_key("laddr", rofsock.get_laddr().str()).set_key("raddr", rofsock.get_raddr().str());
 		return;
 	}
 
@@ -706,13 +742,15 @@ crofconn::echo_request_rcvd(
 						msg->get_body().somem(), msg->get_body().memlen());
 
 		if (trace) {
-			journal.log(LOG_TRACE, "state: %d message sent: %s", state, reply->str().c_str());
+			journal.log(LOG_TRACE, "state: %d message sent: %s", state, reply->str().c_str()).
+					set_key("laddr", rofsock.get_laddr().str()).set_key("raddr", rofsock.get_raddr().str());
 		}
 
 		rofsock.send_message(reply);
 
 	} catch (std::runtime_error& e) {
-		journal.log(LOG_RUNTIME_ERROR, "runtime error: %s", e.what()).set_caller(__PRETTY_FUNCTION__);
+		journal.log(LOG_RUNTIME_ERROR, "runtime error: %s", e.what()).set_caller(__PRETTY_FUNCTION__).
+				set_key("laddr", rofsock.get_laddr().str()).set_key("raddr", rofsock.get_raddr().str());
 	}
 
 	delete msg;

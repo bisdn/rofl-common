@@ -76,11 +76,12 @@ crofchantest::test1()
 
 
 	for (unsigned int i = 0; i < num_of_conns; i++) {
+	//for (unsigned int i = 0; i < 1; i++) {
 		rofl::crofconn& conn = channel1->add_conn(rofl::cauxid(i));
 
 		conn.set_trace(trace);
-		conn.set_journal().log_on_stderr(true);
-		conn.set_tcp_journal().log_on_stderr(true);
+		conn.set_journal().log_on_stderr(false);
+		conn.set_tcp_journal().log_on_stderr(false);
 
 		conn.set_raddr(baddr).
 				  tcp_connect(versionbitmap, rofl::crofconn::MODE_DATAPATH, false);
@@ -129,7 +130,6 @@ crofchantest::test1()
 		std::cerr << conn.get_tcp_journal() << std::endl;
 	}
 
-
 	for (auto auxid : channel2->keys()) {
 		if (not channel2->has_conn(auxid)) {
 			continue;
@@ -164,8 +164,31 @@ crofchantest::handle_listen(
 	num_of_accepts++;
 	std::cerr << "num_of_accepts = " << num_of_accepts << std::endl;
 
-	rofl::crofconn* conn = new rofl::crofconn(this);
-	conn->set_trace(true).tcp_accept(sd, versionbitmap, rofl::crofconn::MODE_CONTROLLER);
+
+	while (true) {
+		rofl::csockaddr raddr;
+		int newsd = 0;
+		if ((newsd = ::accept(sd, raddr.ca_saddr, &(raddr.salen))) < 0) {
+			switch (errno) {
+			case EAGAIN: {
+				/* do nothing */
+				std::cerr << "GGGGGGGGGGGGGGGGGGGGGGGGGGGG EAGAIN" << std::endl;
+			} break;
+			default: {
+				throw rofl::eSysCall("eSysCall", "accept", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+			};
+			}
+		}
+		std::cerr << "GGGGGGGGGGGGGGGGGGGGGGGGGGGG newsd=" << newsd << std::endl;
+
+		rofl::crofconn* conn = new rofl::crofconn(this);
+		{
+			rofl::AcquireReadWriteLock lock(plock);
+			pending_conns.insert(conn);
+			std::cerr << "crofchantest::handle_listen() pending_conns: " << pending_conns.size() << std::endl;
+		}
+		conn->set_trace(true).tcp_accept(sd, versionbitmap, rofl::crofconn::MODE_CONTROLLER);
+	}
 }
 
 
@@ -174,14 +197,20 @@ void
 crofchantest::handle_established(
 		rofl::crofconn& conn, uint8_t ofp_version)
 {
+	{
+		rofl::AcquireReadWriteLock lock(plock);
+		pending_conns.erase(&conn);
+		std::cerr << "crofchantest::handle_established() pending_conns: " << pending_conns.size() << std::endl;
+	}
+
 	channel2->add_conn(&conn);
 	conn.set_trace(trace);
 	conn.set_journal().log_on_stderr(false);
 	conn.set_tcp_journal().log_on_stderr(false);
 
-	//std::cerr << ">>>>>>>>>>>>> server(" << (int)conn.get_auxid().get_id() << ") <<<<<<<<<<<<<<" << std::endl;
-	//std::cerr << conn.get_journal() << std::endl;
-	//std::cerr << conn.get_tcp_journal() << std::endl;
+	std::cerr << ">>>>>>>>>>>>> server(" << (int)conn.get_auxid().get_id() << ") <<<<<<<<<<<<<<" << std::endl;
+	std::cerr << conn.get_journal() << std::endl;
+	std::cerr << conn.get_tcp_journal() << std::endl;
 
 	std::cerr << ">>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<" << std::endl;
 	std::cerr << ">>> crofchantest::handle_established() -conn-" << std::endl;
@@ -192,6 +221,24 @@ crofchantest::handle_established(
 
 	num_of_ctl_established++;
 	std::cerr << "num_of_ctl_established = " << num_of_ctl_established << std::endl;
+#if 0
+	if (num_of_ctl_established < num_of_conns) {
+		int i = num_of_conns - num_of_ctl_established;
+		rofl::crofconn& conn = channel1->add_conn(rofl::cauxid(i));
+
+		conn.set_trace(trace);
+		conn.set_journal().log_on_stderr(false);
+		conn.set_tcp_journal().log_on_stderr(false);
+
+		conn.set_raddr(baddr).
+				  tcp_connect(versionbitmap, rofl::crofconn::MODE_DATAPATH, false);
+
+		num_of_dpt_established++;
+
+		std::cerr << "auxid(" << i << "): connecting to " << baddr.str() << std::endl;
+		//sleep(1);
+	}
+#endif
 }
 
 

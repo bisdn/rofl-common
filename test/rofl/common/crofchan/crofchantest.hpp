@@ -8,6 +8,7 @@
 #ifndef TEST_SRC_ROFL_COMMON_OPENFLOW_MESSAGES_COFMSGAGGRSTATS_TEST_HPP_
 #define TEST_SRC_ROFL_COMMON_OPENFLOW_MESSAGES_COFMSGAGGRSTATS_TEST_HPP_
 
+#include <set>
 #include <atomic>
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
@@ -53,6 +54,9 @@ private:
 	rofl::crofchan*     channel2;
 	rofl::crwlock		rwlock;
 
+	rofl::crwlock       plock;
+	std::set<rofl::crofconn*> pending_conns;
+
 private:
 
 	virtual void
@@ -93,10 +97,18 @@ private:
 	handle_negotiation_failed(
 			rofl::crofchan& chan, rofl::crofconn& conn)
 	{
-		std::cerr << "crofchan::handle_negotiation_failed" << std::endl;
+		std::cerr << "crofchan::handle_negotiation_failed: pending_conns: " << pending_conns.size() << std::endl;
 		std::cerr << ">>>>>>>>>>>>> auxid=" << (int)conn.get_auxid().get_id() << " <<<<<<<<<<<<<<" << std::endl;
 		std::cerr << conn.get_journal() << std::endl;
 		std::cerr << conn.get_tcp_journal() << std::endl;
+
+		rofl::AcquireReadWriteLock lock(plock);
+		for (auto conn : pending_conns) {
+			std::cerr << ">>>>>>>>>>>>> pending crofconn <<<<<<<<<<<<<<" << std::endl;
+			std::cerr << conn->get_journal() << std::endl;
+			std::cerr << conn->get_tcp_journal() << std::endl;
+		}
+
 		CPPUNIT_ASSERT(false);
 	};
 
