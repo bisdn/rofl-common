@@ -569,7 +569,7 @@ crofsock::tcp_connect(
 		/* connect did not succeed, handle error */
 		switch (errno) {
 		case EINPROGRESS: {
-			journal.log(LOG_INFO, "TCP: EINPROGRESS [1]");
+			journal.log(LOG_INFO, "TCP: EINPROGRESS");
 			/* register socket descriptor for write operations */
 			rxthread.add_write_fd(sd);
 		} break;
@@ -1428,17 +1428,9 @@ crofsock::handle_wakeup(
 		cthread& thread)
 {
 	if (&thread == &rxthread) {
-		if (trace) {
-			journal.log(LOG_TRACE, "crofsock::handle_wakeup() rxthread").
-					set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
-		}
 		recv_message();
 	} else
 	if (&thread == &txthread) {
-		if (trace) {
-			journal.log(LOG_TRACE, "crofsock::handle_wakeup() txthread").
-					set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
-		}
 		send_from_queue();
 	}
 }
@@ -1454,22 +1446,12 @@ crofsock::handle_write_event(
 	}
 
  	if (&thread == &txthread) {
-		if (trace) {
-			journal.log(LOG_TRACE, "crofsock::handle_write_event() txthread").
-					set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
-		}
-
 		assert(fd == sd);
 		flags.reset(FLAG_CONGESTED);
 		txthread.drop_write_fd(sd);
 		send_from_queue();
 	} else
 	if (&thread == &rxthread) {
-		if (trace) {
-			journal.log(LOG_TRACE, "crofsock::handle_write_event() rxthread").
-					set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
-		}
-
 		assert(fd == sd);
 		handle_read_event_rxthread(thread, fd);
 	}
@@ -1481,11 +1463,12 @@ void
 crofsock::send_from_queue()
 {
 	if (state <= STATE_CLOSED) {
-		journal.log(LOG_TRACE, "crofsock::send_from_queue() EEEEEEEEEEEEEEEEEEEE MIST 1").
-				set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
+		if (trace) {
+			journal.log(LOG_TRACE, "crofsock::send_from_queue() dropping message, no connection established").
+					set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
+		}
 		return;
 	}
-
 
 	tx_is_running = true;
 
@@ -1604,11 +1587,6 @@ crofsock::handle_read_event(
 		cthread& thread, int fd)
 {
 	if (&thread == &rxthread) {
-		if (trace) {
-			journal.log(LOG_TRACE, "crofsock::handle_read_event() rxthread").
-					set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
-		}
-
 		handle_read_event_rxthread(thread, fd);
 	}
 }
@@ -1623,7 +1601,7 @@ crofsock::handle_read_event_rxthread(
 		switch (state) {
 		case STATE_LISTENING: {
 
-			journal.log(LOG_INFO, "STATE_LISTENING, new incoming connection on sd=%d", sd).
+			journal.log(LOG_INFO, "STATE_LISTENING, new incoming connection(s) on sd=%d", sd).
 					set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
 
 			crofsock_env::call_env(env).handle_listen(*this);
@@ -1752,9 +1730,11 @@ crofsock::recv_message()
 	while (not rx_disabled) {
 
 		if ((state <= STATE_CLOSED)) {
-			journal.log(LOG_TRACE, "crofsock::recv_message() ignoring message").
-					set_key("laddr", laddr.str()).set_key("raddr", raddr.str()).
-					set_key("state", state);
+			if (trace) {
+				journal.log(LOG_TRACE, "crofsock::recv_message() ignoring message").
+						set_key("laddr", laddr.str()).set_key("raddr", raddr.str()).
+						set_key("state", state);
+			}
 			return;
 		}
 
@@ -1772,8 +1752,6 @@ crofsock::recv_message()
 			msg_len = be16toh(header->length);
 		}
 
-		journal.log(LOG_INFO, "crofsock::recv_message() Punkt 3").set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
-
 		/* sanity check: 8 <= msg_len <= 2^16 */
 		if (msg_len < sizeof(struct openflow::ofp_header)) {
 			/* out-of-sync => enforce reconnect in client mode */
@@ -1781,18 +1759,13 @@ crofsock::recv_message()
 			goto on_error;
 		}
 
-		journal.log(LOG_INFO, "crofsock::recv_message() Punkt 4").set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
-
 		/* read from socket more bytes, at most "msg_len - msg_bytes_read" */
 		int rc = ::recv(sd, (void*)(rxbuffer.somem() + msg_bytes_read), msg_len - msg_bytes_read, MSG_DONTWAIT);
-
-		journal.log(LOG_INFO, "crofsock::recv_message() Punkt 5").set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
 
 		if (rc < 0) {
 			switch (errno) {
 			case EAGAIN: {
 				/* do not continue and let kernel inform us, once more data is available */
-				journal.log(LOG_INFO, "crofsock::recv_message() Punkt 5.1").set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
 				return;
 			} break;
 			default: {
@@ -1812,8 +1785,6 @@ crofsock::recv_message()
 			goto on_error;
 		}
 
-		journal.log(LOG_INFO, "crofsock::recv_message() Punkt 6").set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
-
 		msg_bytes_read += rc;
 
 		/* minimum message length received, check completeness of message */
@@ -1824,15 +1795,12 @@ crofsock::recv_message()
 
 			/* ok, message was received completely */
 			if (msg_len == msg_bytes_read) {
-				journal.log(LOG_INFO, "crofsock::recv_message() Punkt 6.1").set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
 				rx_fragment_pending = false;
 				parse_message();
 				msg_bytes_read = 0;
 			} else {
-				journal.log(LOG_INFO, "crofsock::recv_message() Punkt 6.2").set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
 				rx_fragment_pending = true;
 			}
-			journal.log(LOG_INFO, "crofsock::recv_message() Punkt 7").set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
 		}
 	}
 
