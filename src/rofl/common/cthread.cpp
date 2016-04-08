@@ -202,8 +202,6 @@ cthread::add_read_fd(
 		};
 		}
 	}
-
-	wakeup();
 }
 
 
@@ -234,8 +232,6 @@ cthread::drop_read_fd(
 		};
 		}
 	}
-
-	wakeup();
 }
 
 
@@ -266,8 +262,6 @@ cthread::add_write_fd(
 		};
 		}
 	}
-
-	wakeup();
 }
 
 
@@ -298,8 +292,6 @@ cthread::drop_write_fd(
 		};
 		}
 	}
-
-	wakeup();
 }
 
 
