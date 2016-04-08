@@ -64,7 +64,7 @@ make install DESTDIR=$RPM_BUILD_ROOT
 rm -rf $RPM_BUILD_ROOT 
 
 %changelog
-* Thu Apr 07 2016 Andreas Koepsel <andreas.koepsel@bisdn.de> - v0.10.6
+* Fri Apr 08 2016 Andreas Koepsel <andreas.koepsel@bisdn.de> - v0.10.6
 - [B] crofsock: prevent infinite loop
       In case txqueues are not empty tx is rescheduled. The
       flag to do so was not cleared and this would cause an
@@ -95,6 +95,7 @@ rm -rf $RPM_BUILD_ROOT
 - [B] crofsock: add rxthread wakeup handler
       call recv_message() after connect/EINPROGRESS continuation
       in state STATE_TCP_CONNECTING
+- [B] crofsock: fixed bug in listening mode
 
 * Wed Apr 06 2016 Andreas Koepsel <andreas.koepsel@bisdn.de> - v0.10.5
 - [B] version is broken, do not use

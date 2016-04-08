@@ -41,6 +41,7 @@ v0.10.6
 [B] crofsock: add rxthread wakeup handler
     call recv_message() after connect/EINPROGRESS continuation
     in state STATE_TCP_CONNECTING
+[B] crofsock: fixed bug in listening mode
 
 v0.10.5
 
