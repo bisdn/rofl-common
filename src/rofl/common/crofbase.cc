@@ -497,6 +497,8 @@ crofbase::handle_established(
 					set_key("laddr", conn.get_laddr().str()).
 					set_key("raddr", conn.get_raddr().str()).
 					set_key("version", conn.get_version());
+		handle_conn_established(set_dpt(dptid), conn.get_auxid());
+
 	} break;
 	case crofconn::MODE_DATAPATH: {
 		/* add a new controller instance and add connection there
@@ -519,6 +521,8 @@ crofbase::handle_established(
 					set_key("laddr", conn.get_laddr().str()).
 					set_key("raddr", conn.get_raddr().str()).
 					set_key("version", conn.get_version());
+		handle_conn_established(set_ctl(ctlid), conn.get_auxid());
+
 	} break;
 	default: {
 		delete &conn;

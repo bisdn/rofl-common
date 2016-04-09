@@ -1,3 +1,3 @@
 MAINTAINERCLEANFILES = Makefile.in
 
-SUBDIRS = ethswctld tcpclient tcpserver
+SUBDIRS = ethswctld tcpclient tcpserver datapath controller

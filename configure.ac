@@ -70,6 +70,8 @@ AC_CONFIG_FILES([
 	examples/ethswctld/Makefile
 	examples/tcpclient/Makefile
 	examples/tcpserver/Makefile
+	examples/datapath/Makefile
+	examples/controller/Makefile
 
 	tools/Makefile
 	tools/rpmbuild/SPECS/rofl_common.spec
