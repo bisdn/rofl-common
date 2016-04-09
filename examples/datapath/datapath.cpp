@@ -48,25 +48,15 @@ datapath::run(
 	ctlid = rofl::cctlid(0);
 	auxid = rofl::cauxid(0);
 
-	rofl::crofbase::
-		add_ctl(ctlid).
-			add_conn(rofl::cauxid(0)).
-				set_laddr(rofl::csockaddr(AF_INET, "0.0.0.0",   0)).
-				set_raddr(rofl::csockaddr(AF_INET, "127.0.0.1", 6653)).
-				set_trace(true).
-				tcp_connect(vbitmap, rofl::crofconn::MODE_DATAPATH, true);
-
-	std::cerr << rofl::crofbase::set_ctl(ctlid).set_conn(rofl::cauxid(0)).set_journal();
-
-	rofl::crofbase::
-		set_ctl(ctlid).
-			add_conn(rofl::cauxid(1)).
-				set_laddr(rofl::csockaddr(AF_INET, "0.0.0.0",   0)).
-				set_raddr(rofl::csockaddr(AF_INET, "127.0.0.1", 6653)).
-				set_trace(true).
-				tcp_connect(vbitmap, rofl::crofconn::MODE_DATAPATH, true);
-
-	std::cerr << rofl::crofbase::set_ctl(ctlid).set_conn(rofl::cauxid(1)).set_journal();
+	for (uint8_t i = 0; i < 4; i++) {
+		rofl::crofbase::
+			set_ctl(ctlid).
+				add_conn(rofl::cauxid(i)).
+					set_laddr(rofl::csockaddr(AF_INET, "0.0.0.0",   0)).
+					set_raddr(rofl::csockaddr(AF_INET, "127.0.0.1", 6653)).
+					set_trace(true).
+					tcp_connect(vbitmap, rofl::crofconn::MODE_DATAPATH, true);
+	}
 
 	while (keep_on_running) {
 		struct timespec ts;

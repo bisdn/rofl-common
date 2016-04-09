@@ -61,6 +61,7 @@ public:
 		if (this == &dptid)
 			return *this;
 		id = dptid.id;
+		s_id = dptid.s_id;
 		return *this;
 	};
 

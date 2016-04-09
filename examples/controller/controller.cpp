@@ -115,7 +115,7 @@ void
 controller::handle_dpt_open(
 		rofl::crofdpt& dpt)
 {
-	std::cerr << "datapath attached dptid=" << dpt.get_dptid() << std::endl;
+	std::cerr << "datapath attached dptid=" << dpt.get_dptid().get_dptid_s() << std::endl;
 }
 
 

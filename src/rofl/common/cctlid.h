@@ -59,6 +59,7 @@ public:
 		if (this == &ctlid)
 			return *this;
 		id = ctlid.id;
+		s_id = ctlid.s_id;
 		return *this;
 	};
 
