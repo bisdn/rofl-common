@@ -76,6 +76,60 @@ private:
 			const rofl::cdptid& dptid);
 
 	/**
+	 * @brief	OpenFlow Features-Reply message received.
+	 *
+	 * @param dpt datapath instance
+	 * @param auxid control connection identifier
+	 * @param msg OpenFlow message instance
+	 */
+	virtual void
+	handle_features_reply(
+			rofl::crofdpt& dpt,
+			const rofl::cauxid& auxid,
+			rofl::openflow::cofmsg_features_reply& msg);
+
+	/**
+	 * @brief	Timer expired while waiting for OpenFlow Features-Reply message.
+	 *
+	 * No Features-Reply message was received in the specified time interval
+	 * for the given OpenFlow transaction identifier.
+	 *
+	 * @param dpt datapath instance
+	 * @param xid OpenFlow transaction identifier
+	 */
+	virtual void
+	handle_features_reply_timeout(
+			rofl::crofdpt& dpt,
+			uint32_t xid);
+
+	/**
+	 * @brief	OpenFlow Get-Config-Reply message received.
+	 *
+	 * @param dpt datapath instance
+	 * @param auxid control connection identifier
+	 * @param msg OpenFlow message instance
+	 */
+	virtual void
+	handle_get_config_reply(
+			rofl::crofdpt& dpt,
+			const rofl::cauxid& auxid,
+			rofl::openflow::cofmsg_get_config_reply& msg);
+
+	/**
+	 * @brief	Timer expired while waiting for OpenFlow Get-Config-Reply message.
+	 *
+	 * No Get-Config-Reply message was received in the specified time interval
+	 * for the given OpenFlow transaction identifier.
+	 *
+	 * @param dpt datapath instance
+	 * @param xid OpenFlow transaction identifier
+	 */
+	virtual void
+	handle_get_config_reply_timeout(
+			rofl::crofdpt& dpt,
+			uint32_t xid);
+
+	/**
 	 * @brief	OpenFlow Features-Request message received.
 	 *
 	 * @param ctl   reference to crofctl instance

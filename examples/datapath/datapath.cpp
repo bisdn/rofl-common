@@ -26,8 +26,8 @@ datapath::datapath() :
 	auxid(0),
 	dpid(0x0102030405060708),
 	n_buffers(0xffff),
-	n_tables(1),
-	capabilities(0)
+	n_tables(8),
+	capabilities(0xa1a2a3a4)
 {
 
 }
