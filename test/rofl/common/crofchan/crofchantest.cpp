@@ -169,7 +169,7 @@ crofchantest::test_congestion()
 	num_of_ctl_established = 0;
 	int seconds = 60;
 	listening_port = 0;
-	max_congestion_rounds = 128;
+	max_congestion_rounds = 256;
 
 	thread.start();
 
@@ -374,6 +374,7 @@ crofchantest::handle_timeout(
 			match.set_eth_type(0x0806);
 			rofl::cmemory packet(1500);
 
+			std::cerr << "crofchantest::handle_timeout() starting to overload control connection" << std::endl;
 
 			while (true) {
 				rofl::openflow::cofmsg_packet_in* msg =
@@ -396,6 +397,7 @@ crofchantest::handle_timeout(
 
 		} catch (rofl::eRofQueueFull& e) {
 			std::cerr << "exception caught: eRofQueueFull" << std::endl;
+			thread.add_timer(TIMER_ID_START_SENDING_PACKET_INS, rofl::ctimespec().expire_in(8));
 		}
 	} break;
 	default: {
@@ -454,7 +456,7 @@ crofchantest::congestion_solved_indication(
 				<< " max_congestion_rounds=" << max_congestion_rounds << std::endl;
 
 	if (--max_congestion_rounds > 0) {
-		thread.add_timer(TIMER_ID_START_SENDING_PACKET_INS, rofl::ctimespec().expire_in(1));
+		thread.add_timer(TIMER_ID_START_SENDING_PACKET_INS, rofl::ctimespec().expire_in(0));
 	} else {
 		keep_running = false;
 		std::cerr << channel1->get_conn(rofl::cauxid(0)).get_tcp_journal() << std::endl;
