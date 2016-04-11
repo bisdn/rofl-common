@@ -15,23 +15,37 @@
 
 #include "rofl/common/crofchan.h"
 #include "rofl/common/crofsock.h"
+#include "rofl/common/cthread.hpp"
 
 class crofchantest :
 		public CppUnit::TestFixture,
 		public rofl::crofchan_env,
 		public rofl::crofconn_env,
-		public rofl::crofsock_env
+		public rofl::crofsock_env,
+		public rofl::cthread_env
 {
 	CPPUNIT_TEST_SUITE( crofchantest );
-	CPPUNIT_TEST( test1 );
+	CPPUNIT_TEST( test_connections );
+	CPPUNIT_TEST( test_congestion );
 	CPPUNIT_TEST_SUITE_END();
+
+public:
+
+	virtual
+	~crofchantest()
+	{};
+
+	crofchantest() :
+		thread(this)
+	{};
 
 public:
 	void setUp();
 	void tearDown();
 
 public:
-	void test1();
+	void test_connections();
+	void test_congestion();
 
 private:
 
@@ -56,6 +70,35 @@ private:
 
 	rofl::crwlock       plock;
 	std::set<rofl::crofconn*> pending_conns;
+
+	int                 num_of_pkts_sent;
+	int                 num_of_pkts_rcvd;
+	std::atomic_bool    congested;
+
+	rofl::cthread       thread;
+	int                 max_congestion_rounds;
+
+private:
+
+	enum crofchantest_timer_t {
+		TIMER_ID_START_SENDING_PACKET_INS = 1,
+	};
+
+	virtual void
+	handle_wakeup(rofl::cthread& thread)
+	{};
+
+	virtual void
+	handle_timeout(rofl::cthread& thread, uint32_t timer_id,
+			const std::list<unsigned int>& ttypes);
+
+	virtual void
+	handle_read_event(rofl::cthread& thread, int fd)
+	{};
+
+	virtual void
+	handle_write_event(rofl::cthread& thread, int fd)
+	{};
 
 private:
 
@@ -114,8 +157,7 @@ private:
 
 	virtual void
 	congestion_solved_indication(
-			rofl::crofchan& chan, rofl::crofconn& conn)
-	{ std::cerr << "crofchan::congestion_solved_indication" << std::endl; };
+			rofl::crofchan& chan, rofl::crofconn& conn);
 
 	virtual void
 	handle_recv(
@@ -138,8 +180,7 @@ private:
 
 	virtual void
 	congestion_occured_indication(
-			rofl::crofchan& chan, rofl::crofconn& conn)
-	{ std::cerr << "crofchan::congestion_occured_indication" << std::endl; };
+			rofl::crofchan& chan, rofl::crofconn& conn);
 
 	virtual void
 	handle_transaction_timeout(
