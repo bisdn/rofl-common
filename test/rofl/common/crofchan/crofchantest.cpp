@@ -200,8 +200,8 @@ crofchantest::test_congestion()
 		rofl::crofconn& conn = channel1->add_conn(rofl::cauxid(i));
 
 		conn.set_trace(trace);
-		conn.set_journal().log_on_stderr(false).set_max_entries(256);
-		conn.set_tcp_journal().log_on_stderr(false).set_max_entries(256);
+		conn.set_journal().log_on_stderr(false).set_max_entries(1024);
+		conn.set_tcp_journal().log_on_stderr(false).set_max_entries(1024);
 
 		conn.set_raddr(baddr).
 				  tcp_connect(versionbitmap, rofl::crofconn::MODE_DATAPATH, false);
