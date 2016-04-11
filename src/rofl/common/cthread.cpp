@@ -118,15 +118,16 @@ cthread::release()
 
 void
 cthread::add_fd(
-		int fd, bool exception)
+		int fd, bool exception, bool edge_triggered)
 {
 	AcquireReadWriteLock lock(tlock);
 	if (fds.find(fd) != fds.end())
 		return;
 
+	uint32_t events = edge_triggered ? EPOLLET : 0;
 	struct epoll_event epev;
 	memset((uint8_t*)&epev, 0, sizeof(struct epoll_event));
-	epev.events = EPOLLET; // EPOLLET | EPOLLIN | EPOLLOUT
+	epev.events = events;
 	epev.data.fd = fd;
 
 	if (epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &epev) < 0) {
@@ -141,7 +142,7 @@ cthread::add_fd(
 		}
 	}
 
-	fds[fd] = EPOLLET;
+	fds[fd] = events;
 }
 
 
@@ -156,7 +157,6 @@ cthread::drop_fd(
 
 	struct epoll_event epev;
 	memset((uint8_t*)&epev, 0, sizeof(struct epoll_event));
-	epev.events = 0; // EPOLLET | EPOLLIN | EPOLLOUT
 	epev.data.fd = fd;
 
 	if (epoll_ctl(epfd, EPOLL_CTL_DEL, fd, &epev) < 0) {
@@ -178,9 +178,9 @@ cthread::drop_fd(
 
 void
 cthread::add_read_fd(
-		int fd, bool exception)
+		int fd, bool exception, bool edge_triggered)
 {
-	add_fd(fd, exception);
+	add_fd(fd, exception, edge_triggered);
 
 	AcquireReadWriteLock lock(tlock);
 
@@ -238,9 +238,9 @@ cthread::drop_read_fd(
 
 void
 cthread::add_write_fd(
-		int fd, bool exception)
+		int fd, bool exception, bool edge_triggered)
 {
-	add_fd(fd, exception);
+	add_fd(fd, exception, edge_triggered);
 
 	AcquireReadWriteLock lock(tlock);
 

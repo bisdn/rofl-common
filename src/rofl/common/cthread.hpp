@@ -174,7 +174,7 @@ public:
 	 */
 	void
 	add_fd(
-			int fd, bool exception = false);
+			int fd, bool exception = false, bool edge_triggered = true);
 
 	/**
 	 * @brief	Deregister file descriptor
@@ -188,7 +188,7 @@ public:
 	 */
 	void
 	add_read_fd(
-			int fd, bool exception = true);
+			int fd, bool exception = true, bool edge_triggered = true);
 
 	/**
 	 * @brief	Drop file descriptor from set of observed fds
@@ -202,7 +202,7 @@ public:
 	 */
 	void
 	add_write_fd(
-			int fd, bool exception = true);
+			int fd, bool exception = true, bool edge_triggered = true);
 
 	/**
 	 * @brief	Drop file descriptor from set of observed fds
