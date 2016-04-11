@@ -169,7 +169,7 @@ crofchantest::test_congestion()
 	num_of_ctl_established = 0;
 	int seconds = 60;
 	listening_port = 0;
-	max_congestion_rounds = 256;
+	max_congestion_rounds = 16;
 
 	thread.start();
 
