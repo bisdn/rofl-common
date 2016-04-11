@@ -755,6 +755,42 @@ private:
 
 private:
 
+	void
+	flag_set(int __flag, bool value)
+	{
+		AcquireReadWriteLock lock(flags_lock);
+		switch (__flag) {
+		case FLAG_CONGESTED:
+		case FLAG_RECONNECT_ON_FAILURE:
+		case FLAG_TLS_IN_USE:
+		case FLAG_TX_BLOCK_QUEUEING: {
+			flags.set(__flag, value);
+		} break;
+		default: {
+			throw eRofSockNotFound("flag not found", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+		};
+		}
+	};
+
+	bool
+	flag_test(int __flag) const
+	{
+		AcquireReadLock lock(flags_lock);
+		switch (__flag) {
+		case FLAG_CONGESTED:
+		case FLAG_RECONNECT_ON_FAILURE:
+		case FLAG_TLS_IN_USE:
+		case FLAG_TX_BLOCK_QUEUEING: {
+			return flags.test(__flag);
+		} break;
+		default: {
+			throw eRofSockNotFound("flag not found", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+		};
+		}
+	};
+
+private:
+
 	virtual void
 	handle_wakeup(
 			cthread& thread);
@@ -842,6 +878,9 @@ private:
 
 	// various flags for this crofsock instance
 	std::bitset<32>				flags;
+
+	// and the associated rwlock
+	rofl::crwlock               flags_lock;
 
 	// connection state
 	enum socket_state_t		    state;

@@ -148,7 +148,7 @@ crofsock::close()
 
 		if (sd > 0) {
 			rxthread.drop_read_fd(sd, false);
-			if (flags.test(FLAG_CONGESTED)) {
+			if (flag_test(FLAG_CONGESTED)) {
 				txthread.drop_write_fd(sd);
 			}
 			rxthread.drop_fd(sd);
@@ -170,7 +170,7 @@ crofsock::close()
 		tx_disable();
 
 		rxthread.drop_read_fd(sd, false);
-		if (flags.test(FLAG_CONGESTED)) {
+		if (flag_test(FLAG_CONGESTED)) {
 			txthread.drop_write_fd(sd);
 		}
 		shutdown(sd, O_RDWR);
@@ -197,7 +197,7 @@ crofsock::close()
 			SSL_free(ssl); ssl = NULL;
 		}
 		tls_destroy_context();
-		flags.reset(FLAG_TLS_IN_USE);
+		flag_set(FLAG_TLS_IN_USE, false);
 
 		state = STATE_TCP_ESTABLISHED;
 
@@ -212,7 +212,7 @@ crofsock::close()
 			SSL_free(ssl); ssl = NULL;
 		}
 		tls_destroy_context();
-		flags.reset(FLAG_TLS_IN_USE);
+		flag_set(FLAG_TLS_IN_USE, false);
 
 		state = STATE_TCP_ESTABLISHED;
 
@@ -232,7 +232,7 @@ crofsock::close()
 			SSL_free(ssl); ssl = NULL;
 		}
 		tls_destroy_context();
-		flags.reset(FLAG_TLS_IN_USE);
+		flag_set(FLAG_TLS_IN_USE, false);
 
 		state = STATE_TCP_ESTABLISHED;
 
@@ -268,7 +268,7 @@ crofsock::listen()
 	mode = MODE_LISTEN;
 
 	/* reconnect does not make sense for listening sockets */
-	flags.set(FLAG_RECONNECT_ON_FAILURE, false);
+	flag_set(FLAG_RECONNECT_ON_FAILURE, false);
 
 	/* open socket */
 	if ((sd = ::socket(baddr.get_family(), type, protocol)) < 0) {
@@ -389,7 +389,7 @@ crofsock::tcp_accept(
 	mode = MODE_SERVER;
 
 	/* reconnect is not possible for server sockets */
-	flags.set(FLAG_RECONNECT_ON_FAILURE, false);
+	flag_set(FLAG_RECONNECT_ON_FAILURE, false);
 
 	/* new state */
 	state = STATE_TCP_ACCEPTING;
@@ -469,7 +469,7 @@ crofsock::tcp_accept(
 
 	journal.log(LOG_INFO, "STATE_TCP_ESTABLISHED").set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
 
-	if (flags.test(FLAG_TLS_IN_USE)) {
+	if (flag_test(FLAG_TLS_IN_USE)) {
 		crofsock::tls_accept(sd);
 	} else {
 		crofsock_env::call_env(env).handle_tcp_accepted(*this);
@@ -506,7 +506,7 @@ crofsock::tcp_connect(
 	mode = MODE_CLIENT;
 
 	/* reconnect in case of an error? */
-	flags.set(FLAG_RECONNECT_ON_FAILURE, reconnect);
+	flag_set(FLAG_RECONNECT_ON_FAILURE, reconnect);
 
 	/* new state */
 	state = STATE_TCP_CONNECTING;
@@ -579,7 +579,7 @@ crofsock::tcp_connect(
 
 			crofsock_env::call_env(env).handle_tcp_connect_refused(*this);
 
-			if (flags.test(FLAG_RECONNECT_ON_FAILURE)) {
+			if (flag_test(FLAG_RECONNECT_ON_FAILURE)) {
 				backoff_reconnect(false);
 			}
 		} break;
@@ -589,7 +589,7 @@ crofsock::tcp_connect(
 
 			crofsock_env::call_env(env).handle_tcp_connect_failed(*this);
 
-			if (flags.test(FLAG_RECONNECT_ON_FAILURE)) {
+			if (flag_test(FLAG_RECONNECT_ON_FAILURE)) {
 				backoff_reconnect(false);
 			}
 		};
@@ -615,8 +615,8 @@ crofsock::tcp_connect(
 
 		rxthread.wakeup();
 
-		if (flags.test(FLAG_TLS_IN_USE)) {
-			crofsock::tls_connect(flags.test(FLAG_RECONNECT_ON_FAILURE));
+		if (flag_test(FLAG_TLS_IN_USE)) {
+			crofsock::tls_connect(flag_test(FLAG_RECONNECT_ON_FAILURE));
 		} else {
 			crofsock_env::call_env(env).handle_tcp_connected(*this);
 		}
@@ -754,7 +754,7 @@ crofsock::tls_accept(
 	case STATE_CLOSED:
 	case STATE_TCP_ACCEPTING: {
 
-		flags.set(FLAG_TLS_IN_USE);
+		flag_set(FLAG_TLS_IN_USE, true);
 
 		crofsock::tcp_accept(sockfd);
 
@@ -879,7 +879,7 @@ crofsock::tls_connect(
 	case STATE_CLOSED:
 	case STATE_TCP_CONNECTING: {
 
-		flags.set(FLAG_TLS_IN_USE);
+		flag_set(FLAG_TLS_IN_USE, true);
 
 		crofsock::tcp_connect(reconnect);
 
@@ -1208,7 +1208,7 @@ crofsock::is_established() const
 bool
 crofsock::is_tls_encrypted() const
 {
-	return flags.test(FLAG_TLS_IN_USE);
+	return flag_test(FLAG_TLS_IN_USE);
 }
 
 
@@ -1224,7 +1224,7 @@ crofsock::is_passive() const
 bool
 crofsock::is_congested() const
 {
-	return flags.test(FLAG_CONGESTED);
+	return flag_test(FLAG_CONGESTED);
 }
 
 
@@ -1308,7 +1308,7 @@ crofsock::handle_timeout(
 	switch (timer_id) {
 	case TIMER_ID_RECONNECT: {
 		journal.log(LOG_INFO, "TCP: reconnecting").set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
-		if (flags.test(FLAG_TLS_IN_USE)) {
+		if (flag_test(FLAG_TLS_IN_USE)) {
 			tls_connect(true);
 		} else {
 			tcp_connect(true);
@@ -1330,14 +1330,20 @@ crofsock::send_message(
 		delete msg; return;
 	}
 
-	if (flags.test(FLAG_TX_BLOCK_QUEUEING) &&
+	if (flag_test(FLAG_TX_BLOCK_QUEUEING) &&
 			(msg->get_type() != rofl::openflow::OFPT_ECHO_REQUEST) &&
 			(msg->get_type() != rofl::openflow::OFPT_ECHO_REPLY)) {
 		throw eRofQueueFull("crofsock::send_message() transmission blocked, congestion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 
 	txqueue_pending_pkts++;
-
+#if 0
+	if (flag_test(FLAG_TX_BLOCK_QUEUEING) &&
+			((msg->get_type() == rofl::openflow::OFPT_ECHO_REQUEST) ||
+			 (msg->get_type() == rofl::openflow::OFPT_ECHO_REPLY))) {
+		txqueue_size_tx_threshold++;
+	}
+#endif
 	switch (state) {
 	case STATE_TCP_ESTABLISHED:
 	case STATE_TLS_ESTABLISHED: {
@@ -1447,7 +1453,7 @@ crofsock::handle_write_event(
 
  	if (&thread == &txthread) {
 		assert(fd == sd);
-		flags.reset(FLAG_CONGESTED);
+		flag_set(FLAG_CONGESTED, false);
 		txthread.drop_write_fd(sd);
 		send_from_queue();
 	} else
@@ -1520,16 +1526,24 @@ crofsock::send_from_queue()
 					case EAGAIN: /* socket would block */ {
 						tx_is_running = false;
 						tx_fragment_pending = true;
-						flags.set(FLAG_CONGESTED);
+						flag_set(FLAG_CONGESTED, true);
 						txthread.add_write_fd(sd);
 
-						if (not flags.test(FLAG_TX_BLOCK_QUEUEING)) {
+						if (not flag_test(FLAG_TX_BLOCK_QUEUEING)) {
 							/* block transmission of further packets */
-							flags.set(FLAG_TX_BLOCK_QUEUEING);
+							flag_set(FLAG_TX_BLOCK_QUEUEING, true);
 							/* remember queue size, when congestion occured */
 							txqueue_size_congestion_occured = txqueue_pending_pkts;
 							/* threshold for re-enabling acceptance of packets */
 							txqueue_size_tx_threshold = txqueue_pending_pkts / 2;
+
+							if (trace) {
+								journal.log(LOG_TRACE, "congestion occured").
+										set_key("txqueue_pending_pkts", txqueue_pending_pkts).
+										set_key("txqueue_size_congestion_occured", txqueue_size_congestion_occured).
+										set_key("txqueue_size_tx_threshold", txqueue_size_tx_threshold).
+										set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
+							}
 
 							crofsock_env::call_env(env).congestion_occured_indication(*this);
 						}
@@ -1545,6 +1559,7 @@ crofsock::send_from_queue()
 				/* at least some bytes were sent successfully */
 				} else {
 					msg_bytes_sent += nbytes;
+					flag_set(FLAG_CONGESTED, false);
 
 					/* short write */
 					if (msg_bytes_sent < txlen) {
@@ -1554,6 +1569,14 @@ crofsock::send_from_queue()
 					} else {
 						tx_fragment_pending = false;
 						txqueue_pending_pkts--;
+
+						if (trace && flag_test(FLAG_CONGESTED)) {
+							journal.log(LOG_TRACE, "congestion ongoing").
+									set_key("txqueue_pending_pkts", txqueue_pending_pkts).
+									set_key("txqueue_size_congestion_occured", txqueue_size_congestion_occured).
+									set_key("txqueue_size_tx_threshold", txqueue_size_tx_threshold).
+									set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
+						}
 					}
 				}
 
@@ -1564,9 +1587,17 @@ crofsock::send_from_queue()
 			}
 		}
 
-		if ((not flags.test(FLAG_CONGESTED)) && flags.test(FLAG_TX_BLOCK_QUEUEING)) {
+
+		if ((not flag_test(FLAG_CONGESTED)) && flag_test(FLAG_TX_BLOCK_QUEUEING)) {
 			if (txqueue_pending_pkts <= txqueue_size_tx_threshold) {
-				flags.reset(FLAG_TX_BLOCK_QUEUEING);
+				flag_set(FLAG_TX_BLOCK_QUEUEING, false);
+				if (trace) {
+					journal.log(LOG_TRACE, "congestion solved").
+							set_key("txqueue_pending_pkts", txqueue_pending_pkts).
+							set_key("txqueue_size_congestion_occured", txqueue_size_congestion_occured).
+							set_key("txqueue_size_tx_threshold", txqueue_size_tx_threshold).
+							set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
+				}
 				crofsock_env::call_env(env).congestion_solved_indication(*this);
 			}
 		}
@@ -1575,7 +1606,7 @@ crofsock::send_from_queue()
 
 	tx_is_running = false;
 
-	if ((txqueue_pending_pkts > 0) && (not flags.test(FLAG_TX_BLOCK_QUEUEING))) {
+	if ((txqueue_pending_pkts > 0) && (not flag_test(FLAG_TX_BLOCK_QUEUEING))) {
 		txthread.wakeup();
 	}
 }
@@ -1638,8 +1669,8 @@ crofsock::handle_read_event_rxthread(
 				rxthread.add_fd(sd);
 				rxthread.add_read_fd(sd);
 
-				if (flags.test(FLAG_TLS_IN_USE)) {
-					crofsock::tls_connect(flags.test(FLAG_RECONNECT_ON_FAILURE));
+				if (flag_test(FLAG_TLS_IN_USE)) {
+					crofsock::tls_connect(flag_test(FLAG_RECONNECT_ON_FAILURE));
 				} else {
 					crofsock_env::call_env(env).handle_tcp_connected(*this);
 				}
@@ -1657,7 +1688,7 @@ crofsock::handle_read_event_rxthread(
 
 				crofsock_env::call_env(env).handle_tcp_connect_refused(*this);
 
-				if (flags.test(FLAG_RECONNECT_ON_FAILURE)) {
+				if (flag_test(FLAG_RECONNECT_ON_FAILURE)) {
 					backoff_reconnect(false);
 				}
 			} break;
@@ -1667,7 +1698,7 @@ crofsock::handle_read_event_rxthread(
 
 				crofsock_env::call_env(env).handle_tcp_connect_failed(*this);
 
-				if (flags.test(FLAG_RECONNECT_ON_FAILURE)) {
+				if (flag_test(FLAG_RECONNECT_ON_FAILURE)) {
 					backoff_reconnect(false);
 				}
 			};
@@ -1679,7 +1710,7 @@ crofsock::handle_read_event_rxthread(
 		} break;
 		case STATE_TLS_CONNECTING: {
 
-			tls_connect(flags.test(FLAG_RECONNECT_ON_FAILURE));
+			tls_connect(flag_test(FLAG_RECONNECT_ON_FAILURE));
 			if (STATE_TLS_ESTABLISHED == state) {
 				recv_message();
 			}
@@ -1695,14 +1726,14 @@ crofsock::handle_read_event_rxthread(
 		} break;
 		case STATE_TCP_ESTABLISHED: {
 
-			if (flags.test(FLAG_TLS_IN_USE))
+			if (flag_test(FLAG_TLS_IN_USE))
 				return;
 			recv_message();
 
 		} break;
 		case STATE_TLS_ESTABLISHED: {
 
-			if (not flags.test(FLAG_TLS_IN_USE))
+			if (not flag_test(FLAG_TLS_IN_USE))
 				return;
 			recv_message();
 
@@ -1818,7 +1849,7 @@ on_error:
 			journal.log(LOG_NOTICE, "crofsock::recv_message() caught runtime error, what: %s", e.what()).
 					set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
 		}
-		if (flags.test(FLAG_RECONNECT_ON_FAILURE)) {
+		if (flag_test(FLAG_RECONNECT_ON_FAILURE)) {
 			backoff_reconnect(true);
 		}
 
