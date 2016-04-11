@@ -9,6 +9,11 @@ Legend:
 Change log
 ==========
 
+v0.10.7
+
+[B] crofsock: fixed bug in congestion management
+[+] cthread: allow level-triggered file descriptors
+
 v0.10.6
 
 [B] crofsock: prevent infinite loop

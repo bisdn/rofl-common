@@ -64,6 +64,10 @@ make install DESTDIR=$RPM_BUILD_ROOT
 rm -rf $RPM_BUILD_ROOT 
 
 %changelog
+* Mon Apr 11 2016 Andreas Koepsel <andreas.koepsel@bisdn.de> - v0.10.7
+- [B] crofsock: fixed bug in congestion management
+- [+] cthread: allow level-triggered file descriptors
+
 * Fri Apr 08 2016 Andreas Koepsel <andreas.koepsel@bisdn.de> - v0.10.6
 - [B] crofsock: prevent infinite loop
       In case txqueues are not empty tx is rescheduled. The
