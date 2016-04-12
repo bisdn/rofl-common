@@ -1337,13 +1337,7 @@ crofsock::send_message(
 	}
 
 	txqueue_pending_pkts++;
-#if 0
-	if (flag_test(FLAG_TX_BLOCK_QUEUEING) &&
-			((msg->get_type() == rofl::openflow::OFPT_ECHO_REQUEST) ||
-			 (msg->get_type() == rofl::openflow::OFPT_ECHO_REPLY))) {
-		txqueue_size_tx_threshold++;
-	}
-#endif
+
 	switch (state) {
 	case STATE_TCP_ESTABLISHED:
 	case STATE_TLS_ESTABLISHED: {
@@ -1569,14 +1563,6 @@ crofsock::send_from_queue()
 					} else {
 						tx_fragment_pending = false;
 						txqueue_pending_pkts--;
-
-						if (trace && flag_test(FLAG_CONGESTED)) {
-							journal.log(LOG_TRACE, "congestion ongoing").
-									set_key("txqueue_pending_pkts", txqueue_pending_pkts).
-									set_key("txqueue_size_congestion_occured", txqueue_size_congestion_occured).
-									set_key("txqueue_size_tx_threshold", txqueue_size_tx_threshold).
-									set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
-						}
 					}
 				}
 
@@ -1760,7 +1746,7 @@ crofsock::recv_message()
 {
 	while (not rx_disabled) {
 
-		if ((state <= STATE_CLOSED)) {
+		if (state <= STATE_CLOSED) {
 			if (trace) {
 				journal.log(LOG_TRACE, "crofsock::recv_message() ignoring message").
 						set_key("laddr", laddr.str()).set_key("raddr", raddr.str()).
@@ -1890,11 +1876,7 @@ crofsock::parse_message()
 		};
 		}
 
-		if ((state != STATE_TCP_CONNECTING)  &&
-			(state != STATE_TCP_ESTABLISHED) &&
-			(state != STATE_TLS_CONNECTING)  &&
-			(state != STATE_TLS_ACCEPTING)   &&
-			(state != STATE_TLS_ESTABLISHED)) {
+		if (state <= STATE_CLOSED) {
 			return;
 		}
 
