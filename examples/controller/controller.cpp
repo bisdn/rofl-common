@@ -151,7 +151,7 @@ controller::handle_dpt_open(
 	 * instances. Use rofl-common's internal handle only to get access. */
 
 	// get rofl-common's internal handle to rofl::crofdpt instance 'dpt'
-	const rofl::cdptid& dptid = dpt.get_dptid();
+	const rofl::cdptid& reference_to_dptid = dpt.get_dptid();
 
 	// get const reference to associated rofl::crofdpt instance from handle
 	const rofl::crofdpt& const_reference_to_dpt = rofl::crofbase::get_dpt(dptid);
@@ -159,10 +159,16 @@ controller::handle_dpt_open(
 	// get non-const reference
 	rofl::crofdpt& reference_to_dpt = rofl::crofbase::set_dpt(dptid);
 
+	// store copy of rofl::cdptid
+	this->dptid = dpt.get_dptid();
 
-	(void)dptid;
-	(void)const_reference_to_dpt;
+
+
+
+	// make compiler happy ...
 	(void)reference_to_dpt;
+	(void)reference_to_dptid;
+	(void)const_reference_to_dpt;
 }
 
 
@@ -268,20 +274,87 @@ controller::handle_conn_established(
 			dpt.send_port_desc_stats_request(auxid, /*stats-flags*/0, /*timeout=*/5);
 
 			// send an OpenFlow TableFeaturesMultipart.Request message
-			dpt.send_table_features_stats_request(auxid, 0, 5);
-
-		} break;
-		case rofl::openflow12::OFP_VERSION: {
-
-			// send an OpenFlow TableStatistics.Request message
-			dpt.send_table_stats_request(auxid, 0, 5);
+			dpt.send_table_features_stats_request(auxid, /*stats-flags*/0, /*timeout=*/5);
 
 		} break;
 		default: {
-			/* never occurs */
+			/* ... */
 		};
 		}
 	}
+}
+
+
+
+void
+controller::handle_conn_terminated(
+		rofl::crofdpt& dpt,
+		const rofl::cauxid& auxid)
+{
+	std::cerr << "EVENT: connection terminated, auxid:" << (int)auxid.get_id() << std::endl;
+
+	/* A peer entity may shutdown a single OpenFlow connection
+	 * inside an OpenFlow control channel any time. Unfortunately,
+	 * OpenFlow lacks proper means to signal the cause for a shutdown.
+	 * When a control connection terminates, rofl-common calls
+	 * method rofl::crofbase::handle_conn_terminated() indicating
+	 * the particular control connection via the rofl::cauxid instance.
+	 * When the main control connection terminates, rofl-common
+	 * terminates the channel's other auxiliary connections automatically.
+	 *
+	 * When acting in TCP server mode, rofl-common deletes the underlying
+	 * rofl::crofconn connection objects automatically. When acting in TCP
+	 * client mode, rofl::crofconn connection objects are not destroyed
+	 * and may be used for reestablishing the control connection.
+	 *
+	 * As a rule of thumb: Connections (rofl::crofconn instances) created by
+	 * the higher layer application must be destroyed by the application as well.
+	 * Connection instances created by server side sockets are automatically
+	 * removed upon connection shutdown.
+	 */
+}
+
+
+
+void
+controller::handle_conn_congestion_occured(
+		rofl::crofdpt& dpt,
+		const rofl::cauxid& auxid)
+{
+	std::cerr << "EVENT: congestion occured, auxid:" << (int)auxid.get_id() << std::endl;
+
+	/* An OpenFlow control connection may suffer from insufficient
+	 * bandwidth for sending and receiving control messages. rofl-common
+	 * implements a sophisticated flow control mechanism to avoid
+	 * extensive buffering of messages inside the OpenFlow layer thus
+	 * avoiding buffer-bloat like situations.
+	 *
+	 * Each connection's transmission buffer size adapts automatically to
+	 * the bandwidth offered by the underlying TCP connection. If the
+	 * TCP socket indicates a blocking condition, rofl-common will call
+	 * method rofl::crofbase::handle_conn_congestion_occured(). The
+	 * application should stop sending further control messages via this
+	 * connection until a congestion resolution indication is received
+	 * from the library (see below). If an application persists on sending
+	 * further messages, such messages will be dropped and an exception of
+	 * type rofl::eRofQueueFull will be thrown, so you should throttle
+	 * your message generation rate and prepare your code for handling
+	 * exceptions properly. */
+}
+
+
+
+void
+controller::handle_conn_congestion_solved(
+		rofl::crofdpt& dpt,
+		const rofl::cauxid& auxid)
+{
+	std::cerr << "EVENT: congestion resolved, auxid:" << (int)auxid.get_id() << std::endl;
+
+	/* This is the indication used by rofl-common once a congestion situation
+	 * has been solved and complements the congestion indication method (see above).
+	 * When called, the application may send further messages towards the peer
+	 * entity. */
 }
 
 
@@ -292,6 +365,49 @@ controller::handle_features_reply(
 		const rofl::cauxid& auxid,
 		rofl::openflow::cofmsg_features_reply& msg)
 {
+	/* rolf-common abstracts all OpenFlow messages in C++ classes
+	 * for simple and easy handling of their content.
+	 * There are also individual notification methods for each
+	 * OpenFlow message (including requests and replies, asynchronous
+	 * and synchronous messages). See rofl::crofbase for the comprehensive
+	 * list of these methods and overwrite those you are interested in.
+	 *
+	 * Here, we have overwritten rofl::crofbase::handle_features_reply()
+	 * and obtain a reference to a features reply message. You must not refer
+	 * to this message once scope of this handler has concluded. If
+	 * you want to keep the message, please create a copy and store it
+	 * in the application layer.
+	 *
+	 * All rofl-common handlers are executed within scope of rofl-internal
+	 * threads, so please provide proper locking of application data
+	 * structures when manipulating those inside the handler methods. */
+
+
+	// rofl::openflow::cofmsg_features_reply C++ API
+
+	// datapath's number of packet buffers, ...
+	uint32_t n_buffers = msg.get_n_buffers();
+
+	// datapath pipeline's number of tables, ...
+	uint8_t  n_tables  = msg.get_n_tables();
+
+	// datapath pipeline's capabilities, ...
+	uint32_t capabilities = msg.get_capabilities();
+
+	// datapath dpid, ...
+	uint64_t dpid = msg.get_dpid();
+
+	// datapath ports (only valid for Openflow 1.0 and 1.2)
+	const rofl::openflow::cofports& ports = msg.get_ports();
+
+
+
+	/* When snooping has been enabled on an OpenFlow control connection,
+	 * rofl-common stores data from various OpenFlow requests in an
+	 * instance of type rofl::crofdpt for the connection's lifetime.
+	 * So you may acquire these data by querying the rofl::crofdpt
+	 * instance as well. */
+
 	// datapath's number of packet buffers, ...
 	std::cerr << "#buffers: "
 			<< (unsigned int)dpt.get_n_buffers() << std::endl;
@@ -307,6 +423,15 @@ controller::handle_features_reply(
 	// datapath hwaddr derived from dpid, ...
 	std::cerr << "hwaddr: "
 			<< dpt.get_hwaddr().str() << std::endl;
+
+
+
+
+	(void)n_buffers;
+	(void)n_tables;
+	(void)capabilities;
+	(void)dpid;
+	(void)ports;
 }
 
 
@@ -316,7 +441,13 @@ controller::handle_features_reply_timeout(
 		rofl::crofdpt& dpt,
 		uint32_t xid)
 {
+	/* rofl-common maintains timers for pending requests and provides
+	 * notification methods indicating timer expirations. Overwrite
+	 * those notifiers you are interested in, e.g., for a Features.Request
+	 * method rofl::crofbase::hanle_features_reply_timeout(). */
 
+	// transaction identifier of Features.Request whose timer expired
+	(void)xid;
 }
 
 
@@ -343,7 +474,13 @@ controller::handle_get_config_reply_timeout(
 		rofl::crofdpt& dpt,
 		uint32_t xid)
 {
+	/* rofl-common maintains timers for pending requests and provides
+	 * notification methods indicating timer expirations. Overwrite
+	 * those notifiers you are interested in, e.g., for a Get-Config.Request
+	 * method rofl::crofbase::hanle_get_config_reply_timeout(). */
 
+	// transaction identifier of Get-Config.Request whose timer expired
+	(void)xid;
 }
 
 
@@ -355,6 +492,114 @@ controller::handle_port_desc_stats_reply(
 		rofl::openflow::cofmsg_port_desc_stats_reply& msg)
 {
 	std::cerr << "port description received; " << dpt.get_ports() << std::endl;
+
+	/* Class rofl::openflow::cofports defines a container for storing
+	 * a set of OpenFlow port descriptions. Its keys() method returns
+	 * a list of valid 32bit port numbers for this instance. */
+
+	for (auto portno : msg.get_ports().keys()) {
+
+		/* Class rofl::openflow::cofport defines an abstraction of
+		 * a single OpenFlow port. */
+		const rofl::openflow::cofport& port = msg.get_ports().get_port(portno);
+
+		// OpenFlow port number ...
+		uint32_t port_no = port.get_port_no();
+
+		// OpenFlow port config field ...
+		uint32_t config = port.get_config();
+
+		// OpenFlow port state field ...
+		uint32_t state = port.get_state();
+
+		// OpenFlow port name ...
+		const std::string& name = port.get_name();
+
+		// OpenFlow port link layer address ...
+		const rofl::caddress_ll& hwaddr = port.get_hwaddr();
+
+		// OpenFlow port statistics ...
+		const rofl::openflow::cofport_stats_reply& stats = port.get_port_stats();
+
+		// OpenFlow port ethernet parameters ...
+		const rofl::openflow::cofportdesc_prop_ethernet& ethernet = port.get_ethernet();
+
+
+		/*uint32_t*/ethernet.get_advertised();
+		/*uint32_t*/ethernet.get_curr();
+		/*uint32_t*/ethernet.get_curr_speed();
+		/*uint32_t*/ethernet.get_max_speed();
+		/*uint32_t*/ethernet.get_peer();
+		/*uint32_t*/ethernet.get_supported();
+		/*uint16_t*/ethernet.get_type();
+
+		// make compiler happy ...
+		(void)port_no;
+		(void)config;
+		(void)state;
+		(void)name;
+		(void)hwaddr;
+		(void)stats;
+	}
+
+
+
+	/* OpenFlow is a binary protocol and provides many (deeply) nested
+	 * data structures. rofl-common provides a homogeneous API following
+	 * some core principles to simplify use of OpenFlow.
+	 *
+	 * OpenFlow defines various containers for storing elements of the same kind,
+	 * so it is inevitable to conduct CRUD like operations on OpenFlow instances
+	 * frequently. rofl-common defines the following CRUD operations and you
+	 * will encounter these basic methods almost everywhere in rofl-common:
+	 *
+	 * - Adding a new or resetting an existing element:
+	 *   element& add_element();
+	 *
+	 * - Returning an existing or creating a new element if none exists:
+	 *   element& set_element();
+	 *
+	 * - Returning a const reference to an existing element or throw an exception:
+	 *   const element& get_element() const;
+	 *
+	 * - Remove an element (fails silently, if non exists):
+	 *   bool drop_element();
+	 *
+	 * - Check for existence of specific element:
+	 *   bool has_element() const;
+	 */
+	rofl::openflow::cofports ports(rofl::openflow13::OFP_VERSION);
+
+	// add a new rofl::openflow::cofport instance
+	rofl::openflow::cofport& a_new_port = ports.add_port(/*portno=*/1);
+
+
+	// get reference to existing port or create new empty one
+	rofl::openflow::cofport& an_existing_port = ports.set_port(/*portno=*/1);
+
+
+	// get const reference to existing port
+	try {
+		const rofl::openflow::cofport& an_existing_port = ports.get_port(/*portno=*/1);
+		(void)an_existing_port;
+
+	} catch (rofl::openflow::ePortsNotFound& e) {
+		/* ... */
+	}
+
+
+	// remove existing port
+	ports.drop_port(/*portno=*/1);
+
+
+	// check for port
+	if (ports.has_port(/*portno=*/1)) {
+		/* ... */
+	}
+
+
+	(void)a_new_port;
+	(void)an_existing_port;
 }
 
 

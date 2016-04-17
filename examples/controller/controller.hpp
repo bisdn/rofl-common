@@ -225,6 +225,39 @@ private:
 			rofl::crofdpt& dpt,
 			const rofl::cauxid& auxid);
 
+	/**
+	 * @brief 	Called when a control connection (main or auxiliary) has been terminated by the peer entity.
+	 *
+	 * @param dpt datapath instance
+	 * @param auxid connection identifier (main: 0)
+	 */
+	virtual void
+	handle_conn_terminated(
+			rofl::crofdpt& dpt,
+			const rofl::cauxid& auxid);
+
+	/**
+	 * @brief	Called when a congestion situation on the control connection occurs
+	 *
+	 * @param dpt datapath instance
+	 * @param auxid control connection identifier (main: 0)
+	 */
+	virtual void
+	handle_conn_congestion_occured(
+			rofl::crofdpt& dpt,
+			const rofl::cauxid& auxid);
+
+	/**
+	 * @brief	Called when a congestion situation on the control connection has been solved
+	 *
+	 * @param dpt datapath instance
+	 * @param auxid control connection identifier (main: 0)
+	 */
+	virtual void
+	handle_conn_congestion_solved(
+			rofl::crofdpt& dpt,
+			const rofl::cauxid& auxid);
+
 private:
 
 	rofl::cdptid                dptid;
