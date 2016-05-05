@@ -1978,6 +1978,8 @@ cofaction_set_field::pack(
 	if (buflen < cofaction_set_field::length())
 		throw eInvalid("cofaction_set_field::pack() buflen too short", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
+	memset(buf,0,buflen);
+
 	cofaction::pack(buf, sizeof(struct rofl::openflow::ofp_action_header));
 
 	switch (get_version()) {
