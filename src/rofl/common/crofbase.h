@@ -2376,6 +2376,21 @@ public:
 	{};
 
 	/**
+	 * @brief	Timer expired while waiting for OpenFlow Experimenter message.
+	 *
+	 * No Experimenter message was received in the specified time interval
+	 * for the given OpenFlow transaction identifier.
+	 *
+	 * @param ctl controller instance
+	 * @param xid OpenFlow transaction identifier
+	 */
+	virtual void
+	handle_experimenter_timeout(
+			rofl::crofctl& ctl,
+			uint32_t xid)
+	{};
+
+	/**
 	 * @brief	OpenFlow error message received.
 	 *
 	 * @param ctl controller instance

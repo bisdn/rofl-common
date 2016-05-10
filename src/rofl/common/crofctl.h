@@ -667,6 +667,21 @@ protected:
 	{};
 
 	/**
+	 * @brief	Timer expired while waiting for OpenFlow Experimenter message.
+	 *
+	 * No Experimenter message was received in the specified time interval
+	 * for the given OpenFlow transaction identifier.
+	 *
+	 * @param ctl controller instance
+	 * @param xid OpenFlow transaction identifier
+	 */
+	virtual void
+	handle_experimenter_timeout(
+			rofl::crofctl& ctl,
+			uint32_t xid)
+	{};
+
+	/**
 	 * @brief	OpenFlow error message received.
 	 *
 	 * @param ctl controller instance
@@ -1336,7 +1351,8 @@ public:
 			uint32_t experimenter_id,
 			uint32_t exp_type,
 			uint8_t *body = NULL,
-			size_t bodylen = 0);
+			size_t bodylen = 0,
+			int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT);
 
 	/**
 	 * @brief	Sends OpenFlow Flow-Removed message to attached controller entity.
@@ -1529,8 +1545,7 @@ private:
 
 	virtual void
 	handle_transaction_timeout(
-			crofchan& chan, crofconn& conn, uint32_t xid, uint8_t type, uint16_t sub_type)
-	{};
+			crofchan& chan, crofconn& conn, uint32_t xid, uint8_t type, uint16_t sub_type);
 
 private:
 
@@ -1562,6 +1577,9 @@ private:
 
 	// last xid sent
 	uint32_t                         xid_last;
+
+	// default request timeout
+	static const time_t              DEFAULT_REQUEST_TIMEOUT = 0; // seconds (0 : no timeout)
 
 	// default async config template
 	rofl::openflow::cofasync_config  async_config_role_default_template;

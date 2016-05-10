@@ -9,6 +9,11 @@ Legend:
 Change log
 ==========
 
+v0.10.8
+
+[B] crofdpt: do not automatically assign xid to experimenter
+    messages
+
 v0.10.7
 
 [B] crofsock: fixed bug in congestion management

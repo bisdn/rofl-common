@@ -1948,14 +1948,13 @@ crofdpt::send_error_message(
 uint32_t
 crofdpt::send_experimenter_message(
 		const rofl::cauxid& auxid,
+		uint32_t xid,
 		uint32_t experimenter_id,
 		uint32_t exp_type,
 		uint8_t* body,
 		size_t bodylen,
 		int timeout_in_secs)
 {
-	uint32_t xid = ++xid_last;
-
 	rofl::openflow::cofmsg* msg = nullptr;
 	try {
 		msg = new rofl::openflow::cofmsg_experimenter(
@@ -1966,7 +1965,11 @@ crofdpt::send_experimenter_message(
 				body,
 				bodylen);
 
-		rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
+		if (timeout_in_secs > 0) {
+			rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
+		} else {
+			rofchan.send_message(auxid, msg);
+		}
 
 	} catch (eRofConnNotConnected& e) {
 		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));

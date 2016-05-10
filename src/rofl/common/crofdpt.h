@@ -1867,6 +1867,7 @@ public:
 	uint32_t
 	send_experimenter_message(
 			const rofl::cauxid& auxid,
+			uint32_t xid,
 			uint32_t exp_id,
 			uint32_t exp_type,
 			uint8_t *body = NULL,
@@ -2129,7 +2130,7 @@ private:
 	uint32_t                         xid_last;
 
 	// default request timeout
-	static const time_t              DEFAULT_REQUEST_TIMEOUT = 5; // seconds
+	static const time_t              DEFAULT_REQUEST_TIMEOUT = 0; // seconds (0 : no timeout)
 
 	// datapath identifier
 	rofl::cdpid                      dpid;

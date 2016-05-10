@@ -64,6 +64,9 @@ make install DESTDIR=$RPM_BUILD_ROOT
 rm -rf $RPM_BUILD_ROOT 
 
 %changelog
+* Tue May 10 2016 Andreas Koepsel <andreas.koepsel@bisdn.de> - v0.10.8
+- [B] crofdpt: do not automatically assign xid to experimenter messages
+
 * Mon Apr 11 2016 Andreas Koepsel <andreas.koepsel@bisdn.de> - v0.10.7
 - [B] crofsock: fixed bug in congestion management
 - [+] cthread: allow level-triggered file descriptors

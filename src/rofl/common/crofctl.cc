@@ -1926,6 +1926,63 @@ crofctl::handle_recv(
 
 
 void
+crofctl::handle_transaction_timeout(
+		crofchan& chan, crofconn& conn, uint32_t xid, uint8_t type, uint16_t sub_type)
+{
+	journal.log(LOG_NOTICE, "transaction ").
+			set_key("xid", (unsigned int)xid).
+				set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+
+	try {
+		switch (get_version()) {
+		case rofl::openflow10::OFP_VERSION: {
+			switch (type) {
+			case rofl::openflow10::OFPT_VENDOR: {
+				crofctl_env::call_env(env).
+						handle_experimenter_timeout(*this, xid);
+			} break;
+			default: {
+
+			};
+			}
+
+		} break;
+		case rofl::openflow12::OFP_VERSION: {
+			switch (type) {
+			case rofl::openflow12::OFPT_EXPERIMENTER: {
+				crofctl_env::call_env(env).
+						handle_experimenter_timeout(*this, xid);
+			} break;
+			default: {
+
+			};
+			}
+
+		} break;
+		case rofl::openflow13::OFP_VERSION: {
+			switch (type) {
+			case rofl::openflow13::OFPT_EXPERIMENTER: {
+				crofctl_env::call_env(env).
+						handle_experimenter_timeout(*this, xid);
+			} break;
+			default: {
+
+			};
+			}
+
+		} break;
+		default: {
+
+		};
+		}
+
+	} catch (eRofCtlNotFound& e) {
+		/* do nothing */
+	}
+}
+
+
+void
 crofctl::send_features_reply(
 		const cauxid& auxid,
 		uint32_t xid,
@@ -2553,7 +2610,8 @@ crofctl::send_experimenter_message(
 		uint32_t experimenter_id,
 		uint32_t exp_type,
 		uint8_t* body,
-		size_t bodylen)
+		size_t bodylen,
+		int timeout_in_secs)
 {
 	rofl::openflow::cofmsg* msg = nullptr;
 	try {
@@ -2565,7 +2623,11 @@ crofctl::send_experimenter_message(
 				body,
 				bodylen);
 
-		rofchan.send_message(auxid, msg);
+		if (timeout_in_secs > 0) {
+			rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
+		} else {
+			rofchan.send_message(auxid, msg);
+		}
 
 	} catch (eRofConnNotConnected& e) {
 		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
