@@ -1459,6 +1459,69 @@ crofsock::handle_write_event(
 
 
 
+bool
+crofsock::send_from_buffer()
+{
+	/* send memory block via socket in non-blocking mode */
+	int nbytes = ::send(sd, txbuffer.somem() + msg_bytes_sent, txlen - msg_bytes_sent, MSG_DONTWAIT | MSG_NOSIGNAL);
+
+	/* error occured */
+	if (nbytes < 0) {
+		switch (errno) {
+		case EAGAIN: /* socket would block */ {
+			tx_is_running = false;
+			tx_fragment_pending = true;
+			flag_set(FLAG_CONGESTED, true);
+			txthread.add_write_fd(sd);
+
+			if (not flag_test(FLAG_TX_BLOCK_QUEUEING)) {
+				/* block transmission of further packets */
+				flag_set(FLAG_TX_BLOCK_QUEUEING, true);
+				/* remember queue size, when congestion occured */
+				txqueue_size_congestion_occured = txqueue_pending_pkts;
+				/* threshold for re-enabling acceptance of packets */
+				txqueue_size_tx_threshold = txqueue_pending_pkts / 2;
+
+				if (trace) {
+					journal.log(LOG_TRACE, "congestion occured").
+						set_key("txqueue_pending_pkts", txqueue_pending_pkts).
+						set_key("txqueue_size_congestion_occured", txqueue_size_congestion_occured).
+						set_key("txqueue_size_tx_threshold", txqueue_size_tx_threshold).
+						set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
+				}
+
+				crofsock_env::call_env(env).congestion_occured_indication(*this);
+			}
+		} return true;
+		case SIGPIPE:
+		default: {
+			journal.log(LOG_NOTICE, "::send() syscall failed, error: %d (%s)", errno, strerror(errno)).
+				set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+			tx_is_running = false;
+		} return true;
+		}
+
+	/* at least some bytes were sent successfully */
+	} else {
+		msg_bytes_sent += nbytes;
+		flag_set(FLAG_CONGESTED, false);
+
+		/* short write */
+		if (msg_bytes_sent < txlen) {
+			tx_fragment_pending = true;
+
+			/* packet successfully sent */
+		} else {
+			tx_fragment_pending = false;
+			txqueue_pending_pkts--;
+		}
+	}
+
+	return false;
+}
+
+
+
 void
 crofsock::send_from_queue()
 {
@@ -1475,6 +1538,14 @@ crofsock::send_from_queue()
 	bool reschedule;
 	do {
 		reschedule = false;
+
+		// Attempt any pending fragments first
+		if (tx_fragment_pending) {
+			if (send_from_buffer()) {
+				return;
+			}
+		}
+
 		for (unsigned int queue_id = 0; queue_id < QUEUE_MAX; ++queue_id) {
 
 			for (unsigned int num = 0; num < txweights[queue_id]; ++num) {
@@ -1511,68 +1582,15 @@ crofsock::send_from_queue()
 					delete msg;
 				}
 
-				/* send memory block via socket in non-blocking mode */
-				int nbytes = ::send(sd, txbuffer.somem() + msg_bytes_sent, txlen - msg_bytes_sent, MSG_DONTWAIT | MSG_NOSIGNAL);
-
-				/* error occured */
-				if (nbytes < 0) {
-					switch (errno) {
-					case EAGAIN: /* socket would block */ {
-						tx_is_running = false;
-						tx_fragment_pending = true;
-						flag_set(FLAG_CONGESTED, true);
-						txthread.add_write_fd(sd);
-
-						if (not flag_test(FLAG_TX_BLOCK_QUEUEING)) {
-							/* block transmission of further packets */
-							flag_set(FLAG_TX_BLOCK_QUEUEING, true);
-							/* remember queue size, when congestion occured */
-							txqueue_size_congestion_occured = txqueue_pending_pkts;
-							/* threshold for re-enabling acceptance of packets */
-							txqueue_size_tx_threshold = txqueue_pending_pkts / 2;
-
-							if (trace) {
-								journal.log(LOG_TRACE, "congestion occured").
-										set_key("txqueue_pending_pkts", txqueue_pending_pkts).
-										set_key("txqueue_size_congestion_occured", txqueue_size_congestion_occured).
-										set_key("txqueue_size_tx_threshold", txqueue_size_tx_threshold).
-										set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
-							}
-
-							crofsock_env::call_env(env).congestion_occured_indication(*this);
-						}
-					} return;
-					case SIGPIPE:
-					default: {
-						journal.log(LOG_NOTICE, "::send() syscall failed, error: %d (%s)", errno, strerror(errno)).
-								set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
-						tx_is_running = false;
-					} return;
-					}
-
-				/* at least some bytes were sent successfully */
-				} else {
-					msg_bytes_sent += nbytes;
-					flag_set(FLAG_CONGESTED, false);
-
-					/* short write */
-					if (msg_bytes_sent < txlen) {
-						tx_fragment_pending = true;
-
-					/* packet successfully sent */
-					} else {
-						tx_fragment_pending = false;
-						txqueue_pending_pkts--;
-					}
+				if (send_from_buffer()) {
+					return;
 				}
-
 			}
 
 			if (not txqueues[queue_id].empty()) {
 				reschedule = true;
 			}
 		}
-
 
 		if ((not flag_test(FLAG_CONGESTED)) && flag_test(FLAG_TX_BLOCK_QUEUEING)) {
 			if (txqueue_pending_pkts <= txqueue_size_tx_threshold) {

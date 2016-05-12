@@ -6,6 +6,11 @@ Legend:
 [O] Other
 [A] API semantics
 
+On This Branch
+==============
+[B] crofsock: send_from_queue gets into CPU spin if last send in queue fragments.
+[B] cofaction: (~ line 1980) zero buffer on set_field as OpenVSwitch checks for zero padding.
+
 Change log
 ==========
 

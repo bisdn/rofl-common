@@ -855,6 +855,8 @@ private:
 	send_from_queue();
 
 private:
+	bool
+	send_from_buffer();
 
 	void
 	backoff_reconnect(
