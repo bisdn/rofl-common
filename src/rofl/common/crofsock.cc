@@ -11,6 +11,8 @@
  */
 
 #include "crofsock.h"
+#include <climits>
+
 
 using namespace rofl;
 
@@ -1336,7 +1338,11 @@ crofsock::send_message(
 		throw eRofQueueFull("crofsock::send_message() transmission blocked, congestion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 
-	txqueue_pending_pkts++;
+	txqueue_pending_pkts_mutex.lock();
+	if (txqueue_pending_pkts < UINT_MAX) {
+		txqueue_pending_pkts++;
+	}
+	txqueue_pending_pkts_mutex.unlock();
 
 	switch (state) {
 	case STATE_TCP_ESTABLISHED:
@@ -1513,7 +1519,12 @@ crofsock::send_from_buffer()
 			/* packet successfully sent */
 		} else {
 			tx_fragment_pending = false;
-			txqueue_pending_pkts--;
+
+			txqueue_pending_pkts_mutex.lock();
+			if (txqueue_pending_pkts > 0) {
+				txqueue_pending_pkts--;
+			}
+			txqueue_pending_pkts_mutex.unlock();
 		}
 	}
 

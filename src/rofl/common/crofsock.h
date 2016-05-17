@@ -34,6 +34,7 @@
 #include <bitset>
 #include <iostream>
 #include <algorithm>
+#include <mutex>
 
 #include <openssl/bio.h>
 #include <openssl/ssl.h>
@@ -989,6 +990,7 @@ private:
 
     // number of packets waiting for transmission
     unsigned int                txqueue_pending_pkts;
+	std::mutex                  txqueue_pending_pkts_mutex;
 
     // size of tx queue when congestion occured
     unsigned int                txqueue_size_congestion_occured;
