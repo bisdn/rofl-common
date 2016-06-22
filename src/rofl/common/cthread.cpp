@@ -11,6 +11,7 @@
 
 #include "cthread.hpp"
 #include <iostream>
+#include <sys/eventfd.h>
 
 using namespace rofl;
 
@@ -30,8 +31,6 @@ cthread::initialize()
 		cthread::run_thread[this] = false;
 	}
 
-	int pipe_flags = O_NONBLOCK;
-
 	tid = 0;
 
 	wakeup_pending = false;
@@ -41,18 +40,19 @@ cthread::initialize()
 		throw eSysCall("eSysCall", "epoll_create", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 
-	// pipe
-	if (pipe2(pipefd, pipe_flags) < 0) {
-		throw eSysCall("eSysCall", "pipe2", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+	// eventfd
+	event_fd = eventfd(0, 0);
+	if (event_fd < 0) {
+		throw eSysCall("eSysCall", "eventfd", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
 
-	// register pipe read-fd to kernel
+	// register event_fd to kernel
 	struct epoll_event epev;
 	memset((uint8_t*)&epev, 0, sizeof(struct epoll_event));
 	epev.events = EPOLLIN; // level-triggered
-	epev.data.fd = pipefd[PIPE_READ_FD];
+	epev.data.fd = event_fd;
 
-	if (epoll_ctl(epfd, EPOLL_CTL_ADD, pipefd[PIPE_READ_FD], &epev) < 0) {
+	if (epoll_ctl(epfd, EPOLL_CTL_ADD, event_fd, &epev) < 0) {
 		switch (errno) {
 		case EEXIST: {
 			/* do nothing */
@@ -85,13 +85,13 @@ cthread::release()
 		fds.clear();
 	}
 
-	// deregister pipe read-fd from kernel
+	// deregister event_fd from kernel
 	struct epoll_event epev;
 	memset((uint8_t*)&epev, 0, sizeof(struct epoll_event));
 	epev.events = 0;
-	epev.data.fd = pipefd[PIPE_READ_FD];
+	epev.data.fd = event_fd;
 
-	if (epoll_ctl(epfd, EPOLL_CTL_DEL, pipefd[PIPE_READ_FD], &epev) < 0) {
+	if (epoll_ctl(epfd, EPOLL_CTL_DEL, event_fd, &epev) < 0) {
 		switch (errno) {
 		case ENOENT: {
 			/* do nothing */
@@ -104,8 +104,7 @@ cthread::release()
 
 	::close(epfd);
 
-	::close(pipefd[PIPE_READ_FD]);
-	::close(pipefd[PIPE_WRITE_FD]);
+	::close(event_fd);
 
 	{
 		/* remove boolean parameter run_thread from static map */
@@ -470,8 +469,8 @@ cthread::wakeup()
 	case STATE_RUNNING: {
 		if (wakeup_pending)
 				return;
-		char c = 1;
-		if (write(pipefd[PIPE_WRITE_FD], &c, sizeof(c)) < 0) {
+		uint64_t c = 1;
+		if (write(event_fd, &c, sizeof(c)) < 0) {
 			switch (errno) {
 			case EAGAIN: {
 				// do nothing
@@ -480,7 +479,7 @@ cthread::wakeup()
 				// signal received
 			} break;
 			default: {
-				throw eSysCall("eSysCall", "write", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+				throw eSysCall("eSysCall", "write to event_fd", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 			};
 			}
 		}
@@ -561,15 +560,15 @@ cthread::run_loop()
 					if (not get_run_thread())
 						goto out;
 
-					if (events[i].data.fd == pipefd[PIPE_READ_FD]) {
+					if (events[i].data.fd == event_fd) {
 
 						if (not get_run_thread()) {
 							return &retval;
 						}
 
 						if (events[i].events & EPOLLIN) {
-							char c;
-							int rcode = read(pipefd[PIPE_READ_FD], &c, sizeof(c));
+							uint64_t c;
+							int rcode = read(event_fd, &c, sizeof(c));
 							(void)rcode;
 							wakeup_pending = false;
 							cthread_env::call_env(env).handle_wakeup(*this);
