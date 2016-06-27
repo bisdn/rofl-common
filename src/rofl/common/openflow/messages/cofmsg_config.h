@@ -184,7 +184,7 @@ private:
 		switch (get_version()) {
 		case rofl::openflow10::OFP_VERSION: {
 			if (get_flags() == rofl::openflow10::OFPC_FRAG_NORMAL)
-				ss.append("FRAG-NORMAL "); return ss;
+				ss.append("FRAG-NORMAL ");
 			if (get_flags() & rofl::openflow10::OFPC_FRAG_DROP)
 				ss.append("FRAG-DROP ");
 			if (get_flags() & rofl::openflow10::OFPC_FRAG_REASM)
@@ -192,7 +192,7 @@ private:
 		} break;
 		case rofl::openflow12::OFP_VERSION: {
 			if (get_flags() == rofl::openflow12::OFPC_FRAG_NORMAL)
-				ss.append("FRAG-NORMAL "); return ss;
+				ss.append("FRAG-NORMAL ");
 			if (get_flags() & rofl::openflow12::OFPC_FRAG_DROP)
 				ss.append("FRAG-DROP ");
 			if (get_flags() & rofl::openflow12::OFPC_FRAG_REASM)
@@ -202,7 +202,7 @@ private:
 		} break;
 		default: {
 			if (get_flags() == rofl::openflow13::OFPC_FRAG_NORMAL)
-				ss.append("FRAG-NORMAL "); return ss;
+				ss.append("FRAG-NORMAL ");
 			if (get_flags() & rofl::openflow13::OFPC_FRAG_DROP)
 				ss.append("FRAG-DROP ");
 			if (get_flags() & rofl::openflow13::OFPC_FRAG_REASM)
@@ -353,7 +353,7 @@ private:
 		switch (get_version()) {
 		case rofl::openflow10::OFP_VERSION: {
 			if (get_flags() == rofl::openflow10::OFPC_FRAG_NORMAL)
-				ss.append("FRAG-NORMAL "); return ss;
+				ss.append("FRAG-NORMAL ");
 			if (get_flags() & rofl::openflow10::OFPC_FRAG_DROP)
 				ss.append("FRAG-DROP ");
 			if (get_flags() & rofl::openflow10::OFPC_FRAG_REASM)
@@ -361,7 +361,7 @@ private:
 		} break;
 		case rofl::openflow12::OFP_VERSION: {
 			if (get_flags() == rofl::openflow12::OFPC_FRAG_NORMAL)
-				ss.append("FRAG-NORMAL "); return ss;
+				ss.append("FRAG-NORMAL ");
 			if (get_flags() & rofl::openflow12::OFPC_FRAG_DROP)
 				ss.append("FRAG-DROP ");
 			if (get_flags() & rofl::openflow12::OFPC_FRAG_REASM)
@@ -371,7 +371,7 @@ private:
 		} break;
 		default: {
 			if (get_flags() == rofl::openflow13::OFPC_FRAG_NORMAL)
-				ss.append("FRAG-NORMAL "); return ss;
+				ss.append("FRAG-NORMAL ");
 			if (get_flags() & rofl::openflow13::OFPC_FRAG_DROP)
 				ss.append("FRAG-DROP ");
 			if (get_flags() & rofl::openflow13::OFPC_FRAG_REASM)
