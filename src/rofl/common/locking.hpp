@@ -13,6 +13,8 @@
 #define SRC_ROFL_COMMON_LOCKING_HPP_
 
 #include <pthread.h>
+#include <unistd.h>
+#include <signal.h>
 
 #include "rofl/common/exception.hpp"
 
@@ -24,8 +26,7 @@ public:
 public:
 	~crwlock() {
 		if (pthread_rwlock_destroy(&rwlock) < 0) {
-			throw eSysCall("pthread_rwlock_destroy syscall failed").
-					set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+			kill(getpid(), SIGINT);
 		}
 	};
 	crwlock() {
@@ -42,8 +43,7 @@ class AcquireReadLock {
 public:
 	~AcquireReadLock() {
 		if (pthread_rwlock_unlock(rwlock) < 0) {
-			throw eSysCall("pthread_rwlock_unlock syscall failed").
-					set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+			kill(getpid(), SIGINT);
 		}
 	};
 	AcquireReadLock(
@@ -62,8 +62,7 @@ class AcquireReadWriteLock {
 public:
 	~AcquireReadWriteLock() {
 		if (pthread_rwlock_unlock(rwlock) < 0) {
-			throw eSysCall("pthread_rwlock_unlock syscall failed").
-					set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+			kill(getpid(), SIGINT);
 		}
 	};
 	AcquireReadWriteLock(
