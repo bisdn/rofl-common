@@ -500,18 +500,16 @@ public:
 	 * peer entity.
 	 *
 	 * @param dptid internal datapath handle (not DPID)
-	 * @param versionbitmap version bitmap defining all acceptable OpenFlow versions
-	 * @param remove_on_channel_close when true, automatically remove this
-	 * rofl::crofdpt instance, when all OpenFlow control channel connections
-	 * have been terminated
-	 * @param dpid OpenFlow datapath identifier (optional)
+	 * @param raise when true, throw exception instead of adding a new instance
 	 * @result reference to existing or new rofl::crofdpt instance
 	 */
 	rofl::crofdpt&
 	set_dpt(
-		const rofl::cdptid& dptid) {
+		const rofl::cdptid& dptid, bool raise = false) {
 		AcquireReadWriteLock rwlock(rofdpts_rwlock);
 		if (rofdpts.find(dptid) == rofdpts.end()) {
+			if (raise)
+				throw eRofBaseNotFound("rofl::crofbase::set_dpt() dptid not found");
 			rofdpts[dptid] = new crofdpt(this, dptid);
 		}
 		return *(rofdpts[dptid]);
