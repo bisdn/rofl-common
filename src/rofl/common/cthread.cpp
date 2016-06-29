@@ -41,7 +41,7 @@ cthread::initialize()
 	}
 
 	// eventfd
-	event_fd = eventfd(0, 0);
+	event_fd = eventfd(0, EFD_NONBLOCK);
 	if (event_fd < 0) {
 		throw eSysCall("eSysCall", "eventfd", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
