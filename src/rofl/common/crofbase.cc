@@ -488,7 +488,7 @@ crofbase::handle_established(
 		if (conn.get_auxid() == rofl::cauxid(0)) {
 			journal.log(LOG_INFO, "datapath attached").
 						set_key("dptid", dptid.str()).
-						set_key("version", get_dpt(dptid).get_version());
+						set_key("version", get_const_dpt(dptid).get_version());
 			handle_dpt_open(set_dpt(dptid));
 		}
 		journal.log(LOG_INFO, "connection established").
