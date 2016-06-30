@@ -64,6 +64,10 @@ make install DESTDIR=$RPM_BUILD_ROOT
 rm -rf $RPM_BUILD_ROOT 
 
 %changelog
+* Thu Jun 30 2016 Tobias Jungel <tobias.jungel@bisdn.de> - v0.10.9
+- [+] fixed issues with compilation under GCC6
+- [+] Extended behaviour of method rofl::crofbase::set_dpt()
+
 * Tue May 10 2016 Andreas Koepsel <andreas.koepsel@bisdn.de> - v0.10.8
 - [B] crofdpt: do not automatically assign xid to experimenter messages
 
