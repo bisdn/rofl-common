@@ -1421,7 +1421,7 @@ private:
 	rofl::openflow::cofhello_elem_versionbitmap versionbitmap_peer;
 
 	// OpenFlow version negotiated
-	uint8_t                         ofp_version;
+	std::atomic_uint_fast8_t        ofp_version;
 
 	// random number generator
 	rofl::crandom                   random;

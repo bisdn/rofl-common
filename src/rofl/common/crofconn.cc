@@ -1135,7 +1135,7 @@ crofconn::handle_recv(
 		 * exceed the rxqueues capacity threshold. Once, the application
 		 * starts reading message from the rxqueues, we reenable the
 		 * socket. See method crofconn::handle_rx_messages() for details. */
-		switch (ofp_version) {
+		switch (ofp_version.load()) {
 		case rofl::openflow10::OFP_VERSION: {
 			switch (msg->get_type()) {
 			case rofl::openflow10::OFPT_PACKET_IN:
@@ -1377,7 +1377,7 @@ crofconn::handle_rx_messages()
 					}
 
 					/* segmentation and reassembly */
-					switch (ofp_version) {
+					switch (ofp_version.load()) {
 					case rofl::openflow10::OFP_VERSION:
 					case rofl::openflow12::OFP_VERSION: {
 						if (trace) {
