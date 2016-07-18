@@ -34,6 +34,7 @@
 #include <bitset>
 #include <iostream>
 #include <algorithm>
+#include <atomic>
 
 #include <openssl/bio.h>
 #include <openssl/ssl.h>
@@ -976,17 +977,17 @@ private:
     static unsigned int const   DEFAULT_MAX_PKTS_RVCD_PER_ROUND = 16;
 
     // flag for RX reception on socket
-    bool                        rx_disabled;
+    std::atomic_bool            rx_disabled;
 
     // flag for TX reception on socket
-    bool                        tx_disabled;
+    std::atomic_bool            tx_disabled;
 
 	/*
 	 * scheduler and txqueues
 	 */
 
     // number of packets waiting for transmission
-    unsigned int                txqueue_pending_pkts;
+    std::atomic_uint            txqueue_pending_pkts;
 
     // size of tx queue when congestion occured
     unsigned int                txqueue_size_congestion_occured;
@@ -1005,7 +1006,7 @@ private:
 	 */
 
 	// txthread is actively sending messages
-	bool                        tx_is_running;
+	std::atomic_bool            tx_is_running;
 
 	// fragment pending
 	bool                        tx_fragment_pending;
