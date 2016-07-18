@@ -17,6 +17,7 @@
 #include <list>
 #include <bitset>
 #include <inttypes.h>
+#include <atomic>
 
 #include "rofl/common/exception.hpp"
 #include "rofl/common/crofconn.h"
@@ -683,7 +684,7 @@ private:
 	uint8_t                             last_auxid;
 
 	// OFP version negotiated
-	uint8_t                             ofp_version;
+	std::atomic_uint_fast8_t            ofp_version;
 
 	// state related flags
 	std::bitset<32>                     flags;
