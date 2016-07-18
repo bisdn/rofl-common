@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <strings.h>
 #include <bitset>
+#include <atomic>
 
 #include "rofl/common/cmemory.h"
 
@@ -2127,7 +2128,7 @@ private:
 	rofl::crandom                    random;
 
 	// last xid sent
-	uint32_t                         xid_last;
+	std::atomic_uint_fast32_t        xid_last;
 
 	// default request timeout
 	static const time_t              DEFAULT_REQUEST_TIMEOUT = 0; // seconds (0 : no timeout)
