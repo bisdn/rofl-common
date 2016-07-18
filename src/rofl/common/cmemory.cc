@@ -90,6 +90,7 @@ cmemory::operator= (
 
 	mallocate(m.memlen());
 
+	if(m.somem())
 	memcpy(this->somem(), m.somem(), m.memlen());
 
 	return *this;
@@ -304,6 +305,7 @@ cmemory::pack(
 {
 	if (buflen < memlen())
 		throw eInvalid("cmemory::pack()");
+	if(somem())
 	memcpy(buf, somem(), memlen());
 }
 
