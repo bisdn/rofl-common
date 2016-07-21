@@ -77,7 +77,7 @@ public:
 	cpacket(
 			uint8_t *buf, size_t buflen, size_t head = DEFAULT_HSPACE, size_t tail = DEFAULT_TSPACE) :
 				rofl::cmemory(head + buflen + tail), head(head), tail(tail), initial_head(head), initial_tail(tail)
-		{ memcpy(somem()+head, buf, buflen); };
+		{ if(buf) memcpy(somem()+head, buf, buflen); };
 
 	/**
 	 *
