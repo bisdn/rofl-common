@@ -12,6 +12,7 @@
 *.swo
 *.m4
 *.kdev4
+*.trs
 
 Makefile.in
 Makefile
@@ -30,10 +31,19 @@ m4
 ar-lib
 test-driver
 
-src/rofl_pipeline.h
-
+/test/**/*test
+/tags
 /build-*
 /build/*
+
+/examples/controller/controller
+/examples/datapath/datapath
+/examples/ethswctld/ethswctld
+/examples/tcpclient/client
+/examples/tcpserver/server
+/src/rofl/rofl_common.pc
+/src/rofl_common_conf.h
+/tools/rpmbuild/SPECS/rofl_common.spec
 
 !.gitignore
 !.travis.yml
