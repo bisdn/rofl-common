@@ -526,7 +526,7 @@ cthread::run_loop()
 				uint32_t timer_id = 0;
 				ctimespec ts;
 				{
-					AcquireReadLock lock(tlock);
+					AcquireReadWriteLock lock(tlock);
 					if (ordered_timers.empty()) {
 						break;
 					}
