@@ -1350,7 +1350,8 @@ crofsock::send_message(
 				txqueues[QUEUE_PKT].store(msg, true);
 			} break;
 			case rofl::openflow10::OFPT_FLOW_MOD:
-			case rofl::openflow10::OFPT_FLOW_REMOVED: {
+			case rofl::openflow10::OFPT_FLOW_REMOVED:
+			case rofl::openflow10::OFPT_BARRIER_REQUEST: {
 				txqueues[QUEUE_FLOW].store(msg, true);
 			} break;
 			case rofl::openflow10::OFPT_ECHO_REQUEST:
@@ -1372,7 +1373,8 @@ crofsock::send_message(
 			case rofl::openflow12::OFPT_FLOW_REMOVED:
 			case rofl::openflow12::OFPT_GROUP_MOD:
 			case rofl::openflow12::OFPT_PORT_MOD:
-			case rofl::openflow12::OFPT_TABLE_MOD: {
+			case rofl::openflow12::OFPT_TABLE_MOD:
+			case rofl::openflow12::OFPT_BARRIER_REQUEST: {
 				txqueues[QUEUE_FLOW].store(msg, true);
 			} break;
 			case rofl::openflow12::OFPT_ECHO_REQUEST:
@@ -1395,7 +1397,8 @@ crofsock::send_message(
 			case rofl::openflow13::OFPT_FLOW_REMOVED:
 			case rofl::openflow13::OFPT_GROUP_MOD:
 			case rofl::openflow13::OFPT_PORT_MOD:
-			case rofl::openflow13::OFPT_TABLE_MOD: {
+			case rofl::openflow13::OFPT_TABLE_MOD:
+			case rofl::openflow13::OFPT_BARRIER_REQUEST: {
 				txqueues[QUEUE_FLOW].store(msg, true);
 			} break;
 			case rofl::openflow13::OFPT_ECHO_REQUEST:
