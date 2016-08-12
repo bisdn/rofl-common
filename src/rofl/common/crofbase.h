@@ -744,17 +744,16 @@ public:
 	 * peer entity.
 	 *
 	 * @param ctlid internal controller handle
-	 * @param versionbitmap version bitmap defining all acceptable OpenFlow versions
-	 * @param remove_on_channel_close when true, automatically remove this
-	 * rofl::crofctl instance, when all OpenFlow control channel connections
-	 * have been terminated
+	 * @param raise when true, throw exception instead of adding a new instance
 	 * @result reference to existing or new rofl::crofctl instance
 	 */
 	rofl::crofctl&
 	set_ctl(
-		const rofl::cctlid& ctlid) {
+		const rofl::cctlid& ctlid, bool raise = false) {
 		AcquireReadWriteLock rwlock(rofctls_rwlock);
 		if (rofctls.find(ctlid) == rofctls.end()) {
+			if (raise)
+				throw eRofBaseNotFound("rofl::crofbase::set_ctl() ctlid not found");
 			rofctls[ctlid] = new crofctl(this, ctlid);
 		}
 		return *(rofctls[ctlid]);
