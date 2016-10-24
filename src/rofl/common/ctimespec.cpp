@@ -39,19 +39,16 @@ ctimespec
 ctimespec::operator- (
 		const ctimespec& t) const
 {
-	ctimespec timer;
+	ctimespec timer(::timespec {0,0});
 
-	if (t.tspec.tv_nsec > tspec.tv_nsec) {
-		if (tspec.tv_sec > t.tspec.tv_sec) {
+	if (tspec.tv_sec > t.tspec.tv_sec) {
+		if (t.tspec.tv_nsec > tspec.tv_nsec) {
 			timer.tspec.tv_nsec = tspec.tv_nsec - t.tspec.tv_nsec + CC_TIMER_ONE_SECOND_NS;
-			timer.tspec.tv_sec	= tspec.tv_sec  - t.tspec.tv_sec  - CC_TIMER_ONE_SECOND_S;
+			timer.tspec.tv_sec  = tspec.tv_sec  - t.tspec.tv_sec  - CC_TIMER_ONE_SECOND_S;
 		} else {
-			timer.tspec.tv_nsec = 0;
-			timer.tspec.tv_sec	= 0;
+			timer.tspec.tv_nsec = tspec.tv_nsec - t.tspec.tv_nsec;
+			timer.tspec.tv_sec  = tspec.tv_sec  - t.tspec.tv_sec;
 		}
-	} else {
-		timer.tspec.tv_nsec	= tspec.tv_nsec - t.tspec.tv_nsec;
-		timer.tspec.tv_sec	= tspec.tv_sec  - t.tspec.tv_sec;
 	}
 
 	return timer;
@@ -80,17 +77,14 @@ ctimespec&
 ctimespec::operator-= (
 		const ctimespec& t)
 {
-	if (t.tspec.tv_nsec > tspec.tv_nsec) {
-		if (tspec.tv_sec > t.tspec.tv_sec) {
-			tspec.tv_nsec 	= tspec.tv_nsec - t.tspec.tv_nsec + CC_TIMER_ONE_SECOND_NS;
-			tspec.tv_sec	= tspec.tv_sec  - t.tspec.tv_sec  - CC_TIMER_ONE_SECOND_S;
+	if (tspec.tv_sec > t.tspec.tv_sec) {
+		if (t.tspec.tv_nsec > tspec.tv_nsec) {
+			tspec.tv_nsec = tspec.tv_nsec - t.tspec.tv_nsec + CC_TIMER_ONE_SECOND_NS;
+			tspec.tv_sec  = tspec.tv_sec  - t.tspec.tv_sec  - CC_TIMER_ONE_SECOND_S;
 		} else {
-			tspec.tv_nsec 	= 0;
-			tspec.tv_sec	= 0;
+			tspec.tv_nsec = tspec.tv_nsec - t.tspec.tv_nsec;
+			tspec.tv_sec  = tspec.tv_sec  - t.tspec.tv_sec;
 		}
-	} else {
-		tspec.tv_nsec	= tspec.tv_nsec - t.tspec.tv_nsec;
-		tspec.tv_sec	= tspec.tv_sec  - t.tspec.tv_sec;
 	}
 
 	return *this;
