@@ -148,6 +148,15 @@ public:
 	 *
 	 */
 	ctimespec(
+			struct timespec tspec,
+			const cclockid& clk_id = cclockid(CLOCK_MONOTONIC)) :
+			        timer_id(0),
+			        clk_id(clk_id)
+	{ this->tspec.tv_nsec = tspec.tv_nsec; this->tspec.tv_sec = tspec.tv_sec; };
+	/**
+	 *
+	*/
+	ctimespec(
 			const ctimespec& ts)
 	{ *this = ts; };
 
