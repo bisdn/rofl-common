@@ -22,7 +22,7 @@ crandom::crandom() :
 	int fd = 0;
 	int rc = 0;
 
-	if ((fd = open(DEV_URANDOM.c_str(), O_RDONLY, "r")) < 0) {
+	if ((fd = open(DEV_URANDOM.c_str(), O_RDONLY)) < 0) {
 		throw eSysCall("crandom::crandom() open() for /dev/urandom failed");
 	}
 
