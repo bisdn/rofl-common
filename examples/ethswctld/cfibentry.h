@@ -115,13 +115,11 @@ public:
 	 * @brief	cfibentry constructor
 	 *
 	 * @param env environment for this cfibentry instance
-	 * @param dptid rofl-common's internal datapath handle
 	 * @param hwaddr ethernet hardware address used by station
 	 * @param port_no OpenFlow port number of port pointing towards the station
 	 */
 	cfibentry(
 			cfibentry_env *env,
-			const rofl::cdptid& dptid,
 			const rofl::caddress_ll& hwaddr,
 			uint32_t port_no);
 
@@ -207,8 +205,6 @@ private:
 
 	// pointer to class defining the environment for this cfibentry
 	cfibentry_env*              env;
-	// rofl-common's internal datapath handle
-	rofl::cdptid                dptid;
 
 	// OpenFlow port number pointing towards port
 	uint32_t                    port_no;

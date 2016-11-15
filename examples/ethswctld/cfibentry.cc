@@ -12,11 +12,9 @@ using namespace rofl::examples::ethswctld;
 
 cfibentry::cfibentry(
 		cfibentry_env *fibenv,
-		const rofl::cdptid& dptid,
 		const rofl::caddress_ll& hwaddr,
 		uint32_t port_no) :
 				env(fibenv),
-				dptid(dptid),
 				port_no(port_no),
 				hwaddr(hwaddr),
 				entry_timeout(CFIBENTRY_DEFAULT_TIMEOUT),

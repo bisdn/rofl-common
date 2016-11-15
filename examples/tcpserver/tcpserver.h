@@ -37,8 +37,7 @@ public:
 	 * @brief	tcpserver constructor
 	 */
 	tcpserver() :
-		keep_on_running(true),
-		dptid(0)
+		keep_on_running(true)
 	{
 
 	};
@@ -138,12 +137,12 @@ private:
 		stop();
 
 		for (auto dptid : crofbase::dpt_keys()) {
-			std::cerr << ">>> dpt journal for dptid: " << dptid.str() << " <<<" << std::endl;
+			std::cerr << ">>> dpt journal for dptid: " << dptid << " <<<" << std::endl;
 			std::cerr << crofbase::get_dpt(dptid).get_journal() << std::endl;
 			for (auto auxid : crofbase::get_dpt(dptid).keys()) {
-				std::cerr << ">>> conn journal for dptid: " << dptid.str() << ", auxid: " << auxid.str() << " <<<" << std::endl;
+				std::cerr << ">>> conn journal for dptid: " << dptid << ", auxid: " << auxid.str() << " <<<" << std::endl;
 				std::cerr << crofbase::get_dpt(dptid).get_conn(auxid).get_journal() << std::endl;
-				std::cerr << ">>> tcp journal for dptid: " << dptid.str() << ", auxid: " << auxid.str() << " <<<" << std::endl;
+				std::cerr << ">>> tcp journal for dptid: " << dptid << ", auxid: " << auxid.str() << " <<<" << std::endl;
 				std::cerr << crofbase::get_dpt(dptid).get_conn(auxid).get_tcp_journal() << std::endl;
 			}
 		}
@@ -265,8 +264,6 @@ private:
 private:
 
 	bool                        keep_on_running;
-
-	rofl::cdptid                dptid;
 };
 
 }; // namespace examples
