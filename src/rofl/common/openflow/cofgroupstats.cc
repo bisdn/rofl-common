@@ -179,7 +179,6 @@ cofgroup_stats_reply::unpack(uint8_t *buf, size_t buflen)
 		uint16_t length = be16toh(stats->length);
 
 		buf += sizeof(struct rofl::openflow12::ofp_group_stats);
-		buflen -= sizeof(struct rofl::openflow12::ofp_group_stats);
 		length -= sizeof(struct rofl::openflow12::ofp_group_stats);
 
 		uint32_t bucket_counter_id = 0;
@@ -210,7 +209,6 @@ cofgroup_stats_reply::unpack(uint8_t *buf, size_t buflen)
 		uint16_t length = be16toh(stats->length);
 
 		buf += sizeof(struct rofl::openflow13::ofp_group_stats);
-		buflen -= sizeof(struct rofl::openflow13::ofp_group_stats);
 		length -= sizeof(struct rofl::openflow13::ofp_group_stats);
 
 		uint32_t bucket_counter_id = 0;
