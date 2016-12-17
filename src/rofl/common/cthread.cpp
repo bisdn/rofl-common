@@ -310,30 +310,30 @@ cthread::add_timer(
 		uint32_t timer_id, const ctimespec& tspec)
 {
 	AcquireReadWriteLock lock(tlock);
-	if (timers.find(timer_id) != timers.end()) {
+	std::map<uint32_t, ctimer*>::iterator timer_it = timers.find(timer_id);
+	if (timer_it != timers.end()) {
 		std::set<ctimespec>::iterator it;
 		while ((it = find_if(ordered_timers.begin(), ordered_timers.end(),
 				ctimespec::ctimespec_find_by_timer_id(timer_id))) != ordered_timers.end()) {
 			ordered_timers.erase(it);
 		}
-		delete timers[timer_id];
-		timers.erase(timer_id);
+		delete timer_it->second;
+		timer_it->second = new ctimer(timer_id, tspec);
+	} else {
+		timers[timer_id] = new ctimer(timer_id, tspec);
 	}
-	timers[timer_id] = new ctimer(timer_id, tspec);
 
-	{
-		bool do_wakeup = false;
-		if (ordered_timers.empty() || (tspec < (*ordered_timers.begin()))) {
-			do_wakeup = true;
-		}
+	bool do_wakeup = false;
+	if (ordered_timers.empty() || (tspec < (*ordered_timers.begin()))) {
+		do_wakeup = true;
+	}
 
-		ctimespec ts(tspec);
-		ts.set_timer_id(timer_id);
-		ordered_timers.insert(ts);
+	ctimespec ts(tspec);
+	ts.set_timer_id(timer_id);
+	ordered_timers.insert(ts);
 
-		if ((do_wakeup) && (tid != pthread_self())) {
-			wakeup();
-		}
+	if ((do_wakeup) && (tid != pthread_self())) {
+		wakeup();
 	}
 
 	return *(timers[timer_id]);
