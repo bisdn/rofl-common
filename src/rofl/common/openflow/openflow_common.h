@@ -470,9 +470,9 @@ enum rofl_exp_id_t {
 	ROFL_EXP_ID = 0xa1a2a3a4, // TODO
 };
 
-#define OXM_ROFL_TYPE(x)  (x & 0x00000000fffffe00ULL)
-#define OXM_ROFL_CLASS(x) (x & 0x00000000ffff0000ULL)
-#define OXM_ROFL_FIELD(x) (x & 0x000000000000fe00ULL)
+#define OXM_ROFL_TYPE(x)  (x & UINT64_C(0x00000000fffffe00))
+#define OXM_ROFL_CLASS(x) (x & UINT64_C(0x00000000ffff0000))
+#define OXM_ROFL_FIELD(x) (x & UINT64_C(0x000000000000fe00))
 #define OXM_ROFL_OFB_TYPE(x)    (((uint64_t)          0 << 32) | (OXM_ROFL_TYPE(x)))
 #define OXM_ROFL_OFX_TYPE(x)    (((uint64_t)ROFL_EXP_ID << 32) | (OXM_ROFL_TYPE(x)))
 #define OXM_EXPR_OFX_TYPE(w, x) (((uint64_t)          w << 32) | (OXM_ROFL_TYPE(x)))
