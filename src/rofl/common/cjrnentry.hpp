@@ -312,6 +312,14 @@ public:
 		kvmap[key] = ss.str(); return *this;
 	};
 
+	cjrnentry&
+	set_key(
+		const std::string& key, uint64_t value) {
+		AcquireReadWriteLock rwlock(kvmap_lock);
+		std::stringstream ss; ss << value;
+		kvmap[key] = ss.str(); return *this;
+	};
+
 	/**
 	 *
 	 */

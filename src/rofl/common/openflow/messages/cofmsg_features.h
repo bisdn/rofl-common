@@ -311,7 +311,7 @@ public:
 	str() const {
 		std::stringstream ss;
 		ss << cofmsg::str() << "-Features-Reply- " << " ";
-		ss << "dpid: 0x" << std::hex << cdpid(get_dpid()).str() << std::dec << ", ";
+		ss << "dpid: 0x" << std::hex << get_dpid() << std::dec << ", ";
 		if (get_version() >= rofl::openflow13::OFP_VERSION) {
 			ss << "auxid: 0x" << cauxid(get_auxid()).str() << ", ";
 		}

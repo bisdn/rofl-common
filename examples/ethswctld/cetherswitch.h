@@ -179,7 +179,7 @@ public:
 	operator<< (std::ostream& os, const cetherswitch& sw) {
 		try {
 			os << "<ethswitch dpid: "
-					<< sw.get_dpt(sw.dptid).get_dpid().str() << " >" << std::endl;
+					<< sw.get_dpt(sw.dptid).get_dpid() << " >" << std::endl;
 		} catch (rofl::eRofDptNotFound& e) {
 			os << "<ethswitch dptid: " << sw.dptid << " >" << std::endl;
 		}

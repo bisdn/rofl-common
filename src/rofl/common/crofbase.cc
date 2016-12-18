@@ -686,7 +686,7 @@ crofbase::handle_established(
 {
 	journal.log(LOG_INFO, "datapath attached").
 				set_key("dptid", dpt.get_dptid()).
-				set_key("dpid", dpt.get_dpid().str()).
+				set_key("dpid", dpt.get_dpid()).
 				set_key("version", dpt.get_version());
 	handle_dpt_open(dpt);
 }
@@ -699,7 +699,7 @@ crofbase::handle_closed(
 {
 	journal.log(LOG_INFO, "datapath detached").
 				set_key("dptid", dpt.get_dptid()).
-				set_key("dpid", dpt.get_dpid().str());
+				set_key("dpid", dpt.get_dpid());
 	handle_dpt_close(dpt.get_dptid());
 	/* if main connection is passive, delete crofdpt instance */
 	if (dpt.get_conn(rofl::cauxid(0)).is_passive()) {

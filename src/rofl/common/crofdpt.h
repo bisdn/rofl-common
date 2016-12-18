@@ -1927,7 +1927,7 @@ public:
 	std::string
 	str() const {
 		std::stringstream ss;
-		ss << "dpid: " << get_dpid().str() << " ";
+		ss << "dpid: " << get_dpid() << " ";
 		return ss.str();
 	};
 
