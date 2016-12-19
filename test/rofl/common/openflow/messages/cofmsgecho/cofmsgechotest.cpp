@@ -299,8 +299,8 @@ cofmsgechotest::testReplyParser(
 		uint8_t version, uint8_t type, uint32_t xid)
 {
 	rofl::cmemory body(16);
-	size_t msglen = sizeof(struct rofl::openflow13::ofp_header);
-	size_t memlen = 2*msglen/*test overhead*/;
+	size_t msglen = sizeof(struct rofl::openflow13::ofp_header); // 8 byte
+	size_t memlen = 3*msglen; // 24 byte (header + body)
 
 	for (unsigned int i = 0; i < body.length(); i++) {
 		body[i] = i;
@@ -314,7 +314,7 @@ cofmsgechotest::testReplyParser(
 	hdr->type = type;
 	hdr->xid = htobe32(xid);
 	hdr->length = htobe16(0);
-	body.pack((uint8_t*)(hdr + 1), body.length());
+	body.pack((uint8_t*)(hdr+1), body.length());
 
 
 	for (unsigned int i = 1; i < sizeof(struct rofl::openflow::ofp_header); i++) {

@@ -62,6 +62,7 @@ crofqueuetest::test1()
 							<< std::endl;
 				CPPUNIT_ASSERT(queue.capacity() == 0);
 				CPPUNIT_ASSERT(queue.size() == 128);
+				delete msg;
 			}
 		}
 	}

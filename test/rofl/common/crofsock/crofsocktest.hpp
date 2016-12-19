@@ -102,10 +102,10 @@ private:
 	};
 
 	enum crofsock_test_mode_t test_mode;
-	bool                keep_running;
+	std::atomic_bool    keep_running;
 	int                 timeout;
 	int                 msg_counter;
-	int                 server_msg_counter;
+	std::atomic_int     server_msg_counter;
 	int                 client_msg_counter;
 	rofl::crandom       rand;
 	uint16_t            listening_port;
