@@ -109,11 +109,10 @@ public:
 	 *
 	 */
 	static
-	const ctimespec&
+	const ctimespec
 	now(
 			const cclockid& clk_id = cclockid(CLOCK_MONOTONIC)) {
-		ctimespec::current_time.get_time(clk_id);
-		return ctimespec::current_time;
+		return ctimespec(clk_id);
 	};
 
 public:
@@ -412,7 +411,6 @@ public:
 
 private:
 
-	static ctimespec        current_time;
 	static const long       CC_TIMER_ONE_SECOND_S = 1;
 	static const long       CC_TIMER_ONE_SECOND_NS = 1000000000;
 
