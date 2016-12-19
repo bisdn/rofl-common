@@ -346,7 +346,6 @@ private:
 	int 				event_fd;	// event fd for worker thread
 	pthread_t			tid;		// pthread_t for worker thread
 	//bool				run_thread;	// true: continue to run worker thread
-	bool				wakeup_pending;	// true: wakeup already scheduled for worker thread
 	int 				retval;		// worker thread return value
 	int					epfd;		// worker thread epoll fd
 

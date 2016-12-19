@@ -33,8 +33,6 @@ cthread::initialize()
 
 	tid = 0;
 
-	wakeup_pending = false;
-
 	// worker thread
 	if ((epfd = epoll_create(1)) < 0) {
 		throw eSysCall("eSysCall", "epoll_create", __FILE__, __PRETTY_FUNCTION__, __LINE__);
@@ -467,8 +465,6 @@ cthread::wakeup()
 {
 	switch (state) {
 	case STATE_RUNNING: {
-		if (wakeup_pending)
-				return;
 		uint64_t c = 1;
 		if (write(event_fd, &c, sizeof(c)) < 0) {
 			switch (errno) {
@@ -570,7 +566,6 @@ cthread::run_loop()
 							uint64_t c;
 							int rcode = read(event_fd, &c, sizeof(c));
 							(void)rcode;
-							wakeup_pending = false;
 							cthread_env::call_env(env).handle_wakeup(*this);
 						}
 
