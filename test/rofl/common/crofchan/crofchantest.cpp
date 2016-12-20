@@ -363,6 +363,7 @@ crofchantest::handle_timeout(
 		uint32_t timer_id,
 		const std::list<unsigned int>& ttypes)
 {
+	rofl::openflow::cofmsg_packet_in* msg = nullptr;
 	switch (timer_id) {
 	case TIMER_ID_START_SENDING_PACKET_INS: {
 		try {
@@ -377,8 +378,7 @@ crofchantest::handle_timeout(
 			std::cerr << "crofchantest::handle_timeout() starting to overload control connection" << std::endl;
 
 			while (true) {
-				rofl::openflow::cofmsg_packet_in* msg =
-						new rofl::openflow::cofmsg_packet_in(
+				msg = new rofl::openflow::cofmsg_packet_in(
 								rofl::openflow13::OFP_VERSION,
 								xid++,
 								buffer_id++,
@@ -398,6 +398,7 @@ crofchantest::handle_timeout(
 		} catch (rofl::eRofQueueFull& e) {
 			std::cerr << "exception caught: eRofQueueFull" << std::endl;
 			thread.add_timer(TIMER_ID_START_SENDING_PACKET_INS, rofl::ctimespec().expire_in(8));
+			delete msg;
 		}
 	} break;
 	default: {
