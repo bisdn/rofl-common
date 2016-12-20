@@ -13,9 +13,6 @@
 
 using namespace rofl;
 
-/*static*/ctimespec ctimespec::current_time;
-
-
 ctimespec
 ctimespec::operator+ (
 		const ctimespec& t) const

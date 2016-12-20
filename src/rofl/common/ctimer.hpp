@@ -48,7 +48,7 @@ public:
 	 *
 	 */
 	static
-	const ctimespec&
+	const ctimespec
 	now(
 			cclockid clk_id = cclockid(CLOCK_MONOTONIC)) {
 		return ctimespec::now(clk_id);
