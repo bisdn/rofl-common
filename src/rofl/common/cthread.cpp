@@ -592,11 +592,13 @@ cthread::run_loop()
 			}
 
 		} catch (eThreadNotFound& e) {
-
+			std::cerr << __FUNCTION__ << ": ERROR, caught eThreadNotFound: " << e.what() << std::endl;
 		} catch (std::runtime_error& e) {
-
+			std::cerr << __FUNCTION__ << ": ERROR, caught runtimer_error: " << e.what() << std::endl;
+		} catch (std::exception &e) {
+			std::cerr << __FUNCTION__ << ": ERROR, caught exception: " << e.what() << std::endl;
 		} catch (...) {
-
+			std::cerr << __FUNCTION__ << ": ERROR, caught unknown error" << std::endl;
 		}
 	}
 
