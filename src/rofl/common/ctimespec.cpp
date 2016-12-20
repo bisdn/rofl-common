@@ -122,6 +122,9 @@ ctimespec::operator< (
 	}
 
 	// here: tspec.tv_nsec == t.tspec.tv_nsec
+	if (timer_id < t.timer_id) {
+		return true;
+	}
 
 	return false;
 }
@@ -158,6 +161,10 @@ ctimespec::operator> (
 
 	// here: tspec.tv_nsec == t.tspec.tv_nsec
 
+	if (timer_id > t.timer_id) {
+		return true;
+	}
+
 	return false;
 }
 
@@ -175,6 +182,6 @@ bool
 ctimespec::operator== (
 		const ctimespec& t) const
 {
-	return ((not (*this < t)) && (not (t < *this)));
+	return (tspec.tv_sec == t.tspec.tv_sec && tspec.tv_nsec == t.tspec.tv_nsec);
 }
 
