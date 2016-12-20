@@ -17,7 +17,7 @@ script:
   - cd build
   - ../configure $FLAGS 
   - make -j 2
-  - make -j 2 check
+  - VERBOSE=yes make -j 2 check
 branches:
   only:
     - master
