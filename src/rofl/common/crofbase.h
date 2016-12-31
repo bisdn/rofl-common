@@ -526,6 +526,16 @@ public:
 	 * @throws eRofBaseNotFound
 	 */
 	const rofl::crofdpt&
+	get_const_dpt(
+			const rofl::cdptid& dptid) const {
+		AcquireReadLock rlock(rofdpts_rwlock);
+		if (rofdpts.find(dptid) == rofdpts.end()) {
+			throw eRofBaseNotFound("rofl::crofbase::get__const_dpt() dptid not found");
+		}
+		return *(rofdpts.at(dptid));
+	};
+
+	rofl::crofdpt&
 	get_dpt(
 			const rofl::cdptid& dptid) const {
 		AcquireReadLock rlock(rofdpts_rwlock);
@@ -533,7 +543,7 @@ public:
 			throw eRofBaseNotFound("rofl::crofbase::get_dpt() dptid not found");
 		}
 		return *(rofdpts.at(dptid));
-	};
+	}
 
 	/**
 	 * @brief	Deletes a rofl::crofdpt instance given by identifier.
