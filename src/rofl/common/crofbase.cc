@@ -280,7 +280,7 @@ crofbase::listen(
 	}
 
 	/* make socket non-blocking */
-	long flags;
+	int flags;
 	if ((flags = ::fcntl(sd, F_GETFL)) < 0) {
 		throw eSysCall("fnctl() F_GETFL");
 	}
