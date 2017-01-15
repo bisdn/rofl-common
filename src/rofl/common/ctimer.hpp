@@ -66,8 +66,8 @@ public:
 	 *
 	 */
 	ctimer(
-			uint32_t timer_id,
-			const ctimespec& tspec) :
+			uint32_t timer_id = 0,
+			const ctimespec& tspec = ctimespec(::timespec{0,0}) ) :
 				timer_id(timer_id),
 				tspec(tspec)
 	{};
@@ -98,7 +98,15 @@ public:
 		return *this;
 	};
 
-public:
+	bool
+	operator< (
+			const ctimer& t) const {
+		if (tspec == t.tspec) {
+			return timer_id < t.timer_id;
+		} else {
+			return tspec < t.tspec;
+		}
+	}
 
 	/**
 	 *
@@ -220,6 +228,23 @@ private:
 	ctimespec               tspec;
 	std::list<unsigned int> ttypes; // timer types
 };
+
+	/**
+	 *
+	 */
+	class ctimer_find_by_timer_id {
+		uint32_t timer_id;
+	public:
+		ctimer_find_by_timer_id(
+				uint32_t timer_id) :
+					timer_id(timer_id)
+		{}
+		bool
+		operator() (
+				const ctimer& t)
+		{ return (t.get_timer_id() == timer_id); }
+	};
+
 
 }; // end of namespace rofl
 

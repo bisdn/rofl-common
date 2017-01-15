@@ -113,14 +113,6 @@ ctimespec::operator< (
 
 	if (tspec.tv_nsec < t.tspec.tv_nsec) {
 		return true;
-	} else
-	if (tspec.tv_nsec > t.tspec.tv_nsec) {
-		return false;
-	}
-
-	// here: tspec.tv_nsec == t.tspec.tv_nsec
-	if (timer_id < t.timer_id) {
-		return true;
 	}
 
 	return false;
@@ -150,15 +142,6 @@ ctimespec::operator> (
 	// here: tspec.tv_sec == t.tspec.tv_sec
 
 	if (tspec.tv_nsec > t.tspec.tv_nsec) {
-		return true;
-	} else
-	if (tspec.tv_nsec < t.tspec.tv_nsec) {
-		return false;
-	}
-
-	// here: tspec.tv_nsec == t.tspec.tv_nsec
-
-	if (timer_id > t.timer_id) {
 		return true;
 	}
 

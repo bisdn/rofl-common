@@ -128,7 +128,6 @@ public:
 	 */
 	ctimespec(
 			const cclockid& clk_id = cclockid(CLOCK_MONOTONIC)) :
-				timer_id(0),
 				clk_id(clk_id)
 	{ get_time(clk_id); };
 
@@ -139,7 +138,6 @@ public:
 			time_t tv_sec,
 			long tv_nsec,
 			const cclockid& clk_id = cclockid(CLOCK_MONOTONIC)) :
-				timer_id(0),
 				clk_id(clk_id)
 	{ get_time(clk_id); expire_in(tv_sec, tv_nsec); };
 
@@ -149,7 +147,6 @@ public:
 	ctimespec(
 			struct timespec tspec,
 			const cclockid& clk_id = cclockid(CLOCK_MONOTONIC)) :
-			        timer_id(0),
 			        clk_id(clk_id)
 	{ this->tspec.tv_nsec = tspec.tv_nsec; this->tspec.tv_sec = tspec.tv_sec; };
 	/**
@@ -168,7 +165,6 @@ public:
 		if (this == &ts)
 			return *this;
 
-		timer_id = ts.timer_id;
 		clk_id = ts.clk_id;
 		memcpy(&tspec, &(ts.tspec), sizeof(struct timespec));
 
@@ -247,21 +243,6 @@ public:
 
 
 public:
-
-	/**
-	 *
-	 */
-	void
-	set_timer_id(
-			uint32_t timer_id)
-	{ this->timer_id = timer_id; };
-
-	/**
-	 *
-	 */
-	uint32_t
-	get_timer_id() const
-	{ return timer_id; };
 
 	/**
 	 *
@@ -365,8 +346,7 @@ public:
 	 */
 	friend std::ostream&
 	operator<< (std::ostream& os, const ctimespec& ts) {
-		os << "<ctimespec timeout: " << (unsigned int)ts.tspec.tv_sec << "." << ts.tspec.tv_nsec << "s, ";
-			os << "timer_id: " << (unsigned int)ts.get_timer_id() << " >";
+		os << "<ctimespec timeout: " << (unsigned int)ts.tspec.tv_sec << "." << ts.tspec.tv_nsec << "s>";
 		return os;
 	};
 
@@ -393,28 +373,12 @@ public:
 		return s;
 	};
 
-	/**
-	 *
-	 */
-	class ctimespec_find_by_timer_id {
-		uint32_t timer_id;
-	public:
-		ctimespec_find_by_timer_id(
-				uint32_t timer_id) :
-					timer_id(timer_id)
-		{};
-		bool
-		operator() (
-				const ctimespec& ts) const
-		{ return (ts.get_timer_id() == timer_id); };
-	};
 
 private:
 
 	static const long       CC_TIMER_ONE_SECOND_S = 1;
 	static const long       CC_TIMER_ONE_SECOND_NS = 1000000000;
 
-	uint32_t                timer_id;
 	crwlock                 tlock;
 	cclockid                clk_id;
 	struct timespec         tspec;

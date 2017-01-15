@@ -222,16 +222,9 @@ public:
 	/**
 	 *
 	 */
-	ctimer&
+	bool
 	add_timer(
 			uint32_t timer_id, const ctimespec& tspec);
-
-	/**
-	 *
-	 */
-	ctimer&
-	set_timer(
-			uint32_t timer_id);
 
 	/**
 	 *
@@ -241,9 +234,9 @@ public:
 			uint32_t timer_id) const;
 
 	/**
-	 *
-	 */
-	bool
+ 	 *
+ 	 */
+ 	bool
 	drop_timer(
 			uint32_t timer_id);
 
@@ -352,8 +345,7 @@ private:
 	crwlock				tlock;		// thread lock
 
 	std::map<int, uint32_t>     fds;        // set of registered file descriptors
-	std::set<ctimespec> ordered_timers;     // ordered set of timers
-	std::map<uint32_t, ctimer*> timers;     // map of timers
+	std::set<ctimer> ordered_timers;     // ordered set of timers
 
 	enum thread_state_t {
 		STATE_IDLE      = 0,
