@@ -276,7 +276,7 @@ crofsock::listen()
 	}
 
 	/* make socket non-blocking */
-	long flags;
+	int flags;
 	if ((flags = ::fcntl(sd, F_GETFL)) < 0) {
 		throw eSysCall("eSysCall", "fcntl (F_GETFL)", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
@@ -397,7 +397,7 @@ crofsock::tcp_accept(
 	journal.log(LOG_INFO, "STATE_TCP_ACCEPTING").set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
 
 	/* make socket non-blocking, as this status is not inherited */
-	long sockflags = 0;
+	int sockflags;
 	if ((sockflags = ::fcntl(sd, F_GETFL)) < 0) {
 		throw eSysCall("eSysCall", "fcntl (F_GETFL)", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
@@ -519,7 +519,7 @@ crofsock::tcp_connect(
 	}
 
 	/* make socket non-blocking */
-	long sockflags;
+	int sockflags;
 	if ((sockflags = ::fcntl(sd, F_GETFL)) < 0) {
 		throw eSysCall("eSysCall", "fcntl (F_GETCL)", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	}
