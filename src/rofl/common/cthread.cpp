@@ -298,107 +298,74 @@ cthread::clear_timers()
 {
 	AcquireReadWriteLock lock(tlock);
 	ordered_timers.clear();
-	for (auto it : timers)
-		delete it.second;
-	timers.clear();
 };
 
-
-
-ctimer&
+bool
 cthread::add_timer(
 		uint32_t timer_id, const ctimespec& tspec)
 {
-	AcquireReadWriteLock lock(tlock);
-	if (timers.find(timer_id) != timers.end()) {
-		std::set<ctimespec>::iterator it;
-		while ((it = find_if(ordered_timers.begin(), ordered_timers.end(),
-				ctimespec::ctimespec_find_by_timer_id(timer_id))) != ordered_timers.end()) {
-			ordered_timers.erase(it);
-		}
-		delete timers[timer_id];
-		timers.erase(timer_id);
-	}
-	timers[timer_id] = new ctimer(timer_id, tspec);
-
+	std::pair<std::set<ctimer>::iterator, bool> rv;
+	bool do_wakeup = false;
 	{
-		bool do_wakeup = false;
-		if (ordered_timers.empty() || (tspec < (*ordered_timers.begin()))) {
+		AcquireReadWriteLock lock(tlock);
+
+		if (ordered_timers.empty() || tspec < ordered_timers.begin()->get_tspec())
 			do_wakeup = true;
-		}
 
-		ctimespec ts(tspec);
-		ts.set_timer_id(timer_id);
-		ordered_timers.insert(ts);
-
-		if ((do_wakeup) && (tid != pthread_self())) {
-			wakeup();
+		auto timer_it = find_if(ordered_timers.begin(), ordered_timers.end(), ctimer_find_by_timer_id(timer_id));
+		if (timer_it != ordered_timers.end()) {
+			ordered_timers.erase(timer_it);
+			rv = ordered_timers.emplace(timer_id, tspec);
+		} else {
+			rv = ordered_timers.emplace(timer_id, tspec);
 		}
 	}
 
-	return *(timers[timer_id]);
-};
-
-
-
-ctimer&
-cthread::set_timer(
-		uint32_t timer_id)
-{
-	AcquireReadLock lock(tlock);
-	if (timers.find(timer_id) == timers.end()) {
-		throw eThreadNotFound("cthread::set_timer() timer_id not found");
+	if ((do_wakeup) && (tid != pthread_self())) {
+		wakeup();
 	}
-	return *(timers[timer_id]);
-};
 
-
+	return rv.second;
+}
 
 const ctimer&
 cthread::get_timer(
 		uint32_t timer_id) const
 {
 	AcquireReadLock lock(tlock);
-	if (timers.find(timer_id) == timers.end()) {
+	auto timer_it = find_if(ordered_timers.begin(), ordered_timers.end(), ctimer_find_by_timer_id(timer_id));
+	if (timer_it == ordered_timers.end()) {
 		throw eThreadNotFound("cthread::get_timer() timer_id not found");
 	}
-	return *(timers.at(timer_id));
-};
-
-
+	return *timer_it;
+}
 
 bool
 cthread::drop_timer(
 		uint32_t timer_id)
 {
 	AcquireReadWriteLock lock(tlock);
-	if (timers.find(timer_id) == timers.end()) {
+	auto timer_it = find_if(ordered_timers.begin(), ordered_timers.end(), ctimer_find_by_timer_id(timer_id));
+	if (timer_it  == ordered_timers.end()) {
 		return false;
 	}
-	std::set<ctimespec>::iterator it;
-	while ((it = find_if(ordered_timers.begin(), ordered_timers.end(),
-			ctimespec::ctimespec_find_by_timer_id(timer_id))) != ordered_timers.end()) {
-		ordered_timers.erase(it);
-	}
-	delete timers[timer_id];
-	timers.erase(timer_id);
+	ordered_timers.erase(timer_it);
 
 	if (tid != pthread_self()) {
 		wakeup();
 	}
 
 	return true;
-};
-
-
+}
 
 bool
 cthread::has_timer(
 		uint32_t timer_id) const
 {
 	AcquireReadLock lock(tlock);
-	return (not (timers.find(timer_id) == timers.end()));
-};
+	auto timer_it = find_if(ordered_timers.begin(), ordered_timers.end(), ctimer_find_by_timer_id(timer_id));
+	return (not (timer_it == ordered_timers.end()));
+}
 
 
 
@@ -518,16 +485,14 @@ cthread::run_loop()
 
 			while (true) {
 				/* handle expired timers */
-				std::list<unsigned int> ttypes;
-				uint32_t timer_id = 0;
-				ctimespec ts;
+				ctimer timer;
 				{
 					AcquireReadWriteLock lock(tlock);
 					if (ordered_timers.empty()) {
 						break;
 					}
-					ts = *(ordered_timers.begin());
-					if (not ts.is_expired()) {
+					timer = *(ordered_timers.begin());
+					if (not timer.get_tspec().is_expired()) {
 						break;
 					}
 					ordered_timers.erase(ordered_timers.begin());
@@ -535,15 +500,7 @@ cthread::run_loop()
 				if (not get_run_thread())
 					goto out;
 
-				if (ts.is_expired()) // optimization problem?
-				{
-					timer_id = ts.get_timer_id();
-					if (has_timer(timer_id)) {
-						ttypes = get_timer(timer_id).get_timer_types();
-					}
-					drop_timer(timer_id);
-					cthread_env::call_env(env).handle_timeout(*this, timer_id, ttypes);
-				}
+				cthread_env::call_env(env).handle_timeout(*this, timer.get_timer_id());
 			}
 
 			if (not get_run_thread())

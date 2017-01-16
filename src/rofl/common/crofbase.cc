@@ -349,7 +349,7 @@ crofbase::handle_wakeup(
 
 void
 crofbase::handle_timeout(
-		cthread& thread, uint32_t timer_id, const std::list<unsigned int>& ttypes)
+		cthread& thread, uint32_t timer_id)
 {
 	switch (timer_id) {
 	case TIMER_ID_ROFCTL_DESTROY: {

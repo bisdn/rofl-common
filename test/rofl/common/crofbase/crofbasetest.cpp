@@ -86,7 +86,7 @@ crofbasetest::handle_wakeup(
 
 void
 crofbasetest::handle_timeout(
-		rofl::cthread& thread, uint32_t timer_id, const std::list<unsigned int>& ttypes)
+		rofl::cthread& thread, uint32_t timer_id)
 {
 
 }

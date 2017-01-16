@@ -97,7 +97,7 @@ cetherswitch::~cetherswitch()
 
 void
 cetherswitch::handle_timeout(
-		cthread& thread, uint32_t timer_id, const std::list<unsigned int>& ttypes)
+		cthread& thread, uint32_t timer_id)
 {
 	try {
 		switch (timer_id) {
