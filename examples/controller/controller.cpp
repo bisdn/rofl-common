@@ -133,7 +133,7 @@ controller::handle_dpt_open(
 
 	// Dump the peer's OpenFlow datapath identifier (dpid), ...
 	std::cerr << "datapath attached, dpid: 0x"
-			<< dpt.get_dpid().str() << std::endl;
+			<< dpt.get_dpid() << std::endl;
 
 	/* rofl-common maintains unique internal identifiers as handles
 	 * to rofl::crofdpt and rofl::crofctl instances in classes

@@ -420,7 +420,7 @@ public:
 			it.second->clear();
 			/* create journal entry */
 			journal.log(LOG_INFO, "datapath detached").
-						set_key("dptid", it.second->get_dptid().str());
+						set_key("dptid", it.second->get_dptid());
 
 			rofdpts_deletion.insert(it.second);
 		}
@@ -452,12 +452,12 @@ public:
 	rofl::crofdpt&
 	add_dpt() {
 		AcquireReadWriteLock rwlock(rofdpts_rwlock);
-		uint64_t id = 0;
-		while (rofdpts.find(cdptid(id)) != rofdpts.end()) {
+		cdptid id = 0;
+		while (rofdpts.find(id) != rofdpts.end()) {
 			id++;
 		}
-		rofdpts[cdptid(id)] = new crofdpt(this, cdptid(id));
-		return *(rofdpts[cdptid(id)]);
+		rofdpts[id] = new crofdpt(this, id);
+		return *(rofdpts[id]);
 	};
 
 	/**
@@ -548,7 +548,7 @@ public:
 			return false;
 		}
 		journal.log(LOG_INFO, "datapath detached").
-					set_key("dptid", dptid.str());
+					set_key("dptid", dptid);
 		/* redirect environment */
 		rofdpts[dptid]->set_env(nullptr);
 		/* close control channel */
@@ -604,12 +604,12 @@ public:
 				crofdpt::crofdpt_find_by_dpid(dpid))) != rofdpts.end()) {
 			return *(it->second);
 		}
-		uint64_t id = 0;
-		while (rofdpts.find(cdptid(id)) != rofdpts.end()) {
+		cdptid id = 0;
+		while (rofdpts.find(id) != rofdpts.end()) {
 			id++;
 		}
-		rofdpts[cdptid(id)] = new crofdpt(this, cdptid(id));
-		return *(rofdpts[cdptid(id)]);
+		rofdpts[id] = new crofdpt(this, id);
+		return *(rofdpts[id]);
 	};
 
 	/**

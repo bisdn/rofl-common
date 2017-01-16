@@ -163,7 +163,7 @@ cetherswitch::handle_dpt_open(
 	cfibtable::add_fib(dpt.get_dptid());
 
 	std::cerr << "[cetherswitch] datapath attached, dptid: "
-			<< dpt.get_dptid().str() << std::endl
+			<< dpt.get_dptid() << std::endl
 			<< cfibtable::get_fib(dpt.get_dptid());
 
 	//Remove all flows in the table
@@ -215,7 +215,7 @@ cetherswitch::handle_dpt_close(
 	thread.drop_timer(TIMER_ID_GET_FLOW_STATS);
 
 	std::cerr << "[cetherswitch] datapath detached, dptid: "
-			<< dptid.str() << std::endl
+			<< dptid << std::endl
 			<< cfibtable::get_fib(dptid);
 
 	cfibtable::drop_fib(dptid);

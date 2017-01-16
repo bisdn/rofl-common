@@ -376,7 +376,7 @@ public:
 	operator<< (std::ostream& os, cflowtable const& flowtable) {
 		try {
 			os << "<cflowtable dpid:"
-					<< flowtable.env->set_dpt(flowtable.dptid).get_dpid().str() << " >" << std::endl;
+					<< flowtable.env->set_dpt(flowtable.dptid).get_dpid() << " >" << std::endl;
 		} catch (rofl::eRofDptNotFound& e) {
 			os << "<cflowtable dptid:" << flowtable.dptid << " >" << std::endl;
 		}

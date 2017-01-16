@@ -178,7 +178,7 @@ public:
 		if (ftable.find(hwaddr) != ftable.end()) {
 			drop_fib_entry(hwaddr);
 		}
-		ftable[hwaddr] = new cfibentry(this, dptid, hwaddr, portno);
+		ftable[hwaddr] = new cfibentry(this, hwaddr, portno);
 		return *(ftable[hwaddr]);
 	};
 
@@ -200,7 +200,7 @@ public:
 			throw exceptions::eFibInval("cfibtable::set_fib_entry() hwaddr validation failed");
 		}
 		if (ftable.find(hwaddr) == ftable.end()) {
-			ftable[hwaddr] = new cfibentry(this, dptid, hwaddr, portno);
+			ftable[hwaddr] = new cfibentry(this, hwaddr, portno);
 		}
 		return *(ftable[hwaddr]);
 	};
@@ -333,7 +333,7 @@ public:
 					<< rofl::crofdpt::get_dpt(fib.dptid).get_dpid().str() << " >" << std::endl;
 #endif
 		} catch (rofl::eRofDptNotFound& e) {
-			os << "<cfibtable dptid:" << fib.dptid.str() << " >" << std::endl;
+			os << "<cfibtable dptid:" << fib.dptid << " >" << std::endl;
 		}
 		
 		for (std::map<rofl::caddress_ll, cfibentry*>::const_iterator

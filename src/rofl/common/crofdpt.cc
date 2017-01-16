@@ -489,12 +489,12 @@ crofdpt::features_reply_rcvd(
 		}
 
 		// lower 48bits from dpid as datapath mac address
-		hwaddr[0] = (get_dpid().get_uint64_t() & UINT64_C(0x0000ff0000000000)) >> 40;
-		hwaddr[1] = (get_dpid().get_uint64_t() & UINT64_C(0x000000ff00000000)) >> 32;
-		hwaddr[2] = (get_dpid().get_uint64_t() & UINT64_C(0x00000000ff000000)) >> 24;
-		hwaddr[3] = (get_dpid().get_uint64_t() & UINT64_C(0x0000000000ff0000)) >> 16;
-		hwaddr[4] = (get_dpid().get_uint64_t() & UINT64_C(0x000000000000ff00)) >>  8;
-		hwaddr[5] = (get_dpid().get_uint64_t() & UINT64_C(0x00000000000000ff)) >>  0;
+		hwaddr[0] = (get_dpid() & UINT64_C(0x0000ff0000000000)) >> 40;
+		hwaddr[1] = (get_dpid() & UINT64_C(0x000000ff00000000)) >> 32;
+		hwaddr[2] = (get_dpid() & UINT64_C(0x00000000ff000000)) >> 24;
+		hwaddr[3] = (get_dpid() & UINT64_C(0x0000000000ff0000)) >> 16;
+		hwaddr[4] = (get_dpid() & UINT64_C(0x000000000000ff00)) >>  8;
+		hwaddr[5] = (get_dpid() & UINT64_C(0x00000000000000ff)) >>  0;
 		hwaddr[0] &= 0xfc;
 	}
 
