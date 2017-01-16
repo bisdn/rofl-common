@@ -37,7 +37,7 @@ private:
 			{};
 			virtual void
 			handle_timeout(
-					rofl::cthread& thread, uint32_t timer_id, const std::list<unsigned int>& ttypes);
+					rofl::cthread& thread, uint32_t timer_id);
 			virtual void
 			handle_read_event(
 					rofl::cthread& thread, int fd)

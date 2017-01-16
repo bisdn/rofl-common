@@ -81,8 +81,7 @@ protected:
 	virtual void handle_wakeup(cthread& thread)
 	{}
 
-	virtual void handle_timeout(cthread& thread, uint32_t timer_id,
-			const std::list<unsigned int>& ttypes)
+	virtual void handle_timeout(cthread& thread, uint32_t timer_id)
 	{
 		assert(0 && "handle_timeout not overridden");
 	}

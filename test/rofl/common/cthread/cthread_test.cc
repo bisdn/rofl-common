@@ -47,7 +47,7 @@ cthread_test::test1()
 
 void
 cthread_test::cobject::handle_timeout(
-		rofl::cthread& thread, uint32_t timer_id, const std::list<unsigned int>& ttypes)
+		rofl::cthread& thread, uint32_t timer_id)
 {
 	switch (timer_id) {
 	case 0: {

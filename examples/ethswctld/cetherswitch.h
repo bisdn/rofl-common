@@ -155,7 +155,7 @@ private:
 	 */
 	virtual void
 	handle_timeout(
-			cthread& thread, uint32_t timer_id, const std::list<unsigned int>& ttypes);
+			cthread& thread, uint32_t timer_id);
 
 	/**
 	 * @brief	Dump an Ethernet frame received via an OpenFlow Packet-In message.

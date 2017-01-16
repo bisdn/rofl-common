@@ -360,8 +360,7 @@ crofchantest::handle_established(
 void
 crofchantest::handle_timeout(
 		rofl::cthread& thread,
-		uint32_t timer_id,
-		const std::list<unsigned int>& ttypes)
+		uint32_t timer_id)
 {
 	rofl::openflow::cofmsg_packet_in* msg = nullptr;
 	switch (timer_id) {

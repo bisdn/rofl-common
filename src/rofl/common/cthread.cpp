@@ -485,7 +485,6 @@ cthread::run_loop()
 
 			while (true) {
 				/* handle expired timers */
-				std::list<unsigned int> ttypes;
 				ctimer timer;
 				{
 					AcquireReadWriteLock lock(tlock);
@@ -501,7 +500,7 @@ cthread::run_loop()
 				if (not get_run_thread())
 					goto out;
 
-				cthread_env::call_env(env).handle_timeout(*this, timer.get_timer_id(), timer.get_timer_types());
+				cthread_env::call_env(env).handle_timeout(*this, timer.get_timer_id());
 			}
 
 			if (not get_run_thread())

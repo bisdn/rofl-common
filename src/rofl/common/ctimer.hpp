@@ -91,10 +91,6 @@ public:
 		timer_id = ts.timer_id;
 		tspec = ts.tspec;
 
-		clear();
-		for (auto ttype : ts.ttypes)
-			add_timer_type(ttype);
-
 		return *this;
 	};
 
@@ -137,76 +133,6 @@ public:
 	get_relative_timeout() const
 	{ return get_tspec().get_relative_timeout(); };
 
-	/**
-	 *
-	 */
-	const std::list<unsigned int>&
-	get_timer_types() const
-	{ return ttypes; };
-
-public:
-
-	/**
-	 *
-	 */
-	bool
-	empty() const {
-		AcquireReadLock lock(tlock);
-		return ttypes.empty();
-	};
-
-	/**
-	 *
-	 */
-	void
-	clear() {
-		AcquireReadLock lock(tlock);
-		ttypes.clear();
-	};
-
-	/**
-	 *
-	 */
-	ctimer&
-	add_timer_type(
-			unsigned int timer_type) {
-		AcquireReadWriteLock lock(tlock);
-		ttypes.push_back(timer_type);
-		return *this;
-	};
-
-	/**
-	 *
-	 */
-	void
-	drop_timer_type(
-			unsigned int timer_type) {
-		AcquireReadWriteLock lock(tlock);
-		std::list<unsigned int>::iterator it;
-		while ((it = find_if(ttypes.begin(), ttypes.end(),
-				std::bind2nd(std::equal_to<unsigned int>(), timer_type))) != ttypes.end()) {
-			ttypes.remove(timer_type);
-		}
-	};
-
-	/**
-	 *
-	 */
-	int
-	front() {
-		AcquireReadLock lock(tlock);
-		return ttypes.front();
-	};
-
-	/**
-	 *
-	 */
-	void
-	pop_front() {
-		AcquireReadWriteLock lock(tlock);
-		ttypes.pop_front();
-	};
-
 public:
 
 	/**
@@ -214,19 +140,14 @@ public:
 	 */
 	friend std::ostream&
 	operator<< (std::ostream& os, const ctimer& ts) {
-		os << "<ctimer ttypes: ";
-		for (auto ttype : ts.ttypes)
-			os << ttype << " ";
-		os << ">";
+		os << "<ctimer: >";
 		return os;
 	};
 
 private:
 
 	uint32_t                timer_id;
-	crwlock                 tlock;
 	ctimespec               tspec;
-	std::list<unsigned int> ttypes; // timer types
 };
 
 	/**
