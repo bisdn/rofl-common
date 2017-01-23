@@ -3,7 +3,7 @@ AC_INIT(ROFL-COMMON, m4_esyscmd_s(cat VERSION), rofl-devel@roflibs.org, rofl-com
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([m4])
 
-AM_INIT_AUTOMAKE([-Wall -Werror foreign subdir-objects])
+AM_INIT_AUTOMAKE([-Wall -Werror foreign subdir-objects tar-pax])
 
 AC_GNU_SOURCE
 
