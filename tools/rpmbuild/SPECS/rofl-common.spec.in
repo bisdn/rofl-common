@@ -12,8 +12,11 @@ BuildRequires:	openssl-devel
 BuildRequires:	autoconf
 BuildRequires:	automake
 BuildRequires:	libtool
+BuildRequires:	glog-devel
+BuildRequires:	gflags-devel
 Buildroot:	%{_tmppath}/%{name}-%{version}-root
 Requires:	openssl
+Requires:	glog
 
 %description
 Revised OpenFlow Library (ROFL) version @ROFL_VERSION@
@@ -23,6 +26,8 @@ Summary:	Header files and libraries for revised openflow library
 Group:		Development/Libraries
 Requires:	%{name} = %{version}-%{release}
 Requires:	openssl-devel
+Requires:	glog-devel
+Requires:	gflags-devel
 
 %description    devel
 Revised OpenFlow Library (ROFL) version @ROFL_VERSION@ development files

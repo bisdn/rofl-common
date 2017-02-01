@@ -313,13 +313,12 @@ public:
 	 */
 	friend std::ostream&
 	operator<< (std::ostream& os, const coxmatch& oxm) {
-		os  << "<coxmatch ";
-		os << "oxm_id: 0x" << std::hex << (unsigned int)oxm.get_oxm_id() << std::dec << " ";
-		os << "class: 0x" << std::hex << (int)oxm.get_oxm_class() << std::dec << " ";
-		os << "field: 0x" << std::hex << (int)oxm.get_oxm_field() << std::dec << " ";
-		os << "hasmask: " << oxm.get_oxm_hasmask() << " ";
-		os << "length: " << (int)oxm.get_oxm_length() << " ";
-		os << ">" << std::endl;
+		os  << "<coxmatch oxm_id: 0x" << std::hex << (unsigned int)oxm.get_oxm_id()
+		<< " class: 0x" << (int)oxm.get_oxm_class()
+		<< " field: 0x" << (int)oxm.get_oxm_field() << std::dec
+		<< " hasmask: " << oxm.get_oxm_hasmask()
+		<< " length: " << (int)oxm.get_oxm_length()
+		<< ">" << std::endl;
 		return os;
 	};
 
@@ -815,14 +814,13 @@ public:
 	 */
 	friend std::ostream&
 	operator<< (std::ostream& os, const coxmatch_exp& oxm) {
-		os  << "<coxmatch_exp ";
-		os << "exp_id: 0x" << std::hex << oxm.get_oxm_exp_id() << std::dec << " ";
-		os << " >" << std::endl;
-		
-		os << dynamic_cast<const coxmatch&>( oxm );
-		
-		os << "<value: >" << std::endl << oxm.get_value();
-		os << "<mask: >" << std::endl << oxm.get_mask();
+		os  << "<coxmatch_exp exp_id: 0x" << std::hex << oxm.get_oxm_exp_id()
+			<< std::dec << " >" << std::endl
+
+		<< dynamic_cast<const coxmatch&>( oxm )
+
+		<< "<value: >" << std::endl << oxm.get_value()
+		<< "<mask: >" << std::endl << oxm.get_mask();
 		return os;
 	};
 
@@ -995,14 +993,11 @@ public:
 	 */
 	friend std::ostream&
 	operator<< (std::ostream& os, const coxmatch_8& oxm) {
-		os  << "<coxmatch_8 ";
-		os << "value: 0x" << std::hex << (int)oxm.get_u8value() << std::dec << " ";
+		os  << "<coxmatch_8 value: 0x" << std::hex << (int)oxm.get_u8value() << " ";
 		if (oxm.get_oxm_hasmask()) {
-			os << "/ mask: 0x" << std::hex << (int)oxm.get_u8mask() << std::dec << " ";
+			os << "/ mask: 0x" << (int)oxm.get_u8mask() << " ";
 		}
-		os << " >" << std::endl;
-		
-		os << dynamic_cast<const coxmatch&>( oxm );
+		os << std::dec << ">" << std::endl << dynamic_cast<const coxmatch&>( oxm );
 		return os;
 	};
 
@@ -1172,14 +1167,11 @@ public:
 	 */
 	friend std::ostream&
 	operator<< (std::ostream& os, const coxmatch_16& oxm) {
-		os  << "<coxmatch_16 ";
-		os << "value: 0x" << std::hex << oxm.get_u16value() << std::dec << " ";
+		os  << "<coxmatch_16 value: 0x" << std::hex << oxm.get_u16value() << " ";
 		if (oxm.get_oxm_hasmask()) {
-			os << "/ mask: 0x" << std::hex << oxm.get_u16mask() << std::dec << " ";
+			os << "/ mask: 0x" << oxm.get_u16mask() << " ";
 		}
-		os << " >" << std::endl;
-		
-		os << dynamic_cast<const coxmatch&>( oxm );
+		os << std::dec << ">" << std::endl << dynamic_cast<const coxmatch&>( oxm );
 		return os;
 	};
 
@@ -1357,14 +1349,11 @@ public:
 	 */
 	friend std::ostream&
 	operator<< (std::ostream& os, const coxmatch_24& oxm) {
-		os  << "<coxmatch_24 ";
-		os << "value: 0x" << std::hex << (unsigned int)oxm.get_u24value() << std::dec << " ";
+		os  << "<coxmatch_24 value: 0x" << std::hex << (unsigned int)oxm.get_u24value() << " ";
 		if (oxm.get_oxm_hasmask()) {
-			os << "/ mask: 0x" << std::hex << (unsigned int)oxm.get_u24mask() << std::dec << " ";
+			os << "/ mask: 0x" << (unsigned int)oxm.get_u24mask() << " ";
 		}
-		os << " >" << std::endl;
-		
-		os << dynamic_cast<const coxmatch&>( oxm );
+		os << std::dec << ">" << std::endl << dynamic_cast<const coxmatch&>( oxm );
 		return os;
 	};
 
@@ -1581,13 +1570,11 @@ public:
 	friend std::ostream&
 	operator<< (std::ostream& os, const coxmatch_32& oxm) {
 		os  << "<coxmatch_32 ";
-		os << "value: 0x" << std::hex << oxm.get_u32value() << std::dec << " ";
+		os << "value: 0x" << std::hex << oxm.get_u32value() << " ";
 		if (oxm.get_oxm_hasmask()) {
-			os << "/ mask: 0x" << std::hex << oxm.get_u32mask() << std::dec << " ";
+			os << "/ mask: 0x" << oxm.get_u32mask() << " ";
 		}
-		os << " >" << std::endl;
-		
-		os << dynamic_cast<const coxmatch&>( oxm );
+		os << std::dec << ">" << std::endl << dynamic_cast<const coxmatch&>( oxm );
 		return os;
 	};
 
@@ -1863,14 +1850,11 @@ public:
 	 */
 	friend std::ostream&
 	operator<< (std::ostream& os, const coxmatch_48& oxm) {
-		os  << "<coxmatch_48 ";
-		os << "value: 0x" << std::hex << oxm.get_u48value() << std::dec << " ";
+		os  << "<coxmatch_48 value: 0x" << std::hex << oxm.get_u48value() << " ";
 		if (oxm.get_oxm_hasmask()) {
-			os << "/ mask: 0x" << std::hex << oxm.get_u48mask() << std::dec << " ";
+			os << "/ mask: 0x" << oxm.get_u48mask() << " ";
 		}
-		os << " >" << std::endl;
-		
-		os << dynamic_cast<const coxmatch&>( oxm );
+		os << std::dec << ">" << std::endl << dynamic_cast<const coxmatch&>( oxm );
 		return os;
 	};
 
@@ -2040,14 +2024,11 @@ public:
 	 */
 	friend std::ostream&
 	operator<< (std::ostream& os, const coxmatch_64& oxm) {
-		os  << "<coxmatch_64 ";
-		os << "value: 0x" << std::hex << oxm.get_u64value() << std::dec << " ";
+		os  << "<coxmatch_64 value: 0x" << std::hex << oxm.get_u64value() << " ";
 		if (oxm.get_oxm_hasmask()) {
-			os << "/ mask: 0x" << std::hex << oxm.get_u64mask() << std::dec << " ";
+			os << "/ mask: 0x" << oxm.get_u64mask() << " ";
 		}
-		os << " >" << std::endl;
-		
-		os << dynamic_cast<const coxmatch&>( oxm );
+		os << std::dec << ">" << std::endl << dynamic_cast<const coxmatch&>( oxm );
 		return os;
 	};
 
@@ -2219,14 +2200,11 @@ public:
 	 */
 	friend std::ostream&
 	operator<< (std::ostream& os, const coxmatch_128& oxm) {
-		os  << "<coxmatch_128 ";
-		os << "value: 0x" << std::hex << oxm.get_u128value().str() << std::dec << " ";
+		os  << "<coxmatch_128 value: 0x" << oxm.get_u128value().str() << " ";
 		if (oxm.get_oxm_hasmask()) {
-			os << "/ mask: 0x" << std::hex << oxm.get_u128mask().str() << std::dec << " ";
+			os << "/ mask: 0x" << oxm.get_u128mask().str() << " ";
 		}
-		os << " >" << std::endl;
-		
-		os << dynamic_cast<const coxmatch&>( oxm );
+		os << ">" << std::endl << dynamic_cast<const coxmatch&>( oxm );
 		return os;
 	};
 
@@ -2354,12 +2332,11 @@ public:
 public:
 	friend std::ostream&
 	operator<< (std::ostream& os, const coxmatch_ofb_metadata& oxm) {
-		os << dynamic_cast<const coxmatch_64&>(oxm);
-		os << std::hex;
-		os << "<metadata: ";
-		os << "0x" << (unsigned long long)oxm.get_u64value() << " / ";
-		os << "0x" << (unsigned long long)oxm.get_u64mask() << " ";
-		os << std::dec << ">" << std::endl;
+		os << dynamic_cast<const coxmatch_64&>(oxm)
+		<< std::hex
+		<< "<metadata: 0x" << (unsigned long long)oxm.get_u64value()
+		<< " / 0x" << (unsigned long long)oxm.get_u64mask()
+		<< std::dec << " >" << std::endl;
 		return os;
 	};
 };
@@ -2495,12 +2472,11 @@ public:
 public:
 	friend std::ostream&
 	operator<< (std::ostream& os, const coxmatch_ofb_vlan_vid& oxm) {
-		os << dynamic_cast<const coxmatch_16&>(oxm);
-		os  << "<coxmatch_ofb_vlan_vid >" << std::endl;
-		os  << "<vlan-vid: "
-				<< "0x" << std::hex << (int)oxm.get_u16value() << std::dec << " / "
-				<< "0x" << std::hex << (int)oxm.get_u16mask() << std::dec << " "
-				<< ">" << std::endl;
+		os << dynamic_cast<const coxmatch_16&>(oxm)
+			<< "<coxmatch_ofb_vlan_vid >" << std::endl
+			<< "<vlan-vid: 0x" << std::hex << (int)oxm.get_u16value()
+			<< " / 0x" << (int)oxm.get_u16mask() << std::dec
+			<< " >" << std::endl;
 		return os;
 	};
 };

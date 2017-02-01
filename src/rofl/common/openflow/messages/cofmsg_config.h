@@ -66,7 +66,7 @@ public:
 	std::string
 	str() const {
 		std::stringstream ss;
-		ss << cofmsg::str() << "-Get-Config-Request- " << " ";
+		ss << cofmsg::str() << "-Get-Config-Request- ";
 		return ss.str();
 	};
 };
@@ -216,20 +216,17 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, const cofmsg_get_config_reply& msg) {
-		os << dynamic_cast<const cofmsg&>( msg );
-		os << "<cofmsg_get_config_reply ";
-		os << "flags:" << msg.s_flags() << ", ";
-		os << "miss-send-len:" << (int)msg.get_miss_send_len() << " ";
-		os << " >" << std::endl;
+		os << dynamic_cast<const cofmsg&>( msg )
+			<< "<cofmsg_get_config_reply flags:" << msg.s_flags() <<
+			", miss-send-len:" << (int)msg.get_miss_send_len() << " >" << std::endl;
 		return os;
 	};
 
 	std::string
 	str() const {
 		std::stringstream ss;
-		ss << cofmsg::str() << "-Get-Config-Reply- " << " ";
-		ss << "flags: " << s_flags() << ", ";
-		ss << "miss_send_len: " << (unsigned int)get_miss_send_len() << " ";
+		ss << cofmsg::str() << "-Get-Config-Reply- flags: " << s_flags()
+			<< ", miss_send_len: " << (unsigned int)get_miss_send_len();
 		return ss.str();
 	};
 
@@ -385,20 +382,18 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, const cofmsg_set_config& msg) {
-		os << dynamic_cast<const cofmsg&>( msg );
-		os << "<cofmsg_set_config ";
-		os << "flags:" << msg.s_flags() << ", ";
-		os << "miss-send-len:" << (int)msg.get_miss_send_len() << " ";
-		os << " >" << std::endl;
+		os << dynamic_cast<const cofmsg&>( msg )
+			<< "<cofmsg_set_config flags:" << msg.s_flags()
+			<< " miss-send-len:" << (int)msg.get_miss_send_len()
+			<< " >" << std::endl;
 		return os;
 	};
 
 	std::string
 	str() const {
 		std::stringstream ss;
-		ss << cofmsg::str() << "-Set-Config- " << " ";
-		ss << "flags: " << s_flags() << ", ";
-		ss << "miss_send_len: " << (unsigned int)get_miss_send_len() << " ";
+		ss << cofmsg::str() << "-Set-Config- flags: " << s_flags()
+			<< " miss_send_len: " << (unsigned int)get_miss_send_len();
 		return ss.str();
 	};
 

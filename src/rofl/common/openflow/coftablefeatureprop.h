@@ -747,9 +747,8 @@ public:
 	friend std::ostream&
 	operator<< (std::ostream& os, coftable_feature_prop_oxm const& tfp) {
 		os << dynamic_cast<coftable_feature_prop const&>( tfp );
-		os << "<coftable_feature_prop_oxm "
-				<< "#oxm-ids:" << tfp.oxm_ids.size() << " "
-				<< "#oxm-ids-exp:" << tfp.oxm_ids_exp.size() << " ";
+		os << "<coftable_feature_prop_oxm #oxm-ids:" << tfp.oxm_ids.size()
+				<< " #oxm-ids-exp:" << tfp.oxm_ids_exp.size() << " ";
 		switch (tfp.get_type()) {
 		case rofl::openflow13::OFPTFPT_MATCH: {
 			os << "MATCH";

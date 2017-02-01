@@ -406,10 +406,7 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, const cmemory& mem) {
-		os  << "<cmemory: ";
-		os << "data:" << (void*)mem.data.first << " ";
-		os << "datalen:" << (int)mem.data.second << " ";
-		os << ">" << std::endl;
+		os  << "<cmemory: data:" << (void*)mem.data.first << " datalen:" << (int)mem.data.second << ">" << std::endl;
 
 		unsigned int const width = 32;
 

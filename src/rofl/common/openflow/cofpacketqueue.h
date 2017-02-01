@@ -162,15 +162,13 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, cofpacket_queue const& pq) {
-		os  << "<cofpacket_queue version: " << (int)pq.get_version() << " "
-				<< "length: " << pq.length() << " "
-				<< ">" << std::endl;
-		os << std::hex;
-		os  << "<port-no: 0x" << (unsigned int)pq.get_port_no() << " >" << std::endl;
-		os  << "<queue-id: 0x" << (unsigned int)pq.get_queue_id() << " >" << std::endl;
-		os << std::dec;
-			
-			os << pq.queue_props;
+		os  << "<cofpacket_queue version: " << (int)pq.get_version()
+				<< " length: " << pq.length() << ">" << std::endl
+		<< std::hex
+		<< "<port-no: 0x" << (unsigned int)pq.get_port_no() << " >" << std::endl
+		<< "<queue-id: 0x" << (unsigned int)pq.get_queue_id() << " >" << std::endl
+		<< std::dec
+		<< pq.queue_props;
 		return os;
 	};
 

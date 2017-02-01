@@ -31,7 +31,6 @@
 #include "rofl/common/cdpid.h"
 #include "rofl/common/crofqueue.h"
 #include "rofl/common/crandom.h"
-#include "rofl/common/cjournal.hpp"
 
 #include "rofl/common/openflow/cofports.h"
 #include "rofl/common/openflow/coftables.h"
@@ -1024,8 +1023,7 @@ protected:
  *
  */
 class crofdpt :
-		public rofl::crofchan_env,
-		public rofl::cjournal_env
+		public rofl::crofchan_env
 {
 public:
 
@@ -1056,24 +1054,6 @@ public:
 	set_env(
 			crofdpt_env* env)
 	{ this->env = env; return *this; };
-
-public:
-
-	/**
-	 *
-	 */
-	const cjournal&
-	get_journal() const
-	{ return journal; };
-
-	/**
-	 *
-	 */
-	cjournal&
-	set_journal()
-	{ return journal; };
-
-public:
 
 	/**
 	 * @brief	Returns rofl-common's internal rofl::cdptid identifier for this instance
@@ -2108,9 +2088,6 @@ private:
 			const rofl::cauxid& auxid, rofl::openflow::cofmsg *msg);
 
 private:
-
-	// journal
-	rofl::cjournal                   journal;
 
 	// environment
 	rofl::crofdpt_env*               env;

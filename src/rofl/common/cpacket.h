@@ -315,12 +315,9 @@ public:
 	 */
 	friend std::ostream &
 	operator<<(std::ostream& os, const cpacket& pack) {
-		os  << "<cpacket ";
-		os << "data:" << (void*)pack.soframe() << " ";
-		os << "datalen:" << (int)pack.length() << " ";
-		os << "head:" << (int)pack.head << " ";
-		os << "tail:" << (int)pack.tail << " ";
-		os << ">" << std::endl;
+		os  << "<cpacket data:" << (void*)pack.soframe() << " datalen:" <<
+			(int)pack.length() << " head:" << (int)pack.head << " tail:" <<
+			(int)pack.tail << ">" << std::endl;
 		
 
 		unsigned int nbytes = 32;

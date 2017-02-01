@@ -274,31 +274,26 @@ public:
 		os << "<cofmsg_features_reply ";
 		switch (msg.get_version()) {
 		case openflow10::OFP_VERSION: {
-			os << "dpid:" 			<< msg.get_dpid() 				<< " ";
-			os << "#buffers:" 		<< (unsigned int)msg.get_n_buffers() 	<< " ";
-			os << "#tables:" 		<< (int)msg.get_n_tables() 		<< " ";
-			os << "capabilities:0x"	<< std::hex << (int)msg.get_capabilities() << std::dec << " ";
-			os << "actions:" 		<< (int)msg.get_actions_bitmap() << " ";
-			os << " >" << std::endl;
-			
-			os << msg.ports;
+			os << "dpid:" << msg.get_dpid()
+				<< " #buffers:" << (unsigned int)msg.get_n_buffers()
+				<< " #tables:" << (int)msg.get_n_tables()
+				<< " capabilities:0x" << std::hex << (int)msg.get_capabilities() << std::dec
+				<< " actions:" << (int)msg.get_actions_bitmap() << " >" << std::endl
+				<< msg.ports;
 		} break;
 		case openflow12::OFP_VERSION: {
-			os << "dpid:" 			<< msg.get_dpid() 				<< " ";
-			os << "#buffers:" 		<< (unsigned int)msg.get_n_buffers() 	<< " ";
-			os << "#tables:" 		<< (int)msg.get_n_tables() 		<< " ";
-			os << "capabilities:0x"	<< std::hex << (int)msg.get_capabilities() << std::dec << " ";
-			os << " >" << std::endl;
-			
-			os << msg.ports;
+			os << "dpid:" << msg.get_dpid()
+				<< " #buffers:" << (unsigned int)msg.get_n_buffers()
+				<< " #tables:" << (int)msg.get_n_tables()
+				<< " capabilities:0x" << std::hex << (int)msg.get_capabilities() << std::dec
+				<< " >" << std::endl << msg.ports;
 		} break;
 		case openflow13::OFP_VERSION: {
-			os << "dpid:" 			<< msg.get_dpid() 				<< " ";
-			os << "#buffers:" 		<< (unsigned int)msg.get_n_buffers() 	<< " ";
-			os << "#tables:" 		<< (int)msg.get_n_tables() 		<< " ";
-			os << "capabilities:0x"	<< std::hex << (int)msg.get_capabilities() << std::dec << " ";
-			os << "auxid:"          << (int)msg.get_auxid() << " ";
-			os << " >" << std::endl;
+			os << "dpid:" << msg.get_dpid()
+				<< " #buffers:" << (unsigned int)msg.get_n_buffers()
+				<< " #tables:" << (int)msg.get_n_tables()
+				<< " capabilities:0x" << std::hex << (int)msg.get_capabilities() << std::dec
+				<< " auxid:" << (int)msg.get_auxid() << " >" << std::endl;
 		} break;
 		default: {
 
@@ -310,13 +305,12 @@ public:
 	std::string
 	str() const {
 		std::stringstream ss;
-		ss << cofmsg::str() << "-Features-Reply- " << " ";
-		ss << "dpid: 0x" << std::hex << get_dpid() << std::dec << ", ";
+		ss << cofmsg::str() << "-Features-Reply- dpid: 0x" << std::hex << get_dpid();
 		if (get_version() >= rofl::openflow13::OFP_VERSION) {
-			ss << "auxid: 0x" << cauxid(get_auxid()).str() << ", ";
+			ss << ", auxid: 0x" << cauxid(get_auxid()).str();
 		}
-		ss << "#buffers: 0x" << std::hex << (unsigned int)get_n_buffers() << std::dec << ", ";
-		ss << "#tables: 0x"  << std::hex << (int)get_n_tables() << std::dec << " ";
+		ss << ", #buffers: 0x" << (unsigned int)get_n_buffers()
+			<< ", #tables: 0x"  << (int)get_n_tables();
 		return ss.str();
 	};
 

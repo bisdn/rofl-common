@@ -129,7 +129,7 @@ public:
 	virtual std::string
 	str() const {
 		std::stringstream ss;
-		ss << cofmsg::str() << "-Table-Mod- " << " ";
+		ss << cofmsg::str() << "-Table-Mod- ";
 		return ss.str();
 	};
 

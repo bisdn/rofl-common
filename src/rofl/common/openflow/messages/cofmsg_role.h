@@ -106,7 +106,7 @@ public:
 	virtual std::string
 	str() const {
 		std::stringstream ss;
-		ss << cofmsg::str() << "-Role-Request- " << " ";
+		ss << cofmsg::str() << "-Role-Request- ";
 		return ss.str();
 	};
 
@@ -204,7 +204,7 @@ public:
 	virtual std::string
 	str() const {
 		std::stringstream ss;
-		ss << cofmsg::str() << "-Role-Reply- " << " ";
+		ss << cofmsg::str() << "-Role-Reply- ";
 		return ss.str();
 	};
 

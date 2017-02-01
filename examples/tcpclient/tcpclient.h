@@ -68,23 +68,13 @@ public:
 			pselect(0, NULL, NULL, NULL, &ts, NULL);
 		}
 
-		for (auto auxid : crofbase::get_ctl(ctlid).keys()) {
-			std::cerr << ">>> journal for auxid: " << auxid << std::endl;
-			std::cerr << crofbase::get_ctl(ctlid).get_conn(auxid).get_journal() << std::endl;
-			std::cerr << crofbase::get_ctl(ctlid).get_conn(auxid).get_tcp_journal() << std::endl;
-		}
-
 		crofbase::set_ctl(ctlid).close();
-
-		std::cerr << crofbase::get_ctl(ctlid).get_journal() << std::endl;
 
 		crofbase::drop_ctl(ctlid);
 
 		unsigned int shutdown = 4;
 		while (--shutdown > 0)
 		{ std::cerr << "."; sleep(1); } std::cerr << std::endl;
-
-		std::cerr << crofbase::get_journal() << std::endl;
 
 		return 0;
 	};
@@ -108,7 +98,6 @@ public:
 				add_conn(auxid).
 					set_laddr(rofl::csockaddr(AF_INET, "0.0.0.0",   0)).
 					set_raddr(rofl::csockaddr(AF_INET, "127.0.0.1", 6653)).
-					set_trace(true).
 					tcp_connect(vbitmap, rofl::crofconn::MODE_DATAPATH, true);
 	};
 

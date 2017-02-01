@@ -94,7 +94,7 @@ cunixenv::get_usage(char *argv0)
 
 		//Tabulate
 		for(int i= 30 - tmp.length();i>0;i--){
-			tmp +=" ";
+			tmp += " ";
 		}
 
 		tmp +=" <"+it->description;

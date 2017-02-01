@@ -32,7 +32,6 @@ void
 crofconntest::test()
 {
 	try {
-		trace = true;
 		test_mode = TEST_MODE_TCP;
 		keep_running = 10;
 		msg_counter = 0;
@@ -72,12 +71,8 @@ crofconntest::test()
 		versionbitmap_dpt.add_ofp_version(rofl::openflow10::OFP_VERSION);
 		versionbitmap_dpt.add_ofp_version(rofl::openflow12::OFP_VERSION);
 		versionbitmap_dpt.add_ofp_version(rofl::openflow13::OFP_VERSION);
-		sclient->set_journal().log_on_stderr(trace);
-		sclient->set_tcp_journal().log_on_stderr(trace);
 		std::cerr << "connecting to " << baddr.str() << std::endl;
-		sclient->set_raddr(baddr).set_trace(trace).
-				tcp_connect(versionbitmap_dpt, rofl::crofconn::MODE_DATAPATH, /*reconnect=*/false);
-
+		sclient->set_raddr(baddr).tcp_connect(versionbitmap_dpt, rofl::crofconn::MODE_DATAPATH, /*reconnect=*/false);
 
 		while (--keep_running > 0) {
 			struct timespec ts;
@@ -95,15 +90,6 @@ crofconntest::test()
 		slisten->close();
 		sclient->close();
 		sserver->close();
-
-		std::cerr << ">>>>>>>>>>>>> listen <<<<<<<<<<<<<<" << std::endl;
-		std::cerr << slisten->get_journal() << std::endl;
-		std::cerr << ">>>>>>>>>>>>> client <<<<<<<<<<<<<<" << std::endl;
-		std::cerr << sclient->get_journal() << std::endl;
-		std::cerr << sclient->get_tcp_journal() << std::endl;
-		std::cerr << ">>>>>>>>>>>>> server <<<<<<<<<<<<<<" << std::endl;
-		std::cerr << sserver->get_journal() << std::endl;
-		std::cerr << sserver->get_tcp_journal() << std::endl;
 
 		std::cerr << "s:" << srv_pkts_rcvd << "(" << cli_pkts_sent << "), ";
 		std::cerr << "c:" << cli_pkts_rcvd << "(" << srv_pkts_sent << "), " << std::endl;
@@ -141,11 +127,8 @@ crofconntest::handle_listen(
 			versionbitmap_ctl.add_ofp_version(rofl::openflow12::OFP_VERSION);
 			versionbitmap_ctl.add_ofp_version(rofl::openflow13::OFP_VERSION);
 
-			(sserver = new rofl::crofconn(this))->set_trace(trace);
-			sserver->set_journal().log_on_stderr(trace);
-			sserver->set_tcp_journal().log_on_stderr(trace);
-			sserver->set_trace(trace).
-					tcp_accept(sd, versionbitmap_ctl, rofl::crofconn::MODE_CONTROLLER);
+			sserver = new rofl::crofconn(this);
+			sserver->tcp_accept(sd, versionbitmap_ctl, rofl::crofconn::MODE_CONTROLLER);
 
 		} break;
 		default: {

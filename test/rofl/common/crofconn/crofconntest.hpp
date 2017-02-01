@@ -169,7 +169,6 @@ private:
 	rofl::openflow::cofhello_elem_versionbitmap versionbitmap_ctl;
 	rofl::openflow::cofhello_elem_versionbitmap versionbitmap_dpt;
 	enum crofconn_test_mode_t test_mode;
-	bool                trace;
 	int                 keep_running;
 	int                 msg_counter;
 	rofl::crofsock*		slisten;

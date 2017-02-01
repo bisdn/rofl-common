@@ -151,17 +151,16 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, cofmsg const& msg) {
-		os << "<cofmsg ";
-			os << "version: " 	<< (int)msg.get_version() 			<< " ";
-			os << "type: " 		<< std::dec << (int)msg.get_type() 	<< " ";
-			os << "length: " 	<< (int)msg.get_length() 			<< " ";
-			try {
-				os << "(wire: " << (int)msg.length() 			   	<< ") ";
-			} catch (eBadVersion& e) {
-				os << "n.a.) ";
-			}
-			os << "xid: 0x" 	<< std::hex << (unsigned int)msg.get_xid() << std::dec 	<< " ";
-		os << ">" << std::endl;
+		os << "<cofmsg version: " << (int)msg.get_version()
+			<< " type: " << std::dec << (int)msg.get_type()
+			<< " length: " << (int)msg.get_length();
+		try {
+			os << "(wire: " << (int)msg.length() << ")";
+		} catch (eBadVersion& e) {
+			os << "n.a.)";
+		}
+		os << " xid: 0x" << std::hex << (unsigned int)msg.get_xid() <<
+			std::dec << " >" << std::endl;
 		return os;
 	};
 
@@ -171,25 +170,24 @@ public:
 		ss << "OFP:{";
 		switch (get_version()) {
 		case rofl::openflow::OFP_VERSION_UNKNOWN: {
-			ss << "version: unknown, ";
+			ss << "version: unknown";
 		} break;
 		case rofl::openflow10::OFP_VERSION: {
-			ss << "version: 1.0, ";
+			ss << "version: 1.0";
 		} break;
 		case rofl::openflow12::OFP_VERSION: {
-			ss << "version: 1.2, ";
+			ss << "version: 1.2";
 		} break;
 		case rofl::openflow13::OFP_VERSION: {
-			ss << "version: 1.3, ";
+			ss << "version: 1.3";
 		} break;
 		default: {
-			ss << "version: " << (int)get_version() << "(on wire), ";
+			ss << "version: " << (int)get_version() << "(on wire)";
 		} break;
 		}
-		ss << "type: " << (int)get_type() << ", ";
-		ss << "len: " << (int)get_length() << ", ";
-		ss << "xid: 0x" << std::hex << (unsigned int)get_xid() << std::dec;
-		ss << "} ";
+		ss << ", type: " << (int)get_type() << ", len: " << (int)get_length()
+		<< ", xid: 0x" << std::hex << (unsigned int)get_xid() << std::dec
+		<< "} ";
 		return ss.str();
 	};
 

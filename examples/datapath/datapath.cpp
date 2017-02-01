@@ -54,7 +54,6 @@ datapath::run(
 				add_conn(rofl::cauxid(i)).
 					set_laddr(rofl::csockaddr(AF_INET, "0.0.0.0",   0)).
 					set_raddr(rofl::csockaddr(AF_INET, "127.0.0.1", 6653)).
-					set_trace(true).
 					tcp_connect(vbitmap, rofl::crofconn::MODE_DATAPATH, true);
 	}
 
@@ -65,23 +64,13 @@ datapath::run(
 		pselect(0, NULL, NULL, NULL, &ts, NULL);
 	}
 
-	for (auto auxid : crofbase::get_ctl(ctlid).keys()) {
-		std::cerr << ">>> journal for auxid: " << auxid << std::endl;
-		std::cerr << crofbase::get_ctl(ctlid).get_conn(auxid).get_journal() << std::endl;
-		std::cerr << crofbase::get_ctl(ctlid).get_conn(auxid).get_tcp_journal() << std::endl;
-	}
-
 	crofbase::set_ctl(ctlid).close();
-
-	std::cerr << crofbase::get_ctl(ctlid).get_journal() << std::endl;
 
 	crofbase::drop_ctl(ctlid);
 
 	unsigned int shutdown = 4;
 	while (--shutdown > 0)
 	{ std::cerr << "."; sleep(1); } std::cerr << std::endl;
-
-	std::cerr << crofbase::get_journal() << std::endl;
 
 	return 0;
 }
@@ -245,8 +234,6 @@ datapath::handle_table_features_stats_request(
 			auxid,
 			msg.get_xid(),
 			tables);
-
-	std::cerr << rofl::crofbase::set_ctl(ctlid).set_conn(auxid).set_journal();
 }
 
 
@@ -272,8 +259,6 @@ datapath::handle_table_stats_request(
 			auxid,
 			msg.get_xid(),
 			tablestatsarray);
-
-	std::cerr << rofl::crofbase::set_ctl(ctlid).set_conn(auxid).set_journal();
 };
 
 

@@ -14,6 +14,7 @@
 #define CROFBASE_H 1
 
 #include <vector>
+#include <glog/logging.h>
 
 #include "rofl/common/locking.hpp"
 #include "rofl/common/exception.hpp"
@@ -24,7 +25,6 @@
 #include "rofl/common/openflow/cofhelloelemversionbitmap.h"
 #include "rofl/common/crandom.h"
 #include "rofl/common/cthread.hpp"
-#include "rofl/common/cjournal.hpp"
 
 namespace rofl {
 
@@ -54,7 +54,6 @@ public:
 
 class crofbase :
 		public virtual rofl::cthread_env,
-		public rofl::cjournal_env,
 		public rofl::crofconn_env,
 		public rofl::crofctl_env,
 		public rofl::crofdpt_env
@@ -77,22 +76,6 @@ public:
 	 * @brief	crofbase constructor
 	 */
 	crofbase();
-
-public:
-
-	/**
-	 *
-	 */
-	const cjournal&
-	get_journal() const
-	{ return journal; };
-
-	/**
-	 *
-	 */
-	cjournal&
-	set_journal()
-	{ return journal; };
 
 public:
 
@@ -418,10 +401,7 @@ public:
 			it.second->set_env(nullptr);
 			/* close control channel */
 			it.second->clear();
-			/* create journal entry */
-			journal.log(LOG_INFO, "datapath detached").
-						set_key("dptid", it.second->get_dptid());
-
+			VLOG(2) << "datapath detached dptid=" << it.second->get_dptid();
 			rofdpts_deletion.insert(it.second);
 		}
 		rofdpts.clear();
@@ -547,8 +527,7 @@ public:
 		if (rofdpts.find(dptid) == rofdpts.end()) {
 			return false;
 		}
-		journal.log(LOG_INFO, "datapath detached").
-					set_key("dptid", dptid);
+		VLOG(2) << "datapath detached dptid=" << dptid;
 		/* redirect environment */
 		rofdpts[dptid]->set_env(nullptr);
 		/* close control channel */
@@ -664,10 +643,7 @@ public:
 			it.second->set_env(nullptr);
 			/* close control channel */
 			it.second->clear();
-			/* create journal entry */
-			journal.log(LOG_INFO, "controller detached").
-						set_key("ctlid", it.second->get_ctlid().str());
-
+			VLOG(2) << "controller detached ctlid=" << it.second->get_ctlid().str();
 			rofctls_deletion.insert(it.second);
 		}
 		rofctls.clear();
@@ -791,8 +767,7 @@ public:
 		if (rofctls.find(ctlid) == rofctls.end()) {
 			return false;
 		}
-		journal.log(LOG_INFO, "controller detached").
-					set_key("ctlid", ctlid.str());
+		VLOG(2) << "controller detached ctlid=" << ctlid.str();
 		/* redirect environment */
 		rofctls[ctlid]->set_env(nullptr);
 		/* close control channel */
@@ -2685,9 +2660,6 @@ private:
 	};
 
 private:
-
-	// journal
-	rofl::cjournal                  journal;
 
 	enum crofbase_timer_t {
 		TIMER_ID_ROFCTL_DESTROY = 1,

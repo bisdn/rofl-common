@@ -272,9 +272,8 @@ public:
 		} break;
 		case rofl::openflow12::OFP_VERSION:
 		case rofl::openflow13::OFP_VERSION: {
-			os  << "<cofbuckets ";
-			os << "ofp-version:" << (int)buckets.ofp_version << " ";
-			os << "#buckets:" << buckets.buckets.size() << " >" << std::endl;
+			os  << "<cofbuckets ofp-version:" << (int)buckets.ofp_version
+			<< " #buckets:" << buckets.buckets.size() << " >" << std::endl;
 			
 			for (std::map<uint32_t, cofbucket>::const_iterator
 					it = buckets.buckets.begin(); it != buckets.buckets.end(); ++it) {

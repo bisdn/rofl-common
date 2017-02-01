@@ -132,8 +132,7 @@ public:
 	std::string
 	str() const {
 		std::stringstream ss;
-		ss << cofmsg::str() << "-Group-Mod- " << " ";
-		ss << "groupmod: " << groupmod.str() << " ";
+		ss << cofmsg::str() << "-Group-Mod- groupmod: " << groupmod.str() << " ";
 		return ss.str();
 	};
 

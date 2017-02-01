@@ -241,9 +241,9 @@ public:
 	std::string
 	str() const {
 		std::stringstream ss;
-		ss << "command: " << (int)get_command() << ", ";
-		ss << "type: " << (int)get_type() << ", ";
-		ss << "group_id: " << (unsigned int)get_group_id() << " ";
+		ss << "command: " << (int)get_command() << ", "
+		<< "type: " << (int)get_type() << ", "
+		<< "group_id: " << (unsigned int)get_group_id() << " ";
 		return ss.str();
 	};
 

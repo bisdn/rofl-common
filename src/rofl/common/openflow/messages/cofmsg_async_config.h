@@ -87,7 +87,7 @@ public:
 	virtual std::string
 	str() const {
 		std::stringstream ss;
-		ss << cofmsg::str() << "-Get-Async-Config-Request- " << " ";
+		ss << cofmsg::str() << "-Get-Async-Config-Request- ";
 		return ss.str();
 	};
 };
@@ -186,7 +186,7 @@ public:
 	virtual std::string
 	str() const {
 		std::stringstream ss;
-		ss << cofmsg::str() << "-Get-Async-Config-Reply- " << " ";
+		ss << cofmsg::str() << "-Get-Async-Config-Reply- ";
 		return ss.str();
 	};
 
@@ -286,7 +286,7 @@ public:
 	virtual std::string
 	str() const {
 		std::stringstream ss;
-		ss << cofmsg::str() << "-Set-Async-Config- " << " ";
+		ss << cofmsg::str() << "-Set-Async-Config- ";
 		return ss.str();
 	};
 

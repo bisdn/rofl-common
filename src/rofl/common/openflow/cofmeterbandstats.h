@@ -141,12 +141,9 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, const cofmeter_band_stats& mbs) {
-		os  << "<cofmeter_band_stats "
-				<< std::hex
-				<< "packet_band_count: 0x" << mbs.get_packet_band_count() << " "
-				<< "byte_band_count: 0x" << mbs.get_byte_band_count() << " "
-				<< ">"
-				<< std::dec << std::endl;
+		os  << std::hex << "<cofmeter_band_stats packet_band_count: 0x"
+			<< mbs.get_packet_band_count() << " byte_band_count: 0x"
+			<< mbs.get_byte_band_count() << " >" << std::dec << std::endl;
 		return os;
 	};
 

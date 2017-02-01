@@ -60,7 +60,6 @@ private:
 	unsigned int        num_of_dpt_established;
 	std::atomic_uint    num_of_ctl_established;
 
-	bool                trace;
 	rofl::crandom       rand;
 	rofl::csockaddr     baddr;
 	rofl::crofsock*		rofsock;
@@ -141,16 +140,8 @@ private:
 	{
 		std::cerr << "crofchan::handle_negotiation_failed: pending_conns: " << pending_conns.size() << std::endl;
 		std::cerr << ">>>>>>>>>>>>> auxid=" << (int)conn.get_auxid().get_id() << " <<<<<<<<<<<<<<" << std::endl;
-		std::cerr << conn.get_journal() << std::endl;
-		std::cerr << conn.get_tcp_journal() << std::endl;
 
 		rofl::AcquireReadWriteLock lock(plock);
-		for (auto conn : pending_conns) {
-			std::cerr << ">>>>>>>>>>>>> pending crofconn <<<<<<<<<<<<<<" << std::endl;
-			std::cerr << conn->get_journal() << std::endl;
-			std::cerr << conn->get_tcp_journal() << std::endl;
-		}
-
 		CPPUNIT_ASSERT(false);
 	};
 
@@ -213,8 +204,6 @@ private:
 	{
 		std::cerr << "crofconn::handle_negotiation_failed" << std::endl;
 		std::cerr << ">>>>>>>>>>>>> auxid=" << (int)conn.get_auxid().get_id() << " <<<<<<<<<<<<<<" << std::endl;
-		std::cerr << conn.get_journal() << std::endl;
-		std::cerr << conn.get_tcp_journal() << std::endl;
 		CPPUNIT_ASSERT(false);
 	};
 
@@ -224,8 +213,6 @@ private:
 	{
 		std::cerr << "crofconn::handle_closed" << std::endl;
 		std::cerr << ">>>>>>>>>>>>> auxid=" << (int)conn.get_auxid().get_id() << " <<<<<<<<<<<<<<" << std::endl;
-		std::cerr << conn.get_journal() << std::endl;
-		std::cerr << conn.get_tcp_journal() << std::endl;
 		CPPUNIT_ASSERT(false);
 	};
 

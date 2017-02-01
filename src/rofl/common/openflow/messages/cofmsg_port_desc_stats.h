@@ -88,7 +88,7 @@ public:
 	virtual std::string
 	str() const {
 		std::stringstream ss;
-		ss << cofmsg_stats_request::str() << "-Port-Desc-Stats-Request- " << " ";
+		ss << cofmsg_stats_request::str() << "-Port-Desc-Stats-Request- ";
 		return ss.str();
 	};
 };
@@ -184,7 +184,7 @@ public:
 	virtual std::string
 	str() const {
 		std::stringstream ss;
-		ss << cofmsg_stats_reply::str() << "-Port-Desc-Stats-Reply- " << " ";
+		ss << cofmsg_stats_reply::str() << "-Port-Desc-Stats-Reply- ";
 		return ss.str();
 	};
 

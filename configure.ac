@@ -49,6 +49,12 @@ m4_include([config/versioning.m4])
 # Checking OpenSSL
 m4_include([config/openssl.m4])
 
+# check for glog
+PKG_CHECK_MODULES([GLOG], libglog >= 0.3.3,
+  [ CPPFLAGS="$CPPFLAGS $GLOG_CFLAGS"
+        LIBS="$LIBS $GLOG_LIBS $GFLAGS_LIBS" ],
+  [ AC_MSG_ERROR([minimum version of glog is 0.3.3]) ])
+
 AC_SEARCH_LIBS([pthread_rwlock_wrlock], [pthread], [], [AC_MSG_ERROR([lib pthread not found])])
 
 # Output files

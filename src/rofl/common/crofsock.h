@@ -47,7 +47,6 @@
 #include "rofl/common/csockaddr.h"
 #include "rofl/common/crandom.h"
 #include "rofl/common/exception.hpp"
-#include "rofl/common/cjournal.hpp"
 
 #include "rofl/common/openflow/messages/cofmsg.h"
 #include "rofl/common/openflow/messages/cofmsg_hello.h"
@@ -273,8 +272,7 @@ private:
  * @brief	A socket capable of talking OpenFlow via TCP and vice versa
  */
 class crofsock :
-		public cthread_env,
-		public cjournal_env
+		public cthread_env
 {
 	enum outqueue_type_t {
 		QUEUE_OAM  = 0, // Echo.request/Echo.reply
@@ -329,22 +327,6 @@ public:
 	 */
 	crofsock(
 			crofsock_env *env);
-
-public:
-
-	/**
-	 *
-	 */
-	const cjournal&
-	get_journal() const
-	{ return journal; };
-
-	/**
-	 *
-	 */
-	cjournal&
-	set_journal()
-	{ return journal; };
 
 public:
 
@@ -675,25 +657,6 @@ public:
 			const std::string& ciphers)
 	{ this->ciphers = ciphers; return *this; };
 
-public:
-
-	/**
-	 *
-	 */
-	bool
-	get_trace() const
-	{ return trace; };
-
-	/**
-	 *
-	 */
-	crofsock&
-	set_trace(
-			bool trace)
-	{ this->trace = trace; return *this; };
-
-public:
-
 	friend std::ostream&
 	operator<< (std::ostream& os, crofsock const& rofsock) {
 		os  << "<crofsock: transport-connection-established: " << rofsock.is_established() << ">" << std::endl;
@@ -871,9 +834,6 @@ private:
 
 private:
 
-	// journal
-	cjournal                    journal;
-
 	// environment for this crofsock instance
 	crofsock_env*				env;
 
@@ -1019,9 +979,6 @@ private:
 
 	// message length of current tx-fragment
 	size_t                      txlen;
-
-	// enable message tracing
-	bool                        trace;
 };
 
 } /* namespace rofl */
