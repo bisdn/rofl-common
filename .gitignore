@@ -43,7 +43,7 @@ test-driver
 /examples/tcpserver/server
 /src/rofl/rofl_common.pc
 /src/rofl_common_conf.h
-/tools/rpmbuild/SPECS/rofl_common.spec
+/tools/rpmbuild/SPECS/rofl-common.spec
 
 !.gitignore
 !.travis.yml
