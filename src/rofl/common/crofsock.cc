@@ -1502,6 +1502,10 @@ crofsock::send_from_queue()
 					/* overall length of this message */
 					txlen = msg->length();
 
+#ifdef OVS_COMPAT
+					memset(txbuffer.somem(), 0, txlen);
+#endif
+
 					/* pack message into txbuffer */
 					msg->pack(txbuffer.somem(), txlen);
 
