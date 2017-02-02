@@ -74,7 +74,7 @@ AC_CONFIG_FILES([
 	examples/controller/Makefile
 
 	tools/Makefile
-	tools/rpmbuild/SPECS/rofl_common.spec
+	tools/rpmbuild/SPECS/rofl-common.spec
 
 	test/Makefile
 	test/rofl/Makefile
