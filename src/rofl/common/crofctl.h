@@ -26,7 +26,6 @@
 #include "rofl/common/locking.hpp"
 
 #include "rofl/common/crandom.h"
-#include "rofl/common/cjournal.hpp"
 
 #include "rofl/common/openflow/openflow.h"
 #include "rofl/common/openflow/messages/cofmsg.h"
@@ -775,8 +774,7 @@ protected:
  *
  */
 class crofctl :
-		public rofl::crofchan_env,
-		public rofl::cjournal_env
+		public rofl::crofchan_env
 {
 public:
 
@@ -807,22 +805,6 @@ public:
 	set_env(
 			crofctl_env* env)
 	{ this->env = env; return *this; };
-
-public:
-
-	/**
-	 *
-	 */
-	const cjournal&
-	get_journal() const
-	{ return journal; };
-
-	/**
-	 *
-	 */
-	cjournal&
-	set_journal()
-	{ return journal; };
 
 public:
 
@@ -1458,9 +1440,7 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, const crofctl& ctl) {
-		os  << "<crofctl ";
-		os << "ctlid:0x" << ctl.ctlid.str() << " ";
-		os << ">" << std::endl;
+		os  << "<crofctl ctlid:0x" << ctl.ctlid.str() << ">" << std::endl;
 		return os;
 	};
 
@@ -1559,9 +1539,6 @@ private:
 	init_async_config_role_default_template();
 
 private:
-
-	// journal
-	rofl::cjournal                   journal;
 
 	// environment
 	rofl::crofctl_env*               env;

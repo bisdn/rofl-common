@@ -169,12 +169,9 @@ public:
 	 */
 	friend std::ostream&
 	operator<< (std::ostream& os, coftablemod_prop const& prop) {
-		os  << "<coftablemod_prop "
-				<< "version: " << (int)prop.get_version() << " "
-				<< std::hex
-				<< "type: 0x" << (int)prop.get_type() << " "
-				<< std::dec
-				<< ">" << std::endl;
+		os  << "<coftablemod_prop version: " << (int)prop.get_version()
+			<< std::hex << " type: 0x" << (int)prop.get_type() << std::dec
+			<< ">" << std::endl;
 		return os;
 	};
 

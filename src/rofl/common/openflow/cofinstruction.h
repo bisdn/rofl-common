@@ -140,10 +140,8 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, cofinstruction const& inst) {
-		os  << "<cofinstruction ";
-		os << "type: 0x" << std::hex << (int)inst.get_type() << std::dec << " ";
-		os << "length: " << (int)inst.length() << " ";
-		os << ">" << std::endl;
+		os << "<cofinstruction type: 0x" << std::hex << (int)inst.get_type() << std::dec
+			<< " length: " << (int)inst.length() << ">" << std::endl;
 		return os;
 	};
 

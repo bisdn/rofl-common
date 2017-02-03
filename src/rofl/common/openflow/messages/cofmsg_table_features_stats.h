@@ -106,7 +106,7 @@ public:
 	virtual std::string
 	str() const {
 		std::stringstream ss;
-		ss << cofmsg_stats_request::str() << "-Table-Features-Stats-Request- " << " ";
+		ss << cofmsg_stats_request::str() << "-Table-Features-Stats-Request- ";
 		return ss.str();
 	};
 
@@ -209,7 +209,7 @@ public:
 	virtual std::string
 	str() const {
 		std::stringstream ss;
-		ss << cofmsg_stats_reply::str() << "-Table-Features-Stats-Reply- " << " ";
+		ss << cofmsg_stats_reply::str() << "-Table-Features-Stats-Reply- ";
 		return ss.str();
 	};
 

@@ -19,7 +19,6 @@ CPPUNIT_TEST_SUITE_REGISTRATION( crofchantest );
 void
 crofchantest::setUp()
 {
-	trace = true;
 	versionbitmap.add_ofp_version(rofl::openflow13::OFP_VERSION);
 	baddr = rofl::csockaddr(AF_INET, "127.0.0.1", 16455);
 	dpid = 0xa1a2a3a4a5a6a7a8;
@@ -67,7 +66,6 @@ crofchantest::test_connections()
 			std::cerr << "trying listening port=" << (int)listening_port << std::endl;
 			baddr = rofl::csockaddr(rofl::caddress_in4("127.0.0.1"), listening_port);
 			/* try to bind address first */
-			rofsock->set_trace(false);
 			rofsock->set_backlog(num_of_conns);
 			rofsock->set_baddr(baddr).listen();
 			std::cerr << "binding to " << baddr.str() << std::endl;
@@ -80,10 +78,6 @@ crofchantest::test_connections()
 
 	for (unsigned int i = 0; i < num_of_conns; i++) {
 		rofl::crofconn& conn = channel1->add_conn(rofl::cauxid(i));
-
-		conn.set_trace(trace);
-		conn.set_journal().log_on_stderr(false);
-		conn.set_tcp_journal().log_on_stderr(false);
 
 		conn.set_raddr(baddr).
 				  tcp_connect(versionbitmap, rofl::crofconn::MODE_DATAPATH, false);
@@ -110,7 +104,6 @@ crofchantest::test_connections()
 	std::cerr << ">>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<" << std::endl;
 
 	std::cerr << ">>>>>>>>>>>>> listen <<<<<<<<<<<<<<" << std::endl;
-	std::cerr << rofsock->get_journal() << std::endl;
 
 	std::cerr << "num_of_ctl_established = " << num_of_ctl_established << std::endl;
 	std::cerr << "num_of_dpt_established = " << num_of_dpt_established << std::endl;
@@ -126,9 +119,6 @@ crofchantest::test_connections()
 		if (not channel1->has_conn(auxid)) {
 			continue;
 		}
-		const rofl::crofconn& conn = channel1->get_conn(auxid);
-		std::cerr << conn.get_journal() << std::endl;
-		std::cerr << conn.get_tcp_journal() << std::endl;
 	}
 
 	for (auto auxid : channel2->keys()) {
@@ -183,7 +173,6 @@ crofchantest::test_congestion()
 			std::cerr << "trying listening port=" << (int)listening_port << std::endl;
 			baddr = rofl::csockaddr(rofl::caddress_in4("127.0.0.1"), listening_port);
 			/* try to bind address first */
-			rofsock->set_trace(false);
 			rofsock->set_backlog(num_of_conns);
 			rofsock->set_baddr(baddr).listen();
 			std::cerr << "binding to " << baddr.str() << std::endl;
@@ -198,10 +187,6 @@ crofchantest::test_congestion()
 
 	for (unsigned int i = 0; i < num_of_conns; i++) {
 		rofl::crofconn& conn = channel1->add_conn(rofl::cauxid(i));
-
-		conn.set_trace(trace);
-		conn.set_journal().log_on_stderr(false).set_max_entries(1024);
-		conn.set_tcp_journal().log_on_stderr(false).set_max_entries(1024);
 
 		conn.set_raddr(baddr).
 				  tcp_connect(versionbitmap, rofl::crofconn::MODE_DATAPATH, false);
@@ -225,7 +210,6 @@ crofchantest::test_congestion()
 	std::cerr << ">>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<" << std::endl;
 
 	std::cerr << ">>>>>>>>>>>>> listen <<<<<<<<<<<<<<" << std::endl;
-	std::cerr << rofsock->get_journal() << std::endl;
 
 	std::cerr << "num_of_ctl_established = " << num_of_ctl_established << std::endl;
 	std::cerr << "num_of_dpt_established = " << num_of_dpt_established << std::endl;
@@ -241,9 +225,6 @@ crofchantest::test_congestion()
 		if (not channel1->has_conn(auxid)) {
 			continue;
 		}
-		const rofl::crofconn& conn = channel1->get_conn(auxid);
-		std::cerr << conn.get_journal() << std::endl;
-		std::cerr << conn.get_tcp_journal() << std::endl;
 	}
 
 	for (auto auxid : channel2->keys()) {
@@ -288,7 +269,7 @@ crofchantest::handle_listen(
 			pending_conns.insert(conn);
 			std::cerr << "crofchantest::handle_listen() pending_conns: " << pending_conns.size() << std::endl;
 		}
-		conn->set_trace(true).tcp_accept(sd, versionbitmap, rofl::crofconn::MODE_CONTROLLER);
+		conn->tcp_accept(sd, versionbitmap, rofl::crofconn::MODE_CONTROLLER);
 	}
 }
 
@@ -305,13 +286,8 @@ crofchantest::handle_established(
 	}
 
 	channel2->add_conn(&conn);
-	conn.set_trace(trace);
-	conn.set_journal().log_on_stderr(false);
-	conn.set_tcp_journal().log_on_stderr(false);
 
 	std::cerr << ">>>>>>>>>>>>> server(" << (int)conn.get_auxid().get_id() << ") <<<<<<<<<<<<<<" << std::endl;
-	std::cerr << conn.get_journal() << std::endl;
-	std::cerr << conn.get_tcp_journal() << std::endl;
 
 	std::cerr << ">>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<" << std::endl;
 	std::cerr << ">>> crofchantest::handle_established() -conn-" << std::endl;
@@ -341,10 +317,6 @@ crofchantest::handle_established(
 	std::cerr << ">>> conn.get_auxid() = " << (int)conn.get_auxid().get_id() << std::endl;
 	std::cerr << ">>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<" << std::endl;
 	std::cerr << std::endl;
-
-	//std::cerr << ">>>>>>>>>>>>> client(" << (int)conn.get_auxid().get_id() << ") <<<<<<<<<<<<<<" << std::endl;
-	//std::cerr << conn.get_journal() << std::endl;
-	//std::cerr << conn.get_tcp_journal() << std::endl;
 
 	std::cerr << "crofchan::handle_established" << std::endl;
 
@@ -459,7 +431,6 @@ crofchantest::congestion_solved_indication(
 		thread.add_timer(TIMER_ID_START_SENDING_PACKET_INS, rofl::ctimespec().expire_in(0));
 	} else {
 		keep_running = false;
-		std::cerr << channel1->get_conn(rofl::cauxid(0)).get_tcp_journal() << std::endl;
 	}
 }
 

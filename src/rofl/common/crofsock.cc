@@ -12,6 +12,8 @@
 
 #include "crofsock.h"
 
+#include <glog/logging.h>
+
 using namespace rofl;
 
 /*static*/std::set<crofsock_env*>  crofsock_env::socket_envs;
@@ -30,7 +32,6 @@ crofsock::~crofsock()
 
 crofsock::crofsock(
 		crofsock_env* env) :
-				journal(this),
 				env(env),
 				state(STATE_IDLE),
 				mode(MODE_UNKNOWN),
@@ -71,8 +72,7 @@ crofsock::crofsock(
 				tx_fragment_pending(false),
 				txbuffer((size_t)65536),
 				msg_bytes_sent(0),
-				txlen(0),
-				trace(false)
+				txlen(0)
 {
 	/* scheduler weights for transmission */
 	txweights[QUEUE_OAM ] = 16;
@@ -92,7 +92,7 @@ crofsock::close()
 	switch (state) {
 	case STATE_IDLE: {
 
-		journal.log(LOG_INFO, "STATE_IDLE").set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
+		VLOG(2) << "STATE_IDLE laddr=" << laddr.str() << " raddr=" << raddr.str();
 
 		/* TLS down, TCP down => set rx_disabled flag back to false */
 		rx_disabled = false;
@@ -101,7 +101,7 @@ crofsock::close()
 	} break;
 	case STATE_CLOSED: {
 
-		journal.log(LOG_INFO, "STATE_CLOSED").set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
+		VLOG(2) << "STATE_CLOSED laddr=" << laddr.str() << " raddr=" << raddr.str();
 
 		state = STATE_IDLE;
 
@@ -110,7 +110,7 @@ crofsock::close()
 	} break;
 	case STATE_LISTENING: {
 
-		journal.log(LOG_INFO, "STATE_LISTENING").set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
+		VLOG(2) << "STATE_LISTENING laddr=" << laddr.str() << " raddr=" << raddr.str();
 
 		if (sd > 0) {
 			rxthread.drop_read_fd(sd);
@@ -126,7 +126,7 @@ crofsock::close()
 	} break;
 	case STATE_TCP_CONNECTING: {
 
-		journal.log(LOG_INFO, "STATE_TCP_CONNECTING").set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
+		VLOG(2) << "STATE_TCP_CONNECTING laddr=" << laddr.str() << " raddr=" << raddr.str();
 
 		txthread.drop_timer(TIMER_ID_RECONNECT);
 
@@ -144,7 +144,7 @@ crofsock::close()
 	} break;
 	case STATE_TCP_ACCEPTING: {
 
-		journal.log(LOG_INFO, "STATE_TCP_ACCEPTING").set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
+		VLOG(2) << "STATE_TCP_ACCEPTING laddr=" << laddr.str() << " raddr=" << raddr.str();
 
 		if (sd > 0) {
 			rxthread.drop_read_fd(sd, false);
@@ -163,7 +163,7 @@ crofsock::close()
 	} break;
 	case STATE_TCP_ESTABLISHED: {
 
-		journal.log(LOG_INFO, "STATE_TCP_ESTABLISHED").set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
+		VLOG(2) << "STATE_TCP_ESTABLISHED laddr=" << laddr.str() << " raddr=" << raddr.str();
 
 		/* block reception of any further data from remote side */
 		rx_disable();
@@ -191,7 +191,7 @@ crofsock::close()
 	} break;
  	case STATE_TLS_CONNECTING: {
 
- 		journal.log(LOG_INFO, "STATE_TLS_CONNECTING").set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
+ 		VLOG(2) << "STATE_TLS_CONNECTING laddr=" << laddr.str() << " raddr=" << raddr.str();
 
 		if (ssl) {
 			SSL_free(ssl); ssl = NULL;
@@ -206,7 +206,7 @@ crofsock::close()
  	} break;
 	case STATE_TLS_ACCEPTING: {
 
-		journal.log(LOG_INFO, "STATE_TLS_ACCEPTING").set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
+		VLOG(2) << "STATE_TLS_ACCEPTING laddr=" << laddr.str() << " raddr=" << raddr.str();
 
 		if (ssl) {
 			SSL_free(ssl); ssl = NULL;
@@ -221,7 +221,7 @@ crofsock::close()
 	} break;
 	case STATE_TLS_ESTABLISHED: {
 
-		journal.log(LOG_INFO, "STATE_TLS_ESTABLISHED").set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
+		VLOG(2) << "STATE_TLS_ESTABLISHED laddr=" << laddr.str() << " raddr=" << raddr.str();
 
 		/* block reception of any further data from remote side */
 		rx_disable();
@@ -330,7 +330,7 @@ crofsock::listen()
 
 	state = STATE_LISTENING;
 
-	journal.log(LOG_INFO, "STATE_LISTENING");
+	VLOG(2) << "STATE_LISTENING";
 
 	/* instruct rxthread to read from socket descriptor */
 	rxthread.add_fd(sd);
@@ -394,7 +394,7 @@ crofsock::tcp_accept(
 	/* new state */
 	state = STATE_TCP_ACCEPTING;
 
-	journal.log(LOG_INFO, "STATE_TCP_ACCEPTING").set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
+	VLOG(2) << "STATE_TCP_ACCEPTING laddr=" << laddr.str() << " raddr=" << raddr.str();
 
 	/* make socket non-blocking, as this status is not inherited */
 	int sockflags;
@@ -467,7 +467,7 @@ crofsock::tcp_accept(
 
 	state = STATE_TCP_ESTABLISHED;
 
-	journal.log(LOG_INFO, "STATE_TCP_ESTABLISHED").set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
+	VLOG(2) << "STATE_TCP_ESTABLISHED laddr=" << laddr.str() << " raddr=" << raddr.str();
 
 	if (flag_test(FLAG_TLS_IN_USE)) {
 		crofsock::tls_accept(sd);
@@ -511,7 +511,7 @@ crofsock::tcp_connect(
 	/* new state */
 	state = STATE_TCP_CONNECTING;
 
-	journal.log(LOG_INFO, "STATE_TCP_CONNECTING").set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
+	VLOG(2) << "STATE_TCP_CONNECTING laddr=" << laddr.str() << " raddr=" << raddr.str();
 
 	/* open socket */
 	if ((sd = ::socket(raddr.get_family(), type, protocol)) < 0) {
@@ -569,12 +569,12 @@ crofsock::tcp_connect(
 		/* connect did not succeed, handle error */
 		switch (errno) {
 		case EINPROGRESS: {
-			journal.log(LOG_INFO, "TCP: EINPROGRESS");
+			VLOG(2) << "TCP: EINPROGRESS";
 			/* register socket descriptor for write operations */
 			rxthread.add_write_fd(sd);
 		} break;
 		case ECONNREFUSED: {
-			journal.log(LOG_INFO, "TCP: ECONNREFUSED");
+			VLOG(2) << "TCP: ECONNREFUSED";
 			close();
 
 			crofsock_env::call_env(env).handle_tcp_connect_refused(*this);
@@ -584,7 +584,7 @@ crofsock::tcp_connect(
 			}
 		} break;
 		default: {
-			journal.log(LOG_INFO, "TCP: connect error: %d(%s)", errno, strerror(errno));
+			VLOG(2) << "TCP: connect error: " << errno << ": " << strerror(errno);
 			close();
 
 			crofsock_env::call_env(env).handle_tcp_connect_failed(*this);
@@ -607,7 +607,7 @@ crofsock::tcp_connect(
 
 		state = STATE_TCP_ESTABLISHED;
 
-		journal.log(LOG_INFO, "STATE_TCP_ESTABLISHED").set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
+		VLOG(2) << "STATE_TCP_ESTABLISHED laddr=" << laddr.str() << " raddr=" << raddr.str();
 
 		/* register socket descriptor for read operations */
 		rxthread.add_fd(sd);
@@ -779,9 +779,7 @@ crofsock::tls_accept(
 
 		state = STATE_TLS_ACCEPTING;
 
-		journal.log(LOG_INFO, "TLS: start passive connection");
-
-	} break;
+		VLOG(2) << "TLS: start passive connection";	} break;
 	case STATE_TLS_ACCEPTING: {
 
 		int rc = 0, err_code = 0;
@@ -789,33 +787,33 @@ crofsock::tls_accept(
 		if ((rc = SSL_accept(ssl)) <= 0) {
 			switch (err_code = SSL_get_error(ssl, rc)) {
 			case SSL_ERROR_WANT_READ: {
-				journal.log(LOG_INFO, "TLS: accept WANT READ");
+				VLOG(2) << "TLS: accept WANT READ";
 			} return;
 			case SSL_ERROR_WANT_WRITE: {
-				journal.log(LOG_INFO, "TLS: accept WANT WRITE");
+				VLOG(2) << "TLS: accept WANT WRITE";
 			} return;
 			case SSL_ERROR_WANT_ACCEPT: {
-				journal.log(LOG_INFO, "TLS: accept WANT ACCEPT");
+				VLOG(2) << "TLS: accept WANT ACCEPT";
 			} return;
 			case SSL_ERROR_WANT_CONNECT: {
-				journal.log(LOG_INFO, "TLS: accept WANT CONNECT");
+				VLOG(2) << "TLS: accept WANT CONNECT";
 			} return;
 
 
 			case SSL_ERROR_NONE: {
-				journal.log(LOG_INFO, "TLS: accept failed ERROR NONE");
+				VLOG(2) << "TLS: accept failed ERROR NONE";
 			} break;
 			case SSL_ERROR_SSL: {
-				journal.log(LOG_INFO, "TLS: accept failed ERROR SSL");
+				VLOG(2) << "TLS: accept failed ERROR SSL";
 			} break;
 			case SSL_ERROR_SYSCALL: {
-				journal.log(LOG_INFO, "TLS: accept failed ERROR SYSCALL");
+				VLOG(2) << "TLS: accept failed ERROR SYSCALL";
 			} break;
 			case SSL_ERROR_ZERO_RETURN: {
-				journal.log(LOG_INFO, "TLS: accept failed ERROR ZERO RETURN");
+				VLOG(2) << "TLS: accept failed ERROR ZERO RETURN";
 			} break;
 			default: {
-				journal.log(LOG_INFO, "TLS: accept failed");
+				VLOG(2) << "TLS: accept failed";
 			};
 			}
 
@@ -833,7 +831,7 @@ crofsock::tls_accept(
 		if (rc == 1) {
 
 			if (not tls_verify_ok()) {
-				journal.log(LOG_INFO, "TLS: accept peer verification failed");
+				VLOG(2) << "TLS: accept peer verification failed";
 
 				tls_log_errors();
 
@@ -848,7 +846,7 @@ crofsock::tls_accept(
 				return;
 			}
 
-			journal.log(LOG_INFO, "TLS: accept succeeded");
+			VLOG(2) << "TLS: accept succeeded";
 
 			state = STATE_TLS_ESTABLISHED;
 
@@ -904,8 +902,7 @@ crofsock::tls_connect(
 
 		state = STATE_TLS_CONNECTING;
 
-		journal.log(LOG_INFO, "TLS: start active connection");
-
+		VLOG(2) << "TLS: start active connection";
 		crofsock::tls_connect(reconnect);
 
 	} break;
@@ -916,33 +913,33 @@ crofsock::tls_connect(
 		if ((rc = SSL_connect(ssl)) <= 0) {
 			switch (err_code = SSL_get_error(ssl, rc)) {
 			case SSL_ERROR_WANT_READ: {
-				journal.log(LOG_INFO, "TLS: connect WANT READ");
+				VLOG(2) << "TLS: connect WANT READ";
 			} return;
 			case SSL_ERROR_WANT_WRITE: {
-				journal.log(LOG_INFO, "TLS: connect WANT WRITE");
+				VLOG(2) << "TLS: connect WANT WRITE";
 			} return;
 			case SSL_ERROR_WANT_ACCEPT: {
-				journal.log(LOG_INFO, "TLS: connect WANT ACCEPT");
+				VLOG(2) << "TLS: connect WANT ACCEPT";
 			} return;
 			case SSL_ERROR_WANT_CONNECT: {
-				journal.log(LOG_INFO, "TLS: connect WANT CONNECT");
+				VLOG(2) << "TLS: connect WANT CONNECT";
 			} return;
 
 
 			case SSL_ERROR_NONE: {
-				journal.log(LOG_INFO, "TLS: connect failed ERROR NONE");
+				VLOG(2) << "TLS: connect failed ERROR NONE";
 			} break;
 			case SSL_ERROR_SSL: {
-				journal.log(LOG_INFO, "TLS: connect failed ERROR SSL");
+				VLOG(2) << "TLS: connect failed ERROR SSL";
 			} break;
 			case SSL_ERROR_SYSCALL: {
-				journal.log(LOG_INFO, "TLS: connect failed ERROR SYSCALL");
+				VLOG(2) << "TLS: connect failed ERROR SYSCALL";
 			} break;
 			case SSL_ERROR_ZERO_RETURN: {
-				journal.log(LOG_INFO, "TLS: connect failed ERROR ZERO RETURN");
+				VLOG(2) << "TLS: connect failed ERROR ZERO RETURN";
 			} break;
 			default: {
-				journal.log(LOG_INFO, "TLS: connect failed");
+				VLOG(2) << "TLS: connect failed";
 			};
 			}
 
@@ -960,7 +957,7 @@ crofsock::tls_connect(
 		if (rc == 1) {
 
 			if (not tls_verify_ok()) {
-				journal.log(LOG_INFO, "TLS: connect peer verification failed");
+				VLOG(2) << "TLS: connect peer verification failed";
 
 				tls_log_errors();
 
@@ -975,7 +972,7 @@ crofsock::tls_connect(
 				return;
 			}
 
-			journal.log(LOG_INFO, "TLS: connect succeeded");
+			VLOG(2) << "TLS: connect succeeded";
 
 			state = STATE_TLS_ESTABLISHED;
 
@@ -1013,8 +1010,7 @@ crofsock::tls_verify_ok()
 		X509* cert = (X509*)NULL;
 		if ((cert = SSL_get_peer_certificate(ssl)) == NULL) {
 
-			journal.log(LOG_INFO, "TLS: no certificate presented by peer");
-
+			VLOG(2) << "TLS: no certificate presented by peer";
 			tls_log_errors();
 
 			SSL_free(ssl); ssl = NULL; bio = NULL;
@@ -1035,106 +1031,106 @@ crofsock::tls_verify_ok()
 
 			switch (result) {
 			case X509_V_OK: {
-				journal.log(LOG_INFO, "TLS: peer certificate verification: ok");
+				VLOG(2) << "TLS: peer certificate verification: ok";
 			} break;
 			case X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT: {
-				journal.log(LOG_INFO, "TLS: peer certificate verification: unable to get issuer certificate");
+				VLOG(2) << "TLS: peer certificate verification: unable to get issuer certificate";
 			} break;
 			case X509_V_ERR_UNABLE_TO_GET_CRL: {
-				journal.log(LOG_INFO, "TLS: peer certificate verification: unable to get certificate CRL");
+				VLOG(2) << "TLS: peer certificate verification: unable to get certificate CRL";
 			} break;
 			case X509_V_ERR_UNABLE_TO_DECRYPT_CERT_SIGNATURE: {
-				journal.log(LOG_INFO, "TLS: peer certificate verification: unable to decrypt certificate's signature");
+				VLOG(2) << "TLS: peer certificate verification: unable to decrypt certificate's signature";
 			} break;
 			case X509_V_ERR_UNABLE_TO_DECRYPT_CRL_SIGNATURE: {
-				journal.log(LOG_INFO, "TLS: peer certificate verification: unable to decrypt CRL's signature");
+				VLOG(2) << "TLS: peer certificate verification: unable to decrypt CRL's signature";
 			} break;
 			case X509_V_ERR_UNABLE_TO_DECODE_ISSUER_PUBLIC_KEY: {
-				journal.log(LOG_INFO, "TLS: peer certificate verification: unable to decode issuer public key");
+				VLOG(2) << "TLS: peer certificate verification: unable to decode issuer public key";
 			} break;
 			case X509_V_ERR_CERT_SIGNATURE_FAILURE: {
-				journal.log(LOG_INFO, "TLS: peer certificate verification: certificate signature failure");
+				VLOG(2) << "TLS: peer certificate verification: certificate signature failure";
 			} break;
 			case X509_V_ERR_CRL_SIGNATURE_FAILURE: {
-				journal.log(LOG_INFO, "TLS: peer certificate verification: CRL signature failure");
+				VLOG(2) << "TLS: peer certificate verification: CRL signature failure";
 			} break;
 			case X509_V_ERR_CERT_NOT_YET_VALID: {
-				journal.log(LOG_INFO, "TLS: peer certificate verification: certificate is not yet valid");
+				VLOG(2) << "TLS: peer certificate verification: certificate is not yet valid";
 			} break;
 			case X509_V_ERR_CERT_HAS_EXPIRED: {
-				journal.log(LOG_INFO, "TLS: peer certificate verification: certificate has expired");
+				VLOG(2) << "TLS: peer certificate verification: certificate has expired";
 			} break;
 			case X509_V_ERR_CRL_NOT_YET_VALID: {
-				journal.log(LOG_INFO, "TLS: peer certificate verification: CRL is not yet valid");
+				VLOG(2) << "TLS: peer certificate verification: CRL is not yet valid";
 			} break;
 			case X509_V_ERR_CRL_HAS_EXPIRED: {
-				journal.log(LOG_INFO, "TLS: peer certificate verification: CRL has expired");
+				VLOG(2) << "TLS: peer certificate verification: CRL has expired";
 			} break;
 			case X509_V_ERR_ERROR_IN_CERT_NOT_BEFORE_FIELD: {
-				journal.log(LOG_INFO, "TLS: peer certificate verification: format error in certificate's notBefore field");
+				VLOG(2) << "TLS: peer certificate verification: format error in certificate's notBefore field";
 			} break;
 			case X509_V_ERR_ERROR_IN_CERT_NOT_AFTER_FIELD: {
-				journal.log(LOG_INFO, "TLS: peer certificate verification: format error in certificate's notAfter field");
+				VLOG(2) << "TLS: peer certificate verification: format error in certificate's notAfter field";
 			} break;
 			case X509_V_ERR_ERROR_IN_CRL_LAST_UPDATE_FIELD: {
-				journal.log(LOG_INFO, "TLS: peer certificate verification: format error in CRL's lastUpdate field");
+				VLOG(2) << "TLS: peer certificate verification: format error in CRL's lastUpdate field";
 			} break;
 			case X509_V_ERR_ERROR_IN_CRL_NEXT_UPDATE_FIELD: {
-				journal.log(LOG_INFO, "TLS: peer certificate verification: format error in CRL's nextUpdate field");
+				VLOG(2) << "TLS: peer certificate verification: format error in CRL's nextUpdate field";
 			} break;
 			case X509_V_ERR_OUT_OF_MEM: {
-				journal.log(LOG_INFO, "TLS: peer certificate verification: out of memory");
+				VLOG(2) << "TLS: peer certificate verification: out of memory";
 			} break;
 			case X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT: {
-				journal.log(LOG_INFO, "TLS: peer certificate verification: self signed certificate");
+				VLOG(2) << "TLS: peer certificate verification: self signed certificate";
 			} break;
 			case X509_V_ERR_SELF_SIGNED_CERT_IN_CHAIN: {
-				journal.log(LOG_INFO, "TLS: peer certificate verification: self signed certificate in certificate chain");
+				VLOG(2) << "TLS: peer certificate verification: self signed certificate in certificate chain";
 			} break;
 			case X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT_LOCALLY: {
-				journal.log(LOG_INFO, "TLS: peer certificate verification: unable to get local issuer certificate");
+				VLOG(2) << "TLS: peer certificate verification: unable to get local issuer certificate";
 			} break;
 			case X509_V_ERR_UNABLE_TO_VERIFY_LEAF_SIGNATURE: {
-				journal.log(LOG_INFO, "TLS: peer certificate verification: unable to verify the first certificate");
+				VLOG(2) << "TLS: peer certificate verification: unable to verify the first certificate";
 			} break;
 			case X509_V_ERR_CERT_CHAIN_TOO_LONG: {
-				journal.log(LOG_INFO, "TLS: peer certificate verification: certificate chain too long");
+				VLOG(2) << "TLS: peer certificate verification: certificate chain too long";
 			} break;
 			case X509_V_ERR_CERT_REVOKED: {
-				journal.log(LOG_INFO, "TLS: peer certificate verification: certificate revoked");
+				VLOG(2) << "TLS: peer certificate verification: certificate revoked";
 			} break;
 			case X509_V_ERR_INVALID_CA: {
-				journal.log(LOG_INFO, "TLS: peer certificate verification: invalid CA certificate");
+				VLOG(2) << "TLS: peer certificate verification: invalid CA certificate";
 			} break;
 			case X509_V_ERR_PATH_LENGTH_EXCEEDED: {
-				journal.log(LOG_INFO, "TLS: peer certificate verification: path length exceeded");
+				VLOG(2) << "TLS: peer certificate verification: path length exceeded";
 			} break;
 			case X509_V_ERR_INVALID_PURPOSE: {
-				journal.log(LOG_INFO, "TLS: peer certificate verification: invalid purpose");
+				VLOG(2) << "TLS: peer certificate verification: invalid purpose";
 			} break;
 			case X509_V_ERR_CERT_UNTRUSTED: {
-				journal.log(LOG_INFO, "TLS: peer certificate verification: certificate untrusted");
+				VLOG(2) << "TLS: peer certificate verification: certificate untrusted";
 			} break;
 			case X509_V_ERR_CERT_REJECTED: {
-				journal.log(LOG_INFO, "TLS: peer certificate verification: certificate rejected");
+				VLOG(2) << "TLS: peer certificate verification: certificate rejected";
 			} break;
 			case X509_V_ERR_SUBJECT_ISSUER_MISMATCH: {
-				journal.log(LOG_INFO, "TLS: peer certificate verification: subject issuer mismatch");
+				VLOG(2) << "TLS: peer certificate verification: subject issuer mismatch";
 			} break;
 			case X509_V_ERR_AKID_SKID_MISMATCH: {
-				journal.log(LOG_INFO, "TLS: peer certificate verification: authority key id and subject key id mismatch");
+				VLOG(2) << "TLS: peer certificate verification: authority key id and subject key id mismatch";
 			} break;
 			case X509_V_ERR_AKID_ISSUER_SERIAL_MISMATCH: {
-				journal.log(LOG_INFO, "TLS: peer certificate verification: authority and issuer serial number mismatch");
+				VLOG(2) << "TLS: peer certificate verification: authority and issuer serial number mismatch";
 			} break;
 			case X509_V_ERR_KEYUSAGE_NO_CERTSIGN: {
-				journal.log(LOG_INFO, "TLS: peer certificate verification: key usage does not include certificate signing");
+				VLOG(2) << "TLS: peer certificate verification: key usage does not include certificate signing";
 			} break;
 			case X509_V_ERR_APPLICATION_VERIFICATION: {
-				journal.log(LOG_INFO, "TLS: peer certificate verification: application verification failure");
+				VLOG(2) << "TLS: peer certificate verification: application verification failure";
 			} break;
 			default: {
-				journal.log(LOG_INFO, "TLS: peer certificate verification: unknown error");
+				VLOG(2) << "TLS: peer certificate verification: unknown error";
 			};
 			}
 
@@ -1157,7 +1153,7 @@ crofsock::tls_log_errors()
 	while (!BIO_eof(ebio)) {
 		rofl::cmemory mem(1024);
 		BIO_read(ebio, mem.somem(), mem.length() - 1);
-		journal.log(LOG_CRIT_ERROR, "TLS: error history %s", (const char*)mem.somem());
+		VLOG(1) << "TLS: error history " << (const char*)mem.somem();
 	}
 
 	BIO_free(ebio);
@@ -1187,8 +1183,8 @@ crofsock::backoff_reconnect(
 		}
 	}
 
-	journal.log(LOG_NOTICE, "scheduled reconnect in: %d secs", reconnect_backoff_current).
-			set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
+	VLOG(2) << "scheduled reconnect in: " << reconnect_backoff_current << " secs"
+		<< " laddr" << laddr.str() << " raddr=" << raddr.str();
 
 	rxthread.add_timer(TIMER_ID_RECONNECT, ctimespec().expire_in(reconnect_backoff_current, 0));
 
@@ -1245,9 +1241,7 @@ crofsock::rx_disable()
 	case STATE_TCP_ESTABLISHED:
 	case STATE_TLS_ESTABLISHED:{
 		rxthread.drop_read_fd(sd, false);
-		journal.log(LOG_INFO, "disable reception").
-							set_key("laddr", laddr.str()).
-								set_key("raddr", raddr.str());
+		VLOG(2) << "disable reception laddr=" << laddr.str() << " raddr=" << raddr.str();
 	} break;
 	default: {
 
@@ -1265,9 +1259,7 @@ crofsock::rx_enable()
 	case STATE_TCP_ESTABLISHED:
 	case STATE_TLS_ESTABLISHED: {
 		rxthread.add_read_fd(sd, false);
-		journal.log(LOG_INFO, "enable reception").
-							set_key("laddr", laddr.str()).
-								set_key("raddr", raddr.str());
+		VLOG(2) << "enable reception" << " laddr=" << laddr.str() << " raddr=" << raddr.str();
 		rxthread.wakeup();
 	} break;
 	default: {
@@ -1282,9 +1274,7 @@ void
 crofsock::tx_disable()
 {
 	tx_disabled = true;
-	journal.log(LOG_INFO, "disable transmission").
-							set_key("laddr", laddr.str()).
-								set_key("raddr", raddr.str());
+	VLOG(2) << "disable transmission laddr=" << laddr.str() << " raddr=" << raddr.str();
 }
 
 
@@ -1293,9 +1283,7 @@ void
 crofsock::tx_enable()
 {
 	tx_disabled = false;
-	journal.log(LOG_INFO, "enable transmission").
-							set_key("laddr", laddr.str()).
-								set_key("raddr", raddr.str());
+	VLOG(2) << "enable transmission laddr=" << laddr.str() << " raddr=" << raddr.str();
 	txthread.wakeup();
 }
 
@@ -1307,7 +1295,7 @@ crofsock::handle_timeout(
 {
 	switch (timer_id) {
 	case TIMER_ID_RECONNECT: {
-		journal.log(LOG_INFO, "TCP: reconnecting").set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
+		VLOG(2) << "TCP: reconnecting laddr=" << laddr.str() << " raddr=" << raddr.str();
 		if (flag_test(FLAG_TLS_IN_USE)) {
 			tls_connect(true);
 		} else {
@@ -1326,6 +1314,9 @@ void
 crofsock::send_message(
 		rofl::openflow::cofmsg *msg)
 {
+	VLOG(3) << __FUNCTION__ << " msg=" << msg << " txqueue_pending_pkts=" <<
+		txqueue_pending_pkts << " tx_disabled=" << tx_disabled << " tx_is_running=" << tx_is_running;
+
 	if (tx_disabled) {
 		delete msg; return;
 	}
@@ -1466,10 +1457,8 @@ void
 crofsock::send_from_queue()
 {
 	if (state <= STATE_CLOSED) {
-		if (trace) {
-			journal.log(LOG_TRACE, "crofsock::send_from_queue() dropping message, no connection established").
-					set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
-		}
+		VLOG(3) << "crofsock::send_from_queue() dropping message, no connection established"
+					<< " laddr=" << laddr.str() << " raddr=" << raddr.str();
 		return;
 	}
 
@@ -1505,10 +1494,8 @@ crofsock::send_from_queue()
 					/* pack message into txbuffer */
 					msg->pack(txbuffer.somem(), txlen);
 
-					if (trace) {
-						journal.log(LOG_TRACE, "message sent: %s", msg->str().c_str()).
-								set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
-					}
+					VLOG(3) << "message sent: " << msg->str().c_str()
+						<< " laddr=" << laddr.str() << " raddr=" << raddr.str();
 
 					/* remove C++ message object from heap */
 					delete msg;
@@ -1534,21 +1521,19 @@ crofsock::send_from_queue()
 							/* threshold for re-enabling acceptance of packets */
 							txqueue_size_tx_threshold = txqueue_pending_pkts / 2;
 
-							if (trace) {
-								journal.log(LOG_TRACE, "congestion occured").
-										set_key("txqueue_pending_pkts", txqueue_pending_pkts).
-										set_key("txqueue_size_congestion_occured", txqueue_size_congestion_occured).
-										set_key("txqueue_size_tx_threshold", txqueue_size_tx_threshold).
-										set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
-							}
+							VLOG(3) << "congestion occured"
+								<< " txqueue_pending_pkts" << txqueue_pending_pkts
+								<< " txqueue_size_congestion_occured" << txqueue_size_congestion_occured
+								<< " txqueue_size_tx_threshold" << txqueue_size_tx_threshold
+								<< " laddr=" << laddr.str() << " raddr=" << raddr.str();
 
 							crofsock_env::call_env(env).congestion_occured_indication(*this);
 						}
 					} return;
 					case SIGPIPE:
 					default: {
-						journal.log(LOG_NOTICE, "::send() syscall failed, error: %d (%s)", errno, strerror(errno)).
-								set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+						VLOG(1) << __PRETTY_FUNCTION__ << " ::send() syscall failed, error: "
+							<< errno << ": " << strerror(errno);
 						tx_is_running = false;
 					} return;
 					}
@@ -1580,13 +1565,12 @@ crofsock::send_from_queue()
 		if ((not flag_test(FLAG_CONGESTED)) && flag_test(FLAG_TX_BLOCK_QUEUEING)) {
 			if (txqueue_pending_pkts <= txqueue_size_tx_threshold) {
 				flag_set(FLAG_TX_BLOCK_QUEUEING, false);
-				if (trace) {
-					journal.log(LOG_TRACE, "congestion solved").
-							set_key("txqueue_pending_pkts", txqueue_pending_pkts).
-							set_key("txqueue_size_congestion_occured", txqueue_size_congestion_occured).
-							set_key("txqueue_size_tx_threshold", txqueue_size_tx_threshold).
-							set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
-				}
+				VLOG(3) << "congestion solved"
+					<< " txqueue_pending_pkts" << txqueue_pending_pkts
+					<< " txqueue_size_congestion_occured" << txqueue_size_congestion_occured
+					<< " txqueue_size_tx_threshold" << txqueue_size_tx_threshold
+					<< " laddr=" << laddr.str() << " raddr=" << raddr.str();
+
 				crofsock_env::call_env(env).congestion_solved_indication(*this);
 			}
 		}
@@ -1621,8 +1605,8 @@ crofsock::handle_read_event_rxthread(
 		switch (state) {
 		case STATE_LISTENING: {
 
-			journal.log(LOG_INFO, "STATE_LISTENING, new incoming connection(s) on sd=%d", sd).
-					set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
+			VLOG(2) << "STATE_LISTENING, new incoming connection(s) on sd=" << sd
+					<< " laddr=" << laddr.str() << " raddr=" << raddr.str();
 
 			crofsock_env::call_env(env).handle_listen(*this);
 
@@ -1652,7 +1636,7 @@ crofsock::handle_read_event_rxthread(
 
 				state = STATE_TCP_ESTABLISHED;
 
-				journal.log(LOG_INFO, "STATE_TCP_ESTABLISHED").set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
+				VLOG(2) << "STATE_TCP_ESTABLISHED laddr=" << laddr.str() << " raddr=" << raddr.str();
 
 				/* register socket descriptor for read operations */
 				rxthread.add_fd(sd);
@@ -1669,10 +1653,10 @@ crofsock::handle_read_event_rxthread(
 			} break;
 			case EINPROGRESS: {
 				/* connect still pending, just wait */
-				journal.log(LOG_INFO, "TCP: EINPROGRESS").set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
+				VLOG(2) << "TCP: EINPROGRESS laddr=" << laddr.str() << " raddr=" << raddr.str();
 			} break;
 			case ECONNREFUSED: {
-				journal.log(LOG_INFO, "TCP: ECONNREFUSED").set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
+				VLOG(2) << "TCP: ECONNREFUSED laddr=" << laddr.str() << " raddr=" << raddr.str();
 				close();
 
 				crofsock_env::call_env(env).handle_tcp_connect_refused(*this);
@@ -1682,7 +1666,8 @@ crofsock::handle_read_event_rxthread(
 				}
 			} break;
 			default: {
-				journal.log(LOG_INFO, "TCP: connect error: %d(%s)", errno, strerror(errno)).set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
+				VLOG(2) << "TCP: connect error: " << errno << ": " << strerror(errno)
+					<< " laddr=" << laddr.str() << " raddr=" << raddr.str();
 				close();
 
 				crofsock_env::call_env(env).handle_tcp_connect_failed(*this);
@@ -1734,11 +1719,11 @@ crofsock::handle_read_event_rxthread(
 
 
 	} catch (std::runtime_error& e) {
-
-		journal.log(LOG_RUNTIME_ERROR, "crofsock::handle_read_event_rxthread() exception caught, what: ", e.what());
-
+		VLOG(1) << __FUNCTION__ << "() runtime exception caught: " << e.what();
+	} catch (std::exception &e){
+		VLOG(1) << __FUNCTION__ << "() exception caught: " << e.what();
 	} catch (...) {
-
+		VLOG(1) << __FUNCTION__ << "() unknown exception caught";
 	}
 }
 
@@ -1750,11 +1735,8 @@ crofsock::recv_message()
 	while (not rx_disabled) {
 
 		if (state <= STATE_CLOSED) {
-			if (trace) {
-				journal.log(LOG_TRACE, "crofsock::recv_message() ignoring message").
-						set_key("laddr", laddr.str()).set_key("raddr", raddr.str()).
-						set_key("state", state);
-			}
+			VLOG(3) << __FUNCTION__ << "() ignoring message laddr=" <<
+				laddr.str() << " raddr=" << raddr.str() << " state=" << state;
 			return;
 		}
 
@@ -1775,7 +1757,7 @@ crofsock::recv_message()
 		/* sanity check: 8 <= msg_len <= 2^16 */
 		if (msg_len < sizeof(struct openflow::ofp_header)) {
 			/* out-of-sync => enforce reconnect in client mode */
-			journal.log(LOG_NOTICE, "TCP: openflow out-of-sync").set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
+			VLOG(2) << "TCP: openflow out-of-sync laddr=" << laddr.str() << " raddr=" << raddr.str();
 			goto on_error;
 		}
 
@@ -1786,22 +1768,18 @@ crofsock::recv_message()
 			switch (errno) {
 			case EAGAIN: {
 				/* do not continue and let kernel inform us, once more data is available */
+				VLOG(3) << __FUNCTION__ << " EAGAIN on fd=" << sd;
 				return;
 			} break;
 			default: {
-				journal.log(LOG_NOTICE, "::recv() syscall failed, error: %d (%s)", errno, strerror(errno)).
-						set_func(__PRETTY_FUNCTION__).set_line(__LINE__).
-						set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
-				/* oops, error */
-				journal.log(LOG_NOTICE, "TCP: error occured %d (%s)", errno, strerror(errno)).
-						set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
+				VLOG(1) << __FUNCTION__ << " ::recv() syscall failed, error: "
+					<< errno << ": " << strerror(errno) << " laddr=" << laddr.str() << " raddr=" << raddr.str();
 				goto on_error;
 			};
 			}
-		} else
-		if (rc == 0) {
+		} else if (rc == 0) {
 			/* shutdown from peer */
-			journal.log(LOG_INFO, "TCP: peer shutdown").set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
+			VLOG(2) << "TCP: peer shutdown laddr=" << laddr.str() << " raddr=" << raddr.str();
 			goto on_error;
 		}
 
@@ -1830,13 +1808,13 @@ on_error:
 
 	switch (state) {
 	case STATE_TCP_ESTABLISHED: {
-		journal.log(LOG_INFO, "TCP: peer shutdown").set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
+		VLOG(2) << "TCP: peer shutdown laddr=" << laddr.str() << " raddr=" << raddr.str();
 		close();
 		try {
 			crofsock_env::call_env(env).handle_closed(*this);
 		} catch(std::runtime_error& e) {
-			journal.log(LOG_NOTICE, "crofsock::recv_message() caught runtime error, what: %s", e.what()).
-					set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
+			VLOG(1) << __FUNCTION__ << "() caught runtime error, what: %s" << e.what()
+				<< " laddr=" << laddr.str() << " raddr=" << raddr.str();
 		}
 		if (flag_test(FLAG_RECONNECT_ON_FAILURE)) {
 			backoff_reconnect(true);
@@ -1844,7 +1822,7 @@ on_error:
 
 	} break;
 	default: {
-
+		VLOG(2) << __FUNCTION__ << " error in state=" << state;
 	};
 	}
 }
@@ -1883,16 +1861,15 @@ crofsock::parse_message()
 			return;
 		}
 
-		if (trace) {
-			journal.log(LOG_TRACE, "message rcvd: %s", msg->str().c_str()).set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
-		}
+		VLOG(3) << "message rcvd: " << msg->str().c_str() << " laddr=" <<
+			laddr.str() << " raddr=" << raddr.str();
 
 		crofsock_env::call_env(env).handle_recv(*this, msg);
 
 	} catch (eBadRequestBadType& e) {
 
-		e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message").set_key("xid", be32toh(hdr->xid));
-		journal.log(e).set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
+		VLOG(1) << __FUNCTION__ << " dropping message xid=" << be32toh(hdr->xid)
+			<< " laddr=" << laddr.str() << " raddr=" << raddr.str();
 
 		send_message(
 				new rofl::openflow::cofmsg_error_bad_request_bad_type(
@@ -1903,8 +1880,8 @@ crofsock::parse_message()
 
 	} catch (eBadRequestBadStat& e) {
 
-		e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message").set_key("xid", be32toh(hdr->xid));
-		journal.log(e).set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
+		VLOG(1) << __FUNCTION__ << " dropping message xid=" << be32toh(hdr->xid)
+			<< " laddr=" << laddr.str() << " raddr=" << raddr.str();
 
 		send_message(
 				new rofl::openflow::cofmsg_error_bad_request_bad_stat(
@@ -1915,8 +1892,8 @@ crofsock::parse_message()
 
 	} catch (eBadRequestBadVersion& e) {
 
-		e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message").set_key("xid", be32toh(hdr->xid));
-		journal.log(e).set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
+		VLOG(1) << __FUNCTION__ << " dropping message xid=" << be32toh(hdr->xid)
+			<< " laddr=" << laddr.str() << " raddr=" << raddr.str();
 
 		if (msg) delete msg;
 
@@ -1929,8 +1906,8 @@ crofsock::parse_message()
 
 	} catch (eBadRequestBadLen& e) {
 
-		e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message").set_key("xid", be32toh(hdr->xid));
-		journal.log(e).set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
+		VLOG(1) << __FUNCTION__ << " dropping message xid=" << be32toh(hdr->xid)
+			<< " laddr=" << laddr.str() << " raddr=" << raddr.str();
 
 		if (msg) delete msg;
 
@@ -1944,15 +1921,13 @@ crofsock::parse_message()
 
 	} catch (rofl::exception& e) {
 
-		e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message").set_key("xid", be32toh(hdr->xid));
-		journal.log(e).set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
+		VLOG(1) << __FUNCTION__ << " dropping message xid=" << be32toh(hdr->xid)
+			<< " laddr=" << laddr.str() << " raddr=" << raddr.str();
 
 		//if (msg) delete msg;
 
 	} catch (std::runtime_error& e) {
-		journal.log(LOG_RUNTIME_ERROR, "std::runtime_error: %s", e.what())
-						.set_key("laddr", laddr.str()).set_key("raddr", raddr.str());
-
+		VLOG(1) << "std::runtime_error: %s" << e.what() << " laddr=" << laddr.str() << " raddr=" << raddr.str();
 	}
 }
 

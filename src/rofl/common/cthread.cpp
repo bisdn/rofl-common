@@ -12,6 +12,7 @@
 #include "cthread.hpp"
 #include <iostream>
 #include <sys/eventfd.h>
+#include <glog/logging.h>
 
 using namespace rofl;
 
@@ -127,6 +128,9 @@ cthread::add_fd(
 	epev.events = events;
 	epev.data.fd = fd;
 
+	VLOG(3) << __FUNCTION__ << " fd=" << fd << " edge_triggered=" << edge_triggered
+		<< " thread=" << this;
+
 	if (epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &epev) < 0) {
 		switch (errno) {
 		case EEXIST: {
@@ -155,6 +159,8 @@ cthread::drop_fd(
 	struct epoll_event epev;
 	memset((uint8_t*)&epev, 0, sizeof(struct epoll_event));
 	epev.data.fd = fd;
+
+	VLOG(3) << __FUNCTION__ << " fd=" << fd << " thread=" << this;
 
 	if (epoll_ctl(epfd, EPOLL_CTL_DEL, fd, &epev) < 0) {
 		switch (errno) {
@@ -218,6 +224,8 @@ cthread::drop_read_fd(
 	epev.events = fds[fd];
 	epev.data.fd = fd;
 
+	VLOG(3) << __FUNCTION__ << " fd=" << fd << " thread=" << this;
+
 	if (epoll_ctl(epfd, EPOLL_CTL_MOD, fd, &epev) < 0) {
 		switch (errno) {
 		case ENOENT: {
@@ -277,6 +285,8 @@ cthread::drop_write_fd(
 	memset((uint8_t*)&epev, 0, sizeof(struct epoll_event));
 	epev.events = fds[fd];
 	epev.data.fd = fd;
+
+	VLOG(3) << __FUNCTION__ << " fd=" << fd << " thread=" << this;
 
 	if (epoll_ctl(epfd, EPOLL_CTL_MOD, fd, &epev) < 0) {
 		switch (errno) {

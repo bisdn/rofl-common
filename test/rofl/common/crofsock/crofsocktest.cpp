@@ -75,13 +75,6 @@ crofsocktest::test()
 
 			CPPUNIT_ASSERT(timeout > 0);
 
-			std::cerr << "listen log:" << std::endl;
-			std::cerr << slisten->get_journal() << std::endl;
-			std::cerr << "client log:" << std::endl;
-			std::cerr << sclient->get_journal() << std::endl;
-			std::cerr << "server log:" << std::endl;
-			std::cerr << sserver->get_journal() << std::endl;
-
 			slisten->close();
 			sclient->close();
 			sserver->close();
@@ -114,9 +107,6 @@ crofsocktest::test_tls()
 
 		slisten = new rofl::crofsock(this);
 		sclient = new rofl::crofsock(this);
-
-		slisten->set_journal().log_on_stderr(true);
-		sclient->set_journal().log_on_stderr(true);
 
 		/* try to find idle port for test */
 		bool lookup_idle_port = true;
@@ -151,13 +141,6 @@ crofsocktest::test_tls()
 
 		CPPUNIT_ASSERT(timeout > 0);
 
-		std::cerr << "listen log:" << std::endl;
-		std::cerr << slisten->get_journal() << std::endl;
-		std::cerr << "client log:" << std::endl;
-		std::cerr << sclient->get_journal() << std::endl;
-		std::cerr << "server log:" << std::endl;
-		std::cerr << sserver->get_journal() << std::endl;
-
 		delete slisten;
 		delete sclient;
 		delete sserver;
@@ -183,8 +166,6 @@ crofsocktest::handle_listen(
 		std::cerr << "crofsocktest::handle_listen() sd=" << sd << std::endl;
 
 		sserver = new rofl::crofsock(this);
-
-		sserver->set_journal().log_on_stderr(true);
 
 		switch (test_mode) {
 		case TEST_MODE_TCP: {

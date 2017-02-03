@@ -169,10 +169,9 @@ public:
 	std::string
 	str() const {
 		std::stringstream ss;
-		ss << cofmsg::str() << "-Packet-Out- " << " ";
-		ss << "buffer_id: " << (unsigned int)get_buffer_id() << ", ";
-		ss << "in_port: " << (unsigned int)get_in_port() << " ";
-		//ss << "actions: " << get_actions().str() << " ";
+		ss << cofmsg::str() << "-Packet-Out- "
+		<< "buffer_id: " << (unsigned int)get_buffer_id()
+		<< ", in_port: " << (unsigned int)get_in_port() << " ";
 		return ss.str();
 	};
 

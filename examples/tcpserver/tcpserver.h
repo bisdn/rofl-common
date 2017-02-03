@@ -62,9 +62,6 @@ public:
 			pselect(0, NULL, NULL, NULL, &ts, NULL);
 		}
 
-		std::cerr << ">>> journal log <<<" << std::endl;
-		std::cerr << crofbase::get_journal() << std::endl;
-
 		return 0;
 	};
 
@@ -111,9 +108,6 @@ private:
 			rofl::crofdpt& dpt)
 	{
 		std::cerr << "datapath attached dptid=" << dpt.get_dptid() << std::endl;
-
-		dpt.set_conn(rofl::cauxid(0)).set_trace(true);
-
 		dpt.send_port_desc_stats_request(rofl::cauxid(0), 0, 5);
 	};
 
@@ -135,17 +129,6 @@ private:
 		std::cerr << "datapath detached dptid=" << dptid << std::endl;
 
 		stop();
-
-		for (auto dptid : crofbase::dpt_keys()) {
-			std::cerr << ">>> dpt journal for dptid: " << dptid << " <<<" << std::endl;
-			std::cerr << crofbase::get_dpt(dptid).get_journal() << std::endl;
-			for (auto auxid : crofbase::get_dpt(dptid).keys()) {
-				std::cerr << ">>> conn journal for dptid: " << dptid << ", auxid: " << auxid.str() << " <<<" << std::endl;
-				std::cerr << crofbase::get_dpt(dptid).get_conn(auxid).get_journal() << std::endl;
-				std::cerr << ">>> tcp journal for dptid: " << dptid << ", auxid: " << auxid.str() << " <<<" << std::endl;
-				std::cerr << crofbase::get_dpt(dptid).get_conn(auxid).get_tcp_journal() << std::endl;
-			}
-		}
 	};
 
 	/**

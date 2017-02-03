@@ -312,7 +312,7 @@ public:
 	std::string
 	str() const {
 		std::stringstream ss;
-		ss << cofmsg::str() << "-Packet-In- " << " ";
+		ss << cofmsg::str() << "-Packet-In-";
 		ss << "buffer_id: " << (unsigned int)buffer_id << ", ";
 		ss << "total_len: " << (unsigned int)total_len << ", ";
 		ss << "reason: " << s_reason() << ", ";

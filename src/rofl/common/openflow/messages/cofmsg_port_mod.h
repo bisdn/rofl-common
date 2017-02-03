@@ -174,7 +174,7 @@ public:
 	virtual std::string
 	str() const {
 		std::stringstream ss;
-		ss << cofmsg::str() << "-Port-Mod- " << " ";
+		ss << cofmsg::str() << "-Port-Mod-";
 		return ss.str();
 	};
 

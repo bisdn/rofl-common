@@ -111,20 +111,18 @@ public:
 	operator<< (std::ostream& os, cofmsg_stats_request const& msg) {
 		std::string s_flags;
 
-		os << dynamic_cast<cofmsg const&>( msg );
-		os << "<cofmsg_stats_request ";
-		os << "type:" << (int)msg.get_stats_type() << " ";
-		os << "flags: 0x" << std::hex << (int)msg.get_stats_flags() << std::dec << " " << msg.s_flags() << " ";
-		os << ">" << std::endl;;
+		os << dynamic_cast<cofmsg const&>( msg )
+			<< "<cofmsg_stats_request type:" << (int)msg.get_stats_type()
+			<< " flags: 0x" << std::hex << (int)msg.get_stats_flags() <<
+			std::dec << " " << msg.s_flags() << ">" << std::endl;
 		return os;
 	};
 
 	virtual std::string
 	str() const {
 		std::stringstream ss;
-		ss << cofmsg::str() << "-Stats-Request- " << " ";
-		ss << "type: " << (unsigned int)get_stats_type() << ", ";
-		ss << "flags: 0x" << std::hex << (int)get_stats_flags() << std::dec << " " << s_flags() << " ";
+		ss << cofmsg::str() << "-Stats-Request- type: " << (unsigned int)get_stats_type()
+			<< ", flags: 0x" << std::hex << (int)get_stats_flags() << std::dec << " " << s_flags();
 		return ss.str();
 	};
 
@@ -246,20 +244,18 @@ public:
 	operator<< (std::ostream& os, cofmsg_stats_reply const& msg) {
 		std::string s_flags;
 
-		os << dynamic_cast<cofmsg const&>( msg );
-		os << "<cofmsg_stats_reply ";
-		os << "type:" << (int)msg.get_stats_type() << " ";
-		os << "flags: 0x" << std::hex << (int)msg.get_stats_flags() << std::dec << " " << msg.s_flags() << " ";
-		os << ">" << std::endl;;
+		os << dynamic_cast<cofmsg const&>( msg )
+			<< "<cofmsg_stats_reply type:" << (int)msg.get_stats_type()
+			<< " flags: 0x" << std::hex << (int)msg.get_stats_flags() << std::dec << " " << msg.s_flags()
+			<< " >" << std::endl;
 		return os;
 	};
 
 	virtual std::string
 	str() const {
 		std::stringstream ss;
-		ss << cofmsg::str() << "-Stats-Reply- " << " ";
-		ss << "type: " << (unsigned int)get_stats_type() << ", ";
-		ss << "flags: 0x" << std::hex << (int)get_stats_flags() << std::dec << " " << s_flags() << " ";
+		ss << cofmsg::str() << "-Stats-Reply- type: " << (unsigned int)get_stats_type()
+			<< ", flags: 0x" << std::hex << (int)get_stats_flags() << std::dec << " " << s_flags();
 		return ss.str();
 	};
 

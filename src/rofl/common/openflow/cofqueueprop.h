@@ -165,13 +165,12 @@ public:
 	 */
 	friend std::ostream&
 	operator<< (std::ostream& os, cofqueue_prop const& prop) {
-		os  << "<cofqueue_prop "
-				<< "version: " << (int)prop.get_version() << " "
-				<< std::hex
-				<< "property: 0x" << (int)prop.get_property() << " "
-				<< std::dec
-				<< "length: " << (int)prop.get_length() << " "
-				<< ">" << std::endl;
+		os  << "<cofqueue_prop version: " << (int)prop.get_version()
+			<< std::hex
+			<< " property: 0x" << (int)prop.get_property()
+			<< std::dec
+			<< " length: " << (int)prop.get_length()
+			<< ">" << std::endl;
 		return os;
 	};
 

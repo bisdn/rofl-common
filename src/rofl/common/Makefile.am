@@ -7,9 +7,6 @@ noinst_LTLIBRARIES = librofl_common_base.la
 librofl_common_base_la_SOURCES = \
 		rofcommon.h \
 		exception.hpp \
-		cjournal.hpp \
-		cjournal.cpp \
-		cjrnentry.hpp \
 		locking.hpp \
 		crofbase.cc \
 		crofbase.h \
@@ -61,8 +58,6 @@ library_includedir=$(includedir)/rofl/common
 library_include_HEADERS= \
 		rofcommon.h \
 		exception.hpp \
-		cjournal.hpp \
-		cjrnentry.hpp \
 		locking.hpp \
 		crofbase.h \
 		crofdpt.h \

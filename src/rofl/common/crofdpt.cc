@@ -11,6 +11,7 @@
  */
 
 #include "crofdpt.h"
+#include <glog/logging.h>
 
 using namespace rofl;
 
@@ -28,7 +29,6 @@ crofdpt::~crofdpt()
 crofdpt::crofdpt(
 		rofl::crofdpt_env* env,
 		const rofl::cdptid& dptid) :
-				journal(this),
 				env(env),
 				dptid(dptid),
 				snoop(true),
@@ -175,12 +175,11 @@ crofdpt::handle_recv(
 
 	} catch (rofl::exception& e) {
 
-		journal.log(e.set_caller(__PRETTY_FUNCTION__));
+		VLOG(1) << __PRETTY_FUNCTION__ << " error: " << e.what();
 
 	} catch (std::runtime_error& e) {
 
-		journal.log(LOG_CRIT_ERROR, "runtime error: %s", e.what()).
-				set_caller(__PRETTY_FUNCTION__).set_line(__LINE__);
+		VLOG(1) << __PRETTY_FUNCTION__ << " runtime error: " << e.what();
 	}
 
 	delete msg;
@@ -192,9 +191,7 @@ void
 crofdpt::handle_transaction_timeout(
 		crofchan& chan, crofconn& conn, uint32_t xid, uint8_t type, uint16_t sub_type)
 {
-	journal.log(LOG_NOTICE, "transaction ").
-			set_key("xid", (unsigned int)xid).
-				set_func(__PRETTY_FUNCTION__).set_line(__LINE__);
+	VLOG(2) << __PRETTY_FUNCTION__ << " transaction xid=" << (unsigned int)xid;
 
 	try {
 		switch (get_version()) {
@@ -1015,11 +1012,13 @@ crofdpt::send_features_request(
 		rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
 
 	} catch (eRofConnNotConnected& e) {
-		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
-		delete msg; throw;
+		VLOG(1) << __PRETTY_FUNCTION__ << " dropping message " << e.what();
+		delete msg;
+		throw;
 	} catch (eRofQueueFull& e) {
-		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
-		delete msg; throw;
+		VLOG(1) << __PRETTY_FUNCTION__ << " dropping message " << e.what();
+		delete msg;
+		throw;
 	}
 
 	return xid;
@@ -1043,11 +1042,13 @@ crofdpt::send_get_config_request(
 		rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
 
 	} catch (eRofConnNotConnected& e) {
-		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
-		delete msg; throw;
+		VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+		delete msg;
+		throw;
 	} catch (eRofQueueFull& e) {
-		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
-		delete msg; throw;
+		VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+		delete msg;
+		throw;
 	}
 
 	return xid;
@@ -1073,10 +1074,10 @@ crofdpt::send_desc_stats_request(
 		rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
 
 	} catch (eRofConnNotConnected& e) {
-		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
+		VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
 		delete msg; throw;
 	} catch (eRofQueueFull& e) {
-		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
+		VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
 		delete msg; throw;
 	}
 
@@ -1105,11 +1106,13 @@ crofdpt::send_flow_stats_request(
 		rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
 
 	} catch (eRofConnNotConnected& e) {
-		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
-		delete msg; throw;
+		VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+		delete msg;
+		throw;
 	} catch (eRofQueueFull& e) {
-		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
-		delete msg; throw;
+		VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+		delete msg;
+		throw;
 	}
 
 	return xid;
@@ -1137,11 +1140,13 @@ crofdpt::send_aggr_stats_request(
 		rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
 
 	} catch (eRofConnNotConnected& e) {
-		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
-		delete msg; throw;
+		VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+		delete msg;
+	   	throw;
 	} catch (eRofQueueFull& e) {
-		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
-		delete msg; throw;
+		VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+		delete msg;
+	   	throw;
 	}
 
 	return xid;
@@ -1167,11 +1172,13 @@ crofdpt::send_table_stats_request(
 		rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
 
 	} catch (eRofConnNotConnected& e) {
-		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
-		delete msg; throw;
+		VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+		delete msg;
+		throw;
 	} catch (eRofQueueFull& e) {
-		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
-		delete msg; throw;
+		VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+		delete msg;
+		throw;
 	}
 
 	return xid;
@@ -1199,11 +1206,13 @@ crofdpt::send_port_stats_request(
 		rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
 
 	} catch (eRofConnNotConnected& e) {
-		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
-		delete msg; throw;
+		VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+		delete msg;
+		throw;
 	} catch (eRofQueueFull& e) {
-		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
-		delete msg; throw;
+		VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+		delete msg;
+		throw;
 	}
 
 	return xid;
@@ -1231,11 +1240,13 @@ crofdpt::send_queue_stats_request(
 		rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
 
 	} catch (eRofConnNotConnected& e) {
-		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
-		delete msg; throw;
+		VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+		delete msg;
+		throw;
 	} catch (eRofQueueFull& e) {
-		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
-		delete msg; throw;
+		VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+		delete msg;
+		throw;
 	}
 
 	return xid;
@@ -1263,11 +1274,13 @@ crofdpt::send_group_stats_request(
 		rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
 
 	} catch (eRofConnNotConnected& e) {
-		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
-		delete msg; throw;
+		VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+		delete msg;
+		throw;
 	} catch (eRofQueueFull& e) {
-		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
-		delete msg; throw;
+		VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+		delete msg;
+		throw;
 	}
 
 	return xid;
@@ -1293,11 +1306,13 @@ crofdpt::send_group_desc_stats_request(
 		rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
 
 	} catch (eRofConnNotConnected& e) {
-		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
-		delete msg; throw;
+		VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+		delete msg;
+		throw;
 	} catch (eRofQueueFull& e) {
-		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
-		delete msg; throw;
+		VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+		delete msg;
+		throw;
 	}
 
 	return xid;
@@ -1323,11 +1338,13 @@ crofdpt::send_group_features_stats_request(
 		rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
 
 	} catch (eRofConnNotConnected& e) {
-		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
-		delete msg; throw;
+		VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+		delete msg;
+		throw;
 	} catch (eRofQueueFull& e) {
-		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
-		delete msg; throw;
+		VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+		delete msg;
+		throw;
 	}
 
 	return xid;
@@ -1353,11 +1370,13 @@ crofdpt::send_table_features_stats_request(
 		rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
 
 	} catch (eRofConnNotConnected& e) {
-		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
-		delete msg; throw;
+		VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+		delete msg;
+		throw;
 	} catch (eRofQueueFull& e) {
-		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
-		delete msg; throw;
+		VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+		delete msg;
+		throw;
 	}
 
 	return xid;
@@ -1383,11 +1402,13 @@ crofdpt::send_port_desc_stats_request(
 		rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
 
 	} catch (eRofConnNotConnected& e) {
-		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
-		delete msg; throw;
+		VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+		delete msg;
+		throw;
 	} catch (eRofQueueFull& e) {
-		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
-		delete msg; throw;
+		VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+		delete msg;
+		throw;
 	}
 
 	return xid;
@@ -1419,11 +1440,13 @@ crofdpt::send_experimenter_stats_request(
 		rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
 
 	} catch (eRofConnNotConnected& e) {
-		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
-		delete msg; throw;
+		VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+		delete msg;
+		throw;
 	} catch (eRofQueueFull& e) {
-		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
-		delete msg; throw;
+		VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+		delete msg;
+		throw;
 	}
 
 	return xid;
@@ -1451,11 +1474,13 @@ crofdpt::send_meter_stats_request(
 		rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
 
 	} catch (eRofConnNotConnected& e) {
-		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
-		delete msg; throw;
+		VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+		delete msg;
+		throw;
 	} catch (eRofQueueFull& e) {
-		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
-		delete msg; throw;
+		VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+		delete msg;
+		throw;
 	}
 
 	return xid;
@@ -1483,11 +1508,13 @@ crofdpt::send_meter_config_stats_request(
 		rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
 
 	} catch (eRofConnNotConnected& e) {
-		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
-		delete msg; throw;
+		VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+		delete msg;
+		throw;
 	} catch (eRofQueueFull& e) {
-		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
-		delete msg; throw;
+		VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+		delete msg;
+		throw;
 	}
 
 	return xid;
@@ -1513,11 +1540,13 @@ crofdpt::send_meter_features_stats_request(
 		rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
 
 	} catch (eRofConnNotConnected& e) {
-		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
-		delete msg; throw;
+		VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+		delete msg;
+		throw;
 	} catch (eRofQueueFull& e) {
-		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
-		delete msg; throw;
+		VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+		delete msg;
+		throw;
 	}
 
 	return xid;
@@ -1550,11 +1579,13 @@ crofdpt::send_packet_out_message(
 		rofchan.send_message(auxid, msg);
 
 	} catch (eRofConnNotConnected& e) {
-		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
-		delete msg; throw;
+		VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+		delete msg;
+		throw;
 	} catch (eRofQueueFull& e) {
-		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
-		delete msg; throw;
+		VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+		delete msg;
+		throw;
 	}
 
 	return xid;
@@ -1578,11 +1609,13 @@ crofdpt::send_barrier_request(
 		rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
 
 	} catch (eRofConnNotConnected& e) {
-		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
-		delete msg; throw;
+		VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+		delete msg;
+		throw;
 	} catch (eRofQueueFull& e) {
-		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
-		delete msg; throw;
+		VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+		delete msg;
+		throw;
 	}
 
 	return xid;
@@ -1608,11 +1641,13 @@ crofdpt::send_role_request(
 		rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
 
 	} catch (eRofConnNotConnected& e) {
-		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
-		delete msg; throw;
+		VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+		delete msg;
+		throw;
 	} catch (eRofQueueFull& e) {
-		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
-		delete msg; throw;
+		VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+		delete msg;
+		throw;
 	}
 
 	return xid;
@@ -1637,11 +1672,13 @@ crofdpt::send_flow_mod_message(
 		rofchan.send_message(auxid, msg);
 
 	} catch (eRofConnNotConnected& e) {
-		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
-		delete msg; throw;
+		VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+		delete msg;
+		throw;
 	} catch (eRofQueueFull& e) {
-		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
-		delete msg; throw;
+		VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+		delete msg;
+		throw;
 	}
 
 	return xid;
@@ -1666,11 +1703,13 @@ crofdpt::send_group_mod_message(
 		rofchan.send_message(auxid, msg);
 
 	} catch (eRofConnNotConnected& e) {
-		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
-		delete msg; throw;
+		VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+		delete msg;
+		throw;
 	} catch (eRofQueueFull& e) {
-		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
-		delete msg; throw;
+		VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+		delete msg;
+		throw;
 	}
 
 	return xid;
@@ -1697,11 +1736,13 @@ crofdpt::send_table_mod_message(
 		rofchan.send_message(auxid, msg);
 
 	} catch (eRofConnNotConnected& e) {
-		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
-		delete msg; throw;
+		VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+		delete msg;
+		throw;
 	} catch (eRofQueueFull& e) {
-		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
-		delete msg; throw;
+		VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+		delete msg;
+		throw;
 	}
 
 	return xid;
@@ -1743,11 +1784,13 @@ crofdpt::send_port_mod_message(
 		}
 
 	} catch (eRofConnNotConnected& e) {
-		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
-		delete msg; throw;
+		VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+		delete msg;
+		throw;
 	} catch (eRofQueueFull& e) {
-		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
-		delete msg; throw;
+		VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+		delete msg;
+		throw;
 	}
 
 	return xid;
@@ -1779,11 +1822,13 @@ crofdpt::send_set_config_message(
 		}
 
 	} catch (eRofConnNotConnected& e) {
-		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
-		delete msg; throw;
+		VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+		delete msg;
+		throw;
 	} catch (eRofQueueFull& e) {
-		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
-		delete msg; throw;
+		VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+		delete msg;
+		throw;
 	}
 
 	return xid;
@@ -1809,11 +1854,13 @@ crofdpt::send_queue_get_config_request(
 		rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
 
 	} catch (eRofConnNotConnected& e) {
-		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
-		delete msg; throw;
+		VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+		delete msg;
+		throw;
 	} catch (eRofQueueFull& e) {
-		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
-		delete msg; throw;
+		VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+		delete msg;
+		throw;
 	}
 
 	return xid;
@@ -1837,11 +1884,13 @@ crofdpt::send_get_async_config_request(
 		rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
 
 	} catch (eRofConnNotConnected& e) {
-		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
-		delete msg; throw;
+		VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+		delete msg;
+		throw;
 	} catch (eRofQueueFull& e) {
-		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
-		delete msg; throw;
+		VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+		delete msg;
+		throw;
 	}
 
 	return xid;
@@ -1866,10 +1915,10 @@ crofdpt::send_set_async_config_message(
 		rofchan.send_message(auxid, msg);
 
 	} catch (eRofConnNotConnected& e) {
-		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
+		VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
 		delete msg; throw;
 	} catch (eRofQueueFull& e) {
-		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
+		VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
 		delete msg; throw;
 	}
 
@@ -1901,10 +1950,10 @@ crofdpt::send_meter_mod_message(
 		rofchan.send_message(auxid, msg);
 
 	} catch (eRofConnNotConnected& e) {
-		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
+		VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
 		delete msg; throw;
 	} catch (eRofQueueFull& e) {
-		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
+		VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
 		delete msg; throw;
 	}
 
@@ -1935,10 +1984,10 @@ crofdpt::send_error_message(
 		rofchan.send_message(auxid, msg);
 
 	} catch (eRofConnNotConnected& e) {
-		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
+		VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
 		delete msg; throw;
 	} catch (eRofQueueFull& e) {
-		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
+		VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
 		delete msg; throw;
 	}
 }
@@ -1972,10 +2021,10 @@ crofdpt::send_experimenter_message(
 		}
 
 	} catch (eRofConnNotConnected& e) {
-		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
+		VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
 		delete msg; throw;
 	} catch (eRofQueueFull& e) {
-		journal.log(e.set_caller(__PRETTY_FUNCTION__).set_action("dropping message"));
+		VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
 		delete msg; throw;
 	}
 

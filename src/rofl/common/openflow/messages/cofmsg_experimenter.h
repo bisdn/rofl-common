@@ -156,9 +156,8 @@ public:
 	std::string
 	str() const {
 		std::stringstream ss;
-		ss << cofmsg::str() << "-Experimenter- ";
-		ss << "exp_id: " << (int)get_exp_id() << " ";
-		ss << "exp_type: " << (int)get_exp_type() << " ";
+		ss << cofmsg::str() << "-Experimenter- exp_id: " << (int)get_exp_id()
+			<< " exp_type: " << (int)get_exp_type();
 		return ss.str();
 	};
 

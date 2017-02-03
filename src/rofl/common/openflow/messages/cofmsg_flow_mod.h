@@ -104,8 +104,7 @@ public:
 	std::string
 	str() const {
 		std::stringstream ss;
-		ss << cofmsg::str() << "-Flow-Mod- " << " ";
-		ss << "flowmod: " << flowmod.str() << " ";
+		ss << cofmsg::str() << "-Flow-Mod- flowmod: " << flowmod.str() << " ";
 		return ss.str();
 	};
 

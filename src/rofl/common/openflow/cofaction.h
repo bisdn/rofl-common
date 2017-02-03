@@ -157,11 +157,9 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, cofaction const& action) {
-		os  << "<cofaction ";
-			os << "ofp-version:" << (int)action.get_version() << " ";
-			os << "type:0x" << std::hex << (int)action.get_type() << std::dec << " ";
-			os << "length:" << (int)action.get_length() << " ";
-		os << " >" << std::endl;
+		os  << "<cofaction ofp-version:" << (int)action.get_version() <<
+			" type:0x" << std::hex << (int)action.get_type() << std::dec <<
+			" length:" << (int)action.get_length() << " >" << std::endl;
 		return os;
 	}
 
@@ -289,14 +287,11 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, cofaction_output const& action) {
-		os  << "<cofaction_output ";
-		os << std::hex;
-		os << "port-no: 0x" << (unsigned int)action.get_port_no() << " ";
-		os << "max-len: 0x" << (unsigned int)action.get_max_len() << " ";
-		os << std::dec;
-		os << ">" << std::endl;
-		
-		os << dynamic_cast<cofaction const&>( action );
+		os  << "<cofaction_output" << std::hex
+		<< " port-no: 0x" << (unsigned int)action.get_port_no()
+		<< " max-len: 0x" << (unsigned int)action.get_max_len()
+		<< std::dec << ">" << std::endl
+		<< dynamic_cast<cofaction const&>( action );
 		return os;
 	};
 
@@ -1327,13 +1322,10 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, const cofaction_enqueue& action) {
-		os  << "<cofaction_enqueue ";
-		os << std::hex;
-		os << "port-no:0x" << (unsigned int)action.get_port_no() << " ";
-		os << "queue-id:0x" << (unsigned int)action.get_queue_id() << " >" << std::endl;
-		os << std::dec;
-		
-		os << dynamic_cast<cofaction const&>( action );
+		os  << "<cofaction_enqueue" << std::hex
+		<< " port-no:0x" << (unsigned int)action.get_port_no()
+		<< " queue-id:0x" << (unsigned int)action.get_queue_id() << " >" << std::endl
+		<< std::dec << dynamic_cast<cofaction const&>( action );
 		return os;
 	};
 
@@ -3046,14 +3038,11 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, cofaction_experimenter const& action) {
-		os  << "<cofaction_experimenter ";
-		os << std::hex;
-		os << "exp-id:0x" << (unsigned int)action.get_exp_id() << " ";
-		os << std::dec;
-		os << ">" << std::endl;
-		
-		os << dynamic_cast<cofaction const&>( action );
-		os << action.get_exp_body();
+		os  << "<cofaction_experimenter" << std::hex
+		<< " exp-id:0x" << (unsigned int)action.get_exp_id()
+		<< std::dec << ">" << std::endl
+		<< dynamic_cast<cofaction const&>( action )
+		<< action.get_exp_body();
 		return os;
 	};
 

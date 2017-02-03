@@ -107,7 +107,7 @@ public:
 	virtual std::string
 	str() const {
 		std::stringstream ss;
-		ss << cofmsg::str() << "-Queue-Get-Config-Request- " << " ";
+		ss << cofmsg::str() << "-Queue-Get-Config-Request- ";
 		return ss.str();
 	};
 
@@ -223,7 +223,7 @@ public:
 	virtual std::string
 	str() const {
 		std::stringstream ss;
-		ss << cofmsg::str() << "-Queue-Get-Config-Reply- " << " ";
+		ss << cofmsg::str() << "-Queue-Get-Config-Reply- ";
 		return ss.str();
 	};
 

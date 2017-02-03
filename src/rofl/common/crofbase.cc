@@ -44,7 +44,6 @@ crofbase::~crofbase()
 
 
 crofbase::crofbase() :
-		journal(this),
 		thread(this),
 		generation_is_defined(false),
 		cached_generation_id((uint64_t)((int64_t)-1)),
@@ -487,17 +486,12 @@ crofbase::handle_established(
 
 		/* indicate channel up to higher layers */
 		if (conn.get_auxid() == rofl::cauxid(0)) {
-			journal.log(LOG_INFO, "datapath attached").
-						set_key("dptid", dptid).
-						set_key("version", get_dpt(dptid).get_version());
+			VLOG(2) << "datapath attached dptid=" << dptid << " version=" << get_dpt(dptid).get_version();
 			handle_dpt_open(set_dpt(dptid));
 		}
-		journal.log(LOG_INFO, "connection established").
-					set_key("dptid", dptid).
-					set_key("auxid", conn.get_auxid().str()).
-					set_key("laddr", conn.get_laddr().str()).
-					set_key("raddr", conn.get_raddr().str()).
-					set_key("version", conn.get_version());
+		VLOG(2) << "connection established dptid" << dptid << " auxid=" << 
+			conn.get_auxid().str() << " laddr=" << conn.get_laddr().str() <<
+		   	" raddr=" << conn.get_raddr().str() << " version=" << conn.get_version();
 		handle_conn_established(set_dpt(dptid), conn.get_auxid());
 
 	} break;
@@ -511,17 +505,14 @@ crofbase::handle_established(
 
 		/* indicate channel up to higher layers */
 		if (conn.get_auxid() == rofl::cauxid(0)) {
-			journal.log(LOG_INFO, "controller attached").
-						set_key("ctlid", ctlid.str()).
-						set_key("version", get_ctl(ctlid).get_version());
+			VLOG(2) << "controller attached ctlid=" << ctlid.str() << 
+				" version=" << get_ctl(ctlid).get_version();
 			handle_ctl_open(set_ctl(ctlid));
 		}
-		journal.log(LOG_INFO, "connection established").
-					set_key("ctlid", ctlid.str()).
-					set_key("auxid", conn.get_auxid().str()).
-					set_key("laddr", conn.get_laddr().str()).
-					set_key("raddr", conn.get_raddr().str()).
-					set_key("version", conn.get_version());
+		VLOG(2) << "connection established ctlid=" << ctlid.str() <<
+			" auxid=" << conn.get_auxid().str() << " laddr=" <<
+		   	conn.get_laddr().str() << " raddr=" << conn.get_raddr().str() <<
+			" version=" << conn.get_version();
 		handle_conn_established(set_ctl(ctlid), conn.get_auxid());
 
 	} break;
@@ -564,9 +555,8 @@ void
 crofbase::handle_established(
 		crofctl& ctl, uint8_t ofp_version)
 {
-	journal.log(LOG_INFO, "controller attached").
-				set_key("ctlid", ctl.get_ctlid().str()).
-				set_key("version", ctl.get_version());
+	VLOG(2) << "controller attached ctlid=" << ctl.get_ctlid().str() << 
+		" version=" << ctl.get_version();
 	handle_ctl_open(ctl);
 }
 
@@ -576,8 +566,7 @@ void
 crofbase::handle_closed(
 		crofctl& ctl)
 {
-	journal.log(LOG_INFO, "controller detached").
-				set_key("ctlid", ctl.get_ctlid().str());
+	VLOG(2) << "controller detached ctlid=" << ctl.get_ctlid().str();
 	handle_ctl_close(rofl::cctlid(ctl.get_ctlid()));
 	/* if main connection is passive, delete crofctl instance */
 	if (ctl.get_conn(rofl::cauxid(0)).is_passive()) {
@@ -592,12 +581,11 @@ void
 crofbase::handle_established(
 		crofctl& ctl, crofconn& conn, uint8_t ofp_version)
 {
-	journal.log(LOG_INFO, "connection established").
-				set_key("ctlid", ctl.get_ctlid().str()).
-				set_key("auxid", conn.get_auxid().str()).
-				set_key("laddr", conn.get_laddr().str()).
-				set_key("raddr", conn.get_raddr().str()).
-				set_key("version", conn.get_version());
+	VLOG(2) << "connection established ctlid=" << ctl.get_ctlid().str() <<
+				" auxid=" << conn.get_auxid().str() <<
+				" laddr=" << conn.get_laddr().str() <<
+				" raddr=" << conn.get_raddr().str() <<
+				" version=" << conn.get_version();
 	handle_conn_established(ctl, conn.get_auxid());
 }
 
@@ -607,12 +595,11 @@ void
 crofbase::handle_closed(
 		crofctl& ctl, crofconn& conn)
 {
-	journal.log(LOG_INFO, "connection terminated").
-				set_key("ctlid", ctl.get_ctlid().str()).
-				set_key("auxid", conn.get_auxid().str()).
-				set_key("laddr", conn.get_laddr().str()).
-				set_key("raddr", conn.get_raddr().str()).
-				set_key("version", conn.get_version());
+	VLOG(2) << "connection terminated ctlid=" << ctl.get_ctlid().str() <<
+				" auxid=" << conn.get_auxid().str() <<
+				" laddr=" << conn.get_laddr().str() <<
+				" raddr=" << conn.get_raddr().str() <<
+				" version=", conn.get_version();
 	handle_conn_terminated(ctl, conn.get_auxid());
 }
 
@@ -622,8 +609,9 @@ void
 crofbase::handle_connect_refused(
 		crofctl& ctl, crofconn& conn)
 {
-	journal.log(LOG_INFO, "connection refused: ctlid=%s, auxid=%s, raddr=%s",
-			ctl.get_ctlid().str().c_str(), conn.get_auxid().str().c_str(), conn.get_raddr().str().c_str());
+	VLOG(2) << "connection refused: ctlid=" << ctl.get_ctlid().str().c_str()
+	   	<< ", auxid=" << conn.get_auxid().str().c_str() << ", raddr=" << 
+		conn.get_raddr().str().c_str();
 	handle_conn_refused(ctl, conn.get_auxid());
 }
 
@@ -633,8 +621,9 @@ void
 crofbase::handle_connect_failed(
 		crofctl& ctl, crofconn& conn)
 {
-	journal.log(LOG_INFO, "connection failed: ctlid=%s, auxid=%s, raddr=%s",
-			ctl.get_ctlid().str().c_str(), conn.get_auxid().str().c_str(), conn.get_raddr().str().c_str());
+	VLOG(2) << "connection failed: ctlid=" << ctl.get_ctlid().str().c_str()
+	   	<< ", auxid=" << conn.get_auxid().str().c_str() << ", raddr=" << 
+		conn.get_raddr().str().c_str();
 	handle_conn_failed(ctl, conn.get_auxid());
 }
 
@@ -651,8 +640,9 @@ void
 crofbase::handle_negotiation_failed(
 		crofctl& ctl, crofconn& conn)
 {
-	journal.log(LOG_INFO, "connection negotiation failed: ctlid=%s, auxid=%s, raddr=%s",
-			ctl.get_ctlid().str().c_str(), conn.get_auxid().str().c_str(), conn.get_raddr().str().c_str());
+	VLOG(2) << "connection negotiation failed: ctlid=" << ctl.get_ctlid().str().c_str()
+	   	<< ", auxid=" << conn.get_auxid().str().c_str() << ", raddr=" << 
+		conn.get_raddr().str().c_str();
 	handle_conn_negotiation_failed(ctl, conn.get_auxid());
 }
 
@@ -662,8 +652,9 @@ void
 crofbase::congestion_occured_indication(
 		crofctl& ctl, crofconn& conn)
 {
-	journal.log(LOG_NOTICE, "connection congestion occured: ctlid=%s, auxid=%s, raddr=%s",
-			ctl.get_ctlid().str().c_str(), conn.get_auxid().str().c_str(), conn.get_raddr().str().c_str());
+	VLOG(2) << "connection negotiation failed: ctlid=" << ctl.get_ctlid().str().c_str()
+	   	<< ", auxid=" << conn.get_auxid().str().c_str() << ", raddr=" << 
+		conn.get_raddr().str().c_str();
 	handle_conn_congestion_occured(ctl, conn.get_auxid());
 }
 
@@ -673,8 +664,9 @@ void
 crofbase::congestion_solved_indication(
 		crofctl& ctl, crofconn& conn)
 {
-	journal.log(LOG_NOTICE, "connection congestion solved: ctlid=%s, auxid=%s, raddr=%s",
-			ctl.get_ctlid().str().c_str(), conn.get_auxid().str().c_str(), conn.get_raddr().str().c_str());
+	VLOG(2) << "connection congestion solved: ctlid=" << ctl.get_ctlid().str().c_str()
+	   	<< ", auxid=" << conn.get_auxid().str().c_str() << ", raddr=" << 
+		conn.get_raddr().str().c_str();
 	handle_conn_congestion_solved(ctl, conn.get_auxid());
 }
 
@@ -684,10 +676,9 @@ void
 crofbase::handle_established(
 		crofdpt& dpt, uint8_t ofp_version)
 {
-	journal.log(LOG_INFO, "datapath attached").
-				set_key("dptid", dpt.get_dptid()).
-				set_key("dpid", dpt.get_dpid()).
-				set_key("version", dpt.get_version());
+	VLOG(2) << "datapath attached dptid=" << dpt.get_dptid() <<
+				" dpid=" << dpt.get_dpid() <<
+				" version=" << dpt.get_version();
 	handle_dpt_open(dpt);
 }
 
@@ -697,9 +688,8 @@ void
 crofbase::handle_closed(
 		crofdpt& dpt)
 {
-	journal.log(LOG_INFO, "datapath detached").
-				set_key("dptid", dpt.get_dptid()).
-				set_key("dpid", dpt.get_dpid());
+	VLOG(2) << "datapath detached dptid=" << dpt.get_dptid() <<
+				" dpid=" << dpt.get_dpid();
 	handle_dpt_close(dpt.get_dptid());
 	/* if main connection is passive, delete crofdpt instance */
 	if (dpt.get_conn(rofl::cauxid(0)).is_passive()) {
@@ -714,12 +704,11 @@ void
 crofbase::handle_established(
 		crofdpt& dpt, crofconn& conn, uint8_t ofp_version)
 {
-	journal.log(LOG_INFO, "connection established").
-				set_key("dptid", dpt.get_dptid()).
-				set_key("auxid", conn.get_auxid().str()).
-				set_key("laddr", conn.get_laddr().str()).
-				set_key("raddr", conn.get_raddr().str()).
-				set_key("version", conn.get_version());
+	VLOG(2) << "connection established dptid=" << dpt.get_dptid() <<
+				" auxid=" << conn.get_auxid().str() <<
+				" laddr=" << conn.get_laddr().str() <<
+				" raddr=" << conn.get_raddr().str() <<
+				" version=" << conn.get_version();
 	handle_conn_established(dpt, conn.get_auxid());
 }
 
@@ -729,12 +718,11 @@ void
 crofbase::handle_closed(
 		crofdpt& dpt, crofconn& conn)
 {
-	journal.log(LOG_INFO, "connection terminated").
-				set_key("dptid", dpt.get_dptid()).
-				set_key("auxid", conn.get_auxid().str()).
-				set_key("laddr", conn.get_laddr().str()).
-				set_key("raddr", conn.get_raddr().str()).
-				set_key("version", conn.get_version());
+	VLOG(2) << "connection terminated dptid=" << dpt.get_dptid() <<
+				" auxid=" << conn.get_auxid().str() <<
+				" laddr=" << conn.get_laddr().str() <<
+				" raddr=" << conn.get_raddr().str() <<
+				" version=" << conn.get_version();
 	handle_conn_terminated(dpt, conn.get_auxid());
 }
 
@@ -744,8 +732,9 @@ void
 crofbase::handle_connect_refused(
 		crofdpt& dpt, crofconn& conn)
 {
-	journal.log(LOG_INFO, "connection refused: dptid=0x%x, auxid=%s, raddr=%s",
-			dpt.get_dptid(), conn.get_auxid().str().c_str(), conn.get_raddr().str().c_str());
+	VLOG(2) << "connection refused: dptid=" << dpt.get_dptid()
+	   	<< ", auxid=" << conn.get_auxid().str().c_str() << ", raddr=" <<
+		conn.get_raddr().str().c_str();
 	handle_conn_refused(dpt, conn.get_auxid());
 }
 
@@ -755,8 +744,9 @@ void
 crofbase::handle_connect_failed(
 		crofdpt& dpt, crofconn& conn)
 {
-	journal.log(LOG_INFO, "connection failed: dptid=0x%x, auxid=%s, raddr=%s",
-			dpt.get_dptid(), conn.get_auxid().str().c_str(), conn.get_raddr().str().c_str());
+	VLOG(2) << "connection failed: dptid=" << dpt.get_dptid()
+	   	<< ", auxid=" << conn.get_auxid().str().c_str() << ", raddr=" <<
+		conn.get_raddr().str().c_str();
 	handle_conn_failed(dpt, conn.get_auxid());
 }
 
@@ -773,8 +763,9 @@ void
 crofbase::handle_negotiation_failed(
 		crofdpt& dpt, crofconn& conn)
 {
-	journal.log(LOG_INFO, "connection negotiation failed: dptid=0x%x, auxid=%s, raddr=%s",
-			dpt.get_dptid(), conn.get_auxid().str().c_str(), conn.get_raddr().str().c_str());
+	VLOG(2) << "connection negotiation failed: dptid=" << dpt.get_dptid()
+	   	<< ", auxid=" << conn.get_auxid().str().c_str() << ", raddr=" <<
+		conn.get_raddr().str().c_str();
 	handle_conn_negotiation_failed(dpt, conn.get_auxid());
 }
 
@@ -784,8 +775,9 @@ void
 crofbase::congestion_occured_indication(
 		crofdpt& dpt, crofconn& conn)
 {
-	journal.log(LOG_NOTICE, "connection congestion occured: dptid=0x%x, auxid=%s, raddr=%s",
-			dpt.get_dptid(), conn.get_auxid().str().c_str(), conn.get_raddr().str().c_str());
+	VLOG(2) << "connection congestion occured: dptid=" << dpt.get_dptid()
+	   	<< ", auxid=" << conn.get_auxid().str().c_str() << ", raddr=" <<
+		conn.get_raddr().str().c_str();
 	handle_conn_congestion_occured(dpt, conn.get_auxid());
 }
 
@@ -795,8 +787,9 @@ void
 crofbase::congestion_solved_indication(
 		crofdpt& dpt, crofconn& conn)
 {
-	journal.log(LOG_NOTICE, "connection congestion solved: dptid=0x%x, auxid=%s, raddr=%s",
-			dpt.get_dptid(), conn.get_auxid().str().c_str(), conn.get_raddr().str().c_str());
+	VLOG(2) << "connection congestion solved: dptid=" << dpt.get_dptid()
+	   	<< ", auxid=" << conn.get_auxid().str().c_str() << ", raddr=" <<
+		conn.get_raddr().str().c_str();
 	handle_conn_congestion_solved(dpt, conn.get_auxid());
 }
 

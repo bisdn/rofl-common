@@ -107,7 +107,7 @@ public:
 	std::string
 	str() const {
 		std::stringstream ss;
-		ss << cofmsg::str() << "-Aggr-Stats-Request- " << " ";
+		ss << cofmsg::str() << "-Aggr-Stats-Request- ";
 		return ss.str();
 	};
 
@@ -207,7 +207,7 @@ public:
 	std::string
 	str() const {
 		std::stringstream ss;
-		ss << cofmsg::str() << "-Aggr-Stats-Reply- " << " ";
+		ss << cofmsg::str() << "-Aggr-Stats-Reply- ";
 		return ss.str();
 	};
 

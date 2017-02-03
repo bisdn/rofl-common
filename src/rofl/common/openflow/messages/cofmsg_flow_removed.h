@@ -354,17 +354,17 @@ public:
 	std::string
 	str() const {
 		std::stringstream ss;
-		ss << cofmsg::str() << "-Flow-Removed- " << " ";
-		ss << "cookie: " << (unsigned long long)get_cookie() << ", ";
-		ss << "priority: " << (unsigned int)get_priority() << ", ";
-		ss << "reason: " << (unsigned int)get_reason() << ", ";
-		ss << "table_id: " << (unsigned int)get_table_id() << ", ";
-		ss << "dur_sec: " << (unsigned int)get_duration_sec() << ", ";
-		ss << "dur_nsec: " << (unsigned int)get_duration_nsec() << ", ";
-		ss << "idle: " << (unsigned int)get_idle_timeout() << ", ";
-		ss << "hard: " << (unsigned int)get_hard_timeout() << ", ";
-		ss << "#packets: " << (unsigned long long)get_packet_count() << ", ";
-		ss << "#bytes: " << (unsigned long long)get_byte_count() << " ";
+		ss << cofmsg::str() << "-Flow-Removed- "
+			<< " cookie: " << (unsigned long long)get_cookie()
+			<< ", priority: " << (unsigned int)get_priority()
+			<< ", reason: " << (unsigned int)get_reason()
+			<< ", table_id: " << (unsigned int)get_table_id()
+			<< ", dur_sec: " << (unsigned int)get_duration_sec()
+			<< ", dur_nsec: " << (unsigned int)get_duration_nsec()
+			<< ", idle: " << (unsigned int)get_idle_timeout()
+			<< ", hard: " << (unsigned int)get_hard_timeout()
+			<< ", #packets: " << (unsigned long long)get_packet_count()
+			<< ", #bytes: " << (unsigned long long)get_byte_count() << " ";
 		return ss.str();
 	};
 

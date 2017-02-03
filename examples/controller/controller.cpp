@@ -68,26 +68,6 @@ controller::run(
 	// register e.g. port number 3566 to act as a proxy
 	crofbase::ctl_sock_listen(rofl::csockaddr(AF_INET, "0.0.0.0", 3566));
 
-
-
-
-	/* All workflow related classes in rofl-common maintain a journal
-	 * documenting history of their internal operations. This includes classes:
-	 * rofl::crofbase => the base class to derive your application class from
-	 * rofl::crofchan => representing an OpenFlow control channel
-	 * rofl::crofconn => representing an OpenFlow control connection
-	 * rofl::crofsock => representing an OpenFlow socket
-	 *
-	 * A journal stores by default 128 of the most recent log entries,
-	 * replacing the oldest as the number of journal entries grows.
-	 * If you want to keep more entries, just increase the journal's
-	 * capacity. */
-
-	// define maximum threshold of journal entries
-	rofl::crofbase::set_journal().set_max_entries(1024);
-
-
-
 	/* rofl-common's OpenFlow protocol engine uses Posix threads
 	 * for its internal operations. rofl creates and destroys
 	 * threads automatically as needed, but make sure
@@ -100,10 +80,6 @@ controller::run(
 		ts.tv_nsec = 0;
 		pselect(0, NULL, NULL, NULL, &ts, NULL);
 	}
-
-	// dump journal on termination
-	std::cerr << ">>> journal log <<<" << std::endl;
-	std::cerr << crofbase::get_journal() << std::endl;
 
 	return 0;
 };
@@ -222,18 +198,6 @@ controller::handle_conn_established(
 	 * tracing on a per control connection basis, which will generate
 	 * a log entry for each message received and sent by the control
 	 * connection. */
-
-	// enable tracing on control connection 'auxid'
-	dpt.set_conn(auxid).set_trace(true);
-
-	// dump the OpenFlow control connection's journal ...
-	std::cerr << dpt.get_conn(auxid).get_journal() << std::endl;
-
-	// ... and the journal of the underlying OpenFlow socket if needed
-	std::cerr << dpt.get_conn(auxid).get_tcp_journal() << std::endl;
-
-
-
 
 	// auxid(0) always represents the main control connection
 	if (rofl::cauxid(0) == auxid) {

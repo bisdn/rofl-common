@@ -27,7 +27,6 @@
 #include "rofl/common/cauxid.h"
 #include "rofl/common/crofqueue.h"
 #include "rofl/common/exception.hpp"
-#include "rofl/common/cjournal.hpp"
 
 namespace rofl {
 
@@ -156,7 +155,6 @@ private:
  */
 class crofconn :
 		public cthread_env,
-		public cjournal_env,
 		public crofsock_env
 {
 	enum outqueue_type_t {
@@ -220,38 +218,6 @@ public:
 	 */
 	crofconn(
 			crofconn_env *env);
-
-public:
-
-	/**
-	 *
-	 */
-	const cjournal&
-	get_journal() const
-	{ return journal; };
-
-	/**
-	 *
-	 */
-	cjournal&
-	set_journal()
-	{ return journal; };
-
-public:
-
-	/**
-	 *
-	 */
-	const cjournal&
-	get_tcp_journal() const
-	{ return rofsock.get_journal(); };
-
-	/**
-	 *
-	 */
-	cjournal&
-	set_tcp_journal()
-	{ return rofsock.set_journal(); };
 
 public:
 
@@ -737,31 +703,12 @@ public:
 			unsigned int pending_segments_max)
 	{ this->pending_segments_max = pending_segments_max; return *this; };
 
-public:
-
-	/**
-	 *
-	 */
-	bool
-	get_trace() const
-	{ return trace; };
-
-	/**
-	 *
-	 */
-	crofconn&
-	set_trace(
-			bool trace)
-	{ rofsock.set_trace(this->trace = trace); return *this; };
-
-public:
-
 	friend std::ostream&
 	operator<< (std::ostream& os, const crofconn& conn) {
-		os  << "<crofconn ofp-version:" << (int)conn.ofp_version << " "
-				<< "openflow-connection-established: " << conn.is_established() << " "
-				<< "transport-connection-established: " << conn.is_transport_established() << " "
-				<< ">" << std::endl;
+		os  << "<crofconn ofp-version: " << (int)conn.ofp_version
+				<< " openflow-connection-established: " << conn.is_established()
+				<< " transport-connection-established: " << conn.is_transport_established()
+				<< " >" << std::endl;
 		{  os << conn.get_auxid(); }
 		if (conn.state == STATE_NEGOTIATION_FAILED) {
 			os << "<state: -NEGOTIATION-FAILED- >" << std::endl;
@@ -793,9 +740,9 @@ public:
 	std::string
 	str() const {
 		std::stringstream ss;
-		ss << "<crofconn ofp-version:" << (int)ofp_version << " "
-				<< "openflow-connection-established: " << is_established() << " "
-				<< "transport-connection-established: " << is_transport_established() << " ";
+		ss << "<crofconn ofp-version:" << (int)ofp_version
+				<< " openflow-connection-established: " << is_established()
+				<< " transport-connection-established: " << is_transport_established();
 		if (state == STATE_NEGOTIATION_FAILED) {
 			ss << "state: -NEGOTIATION-FAILED- ";
 		} else
@@ -1396,9 +1343,6 @@ private:
 
 private:
 
-	// journal
-	rofl::cjournal                  journal;
-
 	// environment for this instance
 	rofl::crofconn_env*             env;
 
@@ -1507,9 +1451,6 @@ private:
 	// maximum number of pending segments in parallel
 	unsigned int                    pending_segments_max;
 	static const unsigned int       DEFAULT_PENDING_SEGMENTS_MAX;
-
-	// enable message tracing
-	bool                            trace;
 };
 
 }; /* namespace rofl */

@@ -83,15 +83,15 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, const cofmsg_meter_features_stats_request& msg) {
-		os << dynamic_cast<const cofmsg_stats_request&>( msg );
-		os << "<cofmsg_meter_features_request >" << std::endl;
+		os << dynamic_cast<const cofmsg_stats_request&>( msg )
+			<< "<cofmsg_meter_features_request >" << std::endl;
 		return os;
 	};
 
 	virtual std::string
 	str() const {
 		std::stringstream ss;
-		ss << cofmsg_stats_request::str() << "-Meter-Features-Stats-Request- " << " ";
+		ss << cofmsg_stats_request::str() << "-Meter-Features-Stats-Request- ";
 		return ss.str();
 	};
 };
@@ -190,7 +190,7 @@ public:
 	virtual std::string
 	str() const {
 		std::stringstream ss;
-		ss << cofmsg_stats_reply::str() << "-Meter-Features-Stats-Reply- " << " ";
+		ss << cofmsg_stats_reply::str() << "-Meter-Features-Stats-Reply- ";
 		return ss.str();
 	};
 

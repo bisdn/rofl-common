@@ -165,9 +165,8 @@ public:
 	std::string
 	str() const {
 		std::stringstream ss;
-		ss << cofmsg::str() << "-Port-Status- " << " ";
-		ss << "reason: " << (unsigned int)get_reason() << ", ";
-		//ss << "port: " << get_port().str() << " ";
+		ss << cofmsg::str() << "-Port-Status-"
+			<< " reason: " << (unsigned int)get_reason() << ", ";
 		return ss.str();
 	};
 

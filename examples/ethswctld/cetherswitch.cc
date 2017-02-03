@@ -358,10 +358,10 @@ cetherswitch::dump_packet_in(
 
 	//Dump some information
 	std::cerr << "[cetherswitch] PACKET-IN => frame seen, "
-						<< "buffer-id:0x" << std::hex << msg.get_buffer_id() << std::dec << " "
-						<< "eth-src:" << eth_src << " "
-						<< "eth-dst:" << eth_dst << " "
-						<< "eth-type:0x" << std::hex << (int)be16toh(eth_hdr->eth_type) << std::dec << " "
+						<< "buffer-id:0x" << std::hex << msg.get_buffer_id() << std::dec
+						<< " eth-src:" << eth_src
+						<< " eth-dst:" << eth_dst
+						<< " eth-type:0x" << std::hex << (int)be16toh(eth_hdr->eth_type) << std::dec
 						<< std::endl;
 	std::cerr << dpt.get_dpid();
 }

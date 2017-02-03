@@ -141,9 +141,9 @@ public:
 	std::string
 	str() const {
 		std::stringstream ss;
-		ss << cofmsg::str() << "-Experimenter-Stats-Request- ";
-		ss << "exp_id: 0x" << std::hex << (unsigned int)get_exp_id() << std::dec << " ";
-		ss << "exp_type: 0x" << std::hex << (unsigned int)get_exp_type() << std::dec << " ";
+		ss << cofmsg::str() << "-Experimenter-Stats-Request- exp_id: 0x"
+			<< std::hex << (unsigned int)get_exp_id() << " exp_type: 0x"
+			<< (unsigned int)get_exp_type() << std::dec << " ";
 		return ss.str();
 	};
 
@@ -276,9 +276,9 @@ public:
 	std::string
 	str() const {
 		std::stringstream ss;
-		ss << cofmsg::str() << "-Experimenter-Stats-Reply- ";
-		ss << "exp_id: 0x" << std::hex << (unsigned int)get_exp_id() << std::dec << " ";
-		ss << "exp_type: 0x" << std::hex << (unsigned int)get_exp_type() << std::dec << " ";
+		ss << cofmsg::str() << "-Experimenter-Stats-Reply- exp_id: 0x" <<
+			std::hex << (unsigned int)get_exp_id() << " " << "exp_type: 0x" <<
+			(unsigned int)get_exp_type() << std::dec << " ";
 		return ss.str();
 	};
 

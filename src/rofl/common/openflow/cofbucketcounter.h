@@ -181,13 +181,12 @@ public:
 
 	friend std::ostream&
 	operator<< (std::ostream& os, cofbucket_counter const& bc) {
-		os  << "<cofbucket_counter ";
-		os << "ofp-version: " << (int)bc.ofp_version << " ";
-		os << std::hex;
-		os << "packet-count: 0x" << (unsigned long long)bc.packet_count << " ";
-		os << "byte-count: 0x" << (unsigned long long)bc.byte_count << " ";
-		os << std::dec;
-		os << ">" << std::endl;
+		os << "<cofbucket_counter ofp-version: " << (int)bc.ofp_version
+		<< std::hex
+		<< " packet-count: 0x" << (unsigned long long)bc.packet_count
+		<< " byte-count: 0x" << (unsigned long long)bc.byte_count
+		<< std::dec
+		<< ">" << std::endl;
 		return os;
 	};
 
