@@ -15,120 +15,103 @@
 namespace rofl {
 namespace openflow {
 
-class cofhello_elem :
-			public cmemory
-{
+class cofhello_elem : public cmemory {
 
-	union {
-		uint8_t										*ofhu_hello_elem_generic;
-		struct openflow13::ofp_hello_elem_header	*ofhu13_hello_elem_header;
-	} ofhu;
+  union {
+    uint8_t *ofhu_hello_elem_generic;
+    struct openflow13::ofp_hello_elem_header *ofhu13_hello_elem_header;
+  } ofhu;
 
-#define ofh_hello_elem_generic	ofhu.ofhu_hello_elem_generic
-#define ofh_hello_elem_header 	ofhu.ofhu13_hello_elem_header
+#define ofh_hello_elem_generic ofhu.ofhu_hello_elem_generic
+#define ofh_hello_elem_header ofhu.ofhu13_hello_elem_header
 
 public:
+  /**
+   *
+   */
+  cofhello_elem(size_t len);
 
-	/**
-	 *
-	 */
-	cofhello_elem(
-			size_t len);
+  /**
+   *
+   */
+  cofhello_elem(uint8_t *buf, size_t buflen);
 
-	/**
-	 *
-	 */
-	cofhello_elem(
-			uint8_t *buf, size_t buflen);
+  /**
+   *
+   */
+  cofhello_elem(cofhello_elem const &elem);
 
-	/**
-	 *
-	 */
-	cofhello_elem(
-			cofhello_elem const& elem);
+  /**
+   *
+   */
+  virtual ~cofhello_elem();
 
-	/**
-	 *
-	 */
-	virtual
-	~cofhello_elem();
+  /**
+   *
+   */
+  cofhello_elem &operator=(cofhello_elem const &elem);
 
-	/**
-	 *
-	 */
-	cofhello_elem&
-	operator= (
-			cofhello_elem const& elem);
-
-	/**
-	 *
-	 */
-	virtual cofhello_elem*
-	clone() = 0;
+  /**
+   *
+   */
+  virtual cofhello_elem *clone() = 0;
 
 public:
+  /**
+   *
+   */
+  virtual uint8_t *resize(size_t len);
 
-	/**
-	 *
-	 */
-	virtual uint8_t*
-	resize(size_t len);
+  /**
+   *
+   */
+  virtual size_t length() const;
 
-	/**
-	 *
-	 */
-	virtual size_t
-	length() const;
+  /**
+   *
+   */
+  void pack(uint8_t *buf, size_t buflen);
 
-	/**
-	 *
-	 */
-	void
-	pack(uint8_t *buf, size_t buflen);
+  /**
+   *
+   */
+  virtual void unpack(uint8_t *buf, size_t buflen);
 
-	/**
-	 *
-	 */
-	virtual void
-	unpack(uint8_t *buf, size_t buflen);
+  /**
+   *
+   */
+  uint16_t get_type() const { return be16toh(ofh_hello_elem_header->type); };
 
-	/**
-	 *
-	 */
-	uint16_t
-	get_type() const { return be16toh(ofh_hello_elem_header->type); };
+  /**
+   *
+   */
+  void set_type(uint16_t type) { ofh_hello_elem_header->type = htobe16(type); };
 
-	/**
-	 *
-	 */
-	void
-	set_type(uint16_t type) { ofh_hello_elem_header->type = htobe16(type); };
+  /**
+   *
+   */
+  uint16_t get_length() const {
+    return be16toh(ofh_hello_elem_header->length);
+  };
 
-	/**
-	 *
-	 */
-	uint16_t
-	get_length() const { return be16toh(ofh_hello_elem_header->length); };
-
-	/**
-	 *
-	 */
-	void
-	set_length(uint16_t len) { ofh_hello_elem_header->length = htobe16(len); };
+  /**
+   *
+   */
+  void set_length(uint16_t len) {
+    ofh_hello_elem_header->length = htobe16(len);
+  };
 
 public:
-
-	friend std::ostream&
-	operator<< (std::ostream& os, cofhello_elem const& elem) {
-		os  << "<cofhello_elem type:" << elem.get_type()
-				<< " length:" << elem.get_length() << " padding:" << (elem.length()-elem.get_length()) << " >" << std::endl;
-		return os;
-	};
+  friend std::ostream &operator<<(std::ostream &os, cofhello_elem const &elem) {
+    os << "<cofhello_elem type:" << elem.get_type()
+       << " length:" << elem.get_length()
+       << " padding:" << (elem.length() - elem.get_length()) << " >"
+       << std::endl;
+    return os;
+  };
 };
 
 }; /* namespace openflow */
 }; /* namespace rofl */
 
 #endif /* COFHELLO_ELEM_H_ */
-
-

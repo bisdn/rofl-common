@@ -7,7 +7,7 @@
 * @author Marc Sune<marc.sune (at) bisdn.de>
 * @author Andreas Koepsel <andreas.koepsel (at) bisdn.de>
 *
-* @brief Main Revised OpenFlow Library set (ROFL-common) header  
+* @brief Main Revised OpenFlow Library set (ROFL-common) header
 */
 
 #ifndef __ROFL_COMMON_H__
@@ -17,22 +17,22 @@
 #include <stdlib.h>
 
 /**
-* ROFL-common version number (git tag) 
+* ROFL-common version number (git tag)
 */
 extern const char ROFL_COMMON_VERSION[];
 
 /**
-* ROFL-common build number (git hash) 
+* ROFL-common build number (git hash)
 */
 extern const char ROFL_COMMON_BUILD_NUM[];
 
 /**
-* Branch where ROFL-common was compiled in (git branch) 
+* Branch where ROFL-common was compiled in (git branch)
 */
 extern const char ROFL_COMMON_BUILD_BRANCH[];
 
 /**
-* ROFL-common describe summary (git describe) 
+* ROFL-common describe summary (git describe)
 */
 extern const char ROFL_COMMON_BUILD_DESCRIBE[];
 

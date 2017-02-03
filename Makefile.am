@@ -17,9 +17,12 @@ EXTRA_DIST = \
 	VERSION
 
 #Could be improved.. 
-.PHONY: doc
+.PHONY: doc format
 doc:
 	@cd doc/ && make doc		
+
+format:
+	find $(top_srcdir) -regex '.*\.\(hh?\|cc?\|hpp\|cpp\)$$' | xargs clang-format -i -style=file
 
 install-exec-hook:
 

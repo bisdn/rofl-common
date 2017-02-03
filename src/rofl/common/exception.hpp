@@ -16,517 +16,422 @@
 #include <string.h>
 
 #include <map>
-#include <vector>
 #include <sstream>
 #include <stdexcept>
+#include <vector>
 
 namespace rofl {
 
 class exception : public std::runtime_error {
 public:
-	virtual
-        ~exception() _GLIBCXX_USE_NOEXCEPT
-        {};
+  virtual ~exception() _GLIBCXX_USE_NOEXCEPT{};
 
-	exception(
-			const std::string& __arg) :
-				std::runtime_error(__arg)
-	{};
+  exception(const std::string &__arg) : std::runtime_error(__arg){};
 
-	exception(
-			const std::string& __arg,
-			const std::string& __file,
-			const std::string& __func,
-			int __line) :
-				std::runtime_error(__arg)
-	{
-		set_file(__file);
-		set_func(__func);
-		set_line(__line);
-	};
+  exception(const std::string &__arg, const std::string &__file,
+            const std::string &__func, int __line)
+      : std::runtime_error(__arg) {
+    set_file(__file);
+    set_func(__func);
+    set_line(__line);
+  };
 
-	exception(
-			const exception& e) :
-				std::runtime_error(e.what())
-	{ *this = e; };
+  exception(const exception &e) : std::runtime_error(e.what()) { *this = e; };
 
-	exception&
-	operator= (
-			const exception& e) {
-		if (this == &e)
-			return *this;
-		kvmap.clear();
-		for (std::map<std::string, std::string>::const_iterator
-                                it = e.kvmap.begin(); it != e.kvmap.end(); ++it) {
-                        set_key(it->first, it->second);
-                }
-		return *this;
-	};
+  exception &operator=(const exception &e) {
+    if (this == &e)
+      return *this;
+    kvmap.clear();
+    for (std::map<std::string, std::string>::const_iterator it =
+             e.kvmap.begin();
+         it != e.kvmap.end(); ++it) {
+      set_key(it->first, it->second);
+    }
+    return *this;
+  };
 
 public:
+  /**
+   *
+   */
+  const std::string &get_exception() const { return get_key("exception"); };
 
-	/**
-	 *
-	 */
-	const std::string&
-	get_exception() const
-	{ return get_key("exception"); };
-
-	/**
-	 *
-	 */
-	exception&
-	set_exception(
-			const std::string& s_exception)
-	{ set_key("exception", s_exception); return *this; };
+  /**
+   *
+   */
+  exception &set_exception(const std::string &s_exception) {
+    set_key("exception", s_exception);
+    return *this;
+  };
 
 public:
+  /**
+   *
+   */
+  const std::string &get_caller() const { return get_key("caller"); };
 
-	/**
-	 *
-	 */
-	const std::string&
-	get_caller() const
-	{ return get_key("caller"); };
-
-	/**
-	 *
-	 */
-	exception&
-	set_caller(
-			const std::string& s_caller)
-	{ set_key("caller", s_caller); return *this; };
+  /**
+   *
+   */
+  exception &set_caller(const std::string &s_caller) {
+    set_key("caller", s_caller);
+    return *this;
+  };
 
 public:
+  /**
+   *
+   */
+  const std::string &get_action() const { return get_key("action"); };
 
-	/**
-	 *
-	 */
-	const std::string&
-	get_action() const
-	{ return get_key("action"); };
-
-	/**
-	 *
-	 */
-	exception&
-	set_action(
-			const std::string& s_action)
-	{ set_key("action", s_action); return *this; };
+  /**
+   *
+   */
+  exception &set_action(const std::string &s_action) {
+    set_key("action", s_action);
+    return *this;
+  };
 
 public:
+  /**
+   *
+   */
+  const std::string &get_func() const { return get_key("func"); };
 
-	/**
-	 *
-	 */
-	const std::string&
-	get_func() const
-	{ return get_key("func"); };
-
-	/**
-	 *
-	 */
-	exception&
-	set_func(
-			const std::string& s_func)
-	{ set_key("func", s_func); return *this; };
+  /**
+   *
+   */
+  exception &set_func(const std::string &s_func) {
+    set_key("func", s_func);
+    return *this;
+  };
 
 public:
+  /**
+   *
+   */
+  const std::string &get_file() const { return get_key("file"); };
 
-	/**
-	 *
-	 */
-	const std::string&
-	get_file() const
-	{ return get_key("file"); };
-
-	/**
-	 *
-	 */
-	exception&
-	set_file(
-			const std::string& s_file)
-	{ set_key("file", s_file); return *this; };
+  /**
+   *
+   */
+  exception &set_file(const std::string &s_file) {
+    set_key("file", s_file);
+    return *this;
+  };
 
 public:
+  /**
+   *
+   */
+  int get_line() const {
+    std::istringstream ss(get_key("line"));
+    int line = 0;
+    ss >> line;
+    return line;
+  };
 
-	/**
-	 *
-	 */
-	int
-	get_line() const
-	{
-		std::istringstream ss(get_key("line"));
-		int line = 0; ss >> line;
-		return line;
-	};
-
-	/**
-	 *
-	 */
-	exception&
-	set_line(
-			int line)
-	{
-		std::stringstream ss; ss << line;
-		set_key("line", ss.str());
-		return *this;
-	};
+  /**
+   *
+   */
+  exception &set_line(int line) {
+    std::stringstream ss;
+    ss << line;
+    set_key("line", ss.str());
+    return *this;
+  };
 
 public:
+  /**
+   *
+   */
+  const std::string &get_class() const { return get_key("class"); };
 
-	/**
-	 *
-	 */
-	const std::string&
-	get_class() const
-	{ return get_key("class"); };
-
-	/**
-	 *
-	 */
-	exception&
-	set_class(
-			const std::string& s_class)
-	{ set_key("class", s_class); return *this; };
+  /**
+   *
+   */
+  exception &set_class(const std::string &s_class) {
+    set_key("class", s_class);
+    return *this;
+  };
 
 public:
+  /**
+   *
+   */
+  const std::string &get_method() const { return get_key("method"); };
 
-	/**
-	 *
-	 */
-	const std::string&
-	get_method() const
-	{ return get_key("method"); };
-
-	/**
-	 *
-	 */
-	exception&
-	set_method(
-			const std::string& s_method)
-	{ set_key("method", s_method); return *this; };
+  /**
+   *
+   */
+  exception &set_method(const std::string &s_method) {
+    set_key("method", s_method);
+    return *this;
+  };
 
 public:
+  /**
+   *
+   */
+  const std::string &get_reason() const { return get_key("reason"); };
 
-	/**
-	 *
-	 */
-	const std::string&
-	get_reason() const
-	{ return get_key("reason"); };
-
-	/**
-	 *
-	 */
-	exception&
-	set_reason(
-			const std::string& s_reason)
-	{ set_key("reason", s_reason); return *this; };
+  /**
+   *
+   */
+  exception &set_reason(const std::string &s_reason) {
+    set_key("reason", s_reason);
+    return *this;
+  };
 
 public:
+  /**
+   *
+   */
+  int get_errnum() const {
+    int errnum = 0;
+    std::istringstream ss(get_key("errno"));
+    ss >> errnum;
+    return errnum;
+  };
 
-	/**
-	 *
-	 */
-	int
-	get_errnum() const
-	{
-		int errnum = 0;
-		std::istringstream ss(get_key("errno")); ss >> errnum; return errnum;
-	};
-
-	/**
-	 *
-	 */
-	exception&
-	set_errnum(
-			int errnum)
-	{
-		std::ostringstream ss; ss << errnum;
-		set_key("errno", ss.str());
-		set_key("errstr", strerror(errnum));
-		return *this;
-	};
+  /**
+   *
+   */
+  exception &set_errnum(int errnum) {
+    std::ostringstream ss;
+    ss << errnum;
+    set_key("errno", ss.str());
+    set_key("errstr", strerror(errnum));
+    return *this;
+  };
 
 public:
+  /**
+   *
+   */
+  std::vector<std::string> keys() const {
+    std::vector<std::string> vkeys;
+    for (std::map<std::string, std::string>::const_iterator it = kvmap.begin();
+         it != kvmap.end(); ++it) {
+      vkeys.push_back(it->first);
+    }
+    return vkeys;
+  }
 
-	/**
-	 *
-	 */
-	std::vector<std::string>
-	keys() const {
-		std::vector<std::string> vkeys;
-		for (std::map<std::string, std::string>::const_iterator
-                                it = kvmap.begin(); it != kvmap.end(); ++it) {
-			vkeys.push_back(it->first);
-		}
-		return vkeys;
-	}
+  /**
+   *
+   */
+  virtual exception &set_key(const std::string &key, int value) {
+    std::stringstream ss;
+    ss << value;
+    kvmap[key] = ss.str();
+    return *this;
+  };
 
-	/**
-	 *
-	 */
-	virtual exception&
-	set_key(
-			const std::string& key, int value) {
-		std::stringstream ss; ss << value;
-		kvmap[key] = ss.str(); return *this;
-	};
+  /**
+   *
+   */
+  virtual exception &set_key(const std::string &key, unsigned int value) {
+    std::stringstream ss;
+    ss << value;
+    kvmap[key] = ss.str();
+    return *this;
+  };
 
-	/**
-	 *
-	 */
-	virtual exception&
-	set_key(
-			const std::string& key, unsigned int value) {
-		std::stringstream ss; ss << value;
-		kvmap[key] = ss.str(); return *this;
-	};
+  /**
+   *
+   */
+  virtual exception &set_key(const std::string &key, const std::string &value) {
+    kvmap[key] = value;
+    return *this;
+  };
 
-	/**
-	 *
-	 */
-	virtual exception&
-	set_key(
-			const std::string& key, const std::string& value) {
-		kvmap[key] = value; return *this;
-	};
+  /**
+   *
+   */
+  std::string &set_key(const std::string &key) { return kvmap[key]; };
 
-	/**
-	 *
-	 */
-	std::string&
-	set_key(
-			const std::string& key) {
-		return kvmap[key];
-	};
+  /**
+   *
+   */
+  const std::string &get_key(const std::string &key) const {
+    return kvmap.at(key);
+  };
 
-	/**
-	 *
-	 */
-	const std::string&
-	get_key(
-			const std::string& key) const {
-		return kvmap.at(key);
-	};
+  /**
+   *
+   */
+  bool drop_key(const std::string &key) {
+    if (kvmap.find(key) == kvmap.end()) {
+      return false;
+    }
+    kvmap.erase(key);
+    return true;
+  };
 
-	/**
-	 *
-	 */
-	bool
-	drop_key(
-			const std::string& key) {
-		if (kvmap.find(key) == kvmap.end()) {
-			return false;
-
-		}
-		kvmap.erase(key);
-		return true;
-	};
-
-	/**
-	 *
-	 */
-	bool
-	has_key(
-			const std::string& key) const {
-		return (not (kvmap.find(key) == kvmap.end()));
-	};
+  /**
+   *
+   */
+  bool has_key(const std::string &key) const {
+    return (not(kvmap.find(key) == kvmap.end()));
+  };
 
 public:
-	virtual const char*
-	what() const _GLIBCXX_USE_NOEXCEPT {
-		static std::string msg;
-		std::stringstream ss;
-		ss << runtime_error::what();
-		for (std::map<std::string, std::string>::const_iterator
-                                it = kvmap.begin(); it != kvmap.end(); ++it) {
-			ss << it->first << ":" << it->second << ", ";
-		}
+  virtual const char *what() const _GLIBCXX_USE_NOEXCEPT {
+    static std::string msg;
+    std::stringstream ss;
+    ss << runtime_error::what();
+    for (std::map<std::string, std::string>::const_iterator it = kvmap.begin();
+         it != kvmap.end(); ++it) {
+      ss << it->first << ":" << it->second << ", ";
+    }
 
-		msg.assign(ss.str());
-		return msg.c_str();
-	}
+    msg.assign(ss.str());
+    return msg.c_str();
+  }
 
-	friend std::ostream&
-	operator<< (std::ostream& os, const exception& e) {
-		os << "exception: " << e.what() << " ";
-		for (std::map<std::string, std::string>::const_iterator
-                                it = e.kvmap.begin(); it != e.kvmap.end(); ++it) {
-			os << it->first << ":" << it->second << ", ";
-		}
-		return os;
-	};
+  friend std::ostream &operator<<(std::ostream &os, const exception &e) {
+    os << "exception: " << e.what() << " ";
+    for (std::map<std::string, std::string>::const_iterator it =
+             e.kvmap.begin();
+         it != e.kvmap.end(); ++it) {
+      os << it->first << ":" << it->second << ", ";
+    }
+    return os;
+  };
 
-	std::string
-	str() const {
-		std::stringstream ss;
-		ss << *this;
-		return ss.str();
-	};
+  std::string str() const {
+    std::stringstream ss;
+    ss << *this;
+    return ss.str();
+  };
 
 private:
-
-	std::map<std::string, std::string> kvmap;
+  std::map<std::string, std::string> kvmap;
 };
 
 class eNotImplemented : public exception {
 public:
-	eNotImplemented(
-			const std::string& __arg = std::string("eNotImplemented"),
-			const std::string& __file = std::string(""),
-			const std::string& __func = std::string(""),
-			int __line = 0) :
-					exception(__arg, __file, __func, __line)
-	{
-		set_exception("eNotImplemented");
-	};
+  eNotImplemented(const std::string &__arg = std::string("eNotImplemented"),
+                  const std::string &__file = std::string(""),
+                  const std::string &__func = std::string(""), int __line = 0)
+      : exception(__arg, __file, __func, __line) {
+    set_exception("eNotImplemented");
+  };
 };
 
 class eOutOfRange : public exception {
 public:
-	eOutOfRange(
-			const std::string& __arg = std::string("eOutOfRange"),
-			const std::string& __file = std::string(""),
-			const std::string& __func = std::string(""),
-			int __line = 0) :
-					exception(__arg, __file, __func, __line)
-	{
-		set_exception("eOutOfRange");
-	};
+  eOutOfRange(const std::string &__arg = std::string("eOutOfRange"),
+              const std::string &__file = std::string(""),
+              const std::string &__func = std::string(""), int __line = 0)
+      : exception(__arg, __file, __func, __line) {
+    set_exception("eOutOfRange");
+  };
 };
 
 class eOutOfMem : public exception {
 public:
-	eOutOfMem(
-			const std::string& __arg = std::string("eOutOfMem"),
-			const std::string& __file = std::string(""),
-			const std::string& __func = std::string(""),
-			int __line = 0) :
-					exception(__arg, __file, __func, __line)
-	{
-		set_exception("eOutOfMem");
-	};
+  eOutOfMem(const std::string &__arg = std::string("eOutOfMem"),
+            const std::string &__file = std::string(""),
+            const std::string &__func = std::string(""), int __line = 0)
+      : exception(__arg, __file, __func, __line) {
+    set_exception("eOutOfMem");
+  };
 };
 
 class eInvalid : public exception {
 public:
-	eInvalid(
-			const std::string& __arg = std::string("eInvalid"),
-			const std::string& __file = std::string(""),
-			const std::string& __func = std::string(""),
-			int __line = 0) :
-					exception(__arg, __file, __func, __line)
-	{};
+  eInvalid(const std::string &__arg = std::string("eInvalid"),
+           const std::string &__file = std::string(""),
+           const std::string &__func = std::string(""), int __line = 0)
+      : exception(__arg, __file, __func, __line){};
 };
 
 class eSysCall : public exception {
 public:
-	eSysCall(
-			const std::string& __exception = std::string("eSysCall"),
-			const std::string& __arg = std::string(""),
-			const std::string& __file = std::string(""),
-			const std::string& __func = std::string(""),
-			int __line = 0) :
-				exception(__arg, __file, __func, __line),
-				__errno(errno)
-	{
-		set_exception(__exception);
-		set_errnum(errno);
-	};
+  eSysCall(const std::string &__exception = std::string("eSysCall"),
+           const std::string &__arg = std::string(""),
+           const std::string &__file = std::string(""),
+           const std::string &__func = std::string(""), int __line = 0)
+      : exception(__arg, __file, __func, __line), __errno(errno) {
+    set_exception(__exception);
+    set_errnum(errno);
+  };
 
 public:
+  /**
+   *
+   */
+  virtual eSysCall &set_key(const std::string &key, int value) {
+    exception::set_key(key, value);
+    return *this;
+  };
 
-	/**
-	 *
-	 */
-	virtual eSysCall&
-	set_key(
-			const std::string& key, int value) {
-		exception::set_key(key, value);
-		return *this;
-	};
+  /**
+   *
+   */
+  virtual eSysCall &set_key(const std::string &key, unsigned int value) {
+    exception::set_key(key, value);
+    return *this;
+  };
 
-	/**
-	 *
-	 */
-	virtual eSysCall&
-	set_key(
-			const std::string& key, unsigned int value) {
-		exception::set_key(key, value);
-		return *this;
-	};
-
-	/**
-	 *
-	 */
-	virtual eSysCall&
-	set_key(
-			const std::string& key, const std::string& value) {
-		exception::set_key(key, value);
-		return *this;
-	};
+  /**
+   *
+   */
+  virtual eSysCall &set_key(const std::string &key, const std::string &value) {
+    exception::set_key(key, value);
+    return *this;
+  };
 
 public:
+  virtual const char *what() const _GLIBCXX_USE_NOEXCEPT {
+    static std::string msg;
+    std::stringstream ss;
+    ss << exception::what() << " errno: " << __errno << " ("
+       << strerror(__errno) << ")";
+    msg.assign(ss.str());
+    return msg.c_str();
+  }
 
-    virtual
-	const char*
-    what() const _GLIBCXX_USE_NOEXCEPT {
-	static std::string msg;
-    	std::stringstream ss;
-    	ss << exception::what() <<  " errno: " << __errno << " (" << strerror(__errno) << ")";
-    	msg.assign(ss.str());
-    	return msg.c_str();
-    }
 private:
-    int __errno;
+  int __errno;
 };
 
 class eLibCall : public exception {
 public:
-	eLibCall(
-			const std::string& __exception = std::string("eLibCall"),
-			const std::string& __arg = std::string(""),
-			const std::string& __file = std::string(""),
-			const std::string& __func = std::string(""),
-			int __line = 0) :
-				exception(__arg, __file, __func, __line)
-	{
-		set_exception(__exception);
-	};
+  eLibCall(const std::string &__exception = std::string("eLibCall"),
+           const std::string &__arg = std::string(""),
+           const std::string &__file = std::string(""),
+           const std::string &__func = std::string(""), int __line = 0)
+      : exception(__arg, __file, __func, __line) {
+    set_exception(__exception);
+  };
 
 public:
+  /**
+   *
+   */
+  virtual eLibCall &set_key(const std::string &key, int value) {
+    exception::set_key(key, value);
+    return *this;
+  };
 
-	/**
-	 *
-	 */
-	virtual eLibCall&
-	set_key(
-			const std::string& key, int value) {
-		exception::set_key(key, value);
-		return *this;
-	};
+  /**
+   *
+   */
+  virtual eLibCall &set_key(const std::string &key, unsigned int value) {
+    exception::set_key(key, value);
+    return *this;
+  };
 
-	/**
-	 *
-	 */
-	virtual eLibCall&
-	set_key(
-			const std::string& key, unsigned int value) {
-		exception::set_key(key, value);
-		return *this;
-	};
-
-	/**
-	 *
-	 */
-	virtual eLibCall&
-	set_key(
-			const std::string& key, const std::string& value) {
-		exception::set_key(key, value);
-		return *this;
-	};
+  /**
+   *
+   */
+  virtual eLibCall &set_key(const std::string &key, const std::string &value) {
+    exception::set_key(key, value);
+    return *this;
+  };
 };
 
 }; // end of namespace rofl

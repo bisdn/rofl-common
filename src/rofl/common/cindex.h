@@ -19,131 +19,93 @@ namespace rofl {
 
 class cindex {
 public:
+  /**
+   *
+   */
+  ~cindex(){};
 
-	/**
-	 *
-	 */
-	~cindex()
-	{};
+  /**
+   *
+   */
+  cindex() : index(0){};
 
-	/**
-	 *
-	 */
-	cindex() :
-		index(0)
-	{};
+  /**
+   *
+   */
+  explicit cindex(unsigned int index) : index(index){};
 
-	/**
-	 *
-	 */
-	explicit
-	cindex(
-			unsigned int index) :
-				index(index)
-	{};
+  /**
+   *
+   */
+  cindex(const cindex &idx) { *this = idx; };
 
-	/**
-	 *
-	 */
-	cindex(
-			const cindex& idx)
-	{ *this = idx; };
+  /**
+   *
+   */
+  cindex &operator=(const cindex &idx) {
+    if (this == &idx)
+      return *this;
+    index = idx.index;
+    return *this;
+  };
 
-	/**
-	 *
-	 */
-	cindex&
-	operator= (
-			const cindex& idx) {
-		if (this == &idx)
-			return *this;
-		index = idx.index;
-		return *this;
-	};
+  /**
+   *
+   */
+  bool operator<(const cindex &idx) const { return (index < idx.index); };
 
-	/**
-	 *
-	 */
-	bool
-	operator< (
-			const cindex& idx) const {
-		return (index < idx.index);
-	};
+  /**
+   *
+   */
+  bool operator==(const cindex &idx) const { return (index == idx.index); };
 
-	/**
-	 *
-	 */
-	bool
-	operator== (
-			const cindex& idx) const {
-		return (index == idx.index);
-	};
+  /**
+   *
+   */
+  bool operator!=(const cindex &idx) const { return (index != idx.index); };
 
-	/**
-	 *
-	 */
-	bool
-	operator!= (
-			const cindex& idx) const {
-		return (index != idx.index);
-	};
+  /**
+   *
+   */
+  cindex &operator++() { // prefix
+    ++index;
+    return *this;
+  };
 
-	/**
-	 *
-	 */
-	cindex&
-	operator++ () { // prefix
-		++index;
-		return *this;
-	};
-
-	/**
-	 *
-	 */
-	cindex
-	operator++ (
-			int unused) { // postfix
-		cindex result = *this;
-		++index;
-		return result;
-	};
+  /**
+   *
+   */
+  cindex operator++(int unused) { // postfix
+    cindex result = *this;
+    ++index;
+    return result;
+  };
 
 public:
+  /**
+   *
+   */
+  void set_index(unsigned int index) { this->index = index; };
 
-	/**
-	 *
-	 */
-	void
-	set_index(
-			unsigned int index)
-	{ this->index = index; };
-
-	/**
-	 *
-	 */
-	unsigned int
-	get_index() const
-	{ return index; };
+  /**
+   *
+   */
+  unsigned int get_index() const { return index; };
 
 public:
+  friend std::ostream &operator<<(std::ostream &os, const cindex &index) {
+    os << "<cindex idx:" << index.get_index() << " >";
+    return os;
+  };
 
-	friend std::ostream&
-	operator<< (
-			std::ostream& os, const cindex& index) {
-		os << "<cindex idx:" << index.get_index() << " >";
-		return os;
-	};
-
-	std::string
-	str() const {
-		std::stringstream ss;
-		ss << "index: " << index << " ";
-		return ss.str();
-	};
+  std::string str() const {
+    std::stringstream ss;
+    ss << "index: " << index << " ";
+    return ss.str();
+  };
 
 private:
-
-	unsigned int index;
+  unsigned int index;
 };
 
 }; // end of namespace rofl

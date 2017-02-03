@@ -5,99 +5,84 @@
 #ifndef CRANDOM_H
 #define CRANDOM_H 1
 
-#include <sys/types.h>
-#include <sys/stat.h>
+#include <assert.h>
 #include <fcntl.h>
-#include <string.h>
 #include <inttypes.h>
 #include <stdlib.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <unistd.h>
-#include <assert.h>
 
 #include <limits>
 
 #include "rofl/common/exception.hpp"
 
-namespace rofl
-{
+namespace rofl {
 
 class crandom {
-static const std::string DEV_URANDOM;
-public:
-
-	/**
-	 *
-	 */
-	virtual
-	~crandom();
-
-	/**
-	 *
-	 */
-	crandom();
-
-	/**
-	 *
-	 */
-	crandom(
-			const crandom& r)
-	{ *this = r; };
-
-	/**
-	 *
-	 */
-	crandom&
-	operator=(
-			const crandom& r) {
-		if (this == &r)
-			return *this;
-		seedp = r.seedp;
-		return *this;
-	};
+  static const std::string DEV_URANDOM;
 
 public:
+  /**
+   *
+   */
+  virtual ~crandom();
 
-	/**
-	 * @brief	returns a random number between 0 and 1
-	 */
-	double
-	rand();
+  /**
+   *
+   */
+  crandom();
 
-	/**
-	 * @brief	convenience method: return uint8_t
-	 */
-	uint8_t
-	uint8();
+  /**
+   *
+   */
+  crandom(const crandom &r) { *this = r; };
 
-	/**
-	 * @brief	convenience method: return uint16_t
-	 */
-	uint16_t
-	uint16();
-
-	/**
-	 * @brief	convenience method: return uint32_t
-	 */
-	uint32_t
-	uint32();
-
-	/**
-	 * @brief	convenience method: return uint64_t
-	 */
-	uint64_t
-	uint64();
+  /**
+   *
+   */
+  crandom &operator=(const crandom &r) {
+    if (this == &r)
+      return *this;
+    seedp = r.seedp;
+    return *this;
+  };
 
 public:
+  /**
+   * @brief	returns a random number between 0 and 1
+   */
+  double rand();
 
-	friend std::ostream&
-	operator<< (std::ostream& os, crandom const& rand) {
-		os << "<crandom seed=" << rand.seedp << " >";
-		return os;
-	};
+  /**
+   * @brief	convenience method: return uint8_t
+   */
+  uint8_t uint8();
+
+  /**
+   * @brief	convenience method: return uint16_t
+   */
+  uint16_t uint16();
+
+  /**
+   * @brief	convenience method: return uint32_t
+   */
+  uint32_t uint32();
+
+  /**
+   * @brief	convenience method: return uint64_t
+   */
+  uint64_t uint64();
+
+public:
+  friend std::ostream &operator<<(std::ostream &os, crandom const &rand) {
+    os << "<crandom seed=" << rand.seedp << " >";
+    return os;
+  };
 
 private:
-
-	unsigned int        seedp;
+  unsigned int seedp;
 };
 
 }; // end of namespace

@@ -13,19 +13,17 @@
 
 #include "rofl/common/openflow/openflow_rofl_exceptions.h"
 
-class exceptionstest :
-		public CppUnit::TestFixture
-{
-	CPPUNIT_TEST_SUITE( exceptionstest );
-	CPPUNIT_TEST( test );
-	CPPUNIT_TEST_SUITE_END();
+class exceptionstest : public CppUnit::TestFixture {
+  CPPUNIT_TEST_SUITE(exceptionstest);
+  CPPUNIT_TEST(test);
+  CPPUNIT_TEST_SUITE_END();
 
 public:
-	void setUp();
-	void tearDown();
+  void setUp();
+  void tearDown();
 
 public:
-	void test();
+  void test();
 };
 
 #endif /* TEST_SRC_ROFL_COMMON_OPENFLOW_MESSAGES_COFMSGAGGRSTATS_TEST_HPP_ */

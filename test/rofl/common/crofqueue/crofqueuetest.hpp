@@ -13,21 +13,19 @@
 
 #include "rofl/common/crofqueue.h"
 
-class crofqueuetest :
-		public CppUnit::TestFixture
-{
-	CPPUNIT_TEST_SUITE( crofqueuetest );
-	CPPUNIT_TEST( test1 );
-	CPPUNIT_TEST( test2 );
-	CPPUNIT_TEST_SUITE_END();
+class crofqueuetest : public CppUnit::TestFixture {
+  CPPUNIT_TEST_SUITE(crofqueuetest);
+  CPPUNIT_TEST(test1);
+  CPPUNIT_TEST(test2);
+  CPPUNIT_TEST_SUITE_END();
 
 public:
-	void setUp();
-	void tearDown();
+  void setUp();
+  void tearDown();
 
 public:
-	void test1();
-	void test2();
+  void test1();
+  void test2();
 };
 
 #endif /* TEST_SRC_ROFL_COMMON_OPENFLOW_MESSAGES_COFMSGAGGRSTATS_TEST_HPP_ */

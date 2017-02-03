@@ -6,223 +6,175 @@
 
 using namespace rofl::openflow;
 
-cofmsg_group_stats_request::~cofmsg_group_stats_request()
-{}
-
-
+cofmsg_group_stats_request::~cofmsg_group_stats_request() {}
 
 cofmsg_group_stats_request::cofmsg_group_stats_request(
-		uint8_t version,
-		uint32_t xid,
-		uint16_t stats_flags,
-		const rofl::openflow::cofgroup_stats_request& group_stats) :
-				cofmsg_stats_request(version, xid, rofl::openflow::OFPMP_GROUP, stats_flags),
-				group_stats(group_stats)
-{
-	this->group_stats.set_version(version);
+    uint8_t version, uint32_t xid, uint16_t stats_flags,
+    const rofl::openflow::cofgroup_stats_request &group_stats)
+    : cofmsg_stats_request(version, xid, rofl::openflow::OFPMP_GROUP,
+                           stats_flags),
+      group_stats(group_stats) {
+  this->group_stats.set_version(version);
 }
-
-
 
 cofmsg_group_stats_request::cofmsg_group_stats_request(
-		const cofmsg_group_stats_request& msg)
-{
-	*this = msg;
+    const cofmsg_group_stats_request &msg) {
+  *this = msg;
 }
 
-
-
-cofmsg_group_stats_request&
-cofmsg_group_stats_request::operator= (
-		const cofmsg_group_stats_request& msg)
-{
-	if (this == &msg)
-		return *this;
-	cofmsg_stats_request::operator= (msg);
-	group_stats = msg.group_stats;
-	return *this;
+cofmsg_group_stats_request &cofmsg_group_stats_request::
+operator=(const cofmsg_group_stats_request &msg) {
+  if (this == &msg)
+    return *this;
+  cofmsg_stats_request::operator=(msg);
+  group_stats = msg.group_stats;
+  return *this;
 }
 
-
-
-size_t
-cofmsg_group_stats_request::length() const
-{
-	switch (get_version()) {
-	default: {
-		return (sizeof(struct rofl::openflow13::ofp_multipart_request) + group_stats.length());
-	};
-	}
-	return 0;
+size_t cofmsg_group_stats_request::length() const {
+  switch (get_version()) {
+  default: {
+    return (sizeof(struct rofl::openflow13::ofp_multipart_request) +
+            group_stats.length());
+  };
+  }
+  return 0;
 }
 
+void cofmsg_group_stats_request::pack(uint8_t *buf, size_t buflen) {
+  cofmsg_stats_request::pack(buf, buflen); // copies common statistics header
 
+  if ((0 == buf) || (0 == buflen))
+    return;
 
-void
-cofmsg_group_stats_request::pack(
-		uint8_t *buf, size_t buflen)
-{
-	cofmsg_stats_request::pack(buf, buflen); // copies common statistics header
+  if (buflen < cofmsg_group_stats_request::length())
+    throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
-	if ((0 == buf) || (0 == buflen))
-		return;
-
-	if (buflen < cofmsg_group_stats_request::length())
-		throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
-
-	switch (get_version()) {
-	default: {
-		struct rofl::openflow13::ofp_multipart_reply* hdr =
-				(struct rofl::openflow13::ofp_multipart_reply*)buf;
-		group_stats.pack(hdr->body, group_stats.length());
-	};
-	}
+  switch (get_version()) {
+  default: {
+    struct rofl::openflow13::ofp_multipart_reply *hdr =
+        (struct rofl::openflow13::ofp_multipart_reply *)buf;
+    group_stats.pack(hdr->body, group_stats.length());
+  };
+  }
 }
 
+void cofmsg_group_stats_request::unpack(uint8_t *buf, size_t buflen) {
+  cofmsg_stats_request::unpack(buf, buflen);
 
+  group_stats.set_version(get_version());
 
-void
-cofmsg_group_stats_request::unpack(
-		uint8_t *buf, size_t buflen)
-{
-	cofmsg_stats_request::unpack(buf, buflen);
+  if ((0 == buf) || (0 == buflen))
+    return;
 
-	group_stats.set_version(get_version());
+  if (buflen < cofmsg_group_stats_request::length())
+    throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__,
+                            __LINE__);
 
-	if ((0 == buf) || (0 == buflen))
-		return;
+  switch (get_version()) {
+  default: {
+    if (get_stats_type() != rofl::openflow13::OFPMP_GROUP)
+      throw eBadRequestBadStat("eBadRequestBadStat", __FILE__,
+                               __PRETTY_FUNCTION__, __LINE__);
 
-	if (buflen < cofmsg_group_stats_request::length())
-		throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    struct rofl::openflow13::ofp_multipart_reply *hdr =
+        (struct rofl::openflow13::ofp_multipart_reply *)buf;
+    if (buflen > sizeof(struct rofl::openflow13::ofp_multipart_reply)) {
+      group_stats.unpack(
+          hdr->body,
+          buflen - sizeof(struct rofl::openflow13::ofp_multipart_reply));
+    }
+  };
+  }
 
-	switch (get_version()) {
-	default: {
-		if (get_stats_type() != rofl::openflow13::OFPMP_GROUP)
-			throw eBadRequestBadStat("eBadRequestBadStat", __FILE__, __PRETTY_FUNCTION__, __LINE__);
-
-		struct rofl::openflow13::ofp_multipart_reply* hdr =
-				(struct rofl::openflow13::ofp_multipart_reply*)buf;
-		if (buflen > sizeof(struct rofl::openflow13::ofp_multipart_reply)) {
-			group_stats.unpack(hdr->body, buflen - sizeof(struct rofl::openflow13::ofp_multipart_reply));
-		}
-	};
-	}
-
-	if (get_length() < cofmsg_group_stats_request::length())
-		throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+  if (get_length() < cofmsg_group_stats_request::length())
+    throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__,
+                            __LINE__);
 }
 
-
-
-
-
-
-cofmsg_group_stats_reply::~cofmsg_group_stats_reply()
-{}
-
-
+cofmsg_group_stats_reply::~cofmsg_group_stats_reply() {}
 
 cofmsg_group_stats_reply::cofmsg_group_stats_reply(
-		uint8_t version,
-		uint32_t xid,
-		uint16_t stats_flags,
-		const rofl::openflow::cofgroupstatsarray& groupstatsarray) :
-				cofmsg_stats_reply(version, xid, rofl::openflow::OFPMP_GROUP, stats_flags),
-				groupstatsarray(groupstatsarray)
-{
-	this->groupstatsarray.set_version(version);
+    uint8_t version, uint32_t xid, uint16_t stats_flags,
+    const rofl::openflow::cofgroupstatsarray &groupstatsarray)
+    : cofmsg_stats_reply(version, xid, rofl::openflow::OFPMP_GROUP,
+                         stats_flags),
+      groupstatsarray(groupstatsarray) {
+  this->groupstatsarray.set_version(version);
 }
-
-
 
 cofmsg_group_stats_reply::cofmsg_group_stats_reply(
-		const cofmsg_group_stats_reply& msg)
-{
-	*this = msg;
+    const cofmsg_group_stats_reply &msg) {
+  *this = msg;
 }
 
-
-
-cofmsg_group_stats_reply&
-cofmsg_group_stats_reply::operator= (
-		const cofmsg_group_stats_reply& msg)
-{
-	if (this == &msg)
-		return *this;
-	cofmsg_stats_reply::operator= (msg);
-	groupstatsarray = msg.groupstatsarray;
-	return *this;
+cofmsg_group_stats_reply &cofmsg_group_stats_reply::
+operator=(const cofmsg_group_stats_reply &msg) {
+  if (this == &msg)
+    return *this;
+  cofmsg_stats_reply::operator=(msg);
+  groupstatsarray = msg.groupstatsarray;
+  return *this;
 }
 
-
-
-size_t
-cofmsg_group_stats_reply::length() const
-{
-	switch (get_version()) {
-	default: {
-		return (sizeof(struct rofl::openflow13::ofp_multipart_reply) + groupstatsarray.length());
-	};
-	}
-	return 0;
+size_t cofmsg_group_stats_reply::length() const {
+  switch (get_version()) {
+  default: {
+    return (sizeof(struct rofl::openflow13::ofp_multipart_reply) +
+            groupstatsarray.length());
+  };
+  }
+  return 0;
 }
 
+void cofmsg_group_stats_reply::pack(uint8_t *buf, size_t buflen) {
+  cofmsg_stats_reply::pack(buf, buflen); // copies common statistics header
 
+  if ((0 == buf) || (0 == buflen))
+    return;
 
-void
-cofmsg_group_stats_reply::pack(
-		uint8_t *buf, size_t buflen)
-{
-	cofmsg_stats_reply::pack(buf, buflen); // copies common statistics header
+  if (buflen < cofmsg_group_stats_reply::length())
+    throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
-	if ((0 == buf) || (0 == buflen))
-		return;
-
-	if (buflen < cofmsg_group_stats_reply::length())
-		throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
-
-	switch (get_version()) {
-	default: {
-		struct rofl::openflow13::ofp_multipart_reply* hdr =
-				(struct rofl::openflow13::ofp_multipart_reply*)buf;
-		groupstatsarray.pack(hdr->body, groupstatsarray.length());
-	};
-	}
+  switch (get_version()) {
+  default: {
+    struct rofl::openflow13::ofp_multipart_reply *hdr =
+        (struct rofl::openflow13::ofp_multipart_reply *)buf;
+    groupstatsarray.pack(hdr->body, groupstatsarray.length());
+  };
+  }
 }
 
+void cofmsg_group_stats_reply::unpack(uint8_t *buf, size_t buflen) {
+  cofmsg_stats_reply::unpack(buf, buflen);
 
+  groupstatsarray.set_version(get_version());
+  groupstatsarray.clear();
 
-void
-cofmsg_group_stats_reply::unpack(
-		uint8_t *buf, size_t buflen)
-{
-	cofmsg_stats_reply::unpack(buf, buflen);
+  if ((0 == buf) || (0 == buflen))
+    return;
 
-	groupstatsarray.set_version(get_version());
-	groupstatsarray.clear();
+  if (buflen < cofmsg_group_stats_reply::length())
+    throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__,
+                            __LINE__);
 
-	if ((0 == buf) || (0 == buflen))
-		return;
+  switch (get_version()) {
+  default: {
+    if (get_stats_type() != rofl::openflow13::OFPMP_GROUP)
+      throw eBadRequestBadStat("eBadRequestBadStat", __FILE__,
+                               __PRETTY_FUNCTION__, __LINE__);
 
-	if (buflen < cofmsg_group_stats_reply::length())
-		throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    struct rofl::openflow13::ofp_multipart_reply *hdr =
+        (struct rofl::openflow13::ofp_multipart_reply *)buf;
+    if (buflen > sizeof(struct rofl::openflow13::ofp_multipart_reply)) {
+      groupstatsarray.unpack(
+          hdr->body,
+          buflen - sizeof(struct rofl::openflow13::ofp_multipart_reply));
+    }
+  };
+  }
 
-	switch (get_version()) {
-	default: {
-		if (get_stats_type() != rofl::openflow13::OFPMP_GROUP)
-			throw eBadRequestBadStat("eBadRequestBadStat", __FILE__, __PRETTY_FUNCTION__, __LINE__);
-
-		struct rofl::openflow13::ofp_multipart_reply* hdr =
-				(struct rofl::openflow13::ofp_multipart_reply*)buf;
-		if (buflen > sizeof(struct rofl::openflow13::ofp_multipart_reply)) {
-			groupstatsarray.unpack(hdr->body, buflen - sizeof(struct rofl::openflow13::ofp_multipart_reply));
-		}
-	};
-	}
-
-	if (get_length() < cofmsg_group_stats_reply::length())
-		throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+  if (get_length() < cofmsg_group_stats_reply::length())
+    throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__,
+                            __LINE__);
 }
-
-
-

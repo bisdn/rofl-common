@@ -2,13 +2,10 @@
 
 using namespace rofl::examples;
 
-void
-signal_handler(int signal) {
-	switch (signal) {
-	case SIGINT: {
+void signal_handler(int signal) {
+  switch (signal) {
+  case SIGINT: {
 
-	} break;
-	}
+  } break;
+  }
 }
-
-

@@ -12,160 +12,124 @@
 #ifndef SRC_ROFL_COMMON_CTIMER_HPP_
 #define SRC_ROFL_COMMON_CTIMER_HPP_
 
-#include <time.h>
-#include <errno.h>
 #include <algorithm>
-#include <ostream>
+#include <errno.h>
 #include <list>
+#include <ostream>
+#include <time.h>
 
+#include "rofl/common/ctimespec.hpp"
 #include "rofl/common/exception.hpp"
 #include "rofl/common/locking.hpp"
-#include "rofl/common/ctimespec.hpp"
 
 namespace rofl {
 
 class eTimerBase : public exception {
 public:
-	eTimerBase(
-			const std::string& __arg) :
-				exception(__arg)
-	{};
+  eTimerBase(const std::string &__arg) : exception(__arg){};
 };
 
 class eTimerSysCall : public eTimerBase {
 public:
-	eTimerSysCall(
-			const std::string& __arg) :
-				eTimerBase(__arg)
-	{};
+  eTimerSysCall(const std::string &__arg) : eTimerBase(__arg){};
 };
-
 
 class ctimer {
 public:
-
-	/**
-	 *
-	 */
-	static
-	const ctimespec
-	now(
-			cclockid clk_id = cclockid(CLOCK_MONOTONIC)) {
-		return ctimespec::now(clk_id);
-	};
+  /**
+   *
+   */
+  static const ctimespec now(cclockid clk_id = cclockid(CLOCK_MONOTONIC)) {
+    return ctimespec::now(clk_id);
+  };
 
 public:
+  /**
+   *
+   */
+  ~ctimer(){};
 
-	/**
-	 *
-	 */
-	~ctimer()
-	{};
+  /**
+   *
+   */
+  ctimer(uint32_t timer_id = 0,
+         const ctimespec &tspec = ctimespec(::timespec{0, 0}))
+      : timer_id(timer_id), tspec(tspec){};
 
-	/**
-	 *
-	 */
-	ctimer(
-			uint32_t timer_id = 0,
-			const ctimespec& tspec = ctimespec(::timespec{0,0}) ) :
-				timer_id(timer_id),
-				tspec(tspec)
-	{};
+  /**
+   *
+   */
+  ctimer(const ctimer &ts) { *this = ts; };
 
-	/**
-	 *
-	 */
-	ctimer(
-			const ctimer& ts)
-	{ *this = ts; };
+  /**
+   *
+   */
+  ctimer &operator=(const ctimer &ts) {
+    if (this == &ts)
+      return *this;
 
-	/**
-	 *
-	 */
-	ctimer&
-	operator= (
-			const ctimer& ts) {
-		if (this == &ts)
-			return *this;
+    timer_id = ts.timer_id;
+    tspec = ts.tspec;
 
-		timer_id = ts.timer_id;
-		tspec = ts.tspec;
+    return *this;
+  };
 
-		return *this;
-	};
+  bool operator<(const ctimer &t) const {
+    if (tspec == t.tspec) {
+      return timer_id < t.timer_id;
+    } else {
+      return tspec < t.tspec;
+    }
+  }
 
-	bool
-	operator< (
-			const ctimer& t) const {
-		if (tspec == t.tspec) {
-			return timer_id < t.timer_id;
-		} else {
-			return tspec < t.tspec;
-		}
-	}
+  /**
+   *
+   */
+  uint32_t get_timer_id() const { return timer_id; };
 
-	/**
-	 *
-	 */
-	uint32_t
-	get_timer_id() const
-	{ return timer_id; };
+  /**
+   *
+   */
+  const ctimespec &get_tspec() const { return tspec; };
 
-	/**
-	 *
-	 */
-	const ctimespec&
-	get_tspec() const
-	{ return tspec; };
+  /**
+   *
+   */
+  void expire_in(time_t tv_sec = 0, long tv_nsec = 0) {
+    tspec.expire_in(tv_sec, tv_nsec);
+  };
 
-	/**
-	 *
-	 */
-	void
-	expire_in(
-			time_t tv_sec = 0, long tv_nsec = 0)
-	{ tspec.expire_in(tv_sec, tv_nsec); };
-
-	/**
-	 *
-	 */
-	int
-	get_relative_timeout() const
-	{ return get_tspec().get_relative_timeout(); };
+  /**
+   *
+   */
+  int get_relative_timeout() const {
+    return get_tspec().get_relative_timeout();
+  };
 
 public:
-
-	/**
-	 *
-	 */
-	friend std::ostream&
-	operator<< (std::ostream& os, const ctimer& ts) {
-		os << "<ctimer: >";
-		return os;
-	};
+  /**
+   *
+   */
+  friend std::ostream &operator<<(std::ostream &os, const ctimer &ts) {
+    os << "<ctimer: >";
+    return os;
+  };
 
 private:
-
-	uint32_t                timer_id;
-	ctimespec               tspec;
+  uint32_t timer_id;
+  ctimespec tspec;
 };
 
-	/**
-	 *
-	 */
-	class ctimer_find_by_timer_id {
-		uint32_t timer_id;
-	public:
-		ctimer_find_by_timer_id(
-				uint32_t timer_id) :
-					timer_id(timer_id)
-		{}
-		bool
-		operator() (
-				const ctimer& t)
-		{ return (t.get_timer_id() == timer_id); }
-	};
+/**
+ *
+ */
+class ctimer_find_by_timer_id {
+  uint32_t timer_id;
 
+public:
+  ctimer_find_by_timer_id(uint32_t timer_id) : timer_id(timer_id) {}
+  bool operator()(const ctimer &t) { return (t.get_timer_id() == timer_id); }
+};
 
 }; // end of namespace rofl
 

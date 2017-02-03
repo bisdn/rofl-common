@@ -8,8 +8,8 @@
 #ifndef COFMSG_ECHO_H_
 #define COFMSG_ECHO_H_ 1
 
-#include "rofl/common/openflow/messages/cofmsg.h"
 #include "rofl/common/cmemory.h"
+#include "rofl/common/openflow/messages/cofmsg.h"
 
 namespace rofl {
 namespace openflow {
@@ -19,211 +19,159 @@ namespace openflow {
  */
 class cofmsg_echo_request : public cofmsg {
 public:
+  /**
+   *
+   */
+  virtual ~cofmsg_echo_request(){};
 
-	/**
-	 *
-	 */
-	virtual
-	~cofmsg_echo_request()
-	{};
+  /**
+   *
+   */
+  cofmsg_echo_request(uint8_t version = 0, uint32_t xid = 0, uint8_t *data = 0,
+                      size_t datalen = 0)
+      : cofmsg(version, rofl::openflow::OFPT_ECHO_REQUEST, xid),
+        body(data, datalen){};
 
-	/**
-	 *
-	 */
-	cofmsg_echo_request(
-			uint8_t version = 0,
-			uint32_t xid = 0,
-			uint8_t* data = 0,
-			size_t datalen = 0) :
-				cofmsg(version, rofl::openflow::OFPT_ECHO_REQUEST, xid),
-				body(data, datalen)
-	{};
+  /**
+   *
+   */
+  cofmsg_echo_request(const cofmsg_echo_request &msg) { *this = msg; };
 
-	/**
-	 *
-	 */
-	cofmsg_echo_request(
-			const cofmsg_echo_request& msg)
-	{ *this = msg; };
-
-	/**
-	 *
-	 */
-	cofmsg_echo_request&
-	operator= (
-			const cofmsg_echo_request& msg) {
-		if (this == &msg)
-			return *this;
-		cofmsg::operator= (msg);
-		body = msg.body;
-		return *this;
-	};
+  /**
+   *
+   */
+  cofmsg_echo_request &operator=(const cofmsg_echo_request &msg) {
+    if (this == &msg)
+      return *this;
+    cofmsg::operator=(msg);
+    body = msg.body;
+    return *this;
+  };
 
 public:
+  /**
+   *
+   */
+  virtual size_t length() const;
 
-	/**
-	 *
-	 */
-	virtual size_t
-	length() const;
+  /**
+   *
+   */
+  virtual void pack(uint8_t *buf = (uint8_t *)0, size_t buflen = 0);
 
-	/**
-	 *
-	 */
-	virtual void
-	pack(
-			uint8_t *buf = (uint8_t*)0, size_t buflen = 0);
-
-	/**
-	 *
-	 */
-	virtual void
-	unpack(
-			uint8_t *buf, size_t buflen);
+  /**
+   *
+   */
+  virtual void unpack(uint8_t *buf, size_t buflen);
 
 public:
+  /**
+   *
+   */
+  const rofl::cmemory &get_body() const { return body; };
 
-	/**
-	 *
-	 */
-	const rofl::cmemory&
-	get_body() const
-	{ return body; };
-
-	/**
-	 *
-	 */
-	rofl::cmemory&
-	set_body()
-	{ return body; };
+  /**
+   *
+   */
+  rofl::cmemory &set_body() { return body; };
 
 public:
+  friend std::ostream &operator<<(std::ostream &os,
+                                  const cofmsg_echo_request &msg) {
+    os << dynamic_cast<const cofmsg &>(msg);
+    os << "<cofmsg_echo_request >" << std::endl;
+    os << msg.body;
+    return os;
+  };
 
-	friend std::ostream&
-	operator<< (std::ostream& os, const cofmsg_echo_request& msg) {
-		os  << dynamic_cast<const cofmsg&>( msg );
-		os << "<cofmsg_echo_request >" << std::endl;
-		os << msg.body;
-		return os;
-	};
-
-	std::string
-	str() const {
-		std::stringstream ss;
-		ss << cofmsg::str() << "-Echo-Request- ";
-		return ss.str();
-	};
+  std::string str() const {
+    std::stringstream ss;
+    ss << cofmsg::str() << "-Echo-Request- ";
+    return ss.str();
+  };
 
 private:
-
-	rofl::cmemory body;
+  rofl::cmemory body;
 };
-
-
 
 /**
  *
  */
 class cofmsg_echo_reply : public cofmsg {
 public:
+  /**
+   *
+   */
+  virtual ~cofmsg_echo_reply(){};
 
-	/**
-	 *
-	 */
-	virtual
-	~cofmsg_echo_reply()
-	{};
+  /**
+   *
+   */
+  cofmsg_echo_reply(uint8_t version = 0, uint32_t xid = 0, uint8_t *data = 0,
+                    size_t datalen = 0)
+      : cofmsg(version, rofl::openflow::OFPT_ECHO_REPLY, xid),
+        body(data, datalen){};
 
-	/**
-	 *
-	 */
-	cofmsg_echo_reply(
-			uint8_t version = 0,
-			uint32_t xid = 0,
-			uint8_t* data = 0,
-			size_t datalen = 0) :
-				cofmsg(version, rofl::openflow::OFPT_ECHO_REPLY, xid),
-				body(data, datalen)
-	{};
+  /**
+   *
+   */
+  cofmsg_echo_reply(const cofmsg_echo_reply &msg) { *this = msg; };
 
-	/**
-	 *
-	 */
-	cofmsg_echo_reply(
-			const cofmsg_echo_reply& msg)
-	{ *this = msg; };
-
-	/**
-	 *
-	 */
-	cofmsg_echo_reply&
-	operator= (
-			const cofmsg_echo_reply& msg) {
-		if (this == &msg)
-			return *this;
-		cofmsg::operator= (msg);
-		body = msg.body;
-		return *this;
-	};
+  /**
+   *
+   */
+  cofmsg_echo_reply &operator=(const cofmsg_echo_reply &msg) {
+    if (this == &msg)
+      return *this;
+    cofmsg::operator=(msg);
+    body = msg.body;
+    return *this;
+  };
 
 public:
+  /**
+   *
+   */
+  virtual size_t length() const;
 
-	/**
-	 *
-	 */
-	virtual size_t
-	length() const;
+  /**
+   *
+   */
+  virtual void pack(uint8_t *buf = (uint8_t *)0, size_t buflen = 0);
 
-	/**
-	 *
-	 */
-	virtual void
-	pack(
-			uint8_t *buf = (uint8_t*)0, size_t buflen = 0);
-
-	/**
-	 *
-	 */
-	virtual void
-	unpack(
-			uint8_t *buf, size_t buflen);
+  /**
+   *
+   */
+  virtual void unpack(uint8_t *buf, size_t buflen);
 
 public:
+  /**
+   *
+   */
+  const rofl::cmemory &get_body() const { return body; };
 
-	/**
-	 *
-	 */
-	const rofl::cmemory&
-	get_body() const
-	{ return body; };
-
-	/**
-	 *
-	 */
-	rofl::cmemory&
-	set_body()
-	{ return body; };
+  /**
+   *
+   */
+  rofl::cmemory &set_body() { return body; };
 
 public:
+  friend std::ostream &operator<<(std::ostream &os,
+                                  cofmsg_echo_reply const &msg) {
+    os << dynamic_cast<cofmsg const &>(msg);
+    os << "<cofmsg_echo_reply >" << std::endl;
+    os << msg.body;
+    return os;
+  };
 
-	friend std::ostream&
-	operator<< (std::ostream& os, cofmsg_echo_reply const& msg) {
-		os  << dynamic_cast<cofmsg const&>( msg );
-		os << "<cofmsg_echo_reply >" << std::endl;
-		os << msg.body;
-		return os;
-	};
-
-	std::string
-	str() const {
-		std::stringstream ss;
-		ss << cofmsg::str() << "-Echo-Reply- ";
-		return ss.str();
-	};
+  std::string str() const {
+    std::stringstream ss;
+    ss << cofmsg::str() << "-Echo-Reply- ";
+    return ss.str();
+  };
 
 private:
-
-	rofl::cmemory body;
+  rofl::cmemory body;
 };
 
 } // end of namespace openflow

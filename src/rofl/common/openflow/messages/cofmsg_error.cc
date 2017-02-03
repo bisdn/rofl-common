@@ -2,72 +2,61 @@
 
 using namespace rofl::openflow;
 
-size_t
-cofmsg_error::length() const
-{
-	return (sizeof(struct rofl::openflow::ofp_error_msg) + body.memlen());
+size_t cofmsg_error::length() const {
+  return (sizeof(struct rofl::openflow::ofp_error_msg) + body.memlen());
 }
 
+void cofmsg_error::pack(uint8_t *buf, size_t buflen) {
+  cofmsg::pack(buf, buflen);
 
+  if ((0 == buf) || (0 == buflen))
+    return;
 
-void
-cofmsg_error::pack(
-		uint8_t *buf, size_t buflen)
-{
-	cofmsg::pack(buf, buflen);
+  if (buflen < get_length())
+    throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
-	if ((0 == buf) || (0 == buflen))
-		return;
+  struct rofl::openflow::ofp_error_msg *hdr =
+      (struct rofl::openflow::ofp_error_msg *)buf;
 
-	if (buflen < get_length())
-		throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+  hdr->type = htobe16(err_type);
+  hdr->code = htobe16(err_code);
 
-	struct rofl::openflow::ofp_error_msg* hdr =
-			(struct rofl::openflow::ofp_error_msg*)buf;
-
-	hdr->type = htobe16(err_type);
-	hdr->code = htobe16(err_code);
-
-	body.pack(buf + sizeof(struct rofl::openflow::ofp_error_msg),
-			buflen - sizeof(struct rofl::openflow::ofp_error_msg));
+  body.pack(buf + sizeof(struct rofl::openflow::ofp_error_msg),
+            buflen - sizeof(struct rofl::openflow::ofp_error_msg));
 }
 
+void cofmsg_error::unpack(uint8_t *buf, size_t buflen) {
+  cofmsg::unpack(buf, buflen);
 
+  body.resize(0);
 
-void
-cofmsg_error::unpack(
-		uint8_t *buf, size_t buflen)
-{
-	cofmsg::unpack(buf, buflen);
+  if ((0 == buf) || (0 == buflen))
+    return;
 
-	body.resize(0);
+  if (buflen < cofmsg_error::length())
+    throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__,
+                            __LINE__);
 
-	if ((0 == buf) || (0 == buflen))
-		return;
+  switch (get_version()) {
+  default: {
+    if (get_type() != rofl::openflow::OFPT_ERROR)
+      throw eBadRequestBadType("eBadRequestBadType", __FILE__,
+                               __PRETTY_FUNCTION__, __LINE__);
 
-	if (buflen < cofmsg_error::length())
-		throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    struct rofl::openflow::ofp_error_msg *hdr =
+        (struct rofl::openflow::ofp_error_msg *)buf;
 
-	switch (get_version()) {
-	default: {
-		if (get_type() != rofl::openflow::OFPT_ERROR)
-			throw eBadRequestBadType("eBadRequestBadType", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    err_type = be16toh(hdr->type);
+    err_code = be16toh(hdr->code);
 
-		struct rofl::openflow::ofp_error_msg* hdr =
-				(struct rofl::openflow::ofp_error_msg*)buf;
+    if (buflen > sizeof(struct rofl::openflow::ofp_error_msg)) {
+      body.unpack(buf + sizeof(struct rofl::openflow::ofp_error_msg),
+                  buflen - sizeof(struct rofl::openflow::ofp_error_msg));
+    }
+  };
+  }
 
-		err_type = be16toh(hdr->type);
-		err_code = be16toh(hdr->code);
-
-		if (buflen > sizeof(struct rofl::openflow::ofp_error_msg)) {
-			body.unpack(buf + sizeof(struct rofl::openflow::ofp_error_msg),
-					buflen - sizeof(struct rofl::openflow::ofp_error_msg));
-		}
-	};
-	}
-
-	if (get_length() < cofmsg_error::length())
-		throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+  if (get_length() < cofmsg_error::length())
+    throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__,
+                            __LINE__);
 }
-
-

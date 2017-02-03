@@ -9,5 +9,4 @@
 
 using namespace rofl::examples::ethswctld;
 
-std::map<rofl::cdptid, cfibtable*> cfibtable::fibtables;
-
+std::map<rofl::cdptid, cfibtable *> cfibtable::fibtables;

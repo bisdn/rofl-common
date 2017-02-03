@@ -5,159 +5,170 @@
 
 #include "cofgroupstatsarray_test.h"
 
-
-CPPUNIT_TEST_SUITE_REGISTRATION( cofgroupstatsarray_test );
+CPPUNIT_TEST_SUITE_REGISTRATION(cofgroupstatsarray_test);
 
 #if defined DEBUG
 #undef DEBUG
 #endif
 #define DEBUG 1
 
-void
-cofgroupstatsarray_test::setUp()
-{
+void cofgroupstatsarray_test::setUp() {}
+
+void cofgroupstatsarray_test::tearDown() {}
+
+void cofgroupstatsarray_test::testDefaultConstructor() {
+  rofl::openflow::cofgroupstatsarray array;
+  CPPUNIT_ASSERT(rofl::openflow::OFP_VERSION_UNKNOWN == array.get_version());
 }
 
+void cofgroupstatsarray_test::testCopyConstructor() {
+  rofl::openflow::cofgroupstatsarray array(rofl::openflow13::OFP_VERSION);
 
+  array.set_group_stats(0).set_version(rofl::openflow13::OFP_VERSION);
+  array.set_group_stats(0).set_group_id(0);
+  array.set_group_stats(0).set_packet_count(0xaabbccdd);
+  array.set_group_stats(0).set_byte_count(0x11223344);
+  array.set_group_stats(0).set_ref_count(0x55667788);
+  array.set_group_stats(0).set_duration_sec(0x77777777);
+  array.set_group_stats(0).set_duration_nsec(0x88888888);
+  array.set_group_stats(0)
+      .set_bucket_counters()
+      .set_bucket_counter(0)
+      .set_packet_count(0x1111111111111111);
+  array.set_group_stats(0)
+      .set_bucket_counters()
+      .set_bucket_counter(0)
+      .set_byte_count(0x2222222222222222);
+  array.set_group_stats(0)
+      .set_bucket_counters()
+      .set_bucket_counter(1)
+      .set_packet_count(0x3333333333333333);
+  array.set_group_stats(0)
+      .set_bucket_counters()
+      .set_bucket_counter(1)
+      .set_byte_count(0x4444444444444444);
 
-void
-cofgroupstatsarray_test::tearDown()
-{
-}
+  array.set_group_stats(1).set_version(rofl::openflow13::OFP_VERSION);
+  array.set_group_stats(1).set_group_id(1);
+  array.set_group_stats(1).set_packet_count(0xbbccddee);
+  array.set_group_stats(1).set_byte_count(0x22334455);
+  array.set_group_stats(1).set_ref_count(0x778899aa);
+  array.set_group_stats(1).set_duration_sec(0xaaaaaaaa);
+  array.set_group_stats(1).set_duration_nsec(0xbbbbbbbb);
 
+  try {
+    std::cerr << "UUUU: " << (int)array.get_version() << std::endl;
+    std::cerr << "UUUU: " << (int)array.get_group_stats(0).get_version()
+              << std::endl;
+    std::cerr << "UUUU: " << (int)array.get_group_stats(1).get_version()
+              << std::endl;
+    std::cerr << "UUUU: " << (int)array.length() << std::endl;
+  } catch (rofl::eBadVersion &e) {
+    std::cerr << "EEEE" << std::endl;
+  }
 
+  rofl::cmemory marray(array.length());
 
-void
-cofgroupstatsarray_test::testDefaultConstructor()
-{
-	rofl::openflow::cofgroupstatsarray array;
-	CPPUNIT_ASSERT(rofl::openflow::OFP_VERSION_UNKNOWN == array.get_version());
-}
+  return;
 
-
-
-void
-cofgroupstatsarray_test::testCopyConstructor()
-{
-	rofl::openflow::cofgroupstatsarray array(rofl::openflow13::OFP_VERSION);
-
-	array.set_group_stats(0).set_version(rofl::openflow13::OFP_VERSION);
-	array.set_group_stats(0).set_group_id(0);
-	array.set_group_stats(0).set_packet_count(0xaabbccdd);
-	array.set_group_stats(0).set_byte_count(0x11223344);
-	array.set_group_stats(0).set_ref_count(0x55667788);
-	array.set_group_stats(0).set_duration_sec(0x77777777);
-	array.set_group_stats(0).set_duration_nsec(0x88888888);
-	array.set_group_stats(0).set_bucket_counters().set_bucket_counter(0).set_packet_count(0x1111111111111111);
-	array.set_group_stats(0).set_bucket_counters().set_bucket_counter(0).set_byte_count  (0x2222222222222222);
-	array.set_group_stats(0).set_bucket_counters().set_bucket_counter(1).set_packet_count(0x3333333333333333);
-	array.set_group_stats(0).set_bucket_counters().set_bucket_counter(1).set_byte_count  (0x4444444444444444);
-
-	array.set_group_stats(1).set_version(rofl::openflow13::OFP_VERSION);
-	array.set_group_stats(1).set_group_id(1);
-	array.set_group_stats(1).set_packet_count(0xbbccddee);
-	array.set_group_stats(1).set_byte_count(0x22334455);
-	array.set_group_stats(1).set_ref_count(0x778899aa);
-	array.set_group_stats(1).set_duration_sec(0xaaaaaaaa);
-	array.set_group_stats(1).set_duration_nsec(0xbbbbbbbb);
-
-	try {
-		std::cerr << "UUUU: " << (int)array.get_version() << std::endl;
-		std::cerr << "UUUU: " << (int)array.get_group_stats(0).get_version() << std::endl;
-		std::cerr << "UUUU: " << (int)array.get_group_stats(1).get_version() << std::endl;
-		std::cerr << "UUUU: " << (int)array.length() << std::endl;
-	} catch (rofl::eBadVersion& e) {
-		std::cerr << "EEEE" << std::endl;
-	}
-
-	rofl::cmemory marray(array.length());
-
-	return;
-
-	array.pack(marray.somem(), marray.memlen());
+  array.pack(marray.somem(), marray.memlen());
 
 #ifdef DEBUG
-	std::cerr << "array:" << std::endl << array;
-	std::cerr << "marray:" << std::endl << marray;
+  std::cerr << "array:" << std::endl << array;
+  std::cerr << "marray:" << std::endl << marray;
 #endif
 
-	rofl::openflow::cofgroupstatsarray clone(array);
+  rofl::openflow::cofgroupstatsarray clone(array);
 
-	rofl::cmemory mclone(clone.length());
-	clone.pack(mclone.somem(), mclone.memlen());
+  rofl::cmemory mclone(clone.length());
+  clone.pack(mclone.somem(), mclone.memlen());
 
 #ifdef DEBUG
-	std::cerr << "clone:" << std::endl << clone;
-	std::cerr << "mclone:" << std::endl << mclone;
+  std::cerr << "clone:" << std::endl << clone;
+  std::cerr << "mclone:" << std::endl << mclone;
 #endif
 
-	CPPUNIT_ASSERT(marray == mclone);
+  CPPUNIT_ASSERT(marray == mclone);
 }
 
+void cofgroupstatsarray_test::testOperatorPlus() {
+  std::vector<rofl::openflow::cofgroupstatsarray> array;
+  array.push_back(
+      rofl::openflow::cofgroupstatsarray(rofl::openflow13::OFP_VERSION));
+  array.push_back(
+      rofl::openflow::cofgroupstatsarray(rofl::openflow13::OFP_VERSION));
 
+  array[0].set_group_stats(0).set_version(rofl::openflow13::OFP_VERSION);
+  array[0].set_group_stats(0).set_group_id(0);
+  array[0].set_group_stats(0).set_packet_count(0xaabbccdd);
+  array[0].set_group_stats(0).set_byte_count(0x11223344);
+  array[0].set_group_stats(0).set_ref_count(0x10101010);
+  array[0].set_group_stats(0).set_duration_sec(0x77777777);
+  array[0].set_group_stats(0).set_duration_nsec(0x88888888);
+  array[0]
+      .set_group_stats(0)
+      .set_bucket_counters()
+      .set_bucket_counter(0)
+      .set_packet_count(0x1111111111111111);
+  array[0]
+      .set_group_stats(0)
+      .set_bucket_counters()
+      .set_bucket_counter(0)
+      .set_byte_count(0x2222222222222222);
+  array[0]
+      .set_group_stats(0)
+      .set_bucket_counters()
+      .set_bucket_counter(1)
+      .set_packet_count(0x3333333333333333);
+  array[0]
+      .set_group_stats(0)
+      .set_bucket_counters()
+      .set_bucket_counter(1)
+      .set_byte_count(0x4444444444444444);
 
-void
-cofgroupstatsarray_test::testOperatorPlus()
-{
-	std::vector<rofl::openflow::cofgroupstatsarray> array;
-	array.push_back(rofl::openflow::cofgroupstatsarray(rofl::openflow13::OFP_VERSION));
-	array.push_back(rofl::openflow::cofgroupstatsarray(rofl::openflow13::OFP_VERSION));
+  array[0].set_group_stats(1).set_version(rofl::openflow13::OFP_VERSION);
+  array[0].set_group_stats(1).set_group_id(1);
+  array[0].set_group_stats(1).set_packet_count(0xbbccddee);
+  array[0].set_group_stats(1).set_byte_count(0x22334455);
+  array[0].set_group_stats(1).set_ref_count(0x20202020);
+  array[0].set_group_stats(1).set_duration_sec(0xaaaaaaaa);
+  array[0].set_group_stats(1).set_duration_nsec(0xbbbbbbbb);
 
-	array[0].set_group_stats(0).set_version(rofl::openflow13::OFP_VERSION);
-	array[0].set_group_stats(0).set_group_id(0);
-	array[0].set_group_stats(0).set_packet_count(0xaabbccdd);
-	array[0].set_group_stats(0).set_byte_count(0x11223344);
-	array[0].set_group_stats(0).set_ref_count(0x10101010);
-	array[0].set_group_stats(0).set_duration_sec(0x77777777);
-	array[0].set_group_stats(0).set_duration_nsec(0x88888888);
-	array[0].set_group_stats(0).set_bucket_counters().set_bucket_counter(0).set_packet_count(0x1111111111111111);
-	array[0].set_group_stats(0).set_bucket_counters().set_bucket_counter(0).set_byte_count  (0x2222222222222222);
-	array[0].set_group_stats(0).set_bucket_counters().set_bucket_counter(1).set_packet_count(0x3333333333333333);
-	array[0].set_group_stats(0).set_bucket_counters().set_bucket_counter(1).set_byte_count  (0x4444444444444444);
-
-	array[0].set_group_stats(1).set_version(rofl::openflow13::OFP_VERSION);
-	array[0].set_group_stats(1).set_group_id(1);
-	array[0].set_group_stats(1).set_packet_count(0xbbccddee);
-	array[0].set_group_stats(1).set_byte_count(0x22334455);
-	array[0].set_group_stats(1).set_ref_count(0x20202020);
-	array[0].set_group_stats(1).set_duration_sec(0xaaaaaaaa);
-	array[0].set_group_stats(1).set_duration_nsec(0xbbbbbbbb);
-
-	array[1].set_group_stats(2).set_version(rofl::openflow13::OFP_VERSION);
-	array[1].set_group_stats(2).set_group_id(2);
-	array[1].set_group_stats(2).set_packet_count(0xbbccddee);
-	array[1].set_group_stats(2).set_byte_count(0x22334455);
-	array[1].set_group_stats(2).set_ref_count(0x30303030);
-	array[1].set_group_stats(2).set_duration_sec(0xaaaaaaaa);
-	array[1].set_group_stats(2).set_duration_nsec(0xbbbbbbbb);
-
-
+  array[1].set_group_stats(2).set_version(rofl::openflow13::OFP_VERSION);
+  array[1].set_group_stats(2).set_group_id(2);
+  array[1].set_group_stats(2).set_packet_count(0xbbccddee);
+  array[1].set_group_stats(2).set_byte_count(0x22334455);
+  array[1].set_group_stats(2).set_ref_count(0x30303030);
+  array[1].set_group_stats(2).set_duration_sec(0xaaaaaaaa);
+  array[1].set_group_stats(2).set_duration_nsec(0xbbbbbbbb);
 
 #ifdef DEBUG
-	std::cerr << "array[0]:" << std::endl << array[0];
-	std::cerr << "array[1]:" << std::endl << array[1];
+  std::cerr << "array[0]:" << std::endl << array[0];
+  std::cerr << "array[1]:" << std::endl << array[1];
 #endif
 
-	rofl::openflow::cofgroupstatsarray merge(array[0]);
-	merge += array[1];
+  rofl::openflow::cofgroupstatsarray merge(array[0]);
+  merge += array[1];
 
 #ifdef DEBUG
-	std::cerr << "array[0]+array[1]:" << std::endl << merge;
-	std::cerr << "merge.set_group_stats(0) == array[0].get_group_stats(0): " << (merge.set_group_stats(0) == array[0].get_group_stats(0)) << std::endl;
-	std::cerr << "merge.set_group_stats(1) == array[0].get_group_stats(1): " << (merge.set_group_stats(1) == array[0].get_group_stats(1)) << std::endl;
-	std::cerr << "merge.set_group_stats(2) == array[1].get_group_stats(2): " << (merge.set_group_stats(2) == array[1].get_group_stats(2)) << std::endl;
+  std::cerr << "array[0]+array[1]:" << std::endl << merge;
+  std::cerr << "merge.set_group_stats(0) == array[0].get_group_stats(0): "
+            << (merge.set_group_stats(0) == array[0].get_group_stats(0))
+            << std::endl;
+  std::cerr << "merge.set_group_stats(1) == array[0].get_group_stats(1): "
+            << (merge.set_group_stats(1) == array[0].get_group_stats(1))
+            << std::endl;
+  std::cerr << "merge.set_group_stats(2) == array[1].get_group_stats(2): "
+            << (merge.set_group_stats(2) == array[1].get_group_stats(2))
+            << std::endl;
 #endif
 
-	CPPUNIT_ASSERT(merge.set_group_stats(0) == array[0].get_group_stats(0));
-	CPPUNIT_ASSERT(merge.set_group_stats(1) == array[0].get_group_stats(1));
-	CPPUNIT_ASSERT(merge.set_group_stats(2) == array[1].get_group_stats(2));
+  CPPUNIT_ASSERT(merge.set_group_stats(0) == array[0].get_group_stats(0));
+  CPPUNIT_ASSERT(merge.set_group_stats(1) == array[0].get_group_stats(1));
+  CPPUNIT_ASSERT(merge.set_group_stats(2) == array[1].get_group_stats(2));
 }
 
-
-
-void
-cofgroupstatsarray_test::testPackUnpack()
-{
+void cofgroupstatsarray_test::testPackUnpack() {
 #if 0
 	/*
 	 * test memory
@@ -245,50 +256,46 @@ cofgroupstatsarray_test::testPackUnpack()
 #endif
 }
 
+void cofgroupstatsarray_test::testAddDropSetGetHas() {
+  rofl::openflow::cofgroupstatsarray array(rofl::openflow13::OFP_VERSION);
 
+  try {
+    array.get_group_stats(0);
+    CPPUNIT_ASSERT(false);
+  } catch (rofl::openflow::eGroupStatsNotFound &e) {
+  };
 
-void
-cofgroupstatsarray_test::testAddDropSetGetHas()
-{
-	rofl::openflow::cofgroupstatsarray array(rofl::openflow13::OFP_VERSION);
+  if (array.has_group_stats(0)) {
+    CPPUNIT_ASSERT(false);
+  }
+  array.add_group_stats(0);
 
-	try {
-		array.get_group_stats(0);
-		CPPUNIT_ASSERT(false);
-	} catch (rofl::openflow::eGroupStatsNotFound& e) {};
+  try {
+    array.get_group_stats(0);
+  } catch (rofl::openflow::eGroupStatsNotFound &e) {
+    CPPUNIT_ASSERT(false);
+  }
 
-	if (array.has_group_stats(0)) {
-		CPPUNIT_ASSERT(false);
-	}
-	array.add_group_stats(0);
+  try {
+    array.set_group_stats(0);
+  } catch (rofl::openflow::eGroupStatsNotFound &e) {
+    CPPUNIT_ASSERT(false);
+  }
 
-	try {
-		array.get_group_stats(0);
-	} catch (rofl::openflow::eGroupStatsNotFound& e) {
-		CPPUNIT_ASSERT(false);
-	}
+  if (not array.has_group_stats(0)) {
+    CPPUNIT_ASSERT(false);
+  }
 
-	try {
-		array.set_group_stats(0);
-	} catch (rofl::openflow::eGroupStatsNotFound& e) {
-		CPPUNIT_ASSERT(false);
-	}
+  array.drop_group_stats(0);
 
-	if (not array.has_group_stats(0)) {
-		CPPUNIT_ASSERT(false);
-	}
+  try {
+    array.get_group_stats(0);
+    CPPUNIT_ASSERT(false);
+  } catch (rofl::openflow::eGroupStatsNotFound &e) {
+  };
 
-	array.drop_group_stats(0);
-
-	try {
-		array.get_group_stats(0);
-		CPPUNIT_ASSERT(false);
-	} catch (rofl::openflow::eGroupStatsNotFound& e) {};
-
-	if (array.has_group_stats(0)) {
-		CPPUNIT_ASSERT(false);
-	}
-	array.add_group_stats(0);
+  if (array.has_group_stats(0)) {
+    CPPUNIT_ASSERT(false);
+  }
+  array.add_group_stats(0);
 }
-
-

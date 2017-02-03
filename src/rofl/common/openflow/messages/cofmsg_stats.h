@@ -18,269 +18,208 @@
 namespace rofl {
 namespace openflow {
 
-
-class cofmsg_stats_request : public cofmsg
-{
+class cofmsg_stats_request : public cofmsg {
 public:
+  /**
+   *
+   */
+  virtual ~cofmsg_stats_request();
 
-	/**
-	 *
-	 */
-	virtual
-	~cofmsg_stats_request();
+  /**
+   *
+   */
+  cofmsg_stats_request(uint8_t version = 0, uint32_t xid = 0,
+                       uint16_t stats_type = 0, uint16_t stats_flags = 0);
 
-	/**
-	 *
-	 */
-	cofmsg_stats_request(
-			uint8_t version = 0,
-			uint32_t xid = 0,
-			uint16_t stats_type = 0,
-			uint16_t stats_flags = 0);
+  /**
+   *
+   */
+  cofmsg_stats_request(const cofmsg_stats_request &msg);
 
-	/**
-	 *
-	 */
-	cofmsg_stats_request(
-			const cofmsg_stats_request& msg);
-
-	/**
-	 *
-	 */
-	cofmsg_stats_request&
-	operator= (
-			const cofmsg_stats_request& msg);
+  /**
+   *
+   */
+  cofmsg_stats_request &operator=(const cofmsg_stats_request &msg);
 
 public:
+  /**
+   *
+   */
+  virtual size_t length() const;
 
-	/**
-	 *
-	 */
-	virtual size_t
-	length() const;
+  /**
+   *
+   */
+  virtual void pack(uint8_t *buf = (uint8_t *)0, size_t buflen = 0);
 
-	/**
-	 *
-	 */
-	virtual void
-	pack(
-			uint8_t *buf = (uint8_t*)0, size_t buflen = 0);
-
-	/**
-	 *
-	 */
-	virtual void
-	unpack(
-			uint8_t *buf, size_t buflen);
+  /**
+   *
+   */
+  virtual void unpack(uint8_t *buf, size_t buflen);
 
 public:
+  /**
+   *
+   */
+  uint16_t get_stats_type() const { return stats_type; };
 
-	/**
-	 *
-	 */
-	uint16_t
-	get_stats_type() const
-	{ return stats_type; };
+  /**
+   *
+   */
+  void set_stats_type(uint16_t type) { this->stats_type = type; };
 
-	/**
-	 *
-	 */
-	void
-	set_stats_type(
-			uint16_t type)
-	{ this->stats_type = type; };
+  /**
+   *
+   */
+  uint16_t get_stats_flags() const { return stats_flags; };
 
-	/**
-	 *
-	 */
-	uint16_t
-	get_stats_flags() const
-	{ return stats_flags; };
-
-	/**
-	 *
-	 */
-	void
-	set_stats_flags(
-			uint16_t flags)
-	{ this->stats_flags = flags; };
+  /**
+   *
+   */
+  void set_stats_flags(uint16_t flags) { this->stats_flags = flags; };
 
 public:
+  friend std::ostream &operator<<(std::ostream &os,
+                                  cofmsg_stats_request const &msg) {
+    std::string s_flags;
 
-	friend std::ostream&
-	operator<< (std::ostream& os, cofmsg_stats_request const& msg) {
-		std::string s_flags;
+    os << dynamic_cast<cofmsg const &>(msg)
+       << "<cofmsg_stats_request type:" << (int)msg.get_stats_type()
+       << " flags: 0x" << std::hex << (int)msg.get_stats_flags() << std::dec
+       << " " << msg.s_flags() << ">" << std::endl;
+    return os;
+  };
 
-		os << dynamic_cast<cofmsg const&>( msg )
-			<< "<cofmsg_stats_request type:" << (int)msg.get_stats_type()
-			<< " flags: 0x" << std::hex << (int)msg.get_stats_flags() <<
-			std::dec << " " << msg.s_flags() << ">" << std::endl;
-		return os;
-	};
-
-	virtual std::string
-	str() const {
-		std::stringstream ss;
-		ss << cofmsg::str() << "-Stats-Request- type: " << (unsigned int)get_stats_type()
-			<< ", flags: 0x" << std::hex << (int)get_stats_flags() << std::dec << " " << s_flags();
-		return ss.str();
-	};
+  virtual std::string str() const {
+    std::stringstream ss;
+    ss << cofmsg::str()
+       << "-Stats-Request- type: " << (unsigned int)get_stats_type()
+       << ", flags: 0x" << std::hex << (int)get_stats_flags() << std::dec << " "
+       << s_flags();
+    return ss.str();
+  };
 
 private:
-
-	std::string
-	s_flags() const {
-		std::string str;
-		switch (get_version()) {
-		case rofl::openflow10::OFP_VERSION: {
-			if (get_stats_flags() & rofl::openflow10::OFPSF_REPLY_MORE)
-				str.append("MORE ");
-		} break;
-		default: {
-			if (get_stats_flags() & rofl::openflow13::OFPMPF_REPLY_MORE)
-				str.append("MORE ");
-		};
-		}
-		return str;
-	};
+  std::string s_flags() const {
+    std::string str;
+    switch (get_version()) {
+    case rofl::openflow10::OFP_VERSION: {
+      if (get_stats_flags() & rofl::openflow10::OFPSF_REPLY_MORE)
+        str.append("MORE ");
+    } break;
+    default: {
+      if (get_stats_flags() & rofl::openflow13::OFPMPF_REPLY_MORE)
+        str.append("MORE ");
+    };
+    }
+    return str;
+  };
 
 private:
-
-	uint16_t stats_type;
-	uint16_t stats_flags;
+  uint16_t stats_type;
+  uint16_t stats_flags;
 };
 
-
-
-class cofmsg_stats_reply : public cofmsg
-{
+class cofmsg_stats_reply : public cofmsg {
 public:
+  /**
+   *
+   */
+  virtual ~cofmsg_stats_reply();
 
-	/**
-	 *
-	 */
-	virtual
-	~cofmsg_stats_reply();
+  /**
+   *
+   */
+  cofmsg_stats_reply(uint8_t version = 0, uint32_t xid = 0,
+                     uint16_t stats_type = 0, uint16_t stats_flags = 0);
 
-	/**
-	 *
-	 */
-	cofmsg_stats_reply(
-			uint8_t version = 0,
-			uint32_t xid = 0,
-			uint16_t stats_type = 0,
-			uint16_t stats_flags = 0);
+  /**
+   *
+   */
+  cofmsg_stats_reply(const cofmsg_stats_reply &msg);
 
-	/**
-	 *
-	 */
-	cofmsg_stats_reply(
-			const cofmsg_stats_reply& msg);
-
-	/**
-	 *
-	 */
-	cofmsg_stats_reply&
-	operator= (
-			const cofmsg_stats_reply& msg);
+  /**
+   *
+   */
+  cofmsg_stats_reply &operator=(const cofmsg_stats_reply &msg);
 
 public:
+  /**
+   *
+   */
+  virtual size_t length() const;
 
-	/**
-	 *
-	 */
-	virtual size_t
-	length() const;
+  /**
+   *
+   */
+  virtual void pack(uint8_t *buf = (uint8_t *)0, size_t buflen = 0);
 
-	/**
-	 *
-	 */
-	virtual void
-	pack(
-			uint8_t *buf = (uint8_t*)0, size_t buflen = 0);
-
-	/**
-	 *
-	 */
-	virtual void
-	unpack(
-			uint8_t *buf, size_t buflen);
+  /**
+   *
+   */
+  virtual void unpack(uint8_t *buf, size_t buflen);
 
 public:
+  /**
+   *
+   */
+  uint16_t get_stats_type() const { return stats_type; };
 
-	/**
-	 *
-	 */
-	uint16_t
-	get_stats_type() const
-	{ return stats_type; };
+  /**
+   *
+   */
+  void set_stats_type(uint16_t type) { this->stats_type = type; };
 
-	/**
-	 *
-	 */
-	void
-	set_stats_type(
-			uint16_t type)
-	{ this->stats_type = type; };
+  /**
+   *
+   */
+  uint16_t get_stats_flags() const { return stats_flags; };
 
-	/**
-	 *
-	 */
-	uint16_t
-	get_stats_flags() const
-	{ return stats_flags; };
-
-	/**
-	 *
-	 */
-	void
-	set_stats_flags(
-			uint16_t flags)
-	{ this->stats_flags = flags; };
+  /**
+   *
+   */
+  void set_stats_flags(uint16_t flags) { this->stats_flags = flags; };
 
 public:
+  friend std::ostream &operator<<(std::ostream &os,
+                                  cofmsg_stats_reply const &msg) {
+    std::string s_flags;
 
-	friend std::ostream&
-	operator<< (std::ostream& os, cofmsg_stats_reply const& msg) {
-		std::string s_flags;
+    os << dynamic_cast<cofmsg const &>(msg)
+       << "<cofmsg_stats_reply type:" << (int)msg.get_stats_type()
+       << " flags: 0x" << std::hex << (int)msg.get_stats_flags() << std::dec
+       << " " << msg.s_flags() << " >" << std::endl;
+    return os;
+  };
 
-		os << dynamic_cast<cofmsg const&>( msg )
-			<< "<cofmsg_stats_reply type:" << (int)msg.get_stats_type()
-			<< " flags: 0x" << std::hex << (int)msg.get_stats_flags() << std::dec << " " << msg.s_flags()
-			<< " >" << std::endl;
-		return os;
-	};
-
-	virtual std::string
-	str() const {
-		std::stringstream ss;
-		ss << cofmsg::str() << "-Stats-Reply- type: " << (unsigned int)get_stats_type()
-			<< ", flags: 0x" << std::hex << (int)get_stats_flags() << std::dec << " " << s_flags();
-		return ss.str();
-	};
+  virtual std::string str() const {
+    std::stringstream ss;
+    ss << cofmsg::str()
+       << "-Stats-Reply- type: " << (unsigned int)get_stats_type()
+       << ", flags: 0x" << std::hex << (int)get_stats_flags() << std::dec << " "
+       << s_flags();
+    return ss.str();
+  };
 
 private:
-
-	std::string
-	s_flags() const {
-		std::string str;
-		switch (get_version()) {
-		case rofl::openflow10::OFP_VERSION: {
-			if (get_stats_flags() & rofl::openflow10::OFPSF_REPLY_MORE)
-				str.append("MORE ");
-		} break;
-		default: {
-			if (get_stats_flags() & rofl::openflow13::OFPMPF_REPLY_MORE)
-				str.append("MORE ");
-		};
-		}
-		return str;
-	};
+  std::string s_flags() const {
+    std::string str;
+    switch (get_version()) {
+    case rofl::openflow10::OFP_VERSION: {
+      if (get_stats_flags() & rofl::openflow10::OFPSF_REPLY_MORE)
+        str.append("MORE ");
+    } break;
+    default: {
+      if (get_stats_flags() & rofl::openflow13::OFPMPF_REPLY_MORE)
+        str.append("MORE ");
+    };
+    }
+    return str;
+  };
 
 private:
-
-	uint16_t stats_type;
-	uint16_t stats_flags;
+  uint16_t stats_type;
+  uint16_t stats_flags;
 };
 
 }; // end of namespace openflow

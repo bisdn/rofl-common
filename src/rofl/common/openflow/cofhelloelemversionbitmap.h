@@ -16,164 +16,141 @@
 namespace rofl {
 namespace openflow {
 
-class cofhello_elem_versionbitmap :
-		public cofhello_elem
-{
-	std::vector<uint32_t>	bitmaps;
+class cofhello_elem_versionbitmap : public cofhello_elem {
+  std::vector<uint32_t> bitmaps;
 
-	union {
-		uint8_t										*ofhu_hello_elem_versionbitmap_generic;
-		openflow13::ofp_hello_elem_versionbitmap	*ofhu13_versionbitmap;
-	} ofhu;
+  union {
+    uint8_t *ofhu_hello_elem_versionbitmap_generic;
+    openflow13::ofp_hello_elem_versionbitmap *ofhu13_versionbitmap;
+  } ofhu;
 
-#define ofh_hello_elem_version_bitmap_generic 		ofhu.ofhu_hello_elem_versionbitmap_generic
-#define ofh_versionbitmap 							ofhu.ofhu13_versionbitmap
-
-public:
-
-	/**
-	 *
-	 */
-	cofhello_elem_versionbitmap();
-
-	/**
-	 *
-	 */
-	cofhello_elem_versionbitmap(
-			uint8_t *buf, size_t buflen);
-
-	/**
-	 *
-	 */
-	cofhello_elem_versionbitmap(
-			cofhello_elem const& elem);
-
-	/**
-	 *
-	 */
-	cofhello_elem_versionbitmap(
-			cofhello_elem_versionbitmap const& elem);
-
-	/**
-	 *
-	 */
-	virtual
-	~cofhello_elem_versionbitmap();
-
-	/**
-	 *
-	 */
-	cofhello_elem_versionbitmap&
-	operator= (
-			cofhello_elem_versionbitmap const& elem);
-
-	/**
-	 * @brief	Calculates (*this AND versionbitmap) and returns a new copy of cofhello_elem_versionbitmap
-	 */
-	cofhello_elem_versionbitmap
-	operator& (
-			cofhello_elem_versionbitmap const& versionbitmap) const;
-
-	/**
-	 *
-	 */
-	virtual cofhello_elem*
-	clone()
-	{ return new cofhello_elem_versionbitmap(*this); };
+#define ofh_hello_elem_version_bitmap_generic                                  \
+  ofhu.ofhu_hello_elem_versionbitmap_generic
+#define ofh_versionbitmap ofhu.ofhu13_versionbitmap
 
 public:
+  /**
+   *
+   */
+  cofhello_elem_versionbitmap();
 
-	/**
-	 *
-	 */
-	virtual uint8_t*
-	resize(size_t len);
+  /**
+   *
+   */
+  cofhello_elem_versionbitmap(uint8_t *buf, size_t buflen);
 
-	/**
-	 *
-	 */
-	virtual size_t
-	length() const;
+  /**
+   *
+   */
+  cofhello_elem_versionbitmap(cofhello_elem const &elem);
 
-	/**
-	 *
-	 */
-	void
-	pack(uint8_t *buf, size_t buflen);
+  /**
+   *
+   */
+  cofhello_elem_versionbitmap(cofhello_elem_versionbitmap const &elem);
 
-	/**
-	 *
-	 */
-	virtual void
-	unpack(uint8_t *buf, size_t buflen);
+  /**
+   *
+   */
+  virtual ~cofhello_elem_versionbitmap();
 
-public:
+  /**
+   *
+   */
+  cofhello_elem_versionbitmap &
+  operator=(cofhello_elem_versionbitmap const &elem);
 
-	/**
-	 *
-	 */
-	void
-	add_ofp_version(uint8_t ofp_version);
+  /**
+   * @brief	Calculates (*this AND versionbitmap) and returns a new copy of
+   * cofhello_elem_versionbitmap
+   */
+  cofhello_elem_versionbitmap
+  operator&(cofhello_elem_versionbitmap const &versionbitmap) const;
 
-	/**
-	 *
-	 */
-	void
-	drop_ofp_version(uint8_t ofp_version);
-
-	/**
-	 *
-	 */
-	bool
-	has_ofp_version(uint8_t ofp_version) const;
-
-	/**
-	 *
-	 */
-	void
-	clear_ofp_versions();
-
-	/**
-	 *
-	 */
-	uint8_t
-	get_highest_ofp_version() const;
+  /**
+   *
+   */
+  virtual cofhello_elem *clone() {
+    return new cofhello_elem_versionbitmap(*this);
+  };
 
 public:
+  /**
+   *
+   */
+  virtual uint8_t *resize(size_t len);
 
-	friend std::ostream&
-	operator<< (std::ostream& os, cofhello_elem_versionbitmap const& elem) {
-		os << dynamic_cast<cofhello_elem const&>( elem );
-		os << "<cofhello_elem_versionbitmap >" << std::endl;
-		for (unsigned int i = 0; i < elem.bitmaps.size(); i++) {
-			os << "<bitmap[" << i << "] 0x" <<
-					std::setfill('0') << std::setw(8) <<
-					std::hex << elem.bitmaps[i] << std::dec <<
-					std::setw(0) << std::setfill(' ') << " >" << std::endl;
-		}
-		return os;
-	};
+  /**
+   *
+   */
+  virtual size_t length() const;
 
-	std::string
-	str() const {
-		std::stringstream ss;
-		ss << "VersionBitmap ";
-		if (has_ofp_version(rofl::openflow10::OFP_VERSION)) {
-			ss << "1.0(" << (int)rofl::openflow10::OFP_VERSION << ") ";
-		}
-		if (has_ofp_version(rofl::openflow12::OFP_VERSION)) {
-			ss << "1.2(" << (int)rofl::openflow12::OFP_VERSION << ") ";
-		}
-		if (has_ofp_version(rofl::openflow13::OFP_VERSION)) {
-			ss << "1.3(" << (int)rofl::openflow13::OFP_VERSION << ") ";
-		}
-		return ss.str();
-	};
+  /**
+   *
+   */
+  void pack(uint8_t *buf, size_t buflen);
+
+  /**
+   *
+   */
+  virtual void unpack(uint8_t *buf, size_t buflen);
+
+public:
+  /**
+   *
+   */
+  void add_ofp_version(uint8_t ofp_version);
+
+  /**
+   *
+   */
+  void drop_ofp_version(uint8_t ofp_version);
+
+  /**
+   *
+   */
+  bool has_ofp_version(uint8_t ofp_version) const;
+
+  /**
+   *
+   */
+  void clear_ofp_versions();
+
+  /**
+   *
+   */
+  uint8_t get_highest_ofp_version() const;
+
+public:
+  friend std::ostream &operator<<(std::ostream &os,
+                                  cofhello_elem_versionbitmap const &elem) {
+    os << dynamic_cast<cofhello_elem const &>(elem);
+    os << "<cofhello_elem_versionbitmap >" << std::endl;
+    for (unsigned int i = 0; i < elem.bitmaps.size(); i++) {
+      os << "<bitmap[" << i << "] 0x" << std::setfill('0') << std::setw(8)
+         << std::hex << elem.bitmaps[i] << std::dec << std::setw(0)
+         << std::setfill(' ') << " >" << std::endl;
+    }
+    return os;
+  };
+
+  std::string str() const {
+    std::stringstream ss;
+    ss << "VersionBitmap ";
+    if (has_ofp_version(rofl::openflow10::OFP_VERSION)) {
+      ss << "1.0(" << (int)rofl::openflow10::OFP_VERSION << ") ";
+    }
+    if (has_ofp_version(rofl::openflow12::OFP_VERSION)) {
+      ss << "1.2(" << (int)rofl::openflow12::OFP_VERSION << ") ";
+    }
+    if (has_ofp_version(rofl::openflow13::OFP_VERSION)) {
+      ss << "1.3(" << (int)rofl::openflow13::OFP_VERSION << ") ";
+    }
+    return ss.str();
+  };
 };
 
 }; /* namespace openflow */
 }; /* namespace rofl */
-
-
 
 #endif /* COFHELLOELEMVERSIONBITMAP_H_ */

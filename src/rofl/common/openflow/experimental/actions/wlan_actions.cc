@@ -8,5 +8,3 @@
 #include "rofl/common/openflow/experimental/actions/wlan_actions.h"
 
 using namespace rofl::openflow::experimental::wlan;
-
-

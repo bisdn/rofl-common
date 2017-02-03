@@ -13,209 +13,165 @@
 #ifndef COFMSG_FLOW_STATS_H_
 #define COFMSG_FLOW_STATS_H_ 1
 
-#include "rofl/common/openflow/messages/cofmsg_stats.h"
 #include "rofl/common/openflow/cofflowstats.h"
 #include "rofl/common/openflow/cofflowstatsarray.h"
-
+#include "rofl/common/openflow/messages/cofmsg_stats.h"
 
 namespace rofl {
 namespace openflow {
 
-
 /**
  *
  */
-class cofmsg_flow_stats_request :
-		public cofmsg_stats_request
-{
+class cofmsg_flow_stats_request : public cofmsg_stats_request {
 public:
+  /**
+   *
+   */
+  virtual ~cofmsg_flow_stats_request();
 
-	/**
-	 *
-	 */
-	virtual
-	~cofmsg_flow_stats_request();
+  /**
+   *
+   */
+  cofmsg_flow_stats_request(
+      uint8_t version = rofl::openflow::OFP_VERSION_UNKNOWN, uint32_t xid = 0,
+      uint16_t stats_flags = 0,
+      const cofflow_stats_request &flow_stats = cofflow_stats_request());
 
-	/**
-	 *
-	 */
-	cofmsg_flow_stats_request(
-			uint8_t version = rofl::openflow::OFP_VERSION_UNKNOWN,
-			uint32_t xid = 0,
-			uint16_t stats_flags = 0,
-			const cofflow_stats_request& flow_stats = cofflow_stats_request());
+  /**
+   *
+   */
+  cofmsg_flow_stats_request(const cofmsg_flow_stats_request &msg);
 
-	/**
-	 *
-	 */
-	cofmsg_flow_stats_request(
-			const cofmsg_flow_stats_request& msg);
-
-	/**
-	 *
-	 */
-	cofmsg_flow_stats_request&
-	operator= (
-			const cofmsg_flow_stats_request& msg);
+  /**
+   *
+   */
+  cofmsg_flow_stats_request &operator=(const cofmsg_flow_stats_request &msg);
 
 public:
+  /**
+   *
+   */
+  virtual size_t length() const;
 
-	/**
-	 *
-	 */
-	virtual size_t
-	length() const;
+  /**
+   *
+   */
+  virtual void pack(uint8_t *buf = (uint8_t *)0, size_t buflen = 0);
 
-	/**
-	 *
-	 */
-	virtual void
-	pack(
-			uint8_t *buf = (uint8_t*)0, size_t buflen = 0);
-
-	/**
-	 *
-	 */
-	virtual void
-	unpack(
-			uint8_t *buf, size_t buflen);
+  /**
+   *
+   */
+  virtual void unpack(uint8_t *buf, size_t buflen);
 
 public:
+  /**
+   *
+   */
+  const cofflow_stats_request &get_flow_stats() const { return flow_stats; };
 
-	/**
-	 *
-	 */
-	const cofflow_stats_request&
-	get_flow_stats() const
-	{ return flow_stats; };
-
-	/**
-	 *
-	 */
-	cofflow_stats_request&
-	set_flow_stats()
-	{ return flow_stats; };
+  /**
+   *
+   */
+  cofflow_stats_request &set_flow_stats() { return flow_stats; };
 
 public:
+  friend std::ostream &operator<<(std::ostream &os,
+                                  const cofmsg_flow_stats_request &msg) {
+    os << dynamic_cast<const cofmsg_stats_request &>(msg);
+    os << "<cofmsg_flow_stats_request >" << std::endl;
 
-	friend std::ostream&
-	operator<< (std::ostream& os, const cofmsg_flow_stats_request& msg) {
-		os << dynamic_cast<const cofmsg_stats_request&>( msg );
-		os << "<cofmsg_flow_stats_request >" << std::endl;
-		
-		os << msg.flow_stats;
-		return os;
-	};
+    os << msg.flow_stats;
+    return os;
+  };
 
-	virtual std::string
-	str() const {
-		std::stringstream ss;
-		ss << cofmsg::str() << "-Flow-Stats-Request- ";
-		return ss.str();
-	};
+  virtual std::string str() const {
+    std::stringstream ss;
+    ss << cofmsg::str() << "-Flow-Stats-Request- ";
+    return ss.str();
+  };
 
 private:
-
-	cofflow_stats_request 		flow_stats;
+  cofflow_stats_request flow_stats;
 };
 
-
-
 /**
  *
  */
-class cofmsg_flow_stats_reply :
-		public cofmsg_stats_reply
-{
+class cofmsg_flow_stats_reply : public cofmsg_stats_reply {
 public:
+  /**
+   *
+   */
+  virtual ~cofmsg_flow_stats_reply();
 
-	/**
-	 *
-	 */
-	virtual
-	~cofmsg_flow_stats_reply();
+  /**
+   *
+   */
+  cofmsg_flow_stats_reply(uint8_t of_version = 0, uint32_t xid = 0,
+                          uint16_t flags = 0,
+                          const rofl::openflow::cofflowstatsarray &flow_stats =
+                              rofl::openflow::cofflowstatsarray());
 
-	/**
-	 *
-	 */
-	cofmsg_flow_stats_reply(
-			uint8_t of_version = 0,
-			uint32_t xid = 0,
-			uint16_t flags = 0,
-			const rofl::openflow::cofflowstatsarray& flow_stats = rofl::openflow::cofflowstatsarray());
+  /**
+   *
+   */
+  cofmsg_flow_stats_reply(const cofmsg_flow_stats_reply &msg);
 
-	/**
-	 *
-	 */
-	cofmsg_flow_stats_reply(
-			const cofmsg_flow_stats_reply& msg);
-
-	/**
-	 *
-	 */
-	cofmsg_flow_stats_reply&
-	operator= (
-			const cofmsg_flow_stats_reply& msg);
+  /**
+   *
+   */
+  cofmsg_flow_stats_reply &operator=(const cofmsg_flow_stats_reply &msg);
 
 public:
+  /**
+   *
+   */
+  virtual size_t length() const;
 
-	/**
-	 *
-	 */
-	virtual size_t
-	length() const;
+  /**
+   *
+   */
+  virtual void pack(uint8_t *buf = (uint8_t *)0, size_t buflen = 0);
 
-	/**
-	 *
-	 */
-	virtual void
-	pack(
-			uint8_t *buf = (uint8_t*)0, size_t buflen = 0);
-
-	/**
-	 *
-	 */
-	virtual void
-	unpack(
-			uint8_t *buf, size_t buflen);
+  /**
+   *
+   */
+  virtual void unpack(uint8_t *buf, size_t buflen);
 
 public:
+  /**
+   *
+   */
+  const rofl::openflow::cofflowstatsarray &get_flow_stats_array() const {
+    return flowstatsarray;
+  };
 
-	/**
-	 *
-	 */
-	const rofl::openflow::cofflowstatsarray&
-	get_flow_stats_array() const
-	{ return flowstatsarray; };
-
-	/**
-	 *
-	 */
-	rofl::openflow::cofflowstatsarray&
-	set_flow_stats_array()
-	{ return flowstatsarray; };
+  /**
+   *
+   */
+  rofl::openflow::cofflowstatsarray &set_flow_stats_array() {
+    return flowstatsarray;
+  };
 
 public:
+  friend std::ostream &operator<<(std::ostream &os,
+                                  const cofmsg_flow_stats_reply &msg) {
+    os << dynamic_cast<const cofmsg_stats_reply &>(msg);
+    os << "<cofmsg_flow_stats_reply >" << std::endl;
 
-	friend std::ostream&
-	operator<< (std::ostream& os, const cofmsg_flow_stats_reply& msg) {
-		os << dynamic_cast<const cofmsg_stats_reply&>( msg );
-		os << "<cofmsg_flow_stats_reply >" << std::endl;
-		
-		os << msg.flowstatsarray;
-		return os;
-	};
+    os << msg.flowstatsarray;
+    return os;
+  };
 
-	virtual std::string
-	str() const {
-		std::stringstream ss;
-		ss << cofmsg::str() << "-Flow-Stats-Reply- ";
-		return ss.str();
-	};
+  virtual std::string str() const {
+    std::stringstream ss;
+    ss << cofmsg::str() << "-Flow-Stats-Reply- ";
+    return ss.str();
+  };
 
 private:
-
-	rofl::openflow::cofflowstatsarray					flowstatsarray;
+  rofl::openflow::cofflowstatsarray flowstatsarray;
 };
 
 } // end of namespace rofl

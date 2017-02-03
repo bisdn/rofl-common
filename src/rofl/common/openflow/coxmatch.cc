@@ -12,4 +12,3 @@
 #include "rofl/common/openflow/coxmatch.h"
 
 using namespace rofl::openflow;
-

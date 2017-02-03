@@ -5,17 +5,14 @@
 
 class caddrinfo_test : public CppUnit::TestFixture {
 
-	CPPUNIT_TEST_SUITE( caddrinfo_test );
-	CPPUNIT_TEST( testAddrInfo );
-	CPPUNIT_TEST_SUITE_END();
+  CPPUNIT_TEST_SUITE(caddrinfo_test);
+  CPPUNIT_TEST(testAddrInfo);
+  CPPUNIT_TEST_SUITE_END();
 
 private:
-
-
 public:
-	void setUp();
-	void tearDown();
+  void setUp();
+  void tearDown();
 
-	void testAddrInfo();
+  void testAddrInfo();
 };
-

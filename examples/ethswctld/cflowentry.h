@@ -8,8 +8,8 @@
 #ifndef CFLOW_H_
 #define CFLOW_H_
 
-#include <ostream>
 #include <inttypes.h>
+#include <ostream>
 
 #include <rofl/common/caddress.h>
 #include <rofl/common/crofbase.h>
@@ -28,9 +28,9 @@ namespace exceptions {
  *
  * @brief	Base class for all exceptions thrown by class cflowtable.
  */
-class eFlowBase         : public std::runtime_error {
+class eFlowBase : public std::runtime_error {
 public:
-	eFlowBase(const std::string& __arg) : std::runtime_error(__arg) {};
+  eFlowBase(const std::string &__arg) : std::runtime_error(__arg){};
 };
 
 /**
@@ -39,9 +39,9 @@ public:
  *
  * @brief	Invalid parameter specified.
  */
-class eFlowInval        : public eFlowBase {
+class eFlowInval : public eFlowBase {
 public:
-	eFlowInval(const std::string& __arg) : eFlowBase(__arg) {};
+  eFlowInval(const std::string &__arg) : eFlowBase(__arg){};
 };
 
 /**
@@ -50,14 +50,12 @@ public:
  *
  * @brief	Element not found.
  */
-class eFlowNotFound     : public eFlowBase {
+class eFlowNotFound : public eFlowBase {
 public:
-	eFlowNotFound(const std::string& __arg) : eFlowBase(__arg) {};
+  eFlowNotFound(const std::string &__arg) : eFlowBase(__arg){};
 };
 
 }; // namespace exceptions
-
-
 
 class cflowentry; // forward declaration
 
@@ -65,36 +63,29 @@ class cflowentry; // forward declaration
  * @ingroup common_howto_ethswctld
  * @interface cflowentry_env
  *
- * @brief	Defines the environment expected by an instance of class cflowentry.
+ * @brief	Defines the environment expected by an instance of class
+ * cflowentry.
  */
 class cflowentry_env {
-	friend class cflowentry;
-public:
-
-	/**
-	 * @brief	cflowentry_env destructor
-	 */
-	virtual
-	~cflowentry_env()
-	{};
+  friend class cflowentry;
 
 public:
+  /**
+   * @brief	cflowentry_env destructor
+   */
+  virtual ~cflowentry_env(){};
 
-	/**
-	 * @brief	Called once the timer for this flow entry has expired.
-	 */
-	virtual void
-	flow_timer_expired(
-			const cflowentry& entry) = 0;
+public:
+  /**
+   * @brief	Called once the timer for this flow entry has expired.
+   */
+  virtual void flow_timer_expired(const cflowentry &entry) = 0;
 
-	/**
-	 *
-	 */
-	virtual rofl::crofdpt&
-	set_dpt(
-			const rofl::cdptid& dptid) = 0;
+  /**
+   *
+   */
+  virtual rofl::crofdpt &set_dpt(const rofl::cdptid &dptid) = 0;
 };
-
 
 /**
  * @ingroup common_howto_ethswctld
@@ -114,121 +105,100 @@ public:
  */
 class cflowentry : public rofl::cthread_env {
 public:
+  /**
+   * @brief	cflowentry constructor
+   *
+   * @param env environment for this cflowentry instance
+   * @param dptid rofl-common's internal datapath handle
+   * @param src ethernet hardware address used by source station
+   * @param dst ethernet hardware address used by destination station
+   * @param port_no OpenFlow port number of port pointing towards the station
+   */
+  cflowentry(cflowentry_env *flowenv, const rofl::cdptid &dptid,
+             const rofl::caddress_ll &src, const rofl::caddress_ll &dst,
+             uint32_t port_no);
 
-	/**
-	 * @brief	cflowentry constructor
-	 *
-	 * @param env environment for this cflowentry instance
-	 * @param dptid rofl-common's internal datapath handle
-	 * @param src ethernet hardware address used by source station
-	 * @param dst ethernet hardware address used by destination station
-	 * @param port_no OpenFlow port number of port pointing towards the station
-	 */
-	cflowentry(
-			cflowentry_env *flowenv,
-			const rofl::cdptid& dptid,
-			const rofl::caddress_ll& src,
-			const rofl::caddress_ll& dst,
-			uint32_t port_no);
-
-	/**
-	 * @brief	cflowentry destructor
-	 */
-	virtual
-	~cflowentry();
+  /**
+   * @brief	cflowentry destructor
+   */
+  virtual ~cflowentry();
 
 public:
+  /**
+   * @name	Access to class parameters
+   */
 
-	/**
-	 * @name	Access to class parameters
-	 */
+  /**@{*/
 
-	/**@{*/
+  /**
+   * @brief	Returns outgoing port number stored for this flow
+   *
+   * @return OpenFlow port number of port pointing towards destination
+   */
+  uint32_t get_out_port_no() const { return port_no; };
 
-	/**
-	 * @brief	Returns outgoing port number stored for this flow
-	 *
-	 * @return OpenFlow port number of port pointing towards destination
-	 */
-	uint32_t
-	get_out_port_no() const
-	{ return port_no; };
+  /**
+   * @brief	Update port number stored for this flow
+   *
+   * @param port_no new OpenFlow port number of port pointing towards
+   * destination
+   */
+  void set_out_port_no(uint32_t out_port_no);
 
-	/**
-	 * @brief	Update port number stored for this flow
-	 *
-	 * @param port_no new OpenFlow port number of port pointing towards destination
-	 */
-	void
-	set_out_port_no(
-			uint32_t out_port_no);
+  /**
+   * @brief	Returns ethernet hardware address identifying the destination
+   * host
+   *
+   * @return host ethernet hardware address of destination host
+   */
+  const rofl::caddress_ll &get_dst() const { return dst; };
 
-	/**
-	 * @brief	Returns ethernet hardware address identifying the destination host
-	 *
-	 * @return host ethernet hardware address of destination host
-	 */
-	const rofl::caddress_ll&
-	get_dst() const
-	{ return dst; };
+  /**
+   * @brief	Returns ethernet hardware address identifying the source host
+   *
+   * @return host ethernet hardware address of source host
+   */
+  const rofl::caddress_ll &get_src() const { return src; };
 
-	/**
-	 * @brief	Returns ethernet hardware address identifying the source host
-	 *
-	 * @return host ethernet hardware address of source host
-	 */
-	const rofl::caddress_ll&
-	get_src() const
-	{ return src; };
-
-	/**@}*/
+  /**@}*/
 
 private:
+  void flow_mod_add();
 
-	void
-	flow_mod_add();
+  void flow_mod_delete();
 
-	void
-	flow_mod_delete();
-
-	void
-	flow_mod_modify();
+  void flow_mod_modify();
 
 private:
-
-	virtual void
-	handle_timeout(
-			cthread& thread, uint32_t timer_id);
+  virtual void handle_timeout(cthread &thread, uint32_t timer_id);
 
 public:
+  /**
+   * @brief	Output operator
+   */
+  friend std::ostream &operator<<(std::ostream &os, const cflowentry &entry) {
+    os << "<cflowentry portno: " << (unsigned int)entry.port_no << " >"
+       << std::endl;
 
-	/**
-	 * @brief	Output operator
-	 */
-	friend std::ostream&
-	operator<< (std::ostream& os, const cflowentry& entry) {
-		os << "<cflowentry portno: " << (unsigned int)entry.port_no << " >" << std::endl;
-		
-		os << entry.src;
-		os << entry.dst;
-		return os;
-	};
+    os << entry.src;
+    os << entry.dst;
+    return os;
+  };
 
 private:
+  static const long CFLOWENTRY_DEFAULT_TIMEOUT = 60;
 
-	static const long CFLOWENTRY_DEFAULT_TIMEOUT = 60;
+  enum cflowentry_timer_t {
+    CFLOWENTRY_ENTRY_EXPIRED = 1,
+  };
 
-	enum cflowentry_timer_t {
-		CFLOWENTRY_ENTRY_EXPIRED = 1,
-	};
-
-	cflowentry_env*     env;
-	rofl::cdptid        dptid;
-	uint32_t            port_no;
-	rofl::caddress_ll   src;
-	rofl::caddress_ll   dst;
-	int                 entry_timeout;
-	rofl::cthread       thread;
+  cflowentry_env *env;
+  rofl::cdptid dptid;
+  uint32_t port_no;
+  rofl::caddress_ll src;
+  rofl::caddress_ll dst;
+  int entry_timeout;
+  rofl::cthread thread;
 };
 
 }; // namespace ethswctld

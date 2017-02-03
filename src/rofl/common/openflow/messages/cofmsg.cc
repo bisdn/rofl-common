@@ -6,59 +6,48 @@
 
 using namespace rofl::openflow;
 
-size_t
-cofmsg::length() const
-{
-	return sizeof(struct rofl::openflow::ofp_header);
+size_t cofmsg::length() const {
+  return sizeof(struct rofl::openflow::ofp_header);
 }
 
+void cofmsg::pack(uint8_t *buf, size_t buflen) {
+  len = length(); // call overwritten length() method here
 
+  if ((0 == buf) || (0 == buflen))
+    return;
 
-void
-cofmsg::pack(
-		uint8_t *buf, size_t buflen)
-{
-	len = length(); // call overwritten length() method here
+  if (buflen < cofmsg::length())
+    throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
-	if ((0 == buf) || (0 == buflen))
-		return;
+  struct rofl::openflow::ofp_header *hdr =
+      (struct rofl::openflow::ofp_header *)buf;
 
-	if (buflen < cofmsg::length())
-		throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
-
-	struct rofl::openflow::ofp_header* hdr =
-			(struct rofl::openflow::ofp_header*)buf;
-
-	hdr->version = version;
-	hdr->type    = type;
-	hdr->length  = htobe16(len);
-	hdr->xid     = htobe32(xid);
+  hdr->version = version;
+  hdr->type = type;
+  hdr->length = htobe16(len);
+  hdr->xid = htobe32(xid);
 }
 
+void cofmsg::unpack(uint8_t *buf, size_t buflen) {
+  if ((0 == buf) || (0 == buflen))
+    return;
 
+  if (buflen < cofmsg::length())
+    throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__,
+                            __LINE__);
 
-void
-cofmsg::unpack(
-		uint8_t *buf, size_t buflen)
-{
-	if ((0 == buf) || (0 == buflen))
-		return;
+  struct rofl::openflow::ofp_header *hdr =
+      (struct rofl::openflow::ofp_header *)buf;
 
-	if (buflen < cofmsg::length())
-		throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+  version = hdr->version;
+  type = hdr->type;
+  len = be16toh(hdr->length);
+  xid = be32toh(hdr->xid);
 
-	struct rofl::openflow::ofp_header* hdr =
-			(struct rofl::openflow::ofp_header*)buf;
-
-	version = hdr->version;
-	type    = hdr->type;
-	len     = be16toh(hdr->length);
-	xid     = be32toh(hdr->xid);
-
-	if (len < cofmsg::length())
-		throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
-	if (len > buflen)
-		throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+  if (len < cofmsg::length())
+    throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__,
+                            __LINE__);
+  if (len > buflen)
+    throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__,
+                            __LINE__);
 }
-
-

@@ -9,9 +9,9 @@
 #define CCTLID_H_
 
 #include <inttypes.h>
-#include <string>
-#include <iostream>
 #include <ios>
+#include <iostream>
+#include <string>
 
 namespace rofl {
 
@@ -21,104 +21,79 @@ namespace rofl {
  */
 class cctlid {
 
-	uint64_t 	id;
-	std::string s_id;
+  uint64_t id;
+  std::string s_id;
 
 public:
+  /**
+   *
+   */
+  explicit cctlid(uint64_t ctlid = 0) : id(ctlid) {
+    std::stringstream sstr;
+    sstr << id;
+    s_id = sstr.str();
+  };
 
-	/**
-	 *
-	 */
-	explicit
-	cctlid(
-			uint64_t ctlid = 0) :
-				id(ctlid) {
-		std::stringstream sstr; sstr << id;
-		s_id = sstr.str();
-	};
+  /**
+   *
+   */
+  ~cctlid(){};
 
-	/**
-	 *
-	 */
-	~cctlid() {};
+  /**
+   *
+   */
+  cctlid(cctlid const &ctlid) { *this = ctlid; };
 
-	/**
-	 *
-	 */
-	cctlid(
-			cctlid const& ctlid) {
-		*this = ctlid;
-	};
+  /**
+   *
+   */
+  cctlid &operator=(cctlid const &ctlid) {
+    if (this == &ctlid)
+      return *this;
+    id = ctlid.id;
+    s_id = ctlid.s_id;
+    return *this;
+  };
 
-	/**
-	 *
-	 */
-	cctlid&
-	operator= (
-			cctlid const& ctlid) {
-		if (this == &ctlid)
-			return *this;
-		id = ctlid.id;
-		s_id = ctlid.s_id;
-		return *this;
-	};
+  /**
+   *
+   */
+  bool operator==(cctlid const &ctlid) const { return (id == ctlid.id); };
 
-	/**
-	 *
-	 */
-	bool
-	operator== (
-			cctlid const& ctlid) const {
-		return (id == ctlid.id);
-	};
+  /**
+   *
+   */
+  bool operator!=(cctlid const &ctlid) const { return (id != ctlid.id); };
 
-	/**
-	 *
-	 */
-	bool
-	operator!= (
-			cctlid const& ctlid) const {
-		return (id != ctlid.id);
-	};
-
-	/**
-	 *
-	 */
-	bool
-	operator< (
-			cctlid const& ctlid) const {
-		return (id < ctlid.id);
-	};
+  /**
+   *
+   */
+  bool operator<(cctlid const &ctlid) const { return (id < ctlid.id); };
 
 public:
+  /**
+   *
+   */
+  const uint64_t &get_ctlid() const { return id; };
 
-	/**
-	 *
-	 */
-	const uint64_t&
-	get_ctlid() const { return id; };
-
-	/**
-	 *
-	 */
-	const std::string&
-	get_ctlid_s() const { return s_id; };
+  /**
+   *
+   */
+  const std::string &get_ctlid_s() const { return s_id; };
 
 public:
+  friend std::ostream &operator<<(std::ostream &os, const cctlid &ctlid) {
+    os << "<cctlid:" << std::hex << (unsigned long long)ctlid.id << std::dec
+       << "(" << ctlid.s_id << ")"
+       << " >" << std::endl;
+    return os;
+  };
 
-	friend std::ostream&
-	operator<< (std::ostream& os, const cctlid& ctlid) {
-		os << "<cctlid:" << std::hex << (unsigned long long)ctlid.id << std::dec
-				<< "(" << ctlid.s_id << ")" << " >" << std::endl;
-		return os;
-	};
-
-	std::string
-	str() const {
-		std::stringstream ss;
-		ss << id;
-		return ss.str();
-	};
+  std::string str() const {
+    std::stringstream ss;
+    ss << id;
+    return ss.str();
+  };
 };
 
 }; // end of namespace
