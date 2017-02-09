@@ -1491,6 +1491,8 @@ crofsock::send_from_queue()
 					/* overall length of this message */
 					txlen = msg->length();
 
+					memset(txbuffer.somem(), 0, txlen);
+
 					/* pack message into txbuffer */
 					msg->pack(txbuffer.somem(), txlen);
 
@@ -1552,6 +1554,10 @@ crofsock::send_from_queue()
 						tx_fragment_pending = false;
 						txqueue_pending_pkts--;
 					}
+
+					VLOG(3) << __FUNCTION__ << ": sent " << nbytes << " bytes msg_bytes_sent="
+						<< msg_bytes_sent << " tx_fragment_pending=" << tx_fragment_pending <<
+						" txqueue_pending_pkts=" << txqueue_pending_pkts;
 				}
 
 			}
