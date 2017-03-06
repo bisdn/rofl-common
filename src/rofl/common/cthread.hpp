@@ -23,6 +23,7 @@
 #include <unistd.h>
 #include <unistd.h>
 
+#include <atomic>
 #include <cassert>
 #include <inttypes.h>
 #include <iostream>
@@ -52,43 +53,14 @@ class cthread_env {
   friend class cthread;
 
 public:
-  static cthread_env &call_env(cthread_env *env) {
-    AcquireReadLock lock(cthread_env::thread_envs_lock);
-    if (cthread_env::thread_envs.find(env) == cthread_env::thread_envs.end()) {
-      throw eThreadNotFound(
-          "cthread_env::call_env() cthread_env instance not found");
-    }
-    return *(env);
-  };
-
-public:
-  virtual ~cthread_env() {
-    AcquireReadWriteLock lock(cthread_env::thread_envs_lock);
-    cthread_env::thread_envs.erase(this);
-  };
-  cthread_env() {
-    AcquireReadWriteLock lock(cthread_env::thread_envs_lock);
-    cthread_env::thread_envs.insert(this);
-  };
+  cthread_env() {}
+  virtual ~cthread_env() {}
 
 protected:
-  virtual void handle_wakeup(cthread &thread) {}
-
-  virtual void handle_timeout(cthread &thread, uint32_t timer_id) {
-    assert(0 && "handle_timeout not overridden");
-  }
-
-  virtual void handle_read_event(cthread &thread, int fd) {
-    assert(0 && "handle_read_event not overridden");
-  }
-
-  virtual void handle_write_event(cthread &thread, int fd) {
-    assert(0 && "handle_write_event not overridden");
-  }
-
-private:
-  static std::set<cthread_env *> thread_envs;
-  static crwlock thread_envs_lock;
+  virtual void handle_wakeup(cthread &thread) = 0;
+  virtual void handle_timeout(cthread &thread, uint32_t timer_id) = 0;
+  virtual void handle_read_event(cthread &thread, int fd) = 0;
+  virtual void handle_write_event(cthread &thread, int fd) = 0;
 };
 
 class cthread {
@@ -115,26 +87,6 @@ public:
    */
   pthread_t get_thread_id() const { return tid; };
 
-  /**
-   *
-   */
-  cthread &set_run_thread(bool run_thread) {
-    AcquireReadWriteLock rwlock(run_thread_lock);
-    this->cthread::run_thread[this] = run_thread;
-    return *this;
-  };
-
-  /**
-   *
-   */
-  bool get_run_thread() const {
-    AcquireReadLock rwlock(run_thread_lock);
-    if (cthread::run_thread.find(this) == cthread::run_thread.end())
-      return false;
-    return run_thread.at(this);
-  };
-
-public:
   /**
    * @brief	Wake up RX thread via rx pipe
    */
@@ -265,12 +217,8 @@ private:
 
 private:
   // true: continue to run worker thread
-  static std::map<const cthread *, bool> run_thread;
+  std::atomic_bool running;
 
-  // rwlock for run_thread
-  static rofl::crwlock run_thread_lock;
-
-private:
   // thread environment
   cthread_env *env;
 

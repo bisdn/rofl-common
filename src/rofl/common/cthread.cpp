@@ -16,20 +16,11 @@
 
 using namespace rofl;
 
-/*static*/ std::set<cthread_env *> cthread_env::thread_envs;
-/*static*/ rofl::crwlock cthread_env::thread_envs_lock;
-/*static*/ std::map<const cthread *, bool> cthread::run_thread;
-/*static*/ rofl::crwlock cthread::run_thread_lock;
 /*static*/ const int cthread::PIPE_READ_FD = 0;
 /*static*/ const int cthread::PIPE_WRITE_FD = 1;
 
 void cthread::initialize() {
-  {
-    /* add boolean parameter run_thread to static map and set it to false */
-    AcquireReadWriteLock lock(cthread::run_thread_lock);
-    cthread::run_thread[this] = false;
-  }
-
+  running = false;
   tid = 0;
 
   // worker thread
@@ -100,14 +91,7 @@ void cthread::release() {
   }
 
   ::close(epfd);
-
   ::close(event_fd);
-
-  {
-    /* remove boolean parameter run_thread from static map */
-    AcquireReadWriteLock lock(cthread::run_thread_lock);
-    cthread::run_thread.erase(this);
-  }
 }
 
 void cthread::add_fd(int fd, bool exception, bool edge_triggered) {
@@ -343,7 +327,7 @@ void cthread::start() {
   switch (state) {
   case STATE_IDLE: {
 
-    set_run_thread(true);
+    running = true;
     if (pthread_create(&tid, NULL, &(cthread::start_loop), this) < 0) {
       throw eSysCall("eSysCall", "pthread_create", __FILE__,
                      __PRETTY_FUNCTION__, __LINE__);
@@ -360,7 +344,7 @@ void cthread::stop() {
   switch (state) {
   case STATE_RUNNING: {
 
-    set_run_thread(false);
+    running = false;
 
     wakeup();
 
@@ -414,7 +398,7 @@ void *cthread::run_loop() {
   sigset_t signal_set;
   sigfillset(&signal_set); // ignore all signals
 
-  while (get_run_thread()) {
+  while (running) {
     try {
 
       struct epoll_event events[64];
@@ -432,7 +416,7 @@ void *cthread::run_loop() {
 
       rc = epoll_pwait(epfd, events, 64, timeout, &signal_set);
 
-      if (not get_run_thread())
+      if (not running)
         goto out;
 
       while (true) {
@@ -449,25 +433,25 @@ void *cthread::run_loop() {
           }
           ordered_timers.erase(ordered_timers.begin());
         } // release lock here
-        if (not get_run_thread())
+        if (not running)
           goto out;
 
-        cthread_env::call_env(env).handle_timeout(*this, timer.get_timer_id());
+        env->handle_timeout(*this, timer.get_timer_id());
       }
 
-      if (not get_run_thread())
+      if (not running)
         goto out;
 
       /* handle file descriptors */
       if (rc > 0) {
         for (int i = 0; i < rc; i++) {
 
-          if (not get_run_thread())
+          if (not running)
             goto out;
 
           if (events[i].data.fd == event_fd) {
 
-            if (not get_run_thread()) {
+            if (not running) {
               return &retval;
             }
 
@@ -475,16 +459,14 @@ void *cthread::run_loop() {
               uint64_t c;
               int rcode = read(event_fd, &c, sizeof(c));
               (void)rcode;
-              cthread_env::call_env(env).handle_wakeup(*this);
+              env->handle_wakeup(*this);
             }
 
           } else {
             if (events[i].events & EPOLLIN)
-              cthread_env::call_env(env).handle_read_event(*this,
-                                                           events[i].data.fd);
+              env->handle_read_event(*this, events[i].data.fd);
             if (events[i].events & EPOLLOUT)
-              cthread_env::call_env(env).handle_write_event(*this,
-                                                            events[i].data.fd);
+              env->handle_write_event(*this, events[i].data.fd);
           }
         }
       } else if (rc < 0) {
