@@ -7,11 +7,4 @@
 
 #include "rofl/common/openflow/experimental/actions/capwap_actions.h"
 
-
 using namespace rofl::openflow::experimental::capwap;
-
-
-
-
-
-

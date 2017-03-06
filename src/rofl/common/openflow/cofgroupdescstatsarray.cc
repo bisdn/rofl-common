@@ -13,91 +13,84 @@
 
 using namespace rofl::openflow;
 
-
-size_t
-cofgroupdescstatsarray::length() const
-{
-	size_t len = 0;
-	for (std::map<uint32_t, cofgroup_desc_stats_reply>::const_iterator
-			it = array.begin(); it != array.end(); ++it) {
-		len += it->second.length();
-	}
-	return len;
+size_t cofgroupdescstatsarray::length() const {
+  size_t len = 0;
+  for (std::map<uint32_t, cofgroup_desc_stats_reply>::const_iterator it =
+           array.begin();
+       it != array.end(); ++it) {
+    len += it->second.length();
+  }
+  return len;
 }
 
+void cofgroupdescstatsarray::pack(uint8_t *buf, size_t buflen) {
+  if ((0 == buf) || (0 == buflen))
+    return;
 
+  if (buflen < length())
+    throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
-void
-cofgroupdescstatsarray::pack(uint8_t *buf, size_t buflen)
-{
-	if ((0 == buf) || (0 == buflen))
-		return;
+  switch (ofp_version) {
+  case rofl::openflow12::OFP_VERSION:
+  case rofl::openflow13::OFP_VERSION: {
 
-	if (buflen < length())
-		throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    for (std::map<uint32_t, cofgroup_desc_stats_reply>::iterator it =
+             array.begin();
+         it != array.end(); ++it) {
+      it->second.pack(buf, it->second.length());
+      buf += it->second.length();
+    }
 
-	switch (ofp_version) {
-	case rofl::openflow12::OFP_VERSION:
-	case rofl::openflow13::OFP_VERSION: {
-
-		for (std::map<uint32_t, cofgroup_desc_stats_reply>::iterator
-				it = array.begin(); it != array.end(); ++it) {
-			it->second.pack(buf, it->second.length());
-			buf += it->second.length();
-		}
-
-	} break;
-	default:
-		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
-	}
+  } break;
+  default:
+    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+  }
 }
 
+void cofgroupdescstatsarray::unpack(uint8_t *buf, size_t buflen) {
+  array.clear();
 
+  switch (ofp_version) {
+  case rofl::openflow12::OFP_VERSION: {
 
-void
-cofgroupdescstatsarray::unpack(uint8_t *buf, size_t buflen)
-{
-	array.clear();
+    while (buflen >= sizeof(struct rofl::openflow12::ofp_group_desc_stats)) {
 
-	switch (ofp_version) {
-	case rofl::openflow12::OFP_VERSION: {
+      size_t length = be16toh(
+          ((struct rofl::openflow12::ofp_group_desc_stats *)buf)->length);
 
-		while (buflen >= sizeof(struct rofl::openflow12::ofp_group_desc_stats)) {
+      if (length < sizeof(struct rofl::openflow12::ofp_group_desc_stats))
+        throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
-			size_t length = be16toh(((struct rofl::openflow12::ofp_group_desc_stats*)buf)->length);
+      uint32_t group_id = be32toh(
+          ((struct rofl::openflow12::ofp_group_desc_stats *)buf)->group_id);
 
-			if (length < sizeof(struct rofl::openflow12::ofp_group_desc_stats))
-				throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+      add_group_desc_stats(group_id).unpack(buf, length);
 
-			uint32_t group_id = be32toh(((struct rofl::openflow12::ofp_group_desc_stats*)buf)->group_id);
+      buf += length;
+      buflen -= length;
+    }
+  } break;
+  case rofl::openflow13::OFP_VERSION: {
 
-			add_group_desc_stats(group_id).unpack(buf, length);
+    while (buflen >= sizeof(struct rofl::openflow13::ofp_group_desc)) {
 
-			buf += length;
-			buflen -= length;
-		}
-	} break;
-	case rofl::openflow13::OFP_VERSION: {
+      size_t length =
+          be16toh(((struct rofl::openflow13::ofp_group_desc *)buf)->length);
 
-		while (buflen >= sizeof(struct rofl::openflow13::ofp_group_desc)) {
+      if (length < sizeof(struct rofl::openflow13::ofp_group_desc))
+        throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
-			size_t length = be16toh(((struct rofl::openflow13::ofp_group_desc*)buf)->length);
+      uint32_t group_id =
+          be32toh(((struct rofl::openflow13::ofp_group_desc *)buf)->group_id);
 
-			if (length < sizeof(struct rofl::openflow13::ofp_group_desc))
-				throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+      add_group_desc_stats(group_id).unpack(buf, length);
 
-			uint32_t group_id = be32toh(((struct rofl::openflow13::ofp_group_desc*)buf)->group_id);
-
-			add_group_desc_stats(group_id).unpack(buf, length);
-
-			buf += length;
-			buflen -= length;
-		}
-	} break;
-	default:
-		throw eBadRequestBadVersion("eBadRequestBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
-	}
+      buf += length;
+      buflen -= length;
+    }
+  } break;
+  default:
+    throw eBadRequestBadVersion("eBadRequestBadVersion", __FILE__,
+                                __PRETTY_FUNCTION__, __LINE__);
+  }
 }
-
-
-

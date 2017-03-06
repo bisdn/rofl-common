@@ -23,19 +23,14 @@ namespace openflow {
 
 class base {
 public:
-	static uint32_t
-	get_ofp_no_buffer(uint8_t ofp_version);
+  static uint32_t get_ofp_no_buffer(uint8_t ofp_version);
 
-	static uint32_t
-	get_ofpp_flood_port(uint8_t ofp_version);
+  static uint32_t get_ofpp_flood_port(uint8_t ofp_version);
 
-	static uint32_t
-	get_ofpp_controller_port(uint8_t ofp_version);
+  static uint32_t get_ofpp_controller_port(uint8_t ofp_version);
 
-	static uint8_t
-	get_ofptt_all(uint8_t ofp_version);
+  static uint8_t get_ofptt_all(uint8_t ofp_version);
 };
-
 };
 };
 

@@ -11,23 +11,22 @@
 #include "rofl/common/openflow/coxmatch.h"
 
 #ifdef ROFL_EXPERIMENTAL
-	#include "rofl/common/openflow/experimental/matches/gre_matches.h"
-	#include "rofl/common/openflow/experimental/matches/gtp_matches.h"
-	#include "rofl/common/openflow/experimental/matches/pppoe_matches.h"
+#include "rofl/common/openflow/experimental/matches/gre_matches.h"
+#include "rofl/common/openflow/experimental/matches/gtp_matches.h"
+#include "rofl/common/openflow/experimental/matches/pppoe_matches.h"
 #endif
-
 
 namespace rofl {
 namespace openflow {
 
-
 class coxmatch_output {
-	coxmatch oxm;
-public:
-	coxmatch_output(coxmatch const& oxm) : oxm(oxm) {};
+  coxmatch oxm;
 
-	friend std::ostream&
-	operator<<(std::ostream& os, coxmatch_output const& oxm_output) {
+public:
+  coxmatch_output(coxmatch const &oxm) : oxm(oxm){};
+
+  friend std::ostream &operator<<(std::ostream &os,
+                                  coxmatch_output const &oxm_output) {
 #if 0
 		coxmatch const& oxm = oxm_output.oxm;
 		switch (oxm.get_oxm_class()) {
@@ -160,15 +159,11 @@ public:
 		}
 #endif
 
-		return os;
-	};
+    return os;
+  };
 };
-
 
 }; // end of namespace openflow
 }; // end of namespace rofl
-
-
-
 
 #endif /* COXMATCH_OUTPUT_H_ */

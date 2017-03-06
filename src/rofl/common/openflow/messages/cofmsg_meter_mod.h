@@ -13,8 +13,8 @@
 #ifndef COFMSG_METER_MOD_H
 #define COFMSG_METER_MOD_H 1
 
-#include "rofl/common/openflow/messages/cofmsg.h"
 #include "rofl/common/openflow/cofmeterbands.h"
+#include "rofl/common/openflow/messages/cofmsg.h"
 
 namespace rofl {
 namespace openflow {
@@ -22,150 +22,113 @@ namespace openflow {
 /**
  *
  */
-class cofmsg_meter_mod :
-		public cofmsg
-{
+class cofmsg_meter_mod : public cofmsg {
 public:
+  /**
+   *
+   */
+  virtual ~cofmsg_meter_mod();
 
-	/**
-	 *
-	 */
-	virtual
-	~cofmsg_meter_mod();
+  /**
+   *
+   */
+  cofmsg_meter_mod(uint8_t of_version = rofl::openflow::OFP_VERSION_UNKNOWN,
+                   uint32_t xid = 0, uint16_t command = 0, uint16_t flags = 0,
+                   uint32_t meter_id = 0,
+                   const rofl::openflow::cofmeter_bands &mbs =
+                       rofl::openflow::cofmeter_bands());
 
-	/**
-	 *
-	 */
-	cofmsg_meter_mod(
-			uint8_t of_version = rofl::openflow::OFP_VERSION_UNKNOWN,
-			uint32_t xid = 0,
-			uint16_t command = 0,
-			uint16_t flags = 0,
-			uint32_t meter_id = 0,
-			const rofl::openflow::cofmeter_bands& mbs = rofl::openflow::cofmeter_bands());
+  /**
+   *
+   */
+  cofmsg_meter_mod(const cofmsg_meter_mod &msg);
 
-	/**
-	 *
-	 */
-	cofmsg_meter_mod(
-			const cofmsg_meter_mod& msg);
-
-	/**
-	 *
-	 */
-	cofmsg_meter_mod&
-	operator= (
-			const cofmsg_meter_mod& msg);
+  /**
+   *
+   */
+  cofmsg_meter_mod &operator=(const cofmsg_meter_mod &msg);
 
 public:
+  /**
+   *
+   */
+  virtual size_t length() const;
 
-	/**
-	 *
-	 */
-	virtual size_t
-	length() const;
+  /**
+   *
+   */
+  virtual void pack(uint8_t *buf = (uint8_t *)0, size_t buflen = 0);
 
-	/**
-	 *
-	 */
-	virtual void
-	pack(
-			uint8_t *buf = (uint8_t*)0, size_t buflen = 0);
-
-	/**
-	 *
-	 */
-	virtual void
-	unpack(
-			uint8_t *buf, size_t buflen);
+  /**
+   *
+   */
+  virtual void unpack(uint8_t *buf, size_t buflen);
 
 public:
+  /**
+   *
+   */
+  uint16_t get_command() const { return command; };
 
-	/**
-	 *
-	 */
-	uint16_t
-	get_command() const
-	{ return command; };
+  /**
+   *
+   */
+  void set_command(uint16_t command) { this->command = command; };
 
-	/**
-	 *
-	 */
-	void
-	set_command(
-			uint16_t command)
-	{ this->command = command; };
+  /**
+   *
+   */
+  uint16_t get_flags() const { return flags; };
 
-	/**
-	 *
-	 */
-	uint16_t
-	get_flags() const
-	{ return flags; };
+  /**
+   *
+   */
+  void set_flags(uint16_t flags) { this->flags = flags; };
 
-	/**
-	 *
-	 */
-	void
-	set_flags(
-			uint16_t flags)
-	{ this->flags = flags; };
+  /**
+   *
+   */
+  uint32_t get_meter_id() const { return meter_id; };
 
-	/**
-	 *
-	 */
-	uint32_t
-	get_meter_id() const
-	{ return meter_id; };
+  /**
+   *
+   */
+  void set_meter_id(uint32_t meter_id) { this->meter_id = meter_id; };
 
-	/**
-	 *
-	 */
-	void
-	set_meter_id(
-			uint32_t meter_id)
-	{ this->meter_id = meter_id; };
+  /**
+   *
+   */
+  const rofl::openflow::cofmeter_bands &get_meter_bands() const {
+    return meter_bands;
+  };
 
-	/**
-	 *
-	 */
-	const rofl::openflow::cofmeter_bands&
-	get_meter_bands() const
-	{ return meter_bands; };
-
-	/**
-	 *
-	 */
-	rofl::openflow::cofmeter_bands&
-	set_meter_bands()
-	{ return meter_bands; };
+  /**
+   *
+   */
+  rofl::openflow::cofmeter_bands &set_meter_bands() { return meter_bands; };
 
 public:
+  friend std::ostream &operator<<(std::ostream &os,
+                                  const cofmsg_meter_mod &msg) {
+    os << dynamic_cast<const cofmsg &>(msg);
+    os << "<cofmsg_meter >" << std::endl;
 
-	friend std::ostream&
-	operator<< (std::ostream& os, const cofmsg_meter_mod& msg) {
-		os << dynamic_cast<const cofmsg&>( msg );
-		os << "<cofmsg_meter >" << std::endl;
-		
-		os << msg.meter_bands;
-		return os;
-	};
+    os << msg.meter_bands;
+    return os;
+  };
 
-	virtual std::string
-	str() const {
-		std::stringstream ss;
-		ss << cofmsg::str() << "-Meter-Mod- ";
-		return ss.str();
-	};
+  virtual std::string str() const {
+    std::stringstream ss;
+    ss << cofmsg::str() << "-Meter-Mod- ";
+    return ss.str();
+  };
 
 private:
-
-	uint16_t							command;
-	uint16_t							flags;
-	uint32_t							meter_id;
-	rofl::openflow::cofmeter_bands		meter_bands;
+  uint16_t command;
+  uint16_t flags;
+  uint32_t meter_id;
+  rofl::openflow::cofmeter_bands meter_bands;
 };
-
 
 } // end of namespace openflow
 } // end of namespace rofl

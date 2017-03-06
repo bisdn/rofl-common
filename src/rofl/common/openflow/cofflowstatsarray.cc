@@ -13,109 +13,101 @@
 
 using namespace rofl::openflow;
 
-
-size_t
-cofflowstatsarray::length() const
-{
-	size_t len = 0;
-	for (std::map<uint32_t, cofflow_stats_reply>::const_iterator
-			it = array.begin(); it != array.end(); ++it) {
-		len += it->second.length();
-	}
-	return len;
+size_t cofflowstatsarray::length() const {
+  size_t len = 0;
+  for (std::map<uint32_t, cofflow_stats_reply>::const_iterator it =
+           array.begin();
+       it != array.end(); ++it) {
+    len += it->second.length();
+  }
+  return len;
 }
 
+void cofflowstatsarray::pack(uint8_t *buf, size_t buflen) {
+  if ((0 == buf) || (0 == buflen))
+    return;
 
+  if (buflen < length())
+    throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
-void
-cofflowstatsarray::pack(uint8_t *buf, size_t buflen)
-{
-	if ((0 == buf) || (0 == buflen))
-		return;
+  switch (ofp_version) {
+  case rofl::openflow10::OFP_VERSION:
+  case rofl::openflow12::OFP_VERSION:
+  case rofl::openflow13::OFP_VERSION: {
 
-	if (buflen < length())
-		throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    for (std::map<uint32_t, cofflow_stats_reply>::iterator it = array.begin();
+         it != array.end(); ++it) {
+      it->second.pack(buf, it->second.length());
+      buf += it->second.length();
+    }
 
-	switch (ofp_version) {
-	case rofl::openflow10::OFP_VERSION:
-	case rofl::openflow12::OFP_VERSION:
-	case rofl::openflow13::OFP_VERSION: {
-
-		for (std::map<uint32_t, cofflow_stats_reply>::iterator
-				it = array.begin(); it != array.end(); ++it) {
-			it->second.pack(buf, it->second.length());
-			buf += it->second.length();
-		}
-
-	} break;
-	default:
-		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
-	}
+  } break;
+  default:
+    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+  }
 }
 
+void cofflowstatsarray::unpack(uint8_t *buf, size_t buflen) {
+  array.clear();
 
+  switch (ofp_version) {
+  case rofl::openflow10::OFP_VERSION: {
 
-void
-cofflowstatsarray::unpack(uint8_t *buf, size_t buflen)
-{
-	array.clear();
+    uint32_t flow_id = 0;
 
-	switch (ofp_version) {
-	case rofl::openflow10::OFP_VERSION: {
+    while (buflen >= sizeof(struct rofl::openflow10::ofp_flow_stats)) {
 
-		uint32_t flow_id = 0;
+      add_flow_stats(flow_id++).unpack(
+          buf, sizeof(struct rofl::openflow10::ofp_flow_stats));
 
-		while (buflen >= sizeof(struct rofl::openflow10::ofp_flow_stats)) {
+      buf += sizeof(struct rofl::openflow10::ofp_flow_stats);
+      buflen -= sizeof(struct rofl::openflow10::ofp_flow_stats);
+    }
+  } break;
+  case rofl::openflow12::OFP_VERSION: {
 
-			add_flow_stats(flow_id++).unpack(buf, sizeof(struct rofl::openflow10::ofp_flow_stats));
+    uint32_t flow_id = 0;
 
-			buf += sizeof(struct rofl::openflow10::ofp_flow_stats);
-			buflen -= sizeof(struct rofl::openflow10::ofp_flow_stats);
-		}
-	} break;
-	case rofl::openflow12::OFP_VERSION: {
+    while (buflen >= sizeof(struct rofl::openflow12::ofp_flow_stats)) {
 
-		uint32_t flow_id = 0;
+      struct rofl::openflow12::ofp_flow_stats *flow_stats =
+          (struct rofl::openflow12::ofp_flow_stats *)buf;
 
-		while (buflen >= sizeof(struct rofl::openflow12::ofp_flow_stats)) {
+      uint16_t length = be16toh(flow_stats->length);
 
-			struct rofl::openflow12::ofp_flow_stats* flow_stats = (struct rofl::openflow12::ofp_flow_stats*)buf;
+      if (length < sizeof(struct rofl::openflow12::ofp_flow_stats))
+        throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
-			uint16_t length = be16toh(flow_stats->length);
+      add_flow_stats(flow_id++).unpack(buf, length);
 
-			if (length < sizeof(struct rofl::openflow12::ofp_flow_stats))
-				throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+      buf += length;
+      buflen -= length;
+    }
 
-			add_flow_stats(flow_id++).unpack(buf, length);
+  } break;
+  case rofl::openflow13::OFP_VERSION: {
 
-			buf += length;
-			buflen -= length;
-		}
+    uint32_t flow_id = 0;
 
-	} break;
-	case rofl::openflow13::OFP_VERSION: {
+    while (buflen >= sizeof(struct rofl::openflow13::ofp_flow_stats)) {
 
-		uint32_t flow_id = 0;
+      struct rofl::openflow13::ofp_flow_stats *flow_stats =
+          (struct rofl::openflow13::ofp_flow_stats *)buf;
 
-		while (buflen >= sizeof(struct rofl::openflow13::ofp_flow_stats)) {
+      uint16_t length = be16toh(flow_stats->length);
 
-			struct rofl::openflow13::ofp_flow_stats* flow_stats = (struct rofl::openflow13::ofp_flow_stats*)buf;
+      if (length < sizeof(struct rofl::openflow13::ofp_flow_stats))
+        throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
-			uint16_t length = be16toh(flow_stats->length);
+      add_flow_stats(flow_id++).unpack(buf, length);
 
-			if (length < sizeof(struct rofl::openflow13::ofp_flow_stats))
-				throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+      buf += length;
+      buflen -= length;
+    }
 
-			add_flow_stats(flow_id++).unpack(buf, length);
-
-			buf += length;
-			buflen -= length;
-		}
-
-	} break;
-	default:
-		throw eBadRequestBadVersion("eBadRequestBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
-	}
+  } break;
+  default:
+    throw eBadRequestBadVersion("eBadRequestBadVersion", __FILE__,
+                                __PRETTY_FUNCTION__, __LINE__);
+  }
 }
-
-

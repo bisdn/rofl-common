@@ -2,157 +2,148 @@
 
 using namespace rofl::openflow;
 
-size_t
-cofmsg_features_reply::length() const
-{
-	switch (get_version()) {
-	case rofl::openflow10::OFP_VERSION: {
-		return (sizeof(struct rofl::openflow10::ofp_switch_features) + ports.length());
-	} break;
-	case rofl::openflow12::OFP_VERSION: {
-		return (sizeof(struct rofl::openflow12::ofp_switch_features) + ports.length());
-	} break;
-	default: {
-		return (sizeof(struct rofl::openflow13::ofp_switch_features));
-	};
-	}
+size_t cofmsg_features_reply::length() const {
+  switch (get_version()) {
+  case rofl::openflow10::OFP_VERSION: {
+    return (sizeof(struct rofl::openflow10::ofp_switch_features) +
+            ports.length());
+  } break;
+  case rofl::openflow12::OFP_VERSION: {
+    return (sizeof(struct rofl::openflow12::ofp_switch_features) +
+            ports.length());
+  } break;
+  default: { return (sizeof(struct rofl::openflow13::ofp_switch_features)); };
+  }
 }
 
+void cofmsg_features_reply::pack(uint8_t *buf, size_t buflen) {
+  cofmsg::pack(buf, buflen);
 
+  if ((0 == buf) || (0 == buflen))
+    return;
 
-void
-cofmsg_features_reply::pack(
-		uint8_t *buf, size_t buflen)
-{
-	cofmsg::pack(buf, buflen);
+  if (buflen < get_length())
+    throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
-	if ((0 == buf) || (0 == buflen))
-		return;
+  switch (get_version()) {
+  case rofl::openflow10::OFP_VERSION: {
 
-	if (buflen < get_length())
-		throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    struct rofl::openflow10::ofp_switch_features *hdr =
+        (struct rofl::openflow10::ofp_switch_features *)buf;
 
-	switch (get_version()) {
-	case rofl::openflow10::OFP_VERSION: {
+    hdr->datapath_id = htobe64(dpid);
+    hdr->n_buffers = htobe32(n_buffers);
+    hdr->n_tables = n_tables;
+    hdr->capabilities = htobe32(capabilities);
+    hdr->actions = htobe32(actions);
 
-		struct rofl::openflow10::ofp_switch_features* hdr =
-				(struct rofl::openflow10::ofp_switch_features*)buf;
+    ports.pack(buf + sizeof(struct rofl::openflow10::ofp_switch_features),
+               buflen - sizeof(struct rofl::openflow10::ofp_switch_features));
 
-		hdr->datapath_id  = htobe64(dpid);
-		hdr->n_buffers    = htobe32(n_buffers);
-		hdr->n_tables     = n_tables;
-		hdr->capabilities = htobe32(capabilities);
-		hdr->actions      = htobe32(actions);
+  } break;
+  case rofl::openflow12::OFP_VERSION: {
 
-		ports.pack(buf + sizeof(struct rofl::openflow10::ofp_switch_features),
-				buflen - sizeof(struct rofl::openflow10::ofp_switch_features));
+    struct rofl::openflow12::ofp_switch_features *hdr =
+        (struct rofl::openflow12::ofp_switch_features *)buf;
 
-	} break;
-	case rofl::openflow12::OFP_VERSION: {
+    hdr->datapath_id = htobe64(dpid);
+    hdr->n_buffers = htobe32(n_buffers);
+    hdr->n_tables = n_tables;
+    hdr->capabilities = htobe32(capabilities);
 
-		struct rofl::openflow12::ofp_switch_features* hdr =
-				(struct rofl::openflow12::ofp_switch_features*)buf;
+    ports.pack(buf + sizeof(struct rofl::openflow12::ofp_switch_features),
+               buflen - sizeof(struct rofl::openflow12::ofp_switch_features));
 
-		hdr->datapath_id  = htobe64(dpid);
-		hdr->n_buffers    = htobe32(n_buffers);
-		hdr->n_tables     = n_tables;
-		hdr->capabilities = htobe32(capabilities);
+  } break;
+  default: {
 
-		ports.pack(buf + sizeof(struct rofl::openflow12::ofp_switch_features),
-				buflen - sizeof(struct rofl::openflow12::ofp_switch_features));
+    struct rofl::openflow13::ofp_switch_features *hdr =
+        (struct rofl::openflow13::ofp_switch_features *)buf;
 
-	} break;
-	default: {
-
-		struct rofl::openflow13::ofp_switch_features* hdr =
-				(struct rofl::openflow13::ofp_switch_features*)buf;
-
-		hdr->datapath_id  = htobe64(dpid);
-		hdr->n_buffers    = htobe32(n_buffers);
-		hdr->n_tables     = n_tables;
-		hdr->capabilities = htobe32(capabilities);
-		hdr->auxiliary_id = auxid;
-
-	};
-	}
+    hdr->datapath_id = htobe64(dpid);
+    hdr->n_buffers = htobe32(n_buffers);
+    hdr->n_tables = n_tables;
+    hdr->capabilities = htobe32(capabilities);
+    hdr->auxiliary_id = auxid;
+  };
+  }
 }
 
+void cofmsg_features_reply::unpack(uint8_t *buf, size_t buflen) {
+  cofmsg::unpack(buf, buflen);
 
+  this->ports.clear();
+  this->ports.set_version(get_version());
 
-void
-cofmsg_features_reply::unpack(
-		uint8_t *buf, size_t buflen)
-{
-	cofmsg::unpack(buf, buflen);
+  if ((0 == buf) || (0 == buflen))
+    return;
 
-	this->ports.clear();
-	this->ports.set_version(get_version());
+  if (buflen < cofmsg_features_reply::length())
+    throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__,
+                            __LINE__);
 
-	if ((0 == buf) || (0 == buflen))
-		return;
+  switch (get_version()) {
+  case rofl::openflow10::OFP_VERSION: {
 
-	if (buflen < cofmsg_features_reply::length())
-		throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    if (get_type() != rofl::openflow10::OFPT_FEATURES_REPLY)
+      throw eBadRequestBadType("eBadRequestBadType", __FILE__,
+                               __PRETTY_FUNCTION__, __LINE__);
 
-	switch (get_version()) {
-	case rofl::openflow10::OFP_VERSION: {
+    struct rofl::openflow10::ofp_switch_features *hdr =
+        (struct rofl::openflow10::ofp_switch_features *)buf;
 
-		if (get_type() != rofl::openflow10::OFPT_FEATURES_REPLY)
-			throw eBadRequestBadType("eBadRequestBadType", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    dpid = be64toh(hdr->datapath_id);
+    n_buffers = be32toh(hdr->n_buffers);
+    n_tables = hdr->n_tables;
+    capabilities = be32toh(hdr->capabilities);
+    actions = be32toh(hdr->actions);
 
-		struct rofl::openflow10::ofp_switch_features* hdr =
-				(struct rofl::openflow10::ofp_switch_features*)buf;
+    if (buflen > sizeof(struct rofl::openflow10::ofp_switch_features)) {
+      ports.unpack(buf + sizeof(struct rofl::openflow10::ofp_switch_features),
+                   buflen -
+                       sizeof(struct rofl::openflow10::ofp_switch_features));
+    }
 
-		dpid         = be64toh(hdr->datapath_id);
-		n_buffers    = be32toh(hdr->n_buffers);
-		n_tables     = hdr->n_tables;
-		capabilities = be32toh(hdr->capabilities);
-		actions      = be32toh(hdr->actions);
+  } break;
+  case rofl::openflow12::OFP_VERSION: {
 
-		if (buflen > sizeof(struct rofl::openflow10::ofp_switch_features)) {
-			ports.unpack(buf + sizeof(struct rofl::openflow10::ofp_switch_features),
-					buflen - sizeof(struct rofl::openflow10::ofp_switch_features));
-		}
+    if (get_type() != rofl::openflow12::OFPT_FEATURES_REPLY)
+      throw eBadRequestBadType("eBadRequestBadType", __FILE__,
+                               __PRETTY_FUNCTION__, __LINE__);
 
-	} break;
-	case rofl::openflow12::OFP_VERSION: {
+    struct rofl::openflow12::ofp_switch_features *hdr =
+        (struct rofl::openflow12::ofp_switch_features *)buf;
 
-		if (get_type() != rofl::openflow12::OFPT_FEATURES_REPLY)
-			throw eBadRequestBadType("eBadRequestBadType", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    dpid = be64toh(hdr->datapath_id);
+    n_buffers = be32toh(hdr->n_buffers);
+    n_tables = hdr->n_tables;
+    capabilities = be32toh(hdr->capabilities);
 
-		struct rofl::openflow12::ofp_switch_features* hdr =
-				(struct rofl::openflow12::ofp_switch_features*)buf;
+    if (buflen > sizeof(struct rofl::openflow12::ofp_switch_features)) {
+      ports.unpack(buf + sizeof(struct rofl::openflow12::ofp_switch_features),
+                   buflen -
+                       sizeof(struct rofl::openflow12::ofp_switch_features));
+    }
 
-		dpid         = be64toh(hdr->datapath_id);
-		n_buffers    = be32toh(hdr->n_buffers);
-		n_tables     = hdr->n_tables;
-		capabilities = be32toh(hdr->capabilities);
+  } break;
+  default: {
 
-		if (buflen > sizeof(struct rofl::openflow12::ofp_switch_features)) {
-			ports.unpack(buf + sizeof(struct rofl::openflow12::ofp_switch_features),
-					buflen - sizeof(struct rofl::openflow12::ofp_switch_features));
-		}
+    if (get_type() != rofl::openflow13::OFPT_FEATURES_REPLY)
+      throw eBadRequestBadType("eBadRequestBadType", __FILE__,
+                               __PRETTY_FUNCTION__, __LINE__);
 
-	} break;
-	default: {
+    struct rofl::openflow13::ofp_switch_features *hdr =
+        (struct rofl::openflow13::ofp_switch_features *)buf;
 
-		if (get_type() != rofl::openflow13::OFPT_FEATURES_REPLY)
-			throw eBadRequestBadType("eBadRequestBadType", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    dpid = be64toh(hdr->datapath_id);
+    n_buffers = be32toh(hdr->n_buffers);
+    n_tables = hdr->n_tables;
+    auxid = hdr->auxiliary_id;
+    capabilities = be32toh(hdr->capabilities);
+  };
+  }
 
-		struct rofl::openflow13::ofp_switch_features* hdr =
-				(struct rofl::openflow13::ofp_switch_features*)buf;
-
-		dpid         = be64toh(hdr->datapath_id);
-		n_buffers    = be32toh(hdr->n_buffers);
-		n_tables     = hdr->n_tables;
-		auxid        = hdr->auxiliary_id;
-		capabilities = be32toh(hdr->capabilities);
-
-	};
-	}
-
-	if (get_length() < cofmsg_features_reply::length())
-		throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+  if (get_length() < cofmsg_features_reply::length())
+    throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__,
+                            __LINE__);
 }
-
-

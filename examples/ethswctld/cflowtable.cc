@@ -13,8 +13,4 @@
 
 using namespace rofl::examples::ethswctld;
 
-std::map<rofl::cdptid, cflowtable*> cflowtable::flowtables;
-
-
-
-
+std::map<rofl::cdptid, cflowtable *> cflowtable::flowtables;

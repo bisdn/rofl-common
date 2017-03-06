@@ -18,144 +18,127 @@ namespace openflow {
 
 class cofpacket_queues {
 public:
+  /**
+   *
+   */
+  cofpacket_queues(uint8_t of_version = rofl::openflow::OFP_VERSION_UNKNOWN);
 
-	/**
-	 *
-	 */
-	cofpacket_queues(
-		uint8_t of_version = rofl::openflow::OFP_VERSION_UNKNOWN);
+  /**
+   *
+   */
+  virtual ~cofpacket_queues();
 
-	/**
-	 *
-	 */
-	virtual
-	~cofpacket_queues();
+  /**
+   *
+   */
+  cofpacket_queues(const cofpacket_queues &queues);
 
-	/**
-	 *
-	 */
-	cofpacket_queues(
-		const cofpacket_queues& queues);
-
-	/**
-	 */
-	cofpacket_queues&
-	operator= (
-		const cofpacket_queues& queues);
+  /**
+   */
+  cofpacket_queues &operator=(const cofpacket_queues &queues);
 
 public:
+  /**
+   *
+   */
+  uint8_t get_version() const { return ofp_version; };
 
-	/**
-	 *
-	 */
-	uint8_t
-	get_version() const { return ofp_version; };
+  /**
+   *
+   */
+  void set_version(uint8_t ofp_version) { this->ofp_version = ofp_version; };
 
-	/**
-	 *
-	 */
-	void
-	set_version(uint8_t ofp_version) { this->ofp_version = ofp_version; };
+  /**
+   *
+   */
+  const std::map<uint32_t, std::map<uint32_t, cofpacket_queue>> &
+  get_packet_queues() const {
+    return pqueues;
+  };
 
-	/**
-	 *
-	 */
-	const std::map<uint32_t, std::map<uint32_t, cofpacket_queue> >&
-	get_packet_queues() const { return pqueues; };
-
-	/**
-	 *
-	 */
-	std::map<uint32_t, std::map<uint32_t, cofpacket_queue> >&
-	set_packet_queues() { return pqueues; };
-
-public:
-
-	/**
-	 *
-	 */
-	void
-	clear();
-
-	/**
-	 *
-	 */
-	cofpacket_queue&
-	add_pqueue(uint32_t port_no, uint32_t queue_id);
-
-	/**
-	 *
-	 */
-	cofpacket_queue&
-	set_pqueue(uint32_t port_no, uint32_t queue_id);
-
-	/**
-	 *
-	 */
-	const cofpacket_queue&
-	get_pqueue(uint32_t port_no, uint32_t queue_id) const;
-
-	/**
-	 *
-	 */
-	void
-	drop_pqueue(uint32_t port_no, uint32_t queue_id);
-
-	/**
-	 *
-	 */
-	bool
-	has_pqueue(uint32_t port_no, uint32_t queue_id) const;
+  /**
+   *
+   */
+  std::map<uint32_t, std::map<uint32_t, cofpacket_queue>> &set_packet_queues() {
+    return pqueues;
+  };
 
 public:
+  /**
+   *
+   */
+  void clear();
 
-	/**
-	 *
-	 */
-	virtual size_t
-	length() const;
+  /**
+   *
+   */
+  cofpacket_queue &add_pqueue(uint32_t port_no, uint32_t queue_id);
 
-	/**
-	 *
-	 */
-	virtual void
-	unpack(
-		uint8_t *buf, size_t buflen);
+  /**
+   *
+   */
+  cofpacket_queue &set_pqueue(uint32_t port_no, uint32_t queue_id);
 
-	/**
-	 *
-	 */
-	virtual void
-	pack(
-		uint8_t *buf, size_t buflen);
+  /**
+   *
+   */
+  const cofpacket_queue &get_pqueue(uint32_t port_no, uint32_t queue_id) const;
+
+  /**
+   *
+   */
+  void drop_pqueue(uint32_t port_no, uint32_t queue_id);
+
+  /**
+   *
+   */
+  bool has_pqueue(uint32_t port_no, uint32_t queue_id) const;
 
 public:
+  /**
+   *
+   */
+  virtual size_t length() const;
 
-	/**
-	 *
-	 */
-	friend std::ostream&
-	operator<< (std::ostream& os, cofpacket_queues const& pql) {
-		unsigned int count = 0;
-		for (std::map<uint32_t, std::map<uint32_t, cofpacket_queue> >::const_iterator
-				it = pql.pqueues.begin(); it != pql.pqueues.end(); ++it) {
-			count += it->second.size();
-		}
-		os  << "<cofpacket_queues #queues: " << count << " >" << std::endl;
-		for (std::map<uint32_t, std::map<uint32_t, cofpacket_queue> >::const_iterator
-				it = pql.pqueues.begin(); it != pql.pqueues.end(); ++it) {
-			for (std::map<uint32_t, cofpacket_queue>::const_iterator
-					jt = it->second.begin(); jt != it->second.end(); ++jt) {
-				 os << (jt->second);
-			}
-		}
-		return os;
-	};
+  /**
+   *
+   */
+  virtual void unpack(uint8_t *buf, size_t buflen);
+
+  /**
+   *
+   */
+  virtual void pack(uint8_t *buf, size_t buflen);
+
+public:
+  /**
+   *
+   */
+  friend std::ostream &operator<<(std::ostream &os,
+                                  cofpacket_queues const &pql) {
+    unsigned int count = 0;
+    for (std::map<uint32_t, std::map<uint32_t, cofpacket_queue>>::const_iterator
+             it = pql.pqueues.begin();
+         it != pql.pqueues.end(); ++it) {
+      count += it->second.size();
+    }
+    os << "<cofpacket_queues #queues: " << count << " >" << std::endl;
+    for (std::map<uint32_t, std::map<uint32_t, cofpacket_queue>>::const_iterator
+             it = pql.pqueues.begin();
+         it != pql.pqueues.end(); ++it) {
+      for (std::map<uint32_t, cofpacket_queue>::const_iterator jt =
+               it->second.begin();
+           jt != it->second.end(); ++jt) {
+        os << (jt->second);
+      }
+    }
+    return os;
+  };
 
 private:
-
-	uint8_t 													ofp_version;
-	std::map<uint32_t, std::map<uint32_t, cofpacket_queue> > 	pqueues; // port_no/queue_id => cofpacket_queue
+  uint8_t ofp_version;
+  std::map<uint32_t, std::map<uint32_t, cofpacket_queue>>
+      pqueues; // port_no/queue_id => cofpacket_queue
 };
 
 }; // end of namespace openflow

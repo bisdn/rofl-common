@@ -2,71 +2,61 @@
 
 using namespace rofl::openflow;
 
-size_t
-cofmsg_group_mod::length() const
-{
-	return cofmsg::length() + groupmod.length();
+size_t cofmsg_group_mod::length() const {
+  return cofmsg::length() + groupmod.length();
 }
 
+void cofmsg_group_mod::pack(uint8_t *buf, size_t buflen) {
+  cofmsg::pack(buf, buflen);
 
+  if ((0 == buf) || (0 == buflen))
+    return;
 
-void
-cofmsg_group_mod::pack(
-		uint8_t *buf, size_t buflen)
-{
-	cofmsg::pack(buf, buflen);
+  if (buflen < cofmsg_group_mod::length())
+    throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
-	if ((0 == buf) || (0 == buflen))
-		return;
+  switch (get_version()) {
+  default: {
 
-	if (buflen < cofmsg_group_mod::length())
-		throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    struct rofl::openflow::ofp_header *hdr =
+        (struct rofl::openflow::ofp_header *)buf;
 
-	switch (get_version()) {
-	default: {
-
-		struct rofl::openflow::ofp_header* hdr =
-				(struct rofl::openflow::ofp_header*)buf;
-
-		groupmod.pack(hdr->body, groupmod.length());
-	};
-	}
+    groupmod.pack(hdr->body, groupmod.length());
+  };
+  }
 }
 
+void cofmsg_group_mod::unpack(uint8_t *buf, size_t buflen) {
+  cofmsg::unpack(buf, buflen);
 
+  groupmod.set_version(get_version());
+  groupmod.clear();
 
-void
-cofmsg_group_mod::unpack(
-		uint8_t *buf, size_t buflen)
-{
-	cofmsg::unpack(buf, buflen);
+  if ((0 == buf) || (0 == buflen))
+    return;
 
-	groupmod.set_version(get_version());
-	groupmod.clear();
+  if (buflen < cofmsg_group_mod::length())
+    throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__,
+                            __LINE__);
 
-	if ((0 == buf) || (0 == buflen))
-		return;
+  switch (get_version()) {
+  default: {
 
-	if (buflen < cofmsg_group_mod::length())
-		throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    if (get_type() != rofl::openflow::OFPT_GROUP_MOD)
+      throw eBadRequestBadType("eBadRequestBadType", __FILE__,
+                               __PRETTY_FUNCTION__, __LINE__);
 
-	switch (get_version()) {
-	default: {
+    struct rofl::openflow::ofp_header *hdr =
+        (struct rofl::openflow::ofp_header *)buf;
 
-		if (get_type() != rofl::openflow::OFPT_GROUP_MOD)
-			throw eBadRequestBadType("eBadRequestBadType", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    if (buflen > sizeof(struct rofl::openflow::ofp_header)) {
+      groupmod.unpack(hdr->body,
+                      buflen - sizeof(struct rofl::openflow::ofp_header));
+    }
+  };
+  }
 
-		struct rofl::openflow::ofp_header* hdr =
-				(struct rofl::openflow::ofp_header*)buf;
-
-		if (buflen > sizeof(struct rofl::openflow::ofp_header)) {
-			groupmod.unpack(hdr->body, buflen - sizeof(struct rofl::openflow::ofp_header));
-		}
-	};
-	}
-
-	if (get_length() < cofmsg_group_mod::length())
-		throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+  if (get_length() < cofmsg_group_mod::length())
+    throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__,
+                            __LINE__);
 }
-
-

@@ -13,82 +13,75 @@
 
 using namespace rofl::openflow;
 
-
-size_t
-cofportstatsarray::length() const
-{
-	size_t len = 0;
-	for (std::map<uint32_t, cofport_stats_reply>::const_iterator
-			it = array.begin(); it != array.end(); ++it) {
-		len += it->second.length();
-	}
-	return len;
+size_t cofportstatsarray::length() const {
+  size_t len = 0;
+  for (std::map<uint32_t, cofport_stats_reply>::const_iterator it =
+           array.begin();
+       it != array.end(); ++it) {
+    len += it->second.length();
+  }
+  return len;
 }
 
+void cofportstatsarray::pack(uint8_t *buf, size_t buflen) {
+  if ((0 == buf) || (0 == buflen))
+    return;
 
+  if (buflen < length())
+    throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
-void
-cofportstatsarray::pack(uint8_t *buf, size_t buflen)
-{
-	if ((0 == buf) || (0 == buflen))
-		return;
+  switch (ofp_version) {
+  case rofl::openflow10::OFP_VERSION:
+  case rofl::openflow12::OFP_VERSION:
+  case rofl::openflow13::OFP_VERSION: {
 
-	if (buflen < length())
-		throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    for (std::map<uint32_t, cofport_stats_reply>::iterator it = array.begin();
+         it != array.end(); ++it) {
+      it->second.pack(buf, it->second.length());
+      buf += it->second.length();
+    }
 
-	switch (ofp_version) {
-	case rofl::openflow10::OFP_VERSION:
-	case rofl::openflow12::OFP_VERSION:
-	case rofl::openflow13::OFP_VERSION: {
-
-		for (std::map<uint32_t, cofport_stats_reply>::iterator
-				it = array.begin(); it != array.end(); ++it) {
-			it->second.pack(buf, it->second.length());
-			buf += it->second.length();
-		}
-
-	} break;
-	default:
-		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
-	}
+  } break;
+  default:
+    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+  }
 }
 
+void cofportstatsarray::unpack(uint8_t *buf, size_t buflen) {
+  array.clear();
 
+  switch (ofp_version) {
+  case rofl::openflow10::OFP_VERSION:
+  case rofl::openflow12::OFP_VERSION: {
 
-void
-cofportstatsarray::unpack(uint8_t *buf, size_t buflen)
-{
-	array.clear();
+    while (buflen >= sizeof(struct rofl::openflow12::ofp_port_stats)) {
 
-	switch (ofp_version) {
-	case rofl::openflow10::OFP_VERSION:
-	case rofl::openflow12::OFP_VERSION: {
+      uint32_t port_id =
+          be32toh(((struct rofl::openflow12::ofp_port_stats *)buf)->port_no);
 
-		while (buflen >= sizeof(struct rofl::openflow12::ofp_port_stats)) {
+      add_port_stats(port_id).unpack(
+          buf, sizeof(struct rofl::openflow12::ofp_port_stats));
 
-			uint32_t port_id = be32toh(((struct rofl::openflow12::ofp_port_stats*)buf)->port_no);
+      buf += sizeof(struct rofl::openflow12::ofp_port_stats);
+      buflen -= sizeof(struct rofl::openflow12::ofp_port_stats);
+    }
+  } break;
+  case rofl::openflow13::OFP_VERSION: {
 
-			add_port_stats(port_id).unpack(buf, sizeof(struct rofl::openflow12::ofp_port_stats));
+    while (buflen >= sizeof(struct rofl::openflow13::ofp_port_stats)) {
 
-			buf += sizeof(struct rofl::openflow12::ofp_port_stats);
-			buflen -= sizeof(struct rofl::openflow12::ofp_port_stats);
-		}
-	} break;
-	case rofl::openflow13::OFP_VERSION: {
+      uint32_t port_id =
+          be32toh(((struct rofl::openflow13::ofp_port_stats *)buf)->port_no);
 
-		while (buflen >= sizeof(struct rofl::openflow13::ofp_port_stats)) {
+      add_port_stats(port_id).unpack(
+          buf, sizeof(struct rofl::openflow13::ofp_port_stats));
 
-			uint32_t port_id = be32toh(((struct rofl::openflow13::ofp_port_stats*)buf)->port_no);
-
-			add_port_stats(port_id).unpack(buf, sizeof(struct rofl::openflow13::ofp_port_stats));
-
-			buf += sizeof(struct rofl::openflow13::ofp_port_stats);
-			buflen -= sizeof(struct rofl::openflow13::ofp_port_stats);
-		}
-	} break;
-	default:
-		throw eBadRequestBadVersion("eBadRequestBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
-	}
+      buf += sizeof(struct rofl::openflow13::ofp_port_stats);
+      buflen -= sizeof(struct rofl::openflow13::ofp_port_stats);
+    }
+  } break;
+  default:
+    throw eBadRequestBadVersion("eBadRequestBadVersion", __FILE__,
+                                __PRETTY_FUNCTION__, __LINE__);
+  }
 }
-
-

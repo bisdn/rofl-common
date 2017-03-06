@@ -5,5 +5,3 @@
 #include "cpacket.h"
 
 using namespace rofl;
-
-

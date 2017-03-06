@@ -21,122 +21,91 @@ namespace openflow {
 /**
  *
  */
-class cofmsg_table_mod :
-		public cofmsg
-{
+class cofmsg_table_mod : public cofmsg {
 public:
+  /**
+   *
+   */
+  virtual ~cofmsg_table_mod();
 
-	/**
-	 *
-	 */
-	virtual
-	~cofmsg_table_mod();
+  /**
+   *
+   */
+  cofmsg_table_mod(uint8_t version = 0, uint32_t xid = 0, uint8_t table_id = 0,
+                   uint32_t config = 0);
 
-	/**
-	 *
-	 */
-	cofmsg_table_mod(
-			uint8_t version = 0,
-			uint32_t xid = 0,
-			uint8_t  table_id = 0,
-			uint32_t config = 0);
+  /**
+   *
+   */
+  cofmsg_table_mod(const cofmsg_table_mod &msg);
 
-	/**
-	 *
-	 */
-	cofmsg_table_mod(
-			const cofmsg_table_mod& msg);
-
-	/**
-	 *
-	 */
-	cofmsg_table_mod&
-	operator= (
-			const cofmsg_table_mod& msg);
+  /**
+   *
+   */
+  cofmsg_table_mod &operator=(const cofmsg_table_mod &msg);
 
 public:
+  /**
+   *
+   */
+  virtual size_t length() const;
 
-	/**
-	 *
-	 */
-	virtual size_t
-	length() const;
+  /**
+   *
+   */
+  virtual void pack(uint8_t *buf = (uint8_t *)0, size_t buflen = 0);
 
-	/**
-	 *
-	 */
-	virtual void
-	pack(
-			uint8_t *buf = (uint8_t*)0, size_t buflen = 0);
-
-	/**
-	 *
-	 */
-	virtual void
-	unpack(
-			uint8_t *buf, size_t buflen);
+  /**
+   *
+   */
+  virtual void unpack(uint8_t *buf, size_t buflen);
 
 public:
+  /**
+   *
+   */
+  uint8_t get_table_id() const { return table_id; };
 
-	/**
-	 *
-	 */
-	uint8_t
-	get_table_id() const
-	{ return table_id; };
+  /**
+   *
+   */
+  void set_table_id(uint8_t table_id) { this->table_id = table_id; };
 
-	/**
-	 *
-	 */
-	void
-	set_table_id(
-			uint8_t table_id)
-	{ this->table_id = table_id; };
+  /**
+   *
+   */
+  uint32_t get_config() const { return config; };
 
-	/**
-	 *
-	 */
-	uint32_t
-	get_config() const
-	{ return config; };
+  /**
+   *
+   */
+  void set_config(uint32_t config) { this->config = config; };
 
-	/**
-	 *
-	 */
-	void
-	set_config(
-			uint32_t config)
-	{ this->config = config; };
-
-	/**
-	 *
-	 */
-	uint32_t&
-	set_config()
-	{ return config; };
+  /**
+   *
+   */
+  uint32_t &set_config() { return config; };
 
 public:
+  friend std::ostream &operator<<(std::ostream &os,
+                                  cofmsg_table_mod const &msg) {
+    os << dynamic_cast<cofmsg const &>(msg);
+    os << "<cofmsg_table_mod >" << std::endl;
+    os << "<table_id: " << (int)msg.get_table_id() << " >" << std::endl;
+    os << "<config: 0x" << std::hex << (unsigned int)msg.get_config()
+       << std::dec << " >" << std::endl;
+    return os;
+  };
 
-	friend std::ostream&
-	operator<< (std::ostream& os, cofmsg_table_mod const& msg) {
-		os << dynamic_cast<cofmsg const&>( msg );
-		os << "<cofmsg_table_mod >" << std::endl;
-			os << "<table_id: " << (int)msg.get_table_id() << " >" << std::endl;
-			os << "<config: 0x" << std::hex << (unsigned int)msg.get_config() << std::dec << " >" << std::endl;
-		return os;
-	};
-
-	virtual std::string
-	str() const {
-		std::stringstream ss;
-		ss << cofmsg::str() << "-Table-Mod- ";
-		return ss.str();
-	};
+  virtual std::string str() const {
+    std::stringstream ss;
+    ss << cofmsg::str() << "-Table-Mod- ";
+    return ss.str();
+  };
 
 private:
-
-	uint8_t     table_id;
-	uint32_t    config;
+  uint8_t table_id;
+  uint32_t config;
 };
 
 } // end of namespace openflow

@@ -2,54 +2,43 @@
 
 using namespace rofl::openflow;
 
-size_t
-cofmsg_hello::length() const
-{
-	return (cofmsg::length() + helloelems.length());
+size_t cofmsg_hello::length() const {
+  return (cofmsg::length() + helloelems.length());
 }
 
+void cofmsg_hello::pack(uint8_t *buf, size_t buflen) {
+  cofmsg::pack(buf, buflen);
 
+  if ((0 == buf) || (0 == buflen))
+    return;
 
-void
-cofmsg_hello::pack(uint8_t *buf, size_t buflen)
-{
-	cofmsg::pack(buf, buflen);
+  if (buflen < get_length())
+    throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
-	if ((0 == buf) || (0 == buflen))
-		return;
-
-	if (buflen < get_length())
-		throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
-
-	helloelems.pack(buf + sizeof(struct rofl::openflow::ofp_header),
-			buflen - sizeof(struct rofl::openflow::ofp_header));
+  helloelems.pack(buf + sizeof(struct rofl::openflow::ofp_header),
+                  buflen - sizeof(struct rofl::openflow::ofp_header));
 }
 
+void cofmsg_hello::unpack(uint8_t *buf, size_t buflen) {
+  cofmsg::unpack(buf, buflen);
 
+  helloelems.clear();
 
-void
-cofmsg_hello::unpack(uint8_t *buf, size_t buflen)
-{
-	cofmsg::unpack(buf, buflen);
+  if ((0 == buf) || (0 == buflen))
+    return;
 
-	helloelems.clear();
+  if (buflen < cofmsg_hello::length())
+    return;
 
-	if ((0 == buf) || (0 == buflen))
-		return;
+  if (get_type() != rofl::openflow::OFPT_HELLO)
+    throw eBadRequestBadType("eBadRequestBadType", __FILE__,
+                             __PRETTY_FUNCTION__, __LINE__);
 
-	if (buflen < cofmsg_hello::length())
-		return;
+  if (buflen > sizeof(struct rofl::openflow::ofp_header)) {
+    helloelems.unpack(buf + sizeof(struct rofl::openflow::ofp_header),
+                      buflen - sizeof(struct rofl::openflow::ofp_header));
+  }
 
-	if (get_type() != rofl::openflow::OFPT_HELLO)
-		throw eBadRequestBadType("eBadRequestBadType", __FILE__, __PRETTY_FUNCTION__, __LINE__);
-
-	if (buflen > sizeof(struct rofl::openflow::ofp_header)) {
-		helloelems.unpack(buf + sizeof(struct rofl::openflow::ofp_header),
-				buflen - sizeof(struct rofl::openflow::ofp_header));
-	}
-
-	if (get_length() < cofmsg_hello::length())
-		return;
+  if (get_length() < cofmsg_hello::length())
+    return;
 }
-
-

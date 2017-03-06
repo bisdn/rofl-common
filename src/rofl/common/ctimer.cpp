@@ -12,6 +12,3 @@
 #include "ctimer.hpp"
 
 using namespace rofl;
-
-
-

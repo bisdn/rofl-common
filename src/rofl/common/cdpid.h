@@ -13,7 +13,6 @@
 namespace rofl {
 
 typedef uint64_t cdpid;
-
 };
 
 #endif /* CDPID_HPP_ */

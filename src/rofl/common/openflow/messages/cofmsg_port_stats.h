@@ -13,8 +13,8 @@
 #ifndef COFMSG_PORT_STATS_H_
 #define COFMSG_PORT_STATS_H_ 1
 
-#include "rofl/common/openflow/messages/cofmsg_stats.h"
 #include "rofl/common/openflow/cofportstatsarray.h"
+#include "rofl/common/openflow/messages/cofmsg_stats.h"
 
 namespace rofl {
 namespace openflow {
@@ -22,197 +22,160 @@ namespace openflow {
 /**
  *
  */
-class cofmsg_port_stats_request :
-		public cofmsg_stats_request
-{
+class cofmsg_port_stats_request : public cofmsg_stats_request {
 public:
+  /**
+   *
+   */
+  virtual ~cofmsg_port_stats_request();
 
-	/**
-	 *
-	 */
-	virtual
-	~cofmsg_port_stats_request();
+  /**
+   *
+   */
+  cofmsg_port_stats_request(
+      uint8_t version = 0, uint32_t xid = 0, uint16_t flags = 0,
+      const rofl::openflow::cofport_stats_request &port_stats =
+          rofl::openflow::cofport_stats_request());
 
-	/**
-	 *
-	 */
-	cofmsg_port_stats_request(
-			uint8_t version = 0,
-			uint32_t xid = 0,
-			uint16_t flags = 0,
-			const rofl::openflow::cofport_stats_request& port_stats = rofl::openflow::cofport_stats_request());
+  /**
+   *
+   */
+  cofmsg_port_stats_request(const cofmsg_port_stats_request &msg);
 
-	/**
-	 *
-	 */
-	cofmsg_port_stats_request(
-			const cofmsg_port_stats_request& msg);
-
-	/**
-	 *
-	 */
-	cofmsg_port_stats_request&
-	operator= (
-			const cofmsg_port_stats_request& msg);
+  /**
+   *
+   */
+  cofmsg_port_stats_request &operator=(const cofmsg_port_stats_request &msg);
 
 public:
+  /**
+   *
+   */
+  virtual size_t length() const;
 
-	/**
-	 *
-	 */
-	virtual size_t
-	length() const;
+  /**
+   *
+   */
+  virtual void pack(uint8_t *buf = (uint8_t *)0, size_t buflen = 0);
 
-	/**
-	 *
-	 */
-	virtual void
-	pack(
-			uint8_t *buf = (uint8_t*)0, size_t buflen = 0);
-
-	/**
-	 *
-	 */
-	virtual void
-	unpack(
-			uint8_t *buf, size_t buflen);
+  /**
+   *
+   */
+  virtual void unpack(uint8_t *buf, size_t buflen);
 
 public:
+  /**
+   *
+   */
+  const rofl::openflow::cofport_stats_request &get_port_stats() const {
+    return port_stats;
+  };
 
-	/**
-	 *
-	 */
-	const rofl::openflow::cofport_stats_request&
-	get_port_stats() const
-	{ return port_stats; };
-
-	/**
-	 *
-	 */
-	rofl::openflow::cofport_stats_request&
-	set_port_stats()
-	{ return port_stats; };
+  /**
+   *
+   */
+  rofl::openflow::cofport_stats_request &set_port_stats() {
+    return port_stats;
+  };
 
 public:
+  friend std::ostream &operator<<(std::ostream &os,
+                                  const cofmsg_port_stats_request &msg) {
+    os << dynamic_cast<const cofmsg_stats_request &>(msg);
+    os << "<cofmsg_port_stats_request >" << std::endl;
 
-	friend std::ostream&
-	operator<< (std::ostream& os, const cofmsg_port_stats_request& msg) {
-		os << dynamic_cast<const cofmsg_stats_request&>( msg );
-		os << "<cofmsg_port_stats_request >" << std::endl;
-		
-		os << msg.port_stats;
-		return os;
-	};
+    os << msg.port_stats;
+    return os;
+  };
 
-	virtual std::string
-	str() const {
-		std::stringstream ss;
-		ss << cofmsg_stats_request::str() << "-Port-Stats-Request- ";
-		return ss.str();
-	};
+  virtual std::string str() const {
+    std::stringstream ss;
+    ss << cofmsg_stats_request::str() << "-Port-Stats-Request- ";
+    return ss.str();
+  };
 
 private:
-
-	rofl::openflow::cofport_stats_request   port_stats;
+  rofl::openflow::cofport_stats_request port_stats;
 };
-
-
 
 /**
  *
  */
-class cofmsg_port_stats_reply :
-		public cofmsg_stats_reply
-{
+class cofmsg_port_stats_reply : public cofmsg_stats_reply {
 public:
+  /**
+   *
+   */
+  virtual ~cofmsg_port_stats_reply();
 
-	/**
-	 *
-	 */
-	virtual
-	~cofmsg_port_stats_reply();
+  /**
+   *
+   */
+  cofmsg_port_stats_reply(
+      uint8_t version = rofl::openflow::OFP_VERSION_UNKNOWN, uint32_t xid = 0,
+      uint16_t stats_flags = 0,
+      const rofl::openflow::cofportstatsarray &portstatsarray =
+          rofl::openflow::cofportstatsarray());
 
-	/**
-	 *
-	 */
-	cofmsg_port_stats_reply(
-			uint8_t version = rofl::openflow::OFP_VERSION_UNKNOWN,
-			uint32_t xid = 0,
-			uint16_t stats_flags = 0,
-			const rofl::openflow::cofportstatsarray& portstatsarray = rofl::openflow::cofportstatsarray());
+  /**
+   *
+   */
+  cofmsg_port_stats_reply(const cofmsg_port_stats_reply &msg);
 
-	/**
-	 *
-	 */
-	cofmsg_port_stats_reply(
-			const cofmsg_port_stats_reply& msg);
-
-	/**
-	 *
-	 */
-	cofmsg_port_stats_reply&
-	operator= (
-			const cofmsg_port_stats_reply& msg);
+  /**
+   *
+   */
+  cofmsg_port_stats_reply &operator=(const cofmsg_port_stats_reply &msg);
 
 public:
+  /**
+   *
+   */
+  virtual size_t length() const;
 
-	/**
-	 *
-	 */
-	virtual size_t
-	length() const;
+  /**
+   *
+   */
+  virtual void pack(uint8_t *buf = (uint8_t *)0, size_t buflen = 0);
 
-	/**
-	 *
-	 */
-	virtual void
-	pack(
-			uint8_t *buf = (uint8_t*)0, size_t buflen = 0);
-
-	/**
-	 *
-	 */
-	virtual void
-	unpack(
-			uint8_t *buf, size_t buflen);
+  /**
+   *
+   */
+  virtual void unpack(uint8_t *buf, size_t buflen);
 
 public:
+  /**
+   *
+   */
+  const rofl::openflow::cofportstatsarray &get_port_stats_array() const {
+    return portstatsarray;
+  };
 
-	/**
-	 *
-	 */
-	const rofl::openflow::cofportstatsarray&
-	get_port_stats_array() const
-	{ return portstatsarray; };
-
-	/**
-	 *
-	 */
-	rofl::openflow::cofportstatsarray&
-	set_port_stats_array()
-	{ return portstatsarray; };
+  /**
+   *
+   */
+  rofl::openflow::cofportstatsarray &set_port_stats_array() {
+    return portstatsarray;
+  };
 
 public:
+  friend std::ostream &operator<<(std::ostream &os,
+                                  cofmsg_port_stats_reply const &msg) {
+    os << dynamic_cast<cofmsg const &>(msg);
+    os << "<cofmsg_port_stats_reply >" << std::endl;
 
-	friend std::ostream&
-	operator<< (std::ostream& os, cofmsg_port_stats_reply const& msg) {
-		os << dynamic_cast<cofmsg const&>( msg );
-		os << "<cofmsg_port_stats_reply >" << std::endl;
-		
-		os << msg.portstatsarray;
-		return os;
-	};
+    os << msg.portstatsarray;
+    return os;
+  };
 
-	virtual std::string
-	str() const {
-		std::stringstream ss;
-		ss << cofmsg_stats_reply::str() << "-Port-Stats-Reply- ";
-		return ss.str();
-	};
+  virtual std::string str() const {
+    std::stringstream ss;
+    ss << cofmsg_stats_reply::str() << "-Port-Stats-Reply- ";
+    return ss.str();
+  };
 
 private:
-
-	rofl::openflow::cofportstatsarray   portstatsarray;
+  rofl::openflow::cofportstatsarray portstatsarray;
 };
 
 } // end of namespace openflow

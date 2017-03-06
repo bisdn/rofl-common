@@ -13,83 +13,70 @@
 
 using namespace rofl::openflow;
 
-
-size_t
-cofmeterconfigarray::length() const
-{
-	size_t len = 0;
-	for (std::map<unsigned int, cofmeter_config_reply>::const_iterator
-			it = array.begin(); it != array.end(); ++it) {
-		len += it->second.length();
-	}
-	return len;
+size_t cofmeterconfigarray::length() const {
+  size_t len = 0;
+  for (std::map<unsigned int, cofmeter_config_reply>::const_iterator it =
+           array.begin();
+       it != array.end(); ++it) {
+    len += it->second.length();
+  }
+  return len;
 }
 
+void cofmeterconfigarray::pack(uint8_t *buf, size_t buflen) {
+  if ((0 == buf) || (0 == buflen))
+    return;
 
+  if (buflen < length())
+    throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
-void
-cofmeterconfigarray::pack(
-		uint8_t *buf, size_t buflen)
-{
-	if ((0 == buf) || (0 == buflen))
-		return;
+  switch (ofp_version) {
+  case rofl::openflow13::OFP_VERSION: {
 
-	if (buflen < length())
-		throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    for (std::map<unsigned int, cofmeter_config_reply>::iterator it =
+             array.begin();
+         it != array.end(); ++it) {
+      it->second.pack(buf, it->second.length());
+      buf += it->second.length();
+    }
 
-	switch (ofp_version) {
-	case rofl::openflow13::OFP_VERSION: {
-
-		for (std::map<unsigned int, cofmeter_config_reply>::iterator
-				it = array.begin(); it != array.end(); ++it) {
-			it->second.pack(buf, it->second.length());
-			buf += it->second.length();
-		}
-
-	} break;
-	default:
-		throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
-	}
+  } break;
+  default:
+    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+  }
 }
 
+void cofmeterconfigarray::unpack(uint8_t *buf, size_t buflen) {
+  array.clear();
 
+  if ((0 == buf) || (0 == buflen))
+    return;
 
-void
-cofmeterconfigarray::unpack(
-		uint8_t *buf, size_t buflen)
-{
-	array.clear();
+  unsigned int offset = 0;
+  unsigned int index = 0;
 
-	if ((0 == buf) || (0 == buflen))
-		return;
+  switch (ofp_version) {
+  case rofl::openflow13::OFP_VERSION: {
 
-	unsigned int offset = 0;
-	unsigned int index = 0;
+    while ((buflen - offset) >=
+           sizeof(struct rofl::openflow13::ofp_meter_config)) {
 
-	switch (ofp_version) {
-	case rofl::openflow13::OFP_VERSION: {
+      struct rofl::openflow13::ofp_meter_config *mconfig =
+          (struct rofl::openflow13::ofp_meter_config *)(buf + offset);
 
-		while ((buflen - offset) >= sizeof(struct rofl::openflow13::ofp_meter_config)) {
+      uint16_t mconfig_len = be16toh(mconfig->length);
 
-			struct rofl::openflow13::ofp_meter_config* mconfig =
-					(struct rofl::openflow13::ofp_meter_config*)(buf + offset);
+      if (mconfig_len < sizeof(struct rofl::openflow13::ofp_meter_config)) {
+        throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+      }
 
-			uint16_t mconfig_len = be16toh(mconfig->length);
+      add_meter_config(index++).unpack(buf, mconfig_len);
 
-			if (mconfig_len < sizeof(struct rofl::openflow13::ofp_meter_config)) {
-				throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
-			}
-
-			add_meter_config(index++).unpack(buf, mconfig_len);
-
-			offset += mconfig_len;
-		}
-	} break;
-	default:
-		throw eBadRequestBadVersion("eBadRequestBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
-	}
+      offset += mconfig_len;
+    }
+  } break;
+  default:
+    throw eBadRequestBadVersion("eBadRequestBadVersion", __FILE__,
+                                __PRETTY_FUNCTION__, __LINE__);
+  }
 }
-
-
-
-
