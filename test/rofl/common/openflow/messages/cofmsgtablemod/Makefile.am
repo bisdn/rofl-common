@@ -8,7 +8,7 @@ AUTOMAKE_OPTIONS = no-dependencies
 cofmsgtablemodtest_SOURCES= unittest.cpp cofmsgtablemodtest.hpp cofmsgtablemodtest.cpp
 cofmsgtablemodtest_CPPFLAGS= -I$(top_srcdir)/src/
 cofmsgtablemodtest_LDFLAGS= -static
-cofmsgtablemodtest_LDADD= -L$(top_builddir)/src/rofl -lrofl_common -lcppunit 
+cofmsgtablemodtest_LDADD= $(top_builddir)/src/rofl/librofl_common.la -lcppunit
 
 #Tests
 

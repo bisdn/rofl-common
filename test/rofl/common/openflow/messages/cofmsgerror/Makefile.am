@@ -8,7 +8,7 @@ AUTOMAKE_OPTIONS = no-dependencies
 cofmsgerrortest_SOURCES= unittest.cpp cofmsgerrortest.hpp cofmsgerrortest.cpp
 cofmsgerrortest_CPPFLAGS= -I$(top_srcdir)/src/
 cofmsgerrortest_LDFLAGS= -static
-cofmsgerrortest_LDADD= -L$(top_builddir)/src/rofl -lrofl_common -lcppunit 
+cofmsgerrortest_LDADD= $(top_builddir)/src/rofl/librofl_common.la -lcppunit
 
 #Tests
 

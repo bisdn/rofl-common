@@ -8,7 +8,7 @@ AUTOMAKE_OPTIONS = no-dependencies
 coxmatchtest_SOURCES= unittest.cpp coxmatchtest.hpp coxmatchtest.cpp
 coxmatchtest_CPPFLAGS= -I$(top_srcdir)/src/
 coxmatchtest_LDFLAGS= -static
-coxmatchtest_LDADD= -L$(top_builddir)/src/rofl -lrofl_common -lcppunit 
+coxmatchtest_LDADD= $(top_builddir)/src/rofl/librofl_common.la -lcppunit
 
 #Tests
 

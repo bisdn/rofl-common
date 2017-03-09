@@ -8,7 +8,7 @@ AUTOMAKE_OPTIONS = no-dependencies
 cofmsgechotest_SOURCES= unittest.cpp cofmsgechotest.hpp cofmsgechotest.cpp
 cofmsgechotest_CPPFLAGS= -I$(top_srcdir)/src/
 cofmsgechotest_LDFLAGS= -static
-cofmsgechotest_LDADD= -L$(top_builddir)/src/rofl -lrofl_common -lcppunit 
+cofmsgechotest_LDADD= $(top_builddir)/src/rofl/librofl_common.la -lcppunit
 
 #Tests
 

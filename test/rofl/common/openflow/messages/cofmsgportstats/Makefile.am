@@ -8,7 +8,7 @@ AUTOMAKE_OPTIONS = no-dependencies
 cofmsgportstatstest_SOURCES= unittest.cpp cofmsgportstatstest.hpp cofmsgportstatstest.cpp
 cofmsgportstatstest_CPPFLAGS= -I$(top_srcdir)/src/
 cofmsgportstatstest_LDFLAGS= -static
-cofmsgportstatstest_LDADD= -L$(top_builddir)/src/rofl -lrofl_common -lcppunit 
+cofmsgportstatstest_LDADD= $(top_builddir)/src/rofl/librofl_common.la -lcppunit
 
 #Tests
 
