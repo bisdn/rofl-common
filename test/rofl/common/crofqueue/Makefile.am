@@ -8,7 +8,7 @@ AUTOMAKE_OPTIONS = no-dependencies
 crofqueuetest_SOURCES= unittest.cpp crofqueuetest.hpp crofqueuetest.cpp
 crofqueuetest_CPPFLAGS= -I$(top_srcdir)/src/
 crofqueuetest_LDFLAGS= -static
-crofqueuetest_LDADD= -L$(top_builddir)/src/rofl -lrofl_common -lcppunit 
+crofqueuetest_LDADD= $(top_builddir)/src/rofl/librofl_common.la -lcppunit
 
 #Tests
 

@@ -1,6 +1,6 @@
 MAINTAINERCLEANFILES = Makefile.in
 
-SUBDIRS = 
+SUBDIRS =
 
 unittest_SOURCES= \
 	unittest.cc \
@@ -9,6 +9,6 @@ unittest_SOURCES= \
 
 unittest_LDADD=$(top_builddir)/src/rofl/librofl_common.la -lcppunit
 
-check_PROGRAMS=unittest 
+check_PROGRAMS=unittest
 
 TESTS=unittest

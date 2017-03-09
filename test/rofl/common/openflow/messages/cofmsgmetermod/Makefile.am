@@ -8,7 +8,7 @@ AUTOMAKE_OPTIONS = no-dependencies
 cofmsgmetermodtest_SOURCES= unittest.cpp cofmsgmetermodtest.hpp cofmsgmetermodtest.cpp
 cofmsgmetermodtest_CPPFLAGS= -I$(top_srcdir)/src/
 cofmsgmetermodtest_LDFLAGS= -static
-cofmsgmetermodtest_LDADD= -L$(top_builddir)/src/rofl -lrofl_common -lcppunit 
+cofmsgmetermodtest_LDADD= $(top_builddir)/src/rofl/librofl_common.la -lcppunit
 
 #Tests
 

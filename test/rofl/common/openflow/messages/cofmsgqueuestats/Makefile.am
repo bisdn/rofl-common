@@ -8,7 +8,7 @@ AUTOMAKE_OPTIONS = no-dependencies
 cofmsgqueuestatstest_SOURCES= unittest.cpp cofmsgqueuestatstest.hpp cofmsgqueuestatstest.cpp
 cofmsgqueuestatstest_CPPFLAGS= -I$(top_srcdir)/src/
 cofmsgqueuestatstest_LDFLAGS= -static
-cofmsgqueuestatstest_LDADD= -L$(top_builddir)/src/rofl -lrofl_common -lcppunit 
+cofmsgqueuestatstest_LDADD= $(top_builddir)/src/rofl/librofl_common.la -lcppunit
 
 #Tests
 

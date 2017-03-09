@@ -8,7 +8,7 @@ AUTOMAKE_OPTIONS = no-dependencies
 cofmsgpacketouttest_SOURCES= unittest.cpp cofmsgpacketouttest.hpp cofmsgpacketouttest.cpp
 cofmsgpacketouttest_CPPFLAGS= -I$(top_srcdir)/src/
 cofmsgpacketouttest_LDFLAGS= -static
-cofmsgpacketouttest_LDADD= -L$(top_builddir)/src/rofl -lrofl_common -lcppunit 
+cofmsgpacketouttest_LDADD= $(top_builddir)/src/rofl/librofl_common.la -lcppunit
 
 #Tests
 

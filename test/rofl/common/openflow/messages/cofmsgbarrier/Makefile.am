@@ -8,7 +8,7 @@ AUTOMAKE_OPTIONS = no-dependencies
 cofmsgbarriertest_SOURCES= unittest.cpp cofmsgbarriertest.hpp cofmsgbarriertest.cpp
 cofmsgbarriertest_CPPFLAGS= -I$(top_srcdir)/src/
 cofmsgbarriertest_LDFLAGS= -static
-cofmsgbarriertest_LDADD= -L$(top_builddir)/src/rofl -lrofl_common -lcppunit 
+cofmsgbarriertest_LDADD= $(top_builddir)/src/rofl/librofl_common.la -lcppunit
 
 #Tests
 

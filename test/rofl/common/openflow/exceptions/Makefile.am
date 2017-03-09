@@ -8,7 +8,7 @@ AUTOMAKE_OPTIONS = no-dependencies
 exceptionstest_SOURCES= unittest.cpp exceptionstest.hpp exceptionstest.cpp
 exceptionstest_CPPFLAGS= -I$(top_srcdir)/src/
 exceptionstest_LDFLAGS= -static
-exceptionstest_LDADD= -L$(top_builddir)/src/rofl -lrofl_common -lcppunit 
+exceptionstest_LDADD= $(top_builddir)/src/rofl/librofl_common.la -lcppunit
 
 #Tests
 
