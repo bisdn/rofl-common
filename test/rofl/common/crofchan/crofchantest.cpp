@@ -147,7 +147,7 @@ void crofchantest::test_congestion() {
   num_of_accepts = 0;
   num_of_dpt_established = 0;
   num_of_ctl_established = 0;
-  int seconds = 60;
+  int seconds = 30;
   listening_port = 0;
   max_congestion_rounds = 16;
 
@@ -194,6 +194,7 @@ void crofchantest::test_congestion() {
     pselect(0, NULL, NULL, NULL, &ts, NULL);
     std::cerr << ".";
   }
+  keep_running = false;
   sleep(2);
 
   std::cerr << ">>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<" << std::endl;
@@ -225,6 +226,7 @@ void crofchantest::test_congestion() {
     if (not channel2->has_conn(auxid)) {
       continue;
     }
+    std::cerr << "dropping channel2 auxid=" << auxid << std::endl;
     channel2->drop_conn(auxid);
   }
 
@@ -232,8 +234,11 @@ void crofchantest::test_congestion() {
     if (not channel1->has_conn(auxid)) {
       continue;
     }
+    std::cerr << "dropping channel1 auxid=" << auxid << std::endl;
     channel1->drop_conn(auxid);
   }
+
+  sleep(2);
 
   std::cerr << "num_of_ctl_established = " << num_of_ctl_established
             << std::endl;
@@ -332,7 +337,7 @@ void crofchantest::handle_timeout(rofl::cthread &thread, uint32_t timer_id) {
                    "control connection"
                 << std::endl;
 
-      while (true) {
+      while (keep_running) {
         msg = new rofl::openflow::cofmsg_packet_in(
             rofl::openflow13::OFP_VERSION, xid++, buffer_id++,
             /*total_len=*/1500,
@@ -344,6 +349,8 @@ void crofchantest::handle_timeout(rofl::cthread &thread, uint32_t timer_id) {
         channel1->set_conn(rofl::cauxid(0)).send_message(msg);
 
         num_of_pkts_sent++;
+
+        pthread_yield();
       }
 
     } catch (rofl::eRofQueueFull &e) {
@@ -351,6 +358,8 @@ void crofchantest::handle_timeout(rofl::cthread &thread, uint32_t timer_id) {
       thread.add_timer(TIMER_ID_START_SENDING_PACKET_INS,
                        rofl::ctimespec().expire_in(8));
       delete msg;
+    } catch (rofl::eRofSockNotEstablished &e) {
+      std::cerr << "exception caught: eRofSockNotEstablished" << std::endl;
     }
   } break;
   default: {};
