@@ -159,7 +159,10 @@ private:
    *
    * @see rofl::ciosrv
    */
-  virtual void handle_timeout(cthread &thread, uint32_t timer_id);
+  void handle_timeout(cthread &thread, uint32_t timer_id) override;
+  void handle_read_event(cthread &thread, int fd) override {}
+  void handle_write_event(cthread &thread, int fd) override {}
+  void handle_wakeup(cthread &thread) override {}
 
 public:
   /**
