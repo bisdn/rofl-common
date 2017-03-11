@@ -28,8 +28,8 @@ using namespace rofl;
 
 crofconn::~crofconn() {
   /* stop worker thread */
-  thread.stop();
   set_state(STATE_CLOSING);
+  thread.stop();
 }
 
 crofconn::crofconn(crofconn_env *env)
