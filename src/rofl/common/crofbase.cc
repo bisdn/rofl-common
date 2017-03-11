@@ -314,6 +314,7 @@ void crofbase::handle_read_event(cthread &thread, int fd) {
           switch (errno) {
           case EAGAIN: {
             /* do nothing */
+            return;
           } break;
           default: {
             throw eSysCall("eSysCall", "accept", __FILE__, __PRETTY_FUNCTION__,
@@ -356,6 +357,7 @@ void crofbase::handle_read_event(cthread &thread, int fd) {
           switch (errno) {
           case EAGAIN: {
             /* do nothing */
+            return;
           } break;
           default: {
             throw eSysCall("eSysCall", "accept", __FILE__, __PRETTY_FUNCTION__,
