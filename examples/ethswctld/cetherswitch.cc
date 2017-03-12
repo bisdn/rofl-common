@@ -77,7 +77,7 @@ cetherswitch::cetherswitch(
       get_flow_stats_interval(GET_FLOW_STATS_DEFAULT_INTERVAL) {
   rofl::crofbase::set_versionbitmap(versionbitmap);
 
-  thread.start();
+  thread.start("cetherswitch");
 }
 
 cetherswitch::~cetherswitch() {}

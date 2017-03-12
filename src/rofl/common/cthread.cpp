@@ -323,7 +323,7 @@ bool cthread::has_timer(uint32_t timer_id) const {
   return (not(timer_it == ordered_timers.end()));
 }
 
-void cthread::start() {
+void cthread::start(const std::string &thread_name) {
   switch (state) {
   case STATE_IDLE: {
 
@@ -332,6 +332,9 @@ void cthread::start() {
       throw eSysCall("eSysCall", "pthread_create", __FILE__,
                      __PRETTY_FUNCTION__, __LINE__);
     }
+
+    if (thread_name.length() && thread_name.length() < 16)
+      pthread_setname_np(tid, thread_name.c_str());
 
     state = STATE_RUNNING;
 

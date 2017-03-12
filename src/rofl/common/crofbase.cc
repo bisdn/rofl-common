@@ -48,7 +48,7 @@ crofbase::crofbase()
   }
   crofbase::rofbases.insert(this);
   /* start background management thread */
-  thread.start();
+  thread.start("crofbase");
 }
 
 /*static*/

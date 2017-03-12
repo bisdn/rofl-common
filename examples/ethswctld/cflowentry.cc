@@ -18,7 +18,7 @@ cflowentry::cflowentry(cflowentry_env *flowenv, const rofl::cdptid &dptid,
   thread.add_timer(CFLOWENTRY_ENTRY_EXPIRED,
                    rofl::ctimespec().expire_in(entry_timeout));
   std::cerr << "[cflowentry] created" << std::endl << *this;
-  thread.start();
+  thread.start("cflowentry");
 }
 
 cflowentry::~cflowentry() {

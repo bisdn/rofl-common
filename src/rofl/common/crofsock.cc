@@ -51,8 +51,8 @@ crofsock::crofsock(crofsock_env *env)
   txweights[QUEUE_FLOW] = 16;
   txweights[QUEUE_PKT] = 8;
 
-  rxthread.start();
-  txthread.start();
+  rxthread.start("crofsock_rx");
+  txthread.start("crofsock_tx");
 }
 
 void crofsock::close() {

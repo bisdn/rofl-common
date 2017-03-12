@@ -58,7 +58,7 @@ crofconn::crofconn(crofconn_env *env)
     rxqueues[queue_id].set_queue_max_size(rxqueue_max_size);
   }
   /* start worker thread */
-  thread.start();
+  thread.start("crofconn");
 }
 
 void crofconn::close() { set_state(STATE_CLOSING); };
