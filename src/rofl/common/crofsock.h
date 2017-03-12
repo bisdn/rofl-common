@@ -546,7 +546,7 @@ public:
 
   std::string str() const {
     std::stringstream ss;
-    switch (state) {
+    switch (state.load()) {
     case STATE_IDLE: {
       ss << "state: -IDLE- ";
     } break;

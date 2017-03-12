@@ -508,7 +508,7 @@ void crofconn::hello_expired() {
           << " laddr=" << rofsock.get_laddr().str()
           << " raddr=" << rofsock.get_raddr().str();
 
-  switch (state) {
+  switch (state.load()) {
   case STATE_ESTABLISHED: {
     /* ignore event */
     VLOG(1) << __PRETTY_FUNCTION__
