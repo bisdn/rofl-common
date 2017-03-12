@@ -536,11 +536,8 @@ void crofbase::handle_closed(crofdpt &dpt) {
   VLOG(2) << "datapath detached dptid=" << dpt.get_dptid()
           << " dpid=" << dpt.get_dpid();
   handle_dpt_close(dpt.get_dptid());
-  /* if main connection is passive, delete crofdpt instance */
-  if (dpt.get_conn(rofl::cauxid(0)).is_passive()) {
-    /* mark dpt for deletion */
-    drop_dpt(dpt.get_dptid());
-  }
+
+  drop_dpt(dpt.get_dptid());
 }
 
 void crofbase::handle_established(crofdpt &dpt, crofconn &conn,
