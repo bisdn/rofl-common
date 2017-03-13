@@ -1760,16 +1760,18 @@ on_error:
     VLOG(2) << "TCP: peer shutdown laddr=" << laddr.str()
             << " raddr=" << raddr.str();
     close();
+
+    if (flag_test(FLAG_RECONNECT_ON_FAILURE)) {
+      backoff_reconnect(true);
+    }
+
     try {
       crofsock_env::call_env(env).handle_closed(*this);
     } catch (std::runtime_error &e) {
       VLOG(1) << __FUNCTION__ << "() caught runtime error, what: %s" << e.what()
               << " laddr=" << laddr.str() << " raddr=" << raddr.str();
     }
-    if (flag_test(FLAG_RECONNECT_ON_FAILURE)) {
-      backoff_reconnect(true);
-    }
-
+    // WARNING: handle_closed might delete this socket, don't call anything here
   } break;
   default: { VLOG(2) << __FUNCTION__ << " error in state=" << state; };
   }
