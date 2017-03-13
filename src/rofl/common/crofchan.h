@@ -152,7 +152,7 @@ public:
   crofchan(crofchan_env *env)
       : env(env), thread(this), last_auxid(0),
         ofp_version(rofl::openflow::OFP_VERSION_UNKNOWN) {
-    thread.start();
+    thread.start("crofchan");
   };
 
 public:

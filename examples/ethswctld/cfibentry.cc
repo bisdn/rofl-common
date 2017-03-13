@@ -17,7 +17,7 @@ cfibentry::cfibentry(cfibentry_env *fibenv, const rofl::caddress_ll &hwaddr,
   thread.add_timer(TIMER_ID_ENTRY_EXPIRED,
                    rofl::ctimespec().expire_in(entry_timeout));
   std::cerr << "[cfibentry] created" << std::endl << *this;
-  thread.start();
+  thread.start("cfibentry");
 }
 
 cfibentry::~cfibentry() {

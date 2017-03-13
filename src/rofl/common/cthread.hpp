@@ -155,7 +155,7 @@ public:
    * Sets run flag run_rx_thread to true and calls
    * syscall pthread_create() for starting worker thread.
    */
-  void start();
+  void start(const std::string &thread_name = std::string(""));
 
   /**
    * @brief	Stops worker thread
