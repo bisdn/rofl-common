@@ -849,11 +849,8 @@ void crofsock::tls_accept(int sockfd) {
     }
 
   } break;
-  case STATE_TLS_ESTABLISHED: {
-
-    /* do nothing */
-
-  } break;
+  case STATE_TLS_ESTABLISHED: /* do nothing */
+    break;
   default: {
 
     throw eRofSockError("crofsock::tls_accept() called in invalid state",
@@ -977,11 +974,8 @@ void crofsock::tls_connect(bool reconnect) {
     }
 
   } break;
-  case STATE_TLS_ESTABLISHED: {
-
-    /* do nothing */
-
-  } break;
+  case STATE_TLS_ESTABLISHED: /* do nothing */
+    break;
   default: {
 
     throw eRofSockError("crofsock::tls_connect() called in invalid state",
@@ -1264,7 +1258,8 @@ void crofsock::handle_timeout(cthread &thread, uint32_t timer_id) {
       tcp_connect(true);
     }
   } break;
-  default: { /* do nothing */ };
+  default: /* do nothing */
+    break;
   }
 }
 
@@ -1662,7 +1657,8 @@ void crofsock::handle_read_event_rxthread(cthread &thread, int fd) {
       recv_message();
 
     } break;
-    default: { /* do nothing */ };
+    default: /* do nothing */
+      break;
     }
 
   } catch (std::runtime_error &e) {
