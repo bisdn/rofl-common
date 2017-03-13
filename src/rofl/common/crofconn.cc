@@ -213,8 +213,8 @@ void crofconn::set_state(enum crofconn_state_t new_state) {
 
     } break;
     case STATE_ESTABLISHED: {
-      VLOG(2) << __PRETTY_FUNCTION__
-              << " STATE_ESTABLISHED negotiated versions=" << ofp_version
+      VLOG(2) << __PRETTY_FUNCTION__ << " STATE_ESTABLISHED negotiated version="
+              << static_cast<unsigned>(ofp_version.load())
               << " laddr=" << rofsock.get_laddr().str()
               << " raddr=" << rofsock.get_raddr().str();
       thread.drop_timer(TIMER_ID_WAIT_FOR_HELLO);
