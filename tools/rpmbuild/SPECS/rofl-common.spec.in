@@ -1,6 +1,6 @@
 Name:		rofl-common
 Version:	@ROFL_VERSION@
-Release:	0%{?dist}
+Release:	1%{?dist}
 Summary:	Revised OpenFlow Library
 
 Group:		System Environment/Libraries
@@ -69,6 +69,29 @@ make install DESTDIR=$RPM_BUILD_ROOT
 rm -rf $RPM_BUILD_ROOT 
 
 %changelog
+* Mon Mar 13 2017 Tobias Jungel <tobias.jungel@bisdn.de> - v0.11.0
+- [B] made ofp_version atomic
+- [B] multiple thread related issues found with tsan
+- [B] crofsock: txqueue order of barrier requests
+- [+] crofbase: allow set_ctl without creation of a new instance
+- [B] ctimespec: invalid calculation and data race fixed
+- [+] travis: print log of failed tests
+- [+] log exceptions caught in thread
+- [+] cdptid and cdpid are now basic types
+- [+] cthread: timer cleanup
+- [B] tests are now included in dist release
+- [+] rofl journal replaced with glog
+- [+] reset txbuffer before sending to comply with ovs and ofagent
+- [+] clang format added
+- [+] cthread: cleanup locking and api
+- [B] heap-use-after-free in crofconn
+- [B] crofbase: return if accept fails with EAGAIN
+- [+] cthread: set name of thread
+- [B] crofbase: heap-use-after-free fixed
+- [B] crofsock: heap-use-after-free fixed
+- [B] cthread: use pthread_join so finalize a thread
+- [B] debug log of OF version number fixed
+
 * Thu Jun 30 2016 Tobias Jungel <tobias.jungel@bisdn.de> - v0.10.9
 - [+] fixed issues with compilation under GCC6
 - [+] Extended behaviour of method rofl::crofbase::set_dpt()
