@@ -405,15 +405,15 @@ void crofbase::handle_established(crofconn &conn, uint8_t ofp_version) {
 
     /* indicate channel up to higher layers */
     if (conn.get_auxid() == rofl::cauxid(0)) {
-      VLOG(2) << "datapath attached dptid=" << dptid
-              << " version=" << get_dpt(dptid).get_version();
+      VLOG(2) << "datapath attached dptid=" << dptid << " version="
+              << static_cast<unsigned>(get_dpt(dptid).get_version());
       handle_dpt_open(set_dpt(dptid));
     }
-    VLOG(2) << "connection established dptid" << dptid
+    VLOG(2) << "connection established dptid=" << dptid
             << " auxid=" << conn.get_auxid().str()
             << " laddr=" << conn.get_laddr().str()
             << " raddr=" << conn.get_raddr().str()
-            << " version=" << conn.get_version();
+            << " version=" << static_cast<unsigned>(conn.get_version());
     handle_conn_established(set_dpt(dptid), conn.get_auxid());
 
   } break;
@@ -427,15 +427,15 @@ void crofbase::handle_established(crofconn &conn, uint8_t ofp_version) {
 
     /* indicate channel up to higher layers */
     if (conn.get_auxid() == rofl::cauxid(0)) {
-      VLOG(2) << "controller attached ctlid=" << ctlid.str()
-              << " version=" << get_ctl(ctlid).get_version();
+      VLOG(2) << "controller attached ctlid=" << ctlid.str() << " version="
+              << static_cast<unsigned>(get_ctl(ctlid).get_version());
       handle_ctl_open(set_ctl(ctlid));
     }
     VLOG(2) << "connection established ctlid=" << ctlid.str()
             << " auxid=" << conn.get_auxid().str()
             << " laddr=" << conn.get_laddr().str()
             << " raddr=" << conn.get_raddr().str()
-            << " version=" << conn.get_version();
+            << " version=" << static_cast<unsigned>(conn.get_version());
     handle_conn_established(set_ctl(ctlid), conn.get_auxid());
 
   } break;
@@ -451,7 +451,7 @@ void crofbase::handle_closed(crofconn &conn) { delete &conn; }
 
 void crofbase::handle_established(crofctl &ctl, uint8_t ofp_version) {
   VLOG(2) << "controller attached ctlid=" << ctl.get_ctlid().str()
-          << " version=" << ctl.get_version();
+          << " version=" << static_cast<unsigned>(ctl.get_version());
   handle_ctl_open(ctl);
 }
 
@@ -471,7 +471,7 @@ void crofbase::handle_established(crofctl &ctl, crofconn &conn,
           << " auxid=" << conn.get_auxid().str()
           << " laddr=" << conn.get_laddr().str()
           << " raddr=" << conn.get_raddr().str()
-          << " version=" << conn.get_version();
+          << " version=" << static_cast<unsigned>(conn.get_version());
   handle_conn_established(ctl, conn.get_auxid());
 }
 
@@ -479,8 +479,8 @@ void crofbase::handle_closed(crofctl &ctl, crofconn &conn) {
   VLOG(2) << "connection terminated ctlid=" << ctl.get_ctlid().str()
           << " auxid=" << conn.get_auxid().str()
           << " laddr=" << conn.get_laddr().str()
-          << " raddr=" << conn.get_raddr().str() << " version=",
-      conn.get_version();
+          << " raddr=" << conn.get_raddr().str()
+          << " version=" << static_cast<unsigned>(conn.get_version());
   handle_conn_terminated(ctl, conn.get_auxid());
 }
 
@@ -528,7 +528,8 @@ void crofbase::congestion_solved_indication(crofctl &ctl, crofconn &conn) {
 
 void crofbase::handle_established(crofdpt &dpt, uint8_t ofp_version) {
   VLOG(2) << "datapath attached dptid=" << dpt.get_dptid()
-          << " dpid=" << dpt.get_dpid() << " version=" << dpt.get_version();
+          << " dpid=" << dpt.get_dpid()
+          << " version=" << static_cast<unsigned>(dpt.get_version());
   handle_dpt_open(dpt);
 }
 
@@ -546,7 +547,7 @@ void crofbase::handle_established(crofdpt &dpt, crofconn &conn,
           << " auxid=" << conn.get_auxid().str()
           << " laddr=" << conn.get_laddr().str()
           << " raddr=" << conn.get_raddr().str()
-          << " version=" << conn.get_version();
+          << " version=" << static_cast<unsigned>(conn.get_version());
   handle_conn_established(dpt, conn.get_auxid());
 }
 
@@ -555,7 +556,7 @@ void crofbase::handle_closed(crofdpt &dpt, crofconn &conn) {
           << " auxid=" << conn.get_auxid().str()
           << " laddr=" << conn.get_laddr().str()
           << " raddr=" << conn.get_raddr().str()
-          << " version=" << conn.get_version();
+          << " version=" << static_cast<unsigned>(conn.get_version());
   handle_conn_terminated(dpt, conn.get_auxid());
 }
 
