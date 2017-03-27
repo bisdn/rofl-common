@@ -42,7 +42,6 @@ public:
   virtual ~coxmatch_ofx_pppoe_code(){};
   friend std::ostream &operator<<(std::ostream &os,
                                   const coxmatch_ofx_pppoe_code &oxm) {
-    os << dynamic_cast<const coxmatch_exp &>(oxm);
     os << "<pppoe-code: " << (int)oxm.get_u8value() << " >" << std::endl;
     return os;
   };
@@ -59,7 +58,6 @@ public:
   virtual ~coxmatch_ofx_pppoe_type(){};
   friend std::ostream &operator<<(std::ostream &os,
                                   coxmatch_ofx_pppoe_type const &oxm) {
-    os << dynamic_cast<const coxmatch_exp &>(oxm);
     os << "<pppoe-type: " << (int)oxm.get_u8value() << " >" << std::endl;
     return os;
   };
@@ -76,7 +74,6 @@ public:
   virtual ~coxmatch_ofx_pppoe_sid(){};
   friend std::ostream &operator<<(std::ostream &os,
                                   const coxmatch_ofx_pppoe_sid &oxm) {
-    os << dynamic_cast<const coxmatch_exp &>(oxm);
     os << "<pppoe-sid: " << (int)oxm.get_u16value() << " >" << std::endl;
     return os;
   };
@@ -93,7 +90,6 @@ public:
   virtual ~coxmatch_ofx_ppp_prot(){};
   friend std::ostream &operator<<(std::ostream &os,
                                   const coxmatch_ofx_ppp_prot &oxm) {
-    os << dynamic_cast<const coxmatch_exp &>(oxm);
     os << "<ppp-prot: " << (int)oxm.get_u16value() << " >" << std::endl;
     return os;
   };

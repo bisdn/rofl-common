@@ -633,17 +633,7 @@ public:
   /**
    *
    */
-  friend std::ostream &operator<<(std::ostream &os, const coxmatch_exp &oxm) {
-    os << "<coxmatch_exp exp_id: 0x" << std::hex << oxm.get_oxm_exp_id()
-       << std::dec << " >" << std::endl
-
-       << dynamic_cast<const coxmatch &>(oxm)
-
-       << "<value: >" << std::endl
-       << oxm.get_value() << "<mask: >" << std::endl
-       << oxm.get_mask();
-    return os;
-  };
+  friend std::ostream &operator<<(std::ostream &os, const coxmatch_exp &oxm);
 
 private:
   /**
