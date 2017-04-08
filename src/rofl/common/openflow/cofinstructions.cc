@@ -154,7 +154,7 @@ cofinstruction &cofinstructions::set_inst(uint16_t type) {
 const cofinstruction &cofinstructions::get_inst(uint16_t type) const {
   if (instmap.find(type) == instmap.end()) {
     throw eInstructionsNotFound()
-        .set_func(__PRETTY_FUNCTION__)
+        .set_func(__FUNCTION__)
         .set_file(__FILE__)
         .set_line(__LINE__);
   }
@@ -195,7 +195,7 @@ cofinstruction_goto_table &cofinstructions::set_inst_goto_table() {
 const cofinstruction_goto_table &cofinstructions::get_inst_goto_table() const {
   if (instmap.find(rofl::openflow::OFPIT_GOTO_TABLE) == instmap.end()) {
     throw eInstructionsNotFound()
-        .set_func(__PRETTY_FUNCTION__)
+        .set_func(__FUNCTION__)
         .set_file(__FILE__)
         .set_line(__LINE__);
   }
@@ -238,7 +238,7 @@ const cofinstruction_write_metadata &
 cofinstructions::get_inst_write_metadata() const {
   if (instmap.find(rofl::openflow::OFPIT_WRITE_METADATA) == instmap.end()) {
     throw eInstructionsNotFound()
-        .set_func(__PRETTY_FUNCTION__)
+        .set_func(__FUNCTION__)
         .set_file(__FILE__)
         .set_line(__LINE__);
   }
@@ -282,7 +282,7 @@ const cofinstruction_write_actions &
 cofinstructions::get_inst_write_actions() const {
   if (instmap.find(rofl::openflow::OFPIT_WRITE_ACTIONS) == instmap.end()) {
     throw eInstructionsNotFound()
-        .set_func(__PRETTY_FUNCTION__)
+        .set_func(__FUNCTION__)
         .set_file(__FILE__)
         .set_line(__LINE__);
   }
@@ -326,7 +326,7 @@ const cofinstruction_apply_actions &
 cofinstructions::get_inst_apply_actions() const {
   if (instmap.find(rofl::openflow::OFPIT_APPLY_ACTIONS) == instmap.end()) {
     throw eInstructionsNotFound()
-        .set_func(__PRETTY_FUNCTION__)
+        .set_func(__FUNCTION__)
         .set_file(__FILE__)
         .set_line(__LINE__);
   }
@@ -370,7 +370,7 @@ const cofinstruction_clear_actions &
 cofinstructions::get_inst_clear_actions() const {
   if (instmap.find(rofl::openflow::OFPIT_CLEAR_ACTIONS) == instmap.end()) {
     throw eInstructionsNotFound()
-        .set_func(__PRETTY_FUNCTION__)
+        .set_func(__FUNCTION__)
         .set_file(__FILE__)
         .set_line(__LINE__);
   }
@@ -414,7 +414,7 @@ const cofinstruction_experimenter &
 cofinstructions::get_inst_experimenter() const {
   if (instmap.find(rofl::openflow::OFPIT_EXPERIMENTER) == instmap.end()) {
     throw eInstructionsNotFound()
-        .set_func(__PRETTY_FUNCTION__)
+        .set_func(__FUNCTION__)
         .set_file(__FILE__)
         .set_line(__LINE__);
   }
@@ -456,7 +456,7 @@ cofinstruction_meter &cofinstructions::set_inst_meter() {
 const cofinstruction_meter &cofinstructions::get_inst_meter() const {
   if (instmap.find(rofl::openflow::OFPIT_METER) == instmap.end()) {
     throw eInstructionsNotFound()
-        .set_func(__PRETTY_FUNCTION__)
+        .set_func(__FUNCTION__)
         .set_file(__FILE__)
         .set_line(__LINE__);
   }
@@ -490,7 +490,7 @@ size_t cofinstructions::length() const {
 void cofinstructions::pack(uint8_t *buf, size_t buflen) {
   if (buflen < length())
     throw eInstructionsInval()
-        .set_func(__PRETTY_FUNCTION__)
+        .set_func(__FUNCTION__)
         .set_file(__FILE__)
         .set_line(__LINE__);
 
@@ -521,7 +521,7 @@ void cofinstructions::unpack(uint8_t *buf, size_t buflen) {
 
     if (len > buflen)
       throw eInstructionsBadLen()
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_file(__FILE__)
           .set_line(__LINE__);
 

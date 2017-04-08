@@ -32,9 +32,7 @@ size_t cofmsg_port_desc_stats_request::length() const {
     return (sizeof(struct rofl::openflow13::ofp_multipart_request));
   } break;
   default:
-    throw eBadVersion("eBadVersion")
-        .set_func(__PRETTY_FUNCTION__)
-        .set_line(__LINE__);
+    throw eBadVersion("eBadVersion").set_func(__FUNCTION__).set_line(__LINE__);
   }
   return 0;
 }
@@ -46,7 +44,7 @@ void cofmsg_port_desc_stats_request::pack(uint8_t *buf, size_t buflen) {
     return;
 
   if (buflen < cofmsg_port_desc_stats_request::length())
-    throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
 }
 
 void cofmsg_port_desc_stats_request::unpack(uint8_t *buf, size_t buflen) {
@@ -56,19 +54,19 @@ void cofmsg_port_desc_stats_request::unpack(uint8_t *buf, size_t buflen) {
     return;
 
   if (buflen < cofmsg_port_desc_stats_request::length())
-    throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__,
+    throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __FUNCTION__,
                             __LINE__);
 
   switch (get_version()) {
   default: {
     if (get_stats_type() != rofl::openflow13::OFPMP_PORT_DESC)
-      throw eBadRequestBadStat("eBadRequestBadStat", __FILE__,
-                               __PRETTY_FUNCTION__, __LINE__);
+      throw eBadRequestBadStat("eBadRequestBadStat", __FILE__, __FUNCTION__,
+                               __LINE__);
   };
   }
 
   if (get_length() < cofmsg_port_desc_stats_request::length())
-    throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__,
+    throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __FUNCTION__,
                             __LINE__);
 }
 
@@ -103,9 +101,7 @@ size_t cofmsg_port_desc_stats_reply::length() const {
     return sizeof(struct openflow13::ofp_multipart_reply) + ports.length();
   } break;
   default:
-    throw eBadVersion("eBadVersion")
-        .set_func(__PRETTY_FUNCTION__)
-        .set_line(__LINE__);
+    throw eBadVersion("eBadVersion").set_func(__FUNCTION__).set_line(__LINE__);
   }
   return 0;
 }
@@ -117,7 +113,7 @@ void cofmsg_port_desc_stats_reply::pack(uint8_t *buf, size_t buflen) {
     return;
 
   if (buflen < cofmsg_port_desc_stats_reply::length())
-    throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
 
   switch (get_version()) {
   default: {
@@ -138,14 +134,14 @@ void cofmsg_port_desc_stats_reply::unpack(uint8_t *buf, size_t buflen) {
     return;
 
   if (buflen < cofmsg_port_desc_stats_reply::length())
-    throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__,
+    throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __FUNCTION__,
                             __LINE__);
 
   switch (get_version()) {
   default: {
     if (get_stats_type() != rofl::openflow13::OFPMP_PORT_DESC)
-      throw eBadRequestBadStat("eBadRequestBadStat", __FILE__,
-                               __PRETTY_FUNCTION__, __LINE__);
+      throw eBadRequestBadStat("eBadRequestBadStat", __FILE__, __FUNCTION__,
+                               __LINE__);
 
     struct rofl::openflow13::ofp_multipart_reply *hdr =
         (struct rofl::openflow13::ofp_multipart_reply *)buf;
@@ -158,6 +154,6 @@ void cofmsg_port_desc_stats_reply::unpack(uint8_t *buf, size_t buflen) {
   }
 
   if (get_length() < cofmsg_port_desc_stats_reply::length())
-    throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__,
+    throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __FUNCTION__,
                             __LINE__);
 }

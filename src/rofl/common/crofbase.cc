@@ -317,7 +317,7 @@ void crofbase::handle_read_event(cthread &thread, int fd) {
             return;
           } break;
           default: {
-            throw eSysCall("eSysCall", "accept", __FILE__, __PRETTY_FUNCTION__,
+            throw eSysCall("eSysCall", "accept", __FILE__, __FUNCTION__,
                            __LINE__);
           };
           }
@@ -360,7 +360,7 @@ void crofbase::handle_read_event(cthread &thread, int fd) {
             return;
           } break;
           default: {
-            throw eSysCall("eSysCall", "accept", __FILE__, __PRETTY_FUNCTION__,
+            throw eSysCall("eSysCall", "accept", __FILE__, __FUNCTION__,
                            __LINE__);
           };
           }

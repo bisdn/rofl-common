@@ -85,7 +85,7 @@ size_t cmemory::memlen() const { return data.second; }
 uint8_t &cmemory::operator[](size_t index) const {
   if (index >= data.second) {
     throw eOutOfRange("cmemory::operator[] ()")
-        .set_func(__PRETTY_FUNCTION__)
+        .set_func(__FUNCTION__)
         .set_line(__LINE__);
   }
   return *(somem() + index);
@@ -130,7 +130,7 @@ bool cmemory::operator>(const cmemory &m) const {
 cmemory cmemory::operator&(const cmemory &m) const {
   if (memlen() != m.memlen()) {
     throw eInvalid("cmemory::operator& ()")
-        .set_func(__PRETTY_FUNCTION__)
+        .set_func(__FUNCTION__)
         .set_line(__LINE__);
   }
 
@@ -184,7 +184,7 @@ uint8_t *cmemory::resize(size_t len) {
   } else if (len <= data.second) {
     if ((data.first = (uint8_t *)realloc(data.first, len)) == 0) {
       throw eSysCall("realloc syscall failed")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
     }
     // memset(data.first + len, 0x00, data.second);
@@ -194,7 +194,7 @@ uint8_t *cmemory::resize(size_t len) {
   } else {
     if ((data.first = (uint8_t *)realloc(data.first, len)) == 0) {
       throw eSysCall("realloc syscall failed")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
     }
     memset(data.first + data.second, 0x00, len - data.second);
@@ -231,7 +231,7 @@ void cmemory::mallocate(size_t len) {
 
   if ((data.first = (uint8_t *)calloc(1, data.second)) == 0) {
     throw eSysCall("calloc syscall failed")
-        .set_func(__PRETTY_FUNCTION__)
+        .set_func(__FUNCTION__)
         .set_line(__LINE__);
   }
 
@@ -249,7 +249,7 @@ void cmemory::mfree() {
 uint8_t *cmemory::insert(uint8_t *ptr, size_t len) {
   if (not((ptr >= data.first) && (ptr < (data.first + data.second)))) {
     throw eOutOfRange("cmemory::insert()")
-        .set_func(__PRETTY_FUNCTION__)
+        .set_func(__FUNCTION__)
         .set_line(__LINE__);
   }
 
@@ -259,7 +259,7 @@ uint8_t *cmemory::insert(uint8_t *ptr, size_t len) {
 uint8_t *cmemory::insert(unsigned int offset, size_t len) {
   if (offset > data.second) {
     throw eOutOfRange("offset > data.second")
-        .set_func(__PRETTY_FUNCTION__)
+        .set_func(__FUNCTION__)
         .set_line(__LINE__);
   }
 
@@ -273,7 +273,7 @@ uint8_t *cmemory::insert(unsigned int offset, size_t len) {
 
   if ((p_ptr = (uint8_t *)calloc(1, p_len)) == 0) {
     throw eSysCall("calloc syscall failed")
-        .set_func(__PRETTY_FUNCTION__)
+        .set_func(__FUNCTION__)
         .set_line(__LINE__);
   }
 
@@ -292,14 +292,14 @@ uint8_t *cmemory::insert(unsigned int offset, size_t len) {
 void cmemory::remove(uint8_t *ptr, size_t len) {
   if (not((ptr >= data.first) && (ptr < (data.first + data.second)))) {
     throw eOutOfRange("cmemory::remove()")
-        .set_func(__PRETTY_FUNCTION__)
+        .set_func(__FUNCTION__)
         .set_line(__LINE__);
   }
 
   if (not(((ptr + len) >= data.first) &&
           ((ptr + len) < (data.first + data.second)))) {
     throw eOutOfRange("cmemory::remove()")
-        .set_func(__PRETTY_FUNCTION__)
+        .set_func(__FUNCTION__)
         .set_line(__LINE__);
   }
 
@@ -323,6 +323,6 @@ unsigned int cmemory::find_first_of(uint8_t value, unsigned int start) {
     }
   }
   throw eMemNotFound("cmemory::find_first_of()")
-      .set_func(__PRETTY_FUNCTION__)
+      .set_func(__FUNCTION__)
       .set_line(__LINE__);
 }

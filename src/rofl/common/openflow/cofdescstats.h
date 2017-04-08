@@ -203,7 +203,7 @@ public:
 
     } break;
     default: {
-      throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+      throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
     };
     }
     return os;

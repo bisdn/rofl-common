@@ -726,8 +726,8 @@ public:
    */
   void check_role() const {
     if (is_slave())
-      throw eBadRequestIsSlave("eBadRequestIsSlave", __FILE__,
-                               __PRETTY_FUNCTION__, __LINE__);
+      throw eBadRequestIsSlave("eBadRequestIsSlave", __FILE__, __FUNCTION__,
+                               __LINE__);
   };
 
   /**

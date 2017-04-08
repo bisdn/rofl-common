@@ -31,9 +31,7 @@ size_t cofmsg_get_async_config_request::length() const {
     return (sizeof(struct rofl::openflow::ofp_header));
   } break;
   default:
-    throw eBadVersion("eBadVersion")
-        .set_func(__PRETTY_FUNCTION__)
-        .set_line(__LINE__);
+    throw eBadVersion("eBadVersion").set_func(__FUNCTION__).set_line(__LINE__);
   }
 }
 
@@ -44,7 +42,7 @@ void cofmsg_get_async_config_request::pack(uint8_t *buf, size_t buflen) {
     return;
 
   if (buflen < cofmsg_get_async_config_request::length())
-    throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
 }
 
 void cofmsg_get_async_config_request::unpack(uint8_t *buf, size_t buflen) {
@@ -54,19 +52,19 @@ void cofmsg_get_async_config_request::unpack(uint8_t *buf, size_t buflen) {
     return;
 
   if (buflen < cofmsg_get_async_config_request::length())
-    throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__,
+    throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __FUNCTION__,
                             __LINE__);
 
   switch (get_version()) {
   default: {
     if (get_type() != rofl::openflow13::OFPT_GET_ASYNC_REQUEST)
-      throw eBadRequestBadType("eBadRequestBadType", __FILE__,
-                               __PRETTY_FUNCTION__, __LINE__);
+      throw eBadRequestBadType("eBadRequestBadType", __FILE__, __FUNCTION__,
+                               __LINE__);
   };
   }
 
   if (get_length() < cofmsg_get_async_config_request::length())
-    throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__,
+    throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __FUNCTION__,
                             __LINE__);
 }
 
@@ -101,9 +99,7 @@ size_t cofmsg_get_async_config_reply::length() const {
             async_config.length());
   } break;
   default:
-    throw eBadVersion("eBadVersion")
-        .set_func(__PRETTY_FUNCTION__)
-        .set_line(__LINE__);
+    throw eBadVersion("eBadVersion").set_func(__FUNCTION__).set_line(__LINE__);
   }
   return 0;
 }
@@ -115,7 +111,7 @@ void cofmsg_get_async_config_reply::pack(uint8_t *buf, size_t buflen) {
     return;
 
   if (buflen < cofmsg_get_async_config_reply::length())
-    throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
 
   switch (get_version()) {
   default: {
@@ -134,15 +130,15 @@ void cofmsg_get_async_config_reply::unpack(uint8_t *buf, size_t buflen) {
     return;
 
   if (buflen < cofmsg_get_async_config_reply::length())
-    throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__,
+    throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __FUNCTION__,
                             __LINE__);
 
   switch (get_version()) {
   default: {
 
     if (get_type() != rofl::openflow13::OFPT_GET_ASYNC_REPLY)
-      throw eBadRequestBadType("eBadRequestBadType", __FILE__,
-                               __PRETTY_FUNCTION__, __LINE__);
+      throw eBadRequestBadType("eBadRequestBadType", __FILE__, __FUNCTION__,
+                               __LINE__);
 
     if (buflen > sizeof(struct rofl::openflow::ofp_header)) {
       async_config.unpack(buf + sizeof(struct rofl::openflow::ofp_header),
@@ -152,7 +148,7 @@ void cofmsg_get_async_config_reply::unpack(uint8_t *buf, size_t buflen) {
   }
 
   if (get_length() < cofmsg_get_async_config_reply::length())
-    throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__,
+    throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __FUNCTION__,
                             __LINE__);
 }
 
@@ -187,9 +183,7 @@ size_t cofmsg_set_async_config::length() const {
             async_config.length());
   } break;
   default:
-    throw eBadVersion("eBadVersion")
-        .set_func(__PRETTY_FUNCTION__)
-        .set_line(__LINE__);
+    throw eBadVersion("eBadVersion").set_func(__FUNCTION__).set_line(__LINE__);
   }
   return 0;
 }
@@ -201,7 +195,7 @@ void cofmsg_set_async_config::pack(uint8_t *buf, size_t buflen) {
     return;
 
   if (buflen < cofmsg_set_async_config::length())
-    throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
 
   switch (get_version()) {
   default: {
@@ -220,15 +214,15 @@ void cofmsg_set_async_config::unpack(uint8_t *buf, size_t buflen) {
     return;
 
   if (buflen < cofmsg_set_async_config::length())
-    throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__,
+    throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __FUNCTION__,
                             __LINE__);
 
   switch (get_version()) {
   default: {
 
     if (get_type() != rofl::openflow13::OFPT_SET_ASYNC)
-      throw eBadRequestBadType("eBadRequestBadType", __FILE__,
-                               __PRETTY_FUNCTION__, __LINE__);
+      throw eBadRequestBadType("eBadRequestBadType", __FILE__, __FUNCTION__,
+                               __LINE__);
 
     if (buflen > sizeof(struct rofl::openflow::ofp_header)) {
       async_config.unpack(buf + sizeof(struct rofl::openflow::ofp_header),
@@ -238,6 +232,6 @@ void cofmsg_set_async_config::unpack(uint8_t *buf, size_t buflen) {
   }
 
   if (get_length() < cofmsg_set_async_config::length())
-    throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__,
+    throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __FUNCTION__,
                             __LINE__);
 }

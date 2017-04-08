@@ -23,7 +23,7 @@ void cofmsg_features_reply::pack(uint8_t *buf, size_t buflen) {
     return;
 
   if (buflen < get_length())
-    throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
 
   switch (get_version()) {
   case rofl::openflow10::OFP_VERSION: {
@@ -79,15 +79,15 @@ void cofmsg_features_reply::unpack(uint8_t *buf, size_t buflen) {
     return;
 
   if (buflen < cofmsg_features_reply::length())
-    throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__,
+    throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __FUNCTION__,
                             __LINE__);
 
   switch (get_version()) {
   case rofl::openflow10::OFP_VERSION: {
 
     if (get_type() != rofl::openflow10::OFPT_FEATURES_REPLY)
-      throw eBadRequestBadType("eBadRequestBadType", __FILE__,
-                               __PRETTY_FUNCTION__, __LINE__);
+      throw eBadRequestBadType("eBadRequestBadType", __FILE__, __FUNCTION__,
+                               __LINE__);
 
     struct rofl::openflow10::ofp_switch_features *hdr =
         (struct rofl::openflow10::ofp_switch_features *)buf;
@@ -108,8 +108,8 @@ void cofmsg_features_reply::unpack(uint8_t *buf, size_t buflen) {
   case rofl::openflow12::OFP_VERSION: {
 
     if (get_type() != rofl::openflow12::OFPT_FEATURES_REPLY)
-      throw eBadRequestBadType("eBadRequestBadType", __FILE__,
-                               __PRETTY_FUNCTION__, __LINE__);
+      throw eBadRequestBadType("eBadRequestBadType", __FILE__, __FUNCTION__,
+                               __LINE__);
 
     struct rofl::openflow12::ofp_switch_features *hdr =
         (struct rofl::openflow12::ofp_switch_features *)buf;
@@ -129,8 +129,8 @@ void cofmsg_features_reply::unpack(uint8_t *buf, size_t buflen) {
   default: {
 
     if (get_type() != rofl::openflow13::OFPT_FEATURES_REPLY)
-      throw eBadRequestBadType("eBadRequestBadType", __FILE__,
-                               __PRETTY_FUNCTION__, __LINE__);
+      throw eBadRequestBadType("eBadRequestBadType", __FILE__, __FUNCTION__,
+                               __LINE__);
 
     struct rofl::openflow13::ofp_switch_features *hdr =
         (struct rofl::openflow13::ofp_switch_features *)buf;
@@ -144,6 +144,6 @@ void cofmsg_features_reply::unpack(uint8_t *buf, size_t buflen) {
   }
 
   if (get_length() < cofmsg_features_reply::length())
-    throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__,
+    throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __FUNCTION__,
                             __LINE__);
 }

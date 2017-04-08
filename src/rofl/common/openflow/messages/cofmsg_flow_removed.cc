@@ -25,7 +25,7 @@ void cofmsg_flow_removed::pack(uint8_t *buf, size_t buflen) {
     return;
 
   if (buflen < cofmsg_flow_removed::length())
-    throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__,
+    throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __FUNCTION__,
                             __LINE__);
 
   switch (get_version()) {
@@ -82,12 +82,12 @@ void cofmsg_flow_removed::unpack(uint8_t *buf, size_t buflen) {
   case rofl::openflow10::OFP_VERSION: {
 
     if (buflen < sizeof(struct rofl::openflow10::ofp_flow_removed))
-      throw eBadRequestBadLen("eBadRequestBadLen", __FILE__,
-                              __PRETTY_FUNCTION__, __LINE__);
+      throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __FUNCTION__,
+                              __LINE__);
 
     if (get_type() != rofl::openflow10::OFPT_FLOW_REMOVED)
-      throw eBadRequestBadType("eBadRequestBadType", __FILE__,
-                               __PRETTY_FUNCTION__, __LINE__);
+      throw eBadRequestBadType("eBadRequestBadType", __FILE__, __FUNCTION__,
+                               __LINE__);
 
     struct rofl::openflow10::ofp_flow_removed *hdr =
         (struct rofl::openflow10::ofp_flow_removed *)buf;
@@ -107,19 +107,19 @@ void cofmsg_flow_removed::unpack(uint8_t *buf, size_t buflen) {
                  sizeof(struct rofl::openflow10::ofp_match));
 
     if (get_length() < sizeof(struct rofl::openflow10::ofp_flow_removed))
-      throw eBadRequestBadLen("eBadRequestBadLen", __FILE__,
-                              __PRETTY_FUNCTION__, __LINE__);
+      throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __FUNCTION__,
+                              __LINE__);
 
   } break;
   default: {
 
     if (buflen < sizeof(struct rofl::openflow13::ofp_flow_removed))
-      throw eBadRequestBadLen("eBadRequestBadLen", __FILE__,
-                              __PRETTY_FUNCTION__, __LINE__);
+      throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __FUNCTION__,
+                              __LINE__);
 
     if (get_type() != rofl::openflow13::OFPT_FLOW_REMOVED)
-      throw eBadRequestBadType("eBadRequestBadType", __FILE__,
-                               __PRETTY_FUNCTION__, __LINE__);
+      throw eBadRequestBadType("eBadRequestBadType", __FILE__, __FUNCTION__,
+                               __LINE__);
 
     struct rofl::openflow12::ofp_flow_removed *hdr =
         (struct rofl::openflow12::ofp_flow_removed *)buf;
@@ -141,8 +141,8 @@ void cofmsg_flow_removed::unpack(uint8_t *buf, size_t buflen) {
     }
 
     if (get_length() < sizeof(struct rofl::openflow13::ofp_flow_removed))
-      throw eBadRequestBadLen("eBadRequestBadLen", __FILE__,
-                              __PRETTY_FUNCTION__, __LINE__);
+      throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __FUNCTION__,
+                              __LINE__);
   };
   }
 }

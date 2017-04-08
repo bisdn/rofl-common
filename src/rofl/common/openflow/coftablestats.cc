@@ -18,7 +18,7 @@ size_t coftable_stats_reply::length() const {
     return (sizeof(struct rofl::openflow13::ofp_table_stats));
   } break;
   default:
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
 }
 
@@ -26,7 +26,7 @@ void coftable_stats_reply::pack(uint8_t *buf, size_t buflen) const {
   switch (of_version) {
   case rofl::openflow10::OFP_VERSION: {
     if (buflen < sizeof(struct rofl::openflow10::ofp_table_stats))
-      throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+      throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
 
     struct rofl::openflow10::ofp_table_stats *table_stats =
         (struct rofl::openflow10::ofp_table_stats *)buf;
@@ -44,7 +44,7 @@ void coftable_stats_reply::pack(uint8_t *buf, size_t buflen) const {
   } break;
   case rofl::openflow12::OFP_VERSION: {
     if (buflen < sizeof(struct rofl::openflow12::ofp_table_stats))
-      throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+      throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
 
     struct rofl::openflow12::ofp_table_stats *table_stats =
         (struct rofl::openflow12::ofp_table_stats *)buf;
@@ -70,7 +70,7 @@ void coftable_stats_reply::pack(uint8_t *buf, size_t buflen) const {
   } break;
   case rofl::openflow13::OFP_VERSION: {
     if (buflen < sizeof(struct rofl::openflow13::ofp_table_stats))
-      throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+      throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
 
     struct rofl::openflow13::ofp_table_stats *table_stats =
         (struct rofl::openflow13::ofp_table_stats *)buf;
@@ -82,7 +82,7 @@ void coftable_stats_reply::pack(uint8_t *buf, size_t buflen) const {
 
   } break;
   default:
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
 }
 
@@ -90,7 +90,7 @@ void coftable_stats_reply::unpack(uint8_t *buf, size_t buflen) {
   switch (of_version) {
   case rofl::openflow10::OFP_VERSION: {
     if (buflen < sizeof(struct rofl::openflow10::ofp_table_stats))
-      throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+      throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
 
     struct rofl::openflow10::ofp_table_stats *table_stats =
         (struct rofl::openflow10::ofp_table_stats *)buf;
@@ -107,7 +107,7 @@ void coftable_stats_reply::unpack(uint8_t *buf, size_t buflen) {
   } break;
   case openflow12::OFP_VERSION: {
     if (buflen < sizeof(struct rofl::openflow12::ofp_table_stats))
-      throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+      throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
 
     struct rofl::openflow12::ofp_table_stats *table_stats =
         (struct rofl::openflow12::ofp_table_stats *)buf;
@@ -133,7 +133,7 @@ void coftable_stats_reply::unpack(uint8_t *buf, size_t buflen) {
   } break;
   case rofl::openflow13::OFP_VERSION: {
     if (buflen < sizeof(struct rofl::openflow13::ofp_table_stats))
-      throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+      throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
 
     struct rofl::openflow13::ofp_table_stats *table_stats =
         (struct rofl::openflow13::ofp_table_stats *)buf;
@@ -145,6 +145,6 @@ void coftable_stats_reply::unpack(uint8_t *buf, size_t buflen) {
 
   } break;
   default:
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
 }

@@ -44,7 +44,7 @@ size_t cofpacket_queue::length() const {
             queue_props.length());
   } break;
   default:
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
 }
 
@@ -53,7 +53,7 @@ void cofpacket_queue::pack(uint8_t *buf, size_t buflen) {
     return;
 
   if (buflen < cofpacket_queue::length())
-    throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
 
   switch (ofp_version) {
   case rofl::openflow10::OFP_VERSION: {
@@ -85,7 +85,7 @@ void cofpacket_queue::pack(uint8_t *buf, size_t buflen) {
 
   } break;
   default:
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
 }
 
@@ -100,7 +100,7 @@ void cofpacket_queue::unpack(uint8_t *buf, size_t buflen) {
   case rofl::openflow10::OFP_VERSION: {
 
     if (buflen < sizeof(struct rofl::openflow10::ofp_packet_queue))
-      throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+      throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
 
     struct rofl::openflow10::ofp_packet_queue *hdr =
         (struct rofl::openflow10::ofp_packet_queue *)buf;
@@ -109,7 +109,7 @@ void cofpacket_queue::unpack(uint8_t *buf, size_t buflen) {
     len = be16toh(hdr->len);
 
     if (buflen < len)
-      throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+      throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
 
     queue_props.unpack((uint8_t *)hdr->properties,
                        len - sizeof(struct rofl::openflow10::ofp_packet_queue));
@@ -119,7 +119,7 @@ void cofpacket_queue::unpack(uint8_t *buf, size_t buflen) {
   case rofl::openflow13::OFP_VERSION: {
 
     if (buflen < sizeof(struct rofl::openflow13::ofp_packet_queue))
-      throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+      throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
 
     struct rofl::openflow12::ofp_packet_queue *hdr =
         (struct rofl::openflow12::ofp_packet_queue *)buf;
@@ -129,13 +129,13 @@ void cofpacket_queue::unpack(uint8_t *buf, size_t buflen) {
     len = be16toh(hdr->len);
 
     if (buflen < len)
-      throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+      throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
 
     queue_props.unpack((uint8_t *)hdr->properties,
                        len - sizeof(struct rofl::openflow13::ofp_packet_queue));
 
   } break;
   default:
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
 }

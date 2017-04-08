@@ -15,7 +15,7 @@ uint8_t *cofbucket::pack(uint8_t *bucket, size_t bclen) {
     return pack_of13(bucket, bclen);
   } break;
   default:
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
 }
 
@@ -28,7 +28,7 @@ void cofbucket::unpack(uint8_t *bucket, size_t bclen) {
     unpack_of13(bucket, bclen);
   } break;
   default:
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
 }
 

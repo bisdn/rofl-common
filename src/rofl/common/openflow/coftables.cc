@@ -28,7 +28,7 @@ void coftables::pack(uint8_t *buf, size_t buflen) {
   }
 
   if (buflen < length()) {
-    throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
   }
 
   for (std::map<uint8_t, coftable_features>::iterator it = tables.begin();
@@ -52,7 +52,7 @@ void coftables::unpack(uint8_t *buf, size_t buflen) {
         (be16toh(table->length) <
          sizeof(struct rofl::openflow13::ofp_table_features))) {
       throw eTableFeaturesReqBadLen("eTableFeaturesReqBadLen", __FILE__,
-                                    __PRETTY_FUNCTION__, __LINE__);
+                                    __FUNCTION__, __LINE__);
     }
 
     rofl::openflow::coftable_features table_features(get_version());

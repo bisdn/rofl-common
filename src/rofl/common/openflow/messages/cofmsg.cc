@@ -17,7 +17,7 @@ void cofmsg::pack(uint8_t *buf, size_t buflen) {
     return;
 
   if (buflen < cofmsg::length())
-    throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
 
   struct rofl::openflow::ofp_header *hdr =
       (struct rofl::openflow::ofp_header *)buf;
@@ -33,7 +33,7 @@ void cofmsg::unpack(uint8_t *buf, size_t buflen) {
     return;
 
   if (buflen < cofmsg::length())
-    throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__,
+    throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __FUNCTION__,
                             __LINE__);
 
   struct rofl::openflow::ofp_header *hdr =
@@ -45,9 +45,9 @@ void cofmsg::unpack(uint8_t *buf, size_t buflen) {
   xid = be32toh(hdr->xid);
 
   if (len < cofmsg::length())
-    throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__,
+    throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __FUNCTION__,
                             __LINE__);
   if (len > buflen)
-    throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__,
+    throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __FUNCTION__,
                             __LINE__);
 }

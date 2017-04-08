@@ -30,19 +30,19 @@ void crofchan::send_message(const cauxid &auxid, rofl::openflow::cofmsg *msg) {
   if (not is_established()) {
     throw eRofConnNotConnected(
         "crofchan::send_message() channel not established")
-        .set_func(__PRETTY_FUNCTION__)
+        .set_func(__FUNCTION__)
         .set_line(__LINE__);
   }
   if (conns.find(auxid) == conns.end()) {
     throw eRofConnNotConnected("crofchan::send_message() connection not found")
-        .set_func(__PRETTY_FUNCTION__)
+        .set_func(__FUNCTION__)
         .set_line(__LINE__)
         .set_key("auxid", auxid.str());
   }
   if (not conns[auxid]->is_established()) {
     throw eRofConnNotConnected(
         "crofchan::send_message() connection not established")
-        .set_func(__PRETTY_FUNCTION__)
+        .set_func(__FUNCTION__)
         .set_line(__LINE__)
         .set_key("auxid", auxid.str());
   }
@@ -55,19 +55,19 @@ void crofchan::send_message(const cauxid &auxid, rofl::openflow::cofmsg *msg,
   if (not is_established()) {
     throw eRofConnNotConnected(
         "crofchan::send_message() channel not established")
-        .set_func(__PRETTY_FUNCTION__)
+        .set_func(__FUNCTION__)
         .set_line(__LINE__);
   }
   if (conns.find(auxid) == conns.end()) {
     throw eRofConnNotConnected("crofchan::send_message() connection not found")
-        .set_func(__PRETTY_FUNCTION__)
+        .set_func(__FUNCTION__)
         .set_line(__LINE__)
         .set_key("auxid", auxid.str());
   }
   if (not conns[auxid]->is_established()) {
     throw eRofConnNotConnected(
         "crofchan::send_message() connection not established")
-        .set_func(__PRETTY_FUNCTION__)
+        .set_func(__FUNCTION__)
         .set_line(__LINE__)
         .set_key("auxid", auxid.str());
   }

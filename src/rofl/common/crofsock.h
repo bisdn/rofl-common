@@ -161,7 +161,7 @@ public:
         crofsock_env::socket_envs.end()) {
       throw eRofSockNotFound(
           "crofsock_env::call_env() crofsock_env instance not found")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_file(__FILE__)
           .set_line(__LINE__);
     }
@@ -601,7 +601,7 @@ private:
       flags.set(__flag, value);
     } break;
     default: {
-      throw eRofSockNotFound("flag not found", __FILE__, __PRETTY_FUNCTION__,
+      throw eRofSockNotFound("flag not found", __FILE__, __FUNCTION__,
                              __LINE__);
     };
     }
@@ -617,7 +617,7 @@ private:
       return flags.test(__flag);
     } break;
     default: {
-      throw eRofSockNotFound("flag not found", __FILE__, __PRETTY_FUNCTION__,
+      throw eRofSockNotFound("flag not found", __FILE__, __FUNCTION__,
                              __LINE__);
     };
     }

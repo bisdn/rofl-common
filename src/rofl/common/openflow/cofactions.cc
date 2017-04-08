@@ -184,7 +184,7 @@ void cofactions::pack(uint8_t *buf, size_t buflen) {
 
   if (buflen < length())
     throw eInvalid("cofactions::pack() buflen too short", __FILE__,
-                   __PRETTY_FUNCTION__, __LINE__);
+                   __FUNCTION__, __LINE__);
 
   for (std::map<cindex, cofaction *>::iterator it = actions.begin();
        it != actions.end(); ++it) {
@@ -204,7 +204,7 @@ void cofactions::unpack(uint8_t *buf, size_t buflen) {
 
   if (buflen < sizeof(struct rofl::openflow::ofp_action_header))
     throw eInvalid("cofactions::unpack() buflen too short", __FILE__,
-                   __PRETTY_FUNCTION__, __LINE__);
+                   __FUNCTION__, __LINE__);
 
   cindex index;
 
@@ -222,7 +222,7 @@ void cofactions::unpack(uint8_t *buf, size_t buflen) {
     if (len > buflen)
       throw eBadActionBadLen(
           "cofactions::unpack() invalid length field in action", __FILE__,
-          __PRETTY_FUNCTION__, __LINE__);
+          __FUNCTION__, __LINE__);
 
     switch (type) {
     case rofl::openflow::OFPAT_OUTPUT: {
@@ -406,7 +406,7 @@ cofaction_output &cofactions::set_action_output(const cindex &index) {
   if ((actions_index.find(index) != actions_index.end()) &&
       (rofl::openflow::OFPAT_OUTPUT != actions[index]->get_type())) {
     throw eInvalid("cofactions::set_action_output() invalid action type",
-                   __FILE__, __PRETTY_FUNCTION__, __LINE__);
+                   __FILE__, __FUNCTION__, __LINE__);
   }
   if (actions_index.find(index) == actions_index.end()) {
     actions[index] = new cofaction_output(ofp_version);

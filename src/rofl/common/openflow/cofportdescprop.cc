@@ -15,7 +15,7 @@ void cofportdesc_prop::pack(uint8_t *buf, size_t buflen) {
 
   if (buflen <
       cofportdesc_prop::length()) // take length() method from this base class
-    throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
 
   switch (ofp_version) {
   case rofl::openflow14::OFP_VERSION: {
@@ -30,7 +30,7 @@ void cofportdesc_prop::pack(uint8_t *buf, size_t buflen) {
 
   } break;
   default:
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
 }
 
@@ -39,7 +39,7 @@ void cofportdesc_prop::unpack(uint8_t *buf, size_t buflen) {
     return;
 
   if (buflen < cofportdesc_prop::length())
-    throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
 
   switch (ofp_version) {
   case rofl::openflow14::OFP_VERSION: {
@@ -51,11 +51,11 @@ void cofportdesc_prop::unpack(uint8_t *buf, size_t buflen) {
     len = be16toh(hdr->length);
 
     if (len < sizeof(struct rofl::openflow14::ofp_port_desc_prop_header))
-      throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+      throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
 
   } break;
   default:
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
 }
 
@@ -64,7 +64,7 @@ void cofportdesc_prop_ethernet::pack(uint8_t *buf, size_t buflen) {
     return;
 
   if (buflen < cofportdesc_prop_ethernet::length())
-    throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
 
   switch (get_version()) {
   case rofl::openflow14::OFP_VERSION: {
@@ -83,7 +83,7 @@ void cofportdesc_prop_ethernet::pack(uint8_t *buf, size_t buflen) {
 
   } break;
   default:
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
 }
 
@@ -92,7 +92,7 @@ void cofportdesc_prop_ethernet::unpack(uint8_t *buf, size_t buflen) {
     return;
 
   if (buflen < sizeof(struct rofl::openflow14::ofp_port_desc_prop_ethernet))
-    throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
 
   switch (get_version()) {
   case rofl::openflow14::OFP_VERSION: {
@@ -101,7 +101,7 @@ void cofportdesc_prop_ethernet::unpack(uint8_t *buf, size_t buflen) {
 
     if (get_length() <
         sizeof(struct rofl::openflow14::ofp_port_desc_prop_ethernet))
-      throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+      throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
 
     struct rofl::openflow14::ofp_port_desc_prop_ethernet *hdr =
         (struct rofl::openflow14::ofp_port_desc_prop_ethernet *)buf;
@@ -115,7 +115,7 @@ void cofportdesc_prop_ethernet::unpack(uint8_t *buf, size_t buflen) {
 
   } break;
   default:
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
 }
 
@@ -124,7 +124,7 @@ void cofportdesc_prop_optical::pack(uint8_t *buf, size_t buflen) {
     return;
 
   if (buflen < cofportdesc_prop_optical::length())
-    throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
 
   switch (get_version()) {
   case rofl::openflow14::OFP_VERSION: {
@@ -146,7 +146,7 @@ void cofportdesc_prop_optical::pack(uint8_t *buf, size_t buflen) {
 
   } break;
   default:
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
 }
 
@@ -155,7 +155,7 @@ void cofportdesc_prop_optical::unpack(uint8_t *buf, size_t buflen) {
     return;
 
   if (buflen < sizeof(struct rofl::openflow14::ofp_port_desc_prop_optical))
-    throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
 
   switch (get_version()) {
   case rofl::openflow14::OFP_VERSION: {
@@ -164,7 +164,7 @@ void cofportdesc_prop_optical::unpack(uint8_t *buf, size_t buflen) {
 
     if (get_length() <
         sizeof(struct rofl::openflow14::ofp_port_desc_prop_optical))
-      throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+      throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
 
     struct rofl::openflow14::ofp_port_desc_prop_optical *hdr =
         (struct rofl::openflow14::ofp_port_desc_prop_optical *)buf;
@@ -181,7 +181,7 @@ void cofportdesc_prop_optical::unpack(uint8_t *buf, size_t buflen) {
 
   } break;
   default:
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
 }
 
@@ -190,7 +190,7 @@ void cofportdesc_prop_experimenter::pack(uint8_t *buf, size_t buflen) {
     return;
 
   if (buflen < cofportdesc_prop_experimenter::length())
-    throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
 
   switch (get_version()) {
   case rofl::openflow14::OFP_VERSION: {
@@ -206,7 +206,7 @@ void cofportdesc_prop_experimenter::pack(uint8_t *buf, size_t buflen) {
 
   } break;
   default:
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
 }
 
@@ -215,7 +215,7 @@ void cofportdesc_prop_experimenter::unpack(uint8_t *buf, size_t buflen) {
     return;
 
   if (buflen < sizeof(struct rofl::openflow14::ofp_port_desc_prop_experimenter))
-    throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
 
   switch (get_version()) {
   case rofl::openflow14::OFP_VERSION: {
@@ -223,7 +223,7 @@ void cofportdesc_prop_experimenter::unpack(uint8_t *buf, size_t buflen) {
     cofportdesc_prop::unpack(buf, buflen);
 
     if (buflen < get_length())
-      throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+      throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
 
     struct rofl::openflow14::ofp_port_desc_prop_experimenter *hdr =
         (struct rofl::openflow14::ofp_port_desc_prop_experimenter *)buf;
@@ -237,6 +237,6 @@ void cofportdesc_prop_experimenter::unpack(uint8_t *buf, size_t buflen) {
 
   } break;
   default:
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
 }

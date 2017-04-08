@@ -149,11 +149,11 @@ void crofdpt::handle_recv(rofl::crofchan &chan, rofl::crofconn &conn,
 
   } catch (rofl::exception &e) {
 
-    VLOG(1) << __PRETTY_FUNCTION__ << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " error: " << e.what();
 
   } catch (std::runtime_error &e) {
 
-    VLOG(1) << __PRETTY_FUNCTION__ << " runtime error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " runtime error: " << e.what();
   }
 
   delete msg;
@@ -162,7 +162,7 @@ void crofdpt::handle_recv(rofl::crofchan &chan, rofl::crofconn &conn,
 void crofdpt::handle_transaction_timeout(crofchan &chan, crofconn &conn,
                                          uint32_t xid, uint8_t type,
                                          uint16_t sub_type) {
-  VLOG(2) << __PRETTY_FUNCTION__ << " transaction xid=" << (unsigned int)xid;
+  VLOG(2) << __FUNCTION__ << " transaction xid=" << (unsigned int)xid;
 
   try {
     switch (get_version()) {
@@ -811,11 +811,11 @@ uint32_t crofdpt::send_features_request(const rofl::cauxid &auxid,
     rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
 
   } catch (eRofConnNotConnected &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping message " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping message " << e.what();
     delete msg;
     throw;
   } catch (eRofQueueFull &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping message " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping message " << e.what();
     delete msg;
     throw;
   }
@@ -835,11 +835,11 @@ uint32_t crofdpt::send_get_config_request(const rofl::cauxid &auxid,
     rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
 
   } catch (eRofConnNotConnected &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
     delete msg;
     throw;
   } catch (eRofQueueFull &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
     delete msg;
     throw;
   }
@@ -859,11 +859,11 @@ uint32_t crofdpt::send_desc_stats_request(const rofl::cauxid &auxid,
     rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
 
   } catch (eRofConnNotConnected &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
     delete msg;
     throw;
   } catch (eRofQueueFull &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
     delete msg;
     throw;
   }
@@ -885,11 +885,11 @@ uint32_t crofdpt::send_flow_stats_request(
     rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
 
   } catch (eRofConnNotConnected &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
     delete msg;
     throw;
   } catch (eRofQueueFull &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
     delete msg;
     throw;
   }
@@ -911,11 +911,11 @@ uint32_t crofdpt::send_aggr_stats_request(
     rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
 
   } catch (eRofConnNotConnected &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
     delete msg;
     throw;
   } catch (eRofQueueFull &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
     delete msg;
     throw;
   }
@@ -936,11 +936,11 @@ uint32_t crofdpt::send_table_stats_request(const rofl::cauxid &auxid,
     rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
 
   } catch (eRofConnNotConnected &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
     delete msg;
     throw;
   } catch (eRofQueueFull &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
     delete msg;
     throw;
   }
@@ -962,11 +962,11 @@ uint32_t crofdpt::send_port_stats_request(
     rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
 
   } catch (eRofConnNotConnected &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
     delete msg;
     throw;
   } catch (eRofQueueFull &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
     delete msg;
     throw;
   }
@@ -988,11 +988,11 @@ uint32_t crofdpt::send_queue_stats_request(
     rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
 
   } catch (eRofConnNotConnected &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
     delete msg;
     throw;
   } catch (eRofQueueFull &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
     delete msg;
     throw;
   }
@@ -1014,11 +1014,11 @@ uint32_t crofdpt::send_group_stats_request(
     rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
 
   } catch (eRofConnNotConnected &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
     delete msg;
     throw;
   } catch (eRofQueueFull &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
     delete msg;
     throw;
   }
@@ -1039,11 +1039,11 @@ uint32_t crofdpt::send_group_desc_stats_request(const rofl::cauxid &auxid,
     rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
 
   } catch (eRofConnNotConnected &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
     delete msg;
     throw;
   } catch (eRofQueueFull &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
     delete msg;
     throw;
   }
@@ -1064,11 +1064,11 @@ uint32_t crofdpt::send_group_features_stats_request(const rofl::cauxid &auxid,
     rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
 
   } catch (eRofConnNotConnected &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
     delete msg;
     throw;
   } catch (eRofQueueFull &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
     delete msg;
     throw;
   }
@@ -1089,11 +1089,11 @@ uint32_t crofdpt::send_table_features_stats_request(const rofl::cauxid &auxid,
     rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
 
   } catch (eRofConnNotConnected &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
     delete msg;
     throw;
   } catch (eRofQueueFull &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
     delete msg;
     throw;
   }
@@ -1114,11 +1114,11 @@ uint32_t crofdpt::send_port_desc_stats_request(const rofl::cauxid &auxid,
     rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
 
   } catch (eRofConnNotConnected &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
     delete msg;
     throw;
   } catch (eRofQueueFull &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
     delete msg;
     throw;
   }
@@ -1139,11 +1139,11 @@ uint32_t crofdpt::send_experimenter_stats_request(
     rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
 
   } catch (eRofConnNotConnected &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
     delete msg;
     throw;
   } catch (eRofQueueFull &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
     delete msg;
     throw;
   }
@@ -1165,11 +1165,11 @@ uint32_t crofdpt::send_meter_stats_request(
     rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
 
   } catch (eRofConnNotConnected &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
     delete msg;
     throw;
   } catch (eRofQueueFull &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
     delete msg;
     throw;
   }
@@ -1191,11 +1191,11 @@ uint32_t crofdpt::send_meter_config_stats_request(
     rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
 
   } catch (eRofConnNotConnected &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
     delete msg;
     throw;
   } catch (eRofQueueFull &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
     delete msg;
     throw;
   }
@@ -1216,11 +1216,11 @@ uint32_t crofdpt::send_meter_features_stats_request(const rofl::cauxid &auxid,
     rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
 
   } catch (eRofConnNotConnected &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
     delete msg;
     throw;
   } catch (eRofQueueFull &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
     delete msg;
     throw;
   }
@@ -1241,11 +1241,11 @@ uint32_t crofdpt::send_packet_out_message(
     rofchan.send_message(auxid, msg);
 
   } catch (eRofConnNotConnected &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
     delete msg;
     throw;
   } catch (eRofQueueFull &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
     delete msg;
     throw;
   }
@@ -1265,11 +1265,11 @@ uint32_t crofdpt::send_barrier_request(const rofl::cauxid &auxid,
     rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
 
   } catch (eRofConnNotConnected &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
     delete msg;
     throw;
   } catch (eRofQueueFull &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
     delete msg;
     throw;
   }
@@ -1290,11 +1290,11 @@ uint32_t crofdpt::send_role_request(const rofl::cauxid &auxid,
     rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
 
   } catch (eRofConnNotConnected &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
     delete msg;
     throw;
   } catch (eRofQueueFull &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
     delete msg;
     throw;
   }
@@ -1313,11 +1313,11 @@ uint32_t crofdpt::send_flow_mod_message(const rofl::cauxid &auxid,
     rofchan.send_message(auxid, msg);
 
   } catch (eRofConnNotConnected &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
     delete msg;
     throw;
   } catch (eRofQueueFull &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
     delete msg;
     throw;
   }
@@ -1337,11 +1337,11 @@ crofdpt::send_group_mod_message(const rofl::cauxid &auxid,
     rofchan.send_message(auxid, msg);
 
   } catch (eRofConnNotConnected &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
     delete msg;
     throw;
   } catch (eRofQueueFull &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
     delete msg;
     throw;
   }
@@ -1361,11 +1361,11 @@ uint32_t crofdpt::send_table_mod_message(const rofl::cauxid &auxid,
     rofchan.send_message(auxid, msg);
 
   } catch (eRofConnNotConnected &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
     delete msg;
     throw;
   } catch (eRofQueueFull &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
     delete msg;
     throw;
   }
@@ -1397,11 +1397,11 @@ uint32_t crofdpt::send_port_mod_message(const rofl::cauxid &auxid,
     }
 
   } catch (eRofConnNotConnected &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
     delete msg;
     throw;
   } catch (eRofQueueFull &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
     delete msg;
     throw;
   }
@@ -1427,11 +1427,11 @@ uint32_t crofdpt::send_set_config_message(const rofl::cauxid &auxid,
     }
 
   } catch (eRofConnNotConnected &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
     delete msg;
     throw;
   } catch (eRofQueueFull &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
     delete msg;
     throw;
   }
@@ -1452,11 +1452,11 @@ uint32_t crofdpt::send_queue_get_config_request(const rofl::cauxid &auxid,
     rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
 
   } catch (eRofConnNotConnected &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
     delete msg;
     throw;
   } catch (eRofQueueFull &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
     delete msg;
     throw;
   }
@@ -1476,11 +1476,11 @@ uint32_t crofdpt::send_get_async_config_request(const rofl::cauxid &auxid,
     rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
 
   } catch (eRofConnNotConnected &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
     delete msg;
     throw;
   } catch (eRofQueueFull &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
     delete msg;
     throw;
   }
@@ -1501,11 +1501,11 @@ uint32_t crofdpt::send_set_async_config_message(
     rofchan.send_message(auxid, msg);
 
   } catch (eRofConnNotConnected &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
     delete msg;
     throw;
   } catch (eRofQueueFull &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
     delete msg;
     throw;
   }
@@ -1526,11 +1526,11 @@ uint32_t crofdpt::send_meter_mod_message(
     rofchan.send_message(auxid, msg);
 
   } catch (eRofConnNotConnected &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
     delete msg;
     throw;
   } catch (eRofQueueFull &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
     delete msg;
     throw;
   }
@@ -1549,11 +1549,11 @@ void crofdpt::send_error_message(const rofl::cauxid &auxid, uint32_t xid,
     rofchan.send_message(auxid, msg);
 
   } catch (eRofConnNotConnected &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
     delete msg;
     throw;
   } catch (eRofQueueFull &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
     delete msg;
     throw;
   }
@@ -1574,11 +1574,11 @@ uint32_t crofdpt::send_experimenter_message(
     }
 
   } catch (eRofConnNotConnected &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
     delete msg;
     throw;
   } catch (eRofQueueFull &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping mesage " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
     delete msg;
     throw;
   }

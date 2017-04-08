@@ -26,7 +26,7 @@ void cofgroupstatsarray::pack(uint8_t *buf, size_t buflen) {
     return;
 
   if (buflen < length())
-    throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
 
   switch (ofp_version) {
   case rofl::openflow12::OFP_VERSION:
@@ -40,7 +40,7 @@ void cofgroupstatsarray::pack(uint8_t *buf, size_t buflen) {
 
   } break;
   default:
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
 }
 
@@ -87,7 +87,7 @@ void cofgroupstatsarray::unpack(uint8_t *buf, size_t buflen) {
     }
   } break;
   default:
-    throw eBadRequestBadVersion("eBadRequestBadVersion", __FILE__,
-                                __PRETTY_FUNCTION__, __LINE__);
+    throw eBadRequestBadVersion("eBadRequestBadVersion", __FILE__, __FUNCTION__,
+                                __LINE__);
   }
 }

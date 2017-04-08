@@ -792,7 +792,7 @@ public:
                      data, datalen) {
     if (ofp_version < rofl::openflow12::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_bad_action_bad_out_group(){};
@@ -807,7 +807,7 @@ public:
                      OFPBAC_MATCH_INCONSISTENT, data, datalen) {
     if (ofp_version < rofl::openflow12::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_bad_action_match_inconsistent(){};
@@ -822,7 +822,7 @@ public:
                      OFPBAC_UNSUPPORTED_ORDER, data, datalen) {
     if (ofp_version < rofl::openflow12::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_bad_action_unsupported_order(){};
@@ -836,7 +836,7 @@ public:
                      datalen) {
     if (ofp_version < rofl::openflow12::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_bad_action_bad_tag(){};
@@ -850,7 +850,7 @@ public:
                      data, datalen) {
     if (ofp_version < rofl::openflow13::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_bad_action_bad_set_len(){};
@@ -864,7 +864,7 @@ public:
                      data, datalen) {
     if (ofp_version < rofl::openflow13::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_bad_action_bad_set_type(){};
@@ -879,7 +879,7 @@ public:
                      OFPBAC_BAD_SET_ARGUMENT, data, datalen) {
     if (ofp_version < rofl::openflow13::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_bad_action_bad_set_argument(){};
@@ -893,7 +893,7 @@ public:
                      OFPBIC_UNKNOWN_INST, data, datalen) {
     if (ofp_version < rofl::openflow12::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_bad_inst_unknown_inst(){};
@@ -907,7 +907,7 @@ public:
                      data, datalen) {
     if (ofp_version < rofl::openflow12::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_bad_inst_unsup_inst(){};
@@ -921,7 +921,7 @@ public:
                      OFPBIC_BAD_TABLE_ID, data, datalen) {
     if (ofp_version < rofl::openflow12::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_bad_inst_bad_table_id(){};
@@ -935,7 +935,7 @@ public:
                      OFPBIC_UNSUP_METADATA, data, datalen) {
     if (ofp_version < rofl::openflow12::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_bad_inst_unsup_metadata(){};
@@ -950,7 +950,7 @@ public:
                      OFPBIC_UNSUP_METADATA_MASK, data, datalen) {
     if (ofp_version < rofl::openflow12::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_bad_inst_unsup_metadata_mask(){};
@@ -964,7 +964,7 @@ public:
                      OFPBIC_BAD_EXPERIMENTER, data, datalen) {
     if (ofp_version < rofl::openflow12::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_bad_inst_bad_experimenter(){};
@@ -978,7 +978,7 @@ public:
                      OFPBIC_BAD_EXP_TYPE, data, datalen) {
     if (ofp_version < rofl::openflow13::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_bad_inst_bad_exp_type(){};
@@ -992,7 +992,7 @@ public:
                      data, datalen) {
     if (ofp_version < rofl::openflow13::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_bad_inst_bad_len(){};
@@ -1006,7 +1006,7 @@ public:
                      data, datalen) {
     if (ofp_version < rofl::openflow13::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_bad_inst_eperm(){};
@@ -1020,7 +1020,7 @@ public:
                      datalen) {
     if (ofp_version < rofl::openflow12::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_bad_match_bad_type(){};
@@ -1034,7 +1034,7 @@ public:
                      datalen) {
     if (ofp_version < rofl::openflow12::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_bad_match_bad_len(){};
@@ -1048,7 +1048,7 @@ public:
                      datalen) {
     if (ofp_version < rofl::openflow12::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_bad_match_bad_tag(){};
@@ -1062,7 +1062,7 @@ public:
                      data, datalen) {
     if (ofp_version < rofl::openflow12::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_bad_match_bad_dladdr_mask(){};
@@ -1076,7 +1076,7 @@ public:
                      data, datalen) {
     if (ofp_version < rofl::openflow12::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_bad_match_bad_nwaddr_mask(){};
@@ -1090,7 +1090,7 @@ public:
                      data, datalen) {
     if (ofp_version < rofl::openflow12::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_bad_match_bad_wildcards(){};
@@ -1104,7 +1104,7 @@ public:
                      datalen) {
     if (ofp_version < rofl::openflow12::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_bad_match_bad_field(){};
@@ -1118,7 +1118,7 @@ public:
                      datalen) {
     if (ofp_version < rofl::openflow12::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_bad_match_bad_value(){};
@@ -1132,7 +1132,7 @@ public:
                      datalen) {
     if (ofp_version < rofl::openflow12::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_bad_match_bad_mask(){};
@@ -1146,7 +1146,7 @@ public:
                      datalen) {
     if (ofp_version < rofl::openflow12::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_bad_match_bad_prereq(){};
@@ -1160,7 +1160,7 @@ public:
                      datalen) {
     if (ofp_version < rofl::openflow12::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_bad_match_dup_field(){};
@@ -1174,7 +1174,7 @@ public:
                      datalen) {
     if (ofp_version < rofl::openflow12::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_bad_match_eperm(){};
@@ -1197,7 +1197,7 @@ public:
                      datalen) {
     if (ofp_version < rofl::openflow12::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_hello_failed_eperm(){};
@@ -1212,7 +1212,7 @@ public:
                      OFPSCFC_BAD_FLAGS, data, datalen) {
     if (ofp_version < rofl::openflow12::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_switch_config_failed_bad_flags(){};
@@ -1227,7 +1227,7 @@ public:
                      OFPSCFC_BAD_LEN, data, datalen) {
     if (ofp_version < rofl::openflow12::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_switch_config_failed_bad_len(){};
@@ -1241,7 +1241,7 @@ public:
                      OFPSCFC_EPERM, data, datalen) {
     if (ofp_version < rofl::openflow12::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_switch_config_failed_eperm(){};
@@ -1255,7 +1255,7 @@ public:
                      data, datalen) {
     if (ofp_version < rofl::openflow12::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_flow_mod_failed_unknown(){};
@@ -1291,7 +1291,7 @@ public:
                      OFPFMFC_BAD_TABLE_ID, data, datalen) {
     if (ofp_version < rofl::openflow12::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_flow_mod_failed_bad_table_id(){};
@@ -1392,7 +1392,7 @@ public:
                      rofl::openflow10::OFPFMFC_UNSUPPORTED, data, datalen) {
     if (ofp_version > rofl::openflow10::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_flow_mod_failed_unsupported(){};
@@ -1406,7 +1406,7 @@ public:
                      data, datalen) {
     if (ofp_version < rofl::openflow13::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_flow_mod_failed_bad_flags(){};
@@ -1421,7 +1421,7 @@ public:
                      OFPGMFC_GROUP_EXISTS, data, datalen) {
     if (ofp_version < rofl::openflow12::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_group_mod_failed_group_exists(){};
@@ -1436,7 +1436,7 @@ public:
                      OFPGMFC_INVALID_GROUP, data, datalen) {
     if (ofp_version < rofl::openflow12::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_group_mod_failed_inval_group(){};
@@ -1452,7 +1452,7 @@ public:
                      OFPGMFC_WEIGHT_UNSUPPORTED, data, datalen) {
     if (ofp_version < rofl::openflow12::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_group_mod_failed_weight_unsupported(){};
@@ -1467,7 +1467,7 @@ public:
                      OFPGMFC_OUT_OF_GROUPS, data, datalen) {
     if (ofp_version < rofl::openflow12::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_group_mod_failed_out_of_groups(){};
@@ -1482,7 +1482,7 @@ public:
                      OFPGMFC_OUT_OF_BUCKETS, data, datalen) {
     if (ofp_version < rofl::openflow12::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_group_mod_failed_out_of_buckets(){};
@@ -1498,7 +1498,7 @@ public:
                      OFPGMFC_CHAINING_UNSUPPORTED, data, datalen) {
     if (ofp_version < rofl::openflow12::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_group_mod_failed_chaining_unsupported(){};
@@ -1514,7 +1514,7 @@ public:
                      OFPGMFC_WATCH_UNSUPPORTED, data, datalen) {
     if (ofp_version < rofl::openflow12::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_group_mod_failed_watch_unsupported(){};
@@ -1528,7 +1528,7 @@ public:
                      data, datalen) {
     if (ofp_version < rofl::openflow12::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_group_mod_failed_loop(){};
@@ -1543,7 +1543,7 @@ public:
                      OFPGMFC_UNKNOWN_GROUP, data, datalen) {
     if (ofp_version < rofl::openflow12::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_group_mod_failed_unknown_group(){};
@@ -1558,7 +1558,7 @@ public:
                      OFPGMFC_CHAINED_GROUP, data, datalen) {
     if (ofp_version < rofl::openflow12::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_group_mod_failed_chained_group(){};
@@ -1572,7 +1572,7 @@ public:
                      data, datalen) {
     if (ofp_version < rofl::openflow12::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_group_mod_failed_bad_type(){};
@@ -1587,7 +1587,7 @@ public:
                      OFPGMFC_BAD_COMMAND, data, datalen) {
     if (ofp_version < rofl::openflow12::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_group_mod_failed_bad_command(){};
@@ -1602,7 +1602,7 @@ public:
                      OFPGMFC_BAD_BUCKET, data, datalen) {
     if (ofp_version < rofl::openflow12::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_group_mod_failed_bad_bucket(){};
@@ -1616,7 +1616,7 @@ public:
                      OFPGMFC_BAD_WATCH, data, datalen) {
     if (ofp_version < rofl::openflow12::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_group_mod_failed_bad_watch(){};
@@ -1630,7 +1630,7 @@ public:
                      data, datalen) {
     if (ofp_version < rofl::openflow12::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_group_mod_failed_eperm(){};
@@ -1644,7 +1644,7 @@ public:
                      data, datalen) {
     if (ofp_version < rofl::openflow12::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_port_mod_failed_bad_port(){};
@@ -1658,7 +1658,7 @@ public:
                      OFPPMFC_BAD_HW_ADDR, data, datalen) {
     if (ofp_version < rofl::openflow12::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_port_mod_failed_bad_hwaddr(){};
@@ -1672,7 +1672,7 @@ public:
                      OFPPMFC_BAD_CONFIG, data, datalen) {
     if (ofp_version < rofl::openflow12::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_port_mod_failed_bad_config(){};
@@ -1687,7 +1687,7 @@ public:
                      OFPPMFC_BAD_ADVERTISE, data, datalen) {
     if (ofp_version < rofl::openflow12::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_port_mod_failed_bad_advertise(){};
@@ -1701,7 +1701,7 @@ public:
                      data, datalen) {
     if (ofp_version < rofl::openflow12::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_port_mod_failed_eperm(){};
@@ -1715,7 +1715,7 @@ public:
                      OFPTMFC_BAD_TABLE, data, datalen) {
     if (ofp_version < rofl::openflow12::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_table_mod_failed_bad_table(){};
@@ -1730,7 +1730,7 @@ public:
                      OFPTMFC_BAD_CONFIG, data, datalen) {
     if (ofp_version < rofl::openflow12::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_table_mod_failed_bad_config(){};
@@ -1744,7 +1744,7 @@ public:
                      data, datalen) {
     if (ofp_version < rofl::openflow12::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_table_mod_failed_eperm(){};
@@ -1758,7 +1758,7 @@ public:
                      data, datalen) {
     if (ofp_version < rofl::openflow12::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_role_request_failed_stale(){};
@@ -1773,7 +1773,7 @@ public:
                      data, datalen) {
     if (ofp_version < rofl::openflow12::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_role_request_failed_unsupported(){};
@@ -1788,7 +1788,7 @@ public:
                      OFPRRFC_BAD_ROLE, data, datalen) {
     if (ofp_version < rofl::openflow12::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_role_request_failed_bad_role(){};
@@ -1802,7 +1802,7 @@ public:
                      data, datalen) {
     if (ofp_version < rofl::openflow13::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_meter_mod_unknown(){};
@@ -1816,7 +1816,7 @@ public:
                      OFPMMFC_METER_EXISTS, data, datalen) {
     if (ofp_version < rofl::openflow13::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_meter_mod_meter_exists(){};
@@ -1830,7 +1830,7 @@ public:
                      OFPMMFC_INVALID_METER, data, datalen) {
     if (ofp_version < rofl::openflow13::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_meter_mod_invalid_meter(){};
@@ -1844,7 +1844,7 @@ public:
                      OFPMMFC_UNKNOWN_METER, data, datalen) {
     if (ofp_version < rofl::openflow13::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_meter_mod_unknown_meter(){};
@@ -1858,7 +1858,7 @@ public:
                      OFPMMFC_BAD_COMMAND, data, datalen) {
     if (ofp_version < rofl::openflow13::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_meter_mod_bad_command(){};
@@ -1872,7 +1872,7 @@ public:
                      OFPMMFC_BAD_FLAGS, data, datalen) {
     if (ofp_version < rofl::openflow13::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_meter_mod_bad_flags(){};
@@ -1886,7 +1886,7 @@ public:
                      data, datalen) {
     if (ofp_version < rofl::openflow13::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_meter_mod_bad_rate(){};
@@ -1900,7 +1900,7 @@ public:
                      OFPMMFC_BAD_BURST, data, datalen) {
     if (ofp_version < rofl::openflow13::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_meter_mod_bad_burst(){};
@@ -1914,7 +1914,7 @@ public:
                      data, datalen) {
     if (ofp_version < rofl::openflow13::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_meter_mod_bad_band(){};
@@ -1928,7 +1928,7 @@ public:
                      OFPMMFC_BAD_BAND_VALUE, data, datalen) {
     if (ofp_version < rofl::openflow13::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_meter_mod_bad_band_value(){};
@@ -1942,7 +1942,7 @@ public:
                      OFPMMFC_OUT_OF_METERS, data, datalen) {
     if (ofp_version < rofl::openflow13::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_meter_mod_out_of_meters(){};
@@ -1956,7 +1956,7 @@ public:
                      OFPMMFC_OUT_OF_BANDS, data, datalen) {
     if (ofp_version < rofl::openflow13::OFP_VERSION)
       throw eBadVersion("eBadVersion")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
   };
   virtual ~cofmsg_error_meter_mod_out_of_bands(){};
