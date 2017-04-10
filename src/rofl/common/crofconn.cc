@@ -641,6 +641,7 @@ void crofconn::echo_request_expired() {
           << " raddr=" << rofsock.get_raddr().str();
 
   set_state(STATE_CLOSING);
+  handle_closed(rofsock);
 }
 
 void crofconn::echo_request_rcvd(rofl::openflow::cofmsg *pmsg) {
