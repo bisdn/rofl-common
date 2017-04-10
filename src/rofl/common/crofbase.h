@@ -352,7 +352,8 @@ public:
       it.second->set_env(nullptr);
       /* close control channel */
       it.second->clear();
-      VLOG(2) << "datapath detached dptid=" << it.second->get_dptid();
+      VLOG(2) << __FUNCTION__
+              << " datapath detached dptid=" << it.second->get_dptid();
       rofdpts_deletion.insert(it.second);
     }
     rofdpts.clear();
@@ -476,7 +477,7 @@ public:
     if (rofdpts.find(dptid) == rofdpts.end()) {
       return false;
     }
-    VLOG(2) << "datapath detached dptid=" << dptid;
+    VLOG(2) << __FUNCTION__ << " datapath detached dptid=" << dptid;
     /* redirect environment */
     rofdpts[dptid]->set_env(nullptr);
     /* close control channel */
@@ -587,7 +588,8 @@ public:
       it.second->set_env(nullptr);
       /* close control channel */
       it.second->clear();
-      VLOG(2) << "controller detached ctlid=" << it.second->get_ctlid().str();
+      VLOG(2) << __FUNCTION__
+              << " controller detached ctlid=" << it.second->get_ctlid().str();
       rofctls_deletion.insert(it.second);
     }
     rofctls.clear();
@@ -710,7 +712,7 @@ public:
     if (rofctls.find(ctlid) == rofctls.end()) {
       return false;
     }
-    VLOG(2) << "controller detached ctlid=" << ctlid.str();
+    VLOG(2) << __FUNCTION__ << " controller detached ctlid=" << ctlid.str();
     /* redirect environment */
     rofctls[ctlid]->set_env(nullptr);
     /* close control channel */

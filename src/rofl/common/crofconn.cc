@@ -304,7 +304,7 @@ void crofconn::error_rcvd(rofl::openflow::cofmsg *pmsg) {
     }
 
   } catch (std::runtime_error &e) {
-    VLOG(1) << "runtime error: " << e.what()
+    VLOG(1) << __FUNCTION__ << " runtime error: " << e.what()
             << " laddr=" << rofsock.get_laddr().str()
             << " raddr=" << rofsock.get_raddr().str();
   }
@@ -324,7 +324,8 @@ void crofconn::send_hello_message() {
 
     rofl::openflow::cofmsg_hello *msg = new rofl::openflow::cofmsg_hello(
         versionbitmap.get_highest_ofp_version(), ++xid_hello_last, helloIEs);
-    VLOG(3) << "state: " << state << " message sent: " << msg->str().c_str()
+    VLOG(3) << __FUNCTION__ << " state: " << state
+            << " message sent: " << msg->str().c_str()
             << " laddr=" << rofsock.get_laddr().str()
             << " raddr=" << rofsock.get_raddr().str();
 
@@ -341,7 +342,7 @@ void crofconn::hello_rcvd(rofl::openflow::cofmsg *pmsg) {
       dynamic_cast<rofl::openflow::cofmsg_hello *>(pmsg);
 
   if (nullptr == msg) {
-    VLOG(1) << "msg is not of type cofmsg_hello laddr="
+    VLOG(1) << __FUNCTION__ << " msg is not of type cofmsg_hello laddr="
             << rofsock.get_laddr().str()
             << " raddr=" << rofsock.get_raddr().str();
     return;
@@ -536,7 +537,8 @@ void crofconn::send_features_request() {
         new rofl::openflow::cofmsg_features_request(
             ofp_version, ++xid_features_request_last);
 
-    VLOG(3) << "state: " << state << " message sent: " << msg->str().c_str()
+    VLOG(3) << __FUNCTION__ << " state: " << state
+            << " message sent: " << msg->str().c_str()
             << " laddr=" << rofsock.get_laddr().str()
             << " raddr=" << rofsock.get_raddr().str();
 
@@ -599,7 +601,8 @@ void crofconn::send_echo_request() {
         new rofl::openflow::cofmsg_echo_request(ofp_version,
                                                 ++xid_echo_request_last);
 
-    VLOG(3) << "state: " << state << " message sent: " << msg->str().c_str()
+    VLOG(3) << __FUNCTION__ << " state: " << state
+            << " message sent: " << msg->str().c_str()
             << " laddr=" << rofsock.get_laddr().str()
             << " raddr=" << rofsock.get_raddr().str();
 
@@ -657,7 +660,8 @@ void crofconn::echo_request_rcvd(rofl::openflow::cofmsg *pmsg) {
             msg->get_version(), msg->get_xid(), msg->get_body().somem(),
             msg->get_body().memlen());
 
-    VLOG(3) << "state: " << state << " message sent: " << reply->str().c_str()
+    VLOG(3) << __FUNCTION__ << " state: " << state
+            << " message sent: " << reply->str().c_str()
             << " laddr=" << rofsock.get_laddr().str()
             << " raddr=" << rofsock.get_raddr().str();
 
@@ -838,7 +842,8 @@ void crofconn::handle_recv(crofsock &socket, rofl::openflow::cofmsg *msg) {
    * are stored in the appropriate rxqueue and crofconn's internal
    * thread is called for handling these messages. */
 
-  VLOG(3) << "state: " << state << " message rcvd: " << msg->str().c_str();
+  VLOG(3) << __FUNCTION__ << " state: " << state
+          << " message rcvd: " << msg->str().c_str();
 
   switch (get_state()) {
   case STATE_CONNECT_PENDING:
@@ -1203,7 +1208,8 @@ void crofconn::handle_rx_messages() {
           switch (ofp_version.load()) {
           case rofl::openflow10::OFP_VERSION:
           case rofl::openflow12::OFP_VERSION: {
-            VLOG(3) << "call application: " << msg->str().c_str();
+            VLOG(3) << __FUNCTION__
+                    << " call application: " << msg->str().c_str();
             // no segmentation and reassembly below OFP1.3, so hand over message
             // directly to higher layers
             crofconn_env::call_env(env).handle_recv(*this, msg);
@@ -1215,7 +1221,8 @@ void crofconn::handle_rx_messages() {
               handle_rx_multipart_message(msg);
             } break;
             default: {
-              VLOG(3) << "call application: " << msg->str().c_str();
+              VLOG(3) << __FUNCTION__
+                      << " call application: " << msg->str().c_str();
               crofconn_env::call_env(env).handle_recv(*this, msg);
             };
             }
@@ -1270,7 +1277,8 @@ void crofconn::handle_rx_multipart_message(rofl::openflow::cofmsg *msg) {
         dynamic_cast<rofl::openflow::cofmsg_stats_request *>(msg);
 
     if (NULL == stats) {
-      VLOG(1) << "dropping multipart request, invalid message type";
+      VLOG(1) << __FUNCTION__
+              << " dropping multipart request, invalid message type";
       delete msg;
       return;
     }
@@ -1302,7 +1310,7 @@ void crofconn::handle_rx_multipart_message(rofl::openflow::cofmsg *msg) {
 
         crofconn_env::call_env(env).handle_recv(*this, reassembled_msg);
       } else {
-        VLOG(3) << "call application: " << msg->str().c_str();
+        VLOG(3) << __FUNCTION__ << " call application: " << msg->str().c_str();
         // do not delete msg here, will be done by higher layers
         crofconn_env::call_env(env).handle_recv(*this, msg);
       }
@@ -1316,7 +1324,8 @@ void crofconn::handle_rx_multipart_message(rofl::openflow::cofmsg *msg) {
         dynamic_cast<rofl::openflow::cofmsg_stats_reply *>(msg);
 
     if (NULL == stats) {
-      VLOG(1) << "dropping multipart reply, invalid message type";
+      VLOG(1) << __FUNCTION__
+              << " dropping multipart reply, invalid message type";
       delete msg;
       return;
     }
@@ -1348,7 +1357,7 @@ void crofconn::handle_rx_multipart_message(rofl::openflow::cofmsg *msg) {
 
         crofconn_env::call_env(env).handle_recv(*this, reassembled_msg);
       } else {
-        VLOG(3) << "call application: " << msg->str().c_str();
+        VLOG(3) << __FUNCTION__ << " call application: " << msg->str().c_str();
         // do not delete msg here, will be done by higher layers
         crofconn_env::call_env(env).handle_recv(*this, msg);
       }
@@ -1410,7 +1419,8 @@ unsigned int crofconn::send_message(rofl::openflow::cofmsg *msg,
 unsigned int crofconn::segment_and_send_message(rofl::openflow::cofmsg *msg) {
   unsigned int cwnd_size = 0;
 
-  VLOG(3) << "state: " << state << " message sent: " << msg->str().c_str();
+  VLOG(3) << __FUNCTION__ << " state: " << state
+          << " message sent: " << msg->str().c_str();
 
   if (msg->length() <= segmentation_threshold) {
     rofsock.send_message(
