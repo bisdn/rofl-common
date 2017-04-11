@@ -12,6 +12,7 @@ Requirements
 - A modern GNU build-system (autoconf, automake, libtool, ...)
 - pkg-config
 - GNU/Linux and libc development headers (linux-libc-dev and libc6-dev package in Debian/Ubuntu systems)
+- GLOG (libgoogle-glog-dev in Debian/Ubuntu systems)
 - [optional] if you want to run automatic tests (make check), libcunit and libcppunit are required (in libcunit1-dev and libcppunit-dev packages in Debian-like systems).
 - [optional] Doxygen to generate the documentation.
 
