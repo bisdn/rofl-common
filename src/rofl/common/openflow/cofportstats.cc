@@ -18,7 +18,7 @@ size_t cofport_stats_request::length() const {
     return sizeof(struct rofl::openflow13::ofp_port_stats_request);
   } break;
   default:
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
 }
 
@@ -26,7 +26,7 @@ void cofport_stats_request::pack(uint8_t *buf, size_t buflen) const {
   switch (of_version) {
   case rofl::openflow10::OFP_VERSION: {
     if (buflen < sizeof(struct rofl::openflow10::ofp_port_stats_request))
-      throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+      throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
 
     struct rofl::openflow10::ofp_port_stats_request *req =
         (struct rofl::openflow10::ofp_port_stats_request *)buf;
@@ -35,7 +35,7 @@ void cofport_stats_request::pack(uint8_t *buf, size_t buflen) const {
   } break;
   case rofl::openflow12::OFP_VERSION: {
     if (buflen < sizeof(struct rofl::openflow12::ofp_port_stats_request))
-      throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+      throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
 
     struct rofl::openflow12::ofp_port_stats_request *req =
         (struct rofl::openflow12::ofp_port_stats_request *)buf;
@@ -44,7 +44,7 @@ void cofport_stats_request::pack(uint8_t *buf, size_t buflen) const {
   } break;
   case rofl::openflow13::OFP_VERSION: {
     if (buflen < sizeof(struct rofl::openflow13::ofp_port_stats_request))
-      throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+      throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
 
     struct rofl::openflow13::ofp_port_stats_request *req =
         (struct rofl::openflow13::ofp_port_stats_request *)buf;
@@ -52,7 +52,7 @@ void cofport_stats_request::pack(uint8_t *buf, size_t buflen) const {
 
   } break;
   default:
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
 }
 
@@ -60,7 +60,7 @@ void cofport_stats_request::unpack(uint8_t *buf, size_t buflen) {
   switch (of_version) {
   case rofl::openflow10::OFP_VERSION: {
     if (buflen < sizeof(struct rofl::openflow10::ofp_port_stats_request))
-      throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+      throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
 
     struct rofl::openflow10::ofp_port_stats_request *req =
         (struct rofl::openflow10::ofp_port_stats_request *)buf;
@@ -69,7 +69,7 @@ void cofport_stats_request::unpack(uint8_t *buf, size_t buflen) {
   } break;
   case rofl::openflow12::OFP_VERSION: {
     if (buflen < sizeof(struct rofl::openflow12::ofp_port_stats_request))
-      throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+      throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
 
     struct rofl::openflow12::ofp_port_stats_request *req =
         (struct rofl::openflow12::ofp_port_stats_request *)buf;
@@ -78,7 +78,7 @@ void cofport_stats_request::unpack(uint8_t *buf, size_t buflen) {
   } break;
   case rofl::openflow13::OFP_VERSION: {
     if (buflen < sizeof(struct rofl::openflow13::ofp_port_stats_request))
-      throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+      throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
 
     struct rofl::openflow13::ofp_port_stats_request *req =
         (struct rofl::openflow13::ofp_port_stats_request *)buf;
@@ -86,7 +86,7 @@ void cofport_stats_request::unpack(uint8_t *buf, size_t buflen) {
 
   } break;
   default:
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
 }
 
@@ -102,7 +102,7 @@ size_t cofport_stats_reply::length() const {
     return (sizeof(struct rofl::openflow13::ofp_port_stats));
   } break;
   default:
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
   return 0;
 }
@@ -111,7 +111,7 @@ void cofport_stats_reply::pack(uint8_t *buf, size_t buflen) const {
   switch (of_version) {
   case rofl::openflow10::OFP_VERSION: {
     if (buflen < length())
-      throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+      throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
 
     struct rofl::openflow10::ofp_port_stats *ps =
         (struct rofl::openflow10::ofp_port_stats *)buf;
@@ -133,7 +133,7 @@ void cofport_stats_reply::pack(uint8_t *buf, size_t buflen) const {
   } break;
   case rofl::openflow12::OFP_VERSION: {
     if (buflen < length())
-      throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+      throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
 
     struct rofl::openflow12::ofp_port_stats *ps =
         (struct rofl::openflow12::ofp_port_stats *)buf;
@@ -155,7 +155,7 @@ void cofport_stats_reply::pack(uint8_t *buf, size_t buflen) const {
   } break;
   case rofl::openflow13::OFP_VERSION: {
     if (buflen < length())
-      throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+      throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
 
     struct rofl::openflow13::ofp_port_stats *ps =
         (struct rofl::openflow13::ofp_port_stats *)buf;
@@ -178,7 +178,7 @@ void cofport_stats_reply::pack(uint8_t *buf, size_t buflen) const {
 
   } break;
   default:
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
 }
 
@@ -186,7 +186,7 @@ void cofport_stats_reply::unpack(uint8_t *buf, size_t buflen) {
   switch (of_version) {
   case rofl::openflow10::OFP_VERSION: {
     if (buflen < sizeof(struct rofl::openflow10::ofp_port_stats))
-      throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+      throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
 
     struct rofl::openflow10::ofp_port_stats *ps =
         (struct rofl::openflow10::ofp_port_stats *)buf;
@@ -207,7 +207,7 @@ void cofport_stats_reply::unpack(uint8_t *buf, size_t buflen) {
   } break;
   case rofl::openflow12::OFP_VERSION: {
     if (buflen < sizeof(struct rofl::openflow12::ofp_port_stats))
-      throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+      throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
 
     struct rofl::openflow12::ofp_port_stats *ps =
         (struct rofl::openflow12::ofp_port_stats *)buf;
@@ -228,7 +228,7 @@ void cofport_stats_reply::unpack(uint8_t *buf, size_t buflen) {
   } break;
   case rofl::openflow13::OFP_VERSION: {
     if (buflen < sizeof(struct rofl::openflow13::ofp_port_stats))
-      throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+      throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
 
     struct rofl::openflow13::ofp_port_stats *ps =
         (struct rofl::openflow13::ofp_port_stats *)buf;
@@ -250,6 +250,6 @@ void cofport_stats_reply::unpack(uint8_t *buf, size_t buflen) {
 
   } break;
   default:
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
 }

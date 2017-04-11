@@ -53,7 +53,7 @@ size_t coftablemod_props::length() const {
     return len;
   } break;
   default:
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
 }
 
@@ -62,7 +62,7 @@ void coftablemod_props::pack(uint8_t *buf, size_t buflen) {
     return;
 
   if (buflen < coftablemod_props::length())
-    throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
 
   switch (ofp_version) {
   case openflow14::OFP_VERSION: {
@@ -93,7 +93,7 @@ void coftablemod_props::pack(uint8_t *buf, size_t buflen) {
     }
   } break;
   default:
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
 }
 
@@ -113,7 +113,7 @@ void coftablemod_props::unpack(uint8_t *buf, size_t buflen) {
       uint16_t len = be16toh(hdr->length);
 
       if ((buflen < len) || (0 == len))
-        throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+        throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
 
       switch (type) {
       case rofl::openflow14::OFPTMPT_EVICTION: {
@@ -143,6 +143,6 @@ void coftablemod_props::unpack(uint8_t *buf, size_t buflen) {
 
   } break;
   default:
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
 }

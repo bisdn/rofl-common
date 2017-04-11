@@ -71,7 +71,7 @@ public:
         crofchan_env::channel_envs.end()) {
       throw eRofChanNotFound(
           "crofchan_env::call_env() crofchan_env instance not found")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_file(__FILE__)
           .set_line(__LINE__);
     }
@@ -239,7 +239,7 @@ public:
     }
     if (cnt == 0) {
       throw eRofChanExhausted("crofchan::add_conn() cauxid namespace exhausted")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_file(__FILE__)
           .set_line(__LINE__);
     }
@@ -265,7 +265,7 @@ public:
   crofconn &add_conn(crofconn *conn) {
     if (nullptr == conn) {
       throw eRofChanInval("crofchan::add_conn() null pointer")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_file(__FILE__)
           .set_line(__LINE__);
     }
@@ -307,7 +307,7 @@ public:
     AcquireReadLock rwlock(conns_rwlock);
     if (conns.find(auxid) == conns.end()) {
       throw eRofChanNotFound("crofchan::get_conn() auxid not found")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_file(__FILE__)
           .set_line(__LINE__)
           .set_key("auxid", auxid.get_id());

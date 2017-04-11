@@ -44,7 +44,7 @@ size_t cofmeter_band::length() const {
             body.memlen());
   } break;
   default:
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
 }
 
@@ -53,7 +53,7 @@ void cofmeter_band::pack(uint8_t *buf, size_t buflen) {
     return;
 
   if (buflen < length())
-    throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
 
   switch (of_version) {
   case rofl::openflow13::OFP_VERSION: {
@@ -68,7 +68,7 @@ void cofmeter_band::pack(uint8_t *buf, size_t buflen) {
     memcpy(mbh->body, body.somem(), body.memlen());
   } break;
   default: {
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
   }
 }
@@ -81,8 +81,8 @@ void cofmeter_band::unpack(uint8_t *buf, size_t buflen) {
   case openflow13::OFP_VERSION: {
     if (buflen < sizeof(struct rofl::openflow13::ofp_meter_band_header)) {
       std::cerr << "[rofl][cofmeterband][unpack] buffer too short" << std::endl;
-      throw eBadRequestBadLen("eBadRequestBadLen", __FILE__,
-                              __PRETTY_FUNCTION__, __LINE__);
+      throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __FUNCTION__,
+                              __LINE__);
     }
 
     struct rofl::openflow13::ofp_meter_band_header *mbh =
@@ -96,7 +96,7 @@ void cofmeter_band::unpack(uint8_t *buf, size_t buflen) {
     if (len > buflen) {
       std::cerr << "[rofl][cofmeterband][unpack] invalid length field"
                 << std::endl;
-      throw eMeterModBadBand("eMeterModBadBand", __FILE__, __PRETTY_FUNCTION__,
+      throw eMeterModBadBand("eMeterModBadBand", __FILE__, __FUNCTION__,
                              __LINE__);
     }
 
@@ -106,7 +106,7 @@ void cofmeter_band::unpack(uint8_t *buf, size_t buflen) {
 
   } break;
   default: {
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   } break;
   }
 }
@@ -188,7 +188,7 @@ size_t cofmeter_band_dscp_remark::length() const {
     return (sizeof(struct rofl::openflow13::ofp_meter_band_dscp_remark));
   } break;
   default:
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
 }
 
@@ -200,7 +200,7 @@ void cofmeter_band_dscp_remark::pack(uint8_t *buf, size_t buflen) {
   case rofl::openflow13::OFP_VERSION: {
 
     if (buflen < length())
-      throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+      throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
 
     cofmeter_band::pack(buf, buflen);
 
@@ -209,7 +209,7 @@ void cofmeter_band_dscp_remark::pack(uint8_t *buf, size_t buflen) {
     mbh->prec_level = prec_level;
   } break;
   default:
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
 }
 
@@ -223,7 +223,7 @@ void cofmeter_band_dscp_remark::unpack(uint8_t *buf, size_t buflen) {
   case rofl::openflow13::OFP_VERSION: {
 
     if (buflen < length())
-      throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+      throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
 
     set_body() = rofl::cmemory(0);
 
@@ -233,7 +233,7 @@ void cofmeter_band_dscp_remark::unpack(uint8_t *buf, size_t buflen) {
 
   } break;
   default: {
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
   }
 }
@@ -251,7 +251,7 @@ cofmeter_band_experimenter::cofmeter_band_experimenter(uint8_t of_version)
     set_type(openflow13::OFPMBT_EXPERIMENTER);
   } break;
   default: {
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
   }
 }
@@ -289,7 +289,7 @@ size_t cofmeter_band_experimenter::length() const {
             exp_body.memlen());
   } break;
   default: {
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
   }
   return 0;
@@ -305,7 +305,7 @@ void cofmeter_band_experimenter::pack(uint8_t *buf, size_t buflen) {
     if (buflen < length()) {
       std::cerr << "[rofl][cofmeterband_experimenter][pack] invalid length"
                 << std::endl;
-      throw eMeterModBadBand("eMeterModBadBand", __FILE__, __PRETTY_FUNCTION__,
+      throw eMeterModBadBand("eMeterModBadBand", __FILE__, __FUNCTION__,
                              __LINE__);
     }
 
@@ -318,7 +318,7 @@ void cofmeter_band_experimenter::pack(uint8_t *buf, size_t buflen) {
     memcpy(mbh->body, exp_body.somem(), exp_body.memlen());
   } break;
   default: {
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
   }
 }
@@ -333,7 +333,7 @@ void cofmeter_band_experimenter::unpack(uint8_t *buf, size_t buflen) {
     if (buflen < sizeof(struct openflow13::ofp_meter_band_experimenter)) {
       std::cerr << "[rofl][cofmeterband_experimenter][unpack] invalid length"
                 << std::endl;
-      throw eMeterModBadBand("eMeterModBadBand", __FILE__, __PRETTY_FUNCTION__,
+      throw eMeterModBadBand("eMeterModBadBand", __FILE__, __FUNCTION__,
                              __LINE__);
     }
 
@@ -354,7 +354,7 @@ void cofmeter_band_experimenter::unpack(uint8_t *buf, size_t buflen) {
     }
   } break;
   default: {
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
   }
 }

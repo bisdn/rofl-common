@@ -36,9 +36,7 @@ size_t cofmsg_role_request::length() const {
     return (sizeof(struct rofl::openflow13::ofp_header) + role.length());
   } break;
   default:
-    throw eBadVersion("eBadVersion")
-        .set_func(__PRETTY_FUNCTION__)
-        .set_line(__LINE__);
+    throw eBadVersion("eBadVersion").set_func(__FUNCTION__).set_line(__LINE__);
   }
   return 0;
 }
@@ -50,7 +48,7 @@ void cofmsg_role_request::pack(uint8_t *buf, size_t buflen) {
     return;
 
   if (buflen < cofmsg_role_request::length())
-    throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
 
   switch (get_version()) {
   default: {
@@ -68,15 +66,15 @@ void cofmsg_role_request::unpack(uint8_t *buf, size_t buflen) {
     return;
 
   if (buflen < cofmsg_role_request::length())
-    throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__,
+    throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __FUNCTION__,
                             __LINE__);
 
   switch (get_version()) {
   default: {
 
     if (get_type() != rofl::openflow13::OFPT_ROLE_REQUEST)
-      throw eBadRequestBadType("eBadRequestBadType", __FILE__,
-                               __PRETTY_FUNCTION__, __LINE__);
+      throw eBadRequestBadType("eBadRequestBadType", __FILE__, __FUNCTION__,
+                               __LINE__);
 
     if (buflen > sizeof(struct rofl::openflow13::ofp_header)) {
       role.unpack(buf + sizeof(struct rofl::openflow13::ofp_header),
@@ -86,7 +84,7 @@ void cofmsg_role_request::unpack(uint8_t *buf, size_t buflen) {
   }
 
   if (get_length() < cofmsg_role_request::length())
-    throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__,
+    throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __FUNCTION__,
                             __LINE__);
 }
 
@@ -119,9 +117,7 @@ size_t cofmsg_role_reply::length() const {
     return (sizeof(struct rofl::openflow13::ofp_header) + role.length());
   } break;
   default:
-    throw eBadVersion("eBadVersion")
-        .set_func(__PRETTY_FUNCTION__)
-        .set_line(__LINE__);
+    throw eBadVersion("eBadVersion").set_func(__FUNCTION__).set_line(__LINE__);
   }
   return 0;
 }
@@ -133,7 +129,7 @@ void cofmsg_role_reply::pack(uint8_t *buf, size_t buflen) {
     return;
 
   if (buflen < cofmsg_role_reply::length())
-    throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
 
   switch (get_version()) {
   default: {
@@ -151,15 +147,15 @@ void cofmsg_role_reply::unpack(uint8_t *buf, size_t buflen) {
     return;
 
   if (buflen < cofmsg_role_reply::length())
-    throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__,
+    throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __FUNCTION__,
                             __LINE__);
 
   switch (get_version()) {
   default: {
 
     if (get_type() != rofl::openflow13::OFPT_ROLE_REPLY)
-      throw eBadRequestBadType("eBadRequestBadType", __FILE__,
-                               __PRETTY_FUNCTION__, __LINE__);
+      throw eBadRequestBadType("eBadRequestBadType", __FILE__, __FUNCTION__,
+                               __LINE__);
 
     if (buflen > sizeof(struct rofl::openflow13::ofp_header)) {
       role.unpack(buf + sizeof(struct rofl::openflow13::ofp_header),
@@ -169,6 +165,6 @@ void cofmsg_role_reply::unpack(uint8_t *buf, size_t buflen) {
   }
 
   if (get_length() < cofmsg_role_reply::length())
-    throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __PRETTY_FUNCTION__,
+    throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __FUNCTION__,
                             __LINE__);
 }

@@ -238,7 +238,7 @@ void csegment::store_and_merge_msg(const rofl::openflow::cofmsg &msg_stats) {
     if (msg_type != msg_stats.get_type()) {
       throw eSegmentedMessageInvalid(
           "csegment::store_and_merge_msg(), invalid msg type")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
     }
 
@@ -249,7 +249,7 @@ void csegment::store_and_merge_msg(const rofl::openflow::cofmsg &msg_stats) {
       if (msg_multipart_type != mp_req->get_stats_type()) {
         throw eSegmentedMessageInvalid(
             "csegment::store_and_merge_msg(), invalid msg multipart type (REQ)")
-            .set_func(__PRETTY_FUNCTION__)
+            .set_func(__FUNCTION__)
             .set_line(__LINE__);
       }
     }
@@ -261,7 +261,7 @@ void csegment::store_and_merge_msg(const rofl::openflow::cofmsg &msg_stats) {
       if (msg_multipart_type != mp_rep->get_stats_type()) {
         throw eSegmentedMessageInvalid(
             "csegment::store_and_merge_msg(), invalid msg multipart type (REP)")
-            .set_func(__PRETTY_FUNCTION__)
+            .set_func(__FUNCTION__)
             .set_line(__LINE__);
       }
     }

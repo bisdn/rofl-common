@@ -102,7 +102,7 @@ public:
   uint16_t get_exp_type() const {
     if (rofl::cmemory::memlen() < sizeof(struct ofp_exp_capwap_action_body_hdr))
       throw eInvalid("cofaction_exp_body_capwap::get_exp_type()")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
     return be16toh(
         ((struct ofp_exp_capwap_action_body_hdr *)rofl::cmemory::somem())
@@ -115,7 +115,7 @@ public:
   void set_exp_type(uint16_t exptype) {
     if (rofl::cmemory::memlen() < sizeof(struct ofp_exp_capwap_action_body_hdr))
       throw eInvalid("cofaction_exp_body_capwap::set_exp_type()")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
     ((struct ofp_exp_capwap_action_body_hdr *)rofl::cmemory::somem())->exptype =
         htobe16(exptype);
@@ -127,7 +127,7 @@ public:
   uint16_t get_exp_len() const {
     if (rofl::cmemory::memlen() < sizeof(struct ofp_exp_capwap_action_body_hdr))
       throw eInvalid("cofaction_exp_body_capwap::get_exp_len()")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
     return be16toh(
         ((struct ofp_exp_capwap_action_body_hdr *)rofl::cmemory::somem())
@@ -140,7 +140,7 @@ public:
   void set_exp_len(uint16_t explen) {
     if (rofl::cmemory::memlen() < sizeof(struct ofp_exp_capwap_action_body_hdr))
       throw eInvalid("cofaction_exp_body_capwap::set_exp_len()")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
     ((struct ofp_exp_capwap_action_body_hdr *)rofl::cmemory::somem())->explen =
         htobe16(explen);
@@ -215,7 +215,7 @@ public:
     if (rofl::cmemory::memlen() <
         sizeof(struct ofp_exp_capwap_action_body_push_capwap))
       throw eInvalid("cofaction_exp_body_push_capwap::get_ether_type()")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
     return be16toh(((struct ofp_exp_capwap_action_body_push_capwap *)
                         rofl::cmemory::somem())
@@ -229,7 +229,7 @@ public:
     if (rofl::cmemory::memlen() <
         sizeof(struct ofp_exp_capwap_action_body_push_capwap))
       throw eInvalid("cofaction_exp_body_push_capwap::set_ether_type()")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
     ((struct ofp_exp_capwap_action_body_push_capwap *)rofl::cmemory::somem())
         ->ethertype = htobe16(ethertype);
@@ -304,7 +304,7 @@ public:
     if (rofl::cmemory::memlen() <
         sizeof(struct ofp_exp_capwap_action_body_pop_capwap))
       throw eInvalid("cofaction_exp_body_pop_capwap:get_ether_type()")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
     return be16toh(
         ((struct ofp_exp_capwap_action_body_pop_capwap *)rofl::cmemory::somem())
@@ -318,7 +318,7 @@ public:
     if (rofl::cmemory::memlen() <
         sizeof(struct ofp_exp_capwap_action_body_pop_capwap))
       throw eInvalid("cofaction_exp_body_pop_capwap:set_ether_type()")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
     ((struct ofp_exp_capwap_action_body_pop_capwap *)rofl::cmemory::somem())
         ->ethertype = htobe16(ethertype);

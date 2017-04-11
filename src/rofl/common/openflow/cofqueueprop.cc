@@ -17,7 +17,7 @@ size_t cofqueue_prop::length() const {
     return (sizeof(struct rofl::openflow13::ofp_queue_prop_header));
   } break;
   default:
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
 }
 
@@ -27,7 +27,7 @@ void cofqueue_prop::pack(uint8_t *buf, size_t buflen) {
 
   if (buflen <
       cofqueue_prop::length()) // take length() method from this base class
-    throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
 
   switch (ofp_version) {
   case rofl::openflow10::OFP_VERSION:
@@ -44,7 +44,7 @@ void cofqueue_prop::pack(uint8_t *buf, size_t buflen) {
 
   } break;
   default:
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
 }
 
@@ -53,7 +53,7 @@ void cofqueue_prop::unpack(uint8_t *buf, size_t buflen) {
     return;
 
   if (buflen < cofqueue_prop::length())
-    throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
 
   switch (ofp_version) {
   case rofl::openflow10::OFP_VERSION:
@@ -67,11 +67,11 @@ void cofqueue_prop::unpack(uint8_t *buf, size_t buflen) {
     len = be16toh(hdr->len);
 
     if (len < sizeof(struct rofl::openflow13::ofp_queue_prop_header))
-      throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+      throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
 
   } break;
   default:
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
 }
 
@@ -83,7 +83,7 @@ size_t cofqueue_prop_min_rate::length() const {
     return (sizeof(struct rofl::openflow13::ofp_queue_prop_min_rate));
   } break;
   default:
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
 }
 
@@ -92,7 +92,7 @@ void cofqueue_prop_min_rate::pack(uint8_t *buf, size_t buflen) {
     return;
 
   if (buflen < cofqueue_prop_min_rate::length())
-    throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
 
   switch (get_version()) {
   case rofl::openflow10::OFP_VERSION:
@@ -108,7 +108,7 @@ void cofqueue_prop_min_rate::pack(uint8_t *buf, size_t buflen) {
 
   } break;
   default:
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
 }
 
@@ -117,7 +117,7 @@ void cofqueue_prop_min_rate::unpack(uint8_t *buf, size_t buflen) {
     return;
 
   if (buflen < sizeof(struct rofl::openflow13::ofp_queue_prop_min_rate))
-    throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
 
   switch (get_version()) {
   case rofl::openflow10::OFP_VERSION:
@@ -127,7 +127,7 @@ void cofqueue_prop_min_rate::unpack(uint8_t *buf, size_t buflen) {
     cofqueue_prop::unpack(buf, buflen);
 
     if (get_length() < sizeof(struct rofl::openflow13::ofp_queue_prop_min_rate))
-      throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+      throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
 
     struct rofl::openflow13::ofp_queue_prop_min_rate *hdr =
         (struct rofl::openflow13::ofp_queue_prop_min_rate *)buf;
@@ -136,7 +136,7 @@ void cofqueue_prop_min_rate::unpack(uint8_t *buf, size_t buflen) {
 
   } break;
   default:
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
 }
 
@@ -148,7 +148,7 @@ size_t cofqueue_prop_max_rate::length() const {
     return (sizeof(struct rofl::openflow13::ofp_queue_prop_max_rate));
   } break;
   default:
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
 }
 
@@ -157,7 +157,7 @@ void cofqueue_prop_max_rate::pack(uint8_t *buf, size_t buflen) {
     return;
 
   if (buflen < cofqueue_prop_max_rate::length())
-    throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
 
   switch (get_version()) {
   case rofl::openflow10::OFP_VERSION:
@@ -173,7 +173,7 @@ void cofqueue_prop_max_rate::pack(uint8_t *buf, size_t buflen) {
 
   } break;
   default:
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
 }
 
@@ -182,7 +182,7 @@ void cofqueue_prop_max_rate::unpack(uint8_t *buf, size_t buflen) {
     return;
 
   if (buflen < sizeof(struct rofl::openflow13::ofp_queue_prop_max_rate))
-    throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
 
   switch (get_version()) {
   case rofl::openflow10::OFP_VERSION:
@@ -192,7 +192,7 @@ void cofqueue_prop_max_rate::unpack(uint8_t *buf, size_t buflen) {
     cofqueue_prop::unpack(buf, buflen);
 
     if (get_length() < sizeof(struct rofl::openflow13::ofp_queue_prop_max_rate))
-      throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+      throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
 
     struct rofl::openflow13::ofp_queue_prop_max_rate *hdr =
         (struct rofl::openflow13::ofp_queue_prop_max_rate *)buf;
@@ -201,7 +201,7 @@ void cofqueue_prop_max_rate::unpack(uint8_t *buf, size_t buflen) {
 
   } break;
   default:
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
 }
 
@@ -214,7 +214,7 @@ size_t cofqueue_prop_experimenter::length() const {
             exp_body.memlen());
   } break;
   default:
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
 }
 
@@ -223,7 +223,7 @@ void cofqueue_prop_experimenter::pack(uint8_t *buf, size_t buflen) {
     return;
 
   if (buflen < cofqueue_prop_experimenter::length())
-    throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
 
   switch (get_version()) {
   case rofl::openflow10::OFP_VERSION:
@@ -240,7 +240,7 @@ void cofqueue_prop_experimenter::pack(uint8_t *buf, size_t buflen) {
 
   } break;
   default:
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
 }
 
@@ -249,7 +249,7 @@ void cofqueue_prop_experimenter::unpack(uint8_t *buf, size_t buflen) {
     return;
 
   if (buflen < sizeof(struct rofl::openflow13::ofp_queue_prop_experimenter))
-    throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
 
   switch (get_version()) {
   case rofl::openflow10::OFP_VERSION:
@@ -259,7 +259,7 @@ void cofqueue_prop_experimenter::unpack(uint8_t *buf, size_t buflen) {
     cofqueue_prop::unpack(buf, buflen);
 
     if (buflen < get_length())
-      throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+      throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
 
     struct rofl::openflow13::ofp_queue_prop_experimenter *hdr =
         (struct rofl::openflow13::ofp_queue_prop_experimenter *)buf;
@@ -272,6 +272,6 @@ void cofqueue_prop_experimenter::unpack(uint8_t *buf, size_t buflen) {
 
   } break;
   default:
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
 }

@@ -21,7 +21,7 @@ size_t cofport::length() const {
 
 void cofport::pack(uint8_t *buf, size_t buflen) {
   if (buflen < length()) {
-    throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
   }
 
   switch (get_version()) {
@@ -79,7 +79,7 @@ void cofport::pack(uint8_t *buf, size_t buflen) {
 
 void cofport::unpack(uint8_t *buf, size_t buflen) {
   if (buflen < length())
-    throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
 
   switch (get_version()) {
   case rofl::openflow10::OFP_VERSION: {
@@ -145,7 +145,7 @@ void cofport::link_state_set_blocked() {
     set_state(get_state() | openflow12::OFPPS_BLOCKED);
   } break;
   default:
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
 }
 
@@ -156,7 +156,7 @@ void cofport::link_state_clr_blocked() {
     set_state(get_state() & ~openflow12::OFPPS_BLOCKED);
   } break;
   default:
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
 }
 
@@ -167,7 +167,7 @@ bool cofport::link_state_is_blocked() const {
     return (get_state() & openflow12::OFPPS_BLOCKED);
   } break;
   default:
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
 }
 
@@ -178,7 +178,7 @@ void cofport::link_state_set_live() {
     set_state(get_state() | openflow12::OFPPS_LIVE);
   } break;
   default:
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
 }
 
@@ -189,7 +189,7 @@ void cofport::link_state_clr_live() {
     set_state(get_state() & ~openflow12::OFPPS_LIVE);
   } break;
   default:
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
 }
 
@@ -200,7 +200,7 @@ bool cofport::link_state_is_live() const {
     return (get_state() & openflow12::OFPPS_LIVE);
   } break;
   default:
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
 }
 
@@ -212,7 +212,7 @@ void cofport::link_state_set_link_down() {
     set_state(get_state() | openflow10::OFPPS_LINK_DOWN);
   } break;
   default:
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
 }
 
@@ -224,7 +224,7 @@ void cofport::link_state_clr_link_down() {
     set_state(get_state() & ~openflow10::OFPPS_LINK_DOWN);
   } break;
   default:
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
 }
 
@@ -240,7 +240,7 @@ bool cofport::link_state_is_link_down() const {
     return (get_state() & openflow12::OFPPS_LINK_DOWN);
     break; // FIXME: openflow13::OFPPS_LINK_DOWN, once it's been defined
   default:
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
 }
 
@@ -252,7 +252,7 @@ void cofport::link_state_phy_down() {
     set_state(get_state() | openflow10::OFPPS_LINK_DOWN);
   } break;
   default:
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
 }
 
@@ -264,7 +264,7 @@ void cofport::link_state_phy_up() {
     set_state(get_state() & ~openflow10::OFPPS_LINK_DOWN);
   } break;
   default:
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
 }
 
@@ -276,7 +276,7 @@ bool cofport::link_state_phy_is_up() const {
     return not(get_state() & openflow10::OFPPS_LINK_DOWN);
   } break;
   default:
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
 }
 
@@ -288,7 +288,7 @@ bool cofport::config_is_port_down() const {
     return (get_config() & openflow10::OFPPS_LINK_DOWN);
   } break;
   default:
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
 }
 
@@ -304,7 +304,7 @@ void cofport::recv_port_mod(uint32_t config, uint32_t mask,
     recv_port_mod_of12(config, mask, advertise);
   } break;
   default:
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
 }
 

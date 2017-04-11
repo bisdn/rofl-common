@@ -13,7 +13,7 @@ size_t coftable_features::length() const {
             properties.length());
   } break;
   default:
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
 }
 
@@ -24,7 +24,7 @@ void coftable_features::pack(uint8_t *buf, size_t buflen) {
   switch (ofp_version) {
   case rofl::openflow13::OFP_VERSION: {
     if (buflen < coftable_features::length())
-      throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+      throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
 
     struct rofl::openflow13::ofp_table_features *hdr =
         (struct rofl::openflow13::ofp_table_features *)buf;
@@ -42,7 +42,7 @@ void coftable_features::pack(uint8_t *buf, size_t buflen) {
                         sizeof(struct rofl::openflow13::ofp_table_features));
   } break;
   default:
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
 }
 
@@ -50,7 +50,7 @@ void coftable_features::unpack(uint8_t *buf, size_t buflen) {
   switch (ofp_version) {
   case rofl::openflow13::OFP_VERSION: {
     if (buflen < sizeof(struct rofl::openflow13::ofp_table_features))
-      throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+      throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
 
     struct rofl::openflow13::ofp_table_features *hdr =
         (struct rofl::openflow13::ofp_table_features *)buf;
@@ -75,6 +75,6 @@ void coftable_features::unpack(uint8_t *buf, size_t buflen) {
 
   } break;
   default:
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
 }

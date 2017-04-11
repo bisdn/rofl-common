@@ -68,7 +68,7 @@ public:
         crofconn_env::connection_envs.end()) {
       throw eRofConnNotFound(
           "crofconn_env::call_env() crofconn_env instance not found")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_file(__FILE__)
           .set_line(__LINE__);
     }
@@ -314,7 +314,7 @@ public:
   size_t get_rxqueue_max_size(unsigned int queue_id) const {
     if (rxqueues.size() <= queue_id) {
       throw eRofConnInvalid("crofconn::get_rxqueue_max_size() invalid queue_id")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_file(__FILE__)
           .set_line(__LINE__);
     }
@@ -328,7 +328,7 @@ public:
                                  size_t rxqueue_max_size) {
     if (rxqueues.size() <= queue_id) {
       throw eRofConnInvalid("crofconn::set_rxqueue_max_size() invalid queue_id")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_file(__FILE__)
           .set_line(__LINE__);
     }
@@ -650,7 +650,7 @@ private:
         rofl::openflow::OFP_VERSION_UNKNOWN) {
       throw eRofConnInvalid(
           "crofconn::set_versionbitmap() versionbitmap invalid")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_file(__FILE__)
           .set_line(__LINE__);
     }
@@ -979,7 +979,7 @@ private:
     if (not(pending_segments.size() < pending_segments_max)) {
       throw eRofConnInvalid("crofconn::add_pending_segment() too many segments "
                             "in transit, dropping")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_file(__FILE__)
           .set_line(__LINE__);
     }
@@ -1002,7 +1002,7 @@ private:
     if (not(pending_segments.size() < pending_segments_max)) {
       throw eRofConnInvalid("crofconn::set_pending_segment() too many segments "
                             "in transit, dropping")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_file(__FILE__)
           .set_line(__LINE__);
     }
@@ -1026,13 +1026,13 @@ private:
     if (not(pending_segments.size() < pending_segments_max)) {
       throw eRofConnInvalid("crofconn::set_pending_segment() too many segments "
                             "in transit, dropping")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_file(__FILE__)
           .set_line(__LINE__);
     }
     if (pending_segments.find(xid) == pending_segments.end()) {
       throw eRofConnNotFound("crofconn::set_pending_segment() xid not found")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_file(__FILE__)
           .set_line(__LINE__);
     }
@@ -1050,7 +1050,7 @@ private:
     AcquireReadLock rlock(pending_segments_rwlock);
     if (pending_segments.find(xid) == pending_segments.end()) {
       throw eRofConnNotFound("crofconn::get_pending_segment() xid not found")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_file(__FILE__)
           .set_line(__LINE__);
     }

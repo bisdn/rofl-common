@@ -22,7 +22,7 @@ void cofmsg_packet_out::pack(uint8_t *buf, size_t buflen) {
     return;
 
   if (buflen < get_length())
-    throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
 
   switch (get_version()) {
   case rofl::openflow10::OFP_VERSION: {
@@ -81,12 +81,12 @@ void cofmsg_packet_out::unpack(uint8_t *buf, size_t buflen) {
   case rofl::openflow10::OFP_VERSION: {
 
     if (get_length() < sizeof(struct rofl::openflow10::ofp_packet_out))
-      throw eBadRequestBadLen("eBadRequestBadLen", __FILE__,
-                              __PRETTY_FUNCTION__, __LINE__);
+      throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __FUNCTION__,
+                              __LINE__);
 
     if (get_type() != rofl::openflow10::OFPT_PACKET_OUT)
-      throw eBadRequestBadType("eBadRequestBadType", __FILE__,
-                               __PRETTY_FUNCTION__, __LINE__);
+      throw eBadRequestBadType("eBadRequestBadType", __FILE__, __FUNCTION__,
+                               __LINE__);
 
     struct rofl::openflow10::ofp_packet_out *hdr =
         (struct rofl::openflow10::ofp_packet_out *)buf;
@@ -99,8 +99,8 @@ void cofmsg_packet_out::unpack(uint8_t *buf, size_t buflen) {
         sizeof(struct rofl::openflow10::ofp_packet_out) + actions_len;
 
     if (get_length() < packet_offset)
-      throw eBadRequestBadLen("eBadRequestBadLen", __FILE__,
-                              __PRETTY_FUNCTION__, __LINE__);
+      throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __FUNCTION__,
+                              __LINE__);
 
     actions.unpack((uint8_t *)hdr->actions, actions_len);
 
@@ -110,12 +110,12 @@ void cofmsg_packet_out::unpack(uint8_t *buf, size_t buflen) {
   default: {
 
     if (get_length() < sizeof(struct rofl::openflow12::ofp_packet_out))
-      throw eBadRequestBadLen("eBadRequestBadLen", __FILE__,
-                              __PRETTY_FUNCTION__, __LINE__);
+      throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __FUNCTION__,
+                              __LINE__);
 
     if (get_type() != rofl::openflow13::OFPT_PACKET_OUT)
-      throw eBadRequestBadType("eBadRequestBadType", __FILE__,
-                               __PRETTY_FUNCTION__, __LINE__);
+      throw eBadRequestBadType("eBadRequestBadType", __FILE__, __FUNCTION__,
+                               __LINE__);
 
     struct rofl::openflow12::ofp_packet_out *hdr =
         (struct rofl::openflow12::ofp_packet_out *)buf;
@@ -128,8 +128,8 @@ void cofmsg_packet_out::unpack(uint8_t *buf, size_t buflen) {
         sizeof(struct rofl::openflow12::ofp_packet_out) + actions_len;
 
     if (get_length() < packet_offset)
-      throw eBadRequestBadLen("eBadRequestBadLen", __FILE__,
-                              __PRETTY_FUNCTION__, __LINE__);
+      throw eBadRequestBadLen("eBadRequestBadLen", __FILE__, __FUNCTION__,
+                              __LINE__);
 
     actions.unpack((uint8_t *)hdr->actions, actions_len);
 

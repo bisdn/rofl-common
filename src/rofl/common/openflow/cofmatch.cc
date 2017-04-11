@@ -48,7 +48,7 @@ size_t cofmatch::length() const {
     return total_length;
   }
   default:
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
   return 0;
 }
@@ -63,7 +63,7 @@ void cofmatch::pack(uint8_t *buf, size_t buflen) {
     return pack_of13(buf, buflen);
     break;
   default:
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
 }
 
@@ -77,13 +77,13 @@ void cofmatch::unpack(uint8_t *buf, size_t buflen) {
     unpack_of13(buf, buflen);
     break;
   default:
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
 }
 
 void cofmatch::pack_of10(uint8_t *buf, size_t buflen) {
   if (buflen < length()) {
-    throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
   }
 
   uint32_t wildcards = 0;
@@ -198,8 +198,7 @@ void cofmatch::unpack_of10(uint8_t *buf, size_t buflen) {
   matches.clear();
 
   if (buflen < sizeof(struct rofl::openflow10::ofp_match)) {
-    throw eBadMatchBadLen("eBadMatchBadLen", __FILE__, __PRETTY_FUNCTION__,
-                          __LINE__);
+    throw eBadMatchBadLen("eBadMatchBadLen", __FILE__, __FUNCTION__, __LINE__);
   }
 
   struct rofl::openflow10::ofp_match *m =
@@ -328,7 +327,7 @@ void cofmatch::unpack_of10(uint8_t *buf, size_t buflen) {
 
 void cofmatch::pack_of13(uint8_t *buf, size_t buflen) {
   if (buflen < length()) {
-    throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
   }
 
   struct rofl::openflow13::ofp_match *m =
@@ -345,8 +344,7 @@ void cofmatch::unpack_of13(uint8_t *buf, size_t buflen) {
   matches.clear();
 
   if (buflen < 2 * sizeof(uint16_t)) {
-    throw eBadMatchBadLen("eBadMatchBadLen", __FILE__, __PRETTY_FUNCTION__,
-                          __LINE__);
+    throw eBadMatchBadLen("eBadMatchBadLen", __FILE__, __FUNCTION__, __LINE__);
   }
 
   struct rofl::openflow13::ofp_match *m =
@@ -355,7 +353,7 @@ void cofmatch::unpack_of13(uint8_t *buf, size_t buflen) {
   type = be16toh(m->type);
 
   if (rofl::openflow13::OFPMT_OXM != type) {
-    throw eBadMatchBadType("eBadMatchBadType", __FILE__, __PRETTY_FUNCTION__,
+    throw eBadMatchBadType("eBadMatchBadType", __FILE__, __FUNCTION__,
                            __LINE__);
   }
 
@@ -381,8 +379,8 @@ void cofmatch::check_prerequisites() const {
                      "while no IN-PORT is present"
                   << std::endl
                   << matches;
-        throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__,
-                                 __PRETTY_FUNCTION__, __LINE__);
+        throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__, __FUNCTION__,
+                                 __LINE__);
       }
     }
 
@@ -392,8 +390,8 @@ void cofmatch::check_prerequisites() const {
                      "while VID is set to OFPVID-NONE"
                   << std::endl
                   << matches;
-        throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__,
-                                 __PRETTY_FUNCTION__, __LINE__);
+        throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__, __FUNCTION__,
+                                 __LINE__);
       }
     }
 
@@ -405,8 +403,8 @@ void cofmatch::check_prerequisites() const {
                      "ETH-TYPE is not IPv4/IPv6"
                   << std::endl
                   << matches;
-        throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__,
-                                 __PRETTY_FUNCTION__, __LINE__);
+        throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__, __FUNCTION__,
+                                 __LINE__);
       }
     }
 
@@ -418,8 +416,8 @@ void cofmatch::check_prerequisites() const {
                      "ETH-TYPE is not IPv4/IPv6"
                   << std::endl
                   << matches;
-        throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__,
-                                 __PRETTY_FUNCTION__, __LINE__);
+        throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__, __FUNCTION__,
+                                 __LINE__);
       }
     }
 
@@ -431,8 +429,8 @@ void cofmatch::check_prerequisites() const {
                      "while ETH-TYPE is not IPv4/IPv6"
                   << std::endl
                   << matches;
-        throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__,
-                                 __PRETTY_FUNCTION__, __LINE__);
+        throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__, __FUNCTION__,
+                                 __LINE__);
       }
     }
 
@@ -443,8 +441,8 @@ void cofmatch::check_prerequisites() const {
                      "while ETH-TYPE is not IPv4"
                   << std::endl
                   << matches;
-        throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__,
-                                 __PRETTY_FUNCTION__, __LINE__);
+        throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__, __FUNCTION__,
+                                 __LINE__);
       }
     }
 
@@ -455,8 +453,8 @@ void cofmatch::check_prerequisites() const {
                      "while ETH-TYPE is not IPv4"
                   << std::endl
                   << matches;
-        throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__,
-                                 __PRETTY_FUNCTION__, __LINE__);
+        throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__, __FUNCTION__,
+                                 __LINE__);
       }
     }
 
@@ -467,8 +465,8 @@ void cofmatch::check_prerequisites() const {
                      "IP-PROTO is not TCP"
                   << std::endl
                   << matches;
-        throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__,
-                                 __PRETTY_FUNCTION__, __LINE__);
+        throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__, __FUNCTION__,
+                                 __LINE__);
       }
     }
 
@@ -479,8 +477,8 @@ void cofmatch::check_prerequisites() const {
                      "IP-PROTO is not TCP"
                   << std::endl
                   << matches;
-        throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__,
-                                 __PRETTY_FUNCTION__, __LINE__);
+        throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__, __FUNCTION__,
+                                 __LINE__);
       }
     }
 
@@ -491,8 +489,8 @@ void cofmatch::check_prerequisites() const {
                      "IP-PROTO is not UDP"
                   << std::endl
                   << matches;
-        throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__,
-                                 __PRETTY_FUNCTION__, __LINE__);
+        throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__, __FUNCTION__,
+                                 __LINE__);
       }
     }
 
@@ -503,8 +501,8 @@ void cofmatch::check_prerequisites() const {
                      "IP-PROTO is not UDP"
                   << std::endl
                   << matches;
-        throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__,
-                                 __PRETTY_FUNCTION__, __LINE__);
+        throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__, __FUNCTION__,
+                                 __LINE__);
       }
     }
 
@@ -515,8 +513,8 @@ void cofmatch::check_prerequisites() const {
                      "while IP-PROTO is not SCTP"
                   << std::endl
                   << matches;
-        throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__,
-                                 __PRETTY_FUNCTION__, __LINE__);
+        throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__, __FUNCTION__,
+                                 __LINE__);
       }
     }
 
@@ -527,8 +525,8 @@ void cofmatch::check_prerequisites() const {
                      "while IP-PROTO is not SCTP"
                   << std::endl
                   << matches;
-        throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__,
-                                 __PRETTY_FUNCTION__, __LINE__);
+        throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__, __FUNCTION__,
+                                 __LINE__);
       }
     }
 
@@ -539,8 +537,8 @@ void cofmatch::check_prerequisites() const {
                      "while IP-PROTO is not ICMPV4"
                   << std::endl
                   << matches;
-        throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__,
-                                 __PRETTY_FUNCTION__, __LINE__);
+        throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__, __FUNCTION__,
+                                 __LINE__);
       }
     }
 
@@ -551,8 +549,8 @@ void cofmatch::check_prerequisites() const {
                      "while IP-PROTO is not ICMPV4"
                   << std::endl
                   << matches;
-        throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__,
-                                 __PRETTY_FUNCTION__, __LINE__);
+        throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__, __FUNCTION__,
+                                 __LINE__);
       }
     }
 
@@ -563,8 +561,8 @@ void cofmatch::check_prerequisites() const {
                      "while ETH-TYPE is not ARP"
                   << std::endl
                   << matches;
-        throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__,
-                                 __PRETTY_FUNCTION__, __LINE__);
+        throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__, __FUNCTION__,
+                                 __LINE__);
       }
     }
 
@@ -575,8 +573,8 @@ void cofmatch::check_prerequisites() const {
                      "ETH-TYPE is not ARP"
                   << std::endl
                   << matches;
-        throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__,
-                                 __PRETTY_FUNCTION__, __LINE__);
+        throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__, __FUNCTION__,
+                                 __LINE__);
       }
     }
 
@@ -587,8 +585,8 @@ void cofmatch::check_prerequisites() const {
                      "ETH-TYPE is not ARP"
                   << std::endl
                   << matches;
-        throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__,
-                                 __PRETTY_FUNCTION__, __LINE__);
+        throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__, __FUNCTION__,
+                                 __LINE__);
       }
     }
 
@@ -599,8 +597,8 @@ void cofmatch::check_prerequisites() const {
                      "ETH-TYPE is not ARP"
                   << std::endl
                   << matches;
-        throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__,
-                                 __PRETTY_FUNCTION__, __LINE__);
+        throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__, __FUNCTION__,
+                                 __LINE__);
       }
     }
 
@@ -611,8 +609,8 @@ void cofmatch::check_prerequisites() const {
                      "ETH-TYPE is not ARP"
                   << std::endl
                   << matches;
-        throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__,
-                                 __PRETTY_FUNCTION__, __LINE__);
+        throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__, __FUNCTION__,
+                                 __LINE__);
       }
     }
 
@@ -623,8 +621,8 @@ void cofmatch::check_prerequisites() const {
                      "while ETH-TYPE is not IPv6"
                   << std::endl
                   << matches;
-        throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__,
-                                 __PRETTY_FUNCTION__, __LINE__);
+        throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__, __FUNCTION__,
+                                 __LINE__);
       }
     }
 
@@ -635,8 +633,8 @@ void cofmatch::check_prerequisites() const {
                      "while ETH-TYPE is not IPv6"
                   << std::endl
                   << matches;
-        throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__,
-                                 __PRETTY_FUNCTION__, __LINE__);
+        throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__, __FUNCTION__,
+                                 __LINE__);
       }
     }
 
@@ -647,8 +645,8 @@ void cofmatch::check_prerequisites() const {
                      "while ETH-TYPE is not IPv6"
                   << std::endl
                   << matches;
-        throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__,
-                                 __PRETTY_FUNCTION__, __LINE__);
+        throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__, __FUNCTION__,
+                                 __LINE__);
       }
     }
 
@@ -659,8 +657,8 @@ void cofmatch::check_prerequisites() const {
                      "while IP-PROTO is not ICMPV6"
                   << std::endl
                   << matches;
-        throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__,
-                                 __PRETTY_FUNCTION__, __LINE__);
+        throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__, __FUNCTION__,
+                                 __LINE__);
       }
     }
 
@@ -671,8 +669,8 @@ void cofmatch::check_prerequisites() const {
                      "while IP-PROTO is not ICMPV6"
                   << std::endl
                   << matches;
-        throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__,
-                                 __PRETTY_FUNCTION__, __LINE__);
+        throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__, __FUNCTION__,
+                                 __LINE__);
       }
     }
 
@@ -685,8 +683,8 @@ void cofmatch::check_prerequisites() const {
                      "ND-ADVERTISEMENT"
                   << std::endl
                   << matches;
-        throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__,
-                                 __PRETTY_FUNCTION__, __LINE__);
+        throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__, __FUNCTION__,
+                                 __LINE__);
       }
     }
 
@@ -697,8 +695,8 @@ void cofmatch::check_prerequisites() const {
                      "while ICMPV6-TYPE is not ND-SOLICITATION"
                   << std::endl
                   << matches;
-        throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__,
-                                 __PRETTY_FUNCTION__, __LINE__);
+        throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__, __FUNCTION__,
+                                 __LINE__);
       }
     }
 
@@ -709,8 +707,8 @@ void cofmatch::check_prerequisites() const {
                      "while ICMPV6-TYPE is not ND-ADVERTISEMENT"
                   << std::endl
                   << matches;
-        throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__,
-                                 __PRETTY_FUNCTION__, __LINE__);
+        throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__, __FUNCTION__,
+                                 __LINE__);
       }
     }
 
@@ -722,8 +720,8 @@ void cofmatch::check_prerequisites() const {
                      "while ETH-TYPE is not MPLS/MPLS-UPSTREAM"
                   << std::endl
                   << matches;
-        throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__,
-                                 __PRETTY_FUNCTION__, __LINE__);
+        throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__, __FUNCTION__,
+                                 __LINE__);
       }
     }
 
@@ -735,8 +733,8 @@ void cofmatch::check_prerequisites() const {
                      "ETH-TYPE is not MPLS/MPLS-UPSTREAM"
                   << std::endl
                   << matches;
-        throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__,
-                                 __PRETTY_FUNCTION__, __LINE__);
+        throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__, __FUNCTION__,
+                                 __LINE__);
       }
     }
 
@@ -748,8 +746,8 @@ void cofmatch::check_prerequisites() const {
                      "while ETH-TYPE is not MPLS/MPLS-UPSTREAM"
                   << std::endl
                   << matches;
-        throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__,
-                                 __PRETTY_FUNCTION__, __LINE__);
+        throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__, __FUNCTION__,
+                                 __LINE__);
       }
     }
 
@@ -760,8 +758,8 @@ void cofmatch::check_prerequisites() const {
                      "while ETH-TYPE is not PBB"
                   << std::endl
                   << matches;
-        throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__,
-                                 __PRETTY_FUNCTION__, __LINE__);
+        throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__, __FUNCTION__,
+                                 __LINE__);
       }
     }
 
@@ -772,8 +770,8 @@ void cofmatch::check_prerequisites() const {
                      "while ETH-TYPE is not IPv6"
                   << std::endl
                   << matches;
-        throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__,
-                                 __PRETTY_FUNCTION__, __LINE__);
+        throw eBadMatchBadPrereq("eBadMatchBadPrereq", __FILE__, __FUNCTION__,
+                                 __LINE__);
       }
     }
 

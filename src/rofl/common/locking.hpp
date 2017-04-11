@@ -33,7 +33,7 @@ public:
   crwlock() {
     if (pthread_rwlock_init(&rwlock, NULL) < 0) {
       throw eSysCall("pthread_rwlock_init syscall failed")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
     }
   };
@@ -51,7 +51,7 @@ public:
   AcquireReadLock(const crwlock &lock) : rwlock(&(lock.rwlock)) {
     if (pthread_rwlock_rdlock(rwlock) < 0) {
       throw eSysCall("pthread_rwlock_rdlock syscall failed")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
     }
   };
@@ -69,7 +69,7 @@ public:
   AcquireReadWriteLock(const crwlock &lock) : rwlock(&(lock.rwlock)) {
     if (pthread_rwlock_wrlock(rwlock) < 0) {
       throw eSysCall("pthread_rwlock_wrlock syscall failed")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
     }
   };

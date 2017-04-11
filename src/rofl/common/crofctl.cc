@@ -626,7 +626,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eBadVersion &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -639,7 +640,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eBadRequestBadVersion &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -652,7 +654,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eBadRequestBadType &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -665,7 +668,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eBadRequestBadStat &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -678,7 +682,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eBadRequestBadExperimenter &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -691,7 +696,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eBadRequestBadExpType &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -704,7 +710,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eBadRequestEperm &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -717,7 +724,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eBadRequestBadLen &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -730,7 +738,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eBadRequestBufferEmpty &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -743,7 +752,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eBadRequestBufferUnknown &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -756,7 +766,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eBadRequestBadTableId &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -769,7 +780,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eBadRequestIsSlave &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -782,7 +794,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eBadRequestBadPort &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -795,7 +808,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eBadRequestBadPacket &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -808,7 +822,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eBadRequestMultipartBufferOverflow &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -821,11 +836,13 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eBadRequestBase &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
   } catch (eSwitchConfigBadFlags &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -838,7 +855,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eSwitchConfigBadLen &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -851,7 +869,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eSwitchConfigEPerm &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -864,11 +883,13 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eSwitchConfigBase &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
   } catch (eFlowModUnknown &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -881,7 +902,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eFlowModTableFull &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -894,7 +916,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eFlowModBadTableId &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -907,7 +930,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eFlowModOverlap &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -920,7 +944,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eFlowModEperm &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -933,7 +958,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eFlowModBadTimeout &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -946,7 +972,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eFlowModBadCommand &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -959,7 +986,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eFlowModBadFlags &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -972,11 +1000,13 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eFlowModBase &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
   } catch (eGroupModExists &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -989,7 +1019,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eGroupModInvalGroup &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1002,7 +1033,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eGroupModWeightUnsupported &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1015,7 +1047,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eGroupModOutOfGroups &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1028,7 +1061,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eGroupModOutOfBuckets &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1041,7 +1075,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eGroupModChainingUnsupported &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1054,7 +1089,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eGroupModWatchUnsupported &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1067,7 +1103,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eGroupModLoop &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1080,7 +1117,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eGroupModUnknownGroup &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1093,7 +1131,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eGroupModChainedGroup &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1106,7 +1145,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eGroupModBadType &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1119,7 +1159,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eGroupModBadCommand &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1132,7 +1173,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eGroupModBadBucket &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1145,7 +1187,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eGroupModBadWatch &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1158,7 +1201,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eGroupModEperm &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1171,11 +1215,13 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eGroupModBase &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
   } catch (ePortModBadPort &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1188,7 +1234,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (ePortModBadHwAddr &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1201,7 +1248,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (ePortModBadConfig &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1214,7 +1262,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (ePortModBadAdvertise &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1227,7 +1276,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (ePortModEperm &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1240,11 +1290,13 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (ePortModBase &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
   } catch (eTableModBadTable &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1257,7 +1309,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eTableModBadConfig &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1270,7 +1323,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eTableModEperm &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1283,7 +1337,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eTableModBase &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
 #if 0
 	} catch (rofl::openflow::eInstructionInvalType& e) {
@@ -1311,7 +1366,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eBadActionBadType &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1324,7 +1380,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eBadActionBadLen &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1337,7 +1394,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eBadActionBadExperimenter &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1350,7 +1408,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eBadActionBadExperimenterType &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1363,7 +1422,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eBadActionBadOutPort &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1376,7 +1436,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eBadActionBadArgument &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1389,7 +1450,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eBadActionEperm &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1402,7 +1464,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eBadActionTooMany &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1415,7 +1478,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eBadActionBadQueue &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1428,7 +1492,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eBadActionBadOutGroup &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1441,7 +1506,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eBadActionMatchInconsistent &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1454,7 +1520,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eBadActionUnsupportedOrder &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1467,7 +1534,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eBadActionBadTag &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1480,7 +1548,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eBadActionBadSetType &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1493,7 +1562,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eBadActionBadSetLen &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1506,7 +1576,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eBadActionBadSetArgument &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1519,11 +1590,13 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eBadActionBase &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
   } catch (eBadInstUnknownInst &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1536,7 +1609,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eBadInstUnsupInst &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1549,7 +1623,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eBadInstBadTableId &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1562,7 +1637,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eBadInstUnsupMetadata &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1575,7 +1651,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eBadInstUnsupMetadataMask &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1588,7 +1665,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eBadInstBadExperimenter &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1601,7 +1679,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eBadInstBadExpType &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1614,7 +1693,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eBadInstBadLen &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1627,7 +1707,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eBadInstEperm &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1640,11 +1721,13 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eBadInstBase &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
   } catch (eBadMatchBadType &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1657,7 +1740,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eBadMatchBadLen &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1670,7 +1754,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eBadMatchBadTag &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1683,7 +1768,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eBadMatchBadDlAddrMask &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1696,7 +1782,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eBadMatchBadNwAddrMask &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1709,7 +1796,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eBadMatchBadWildcards &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1722,7 +1810,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eBadMatchBadField &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1735,7 +1824,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eBadMatchBadValue &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1748,7 +1838,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eBadMatchBadMask &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1761,7 +1852,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eBadMatchBadPrereq &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1774,7 +1866,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eBadMatchDupField &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1787,7 +1880,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eBadMatchEperm &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1800,11 +1894,13 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eBadMatchBase &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
   } catch (eRoleRequestStale &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1817,7 +1913,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eRoleRequestUnsupported &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1830,7 +1927,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eRoleRequestBadRole &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1843,11 +1941,13 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eRoleRequestBase &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
   } catch (eMeterModUnknown &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1860,7 +1960,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eMeterModMeterExists &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1873,7 +1974,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eMeterModInvalidMeter &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1886,7 +1988,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eMeterModUnknownMeter &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1899,7 +2002,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eMeterModBadCommand &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1912,7 +2016,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eMeterModBadFlags &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1925,7 +2030,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eMeterModBadRate &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1938,7 +2044,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eMeterModBadBurst &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1951,7 +2058,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eMeterModBadBand &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1964,7 +2072,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eMeterModBadBandValue &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1977,7 +2086,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eMeterModOutOfMeters &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -1990,7 +2100,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eMeterModOutOfBands &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
     size_t len = msg->length() < 64 ? msg->length() : 64;
     rofl::cmemory mem(msg->length());
@@ -2003,15 +2114,17 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 
   } catch (eMeterModBase &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
   } catch (exception &e) {
 
-    VLOG(1) << "message: " << msg->str() << " error: " << e.what();
+    VLOG(1) << __FUNCTION__ << " message: " << msg->str()
+            << " error: " << e.what();
 
   } catch (std::runtime_error &e) {
 
-    VLOG(1) << "exception: " << e.what();
+    VLOG(1) << __FUNCTION__ << " exception: " << e.what();
   }
 
   delete msg;
@@ -2020,7 +2133,7 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 void crofctl::handle_transaction_timeout(crofchan &chan, crofconn &conn,
                                          uint32_t xid, uint8_t type,
                                          uint16_t sub_type) {
-  VLOG(2) << __PRETTY_FUNCTION__ << ": transaction xid=" << (unsigned int)xid;
+  VLOG(2) << __FUNCTION__ << ": transaction xid=" << (unsigned int)xid;
 
   try {
     switch (get_version()) {
@@ -2074,11 +2187,11 @@ void crofctl::send_features_reply(const cauxid &auxid, uint32_t xid,
     rofchan.send_message(auxid, msg);
 
   } catch (eRofConnNotConnected &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping message " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping message " << e.what();
     delete msg;
     throw;
   } catch (eRofQueueFull &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping message " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping message " << e.what();
     delete msg;
     throw;
   }
@@ -2094,11 +2207,11 @@ void crofctl::send_get_config_reply(const cauxid &auxid, uint32_t xid,
     rofchan.send_message(auxid, msg);
 
   } catch (eRofConnNotConnected &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping message " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping message " << e.what();
     delete msg;
     throw;
   } catch (eRofQueueFull &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping message " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping message " << e.what();
     delete msg;
     throw;
   }
@@ -2116,11 +2229,11 @@ void crofctl::send_desc_stats_reply(
     rofchan.send_message(auxid, msg);
 
   } catch (eRofConnNotConnected &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping message " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping message " << e.what();
     delete msg;
     throw;
   } catch (eRofQueueFull &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping message " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping message " << e.what();
     delete msg;
     throw;
   }
@@ -2138,11 +2251,11 @@ void crofctl::send_flow_stats_reply(
     rofchan.send_message(auxid, msg);
 
   } catch (eRofConnNotConnected &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping message " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping message " << e.what();
     delete msg;
     throw;
   } catch (eRofQueueFull &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping message " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping message " << e.what();
     delete msg;
     throw;
   }
@@ -2161,11 +2274,11 @@ void crofctl::send_aggr_stats_reply(
     rofchan.send_message(auxid, msg);
 
   } catch (eRofConnNotConnected &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping message " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping message " << e.what();
     delete msg;
     throw;
   } catch (eRofQueueFull &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping message " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping message " << e.what();
     delete msg;
     throw;
   }
@@ -2183,11 +2296,11 @@ void crofctl::send_table_stats_reply(
     rofchan.send_message(auxid, msg);
 
   } catch (eRofConnNotConnected &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping message " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping message " << e.what();
     delete msg;
     throw;
   } catch (eRofQueueFull &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping message " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping message " << e.what();
     delete msg;
     throw;
   }
@@ -2205,11 +2318,11 @@ void crofctl::send_port_stats_reply(
     rofchan.send_message(auxid, msg);
 
   } catch (eRofConnNotConnected &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping message " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping message " << e.what();
     delete msg;
     throw;
   } catch (eRofQueueFull &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping message " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping message " << e.what();
     delete msg;
     throw;
   }
@@ -2227,11 +2340,11 @@ void crofctl::send_queue_stats_reply(
     rofchan.send_message(auxid, msg);
 
   } catch (eRofConnNotConnected &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping message " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping message " << e.what();
     delete msg;
     throw;
   } catch (eRofQueueFull &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping message " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping message " << e.what();
     delete msg;
     throw;
   }
@@ -2249,11 +2362,11 @@ void crofctl::send_group_stats_reply(
     rofchan.send_message(auxid, msg);
 
   } catch (eRofConnNotConnected &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping message " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping message " << e.what();
     delete msg;
     throw;
   } catch (eRofQueueFull &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping message " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping message " << e.what();
     delete msg;
     throw;
   }
@@ -2271,11 +2384,11 @@ void crofctl::send_group_desc_stats_reply(
     rofchan.send_message(auxid, msg);
 
   } catch (eRofConnNotConnected &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping message " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping message " << e.what();
     delete msg;
     throw;
   } catch (eRofQueueFull &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping message " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping message " << e.what();
     delete msg;
     throw;
   }
@@ -2293,11 +2406,11 @@ void crofctl::send_group_features_stats_reply(
     rofchan.send_message(auxid, msg);
 
   } catch (eRofConnNotConnected &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping message " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping message " << e.what();
     delete msg;
     throw;
   } catch (eRofQueueFull &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping message " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping message " << e.what();
     delete msg;
     throw;
   }
@@ -2314,11 +2427,11 @@ void crofctl::send_table_features_stats_reply(
     rofchan.send_message(auxid, msg);
 
   } catch (eRofConnNotConnected &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping message " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping message " << e.what();
     delete msg;
     throw;
   } catch (eRofQueueFull &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping message " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping message " << e.what();
     delete msg;
     throw;
   }
@@ -2335,11 +2448,11 @@ void crofctl::send_port_desc_stats_reply(const cauxid &auxid, uint32_t xid,
     rofchan.send_message(auxid, msg);
 
   } catch (eRofConnNotConnected &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping message " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping message " << e.what();
     delete msg;
     throw;
   } catch (eRofQueueFull &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping message " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping message " << e.what();
     delete msg;
     throw;
   }
@@ -2357,11 +2470,11 @@ void crofctl::send_experimenter_stats_reply(const cauxid &auxid, uint32_t xid,
     rofchan.send_message(auxid, msg);
 
   } catch (eRofConnNotConnected &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping message " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping message " << e.what();
     delete msg;
     throw;
   } catch (eRofQueueFull &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping message " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping message " << e.what();
     delete msg;
     throw;
   }
@@ -2379,11 +2492,11 @@ void crofctl::send_meter_stats_reply(
     rofchan.send_message(auxid, msg);
 
   } catch (eRofConnNotConnected &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping message " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping message " << e.what();
     delete msg;
     throw;
   } catch (eRofQueueFull &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping message " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping message " << e.what();
     delete msg;
     throw;
   }
@@ -2401,11 +2514,11 @@ void crofctl::send_meter_config_stats_reply(
     rofchan.send_message(auxid, msg);
 
   } catch (eRofConnNotConnected &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping message " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping message " << e.what();
     delete msg;
     throw;
   } catch (eRofQueueFull &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping message " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping message " << e.what();
     delete msg;
     throw;
   }
@@ -2423,11 +2536,11 @@ void crofctl::send_meter_features_stats_reply(
     rofchan.send_message(auxid, msg);
 
   } catch (eRofConnNotConnected &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping message " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping message " << e.what();
     delete msg;
     throw;
   } catch (eRofQueueFull &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping message " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping message " << e.what();
     delete msg;
     throw;
   }
@@ -2478,11 +2591,11 @@ void crofctl::send_packet_in_message(const cauxid &auxid, uint32_t buffer_id,
     rofchan.send_message(auxid, msg);
 
   } catch (eRofConnNotConnected &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping message " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping message " << e.what();
     delete msg;
     throw;
   } catch (eRofQueueFull &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping message " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping message " << e.what();
     delete msg;
     throw;
   }
@@ -2496,11 +2609,11 @@ void crofctl::send_barrier_reply(const cauxid &auxid, uint32_t xid) {
     rofchan.send_message(auxid, msg);
 
   } catch (eRofConnNotConnected &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping message " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping message " << e.what();
     delete msg;
     throw;
   } catch (eRofQueueFull &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping message " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping message " << e.what();
     delete msg;
     throw;
   }
@@ -2516,11 +2629,11 @@ void crofctl::send_role_reply(const cauxid &auxid, uint32_t xid,
     rofchan.send_message(auxid, msg);
 
   } catch (eRofConnNotConnected &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping message " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping message " << e.what();
     delete msg;
     throw;
   } catch (eRofQueueFull &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping message " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping message " << e.what();
     delete msg;
     throw;
   }
@@ -2537,11 +2650,11 @@ void crofctl::send_error_message(const cauxid &auxid, uint32_t xid,
     rofchan.send_message(auxid, msg);
 
   } catch (eRofConnNotConnected &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping message " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping message " << e.what();
     delete msg;
     throw;
   } catch (eRofQueueFull &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping message " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping message " << e.what();
     delete msg;
     throw;
   }
@@ -2563,11 +2676,11 @@ void crofctl::send_experimenter_message(const cauxid &auxid, uint32_t xid,
     }
 
   } catch (eRofConnNotConnected &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping message " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping message " << e.what();
     delete msg;
     throw;
   } catch (eRofQueueFull &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping message " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping message " << e.what();
     delete msg;
     throw;
   }
@@ -2617,11 +2730,11 @@ void crofctl::send_flow_removed_message(
     rofchan.send_message(auxid, msg);
 
   } catch (eRofConnNotConnected &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping message " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping message " << e.what();
     delete msg;
     throw;
   } catch (eRofQueueFull &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping message " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping message " << e.what();
     delete msg;
     throw;
   }
@@ -2664,11 +2777,11 @@ void crofctl::send_port_status_message(const cauxid &auxid, uint8_t reason,
     rofchan.send_message(auxid, msg);
 
   } catch (eRofConnNotConnected &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping message " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping message " << e.what();
     delete msg;
     throw;
   } catch (eRofQueueFull &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping message " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping message " << e.what();
     delete msg;
     throw;
   }
@@ -2685,11 +2798,11 @@ void crofctl::send_queue_get_config_reply(
     rofchan.send_message(auxid, msg);
 
   } catch (eRofConnNotConnected &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping message " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping message " << e.what();
     delete msg;
     throw;
   } catch (eRofQueueFull &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping message " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping message " << e.what();
     delete msg;
     throw;
   }
@@ -2706,11 +2819,11 @@ void crofctl::send_get_async_config_reply(
     rofchan.send_message(auxid, msg);
 
   } catch (eRofConnNotConnected &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping message " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping message " << e.what();
     delete msg;
     throw;
   } catch (eRofQueueFull &e) {
-    VLOG(1) << __PRETTY_FUNCTION__ << " dropping message " << e.what();
+    VLOG(1) << __FUNCTION__ << " dropping message " << e.what();
     delete msg;
     throw;
   }

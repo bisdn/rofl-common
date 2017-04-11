@@ -25,15 +25,14 @@ void cthread::initialize() {
 
   // worker thread
   if ((epfd = epoll_create(1)) < 0) {
-    throw eSysCall("eSysCall", "epoll_create", __FILE__, __PRETTY_FUNCTION__,
+    throw eSysCall("eSysCall", "epoll_create", __FILE__, __FUNCTION__,
                    __LINE__);
   }
 
   // eventfd
   event_fd = eventfd(0, EFD_NONBLOCK);
   if (event_fd < 0) {
-    throw eSysCall("eSysCall", "eventfd", __FILE__, __PRETTY_FUNCTION__,
-                   __LINE__);
+    throw eSysCall("eSysCall", "eventfd", __FILE__, __FUNCTION__, __LINE__);
   }
 
   // register event_fd to kernel
@@ -49,7 +48,7 @@ void cthread::initialize() {
     } break;
     default: {
       throw eSysCall("eSysCall", "epoll_ctl (EPOLL_CTL_ADD)", __FILE__,
-                     __PRETTY_FUNCTION__, __LINE__);
+                     __FUNCTION__, __LINE__);
     };
     }
   }
@@ -85,7 +84,7 @@ void cthread::release() {
     } break;
     default: {
       throw eSysCall("eSysCall", "epoll_ctl (EPOLL_CTL_DEL)", __FILE__,
-                     __PRETTY_FUNCTION__, __LINE__);
+                     __FUNCTION__, __LINE__);
     };
     }
   }
@@ -116,7 +115,7 @@ void cthread::add_fd(int fd, bool exception, bool edge_triggered) {
     default: {
       if (exception)
         throw eSysCall("eSysCall", "epoll_ctl (EPOLL_CTL_ADD)", __FILE__,
-                       __PRETTY_FUNCTION__, __LINE__);
+                       __FUNCTION__, __LINE__);
     };
     }
   }
@@ -143,7 +142,7 @@ void cthread::drop_fd(int fd, bool exception) {
     default: {
       if (exception)
         throw eSysCall("eSysCall", "epoll_ctl (EPOLL_CTL_DEL)", __FILE__,
-                       __PRETTY_FUNCTION__, __LINE__);
+                       __FUNCTION__, __LINE__);
     };
     }
   }
@@ -171,7 +170,7 @@ void cthread::add_read_fd(int fd, bool exception, bool edge_triggered) {
     default: {
       if (exception)
         throw eSysCall("eSysCall", "epoll_ctl (EPOLL_CTL_MOD)", __FILE__,
-                       __PRETTY_FUNCTION__, __LINE__);
+                       __FUNCTION__, __LINE__);
     };
     }
   }
@@ -199,7 +198,7 @@ void cthread::drop_read_fd(int fd, bool exception) {
     default: {
       if (exception)
         throw eSysCall("eSysCall", "epoll_ctl (EPOLL_CTL_MOD)", __FILE__,
-                       __PRETTY_FUNCTION__, __LINE__);
+                       __FUNCTION__, __LINE__);
     };
     }
   }
@@ -225,7 +224,7 @@ void cthread::add_write_fd(int fd, bool exception, bool edge_triggered) {
     default: {
       if (exception)
         throw eSysCall("eSysCall", "epoll_ctl (EPOLL_CTL_MOD)", __FILE__,
-                       __PRETTY_FUNCTION__, __LINE__);
+                       __FUNCTION__, __LINE__);
     };
     }
   }
@@ -253,7 +252,7 @@ void cthread::drop_write_fd(int fd, bool exception) {
     default: {
       if (exception)
         throw eSysCall("eSysCall", "epoll_ctl (EPOLL_CTL_MOD)", __FILE__,
-                       __PRETTY_FUNCTION__, __LINE__);
+                       __FUNCTION__, __LINE__);
     };
     }
   }
@@ -329,8 +328,8 @@ void cthread::start(const std::string &thread_name) {
 
     running = true;
     if (pthread_create(&tid, NULL, &(cthread::start_loop), this) < 0) {
-      throw eSysCall("eSysCall", "pthread_create", __FILE__,
-                     __PRETTY_FUNCTION__, __LINE__);
+      throw eSysCall("eSysCall", "pthread_create", __FILE__, __FUNCTION__,
+                     __LINE__);
     }
 
     if (thread_name.length() && thread_name.length() < 16)
@@ -381,8 +380,8 @@ void cthread::wakeup() {
         // signal received
       } break;
       default: {
-        throw eSysCall("eSysCall", "write to event_fd", __FILE__,
-                       __PRETTY_FUNCTION__, __LINE__);
+        throw eSysCall("eSysCall", "write to event_fd", __FILE__, __FUNCTION__,
+                       __LINE__);
       };
       }
     }

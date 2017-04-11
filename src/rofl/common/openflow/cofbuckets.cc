@@ -28,7 +28,7 @@ uint8_t *cofbuckets::pack(uint8_t *buf, size_t buflen) {
   case openflow13::OFP_VERSION:
     return pack_of13(buf, buflen);
   default:
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
 }
 
@@ -39,7 +39,7 @@ void cofbuckets::unpack(uint8_t *buf, size_t buflen) {
     unpack_of13(buf, buflen);
     break;
   default:
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
 }
 

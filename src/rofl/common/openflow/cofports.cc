@@ -17,7 +17,7 @@ size_t cofports::length() const {
 
 void cofports::pack(uint8_t *buf, size_t buflen) {
   if (buflen < length()) {
-    throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
   }
 
   switch (ofp_version) {
@@ -46,7 +46,7 @@ void cofports::pack(uint8_t *buf, size_t buflen) {
     }
   } break;
   default:
-    throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
   }
 }
 
@@ -99,7 +99,7 @@ void cofports::unpack(uint8_t *buf, size_t buflen) {
 
     } break;
     default:
-      throw eBadVersion("eBadVersion", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+      throw eBadVersion("eBadVersion", __FILE__, __FUNCTION__, __LINE__);
     }
   }
 }

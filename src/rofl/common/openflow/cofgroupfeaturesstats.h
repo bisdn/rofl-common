@@ -53,9 +53,9 @@ public:
       : of_version(of_version), types(types), capabilities(capabilities),
         max_groups(max_groups), actions(actions) {
     if (max_groups.size() < 4)
-      throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+      throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
     if (actions.size() < 4)
-      throw eInvalid("eInvalid", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+      throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
   };
 
   /**

@@ -115,7 +115,7 @@ public:
   const rofl::openflow::cofmsg &get_msg() const {
     if (0 == msg)
       throw eInvalid("csegment::get_msg()")
-          .set_func(__PRETTY_FUNCTION__)
+          .set_func(__FUNCTION__)
           .set_line(__LINE__);
     return *msg;
   };

@@ -254,8 +254,7 @@ void coxmatches::unpack(uint8_t *buf, size_t buflen) {
 
 void coxmatches::pack(uint8_t *buf, size_t buflen) {
   if (buflen < length()) {
-    throw eBadMatchBadLen("eBadMatchBadLen", __FILE__, __PRETTY_FUNCTION__,
-                          __LINE__);
+    throw eBadMatchBadLen("eBadMatchBadLen", __FILE__, __FUNCTION__, __LINE__);
   }
   for (std::map<uint64_t, coxmatch *>::iterator jt = matches.begin();
        jt != matches.end(); ++jt) {
