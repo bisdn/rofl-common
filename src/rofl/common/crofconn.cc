@@ -19,10 +19,10 @@ using namespace rofl;
 /*static*/ crwlock crofconn_env::connection_envs_lock;
 /*static*/ const int crofconn::RXQUEUE_MAX_SIZE_DEFAULT = 128;
 /*static*/ const unsigned int crofconn::DEFAULT_SEGMENTATION_THRESHOLD = 65535;
-/*static*/ const time_t crofconn::DEFAULT_HELLO_TIMEOUT = 5;
+/*static*/ const time_t crofconn::DEFAULT_HELLO_TIMEOUT = 3;
 /*static*/ const time_t crofconn::DEFAULT_FEATURES_TIMEOUT = 5;
-/*static*/ const time_t crofconn::DEFAULT_ECHO_TIMEOUT = 10;
-/*static*/ const time_t crofconn::DEFAULT_LIFECHECK_TIMEOUT = 60;
+/*static*/ const time_t crofconn::DEFAULT_ECHO_TIMEOUT = 3;
+/*static*/ const time_t crofconn::DEFAULT_LIFECHECK_TIMEOUT = 1;
 /*static*/ const time_t crofconn::DEFAULT_SEGMENTS_TIMEOUT = 60;
 /*static*/ const unsigned int crofconn::DEFAULT_PENDING_SEGMENTS_MAX = 256;
 
@@ -641,6 +641,7 @@ void crofconn::echo_request_expired() {
           << " raddr=" << rofsock.get_raddr().str();
 
   set_state(STATE_CLOSING);
+  handle_closed(rofsock);
 }
 
 void crofconn::echo_request_rcvd(rofl::openflow::cofmsg *pmsg) {
