@@ -2153,7 +2153,7 @@ private:
 
   static void terminate();
 
-private:
+protected:
   virtual void handle_wakeup(cthread &thread);
 
   virtual void handle_timeout(cthread &thread, uint32_t timer_id);
