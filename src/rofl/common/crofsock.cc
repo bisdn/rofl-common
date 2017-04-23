@@ -56,7 +56,7 @@ crofsock::crofsock(crofsock_env *env)
 }
 
 void crofsock::close() {
-  switch (state) {
+  switch (state.load()) {
   case STATE_IDLE: {
 
     VLOG(2) << __FUNCTION__ << " STATE_IDLE laddr=" << laddr.str()
@@ -733,7 +733,7 @@ int crofsock::tls_pswd_cb(char *buf, int size, int rwflag, void *userdata) {
 }
 
 void crofsock::tls_accept(int sockfd) {
-  switch (state) {
+  switch (state.load()) {
   case STATE_IDLE:
   case STATE_CLOSED:
   case STATE_TCP_ACCEPTING: {
@@ -854,7 +854,7 @@ void crofsock::tls_accept(int sockfd) {
 }
 
 void crofsock::tls_connect(bool reconnect) {
-  switch (state) {
+  switch (state.load()) {
   case STATE_IDLE:
   case STATE_CLOSED:
   case STATE_TCP_CONNECTING: {
@@ -1234,7 +1234,7 @@ bool crofsock::is_rx_disabled() const { return rx_disabled; }
 
 void crofsock::rx_disable() {
   rx_disabled = true;
-  switch (state) {
+  switch (state.load()) {
   case STATE_TCP_ESTABLISHED:
   case STATE_TLS_ESTABLISHED: {
     rxthread.drop_read_fd(sd, false);
@@ -1247,7 +1247,7 @@ void crofsock::rx_disable() {
 
 void crofsock::rx_enable() {
   rx_disabled = false;
-  switch (state) {
+  switch (state.load()) {
   case STATE_TCP_ESTABLISHED:
   case STATE_TLS_ESTABLISHED: {
     rxthread.add_read_fd(sd, false);
@@ -1309,7 +1309,7 @@ void crofsock::send_message(rofl::openflow::cofmsg *msg) {
 
   txqueue_pending_pkts++;
 
-  switch (state) {
+  switch (state.load()) {
   case STATE_TCP_ESTABLISHED:
   case STATE_TLS_ESTABLISHED: {
 
@@ -1567,7 +1567,7 @@ void crofsock::handle_read_event(cthread &thread, int fd) {
 
 void crofsock::handle_read_event_rxthread(cthread &thread, int fd) {
   try {
-    switch (state) {
+    switch (state.load()) {
     case STATE_LISTENING: {
 
       VLOG(2) << __FUNCTION__
@@ -1781,7 +1781,7 @@ void crofsock::recv_message() {
 
 on_error:
 
-  switch (state) {
+  switch (state.load()) {
   case STATE_TCP_ESTABLISHED: {
     VLOG(2) << __FUNCTION__ << " TCP: peer shutdown laddr=" << laddr.str()
             << " raddr=" << raddr.str();
