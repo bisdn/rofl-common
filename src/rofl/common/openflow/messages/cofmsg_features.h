@@ -99,6 +99,7 @@ public:
   cofmsg_features_reply &operator=(const cofmsg_features_reply &msg) {
     if (this == &msg)
       return *this;
+    cofmsg::operator=(msg);
     dpid = msg.dpid;
     n_buffers = msg.n_buffers;
     n_tables = msg.n_tables;
