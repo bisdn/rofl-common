@@ -1202,7 +1202,7 @@ void crofconn::handle_rx_messages() {
           }
 
           if ((msg = rxqueues[queue_id].retrieve()) == NULL) {
-            continue; // no further messages in this queue
+            break; // no further messages in this queue
           }
 
           /* segmentation and reassembly */
