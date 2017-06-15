@@ -9,6 +9,10 @@ Legend:
 Change log
 ==========
 
+v0.11.2
+[B] cofmsg: fix copy of cofmsg_features_reply
+[+] crofconn: handle_rx_messages optimization
+
 v0.11.1
 [+] coxmatch: added outputter for ppp(oe) experimental oxmatches
 [+] crofconn: hello timeout values decreased

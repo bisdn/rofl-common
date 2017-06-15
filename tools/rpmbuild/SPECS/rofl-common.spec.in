@@ -69,6 +69,10 @@ make install DESTDIR=$RPM_BUILD_ROOT
 rm -rf $RPM_BUILD_ROOT 
 
 %changelog
+* Thu Jun 15 2017 Tobias Jungel <tobias.jungel@bisdn.de> - v0.11.2
+- [B] cofmsg: fix copy of cofmsg_features_reply
+- [+] crofconn: handle_rx_messages optimization
+
 * Thu Apr 13 2017 Tobias Jungel <tobias.jungel@bisdn.de> - v0.11.1
 - [+] coxmatch: added outputter for ppp(oe) experimental oxmatches
 - [+] crofconn: hello timeout values decreased
