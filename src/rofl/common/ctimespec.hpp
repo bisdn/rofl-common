@@ -206,28 +206,6 @@ public:
   /**
    *
    */
-  ctimespec &get_time() {
-    // get current time
-    if (clock_gettime(clk_id.get_clkid(), &tspec) < 0) {
-      switch (errno) {
-      case EFAULT: {
-        throw eTimeSpecSysCall("ctimespec::now() invalid struct timespec");
-      } break;
-      case EINVAL: {
-        throw eTimeSpecSysCall("ctimespec::now() clockid_t is invalid");
-      } break;
-      default: {
-        throw eTimeSpecSysCall("ctimespec::now() unknown internal error on "
-                               "syscall clock_gettime()");
-      };
-      }
-    }
-    return *this;
-  };
-
-  /**
-   *
-   */
   ctimespec &get_time(const cclockid &clk_id = cclockid(CLOCK_MONOTONIC)) {
     // get current time
     if (clock_gettime(clk_id.get_clkid(), &tspec) < 0) {
