@@ -1322,6 +1322,7 @@ void crofsock::send_message(rofl::openflow::cofmsg *msg) {
       } break;
       case rofl::openflow10::OFPT_FLOW_MOD:
       case rofl::openflow10::OFPT_FLOW_REMOVED:
+      case rofl::openflow10::OFPT_BARRIER_REPLY:
       case rofl::openflow10::OFPT_BARRIER_REQUEST: {
         txqueues[QUEUE_FLOW].store(msg, true);
       } break;
@@ -1343,6 +1344,7 @@ void crofsock::send_message(rofl::openflow::cofmsg *msg) {
       case rofl::openflow12::OFPT_GROUP_MOD:
       case rofl::openflow12::OFPT_PORT_MOD:
       case rofl::openflow12::OFPT_TABLE_MOD:
+      case rofl::openflow12::OFPT_BARRIER_REPLY:
       case rofl::openflow12::OFPT_BARRIER_REQUEST: {
         txqueues[QUEUE_FLOW].store(msg, true);
       } break;
@@ -1365,6 +1367,7 @@ void crofsock::send_message(rofl::openflow::cofmsg *msg) {
       case rofl::openflow13::OFPT_GROUP_MOD:
       case rofl::openflow13::OFPT_PORT_MOD:
       case rofl::openflow13::OFPT_TABLE_MOD:
+      case rofl::openflow13::OFPT_BARRIER_REPLY:
       case rofl::openflow13::OFPT_BARRIER_REQUEST: {
         txqueues[QUEUE_FLOW].store(msg, true);
       } break;
