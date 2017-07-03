@@ -453,33 +453,31 @@ public:
   friend std::ostream &operator<<(std::ostream &os,
                                   cofport_stats_reply const &r) {
     os << "<cofport_stats_reply >" << std::endl;
-    os << std::hex;
-    os << "<port-no: 0x" << (int)r.get_port_no() << " >" << std::endl;
-    os << "<rx-packets: 0x" << (unsigned long long)r.get_rx_packets() << " >"
+    os << "<port-no: " << (int)r.get_port_no() << " >" << std::endl;
+    os << "<rx-packets: " << (unsigned long long)r.get_rx_packets() << " >"
        << std::endl;
-    os << "<tx-packets: 0x" << (unsigned long long)r.get_tx_packets() << " >"
+    os << "<tx-packets: " << (unsigned long long)r.get_tx_packets() << " >"
        << std::endl;
-    os << "<rx-bytes: 0x" << (unsigned long long)r.get_rx_bytes() << " >"
+    os << "<rx-bytes: " << (unsigned long long)r.get_rx_bytes() << " >"
        << std::endl;
-    os << "<tx-bytes: 0x" << (unsigned long long)r.get_tx_bytes() << " >"
+    os << "<tx-bytes: " << (unsigned long long)r.get_tx_bytes() << " >"
        << std::endl;
-    os << "<rx-dropped: 0x" << (unsigned long long)r.get_rx_dropped() << " >"
+    os << "<rx-dropped: " << (unsigned long long)r.get_rx_dropped() << " >"
        << std::endl;
-    os << "<tx-dropped: 0x" << (unsigned long long)r.get_tx_dropped() << " >"
+    os << "<tx-dropped: " << (unsigned long long)r.get_tx_dropped() << " >"
        << std::endl;
-    os << "<rx-errors: 0x" << (unsigned long long)r.get_rx_errors() << " >"
+    os << "<rx-errors: " << (unsigned long long)r.get_rx_errors() << " >"
        << std::endl;
-    os << "<tx-errors: 0x" << (unsigned long long)r.get_tx_errors() << " >"
+    os << "<tx-errors: " << (unsigned long long)r.get_tx_errors() << " >"
        << std::endl;
-    os << "<rx-frame-err: 0x" << (unsigned long long)r.get_rx_frame_err()
+    os << "<rx-frame-err: " << (unsigned long long)r.get_rx_frame_err()
        << " >" << std::endl;
-    os << "<rx-over-err: 0x" << (unsigned long long)r.get_rx_over_err() << " >"
+    os << "<rx-over-err: " << (unsigned long long)r.get_rx_over_err() << " >"
        << std::endl;
-    os << "<rx-crc-err: 0x" << (unsigned long long)r.get_rx_crc_err() << " >"
+    os << "<rx-crc-err: " << (unsigned long long)r.get_rx_crc_err() << " >"
        << std::endl;
-    os << "<collisions: 0x" << (unsigned long long)r.get_collisions() << " >"
+    os << "<collisions: " << (unsigned long long)r.get_collisions() << " >"
        << std::endl;
-    os << std::dec;
     switch (r.get_version()) {
     case rofl::openflow13::OFP_VERSION: {
       os << "<duration-sec: " << (unsigned long long)r.get_duration_sec()
