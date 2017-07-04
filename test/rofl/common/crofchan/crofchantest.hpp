@@ -31,9 +31,9 @@ public:
   virtual ~crofchantest(){};
 
   crofchantest() :
-	  thread(this),
 	  num_of_pkts_sent(0),
 	  num_of_pkts_rcvd(0),
+	  thread(this),
 	  max_congestion_rounds(16) {};
 
 public:
