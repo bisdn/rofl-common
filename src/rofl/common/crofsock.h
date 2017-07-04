@@ -591,36 +591,14 @@ private:
   crofsock &operator=(const crofsock &socket);
 
 private:
-  void flag_set(int __flag, bool value) {
+  void flag_set(crofsock_flag_t __flag, bool value) {
     AcquireReadWriteLock lock(flags_lock);
-    switch (__flag) {
-    case FLAG_CONGESTED:
-    case FLAG_RECONNECT_ON_FAILURE:
-    case FLAG_TLS_IN_USE:
-    case FLAG_TX_BLOCK_QUEUEING: {
-      flags.set(__flag, value);
-    } break;
-    default: {
-      throw eRofSockNotFound("flag not found", __FILE__, __FUNCTION__,
-                             __LINE__);
-    };
-    }
+    flags.set(__flag, value);
   };
 
-  bool flag_test(int __flag) const {
+  bool flag_test(crofsock_flag_t __flag) const {
     AcquireReadLock lock(flags_lock);
-    switch (__flag) {
-    case FLAG_CONGESTED:
-    case FLAG_RECONNECT_ON_FAILURE:
-    case FLAG_TLS_IN_USE:
-    case FLAG_TX_BLOCK_QUEUEING: {
-      return flags.test(__flag);
-    } break;
-    default: {
-      throw eRofSockNotFound("flag not found", __FILE__, __FUNCTION__,
-                             __LINE__);
-    };
-    }
+    return flags.test(__flag);
   };
 
 private:
