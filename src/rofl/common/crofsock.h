@@ -264,9 +264,9 @@ public:
   enum msg_result_t {
 	MSG_QUEUED = 0,
 	MSG_QUEUED_CONGESTION = 1,
-	MSG_DROPPED_QUEUE_FULL = 2,
-	MSG_DROPPED_NOT_ESTABLISHED = 3,
-	MSG_DROPPED_SHUTDOWN_IN_PROGRESS = 4,
+	MSG_QUEUEING_FAILED_QUEUE_FULL = 2,
+	MSG_QUEUEING_FAILED_NOT_ESTABLISHED = 3,
+	MSG_QUEUEING_FAILED_SHUTDOWN_IN_PROGRESS = 4,
   };
 
 public:
@@ -317,7 +317,7 @@ public:
   /**
    *
    */
-  enum msg_result_t send_message(rofl::openflow::cofmsg *msg, bool keep_message = false);
+  enum msg_result_t send_message(rofl::openflow::cofmsg *msg, bool enforce_queueing = false, bool keep_message = false);
 
   /**
    *

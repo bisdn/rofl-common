@@ -857,7 +857,8 @@ public:
    * @exception rofl::eRofBaseNotConnected
    * @exception rofl::eRofBaseCongested
    */
-  void send_features_reply(
+  rofl::crofsock::msg_result_t
+  send_features_reply(
       const rofl::cauxid &auxid, uint32_t xid, uint64_t dpid,
       uint32_t n_buffers, uint8_t n_tables, uint32_t capabilities,
       uint8_t of13_auxiliary_id = 0, uint32_t of10_actions_bitmap = 0,
@@ -871,7 +872,8 @@ public:
    * @param flags datapath element flags
    * @param miss_send_len default miss_send_len value
    */
-  void send_get_config_reply(const rofl::cauxid &auxid, uint32_t xid,
+  rofl::crofsock::msg_result_t
+  send_get_config_reply(const rofl::cauxid &auxid, uint32_t xid,
                              uint16_t flags, uint16_t miss_send_len);
 
   /**
@@ -882,7 +884,7 @@ public:
    * @param desc_stats body of DESC-STATS.reply
    * @param more flag if multiple STATS replies will be sent
    */
-  void
+  rofl::crofsock::msg_result_t
   send_desc_stats_reply(const rofl::cauxid &auxid, uint32_t xid,
                         const rofl::openflow::cofdesc_stats_reply &desc_stats,
                         uint16_t stats_flags = 0);
@@ -895,7 +897,7 @@ public:
    * @param flow_stats array of flow_stats bodies
    * @param more flag if multiple STATS replies will be sent
    */
-  void
+  rofl::crofsock::msg_result_t
   send_flow_stats_reply(const rofl::cauxid &auxid, uint32_t xid,
                         const rofl::openflow::cofflowstatsarray &flow_stats,
                         uint16_t stats_flags = 0);
@@ -908,7 +910,7 @@ public:
    * @param aggr_stats aggr_stats body
    * @param more flag if multiple STATS replies will be sent
    */
-  void
+  rofl::crofsock::msg_result_t
   send_aggr_stats_reply(const rofl::cauxid &auxid, uint32_t xid,
                         const rofl::openflow::cofaggr_stats_reply &aggr_stats,
                         uint16_t stats_flags = 0);
@@ -921,7 +923,8 @@ public:
    * @param table_stats array of table_stats bodies
    * @param more flag if multiple STATS replies will be sent
    */
-  void send_table_stats_reply(
+  rofl::crofsock::msg_result_t
+  send_table_stats_reply(
       const rofl::cauxid &auxid, uint32_t xid,
       const rofl::openflow::coftablestatsarray &tablestatsarray,
       uint16_t stats_flags = 0);
@@ -934,7 +937,7 @@ public:
    * @param port_stats array of port_stats bodies
    * @param more flag if multiple STATS replies will be sent
    */
-  void
+  rofl::crofsock::msg_result_t
   send_port_stats_reply(const rofl::cauxid &auxid, uint32_t xid,
                         const rofl::openflow::cofportstatsarray &portstatsarray,
                         uint16_t stats_flags = 0);
@@ -947,7 +950,8 @@ public:
    * @param port_stats array of port_stats bodies
    * @param more flag if multiple STATS replies will be sent
    */
-  void send_queue_stats_reply(
+  rofl::crofsock::msg_result_t
+  send_queue_stats_reply(
       const rofl::cauxid &auxid, uint32_t xid,
       const rofl::openflow::cofqueuestatsarray &queuestatsarray,
       uint16_t stats_flags = 0);
@@ -960,7 +964,8 @@ public:
    * @param group_stats array of group_stats bodies
    * @param more flag if multiple STATS replies will be sent
    */
-  void send_group_stats_reply(
+  rofl::crofsock::msg_result_t
+  send_group_stats_reply(
       const rofl::cauxid &auxid, uint32_t xid,
       const rofl::openflow::cofgroupstatsarray &groupstatsarray,
       uint16_t stats_flags = 0);
@@ -973,7 +978,8 @@ public:
    * @param group_desc_stats array of group_desc_stats bodies
    * @param more flag if multiple STATS replies will be sent
    */
-  void send_group_desc_stats_reply(
+  rofl::crofsock::msg_result_t
+  send_group_desc_stats_reply(
       const rofl::cauxid &auxid, uint32_t xid,
       const rofl::openflow::cofgroupdescstatsarray &groupdescs,
       uint16_t stats_flags = 0);
@@ -986,7 +992,8 @@ public:
    * @param group_features_stats group_features_stats body
    * @param more flag if multiple STATS replies will be sent
    */
-  void send_group_features_stats_reply(
+  rofl::crofsock::msg_result_t
+  send_group_features_stats_reply(
       const rofl::cauxid &auxid, uint32_t xid,
       const rofl::openflow::cofgroup_features_stats_reply &group_features_stats,
       uint16_t stats_flags = 0);
@@ -999,7 +1006,8 @@ public:
    * @param tables tables body
    * @param more flag if multiple STATS replies will be sent
    */
-  void send_table_features_stats_reply(const rofl::cauxid &auxid, uint32_t xid,
+  rofl::crofsock::msg_result_t
+  send_table_features_stats_reply(const rofl::cauxid &auxid, uint32_t xid,
                                        const rofl::openflow::coftables &tables,
                                        uint16_t stats_flags = 0);
 
@@ -1011,7 +1019,8 @@ public:
    * @param ports ports body
    * @param more flag if multiple STATS replies will be sent
    */
-  void send_port_desc_stats_reply(const rofl::cauxid &auxid, uint32_t xid,
+  rofl::crofsock::msg_result_t
+  send_port_desc_stats_reply(const rofl::cauxid &auxid, uint32_t xid,
                                   const rofl::openflow::cofports &ports,
                                   uint16_t stats_flags = 0);
 
@@ -1027,7 +1036,8 @@ public:
    * @param bodylen length of user defined body
    * @param more flag if multiple STATS replies will be sent
    */
-  void send_experimenter_stats_reply(const rofl::cauxid &auxid, uint32_t xid,
+  rofl::crofsock::msg_result_t
+  send_experimenter_stats_reply(const rofl::cauxid &auxid, uint32_t xid,
                                      uint32_t exp_id, uint32_t exp_type,
                                      const cmemory &body,
                                      uint16_t stats_flags = 0);
@@ -1042,7 +1052,8 @@ public:
    * @param stats_flags flags for OpenFlow statistics messages, if any (default:
    * 0)
    */
-  void send_meter_stats_reply(
+  rofl::crofsock::msg_result_t
+  send_meter_stats_reply(
       const rofl::cauxid &auxid, uint32_t xid,
       const rofl::openflow::cofmeterstatsarray &meter_stats_array,
       uint16_t stats_flags = 0);
@@ -1057,7 +1068,8 @@ public:
    * @param stats_flags flags for OpenFlow statistics messages, if any (default:
    * 0)
    */
-  void send_meter_config_stats_reply(
+  rofl::crofsock::msg_result_t
+  send_meter_config_stats_reply(
       const rofl::cauxid &auxid, uint32_t xid,
       const rofl::openflow::cofmeterconfigarray &meter_config_array,
       uint16_t stats_flags = 0);
@@ -1072,7 +1084,8 @@ public:
    * @param stats_flags flags for OpenFlow statistics messages, if any (default:
    * 0)
    */
-  void send_meter_features_stats_reply(
+  rofl::crofsock::msg_result_t
+  send_meter_features_stats_reply(
       const rofl::cauxid &auxid, uint32_t xid,
       const rofl::openflow::cofmeter_features &meter_features,
       uint16_t stats_flags = 0);
@@ -1090,7 +1103,8 @@ public:
    * @param data data packet
    * @param datalen length of data packet
    */
-  void send_packet_in_message(const rofl::cauxid &auxid, uint32_t buffer_id,
+  rofl::crofsock::msg_result_t
+  send_packet_in_message(const rofl::cauxid &auxid, uint32_t buffer_id,
                               uint16_t total_len, uint8_t reason,
                               uint8_t table_id, uint64_t cookie,
                               uint16_t in_port, // for OF1.0
@@ -1103,7 +1117,8 @@ public:
    *
    * @param xid OpenFlow transaction identifier
    */
-  void send_barrier_reply(const rofl::cauxid &auxid, uint32_t xid);
+  rofl::crofsock::msg_result_t
+  send_barrier_reply(const rofl::cauxid &auxid, uint32_t xid);
 
   /**
    * @brief	Sends OpenFlow Error message to attached controller entity.
@@ -1114,7 +1129,8 @@ public:
    * @param data first (at least 64) bytes of failed request
    * @param datalen length of failed request appended to error message
    */
-  void send_error_message(const rofl::cauxid &auxid, uint32_t xid,
+  rofl::crofsock::msg_result_t
+  send_error_message(const rofl::cauxid &auxid, uint32_t xid,
                           uint16_t type, uint16_t code, uint8_t *data = NULL,
                           size_t datalen = 0);
 
@@ -1129,7 +1145,8 @@ public:
    * @param bodylen length of body (optional)
    * @result transaction ID assigned to this request
    */
-  void send_experimenter_message(const rofl::cauxid &auxid, uint32_t xid,
+  rofl::crofsock::msg_result_t
+  send_experimenter_message(const rofl::cauxid &auxid, uint32_t xid,
                                  uint32_t experimenter_id, uint32_t exp_type,
                                  uint8_t *body = NULL, size_t bodylen = 0,
                                  int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT);
@@ -1150,7 +1167,8 @@ public:
    * @param packet_count number of packets handled by this flow mod
    * @param byte_count number of bytes handled by this flow mod
    */
-  void send_flow_removed_message(const rofl::cauxid &auxid,
+  rofl::crofsock::msg_result_t
+  send_flow_removed_message(const rofl::cauxid &auxid,
                                  const rofl::openflow::cofmatch &match,
                                  uint64_t cookie, uint16_t priority,
                                  uint8_t reason, uint8_t table_id,
@@ -1165,7 +1183,8 @@ public:
    * @param reason one of OpenFlow's OFPPR_* constants
    * @param port rofl::openflow::cofport instance that changed its status
    */
-  void send_port_status_message(const rofl::cauxid &auxid, uint8_t reason,
+  rofl::crofsock::msg_result_t
+  send_port_status_message(const rofl::cauxid &auxid, uint8_t reason,
                                 const rofl::openflow::cofport &port);
 
   /**
@@ -1175,7 +1194,7 @@ public:
    * @param xid OpenFlow transaction identifier
    * @param portno OpenFlow number assigned to port
    */
-  void
+  rofl::crofsock::msg_result_t
   send_queue_get_config_reply(const rofl::cauxid &auxid, uint32_t xid,
                               uint32_t portno,
                               const rofl::openflow::cofpacket_queues &queues);
@@ -1187,7 +1206,8 @@ public:
    * @param role defined role from data path
    * @param generation_id gen_id as defined by OpenFlow
    */
-  void send_role_reply(const rofl::cauxid &auxid, uint32_t xid,
+  rofl::crofsock::msg_result_t
+  send_role_reply(const rofl::cauxid &auxid, uint32_t xid,
                        const rofl::openflow::cofrole &role);
 
   /**
@@ -1196,7 +1216,8 @@ public:
    *
    * @param xid OpenFlow transaction identifier
    */
-  void send_get_async_config_reply(
+  rofl::crofsock::msg_result_t
+  send_get_async_config_reply(
       const rofl::cauxid &auxid, uint32_t xid,
       const rofl::openflow::cofasync_config &async_config);
 

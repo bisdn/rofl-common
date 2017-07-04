@@ -1288,8 +1288,7 @@ void crofsock::handle_timeout(cthread &thread, uint32_t timer_id) {
   }
 }
 
-enum crofsock::msg_result_t crofsock::send_message(rofl::openflow::cofmsg *msg, bool keep_message) {
-  bool enforce = false;
+enum crofsock::msg_result_t crofsock::send_message(rofl::openflow::cofmsg *msg, bool enforce_queueing, bool keep_message) {
 
   VLOG(3) << __FUNCTION__ << " msg=" << msg
           << " txqueue_pending_pkts=" << txqueue_pending_pkts
@@ -1301,7 +1300,7 @@ enum crofsock::msg_result_t crofsock::send_message(rofl::openflow::cofmsg *msg, 
       delete msg;
 	}
     /* connection shutdown in progress, a very specific form of congestion ..., message is deleted */
-    return MSG_DROPPED_SHUTDOWN_IN_PROGRESS;
+    return MSG_QUEUEING_FAILED_SHUTDOWN_IN_PROGRESS;
   }
 
   if ((state != STATE_TCP_ESTABLISHED) && (state != STATE_TLS_ESTABLISHED)) {
@@ -1309,12 +1308,12 @@ enum crofsock::msg_result_t crofsock::send_message(rofl::openflow::cofmsg *msg, 
       delete msg;
 	}
     /* connection is not established: message is deleted */
-    return MSG_DROPPED_NOT_ESTABLISHED;
+    return MSG_QUEUEING_FAILED_NOT_ESTABLISHED;
   }
 
   if ((msg->get_type() == rofl::openflow::OFPT_ECHO_REQUEST) ||
       (msg->get_type() == rofl::openflow::OFPT_ECHO_REPLY)) {
-    enforce = true;
+    enforce_queueing = true;
   }
 
   try {
@@ -1326,25 +1325,25 @@ enum crofsock::msg_result_t crofsock::send_message(rofl::openflow::cofmsg *msg, 
       switch (msg->get_type()) {
       case rofl::openflow10::OFPT_PACKET_IN:
       case rofl::openflow10::OFPT_PACKET_OUT: {
-        txqueues[QUEUE_PKT].store(msg, enforce);
+        txqueues[QUEUE_PKT].store(msg, enforce_queueing);
       } break;
       case rofl::openflow10::OFPT_FLOW_MOD:
       case rofl::openflow10::OFPT_FLOW_REMOVED:
       case rofl::openflow10::OFPT_BARRIER_REQUEST: {
-        txqueues[QUEUE_FLOW].store(msg, enforce);
+        txqueues[QUEUE_FLOW].store(msg, enforce_queueing);
       } break;
       case rofl::openflow10::OFPT_ECHO_REQUEST:
       case rofl::openflow10::OFPT_ECHO_REPLY: {
-        txqueues[QUEUE_OAM].store(msg, enforce);
+        txqueues[QUEUE_OAM].store(msg, enforce_queueing);
       } break;
-      default: { txqueues[QUEUE_MGMT].store(msg, enforce); };
+      default: { txqueues[QUEUE_MGMT].store(msg, enforce_queueing); };
       }
     } break;
     case rofl::openflow12::OFP_VERSION: {
       switch (msg->get_type()) {
       case rofl::openflow12::OFPT_PACKET_IN:
       case rofl::openflow12::OFPT_PACKET_OUT: {
-        txqueues[QUEUE_PKT].store(msg, enforce);
+        txqueues[QUEUE_PKT].store(msg, enforce_queueing);
       } break;
       case rofl::openflow12::OFPT_FLOW_MOD:
       case rofl::openflow12::OFPT_FLOW_REMOVED:
@@ -1352,13 +1351,13 @@ enum crofsock::msg_result_t crofsock::send_message(rofl::openflow::cofmsg *msg, 
       case rofl::openflow12::OFPT_PORT_MOD:
       case rofl::openflow12::OFPT_TABLE_MOD:
       case rofl::openflow12::OFPT_BARRIER_REQUEST: {
-        txqueues[QUEUE_FLOW].store(msg, enforce);
+        txqueues[QUEUE_FLOW].store(msg, enforce_queueing);
       } break;
       case rofl::openflow12::OFPT_ECHO_REQUEST:
       case rofl::openflow12::OFPT_ECHO_REPLY: {
-        txqueues[QUEUE_OAM].store(msg, enforce);
+        txqueues[QUEUE_OAM].store(msg, enforce_queueing);
       } break;
-      default: { txqueues[QUEUE_MGMT].store(msg, enforce); };
+      default: { txqueues[QUEUE_MGMT].store(msg, enforce_queueing); };
       }
     } break;
     case rofl::openflow13::OFP_VERSION:
@@ -1366,7 +1365,7 @@ enum crofsock::msg_result_t crofsock::send_message(rofl::openflow::cofmsg *msg, 
       switch (msg->get_type()) {
       case rofl::openflow13::OFPT_PACKET_IN:
       case rofl::openflow13::OFPT_PACKET_OUT: {
-         txqueues[QUEUE_PKT].store(msg, enforce);
+         txqueues[QUEUE_PKT].store(msg, enforce_queueing);
       } break;
       case rofl::openflow13::OFPT_FLOW_MOD:
       case rofl::openflow13::OFPT_FLOW_REMOVED:
@@ -1374,13 +1373,13 @@ enum crofsock::msg_result_t crofsock::send_message(rofl::openflow::cofmsg *msg, 
       case rofl::openflow13::OFPT_PORT_MOD:
       case rofl::openflow13::OFPT_TABLE_MOD:
       case rofl::openflow13::OFPT_BARRIER_REQUEST: {
-        txqueues[QUEUE_FLOW].store(msg, enforce);
+        txqueues[QUEUE_FLOW].store(msg, enforce_queueing);
       } break;
       case rofl::openflow13::OFPT_ECHO_REQUEST:
       case rofl::openflow13::OFPT_ECHO_REPLY: {
-        txqueues[QUEUE_OAM].store(msg, enforce);
+        txqueues[QUEUE_OAM].store(msg, enforce_queueing);
       } break;
-      default: { txqueues[QUEUE_MGMT].store(msg, enforce); };
+      default: { txqueues[QUEUE_MGMT].store(msg, enforce_queueing); };
       }
     };
     }
@@ -1411,7 +1410,7 @@ enum crofsock::msg_result_t crofsock::send_message(rofl::openflow::cofmsg *msg, 
 	    delete msg;
 	  }
 	  /* message was not stored in txqueue and deleted here */
-	  return MSG_DROPPED_QUEUE_FULL;
+	  return MSG_QUEUEING_FAILED_QUEUE_FULL;
   }
 }
 

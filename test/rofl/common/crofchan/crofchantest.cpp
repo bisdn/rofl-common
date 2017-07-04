@@ -211,6 +211,8 @@ void crofchantest::test_congestion() {
   std::cerr << "num_of_accepts = " << num_of_accepts << std::endl;
   std::cerr << "channel1.size() = " << channel1->keys().size() << std::endl;
   std::cerr << "channel2.size() = " << channel2->keys().size() << std::endl;
+  std::cerr << "num_of_pkts_sent = " << num_of_pkts_sent << std::endl;
+  std::cerr << "num_of_pkts_rcvd = " << num_of_pkts_rcvd << std::endl;
   CPPUNIT_ASSERT(channel1->keys().size() == num_of_conns);
   CPPUNIT_ASSERT(channel2->keys().size() == num_of_conns);
 
@@ -314,6 +316,11 @@ void crofchantest::handle_established(rofl::crofchan &chan,
 
   CPPUNIT_ASSERT(conn.is_established());
 
+  /* we need a large queue size to force a loopback socket into congestion */
+  if (channel1 == &chan) {
+	  conn.set_txqueue_max_size(65536);
+  }
+
   if (conn.get_auxid() == rofl::cauxid(0)) {
     thread.add_timer(TIMER_ID_START_SENDING_PACKET_INS,
                      rofl::ctimespec().expire_in(1));
@@ -355,27 +362,27 @@ void crofchantest::handle_timeout(rofl::cthread &thread, uint32_t timer_id) {
         case rofl::crofsock::MSG_QUEUED_CONGESTION: {
         	num_of_pkts_sent++;
         	//std::cerr << "MSG-QUEUED-CONGESTION" << std::endl;
-        	std::cout << "c";
+        	std::cerr << "<C> " << std::endl;
             /* stop queueing and reschedule this function */
             thread.add_timer(TIMER_ID_START_SENDING_PACKET_INS,
                              rofl::ctimespec().expire_in(1));
         } return;
-        case rofl::crofsock::MSG_DROPPED_QUEUE_FULL: {
+        case rofl::crofsock::MSG_QUEUEING_FAILED_QUEUE_FULL: {
         	//std::cerr << "MSG-DROPPED-QUEUE-FULL" << std::endl;
-        	std::cout << "Q";
+        	std::cerr << "<Q> " << std::endl;
             /* stop queueing and reschedule this function */
             thread.add_timer(TIMER_ID_START_SENDING_PACKET_INS,
                              rofl::ctimespec().expire_in(1));
         } return;
-        case rofl::crofsock::MSG_DROPPED_NOT_ESTABLISHED: {
+        case rofl::crofsock::MSG_QUEUEING_FAILED_NOT_ESTABLISHED: {
         	//std::cerr << "MSG-DROPPED-NOT-ESTABLISHED" << std::endl;
-        	std::cout << "N";
+        	std::cerr << "<N> " << std::endl;
         	//std::cerr << "ERROR: crofsock::send_message() dropped message due to connection now established" << std::endl;
         	/* stop this test, something failed */
         	keep_running = false;
         } return;
-        case rofl::crofsock::MSG_DROPPED_SHUTDOWN_IN_PROGRESS: {
-        	std::cout << "S";
+        case rofl::crofsock::MSG_QUEUEING_FAILED_SHUTDOWN_IN_PROGRESS: {
+        	std::cerr << "<S> " << std::endl;
         	//std::cerr << "MSG-DROPPED-SHUTDOWN-IN-PROGRESS" << std::endl;
         	/* stop this test, something failed */
         	keep_running = false;
@@ -424,6 +431,9 @@ void crofchantest::handle_recv(rofl::crofchan &chan, rofl::crofconn &conn,
   } break;
   case rofl::openflow13::OFPT_PACKET_IN: {
     num_of_pkts_rcvd++;
+    if ((num_of_pkts_sent == num_of_pkts_rcvd) && (max_congestion_rounds == 0)) {
+    	keep_running = false;
+    }
   } break;
   case rofl::openflow13::OFPT_PACKET_OUT: {
 
@@ -445,7 +455,7 @@ void crofchantest::congestion_solved_indication(rofl::crofchan &chan,
     thread.add_timer(TIMER_ID_START_SENDING_PACKET_INS,
                      rofl::ctimespec().expire_in(1));
   } else {
-    keep_running = false;
+    //keep_running = false;
   }
 }
 

@@ -261,14 +261,14 @@ public:
   /**
    * @brief	Send OFP message via socket
    */
-  unsigned int send_message(rofl::openflow::cofmsg *msg) {
+  rofl::crofsock::msg_result_t send_message(rofl::openflow::cofmsg *msg) {
     return segment_and_send_message(msg);
   };
 
   /**
    * @brief	Send OFP message via socket with expiration timer
    */
-  unsigned int send_message(rofl::openflow::cofmsg *msg, const ctimespec &ts);
+  rofl::crofsock::msg_result_t send_message(rofl::openflow::cofmsg *msg, const ctimespec &ts);
 
 public:
   /**
@@ -741,72 +741,77 @@ private:
   /**
    *
    */
-  unsigned int segment_and_send_message(rofl::openflow::cofmsg *msg);
+  rofl::crofsock::msg_result_t segment_and_send_message(rofl::openflow::cofmsg *msg);
 
   /**
    *
    */
-  unsigned int segment_table_features_stats_request(
+  rofl::crofsock::msg_result_t
+  segment_table_features_stats_request(
       rofl::openflow::cofmsg_table_features_stats_request *msg);
 
   /**
    *
    */
-  unsigned int
+  rofl::crofsock::msg_result_t
   segment_flow_stats_reply(rofl::openflow::cofmsg_flow_stats_reply *msg);
 
   /**
    *
    */
-  unsigned int
+  rofl::crofsock::msg_result_t
   segment_table_stats_reply(rofl::openflow::cofmsg_table_stats_reply *msg);
 
   /**
    *
    */
-  unsigned int
+  rofl::crofsock::msg_result_t
   segment_port_stats_reply(rofl::openflow::cofmsg_port_stats_reply *msg);
 
   /**
    *
    */
-  unsigned int
+  rofl::crofsock::msg_result_t
   segment_queue_stats_reply(rofl::openflow::cofmsg_queue_stats_reply *msg);
 
   /**
    *
    */
-  unsigned int
+  rofl::crofsock::msg_result_t
   segment_group_stats_reply(rofl::openflow::cofmsg_group_stats_reply *msg);
 
   /**
    *
    */
-  unsigned int segment_group_desc_stats_reply(
+  rofl::crofsock::msg_result_t
+  segment_group_desc_stats_reply(
       rofl::openflow::cofmsg_group_desc_stats_reply *msg);
 
   /**
    *
    */
-  unsigned int segment_table_features_stats_reply(
+  rofl::crofsock::msg_result_t
+  segment_table_features_stats_reply(
       rofl::openflow::cofmsg_table_features_stats_reply *msg);
 
   /**
    *
    */
-  unsigned int segment_port_desc_stats_reply(
+  rofl::crofsock::msg_result_t
+  segment_port_desc_stats_reply(
       rofl::openflow::cofmsg_port_desc_stats_reply *msg);
 
   /**
    *
    */
-  unsigned int
+  rofl::crofsock::msg_result_t
   segment_meter_stats_reply(rofl::openflow::cofmsg_meter_stats_reply *msg);
 
   /**
    *
    */
-  unsigned int segment_meter_config_stats_reply(
+  rofl::crofsock::msg_result_t
+  segment_meter_config_stats_reply(
       rofl::openflow::cofmsg_meter_config_stats_reply *msg);
 
 private:
