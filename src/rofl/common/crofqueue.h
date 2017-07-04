@@ -185,7 +185,7 @@ private:
   std::list<rofl::openflow::cofmsg *> queue;
   mutable crwlock queue_lock;
   size_t queue_max_size;
-  static const size_t QUEUE_MAX_SIZE_DEFAULT = 32768;
+  static const size_t QUEUE_MAX_SIZE_DEFAULT = 128;
 };
 
 }; // end of namespace rofl

@@ -1288,7 +1288,7 @@ void crofsock::handle_timeout(cthread &thread, uint32_t timer_id) {
   }
 }
 
-void crofsock::send_message(rofl::openflow::cofmsg *msg) {
+enum crofsock::msg_result_t crofsock::send_message(rofl::openflow::cofmsg *msg) {
   bool enforce = false;
 
   VLOG(3) << __FUNCTION__ << " msg=" << msg
@@ -1298,7 +1298,14 @@ void crofsock::send_message(rofl::openflow::cofmsg *msg) {
 
   if (tx_disabled) {
     delete msg;
-    return;
+    /* connection shutdown in progress, a very specific form of congestion ..., message is deleted */
+    return MSG_DROPPED_SHUTDOWN_IN_PROGRESS;
+  }
+
+  if ((state != STATE_TCP_ESTABLISHED) && (state != STATE_TLS_ESTABLISHED)) {
+    delete msg;
+    /* connection is not established: message is deleted */
+    return MSG_DROPPED_NOT_ESTABLISHED;
   }
 
   if ((msg->get_type() == rofl::openflow::OFPT_ECHO_REQUEST) ||
@@ -1308,95 +1315,86 @@ void crofsock::send_message(rofl::openflow::cofmsg *msg) {
 
   try {
 
-    switch (state) {
-    case STATE_TCP_ESTABLISHED:
-    case STATE_TLS_ESTABLISHED: {
-
-      switch (msg->get_version()) {
-      case rofl::openflow10::OFP_VERSION: {
-        switch (msg->get_type()) {
-        case rofl::openflow10::OFPT_PACKET_IN:
-        case rofl::openflow10::OFPT_PACKET_OUT: {
-          txqueues[QUEUE_PKT].store(msg, enforce);
-        } break;
-        case rofl::openflow10::OFPT_FLOW_MOD:
-        case rofl::openflow10::OFPT_FLOW_REMOVED:
-        case rofl::openflow10::OFPT_BARRIER_REQUEST: {
-          txqueues[QUEUE_FLOW].store(msg, enforce);
-        } break;
-        case rofl::openflow10::OFPT_ECHO_REQUEST:
-        case rofl::openflow10::OFPT_ECHO_REPLY: {
-          txqueues[QUEUE_OAM].store(msg, enforce);
-        } break;
-        default: { txqueues[QUEUE_MGMT].store(msg, enforce); };
-        }
+    /* enqueue the message in rofl's internal queue, as long
+     * as these are not exhausted */
+    switch (msg->get_version()) {
+    case rofl::openflow10::OFP_VERSION: {
+      switch (msg->get_type()) {
+      case rofl::openflow10::OFPT_PACKET_IN:
+      case rofl::openflow10::OFPT_PACKET_OUT: {
+        txqueues[QUEUE_PKT].store(msg, enforce);
       } break;
-      case rofl::openflow12::OFP_VERSION: {
-        switch (msg->get_type()) {
-        case rofl::openflow12::OFPT_PACKET_IN:
-        case rofl::openflow12::OFPT_PACKET_OUT: {
-          txqueues[QUEUE_PKT].store(msg, enforce);
-        } break;
-        case rofl::openflow12::OFPT_FLOW_MOD:
-        case rofl::openflow12::OFPT_FLOW_REMOVED:
-        case rofl::openflow12::OFPT_GROUP_MOD:
-        case rofl::openflow12::OFPT_PORT_MOD:
-        case rofl::openflow12::OFPT_TABLE_MOD:
-        case rofl::openflow12::OFPT_BARRIER_REQUEST: {
-          txqueues[QUEUE_FLOW].store(msg, enforce);
-        } break;
-        case rofl::openflow12::OFPT_ECHO_REQUEST:
-        case rofl::openflow12::OFPT_ECHO_REPLY: {
-          txqueues[QUEUE_OAM].store(msg, enforce);
-        } break;
-        default: { txqueues[QUEUE_MGMT].store(msg, enforce); };
-        }
+      case rofl::openflow10::OFPT_FLOW_MOD:
+      case rofl::openflow10::OFPT_FLOW_REMOVED:
+      case rofl::openflow10::OFPT_BARRIER_REQUEST: {
+        txqueues[QUEUE_FLOW].store(msg, enforce);
       } break;
-      case rofl::openflow13::OFP_VERSION:
-      default: {
-        switch (msg->get_type()) {
-        case rofl::openflow13::OFPT_PACKET_IN:
-        case rofl::openflow13::OFPT_PACKET_OUT: {
-          txqueues[QUEUE_PKT].store(msg, enforce);
-        } break;
-        case rofl::openflow13::OFPT_FLOW_MOD:
-        case rofl::openflow13::OFPT_FLOW_REMOVED:
-        case rofl::openflow13::OFPT_GROUP_MOD:
-        case rofl::openflow13::OFPT_PORT_MOD:
-        case rofl::openflow13::OFPT_TABLE_MOD:
-        case rofl::openflow13::OFPT_BARRIER_REQUEST: {
-          txqueues[QUEUE_FLOW].store(msg, enforce);
-        } break;
-        case rofl::openflow13::OFPT_ECHO_REQUEST:
-        case rofl::openflow13::OFPT_ECHO_REPLY: {
-          txqueues[QUEUE_OAM].store(msg, enforce);
-        } break;
-        default: { txqueues[QUEUE_MGMT].store(msg, enforce); };
-        }
-      };
+      case rofl::openflow10::OFPT_ECHO_REQUEST:
+      case rofl::openflow10::OFPT_ECHO_REPLY: {
+        txqueues[QUEUE_OAM].store(msg, enforce);
+      } break;
+      default: { txqueues[QUEUE_MGMT].store(msg, enforce); };
       }
-
-      txqueue_pending_pkts++;
-
-      if (not tx_is_running) {
-        txthread.wakeup();
-      }
-
     } break;
+    case rofl::openflow12::OFP_VERSION: {
+      switch (msg->get_type()) {
+      case rofl::openflow12::OFPT_PACKET_IN:
+      case rofl::openflow12::OFPT_PACKET_OUT: {
+        txqueues[QUEUE_PKT].store(msg, enforce);
+      } break;
+      case rofl::openflow12::OFPT_FLOW_MOD:
+      case rofl::openflow12::OFPT_FLOW_REMOVED:
+      case rofl::openflow12::OFPT_GROUP_MOD:
+      case rofl::openflow12::OFPT_PORT_MOD:
+      case rofl::openflow12::OFPT_TABLE_MOD:
+      case rofl::openflow12::OFPT_BARRIER_REQUEST: {
+        txqueues[QUEUE_FLOW].store(msg, enforce);
+      } break;
+      case rofl::openflow12::OFPT_ECHO_REQUEST:
+      case rofl::openflow12::OFPT_ECHO_REPLY: {
+        txqueues[QUEUE_OAM].store(msg, enforce);
+      } break;
+      default: { txqueues[QUEUE_MGMT].store(msg, enforce); };
+      }
+    } break;
+    case rofl::openflow13::OFP_VERSION:
     default: {
-      delete msg;
-      throw eRofSockNotEstablished(
-          "crofsock::send_message() socket not established", __FILE__,
-          __FUNCTION__, __LINE__);
+      switch (msg->get_type()) {
+      case rofl::openflow13::OFPT_PACKET_IN:
+      case rofl::openflow13::OFPT_PACKET_OUT: {
+         txqueues[QUEUE_PKT].store(msg, enforce);
+      } break;
+      case rofl::openflow13::OFPT_FLOW_MOD:
+      case rofl::openflow13::OFPT_FLOW_REMOVED:
+      case rofl::openflow13::OFPT_GROUP_MOD:
+      case rofl::openflow13::OFPT_PORT_MOD:
+      case rofl::openflow13::OFPT_TABLE_MOD:
+      case rofl::openflow13::OFPT_BARRIER_REQUEST: {
+        txqueues[QUEUE_FLOW].store(msg, enforce);
+      } break;
+      case rofl::openflow13::OFPT_ECHO_REQUEST:
+      case rofl::openflow13::OFPT_ECHO_REPLY: {
+        txqueues[QUEUE_OAM].store(msg, enforce);
+      } break;
+      default: { txqueues[QUEUE_MGMT].store(msg, enforce); };
+      }
     };
+    }
+
+    txqueue_pending_pkts++;
+
+    if (not tx_is_running) {
+      txthread.wakeup();
     }
 
 
     if (flag_test(FLAG_TX_BLOCK_QUEUEING)) {
-      throw eRofQueueFull(
-          "crofsock::send_message() transmission blocked, congestion", __FILE__,
-          __FUNCTION__, __LINE__);
+      /* message was queued, but congestion prevents us from sending it */
+      return MSG_QUEUED_CONGESTION;
     }
+
+    /* message was queued, waiting for transmission */
+    return MSG_QUEUED;
 
   } catch (eRofQueueFull& e) {
 	  VLOG(3) << __FUNCTION__
@@ -1405,7 +1403,9 @@ void crofsock::send_message(rofl::openflow::cofmsg *msg) {
 	          << " txqueue_pending_pkts=" << txqueue_pending_pkts
 	          << " tx_disabled=" << tx_disabled
 	          << " tx_is_running=" << tx_is_running;
-	  throw;
+	  delete msg;
+	  /* message was not stored in txqueue and deleted here */
+	  return MSG_DROPPED_QUEUE_FULL;
   }
 }
 
