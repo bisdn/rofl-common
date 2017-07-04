@@ -30,7 +30,11 @@ class crofchantest : public CppUnit::TestFixture,
 public:
   virtual ~crofchantest(){};
 
-  crofchantest() : thread(this){};
+  crofchantest() :
+	  thread(this),
+	  num_of_pkts_sent(0),
+	  num_of_pkts_rcvd(0),
+	  max_congestion_rounds(16) {};
 
 public:
   void setUp();

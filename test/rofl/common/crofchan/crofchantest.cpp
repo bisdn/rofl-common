@@ -431,7 +431,7 @@ void crofchantest::handle_recv(rofl::crofchan &chan, rofl::crofconn &conn,
   } break;
   case rofl::openflow13::OFPT_PACKET_IN: {
     num_of_pkts_rcvd++;
-    if ((num_of_pkts_sent == num_of_pkts_rcvd) && (max_congestion_rounds == 0)) {
+    if ((num_of_pkts_sent == num_of_pkts_rcvd) && (max_congestion_rounds <= 0)) {
     	keep_running = false;
     }
   } break;
