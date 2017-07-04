@@ -1418,7 +1418,7 @@ rofl::crofsock::msg_result_t crofconn::send_message(rofl::openflow::cofmsg *msg,
 };
 
 rofl::crofsock::msg_result_t crofconn::segment_and_send_message(rofl::openflow::cofmsg *msg) {
-  rofl::crofsock::msg_result_t msg_result;
+  rofl::crofsock::msg_result_t msg_result = rofl::crofsock::MSG_QUEUED;
 
   VLOG(3) << __FUNCTION__ << " state: " << state
           << " message sent: " << msg->str().c_str();
