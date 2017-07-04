@@ -523,7 +523,7 @@ void crofbase::congestion_occured_indication(crofctl &ctl, crofconn &conn) {
           << ctl.get_ctlid().str().c_str()
           << ", auxid=" << conn.get_auxid().str().c_str()
           << ", raddr=" << conn.get_raddr().str().c_str();
-  handle_conn_congestion_occured(ctl, conn.get_auxid());
+  handle_conn_congestion_occurred(ctl, conn.get_auxid());
 }
 
 void crofbase::congestion_solved_indication(crofctl &ctl, crofconn &conn) {
@@ -599,7 +599,7 @@ void crofbase::congestion_occured_indication(crofdpt &dpt, crofconn &conn) {
           << " connection congestion occured: dptid=" << dpt.get_dptid()
           << ", auxid=" << conn.get_auxid().str().c_str()
           << ", raddr=" << conn.get_raddr().str().c_str();
-  handle_conn_congestion_occured(dpt, conn.get_auxid());
+  handle_conn_congestion_occurred(dpt, conn.get_auxid());
 }
 
 void crofbase::congestion_solved_indication(crofdpt &dpt, crofconn &conn) {

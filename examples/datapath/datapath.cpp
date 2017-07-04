@@ -92,7 +92,7 @@ void datapath::handle_conn_negotiation_failed(rofl::crofctl &ctl,
   std::cerr << "channel failed ctlid=" << ctlid << std::endl;
 }
 
-void datapath::handle_conn_congestion_occured(rofl::crofctl &ctl,
+void datapath::handle_conn_congestion_occurred(rofl::crofctl &ctl,
                                               const rofl::cauxid &auxid) {
   std::cerr << "channel congestion occured, ctlid=" << ctlid << std::endl;
 }

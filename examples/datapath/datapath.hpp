@@ -132,7 +132,7 @@ private:
    * @param ctl controller instance
    * @param auxid control connection identifier (main: 0)
    */
-  virtual void handle_conn_congestion_occured(rofl::crofctl &ctl,
+  virtual void handle_conn_congestion_occurred(rofl::crofctl &ctl,
                                               const rofl::cauxid &auxid);
 
   /**
