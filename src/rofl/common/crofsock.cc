@@ -1289,6 +1289,8 @@ void crofsock::handle_timeout(cthread &thread, uint32_t timer_id) {
 }
 
 void crofsock::send_message(rofl::openflow::cofmsg *msg) {
+  bool enforce = false;
+
   VLOG(3) << __FUNCTION__ << " msg=" << msg
           << " txqueue_pending_pkts=" << txqueue_pending_pkts
           << " tx_disabled=" << tx_disabled
@@ -1299,95 +1301,111 @@ void crofsock::send_message(rofl::openflow::cofmsg *msg) {
     return;
   }
 
-  if (flag_test(FLAG_TX_BLOCK_QUEUEING) &&
-      (msg->get_type() != rofl::openflow::OFPT_ECHO_REQUEST) &&
-      (msg->get_type() != rofl::openflow::OFPT_ECHO_REPLY)) {
-    throw eRofQueueFull(
-        "crofsock::send_message() transmission blocked, congestion", __FILE__,
-        __FUNCTION__, __LINE__);
+  if ((msg->get_type() == rofl::openflow::OFPT_ECHO_REQUEST) ||
+      (msg->get_type() == rofl::openflow::OFPT_ECHO_REPLY)) {
+    enforce = true;
   }
 
-  txqueue_pending_pkts++;
+  try {
 
-  switch (state) {
-  case STATE_TCP_ESTABLISHED:
-  case STATE_TLS_ESTABLISHED: {
+    switch (state) {
+    case STATE_TCP_ESTABLISHED:
+    case STATE_TLS_ESTABLISHED: {
 
-    switch (msg->get_version()) {
-    case rofl::openflow10::OFP_VERSION: {
-      switch (msg->get_type()) {
-      case rofl::openflow10::OFPT_PACKET_IN:
-      case rofl::openflow10::OFPT_PACKET_OUT: {
-        txqueues[QUEUE_PKT].store(msg, true);
+      switch (msg->get_version()) {
+      case rofl::openflow10::OFP_VERSION: {
+        switch (msg->get_type()) {
+        case rofl::openflow10::OFPT_PACKET_IN:
+        case rofl::openflow10::OFPT_PACKET_OUT: {
+          txqueues[QUEUE_PKT].store(msg, enforce);
+        } break;
+        case rofl::openflow10::OFPT_FLOW_MOD:
+        case rofl::openflow10::OFPT_FLOW_REMOVED:
+        case rofl::openflow10::OFPT_BARRIER_REQUEST: {
+          txqueues[QUEUE_FLOW].store(msg, enforce);
+        } break;
+        case rofl::openflow10::OFPT_ECHO_REQUEST:
+        case rofl::openflow10::OFPT_ECHO_REPLY: {
+          txqueues[QUEUE_OAM].store(msg, enforce);
+        } break;
+        default: { txqueues[QUEUE_MGMT].store(msg, enforce); };
+        }
       } break;
-      case rofl::openflow10::OFPT_FLOW_MOD:
-      case rofl::openflow10::OFPT_FLOW_REMOVED:
-      case rofl::openflow10::OFPT_BARRIER_REQUEST: {
-        txqueues[QUEUE_FLOW].store(msg, true);
+      case rofl::openflow12::OFP_VERSION: {
+        switch (msg->get_type()) {
+        case rofl::openflow12::OFPT_PACKET_IN:
+        case rofl::openflow12::OFPT_PACKET_OUT: {
+          txqueues[QUEUE_PKT].store(msg, enforce);
+        } break;
+        case rofl::openflow12::OFPT_FLOW_MOD:
+        case rofl::openflow12::OFPT_FLOW_REMOVED:
+        case rofl::openflow12::OFPT_GROUP_MOD:
+        case rofl::openflow12::OFPT_PORT_MOD:
+        case rofl::openflow12::OFPT_TABLE_MOD:
+        case rofl::openflow12::OFPT_BARRIER_REQUEST: {
+          txqueues[QUEUE_FLOW].store(msg, enforce);
+        } break;
+        case rofl::openflow12::OFPT_ECHO_REQUEST:
+        case rofl::openflow12::OFPT_ECHO_REPLY: {
+          txqueues[QUEUE_OAM].store(msg, enforce);
+        } break;
+        default: { txqueues[QUEUE_MGMT].store(msg, enforce); };
+        }
       } break;
-      case rofl::openflow10::OFPT_ECHO_REQUEST:
-      case rofl::openflow10::OFPT_ECHO_REPLY: {
-        txqueues[QUEUE_OAM].store(msg, true);
-      } break;
-      default: { txqueues[QUEUE_MGMT].store(msg, true); };
+      case rofl::openflow13::OFP_VERSION:
+      default: {
+        switch (msg->get_type()) {
+        case rofl::openflow13::OFPT_PACKET_IN:
+        case rofl::openflow13::OFPT_PACKET_OUT: {
+          txqueues[QUEUE_PKT].store(msg, enforce);
+        } break;
+        case rofl::openflow13::OFPT_FLOW_MOD:
+        case rofl::openflow13::OFPT_FLOW_REMOVED:
+        case rofl::openflow13::OFPT_GROUP_MOD:
+        case rofl::openflow13::OFPT_PORT_MOD:
+        case rofl::openflow13::OFPT_TABLE_MOD:
+        case rofl::openflow13::OFPT_BARRIER_REQUEST: {
+          txqueues[QUEUE_FLOW].store(msg, enforce);
+        } break;
+        case rofl::openflow13::OFPT_ECHO_REQUEST:
+        case rofl::openflow13::OFPT_ECHO_REPLY: {
+          txqueues[QUEUE_OAM].store(msg, enforce);
+        } break;
+        default: { txqueues[QUEUE_MGMT].store(msg, enforce); };
+        }
+      };
       }
-    } break;
-    case rofl::openflow12::OFP_VERSION: {
-      switch (msg->get_type()) {
-      case rofl::openflow12::OFPT_PACKET_IN:
-      case rofl::openflow12::OFPT_PACKET_OUT: {
-        txqueues[QUEUE_PKT].store(msg, true);
-      } break;
-      case rofl::openflow12::OFPT_FLOW_MOD:
-      case rofl::openflow12::OFPT_FLOW_REMOVED:
-      case rofl::openflow12::OFPT_GROUP_MOD:
-      case rofl::openflow12::OFPT_PORT_MOD:
-      case rofl::openflow12::OFPT_TABLE_MOD:
-      case rofl::openflow12::OFPT_BARRIER_REQUEST: {
-        txqueues[QUEUE_FLOW].store(msg, true);
-      } break;
-      case rofl::openflow12::OFPT_ECHO_REQUEST:
-      case rofl::openflow12::OFPT_ECHO_REPLY: {
-        txqueues[QUEUE_OAM].store(msg, true);
-      } break;
-      default: { txqueues[QUEUE_MGMT].store(msg, true); };
+
+      txqueue_pending_pkts++;
+
+      if (not tx_is_running) {
+        txthread.wakeup();
       }
+
     } break;
-    case rofl::openflow13::OFP_VERSION:
     default: {
-      switch (msg->get_type()) {
-      case rofl::openflow13::OFPT_PACKET_IN:
-      case rofl::openflow13::OFPT_PACKET_OUT: {
-        txqueues[QUEUE_PKT].store(msg, true);
-      } break;
-      case rofl::openflow13::OFPT_FLOW_MOD:
-      case rofl::openflow13::OFPT_FLOW_REMOVED:
-      case rofl::openflow13::OFPT_GROUP_MOD:
-      case rofl::openflow13::OFPT_PORT_MOD:
-      case rofl::openflow13::OFPT_TABLE_MOD:
-      case rofl::openflow13::OFPT_BARRIER_REQUEST: {
-        txqueues[QUEUE_FLOW].store(msg, true);
-      } break;
-      case rofl::openflow13::OFPT_ECHO_REQUEST:
-      case rofl::openflow13::OFPT_ECHO_REPLY: {
-        txqueues[QUEUE_OAM].store(msg, true);
-      } break;
-      default: { txqueues[QUEUE_MGMT].store(msg, true); };
-      }
+      delete msg;
+      throw eRofSockNotEstablished(
+          "crofsock::send_message() socket not established", __FILE__,
+          __FUNCTION__, __LINE__);
     };
     }
 
-    if (not tx_is_running) {
-      txthread.wakeup();
+
+    if (flag_test(FLAG_TX_BLOCK_QUEUEING)) {
+      throw eRofQueueFull(
+          "crofsock::send_message() transmission blocked, congestion", __FILE__,
+          __FUNCTION__, __LINE__);
     }
 
-  } break;
-  default: {
-    delete msg;
-    throw eRofSockNotEstablished(
-        "crofsock::send_message() socket not established", __FILE__,
-        __FUNCTION__, __LINE__);
-  };
+  } catch (eRofQueueFull& e) {
+	  VLOG(3) << __FUNCTION__
+			  << " txqueue exhausted, "
+			  << " msg=" << msg
+	          << " txqueue_pending_pkts=" << txqueue_pending_pkts
+	          << " tx_disabled=" << tx_disabled
+	          << " tx_is_running=" << tx_is_running;
+	  throw;
   }
 }
 
