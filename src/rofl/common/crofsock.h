@@ -317,7 +317,7 @@ public:
   /**
    *
    */
-  enum msg_result_t send_message(rofl::openflow::cofmsg *msg);
+  enum msg_result_t send_message(rofl::openflow::cofmsg *msg, bool keep_message = false);
 
   /**
    *

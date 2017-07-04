@@ -1288,7 +1288,7 @@ void crofsock::handle_timeout(cthread &thread, uint32_t timer_id) {
   }
 }
 
-enum crofsock::msg_result_t crofsock::send_message(rofl::openflow::cofmsg *msg) {
+enum crofsock::msg_result_t crofsock::send_message(rofl::openflow::cofmsg *msg, bool keep_message) {
   bool enforce = false;
 
   VLOG(3) << __FUNCTION__ << " msg=" << msg
@@ -1297,13 +1297,17 @@ enum crofsock::msg_result_t crofsock::send_message(rofl::openflow::cofmsg *msg) 
           << " tx_is_running=" << tx_is_running;
 
   if (tx_disabled) {
-    delete msg;
+	if (!keep_message) {
+      delete msg;
+	}
     /* connection shutdown in progress, a very specific form of congestion ..., message is deleted */
     return MSG_DROPPED_SHUTDOWN_IN_PROGRESS;
   }
 
   if ((state != STATE_TCP_ESTABLISHED) && (state != STATE_TLS_ESTABLISHED)) {
-    delete msg;
+	if (!keep_message) {
+      delete msg;
+	}
     /* connection is not established: message is deleted */
     return MSG_DROPPED_NOT_ESTABLISHED;
   }
@@ -1403,7 +1407,9 @@ enum crofsock::msg_result_t crofsock::send_message(rofl::openflow::cofmsg *msg) 
 	          << " txqueue_pending_pkts=" << txqueue_pending_pkts
 	          << " tx_disabled=" << tx_disabled
 	          << " tx_is_running=" << tx_is_running;
-	  delete msg;
+	  if (!keep_message) {
+	    delete msg;
+	  }
 	  /* message was not stored in txqueue and deleted here */
 	  return MSG_DROPPED_QUEUE_FULL;
   }
