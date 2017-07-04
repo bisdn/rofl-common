@@ -357,7 +357,6 @@ void crofchantest::handle_timeout(rofl::cthread &thread, uint32_t timer_id) {
       std::cerr << "exception caught: eRofQueueFull" << std::endl;
       thread.add_timer(TIMER_ID_START_SENDING_PACKET_INS,
                        rofl::ctimespec().expire_in(8));
-      delete msg;
     } catch (rofl::eRofSockNotEstablished &e) {
       std::cerr << "exception caught: eRofSockNotEstablished" << std::endl;
     }
