@@ -214,7 +214,7 @@ private:
    * @param dpt datapath instance
    * @param auxid control connection identifier (main: 0)
    */
-  virtual void handle_conn_congestion_occured(rofl::crofdpt &dpt,
+  virtual void handle_conn_congestion_occurred(rofl::crofdpt &dpt,
                                               const rofl::cauxid &auxid);
 
   /**

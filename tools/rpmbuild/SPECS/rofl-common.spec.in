@@ -69,6 +69,9 @@ make install DESTDIR=$RPM_BUILD_ROOT
 rm -rf $RPM_BUILD_ROOT 
 
 %changelog
+* Thu Jun 22 2017 Tobias Jungel <tobias.jungel@bisdn.de> - v0.11.3
+- [B] remove ambiguous get_time
+
 * Thu Jun 15 2017 Tobias Jungel <tobias.jungel@bisdn.de> - v0.11.2
 - [B] cofmsg: fix copy of cofmsg_features_reply
 - [+] crofconn: handle_rx_messages optimization
