@@ -800,20 +800,21 @@ void crofdpt::group_mod_reset() {
 }
 
 rofl::crofsock::msg_result_t
-crofdpt::send_features_request(const rofl::cauxid &auxid,
-                                        int timeout_in_secs,
-										uint32_t *xid) {
+crofdpt::send_features_request(const rofl::cauxid &auxid, int timeout_in_secs,
+                               uint32_t *xid) {
 
   rofl::openflow::cofmsg *msg = nullptr;
+  uint32_t __xid = ++xid_last;
   try {
-    msg =
-        new rofl::openflow::cofmsg_features_request(rofchan.get_version(), ++xid_last);
+    msg = new rofl::openflow::cofmsg_features_request(rofchan.get_version(),
+                                                      __xid);
 
     if (xid != nullptr) {
-    	*xid = xid_last;
+      *xid = __xid;
     }
 
-    return rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
+    return rofchan.send_message(auxid, msg,
+                                ctimespec().expire_in(timeout_in_secs));
 
   } catch (eRofConnNotConnected &e) {
     VLOG(1) << __FUNCTION__ << " dropping message " << e.what();
@@ -827,19 +828,20 @@ crofdpt::send_features_request(const rofl::cauxid &auxid,
 }
 
 rofl::crofsock::msg_result_t
-crofdpt::send_get_config_request(const rofl::cauxid &auxid,
-                                          int timeout_in_secs,
-										  uint32_t *xid) {
+crofdpt::send_get_config_request(const rofl::cauxid &auxid, int timeout_in_secs,
+                                 uint32_t *xid) {
 
   rofl::openflow::cofmsg *msg = nullptr;
+  uint32_t __xid = ++xid_last;
   try {
     msg = new rofl::openflow::cofmsg_get_config_request(rofchan.get_version(),
-                                                        ++xid_last);
+                                                        __xid);
 
     if (xid != nullptr) {
-    	*xid = xid_last;
+      *xid = __xid;
     }
-    return rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
+    return rofchan.send_message(auxid, msg,
+                                ctimespec().expire_in(timeout_in_secs));
 
   } catch (eRofConnNotConnected &e) {
     VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
@@ -852,18 +854,20 @@ crofdpt::send_get_config_request(const rofl::cauxid &auxid,
   }
 }
 
-rofl::crofsock::msg_result_t crofdpt::send_desc_stats_request(const rofl::cauxid &auxid,
-                                          uint16_t flags, int timeout_in_secs,
-										  uint32_t *xid) {
+rofl::crofsock::msg_result_t
+crofdpt::send_desc_stats_request(const rofl::cauxid &auxid, uint16_t flags,
+                                 int timeout_in_secs, uint32_t *xid) {
   rofl::openflow::cofmsg *msg = nullptr;
+  uint32_t __xid = ++xid_last;
   try {
     msg = new rofl::openflow::cofmsg_desc_stats_request(rofchan.get_version(),
-    		++xid_last, flags);
+                                                        __xid, flags);
 
     if (xid != nullptr) {
-    	*xid = xid_last;
+      *xid = __xid;
     }
-    return rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
+    return rofchan.send_message(auxid, msg,
+                                ctimespec().expire_in(timeout_in_secs));
 
   } catch (eRofConnNotConnected &e) {
     VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
@@ -879,17 +883,18 @@ rofl::crofsock::msg_result_t crofdpt::send_desc_stats_request(const rofl::cauxid
 rofl::crofsock::msg_result_t crofdpt::send_flow_stats_request(
     const rofl::cauxid &auxid, uint16_t flags,
     const rofl::openflow::cofflow_stats_request &flow_stats_request,
-    int timeout_in_secs,
-	uint32_t *xid) {
+    int timeout_in_secs, uint32_t *xid) {
   rofl::openflow::cofmsg *msg = nullptr;
+  uint32_t __xid = ++xid_last;
   try {
     msg = new rofl::openflow::cofmsg_flow_stats_request(
-        rofchan.get_version(), ++xid_last, flags, flow_stats_request);
+        rofchan.get_version(), __xid, flags, flow_stats_request);
 
     if (xid != nullptr) {
-    	*xid = xid_last;
+      *xid = __xid;
     }
-    return rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
+    return rofchan.send_message(auxid, msg,
+                                ctimespec().expire_in(timeout_in_secs));
 
   } catch (eRofConnNotConnected &e) {
     VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
@@ -905,17 +910,18 @@ rofl::crofsock::msg_result_t crofdpt::send_flow_stats_request(
 rofl::crofsock::msg_result_t crofdpt::send_aggr_stats_request(
     const rofl::cauxid &auxid, uint16_t flags,
     const rofl::openflow::cofaggr_stats_request &aggr_stats_request,
-    int timeout_in_secs,
-	uint32_t *xid) {
+    int timeout_in_secs, uint32_t *xid) {
   rofl::openflow::cofmsg *msg = nullptr;
+  uint32_t __xid = ++xid_last;
   try {
     msg = new rofl::openflow::cofmsg_aggr_stats_request(
-        rofchan.get_version(), ++xid_last, flags, aggr_stats_request);
+        rofchan.get_version(), __xid, flags, aggr_stats_request);
 
     if (xid != nullptr) {
-    	*xid = xid_last;
+      *xid = __xid;
     }
-    return rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
+    return rofchan.send_message(auxid, msg,
+                                ctimespec().expire_in(timeout_in_secs));
 
   } catch (eRofConnNotConnected &e) {
     VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
@@ -928,19 +934,20 @@ rofl::crofsock::msg_result_t crofdpt::send_aggr_stats_request(
   }
 }
 
-rofl::crofsock::msg_result_t crofdpt::send_table_stats_request(const rofl::cauxid &auxid,
-                                           uint16_t flags,
-                                           int timeout_in_secs,
-										   uint32_t *xid) {
+rofl::crofsock::msg_result_t
+crofdpt::send_table_stats_request(const rofl::cauxid &auxid, uint16_t flags,
+                                  int timeout_in_secs, uint32_t *xid) {
   rofl::openflow::cofmsg *msg = nullptr;
+  uint32_t __xid = ++xid_last;
   try {
     msg = new rofl::openflow::cofmsg_table_stats_request(rofchan.get_version(),
-    		++xid_last, flags);
+                                                         __xid, flags);
 
     if (xid != nullptr) {
-    	*xid = xid_last;
+      *xid = __xid;
     }
-    return rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
+    return rofchan.send_message(auxid, msg,
+                                ctimespec().expire_in(timeout_in_secs));
 
   } catch (eRofConnNotConnected &e) {
     VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
@@ -956,17 +963,18 @@ rofl::crofsock::msg_result_t crofdpt::send_table_stats_request(const rofl::cauxi
 rofl::crofsock::msg_result_t crofdpt::send_port_stats_request(
     const rofl::cauxid &auxid, uint16_t flags,
     const rofl::openflow::cofport_stats_request &port_stats_request,
-    int timeout_in_secs,
-	uint32_t *xid) {
+    int timeout_in_secs, uint32_t *xid) {
   rofl::openflow::cofmsg *msg = nullptr;
+  uint32_t __xid = ++xid_last;
   try {
     msg = new rofl::openflow::cofmsg_port_stats_request(
-        rofchan.get_version(), ++xid_last, flags, port_stats_request);
+        rofchan.get_version(), __xid, flags, port_stats_request);
 
     if (xid != nullptr) {
-    	*xid = xid_last;
+      *xid = __xid;
     }
-    return rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
+    return rofchan.send_message(auxid, msg,
+                                ctimespec().expire_in(timeout_in_secs));
 
   } catch (eRofConnNotConnected &e) {
     VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
@@ -982,17 +990,18 @@ rofl::crofsock::msg_result_t crofdpt::send_port_stats_request(
 rofl::crofsock::msg_result_t crofdpt::send_queue_stats_request(
     const rofl::cauxid &auxid, uint16_t flags,
     const rofl::openflow::cofqueue_stats_request &queue_stats_request,
-    int timeout_in_secs,
-	uint32_t *xid) {
+    int timeout_in_secs, uint32_t *xid) {
   rofl::openflow::cofmsg *msg = nullptr;
+  uint32_t __xid = ++xid_last;
   try {
     msg = new rofl::openflow::cofmsg_queue_stats_request(
-        rofchan.get_version(), ++xid_last, flags, queue_stats_request);
+        rofchan.get_version(), __xid, flags, queue_stats_request);
 
     if (xid != nullptr) {
-    	*xid = xid_last;
+      *xid = __xid;
     }
-    return rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
+    return rofchan.send_message(auxid, msg,
+                                ctimespec().expire_in(timeout_in_secs));
 
   } catch (eRofConnNotConnected &e) {
     VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
@@ -1008,17 +1017,18 @@ rofl::crofsock::msg_result_t crofdpt::send_queue_stats_request(
 rofl::crofsock::msg_result_t crofdpt::send_group_stats_request(
     const rofl::cauxid &auxid, uint16_t flags,
     const rofl::openflow::cofgroup_stats_request &group_stats_request,
-    int timeout_in_secs,
-	uint32_t *xid) {
+    int timeout_in_secs, uint32_t *xid) {
   rofl::openflow::cofmsg *msg = nullptr;
+  uint32_t __xid = ++xid_last;
   try {
     msg = new rofl::openflow::cofmsg_group_stats_request(
-        rofchan.get_version(), ++xid_last, flags, group_stats_request);
+        rofchan.get_version(), __xid, flags, group_stats_request);
 
     if (xid != nullptr) {
-    	*xid = xid_last;
+      *xid = __xid;
     }
-    return rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
+    return rofchan.send_message(auxid, msg,
+                                ctimespec().expire_in(timeout_in_secs));
 
   } catch (eRofConnNotConnected &e) {
     VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
@@ -1031,19 +1041,21 @@ rofl::crofsock::msg_result_t crofdpt::send_group_stats_request(
   }
 }
 
-rofl::crofsock::msg_result_t crofdpt::send_group_desc_stats_request(const rofl::cauxid &auxid,
-                                                uint16_t flags,
-                                                int timeout_in_secs,
-												uint32_t *xid) {
+rofl::crofsock::msg_result_t
+crofdpt::send_group_desc_stats_request(const rofl::cauxid &auxid,
+                                       uint16_t flags, int timeout_in_secs,
+                                       uint32_t *xid) {
   rofl::openflow::cofmsg *msg = nullptr;
+  uint32_t __xid = ++xid_last;
   try {
     msg = new rofl::openflow::cofmsg_group_desc_stats_request(
-        rofchan.get_version(), ++xid_last, flags);
+        rofchan.get_version(), __xid, flags);
 
     if (xid != nullptr) {
-    	*xid = xid_last;
+      *xid = __xid;
     }
-    return rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
+    return rofchan.send_message(auxid, msg,
+                                ctimespec().expire_in(timeout_in_secs));
 
   } catch (eRofConnNotConnected &e) {
     VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
@@ -1056,19 +1068,21 @@ rofl::crofsock::msg_result_t crofdpt::send_group_desc_stats_request(const rofl::
   }
 }
 
-rofl::crofsock::msg_result_t crofdpt::send_group_features_stats_request(const rofl::cauxid &auxid,
-                                                    uint16_t flags,
-                                                    int timeout_in_secs,
-													uint32_t *xid) {
+rofl::crofsock::msg_result_t
+crofdpt::send_group_features_stats_request(const rofl::cauxid &auxid,
+                                           uint16_t flags, int timeout_in_secs,
+                                           uint32_t *xid) {
   rofl::openflow::cofmsg *msg = nullptr;
+  uint32_t __xid = ++xid_last;
   try {
     msg = new rofl::openflow::cofmsg_group_features_stats_request(
-        rofchan.get_version(), ++xid_last, flags);
+        rofchan.get_version(), __xid, flags);
 
     if (xid != nullptr) {
-    	*xid = xid_last;
+      *xid = __xid;
     }
-    return rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
+    return rofchan.send_message(auxid, msg,
+                                ctimespec().expire_in(timeout_in_secs));
 
   } catch (eRofConnNotConnected &e) {
     VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
@@ -1081,19 +1095,21 @@ rofl::crofsock::msg_result_t crofdpt::send_group_features_stats_request(const ro
   }
 }
 
-rofl::crofsock::msg_result_t crofdpt::send_table_features_stats_request(const rofl::cauxid &auxid,
-                                                    uint16_t flags,
-                                                    int timeout_in_secs,
-													uint32_t *xid) {
+rofl::crofsock::msg_result_t
+crofdpt::send_table_features_stats_request(const rofl::cauxid &auxid,
+                                           uint16_t flags, int timeout_in_secs,
+                                           uint32_t *xid) {
   rofl::openflow::cofmsg *msg = nullptr;
+  uint32_t __xid = ++xid_last;
   try {
     msg = new rofl::openflow::cofmsg_table_features_stats_request(
-        rofchan.get_version(), ++xid_last, flags);
+        rofchan.get_version(), __xid, flags);
 
     if (xid != nullptr) {
-    	*xid = xid_last;
+      *xid = __xid;
     }
-    return rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
+    return rofchan.send_message(auxid, msg,
+                                ctimespec().expire_in(timeout_in_secs));
 
   } catch (eRofConnNotConnected &e) {
     VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
@@ -1106,19 +1122,20 @@ rofl::crofsock::msg_result_t crofdpt::send_table_features_stats_request(const ro
   }
 }
 
-rofl::crofsock::msg_result_t crofdpt::send_port_desc_stats_request(const rofl::cauxid &auxid,
-                                               uint16_t flags,
-                                               int timeout_in_secs,
-											   uint32_t *xid) {
+rofl::crofsock::msg_result_t
+crofdpt::send_port_desc_stats_request(const rofl::cauxid &auxid, uint16_t flags,
+                                      int timeout_in_secs, uint32_t *xid) {
   rofl::openflow::cofmsg *msg = nullptr;
+  uint32_t __xid = ++xid_last;
   try {
     msg = new rofl::openflow::cofmsg_port_desc_stats_request(
-        rofchan.get_version(), ++xid_last, flags);
+        rofchan.get_version(), __xid, flags);
 
     if (xid != nullptr) {
-    	*xid = xid_last;
+      *xid = __xid;
     }
-    return rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
+    return rofchan.send_message(auxid, msg,
+                                ctimespec().expire_in(timeout_in_secs));
 
   } catch (eRofConnNotConnected &e) {
     VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
@@ -1131,19 +1148,22 @@ rofl::crofsock::msg_result_t crofdpt::send_port_desc_stats_request(const rofl::c
   }
 }
 
-rofl::crofsock::msg_result_t crofdpt::send_experimenter_stats_request(
-    const rofl::cauxid &auxid, uint16_t flags, uint32_t exp_id,
-    uint32_t exp_type, const cmemory &body, int timeout_in_secs,
-	uint32_t *xid) {
+rofl::crofsock::msg_result_t
+crofdpt::send_experimenter_stats_request(const rofl::cauxid &auxid,
+                                         uint16_t flags, uint32_t exp_id,
+                                         uint32_t exp_type, const cmemory &body,
+                                         int timeout_in_secs, uint32_t *xid) {
   rofl::openflow::cofmsg *msg = nullptr;
+  uint32_t __xid = ++xid_last;
   try {
     msg = new rofl::openflow::cofmsg_experimenter_stats_request(
-        rofchan.get_version(), ++xid_last, flags, exp_id, exp_type, body);
+        rofchan.get_version(), __xid, flags, exp_id, exp_type, body);
 
     if (xid != nullptr) {
-    	*xid = xid_last;
+      *xid = __xid;
     }
-    return rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
+    return rofchan.send_message(auxid, msg,
+                                ctimespec().expire_in(timeout_in_secs));
 
   } catch (eRofConnNotConnected &e) {
     VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
@@ -1159,17 +1179,18 @@ rofl::crofsock::msg_result_t crofdpt::send_experimenter_stats_request(
 rofl::crofsock::msg_result_t crofdpt::send_meter_stats_request(
     const rofl::cauxid &auxid, uint16_t stats_flags,
     const rofl::openflow::cofmeter_stats_request &meter_stats_request,
-    int timeout_in_secs,
-	uint32_t *xid) {
+    int timeout_in_secs, uint32_t *xid) {
   rofl::openflow::cofmsg *msg = nullptr;
+  uint32_t __xid = ++xid_last;
   try {
     msg = new rofl::openflow::cofmsg_meter_stats_request(
-        rofchan.get_version(), ++xid_last, stats_flags, meter_stats_request);
+        rofchan.get_version(), __xid, stats_flags, meter_stats_request);
 
     if (xid != nullptr) {
-    	*xid = xid_last;
+      *xid = __xid;
     }
-    return rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
+    return rofchan.send_message(auxid, msg,
+                                ctimespec().expire_in(timeout_in_secs));
 
   } catch (eRofConnNotConnected &e) {
     VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
@@ -1185,17 +1206,18 @@ rofl::crofsock::msg_result_t crofdpt::send_meter_stats_request(
 rofl::crofsock::msg_result_t crofdpt::send_meter_config_stats_request(
     const rofl::cauxid &auxid, uint16_t stats_flags,
     const rofl::openflow::cofmeter_config_request &meter_config_request,
-    int timeout_in_secs,
-	uint32_t *xid) {
+    int timeout_in_secs, uint32_t *xid) {
   rofl::openflow::cofmsg *msg = nullptr;
+  uint32_t __xid = ++xid_last;
   try {
     msg = new rofl::openflow::cofmsg_meter_config_stats_request(
-        rofchan.get_version(), ++xid_last, stats_flags, meter_config_request);
+        rofchan.get_version(), __xid, stats_flags, meter_config_request);
 
     if (xid != nullptr) {
-    	*xid = xid_last;
+      *xid = __xid;
     }
-    return rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
+    return rofchan.send_message(auxid, msg,
+                                ctimespec().expire_in(timeout_in_secs));
 
   } catch (eRofConnNotConnected &e) {
     VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
@@ -1208,19 +1230,21 @@ rofl::crofsock::msg_result_t crofdpt::send_meter_config_stats_request(
   }
 }
 
-rofl::crofsock::msg_result_t crofdpt::send_meter_features_stats_request(const rofl::cauxid &auxid,
-                                                    uint16_t stats_flags,
-                                                    int timeout_in_secs,
-													uint32_t *xid) {
+rofl::crofsock::msg_result_t
+crofdpt::send_meter_features_stats_request(const rofl::cauxid &auxid,
+                                           uint16_t stats_flags,
+                                           int timeout_in_secs, uint32_t *xid) {
   rofl::openflow::cofmsg *msg = nullptr;
+  uint32_t __xid = ++xid_last;
   try {
     msg = new rofl::openflow::cofmsg_meter_features_stats_request(
-        rofchan.get_version(), ++xid_last, stats_flags);
+        rofchan.get_version(), __xid, stats_flags);
 
     if (xid != nullptr) {
-    	*xid = xid_last;
+      *xid = __xid;
     }
-    return rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
+    return rofchan.send_message(auxid, msg,
+                                ctimespec().expire_in(timeout_in_secs));
 
   } catch (eRofConnNotConnected &e) {
     VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
@@ -1233,17 +1257,20 @@ rofl::crofsock::msg_result_t crofdpt::send_meter_features_stats_request(const ro
   }
 }
 
-rofl::crofsock::msg_result_t crofdpt::send_packet_out_message(
-    const rofl::cauxid &auxid, uint32_t buffer_id, uint32_t in_port,
-    const rofl::openflow::cofactions &actions, uint8_t *data, size_t datalen,
-	uint32_t *xid) {
+rofl::crofsock::msg_result_t
+crofdpt::send_packet_out_message(const rofl::cauxid &auxid, uint32_t buffer_id,
+                                 uint32_t in_port,
+                                 const rofl::openflow::cofactions &actions,
+                                 uint8_t *data, size_t datalen, uint32_t *xid) {
   rofl::openflow::cofmsg *msg = nullptr;
+  uint32_t __xid = ++xid_last;
   try {
-    msg = new rofl::openflow::cofmsg_packet_out(
-        rofchan.get_version(), ++xid_last, buffer_id, in_port, actions, data, datalen);
+    msg = new rofl::openflow::cofmsg_packet_out(rofchan.get_version(), __xid,
+                                                buffer_id, in_port, actions,
+                                                data, datalen);
 
     if (xid != nullptr) {
-    	*xid = xid_last;
+      *xid = __xid;
     }
     return rofchan.send_message(auxid, msg);
 
@@ -1258,18 +1285,20 @@ rofl::crofsock::msg_result_t crofdpt::send_packet_out_message(
   }
 }
 
-rofl::crofsock::msg_result_t crofdpt::send_barrier_request(const rofl::cauxid &auxid,
-                                       int timeout_in_secs,
-									   uint32_t *xid) {
+rofl::crofsock::msg_result_t
+crofdpt::send_barrier_request(const rofl::cauxid &auxid, int timeout_in_secs,
+                              uint32_t *xid) {
   rofl::openflow::cofmsg *msg = nullptr;
+  uint32_t __xid = ++xid_last;
   try {
-    msg =
-        new rofl::openflow::cofmsg_barrier_request(rofchan.get_version(), ++xid_last);
+    msg = new rofl::openflow::cofmsg_barrier_request(rofchan.get_version(),
+                                                     __xid);
 
     if (xid != nullptr) {
-    	*xid = xid_last;
+      *xid = __xid;
     }
-    return rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
+    return rofchan.send_message(auxid, msg,
+                                ctimespec().expire_in(timeout_in_secs));
 
   } catch (eRofConnNotConnected &e) {
     VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
@@ -1282,19 +1311,21 @@ rofl::crofsock::msg_result_t crofdpt::send_barrier_request(const rofl::cauxid &a
   }
 }
 
-rofl::crofsock::msg_result_t crofdpt::send_role_request(const rofl::cauxid &auxid,
-                                    const rofl::openflow::cofrole &role,
-                                    int timeout_in_secs,
-									uint32_t *xid) {
+rofl::crofsock::msg_result_t
+crofdpt::send_role_request(const rofl::cauxid &auxid,
+                           const rofl::openflow::cofrole &role,
+                           int timeout_in_secs, uint32_t *xid) {
   rofl::openflow::cofmsg *msg = nullptr;
+  uint32_t __xid = ++xid_last;
   try {
-    msg = new rofl::openflow::cofmsg_role_request(rofchan.get_version(), ++xid_last,
+    msg = new rofl::openflow::cofmsg_role_request(rofchan.get_version(), __xid,
                                                   role);
 
     if (xid != nullptr) {
-    	*xid = xid_last;
+      *xid = __xid;
     }
-    return rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
+    return rofchan.send_message(auxid, msg,
+                                ctimespec().expire_in(timeout_in_secs));
 
   } catch (eRofConnNotConnected &e) {
     VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
@@ -1307,15 +1338,17 @@ rofl::crofsock::msg_result_t crofdpt::send_role_request(const rofl::cauxid &auxi
   }
 }
 
-rofl::crofsock::msg_result_t crofdpt::send_flow_mod_message(const rofl::cauxid &auxid,
-                                        const rofl::openflow::cofflowmod &fe,
-										uint32_t *xid) {
+rofl::crofsock::msg_result_t
+crofdpt::send_flow_mod_message(const rofl::cauxid &auxid,
+                               const rofl::openflow::cofflowmod &fe,
+                               uint32_t *xid) {
   rofl::openflow::cofmsg *msg = nullptr;
+  uint32_t __xid = ++xid_last;
   try {
-    msg = new rofl::openflow::cofmsg_flow_mod(rofchan.get_version(), ++xid_last, fe);
+    msg = new rofl::openflow::cofmsg_flow_mod(rofchan.get_version(), __xid, fe);
 
     if (xid != nullptr) {
-    	*xid = xid_last;
+      *xid = __xid;
     }
     return rofchan.send_message(auxid, msg);
 
@@ -1330,15 +1363,18 @@ rofl::crofsock::msg_result_t crofdpt::send_flow_mod_message(const rofl::cauxid &
   }
 }
 
-rofl::crofsock::msg_result_t crofdpt::send_group_mod_message(const rofl::cauxid &auxid,
+rofl::crofsock::msg_result_t
+crofdpt::send_group_mod_message(const rofl::cauxid &auxid,
                                 const rofl::openflow::cofgroupmod &ge,
-								uint32_t *xid) {
+                                uint32_t *xid) {
   rofl::openflow::cofmsg *msg = nullptr;
+  uint32_t __xid = ++xid_last;
   try {
-    msg = new rofl::openflow::cofmsg_group_mod(rofchan.get_version(), ++xid_last, ge);
+    msg =
+        new rofl::openflow::cofmsg_group_mod(rofchan.get_version(), __xid, ge);
 
     if (xid != nullptr) {
-    	*xid = xid_last;
+      *xid = __xid;
     }
     return rofchan.send_message(auxid, msg);
 
@@ -1353,16 +1389,17 @@ rofl::crofsock::msg_result_t crofdpt::send_group_mod_message(const rofl::cauxid 
   }
 }
 
-rofl::crofsock::msg_result_t crofdpt::send_table_mod_message(const rofl::cauxid &auxid,
-                                         uint8_t table_id, uint32_t config,
-										 uint32_t *xid) {
+rofl::crofsock::msg_result_t
+crofdpt::send_table_mod_message(const rofl::cauxid &auxid, uint8_t table_id,
+                                uint32_t config, uint32_t *xid) {
   rofl::openflow::cofmsg *msg = nullptr;
+  uint32_t __xid = ++xid_last;
   try {
-    msg = new rofl::openflow::cofmsg_table_mod(rofchan.get_version(), ++xid_last,
+    msg = new rofl::openflow::cofmsg_table_mod(rofchan.get_version(), __xid,
                                                table_id, config);
 
     if (xid != nullptr) {
-    	*xid = xid_last;
+      *xid = __xid;
     }
     return rofchan.send_message(auxid, msg);
 
@@ -1377,19 +1414,17 @@ rofl::crofsock::msg_result_t crofdpt::send_table_mod_message(const rofl::cauxid 
   }
 }
 
-rofl::crofsock::msg_result_t crofdpt::send_port_mod_message(const rofl::cauxid &auxid,
-                                        uint32_t port_no,
-                                        const caddress_ll &hwaddr,
-                                        uint32_t config, uint32_t mask,
-                                        uint32_t advertise,
-										uint32_t *xid) {
+rofl::crofsock::msg_result_t crofdpt::send_port_mod_message(
+    const rofl::cauxid &auxid, uint32_t port_no, const caddress_ll &hwaddr,
+    uint32_t config, uint32_t mask, uint32_t advertise, uint32_t *xid) {
   rofl::openflow::cofmsg *msg = nullptr;
+  uint32_t __xid = ++xid_last;
   try {
     msg = new rofl::openflow::cofmsg_port_mod(
-        rofchan.get_version(), ++xid_last, port_no, hwaddr, config, mask, advertise);
+        rofchan.get_version(), __xid, port_no, hwaddr, config, mask, advertise);
 
     if (xid != nullptr) {
-    	*xid = xid_last;
+      *xid = __xid;
     }
     return rofchan.send_message(auxid, msg);
 
@@ -1413,17 +1448,17 @@ rofl::crofsock::msg_result_t crofdpt::send_port_mod_message(const rofl::cauxid &
   }
 }
 
-rofl::crofsock::msg_result_t crofdpt::send_set_config_message(const rofl::cauxid &auxid,
-                                          uint16_t flags,
-                                          uint16_t miss_send_len,
-										  uint32_t *xid) {
+rofl::crofsock::msg_result_t
+crofdpt::send_set_config_message(const rofl::cauxid &auxid, uint16_t flags,
+                                 uint16_t miss_send_len, uint32_t *xid) {
   rofl::openflow::cofmsg *msg = nullptr;
+  uint32_t __xid = ++xid_last;
   try {
-    msg = new rofl::openflow::cofmsg_set_config(rofchan.get_version(), ++xid_last,
+    msg = new rofl::openflow::cofmsg_set_config(rofchan.get_version(), __xid,
                                                 flags, miss_send_len);
 
     if (xid != nullptr) {
-    	*xid = xid_last;
+      *xid = __xid;
     }
     return rofchan.send_message(auxid, msg);
 
@@ -1443,19 +1478,20 @@ rofl::crofsock::msg_result_t crofdpt::send_set_config_message(const rofl::cauxid
   }
 }
 
-rofl::crofsock::msg_result_t crofdpt::send_queue_get_config_request(const rofl::cauxid &auxid,
-                                                uint32_t port,
-                                                int timeout_in_secs,
-												uint32_t *xid) {
+rofl::crofsock::msg_result_t
+crofdpt::send_queue_get_config_request(const rofl::cauxid &auxid, uint32_t port,
+                                       int timeout_in_secs, uint32_t *xid) {
   rofl::openflow::cofmsg *msg = nullptr;
+  uint32_t __xid = ++xid_last;
   try {
     msg = new rofl::openflow::cofmsg_queue_get_config_request(
-        rofchan.get_version(), ++xid_last, port);
+        rofchan.get_version(), __xid, port);
 
     if (xid != nullptr) {
-    	*xid = xid_last;
+      *xid = __xid;
     }
-    return rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
+    return rofchan.send_message(auxid, msg,
+                                ctimespec().expire_in(timeout_in_secs));
 
   } catch (eRofConnNotConnected &e) {
     VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
@@ -1468,18 +1504,20 @@ rofl::crofsock::msg_result_t crofdpt::send_queue_get_config_request(const rofl::
   }
 }
 
-rofl::crofsock::msg_result_t crofdpt::send_get_async_config_request(const rofl::cauxid &auxid,
-                                                int timeout_in_secs,
-												uint32_t *xid) {
+rofl::crofsock::msg_result_t
+crofdpt::send_get_async_config_request(const rofl::cauxid &auxid,
+                                       int timeout_in_secs, uint32_t *xid) {
   rofl::openflow::cofmsg *msg = nullptr;
+  uint32_t __xid = ++xid_last;
   try {
     msg = new rofl::openflow::cofmsg_get_async_config_request(
-        rofchan.get_version(), ++xid_last);
+        rofchan.get_version(), __xid);
 
     if (xid != nullptr) {
-    	*xid = xid_last;
+      *xid = __xid;
     }
-    return rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
+    return rofchan.send_message(auxid, msg,
+                                ctimespec().expire_in(timeout_in_secs));
 
   } catch (eRofConnNotConnected &e) {
     VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
@@ -1494,15 +1532,15 @@ rofl::crofsock::msg_result_t crofdpt::send_get_async_config_request(const rofl::
 
 rofl::crofsock::msg_result_t crofdpt::send_set_async_config_message(
     const rofl::cauxid &auxid,
-    const rofl::openflow::cofasync_config &async_config,
-	uint32_t *xid) {
+    const rofl::openflow::cofasync_config &async_config, uint32_t *xid) {
   rofl::openflow::cofmsg *msg = nullptr;
+  uint32_t __xid = ++xid_last;
   try {
     msg = new rofl::openflow::cofmsg_set_async_config(rofchan.get_version(),
-    		++xid_last, async_config);
+                                                      __xid, async_config);
 
     if (xid != nullptr) {
-    	*xid = xid_last;
+      *xid = __xid;
     }
     return rofchan.send_message(auxid, msg);
 
@@ -1520,14 +1558,15 @@ rofl::crofsock::msg_result_t crofdpt::send_set_async_config_message(
 rofl::crofsock::msg_result_t crofdpt::send_meter_mod_message(
     const rofl::cauxid &auxid, uint16_t command, uint16_t flags,
     uint32_t meter_id, const rofl::openflow::cofmeter_bands &meter_bands,
-	uint32_t *xid) {
+    uint32_t *xid) {
   rofl::openflow::cofmsg *msg = nullptr;
+  uint32_t __xid = ++xid_last;
   try {
     msg = new rofl::openflow::cofmsg_meter_mod(
-        rofchan.get_version(), ++xid_last, command, flags, meter_id, meter_bands);
+        rofchan.get_version(), __xid, command, flags, meter_id, meter_bands);
 
     if (xid != nullptr) {
-    	*xid = xid_last;
+      *xid = __xid;
     }
     return rofchan.send_message(auxid, msg);
 
@@ -1542,12 +1581,13 @@ rofl::crofsock::msg_result_t crofdpt::send_meter_mod_message(
   }
 }
 
-rofl::crofsock::msg_result_t crofdpt::send_error_message(const rofl::cauxid &auxid, uint32_t xid,
-                                 uint16_t type, uint16_t code, uint8_t *data,
-                                 size_t datalen) {
+rofl::crofsock::msg_result_t
+crofdpt::send_error_message(const rofl::cauxid &auxid, uint32_t xid,
+                            uint16_t type, uint16_t code, uint8_t *data,
+                            size_t datalen) {
   rofl::openflow::cofmsg *msg = nullptr;
   try {
-    msg = new rofl::openflow::cofmsg_error(rofchan.get_version(), ++xid_last, type,
+    msg = new rofl::openflow::cofmsg_error(rofchan.get_version(), xid, type,
                                            code, data, datalen);
 
     return rofchan.send_message(auxid, msg);
@@ -1572,7 +1612,8 @@ rofl::crofsock::msg_result_t crofdpt::send_experimenter_message(
         rofchan.get_version(), xid, experimenter_id, exp_type, body, bodylen);
 
     if (timeout_in_secs > 0) {
-      return rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
+      return rofchan.send_message(auxid, msg,
+                                  ctimespec().expire_in(timeout_in_secs));
     } else {
       return rofchan.send_message(auxid, msg);
     }

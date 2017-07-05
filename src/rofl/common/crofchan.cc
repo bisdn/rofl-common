@@ -25,7 +25,8 @@ bool crofchan::is_established() const {
   return conns.at(cauxid(0))->is_established();
 }
 
-rofl::crofsock::msg_result_t crofchan::send_message(const cauxid &auxid, rofl::openflow::cofmsg *msg) {
+rofl::crofsock::msg_result_t
+crofchan::send_message(const cauxid &auxid, rofl::openflow::cofmsg *msg) {
   AcquireReadLock rwlock(conns_rwlock);
   if (not is_established()) {
     throw eRofConnNotConnected(
@@ -49,8 +50,9 @@ rofl::crofsock::msg_result_t crofchan::send_message(const cauxid &auxid, rofl::o
   return conns[auxid]->send_message(msg);
 }
 
-rofl::crofsock::msg_result_t crofchan::send_message(const cauxid &auxid, rofl::openflow::cofmsg *msg,
-                            const ctimespec &ts) {
+rofl::crofsock::msg_result_t crofchan::send_message(const cauxid &auxid,
+                                                    rofl::openflow::cofmsg *msg,
+                                                    const ctimespec &ts) {
   AcquireReadLock rwlock(conns_rwlock);
   if (not is_established()) {
     throw eRofConnNotConnected(

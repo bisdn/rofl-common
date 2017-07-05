@@ -100,8 +100,8 @@ public:
   size_t store(rofl::openflow::cofmsg *msg, bool enforce = false) {
     AcquireReadWriteLock rwlock(queue_lock);
     if ((not enforce) && (queue.size() >= queue_max_size)) {
-      throw eRofQueueFull("crofqueue::store() queue max size exceeded", __FILE__,
-              __FUNCTION__, __LINE__);
+      throw eRofQueueFull("crofqueue::store() queue max size exceeded",
+                          __FILE__, __FUNCTION__, __LINE__);
     }
     queue.push_back(msg);
     return queue.size();

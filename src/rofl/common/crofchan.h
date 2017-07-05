@@ -159,13 +159,15 @@ public:
   /**
    *
    */
-  rofl::crofsock::msg_result_t send_message(const cauxid &auxid, rofl::openflow::cofmsg *msg);
+  rofl::crofsock::msg_result_t send_message(const cauxid &auxid,
+                                            rofl::openflow::cofmsg *msg);
 
   /**
    *
    */
-  rofl::crofsock::msg_result_t send_message(const cauxid &auxid, rofl::openflow::cofmsg *msg,
-                    const ctimespec &ts);
+  rofl::crofsock::msg_result_t send_message(const cauxid &auxid,
+                                            rofl::openflow::cofmsg *msg,
+                                            const ctimespec &ts);
 
 public:
   /**

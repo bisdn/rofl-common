@@ -2172,12 +2172,10 @@ void crofctl::handle_transaction_timeout(crofchan &chan, crofconn &conn,
   }
 }
 
-rofl::crofsock::msg_result_t crofctl::send_features_reply(const cauxid &auxid, uint32_t xid,
-                                  uint64_t dpid, uint32_t n_buffers,
-                                  uint8_t n_tables, uint32_t capabilities,
-                                  uint8_t of13_auxiliary_id,
-                                  uint32_t of10_actions_bitmap,
-                                  const rofl::openflow::cofports &ports) {
+rofl::crofsock::msg_result_t crofctl::send_features_reply(
+    const cauxid &auxid, uint32_t xid, uint64_t dpid, uint32_t n_buffers,
+    uint8_t n_tables, uint32_t capabilities, uint8_t of13_auxiliary_id,
+    uint32_t of10_actions_bitmap, const rofl::openflow::cofports &ports) {
   rofl::openflow::cofmsg *msg = nullptr;
   try {
     msg = new rofl::openflow::cofmsg_features_reply(
@@ -2197,8 +2195,9 @@ rofl::crofsock::msg_result_t crofctl::send_features_reply(const cauxid &auxid, u
   }
 }
 
-rofl::crofsock::msg_result_t crofctl::send_get_config_reply(const cauxid &auxid, uint32_t xid,
-                                    uint16_t flags, uint16_t miss_send_len) {
+rofl::crofsock::msg_result_t
+crofctl::send_get_config_reply(const cauxid &auxid, uint32_t xid,
+                               uint16_t flags, uint16_t miss_send_len) {
   rofl::openflow::cofmsg *msg = nullptr;
   try {
     msg = new rofl::openflow::cofmsg_get_config_reply(
@@ -2437,9 +2436,10 @@ rofl::crofsock::msg_result_t crofctl::send_table_features_stats_reply(
   }
 }
 
-rofl::crofsock::msg_result_t crofctl::send_port_desc_stats_reply(const cauxid &auxid, uint32_t xid,
-                                         const rofl::openflow::cofports &ports,
-                                         uint16_t stats_flags) {
+rofl::crofsock::msg_result_t
+crofctl::send_port_desc_stats_reply(const cauxid &auxid, uint32_t xid,
+                                    const rofl::openflow::cofports &ports,
+                                    uint16_t stats_flags) {
   rofl::openflow::cofmsg *msg = nullptr;
   try {
     msg = new rofl::openflow::cofmsg_port_desc_stats_reply(
@@ -2458,10 +2458,9 @@ rofl::crofsock::msg_result_t crofctl::send_port_desc_stats_reply(const cauxid &a
   }
 }
 
-rofl::crofsock::msg_result_t crofctl::send_experimenter_stats_reply(const cauxid &auxid, uint32_t xid,
-                                            uint32_t exp_id, uint32_t exp_type,
-                                            const cmemory &body,
-                                            uint16_t stats_flags) {
+rofl::crofsock::msg_result_t crofctl::send_experimenter_stats_reply(
+    const cauxid &auxid, uint32_t xid, uint32_t exp_id, uint32_t exp_type,
+    const cmemory &body, uint16_t stats_flags) {
   rofl::openflow::cofmsg *msg = nullptr;
   try {
     msg = new rofl::openflow::cofmsg_experimenter_stats_reply(
@@ -2546,18 +2545,17 @@ rofl::crofsock::msg_result_t crofctl::send_meter_features_stats_reply(
   }
 }
 
-rofl::crofsock::msg_result_t crofctl::send_packet_in_message(const cauxid &auxid, uint32_t buffer_id,
-                                     uint16_t total_len, uint8_t reason,
-                                     uint8_t table_id, uint64_t cookie,
-                                     uint16_t in_port, // for OF 1.0
-                                     const rofl::openflow::cofmatch &match,
-                                     uint8_t *data, size_t datalen) {
+rofl::crofsock::msg_result_t crofctl::send_packet_in_message(
+    const cauxid &auxid, uint32_t buffer_id, uint16_t total_len, uint8_t reason,
+    uint8_t table_id, uint64_t cookie,
+    uint16_t in_port, // for OF 1.0
+    const rofl::openflow::cofmatch &match, uint8_t *data, size_t datalen) {
   rofl::openflow::cofmsg *msg = nullptr;
   try {
     switch (rofchan.get_version()) {
     case rofl::openflow12::OFP_VERSION: {
       if (is_slave()) {
-        return rofl::crofsock::MSG_QUEUED;
+        return rofl::crofsock::MSG_IGNORED;
       }
     } break;
     case rofl::openflow13::OFP_VERSION: {
@@ -2565,12 +2563,12 @@ rofl::crofsock::msg_result_t crofctl::send_packet_in_message(const cauxid &auxid
       case rofl::openflow13::OFPCR_ROLE_EQUAL:
       case rofl::openflow13::OFPCR_ROLE_MASTER: {
         if (not(async_config.get_packet_in_mask_master() & (1 << reason))) {
-          return rofl::crofsock::MSG_QUEUED;
+          return rofl::crofsock::MSG_IGNORED;
         }
       } break;
       case rofl::openflow13::OFPCR_ROLE_SLAVE: {
         if (not(async_config.get_packet_in_mask_slave() & (1 << reason))) {
-          return rofl::crofsock::MSG_QUEUED;
+          return rofl::crofsock::MSG_IGNORED;
         }
       } break;
       default: {
@@ -2601,7 +2599,8 @@ rofl::crofsock::msg_result_t crofctl::send_packet_in_message(const cauxid &auxid
   }
 }
 
-rofl::crofsock::msg_result_t crofctl::send_barrier_reply(const cauxid &auxid, uint32_t xid) {
+rofl::crofsock::msg_result_t crofctl::send_barrier_reply(const cauxid &auxid,
+                                                         uint32_t xid) {
   rofl::openflow::cofmsg *msg = nullptr;
   try {
     msg = new rofl::openflow::cofmsg_barrier_reply(rofchan.get_version(), xid);
@@ -2619,8 +2618,9 @@ rofl::crofsock::msg_result_t crofctl::send_barrier_reply(const cauxid &auxid, ui
   }
 }
 
-rofl::crofsock::msg_result_t crofctl::send_role_reply(const cauxid &auxid, uint32_t xid,
-                              const rofl::openflow::cofrole &role) {
+rofl::crofsock::msg_result_t
+crofctl::send_role_reply(const cauxid &auxid, uint32_t xid,
+                         const rofl::openflow::cofrole &role) {
   rofl::openflow::cofmsg *msg = nullptr;
   try {
     msg =
@@ -2639,9 +2639,9 @@ rofl::crofsock::msg_result_t crofctl::send_role_reply(const cauxid &auxid, uint3
   }
 }
 
-rofl::crofsock::msg_result_t crofctl::send_error_message(const cauxid &auxid, uint32_t xid,
-                                 uint16_t type, uint16_t code, uint8_t *data,
-                                 size_t datalen) {
+rofl::crofsock::msg_result_t
+crofctl::send_error_message(const cauxid &auxid, uint32_t xid, uint16_t type,
+                            uint16_t code, uint8_t *data, size_t datalen) {
   rofl::openflow::cofmsg *msg = nullptr;
   try {
     msg = new rofl::openflow::cofmsg_error(rofchan.get_version(), xid, type,
@@ -2660,17 +2660,17 @@ rofl::crofsock::msg_result_t crofctl::send_error_message(const cauxid &auxid, ui
   }
 }
 
-rofl::crofsock::msg_result_t crofctl::send_experimenter_message(const cauxid &auxid, uint32_t xid,
-                                        uint32_t experimenter_id,
-                                        uint32_t exp_type, uint8_t *body,
-                                        size_t bodylen, int timeout_in_secs) {
+rofl::crofsock::msg_result_t crofctl::send_experimenter_message(
+    const cauxid &auxid, uint32_t xid, uint32_t experimenter_id,
+    uint32_t exp_type, uint8_t *body, size_t bodylen, int timeout_in_secs) {
   rofl::openflow::cofmsg *msg = nullptr;
   try {
     msg = new rofl::openflow::cofmsg_experimenter(
         rofchan.get_version(), xid, experimenter_id, exp_type, body, bodylen);
 
     if (timeout_in_secs > 0) {
-      return rofchan.send_message(auxid, msg, ctimespec().expire_in(timeout_in_secs));
+      return rofchan.send_message(auxid, msg,
+                                  ctimespec().expire_in(timeout_in_secs));
     } else {
       return rofchan.send_message(auxid, msg);
     }
@@ -2696,7 +2696,7 @@ rofl::crofsock::msg_result_t crofctl::send_flow_removed_message(
     switch (rofchan.get_version()) {
     case rofl::openflow12::OFP_VERSION: {
       if (is_slave()) {
-        return rofl::crofsock::MSG_QUEUED;
+        return rofl::crofsock::MSG_IGNORED;
       }
     } break;
     case rofl::openflow13::OFP_VERSION: {
@@ -2704,12 +2704,12 @@ rofl::crofsock::msg_result_t crofctl::send_flow_removed_message(
       case rofl::openflow13::OFPCR_ROLE_EQUAL:
       case rofl::openflow13::OFPCR_ROLE_MASTER: {
         if (not(async_config.get_flow_removed_mask_master() & (1 << reason))) {
-          return rofl::crofsock::MSG_QUEUED;
+          return rofl::crofsock::MSG_IGNORED;
         }
       } break;
       case rofl::openflow13::OFPCR_ROLE_SLAVE: {
         if (not(async_config.get_flow_removed_mask_slave() & (1 << reason))) {
-          return rofl::crofsock::MSG_QUEUED;
+          return rofl::crofsock::MSG_IGNORED;
         }
       } break;
       default: {
@@ -2740,8 +2740,9 @@ rofl::crofsock::msg_result_t crofctl::send_flow_removed_message(
   }
 }
 
-rofl::crofsock::msg_result_t crofctl::send_port_status_message(const cauxid &auxid, uint8_t reason,
-                                       const rofl::openflow::cofport &port) {
+rofl::crofsock::msg_result_t
+crofctl::send_port_status_message(const cauxid &auxid, uint8_t reason,
+                                  const rofl::openflow::cofport &port) {
   rofl::openflow::cofmsg *msg = nullptr;
   try {
     switch (rofchan.get_version()) {
@@ -2753,12 +2754,12 @@ rofl::crofsock::msg_result_t crofctl::send_port_status_message(const cauxid &aux
       case rofl::openflow13::OFPCR_ROLE_EQUAL:
       case rofl::openflow13::OFPCR_ROLE_MASTER: {
         if (not(async_config.get_port_status_mask_master() & (1 << reason))) {
-          return rofl::crofsock::MSG_QUEUED;
+          return rofl::crofsock::MSG_IGNORED;
         }
       } break;
       case rofl::openflow13::OFPCR_ROLE_SLAVE: {
         if (not(async_config.get_port_status_mask_slave() & (1 << reason))) {
-          return rofl::crofsock::MSG_QUEUED;
+          return rofl::crofsock::MSG_IGNORED;
         }
       } break;
       default: {

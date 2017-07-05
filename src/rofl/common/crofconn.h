@@ -268,7 +268,8 @@ public:
   /**
    * @brief	Send OFP message via socket with expiration timer
    */
-  rofl::crofsock::msg_result_t send_message(rofl::openflow::cofmsg *msg, const ctimespec &ts);
+  rofl::crofsock::msg_result_t send_message(rofl::openflow::cofmsg *msg,
+                                            const ctimespec &ts);
 
 public:
   /**
@@ -741,13 +742,13 @@ private:
   /**
    *
    */
-  rofl::crofsock::msg_result_t segment_and_send_message(rofl::openflow::cofmsg *msg);
+  rofl::crofsock::msg_result_t
+  segment_and_send_message(rofl::openflow::cofmsg *msg);
 
   /**
    *
    */
-  rofl::crofsock::msg_result_t
-  segment_table_features_stats_request(
+  rofl::crofsock::msg_result_t segment_table_features_stats_request(
       rofl::openflow::cofmsg_table_features_stats_request *msg);
 
   /**
@@ -783,22 +784,19 @@ private:
   /**
    *
    */
-  rofl::crofsock::msg_result_t
-  segment_group_desc_stats_reply(
+  rofl::crofsock::msg_result_t segment_group_desc_stats_reply(
       rofl::openflow::cofmsg_group_desc_stats_reply *msg);
 
   /**
    *
    */
-  rofl::crofsock::msg_result_t
-  segment_table_features_stats_reply(
+  rofl::crofsock::msg_result_t segment_table_features_stats_reply(
       rofl::openflow::cofmsg_table_features_stats_reply *msg);
 
   /**
    *
    */
-  rofl::crofsock::msg_result_t
-  segment_port_desc_stats_reply(
+  rofl::crofsock::msg_result_t segment_port_desc_stats_reply(
       rofl::openflow::cofmsg_port_desc_stats_reply *msg);
 
   /**
@@ -810,8 +808,7 @@ private:
   /**
    *
    */
-  rofl::crofsock::msg_result_t
-  segment_meter_config_stats_reply(
+  rofl::crofsock::msg_result_t segment_meter_config_stats_reply(
       rofl::openflow::cofmsg_meter_config_stats_reply *msg);
 
 private:

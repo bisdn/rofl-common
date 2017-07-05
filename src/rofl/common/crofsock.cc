@@ -1288,7 +1288,8 @@ void crofsock::handle_timeout(cthread &thread, uint32_t timer_id) {
   }
 }
 
-enum crofsock::msg_result_t crofsock::send_message(rofl::openflow::cofmsg *msg, bool enforce_queueing, bool keep_message) {
+crofsock::msg_result_t crofsock::send_message(rofl::openflow::cofmsg *msg,
+                                              bool enforce_queueing) {
 
   VLOG(3) << __FUNCTION__ << " msg=" << msg
           << " txqueue_pending_pkts=" << txqueue_pending_pkts
@@ -1296,17 +1297,16 @@ enum crofsock::msg_result_t crofsock::send_message(rofl::openflow::cofmsg *msg, 
           << " tx_is_running=" << tx_is_running;
 
   if (tx_disabled) {
-	if (!keep_message) {
-      delete msg;
-	}
-    /* connection shutdown in progress, a very specific form of congestion ..., message is deleted */
+    delete msg;
+    /* connection shutdown in progress, a very specific form of congestion ...,
+     * message is deleted */
     return MSG_QUEUEING_FAILED_SHUTDOWN_IN_PROGRESS;
   }
 
   if ((state != STATE_TCP_ESTABLISHED) && (state != STATE_TLS_ESTABLISHED)) {
-	if (!keep_message) {
-      delete msg;
-	}
+
+    delete msg;
+
     /* connection is not established: message is deleted */
     return MSG_QUEUEING_FAILED_NOT_ESTABLISHED;
   }
@@ -1365,7 +1365,7 @@ enum crofsock::msg_result_t crofsock::send_message(rofl::openflow::cofmsg *msg, 
       switch (msg->get_type()) {
       case rofl::openflow13::OFPT_PACKET_IN:
       case rofl::openflow13::OFPT_PACKET_OUT: {
-         txqueues[QUEUE_PKT].store(msg, enforce_queueing);
+        txqueues[QUEUE_PKT].store(msg, enforce_queueing);
       } break;
       case rofl::openflow13::OFPT_FLOW_MOD:
       case rofl::openflow13::OFPT_FLOW_REMOVED:
@@ -1390,7 +1390,6 @@ enum crofsock::msg_result_t crofsock::send_message(rofl::openflow::cofmsg *msg, 
       txthread.wakeup();
     }
 
-
     if (flag_test(FLAG_TX_BLOCK_QUEUEING)) {
       /* message was queued, but congestion prevents us from sending it */
       return MSG_QUEUED_CONGESTION;
@@ -1399,18 +1398,15 @@ enum crofsock::msg_result_t crofsock::send_message(rofl::openflow::cofmsg *msg, 
     /* message was queued, waiting for transmission */
     return MSG_QUEUED;
 
-  } catch (eRofQueueFull& e) {
-	  VLOG(3) << __FUNCTION__
-			  << " txqueue exhausted, "
-			  << " msg=" << msg
-	          << " txqueue_pending_pkts=" << txqueue_pending_pkts
-	          << " tx_disabled=" << tx_disabled
-	          << " tx_is_running=" << tx_is_running;
-	  if (!keep_message) {
-	    delete msg;
-	  }
-	  /* message was not stored in txqueue and deleted here */
-	  return MSG_QUEUEING_FAILED_QUEUE_FULL;
+  } catch (eRofQueueFull &e) {
+    VLOG(3) << __FUNCTION__ << " txqueue exhausted, "
+            << " msg=" << msg
+            << " txqueue_pending_pkts=" << txqueue_pending_pkts
+            << " tx_disabled=" << tx_disabled
+            << " tx_is_running=" << tx_is_running;
+    delete msg;
+    /* message was not stored in txqueue and deleted here */
+    return MSG_QUEUEING_FAILED_QUEUE_FULL;
   }
 }
 

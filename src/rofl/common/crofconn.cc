@@ -1369,7 +1369,7 @@ void crofconn::handle_rx_multipart_message(rofl::openflow::cofmsg *msg) {
 }
 
 rofl::crofsock::msg_result_t crofconn::send_message(rofl::openflow::cofmsg *msg,
-                                    const ctimespec &ts) {
+                                                    const ctimespec &ts) {
 
   switch (msg->get_version()) {
   case rofl::openflow10::OFP_VERSION: {
@@ -1417,8 +1417,9 @@ rofl::crofsock::msg_result_t crofconn::send_message(rofl::openflow::cofmsg *msg,
   return segment_and_send_message(msg);
 };
 
-rofl::crofsock::msg_result_t crofconn::segment_and_send_message(rofl::openflow::cofmsg *msg) {
-  rofl::crofsock::msg_result_t msg_result = rofl::crofsock::MSG_QUEUED;
+rofl::crofsock::msg_result_t
+crofconn::segment_and_send_message(rofl::openflow::cofmsg *msg) {
+  rofl::crofsock::msg_result_t msg_result = rofl::crofsock::MSG_IGNORED;
 
   VLOG(3) << __FUNCTION__ << " state: " << state
           << " message sent: " << msg->str().c_str();
@@ -1529,8 +1530,9 @@ rofl::crofsock::msg_result_t crofconn::segment_and_send_message(rofl::openflow::
         } break;
         case rofl::openflow13::OFPMP_METER_FEATURES: {
           // no array in meter-features, so no need to segment
-          msg_result = rofsock.send_message(msg); // default behaviour for now: send message
-                                                  // directly to rofsock
+          msg_result = rofsock.send_message(
+              msg); // default behaviour for now: send message
+                    // directly to rofsock
         } break;
         }
 
@@ -1579,7 +1581,7 @@ rofl::crofsock::msg_result_t crofconn::segment_table_features_stats_request(
     /* when enforcing queueing, there are only two return values possible:
      * MSQ_QUEUED and MSG_QUEUED_CONGESTION. We return the result received for
      * the last fragment. */
-    msg_result = rofsock.send_message(msg, /*enforce-queueing*/true);
+    msg_result = rofsock.send_message(msg, /*enforce-queueing*/ true);
   }
 
   return msg_result;
@@ -1621,7 +1623,7 @@ rofl::crofsock::msg_result_t crofconn::segment_table_features_stats_reply(
     /* when enforcing queueing, there are only two return values possible:
      * MSQ_QUEUED and MSG_QUEUED_CONGESTION. We return the result received for
      * the last fragment. */
-    msg_result = rofsock.send_message(msg, /*enforce-queueing*/true);
+    msg_result = rofsock.send_message(msg, /*enforce-queueing*/ true);
   }
 
   return msg_result;
@@ -1664,7 +1666,7 @@ rofl::crofsock::msg_result_t crofconn::segment_flow_stats_reply(
     /* when enforcing queueing, there are only two return values possible:
      * MSQ_QUEUED and MSG_QUEUED_CONGESTION. We return the result received for
      * the last fragment. */
-    msg_result = rofsock.send_message(msg, /*enforce-queueing*/true);
+    msg_result = rofsock.send_message(msg, /*enforce-queueing*/ true);
   }
 
   return msg_result;
@@ -1707,7 +1709,7 @@ rofl::crofsock::msg_result_t crofconn::segment_group_desc_stats_reply(
     /* when enforcing queueing, there are only two return values possible:
      * MSQ_QUEUED and MSG_QUEUED_CONGESTION. We return the result received for
      * the last fragment. */
-    msg_result = rofsock.send_message(msg, /*enforce-queueing*/true);
+    msg_result = rofsock.send_message(msg, /*enforce-queueing*/ true);
   }
 
   return msg_result;
@@ -1750,7 +1752,7 @@ rofl::crofsock::msg_result_t crofconn::segment_group_stats_reply(
     /* when enforcing queueing, there are only two return values possible:
      * MSQ_QUEUED and MSG_QUEUED_CONGESTION. We return the result received for
      * the last fragment. */
-    msg_result = rofsock.send_message(msg, /*enforce-queueing*/true);
+    msg_result = rofsock.send_message(msg, /*enforce-queueing*/ true);
   }
 
   return msg_result;
@@ -1793,7 +1795,7 @@ rofl::crofsock::msg_result_t crofconn::segment_table_stats_reply(
     /* when enforcing queueing, there are only two return values possible:
      * MSQ_QUEUED and MSG_QUEUED_CONGESTION. We return the result received for
      * the last fragment. */
-    msg_result = rofsock.send_message(msg, /*enforce-queueing*/true);
+    msg_result = rofsock.send_message(msg, /*enforce-queueing*/ true);
   }
 
   return msg_result;
@@ -1836,7 +1838,7 @@ rofl::crofsock::msg_result_t crofconn::segment_port_stats_reply(
     /* when enforcing queueing, there are only two return values possible:
      * MSQ_QUEUED and MSG_QUEUED_CONGESTION. We return the result received for
      * the last fragment. */
-    msg_result = rofsock.send_message(msg, /*enforce-queueing*/true);
+    msg_result = rofsock.send_message(msg, /*enforce-queueing*/ true);
   }
 
   return msg_result;
@@ -1882,7 +1884,7 @@ rofl::crofsock::msg_result_t crofconn::segment_queue_stats_reply(
     /* when enforcing queueing, there are only two return values possible:
      * MSQ_QUEUED and MSG_QUEUED_CONGESTION. We return the result received for
      * the last fragment. */
-    msg_result = rofsock.send_message(msg, /*enforce-queueing*/true);
+    msg_result = rofsock.send_message(msg, /*enforce-queueing*/ true);
   }
 
   return msg_result;
@@ -1924,7 +1926,7 @@ rofl::crofsock::msg_result_t crofconn::segment_port_desc_stats_reply(
     /* when enforcing queueing, there are only two return values possible:
      * MSQ_QUEUED and MSG_QUEUED_CONGESTION. We return the result received for
      * the last fragment. */
-    msg_result = rofsock.send_message(msg, /*enforce-queueing*/true);
+    msg_result = rofsock.send_message(msg, /*enforce-queueing*/ true);
   }
 
   return msg_result;
@@ -1967,7 +1969,7 @@ rofl::crofsock::msg_result_t crofconn::segment_meter_stats_reply(
     /* when enforcing queueing, there are only two return values possible:
      * MSQ_QUEUED and MSG_QUEUED_CONGESTION. We return the result received for
      * the last fragment. */
-    msg_result = rofsock.send_message(msg, /*enforce-queueing*/true);
+    msg_result = rofsock.send_message(msg, /*enforce-queueing*/ true);
   }
 
   return msg_result;
@@ -2010,7 +2012,7 @@ rofl::crofsock::msg_result_t crofconn::segment_meter_config_stats_reply(
     /* when enforcing queueing, there are only two return values possible:
      * MSQ_QUEUED and MSG_QUEUED_CONGESTION. We return the result received for
      * the last fragment. */
-    msg_result = rofsock.send_message(msg, /*enforce-queueing*/true);
+    msg_result = rofsock.send_message(msg, /*enforce-queueing*/ true);
   }
 
   return msg_result;
