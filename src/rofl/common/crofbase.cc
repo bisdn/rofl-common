@@ -518,7 +518,7 @@ void crofbase::handle_negotiation_failed(crofctl &ctl, crofconn &conn) {
   handle_conn_negotiation_failed(ctl, conn.get_auxid());
 }
 
-void crofbase::congestion_occured_indication(crofctl &ctl, crofconn &conn) {
+void crofbase::congestion_occurred_indication(crofctl &ctl, crofconn &conn) {
   VLOG(2) << __FUNCTION__ << " connection negotiation failed: ctlid="
           << ctl.get_ctlid().str().c_str()
           << ", auxid=" << conn.get_auxid().str().c_str()
@@ -594,7 +594,7 @@ void crofbase::handle_negotiation_failed(crofdpt &dpt, crofconn &conn) {
   handle_conn_negotiation_failed(dpt, conn.get_auxid());
 }
 
-void crofbase::congestion_occured_indication(crofdpt &dpt, crofconn &conn) {
+void crofbase::congestion_occurred_indication(crofdpt &dpt, crofconn &conn) {
   VLOG(2) << __FUNCTION__
           << " connection congestion occurred: dptid=" << dpt.get_dptid()
           << ", auxid=" << conn.get_auxid().str().c_str()

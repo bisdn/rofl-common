@@ -2180,7 +2180,7 @@ private:
 
   virtual void handle_negotiation_failed(crofdpt &dpt, crofconn &conn);
 
-  virtual void congestion_occured_indication(crofdpt &dpt, crofconn &conn);
+  virtual void congestion_occurred_indication(crofdpt &dpt, crofconn &conn);
 
   virtual void congestion_solved_indication(crofdpt &dpt, crofconn &conn);
 
@@ -2202,7 +2202,7 @@ private:
 
   virtual void handle_negotiation_failed(crofctl &ctl, crofconn &conn);
 
-  virtual void congestion_occured_indication(crofctl &ctl, crofconn &conn);
+  virtual void congestion_occurred_indication(crofctl &ctl, crofconn &conn);
 
   virtual void congestion_solved_indication(crofctl &ctl, crofconn &conn);
 
@@ -2223,7 +2223,7 @@ private:
     delete msg;
   };
 
-  virtual void congestion_occured_indication(crofconn &conn){};
+  virtual void congestion_occurred_indication(crofconn &conn){};
 
   virtual void congestion_solved_indication(crofconn &conn){};
 

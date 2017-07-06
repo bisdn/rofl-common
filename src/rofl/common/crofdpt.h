@@ -217,7 +217,7 @@ protected:
    * @param dpt datapath instance
    * @param conn control connection instance
    */
-  virtual void congestion_occured_indication(crofdpt &dpt, crofconn &conn){};
+  virtual void congestion_occurred_indication(crofdpt &dpt, crofconn &conn){};
 
   /**
    * @brief	Called when a congestion situation on the control connection has
@@ -1704,8 +1704,8 @@ private:
     crofdpt_env::call_env(env).handle_negotiation_failed(*this, conn);
   };
 
-  virtual void congestion_occured_indication(crofchan &chan, crofconn &conn) {
-    crofdpt_env::call_env(env).congestion_occured_indication(*this, conn);
+  virtual void congestion_occurred_indication(crofchan &chan, crofconn &conn) {
+    crofdpt_env::call_env(env).congestion_occurred_indication(*this, conn);
   };
 
   virtual void congestion_solved_indication(crofchan &chan, crofconn &conn) {

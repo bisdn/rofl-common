@@ -59,7 +59,7 @@ private:
   virtual void handle_recv(rofl::crofsock &socket,
                            rofl::openflow::cofmsg *msg){};
 
-  virtual void congestion_occured_indication(rofl::crofsock &socket){};
+  virtual void congestion_occurred_indication(rofl::crofsock &socket){};
 
 private:
   virtual void handle_established(rofl::crofconn &conn, uint8_t ofp_version);
@@ -78,7 +78,7 @@ private:
 
   virtual void handle_recv(rofl::crofconn &conn, rofl::openflow::cofmsg *msg);
 
-  virtual void congestion_occured_indication(rofl::crofconn &conn);
+  virtual void congestion_occurred_indication(rofl::crofconn &conn);
 
   virtual void handle_transaction_timeout(rofl::crofconn &conn, uint32_t xid,
                                           uint8_t type,

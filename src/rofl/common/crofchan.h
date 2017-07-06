@@ -109,8 +109,8 @@ protected:
   virtual void handle_recv(crofchan &chan, crofconn &conn,
                            rofl::openflow::cofmsg *msg) = 0;
 
-  virtual void congestion_occured_indication(crofchan &chan,
-                                             crofconn &conn) = 0;
+  virtual void congestion_occurred_indication(crofchan &chan,
+                                              crofconn &conn) = 0;
 
   virtual void congestion_solved_indication(crofchan &chan, crofconn &conn) = 0;
 
@@ -527,8 +527,8 @@ private:
     crofchan_env::call_env(env).handle_recv(*this, conn, msg);
   };
 
-  virtual void congestion_occured_indication(crofconn &conn) {
-    crofchan_env::call_env(env).congestion_occured_indication(*this, conn);
+  virtual void congestion_occurred_indication(crofconn &conn) {
+    crofchan_env::call_env(env).congestion_occurred_indication(*this, conn);
   };
 
   virtual void congestion_solved_indication(crofconn &conn) {

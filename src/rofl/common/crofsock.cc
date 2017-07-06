@@ -1517,7 +1517,7 @@ void crofsock::send_from_queue() {
                       << txqueue_size_tx_threshold << " laddr=" << laddr.str()
                       << " raddr=" << raddr.str();
 
-              crofsock_env::call_env(env).congestion_occured_indication(*this);
+              crofsock_env::call_env(env).congestion_occurred_indication(*this);
             }
           }
             return;

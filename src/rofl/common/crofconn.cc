@@ -829,10 +829,10 @@ void crofconn::congestion_solved_indication(crofsock &rofsock) {
   crofconn_env::call_env(env).congestion_solved_indication(*this);
 };
 
-void crofconn::congestion_occured_indication(crofsock &rofsock) {
+void crofconn::congestion_occurred_indication(crofsock &rofsock) {
   VLOG(2) << __FUNCTION__ << " congestion occurred indication; action: message "
                              "transmission blocked";
-  crofconn_env::call_env(env).congestion_occured_indication(*this);
+  crofconn_env::call_env(env).congestion_occurred_indication(*this);
 };
 
 void crofconn::handle_recv(crofsock &socket, rofl::openflow::cofmsg *msg) {

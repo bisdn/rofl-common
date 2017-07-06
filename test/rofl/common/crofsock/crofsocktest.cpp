@@ -240,7 +240,7 @@ void crofsocktest::congestion_solved_indication(rofl::crofsock &socket) {
   std::cerr << "handle send" << std::endl;
 }
 
-void crofsocktest::congestion_occured_indication(rofl::crofsock &socket) {
+void crofsocktest::congestion_occurred_indication(rofl::crofsock &socket) {
   std::cerr << "congestion indication" << std::endl;
 }
 
