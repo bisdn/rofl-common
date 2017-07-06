@@ -110,7 +110,7 @@ protected:
                            rofl::openflow::cofmsg *msg) = 0;
 
   virtual void congestion_occurred_indication(crofchan &chan,
-                                             crofconn &conn) = 0;
+                                              crofconn &conn) = 0;
 
   virtual void congestion_solved_indication(crofchan &chan, crofconn &conn) = 0;
 

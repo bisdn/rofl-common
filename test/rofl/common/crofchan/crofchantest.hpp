@@ -144,7 +144,7 @@ private:
   };
 
   virtual void congestion_occurred_indication(rofl::crofchan &chan,
-                                             rofl::crofconn &conn);
+                                              rofl::crofconn &conn);
 
   virtual void handle_transaction_timeout(rofl::crofchan &chan,
                                           rofl::crofconn &conn, uint32_t xid,

@@ -467,7 +467,7 @@ void crofchantest::congestion_solved_indication(rofl::crofchan &chan,
 }
 
 void crofchantest::congestion_occurred_indication(rofl::crofchan &chan,
-                                                 rofl::crofconn &conn) {
+                                                  rofl::crofconn &conn) {
   congested = true;
   std::cerr << "crofchan::congestion_occurred_indication: ";
   std::cerr << "num_of_pkts_sent=" << num_of_pkts_sent
