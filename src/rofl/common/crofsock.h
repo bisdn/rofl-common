@@ -205,7 +205,7 @@ protected:
 
   virtual void handle_recv(crofsock &socket, rofl::openflow::cofmsg *msg) = 0;
 
-  virtual void congestion_occured_indication(crofsock &socket) = 0;
+  virtual void congestion_occurred_indication(crofsock &socket) = 0;
 
   virtual void congestion_solved_indication(crofsock &socket) = 0;
 

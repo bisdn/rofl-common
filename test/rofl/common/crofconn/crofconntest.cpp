@@ -183,7 +183,7 @@ void crofconntest::congestion_solved_indication(rofl::crofconn &conn) {
   std::cerr << "crofconntest::handle_send()" << std::endl << conn;
 }
 
-void crofconntest::congestion_occured_indication(rofl::crofconn &conn) {
+void crofconntest::congestion_occurred_indication(rofl::crofconn &conn) {
   std::cerr << "crofconntest::congestion_indication()" << std::endl << conn;
 }
 

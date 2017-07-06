@@ -143,7 +143,7 @@ private:
     std::cerr << "crofchan::release_sync_xid" << std::endl;
   };
 
-  virtual void congestion_occured_indication(rofl::crofchan &chan,
+  virtual void congestion_occurred_indication(rofl::crofchan &chan,
                                              rofl::crofconn &conn);
 
   virtual void handle_transaction_timeout(rofl::crofchan &chan,
@@ -185,7 +185,7 @@ private:
     std::cerr << "crofconn::handle_recv" << std::endl;
   };
 
-  virtual void congestion_occured_indication(rofl::crofconn &conn) {
+  virtual void congestion_occurred_indication(rofl::crofconn &conn) {
     std::cerr << "crofconn::congestion_occurred_indication" << std::endl;
   };
 
@@ -254,7 +254,7 @@ private:
     std::cerr << "crofsock::handle_recv" << std::endl;
   };
 
-  virtual void congestion_occured_indication(rofl::crofsock &socket) {
+  virtual void congestion_occurred_indication(rofl::crofsock &socket) {
     std::cerr << "crofsock::congestion_occurred_indication" << std::endl;
   };
 };

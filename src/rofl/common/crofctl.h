@@ -216,7 +216,7 @@ protected:
    * @param ctl controller instance
    * @param conn control connection instance
    */
-  virtual void congestion_occured_indication(crofctl &ctl, crofconn &conn){};
+  virtual void congestion_occurred_indication(crofctl &ctl, crofconn &conn){};
 
   /**
    * @brief	Called when a congestion situation on the control connection has
@@ -1283,8 +1283,8 @@ private:
     crofctl_env::call_env(env).handle_negotiation_failed(*this, conn);
   };
 
-  virtual void congestion_occured_indication(crofchan &chan, crofconn &conn) {
-    crofctl_env::call_env(env).congestion_occured_indication(*this, conn);
+  virtual void congestion_occurred_indication(crofchan &chan, crofconn &conn) {
+    crofctl_env::call_env(env).congestion_occurred_indication(*this, conn);
   };
 
   virtual void congestion_solved_indication(crofchan &chan, crofconn &conn) {

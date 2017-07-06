@@ -100,7 +100,7 @@ protected:
 
   virtual void handle_recv(crofconn &conn, rofl::openflow::cofmsg *msg) = 0;
 
-  virtual void congestion_occured_indication(crofconn &conn) = 0;
+  virtual void congestion_occurred_indication(crofconn &conn) = 0;
 
   virtual void congestion_solved_indication(crofconn &conn) = 0;
 
@@ -694,7 +694,7 @@ private:
 
   virtual void handle_recv(crofsock &socket, rofl::openflow::cofmsg *msg);
 
-  virtual void congestion_occured_indication(crofsock &socket);
+  virtual void congestion_occurred_indication(crofsock &socket);
 
   virtual void congestion_solved_indication(crofsock &rofsock);
 
