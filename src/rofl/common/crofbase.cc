@@ -596,7 +596,7 @@ void crofbase::handle_negotiation_failed(crofdpt &dpt, crofconn &conn) {
 
 void crofbase::congestion_occured_indication(crofdpt &dpt, crofconn &conn) {
   VLOG(2) << __FUNCTION__
-          << " connection congestion occured: dptid=" << dpt.get_dptid()
+          << " connection congestion occurred: dptid=" << dpt.get_dptid()
           << ", auxid=" << conn.get_auxid().str().c_str()
           << ", raddr=" << conn.get_raddr().str().c_str();
   handle_conn_congestion_occurred(dpt, conn.get_auxid());

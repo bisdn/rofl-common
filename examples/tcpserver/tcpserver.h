@@ -146,7 +146,7 @@ private:
    */
   virtual void handle_port_desc_stats_reply_timeout(rofl::crofdpt &dpt,
                                                     uint32_t xid) {
-    std::cerr << "Port-Desc-Stats timeout occured, xid: " << (unsigned int)xid
+    std::cerr << "Port-Desc-Stats timeout occurred, xid: " << (unsigned int)xid
               << std::endl;
   };
 
@@ -177,7 +177,7 @@ private:
    */
   virtual void handle_table_features_stats_reply_timeout(rofl::crofdpt &dpt,
                                                          uint32_t xid) {
-    std::cerr << "Table-Features-Stats timeout occured, xid: "
+    std::cerr << "Table-Features-Stats timeout occurred, xid: "
               << (unsigned int)xid << std::endl;
   };
 
@@ -206,7 +206,7 @@ private:
    */
   virtual void handle_table_stats_reply_timeout(rofl::crofdpt &dpt,
                                                 uint32_t xid) {
-    std::cerr << "Table-Stats timeout occured, xid: " << (unsigned int)xid
+    std::cerr << "Table-Stats timeout occurred, xid: " << (unsigned int)xid
               << std::endl;
   };
 

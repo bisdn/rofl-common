@@ -200,7 +200,7 @@ private:
    */
   virtual void handle_conn_congestion_occurred(rofl::crofctl &ctl,
                                                const rofl::cauxid &auxid) {
-    std::cerr << "channel congestion occured, ctlid=" << ctlid << std::endl;
+    std::cerr << "channel congestion occurred, ctlid=" << ctlid << std::endl;
   };
 
   /**

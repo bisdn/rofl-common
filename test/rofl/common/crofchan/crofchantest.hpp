@@ -186,7 +186,7 @@ private:
   };
 
   virtual void congestion_occured_indication(rofl::crofconn &conn) {
-    std::cerr << "crofconn::congestion_occured_indication" << std::endl;
+    std::cerr << "crofconn::congestion_occurred_indication" << std::endl;
   };
 
   virtual void congestion_solved_indication(rofl::crofconn &conn) {
@@ -255,7 +255,7 @@ private:
   };
 
   virtual void congestion_occured_indication(rofl::crofsock &socket) {
-    std::cerr << "crofsock::congestion_occured_indication" << std::endl;
+    std::cerr << "crofsock::congestion_occurred_indication" << std::endl;
   };
 };
 
