@@ -1368,8 +1368,8 @@ void crofconn::handle_rx_multipart_message(rofl::openflow::cofmsg *msg) {
   }
 }
 
-unsigned int crofconn::send_message(rofl::openflow::cofmsg *msg,
-                                    const ctimespec &ts) {
+rofl::crofsock::msg_result_t crofconn::send_message(rofl::openflow::cofmsg *msg,
+                                                    const ctimespec &ts) {
 
   switch (msg->get_version()) {
   case rofl::openflow10::OFP_VERSION: {
@@ -1417,14 +1417,15 @@ unsigned int crofconn::send_message(rofl::openflow::cofmsg *msg,
   return segment_and_send_message(msg);
 };
 
-unsigned int crofconn::segment_and_send_message(rofl::openflow::cofmsg *msg) {
-  unsigned int cwnd_size = 0;
+rofl::crofsock::msg_result_t
+crofconn::segment_and_send_message(rofl::openflow::cofmsg *msg) {
+  rofl::crofsock::msg_result_t msg_result = rofl::crofsock::MSG_IGNORED;
 
   VLOG(3) << __FUNCTION__ << " state: " << state
           << " message sent: " << msg->str().c_str();
 
   if (msg->length() <= segmentation_threshold) {
-    rofsock.send_message(
+    msg_result = rofsock.send_message(
         msg); // default behaviour for now: send message directly to rofsock
 
   } else {
@@ -1439,23 +1440,23 @@ unsigned int crofconn::segment_and_send_message(rofl::openflow::cofmsg *msg) {
         switch (dynamic_cast<rofl::openflow::cofmsg_stats_reply *>(msg)
                     ->get_stats_type()) {
         case rofl::openflow12::OFPST_FLOW: {
-          cwnd_size = segment_flow_stats_reply(
+          msg_result = segment_flow_stats_reply(
               dynamic_cast<rofl::openflow::cofmsg_flow_stats_reply *>(msg));
         } break;
         case rofl::openflow12::OFPST_TABLE: {
-          cwnd_size = segment_table_stats_reply(
+          msg_result = segment_table_stats_reply(
               dynamic_cast<rofl::openflow::cofmsg_table_stats_reply *>(msg));
         } break;
         case rofl::openflow12::OFPST_QUEUE: {
-          cwnd_size = segment_queue_stats_reply(
+          msg_result = segment_queue_stats_reply(
               dynamic_cast<rofl::openflow::cofmsg_queue_stats_reply *>(msg));
         } break;
         case rofl::openflow12::OFPST_GROUP: {
-          cwnd_size = segment_group_stats_reply(
+          msg_result = segment_group_stats_reply(
               dynamic_cast<rofl::openflow::cofmsg_group_stats_reply *>(msg));
         } break;
         case rofl::openflow12::OFPST_GROUP_DESC: {
-          cwnd_size = segment_group_desc_stats_reply(
+          msg_result = segment_group_desc_stats_reply(
               dynamic_cast<rofl::openflow::cofmsg_group_desc_stats_reply *>(
                   msg));
         } break;
@@ -1472,7 +1473,7 @@ unsigned int crofconn::segment_and_send_message(rofl::openflow::cofmsg *msg) {
         switch (dynamic_cast<rofl::openflow::cofmsg_stats_request *>(msg)
                     ->get_stats_type()) {
         case rofl::openflow13::OFPMP_TABLE_FEATURES: {
-          cwnd_size = segment_table_features_stats_request(
+          msg_result = segment_table_features_stats_request(
               dynamic_cast<
                   rofl::openflow::cofmsg_table_features_stats_request *>(msg));
         } break;
@@ -1484,53 +1485,54 @@ unsigned int crofconn::segment_and_send_message(rofl::openflow::cofmsg *msg) {
         switch (dynamic_cast<rofl::openflow::cofmsg_stats_reply *>(msg)
                     ->get_stats_type()) {
         case rofl::openflow13::OFPMP_FLOW: {
-          cwnd_size = segment_flow_stats_reply(
+          msg_result = segment_flow_stats_reply(
               dynamic_cast<rofl::openflow::cofmsg_flow_stats_reply *>(msg));
         } break;
         case rofl::openflow13::OFPMP_TABLE: {
-          cwnd_size = segment_table_stats_reply(
+          msg_result = segment_table_stats_reply(
               dynamic_cast<rofl::openflow::cofmsg_table_stats_reply *>(msg));
         } break;
         case rofl::openflow13::OFPMP_PORT_STATS: {
-          cwnd_size = segment_port_stats_reply(
+          msg_result = segment_port_stats_reply(
               dynamic_cast<rofl::openflow::cofmsg_port_stats_reply *>(msg));
         } break;
         case rofl::openflow13::OFPMP_QUEUE: {
-          cwnd_size = segment_queue_stats_reply(
+          msg_result = segment_queue_stats_reply(
               dynamic_cast<rofl::openflow::cofmsg_queue_stats_reply *>(msg));
         } break;
         case rofl::openflow13::OFPMP_GROUP: {
-          cwnd_size = segment_group_stats_reply(
+          msg_result = segment_group_stats_reply(
               dynamic_cast<rofl::openflow::cofmsg_group_stats_reply *>(msg));
         } break;
         case rofl::openflow13::OFPMP_GROUP_DESC: {
-          cwnd_size = segment_group_desc_stats_reply(
+          msg_result = segment_group_desc_stats_reply(
               dynamic_cast<rofl::openflow::cofmsg_group_desc_stats_reply *>(
                   msg));
         } break;
         case rofl::openflow13::OFPMP_TABLE_FEATURES: {
-          cwnd_size = segment_table_features_stats_reply(
+          msg_result = segment_table_features_stats_reply(
               dynamic_cast<rofl::openflow::cofmsg_table_features_stats_reply *>(
                   msg));
         } break;
         case rofl::openflow13::OFPMP_PORT_DESC: {
-          cwnd_size = segment_port_desc_stats_reply(
+          msg_result = segment_port_desc_stats_reply(
               dynamic_cast<rofl::openflow::cofmsg_port_desc_stats_reply *>(
                   msg));
         } break;
         case rofl::openflow13::OFPMP_METER: {
-          cwnd_size = segment_meter_stats_reply(
+          msg_result = segment_meter_stats_reply(
               dynamic_cast<rofl::openflow::cofmsg_meter_stats_reply *>(msg));
         } break;
         case rofl::openflow13::OFPMP_METER_CONFIG: {
-          cwnd_size = segment_meter_config_stats_reply(
+          msg_result = segment_meter_config_stats_reply(
               dynamic_cast<rofl::openflow::cofmsg_meter_config_stats_reply *>(
                   msg));
         } break;
         case rofl::openflow13::OFPMP_METER_FEATURES: {
           // no array in meter-features, so no need to segment
-          rofsock.send_message(msg); // default behaviour for now: send message
-                                     // directly to rofsock
+          msg_result = rofsock.send_message(
+              msg); // default behaviour for now: send message
+                    // directly to rofsock
         } break;
         }
 
@@ -1540,14 +1542,15 @@ unsigned int crofconn::segment_and_send_message(rofl::openflow::cofmsg *msg) {
     }
   }
 
-  return cwnd_size;
+  return msg_result;
 }
 
-unsigned int crofconn::segment_table_features_stats_request(
+rofl::crofsock::msg_result_t crofconn::segment_table_features_stats_request(
     rofl::openflow::cofmsg_table_features_stats_request *msg) {
   std::list<rofl::openflow::cofmsg_table_features_stats_request *> segments;
   const int MAX_LENGTH = 64000 /*bytes*/;
   auto tableids = msg->get_tables().keys();
+  rofl::crofsock::msg_result_t msg_result = rofl::crofsock::MSG_QUEUED;
 
   /* create fragments */
   while (not tableids.empty()) {
@@ -1575,17 +1578,21 @@ unsigned int crofconn::segment_table_features_stats_request(
       msg->set_stats_flags(msg->get_stats_flags() |
                            rofl::openflow13::OFPMPF_REQ_MORE);
     }
-    rofsock.send_message(msg);
+    /* when enforcing queueing, there are only two return values possible:
+     * MSQ_QUEUED and MSG_QUEUED_CONGESTION. We return the result received for
+     * the last fragment. */
+    msg_result = rofsock.send_message(msg, /*enforce-queueing*/ true);
   }
 
-  return 0;
+  return msg_result;
 }
 
-unsigned int crofconn::segment_table_features_stats_reply(
+rofl::crofsock::msg_result_t crofconn::segment_table_features_stats_reply(
     rofl::openflow::cofmsg_table_features_stats_reply *msg) {
   std::list<rofl::openflow::cofmsg_table_features_stats_reply *> segments;
   const int MAX_LENGTH = 64000 /*bytes*/;
   auto tableids = msg->get_tables().keys();
+  rofl::crofsock::msg_result_t msg_result = rofl::crofsock::MSG_QUEUED;
 
   /* create fragments */
   while (not tableids.empty()) {
@@ -1613,17 +1620,21 @@ unsigned int crofconn::segment_table_features_stats_reply(
       msg->set_stats_flags(msg->get_stats_flags() |
                            rofl::openflow13::OFPMPF_REPLY_MORE);
     }
-    rofsock.send_message(msg);
+    /* when enforcing queueing, there are only two return values possible:
+     * MSQ_QUEUED and MSG_QUEUED_CONGESTION. We return the result received for
+     * the last fragment. */
+    msg_result = rofsock.send_message(msg, /*enforce-queueing*/ true);
   }
 
-  return 0;
+  return msg_result;
 }
 
-unsigned int crofconn::segment_flow_stats_reply(
+rofl::crofsock::msg_result_t crofconn::segment_flow_stats_reply(
     rofl::openflow::cofmsg_flow_stats_reply *msg) {
   std::list<rofl::openflow::cofmsg_flow_stats_reply *> segments;
   const int MAX_LENGTH = 64000 /*bytes*/;
   auto flowids = msg->get_flow_stats_array().keys();
+  rofl::crofsock::msg_result_t msg_result = rofl::crofsock::MSG_QUEUED;
 
   /* create fragments */
   while (not flowids.empty()) {
@@ -1652,17 +1663,21 @@ unsigned int crofconn::segment_flow_stats_reply(
       msg->set_stats_flags(msg->get_stats_flags() |
                            rofl::openflow13::OFPMPF_REPLY_MORE);
     }
-    rofsock.send_message(msg);
+    /* when enforcing queueing, there are only two return values possible:
+     * MSQ_QUEUED and MSG_QUEUED_CONGESTION. We return the result received for
+     * the last fragment. */
+    msg_result = rofsock.send_message(msg, /*enforce-queueing*/ true);
   }
 
-  return 0;
+  return msg_result;
 }
 
-unsigned int crofconn::segment_group_desc_stats_reply(
+rofl::crofsock::msg_result_t crofconn::segment_group_desc_stats_reply(
     rofl::openflow::cofmsg_group_desc_stats_reply *msg) {
   std::list<rofl::openflow::cofmsg_group_desc_stats_reply *> segments;
   const int MAX_LENGTH = 64000 /*bytes*/;
   auto groupids = msg->get_group_desc_stats_array().keys();
+  rofl::crofsock::msg_result_t msg_result = rofl::crofsock::MSG_QUEUED;
 
   /* create fragments */
   while (not groupids.empty()) {
@@ -1691,17 +1706,21 @@ unsigned int crofconn::segment_group_desc_stats_reply(
       msg->set_stats_flags(msg->get_stats_flags() |
                            rofl::openflow13::OFPMPF_REPLY_MORE);
     }
-    rofsock.send_message(msg);
+    /* when enforcing queueing, there are only two return values possible:
+     * MSQ_QUEUED and MSG_QUEUED_CONGESTION. We return the result received for
+     * the last fragment. */
+    msg_result = rofsock.send_message(msg, /*enforce-queueing*/ true);
   }
 
-  return 0;
+  return msg_result;
 }
 
-unsigned int crofconn::segment_group_stats_reply(
+rofl::crofsock::msg_result_t crofconn::segment_group_stats_reply(
     rofl::openflow::cofmsg_group_stats_reply *msg) {
   std::list<rofl::openflow::cofmsg_group_stats_reply *> segments;
   const int MAX_LENGTH = 64000 /*bytes*/;
   auto groupids = msg->get_group_stats_array().keys();
+  rofl::crofsock::msg_result_t msg_result = rofl::crofsock::MSG_QUEUED;
 
   /* create fragments */
   while (not groupids.empty()) {
@@ -1730,17 +1749,21 @@ unsigned int crofconn::segment_group_stats_reply(
       msg->set_stats_flags(msg->get_stats_flags() |
                            rofl::openflow13::OFPMPF_REPLY_MORE);
     }
-    rofsock.send_message(msg);
+    /* when enforcing queueing, there are only two return values possible:
+     * MSQ_QUEUED and MSG_QUEUED_CONGESTION. We return the result received for
+     * the last fragment. */
+    msg_result = rofsock.send_message(msg, /*enforce-queueing*/ true);
   }
 
-  return 0;
+  return msg_result;
 }
 
-unsigned int crofconn::segment_table_stats_reply(
+rofl::crofsock::msg_result_t crofconn::segment_table_stats_reply(
     rofl::openflow::cofmsg_table_stats_reply *msg) {
   std::list<rofl::openflow::cofmsg_table_stats_reply *> segments;
   const int MAX_LENGTH = 64000 /*bytes*/;
   auto tableids = msg->get_table_stats_array().keys();
+  rofl::crofsock::msg_result_t msg_result = rofl::crofsock::MSG_QUEUED;
 
   /* create fragments */
   while (not tableids.empty()) {
@@ -1769,17 +1792,21 @@ unsigned int crofconn::segment_table_stats_reply(
       msg->set_stats_flags(msg->get_stats_flags() |
                            rofl::openflow13::OFPMPF_REPLY_MORE);
     }
-    rofsock.send_message(msg);
+    /* when enforcing queueing, there are only two return values possible:
+     * MSQ_QUEUED and MSG_QUEUED_CONGESTION. We return the result received for
+     * the last fragment. */
+    msg_result = rofsock.send_message(msg, /*enforce-queueing*/ true);
   }
 
-  return 0;
+  return msg_result;
 }
 
-unsigned int crofconn::segment_port_stats_reply(
+rofl::crofsock::msg_result_t crofconn::segment_port_stats_reply(
     rofl::openflow::cofmsg_port_stats_reply *msg) {
   std::list<rofl::openflow::cofmsg_port_stats_reply *> segments;
   const int MAX_LENGTH = 64000 /*bytes*/;
   auto portids = msg->get_port_stats_array().keys();
+  rofl::crofsock::msg_result_t msg_result = rofl::crofsock::MSG_QUEUED;
 
   /* create fragments */
   while (not portids.empty()) {
@@ -1808,17 +1835,21 @@ unsigned int crofconn::segment_port_stats_reply(
       msg->set_stats_flags(msg->get_stats_flags() |
                            rofl::openflow13::OFPMPF_REPLY_MORE);
     }
-    rofsock.send_message(msg);
+    /* when enforcing queueing, there are only two return values possible:
+     * MSQ_QUEUED and MSG_QUEUED_CONGESTION. We return the result received for
+     * the last fragment. */
+    msg_result = rofsock.send_message(msg, /*enforce-queueing*/ true);
   }
 
-  return 0;
+  return msg_result;
 }
 
-unsigned int crofconn::segment_queue_stats_reply(
+rofl::crofsock::msg_result_t crofconn::segment_queue_stats_reply(
     rofl::openflow::cofmsg_queue_stats_reply *msg) {
   std::list<rofl::openflow::cofmsg_queue_stats_reply *> segments;
   const int MAX_LENGTH = 64000 /*bytes*/;
   auto portids = msg->get_queue_stats_array().keys();
+  rofl::crofsock::msg_result_t msg_result = rofl::crofsock::MSG_QUEUED;
 
   /* create fragments */
   while (not portids.empty()) {
@@ -1850,17 +1881,21 @@ unsigned int crofconn::segment_queue_stats_reply(
       msg->set_stats_flags(msg->get_stats_flags() |
                            rofl::openflow13::OFPMPF_REPLY_MORE);
     }
-    rofsock.send_message(msg);
+    /* when enforcing queueing, there are only two return values possible:
+     * MSQ_QUEUED and MSG_QUEUED_CONGESTION. We return the result received for
+     * the last fragment. */
+    msg_result = rofsock.send_message(msg, /*enforce-queueing*/ true);
   }
 
-  return 0;
+  return msg_result;
 }
 
-unsigned int crofconn::segment_port_desc_stats_reply(
+rofl::crofsock::msg_result_t crofconn::segment_port_desc_stats_reply(
     rofl::openflow::cofmsg_port_desc_stats_reply *msg) {
   std::list<rofl::openflow::cofmsg_port_desc_stats_reply *> segments;
   const int MAX_LENGTH = 64000 /*bytes*/;
   auto portids = msg->get_ports().keys();
+  rofl::crofsock::msg_result_t msg_result = rofl::crofsock::MSG_QUEUED;
 
   /* create fragments */
   while (not portids.empty()) {
@@ -1888,17 +1923,21 @@ unsigned int crofconn::segment_port_desc_stats_reply(
       msg->set_stats_flags(msg->get_stats_flags() |
                            rofl::openflow13::OFPMPF_REPLY_MORE);
     }
-    rofsock.send_message(msg);
+    /* when enforcing queueing, there are only two return values possible:
+     * MSQ_QUEUED and MSG_QUEUED_CONGESTION. We return the result received for
+     * the last fragment. */
+    msg_result = rofsock.send_message(msg, /*enforce-queueing*/ true);
   }
 
-  return 0;
+  return msg_result;
 }
 
-unsigned int crofconn::segment_meter_stats_reply(
+rofl::crofsock::msg_result_t crofconn::segment_meter_stats_reply(
     rofl::openflow::cofmsg_meter_stats_reply *msg) {
   std::list<rofl::openflow::cofmsg_meter_stats_reply *> segments;
   const int MAX_LENGTH = 64000 /*bytes*/;
   auto meterids = msg->get_meter_stats_array().keys();
+  rofl::crofsock::msg_result_t msg_result = rofl::crofsock::MSG_QUEUED;
 
   /* create fragments */
   while (not meterids.empty()) {
@@ -1927,17 +1966,21 @@ unsigned int crofconn::segment_meter_stats_reply(
       msg->set_stats_flags(msg->get_stats_flags() |
                            rofl::openflow13::OFPMPF_REPLY_MORE);
     }
-    rofsock.send_message(msg);
+    /* when enforcing queueing, there are only two return values possible:
+     * MSQ_QUEUED and MSG_QUEUED_CONGESTION. We return the result received for
+     * the last fragment. */
+    msg_result = rofsock.send_message(msg, /*enforce-queueing*/ true);
   }
 
-  return 0;
+  return msg_result;
 }
 
-unsigned int crofconn::segment_meter_config_stats_reply(
+rofl::crofsock::msg_result_t crofconn::segment_meter_config_stats_reply(
     rofl::openflow::cofmsg_meter_config_stats_reply *msg) {
   std::list<rofl::openflow::cofmsg_meter_config_stats_reply *> segments;
   const int MAX_LENGTH = 64000 /*bytes*/;
   auto meterids = msg->get_meter_config_array().keys();
+  rofl::crofsock::msg_result_t msg_result = rofl::crofsock::MSG_QUEUED;
 
   /* create fragments */
   while (not meterids.empty()) {
@@ -1966,8 +2009,11 @@ unsigned int crofconn::segment_meter_config_stats_reply(
       msg->set_stats_flags(msg->get_stats_flags() |
                            rofl::openflow13::OFPMPF_REPLY_MORE);
     }
-    rofsock.send_message(msg);
+    /* when enforcing queueing, there are only two return values possible:
+     * MSQ_QUEUED and MSG_QUEUED_CONGESTION. We return the result received for
+     * the last fragment. */
+    msg_result = rofsock.send_message(msg, /*enforce-queueing*/ true);
   }
 
-  return 0;
+  return msg_result;
 }

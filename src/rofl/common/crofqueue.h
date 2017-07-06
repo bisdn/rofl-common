@@ -100,7 +100,8 @@ public:
   size_t store(rofl::openflow::cofmsg *msg, bool enforce = false) {
     AcquireReadWriteLock rwlock(queue_lock);
     if ((not enforce) && (queue.size() >= queue_max_size)) {
-      throw eRofQueueFull("crofqueue::store() queue max size exceeded");
+      throw eRofQueueFull("crofqueue::store() queue max size exceeded",
+                          __FILE__, __FUNCTION__, __LINE__);
     }
     queue.push_back(msg);
     return queue.size();
@@ -184,7 +185,7 @@ private:
   std::list<rofl::openflow::cofmsg *> queue;
   mutable crwlock queue_lock;
   size_t queue_max_size;
-  static const size_t QUEUE_MAX_SIZE_DEFAULT = 32768;
+  static const size_t QUEUE_MAX_SIZE_DEFAULT = 128;
 };
 
 }; // end of namespace rofl

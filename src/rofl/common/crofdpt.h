@@ -1131,8 +1131,10 @@ public:
    * @exception rofl::eRofBaseNotConnected
    * @exception rofl::eRofBaseCongested
    */
-  uint32_t send_features_request(const rofl::cauxid &auxid,
-                                 int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT);
+  rofl::crofsock::msg_result_t
+  send_features_request(const rofl::cauxid &auxid,
+                        int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT,
+                        uint32_t *xid = nullptr);
 
   /**
    * @brief	Sends OpenFlow Get-Config-Request message to attached datapath
@@ -1144,9 +1146,10 @@ public:
    * @exception rofl::eRofBaseNotConnected
    * @exception rofl::eRofBaseCongested
    */
-  uint32_t
+  rofl::crofsock::msg_result_t
   send_get_config_request(const rofl::cauxid &auxid,
-                          int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT);
+                          int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT,
+                          uint32_t *xid = nullptr);
 
   /**
    * @brief	Sends OpenFlow Table-Features-Stats-Request message to attached
@@ -1159,9 +1162,9 @@ public:
    * @exception rofl::eRofBaseNotConnected
    * @exception rofl::eRofBaseCongested
    */
-  uint32_t send_table_features_stats_request(
+  rofl::crofsock::msg_result_t send_table_features_stats_request(
       const rofl::cauxid &auxid, uint16_t stats_flags,
-      int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT);
+      int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT, uint32_t *xid = nullptr);
 
   /**
    * @brief	Sends OpenFlow Desc-Stats-Request message to attached datapath
@@ -1174,9 +1177,10 @@ public:
    * @exception rofl::eRofBaseNotConnected
    * @exception rofl::eRofBaseCongested
    */
-  uint32_t
+  rofl::crofsock::msg_result_t
   send_desc_stats_request(const rofl::cauxid &auxid, uint16_t stats_flags,
-                          int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT);
+                          int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT,
+                          uint32_t *xid = nullptr);
 
   /**
    * @brief	Sends OpenFlow Flow-Stats-Request message to attached datapath
@@ -1189,10 +1193,10 @@ public:
    * @exception rofl::eRofBaseNotConnected
    * @exception rofl::eRofBaseCongested
    */
-  uint32_t send_flow_stats_request(
+  rofl::crofsock::msg_result_t send_flow_stats_request(
       const rofl::cauxid &auxid, uint16_t stats_flags,
       const rofl::openflow::cofflow_stats_request &flow_stats_request,
-      int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT);
+      int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT, uint32_t *xid = nullptr);
 
   /**
    * @brief	Sends OpenFlow Aggregate-Stats-Request message to attached
@@ -1206,10 +1210,10 @@ public:
    * @exception rofl::eRofBaseNotConnected
    * @exception rofl::eRofBaseCongested
    */
-  uint32_t send_aggr_stats_request(
+  rofl::crofsock::msg_result_t send_aggr_stats_request(
       const rofl::cauxid &auxid, uint16_t flags,
       const rofl::openflow::cofaggr_stats_request &aggr_stats_request,
-      int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT);
+      int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT, uint32_t *xid = nullptr);
 
   /**
    * @brief	Sends OpenFlow Table-Stats-Request message to attached datapath
@@ -1222,9 +1226,10 @@ public:
    * @exception rofl::eRofBaseNotConnected
    * @exception rofl::eRofBaseCongested
    */
-  uint32_t
+  rofl::crofsock::msg_result_t
   send_table_stats_request(const rofl::cauxid &auxid, uint16_t stats_flags = 0,
-                           int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT);
+                           int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT,
+                           uint32_t *xid = nullptr);
 
   /**
    * @brief	Sends OpenFlow Port-Stats-Request message to attached datapath
@@ -1238,10 +1243,10 @@ public:
    * @exception rofl::eRofBaseNotConnected
    * @exception rofl::eRofBaseCongested
    */
-  uint32_t send_port_stats_request(
+  rofl::crofsock::msg_result_t send_port_stats_request(
       const rofl::cauxid &auxid, uint16_t stats_flags,
       const rofl::openflow::cofport_stats_request &port_stats_request,
-      int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT);
+      int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT, uint32_t *xid = nullptr);
 
   /**
    * @brief	Sends OpenFlow Queue-Stats-Request message to attached datapath
@@ -1255,10 +1260,10 @@ public:
    * @exception rofl::eRofBaseNotConnected
    * @exception rofl::eRofBaseCongested
    */
-  uint32_t send_queue_stats_request(
+  rofl::crofsock::msg_result_t send_queue_stats_request(
       const rofl::cauxid &auxid, uint16_t stats_flags,
       const rofl::openflow::cofqueue_stats_request &queue_stats_request,
-      int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT);
+      int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT, uint32_t *xid = nullptr);
 
   /**
    * @brief	Sends OpenFlow Group-Stats-Request message to attached datapath
@@ -1272,10 +1277,10 @@ public:
    * @exception rofl::eRofBaseNotConnected
    * @exception rofl::eRofBaseCongested
    */
-  uint32_t send_group_stats_request(
+  rofl::crofsock::msg_result_t send_group_stats_request(
       const rofl::cauxid &auxid, uint16_t stats_flags,
       const rofl::openflow::cofgroup_stats_request &group_stats_request,
-      int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT);
+      int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT, uint32_t *xid = nullptr);
 
   /**
    * @brief	Sends OpenFlow Group-Desc-Stats-Request message to attached
@@ -1288,10 +1293,9 @@ public:
    * @exception rofl::eRofBaseNotConnected
    * @exception rofl::eRofBaseCongested
    */
-  uint32_t
-  send_group_desc_stats_request(const rofl::cauxid &auxid,
-                                uint16_t stats_flags = 0,
-                                int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT);
+  rofl::crofsock::msg_result_t send_group_desc_stats_request(
+      const rofl::cauxid &auxid, uint16_t stats_flags = 0,
+      int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT, uint32_t *xid = nullptr);
 
   /**
    * @brief	Sends OpenFlow Group-Features-Stats-Request message to attached
@@ -1304,9 +1308,9 @@ public:
    * @exception rofl::eRofBaseNotConnected
    * @exception rofl::eRofBaseCongested
    */
-  uint32_t send_group_features_stats_request(
+  rofl::crofsock::msg_result_t send_group_features_stats_request(
       const rofl::cauxid &auxid, uint16_t stats_flags,
-      int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT);
+      int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT, uint32_t *xid = nullptr);
 
   /**
    * @brief	Sends OpenFlow Port-Desc-Stats-Request message to attached
@@ -1319,9 +1323,10 @@ public:
    * @exception rofl::eRofBaseNotConnected
    * @exception rofl::eRofBaseCongested
    */
-  uint32_t
+  rofl::crofsock::msg_result_t
   send_port_desc_stats_request(const rofl::cauxid &auxid, uint16_t stats_flags,
-                               int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT);
+                               int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT,
+                               uint32_t *xid = nullptr);
 
   /**
    * @brief	Sends OpenFlow Experimenter-Stats-Request message to attached
@@ -1337,10 +1342,10 @@ public:
    * @exception rofl::eRofBaseNotConnected
    * @exception rofl::eRofBaseCongested
    */
-  uint32_t send_experimenter_stats_request(
+  rofl::crofsock::msg_result_t send_experimenter_stats_request(
       const rofl::cauxid &auxid, uint16_t stats_flags, uint32_t exp_id,
       uint32_t exp_type, const cmemory &body,
-      int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT);
+      int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT, uint32_t *xid = nullptr);
 
   /**
    * @brief	Sends OpenFlow Meter-Stats-Request message to attached datapath
@@ -1354,10 +1359,10 @@ public:
    * @exception rofl::eRofBaseNotConnected
    * @exception rofl::eRofBaseCongested
    */
-  uint32_t send_meter_stats_request(
+  rofl::crofsock::msg_result_t send_meter_stats_request(
       const rofl::cauxid &auxid, uint16_t stats_flags,
       const rofl::openflow::cofmeter_stats_request &meter_stats_request,
-      int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT);
+      int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT, uint32_t *xid = nullptr);
 
   /**
    * @brief	Sends OpenFlow Meter-Config-Stats-Request message to attached
@@ -1372,10 +1377,10 @@ public:
    * @exception rofl::eRofBaseNotConnected
    * @exception rofl::eRofBaseCongested
    */
-  uint32_t send_meter_config_stats_request(
+  rofl::crofsock::msg_result_t send_meter_config_stats_request(
       const rofl::cauxid &auxid, uint16_t stats_flags,
       const rofl::openflow::cofmeter_config_request &meter_config_stats_request,
-      int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT);
+      int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT, uint32_t *xid = nullptr);
 
   /**
    * @brief	Sends OpenFlow Meter-Features-Stats-Request message to attached
@@ -1388,9 +1393,9 @@ public:
    * @exception rofl::eRofBaseNotConnected
    * @exception rofl::eRofBaseCongested
    */
-  uint32_t send_meter_features_stats_request(
+  rofl::crofsock::msg_result_t send_meter_features_stats_request(
       const rofl::cauxid &auxid, uint16_t stats_flags,
-      int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT);
+      int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT, uint32_t *xid = nullptr);
 
   /**
    * @brief	Sends OpenFlow Packet-Out message to attached datapath element.
@@ -1405,10 +1410,10 @@ public:
    * @exception rofl::eRofBaseNotConnected
    * @exception rofl::eRofBaseCongested
    */
-  uint32_t send_packet_out_message(const rofl::cauxid &auxid,
-                                   uint32_t buffer_id, uint32_t in_port,
-                                   const rofl::openflow::cofactions &actions,
-                                   uint8_t *data = NULL, size_t datalen = 0);
+  rofl::crofsock::msg_result_t send_packet_out_message(
+      const rofl::cauxid &auxid, uint32_t buffer_id, uint32_t in_port,
+      const rofl::openflow::cofactions &actions, uint8_t *data = NULL,
+      size_t datalen = 0, uint32_t *xid = nullptr);
 
   /**
    * @brief	Sends OpenFlow Barrier-Request message to attached datapath
@@ -1420,8 +1425,10 @@ public:
    * @exception rofl::eRofBaseNotConnected
    * @exception rofl::eRofBaseCongested
    */
-  uint32_t send_barrier_request(const rofl::cauxid &auxid,
-                                int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT);
+  rofl::crofsock::msg_result_t
+  send_barrier_request(const rofl::cauxid &auxid,
+                       int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT,
+                       uint32_t *xid = nullptr);
 
   /**
    * @brief	Sends OpenFlow Role-Request message to attached datapath
@@ -1434,9 +1441,9 @@ public:
    * @exception rofl::eRofBaseNotConnected
    * @exception rofl::eRofBaseCongested
    */
-  uint32_t send_role_request(const rofl::cauxid &auxid,
-                             const rofl::openflow::cofrole &role,
-                             int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT);
+  rofl::crofsock::msg_result_t send_role_request(
+      const rofl::cauxid &auxid, const rofl::openflow::cofrole &role,
+      int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT, uint32_t *xid = nullptr);
 
   /**
    * @brief	Sends OpenFlow Flow-Mod message to attached datapath element.
@@ -1447,8 +1454,10 @@ public:
    * @exception rofl::eRofBaseNotConnected
    * @exception rofl::eRofBaseCongested
    */
-  uint32_t send_flow_mod_message(const rofl::cauxid &auxid,
-                                 const rofl::openflow::cofflowmod &flowmod);
+  rofl::crofsock::msg_result_t
+  send_flow_mod_message(const rofl::cauxid &auxid,
+                        const rofl::openflow::cofflowmod &flowmod,
+                        uint32_t *xid = nullptr);
 
   /**
    * @brief	Sends OpenFlow Group-Mod message to attached datapath element.
@@ -1459,8 +1468,10 @@ public:
    * @exception rofl::eRofBaseNotConnected
    * @exception rofl::eRofBaseCongested
    */
-  uint32_t send_group_mod_message(const rofl::cauxid &auxid,
-                                  const rofl::openflow::cofgroupmod &groupmod);
+  rofl::crofsock::msg_result_t
+  send_group_mod_message(const rofl::cauxid &auxid,
+                         const rofl::openflow::cofgroupmod &groupmod,
+                         uint32_t *xid = nullptr);
 
   /**
    * @brief	Sends OpenFlow Table-Mod message to attached datapath element.
@@ -1472,8 +1483,10 @@ public:
    * @exception rofl::eRofBaseNotConnected
    * @exception rofl::eRofBaseCongested
    */
-  uint32_t send_table_mod_message(const rofl::cauxid &auxid, uint8_t table_id,
-                                  uint32_t config);
+  rofl::crofsock::msg_result_t send_table_mod_message(const rofl::cauxid &auxid,
+                                                      uint8_t table_id,
+                                                      uint32_t config,
+                                                      uint32_t *xid = nullptr);
 
   /**
    * @brief	Sends OpenFlow Port-Mod message to attached datapath element.
@@ -1488,10 +1501,11 @@ public:
    * @exception rofl::eRofBaseNotConnected
    * @exception rofl::eRofBaseCongested
    */
-  uint32_t send_port_mod_message(const rofl::cauxid &auxid, uint32_t port_no,
-                                 const rofl::caddress_ll &hwaddr,
-                                 uint32_t config, uint32_t mask,
-                                 uint32_t advertise);
+  rofl::crofsock::msg_result_t
+  send_port_mod_message(const rofl::cauxid &auxid, uint32_t port_no,
+                        const rofl::caddress_ll &hwaddr, uint32_t config,
+                        uint32_t mask, uint32_t advertise,
+                        uint32_t *xid = nullptr);
 
   /**
    * @brief	Sends OpenFlow Set-Config message to attached datapath element.
@@ -1503,8 +1517,9 @@ public:
    * @exception rofl::eRofBaseNotConnected
    * @exception rofl::eRofBaseCongested
    */
-  uint32_t send_set_config_message(const rofl::cauxid &auxid, uint16_t flags,
-                                   uint16_t miss_send_len);
+  rofl::crofsock::msg_result_t
+  send_set_config_message(const rofl::cauxid &auxid, uint16_t flags,
+                          uint16_t miss_send_len, uint32_t *xid = nullptr);
 
   /**
    * @brief	Sends OpenFlow Queue-Get-Config-Request message to attached
@@ -1517,9 +1532,10 @@ public:
    * @exception rofl::eRofBaseNotConnected
    * @exception rofl::eRofBaseCongested
    */
-  uint32_t
+  rofl::crofsock::msg_result_t
   send_queue_get_config_request(const rofl::cauxid &auxid, uint32_t port,
-                                int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT);
+                                int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT,
+                                uint32_t *xid = nullptr);
 
   /**
    * @brief	Sends OpenFlow Get-Async-Config-Request message to attached
@@ -1531,9 +1547,10 @@ public:
    * @exception rofl::eRofBaseNotConnected
    * @exception rofl::eRofBaseCongested
    */
-  uint32_t
+  rofl::crofsock::msg_result_t
   send_get_async_config_request(const rofl::cauxid &auxid,
-                                int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT);
+                                int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT,
+                                uint32_t *xid = nullptr);
 
   /**
    * @brief	Sends OpenFlow Set-Async-Config message to attached datapath
@@ -1545,9 +1562,10 @@ public:
    * @exception rofl::eRofBaseNotConnected
    * @exception rofl::eRofBaseCongested
    */
-  uint32_t send_set_async_config_message(
+  rofl::crofsock::msg_result_t send_set_async_config_message(
       const rofl::cauxid &auxid,
-      const rofl::openflow::cofasync_config &async_config);
+      const rofl::openflow::cofasync_config &async_config,
+      uint32_t *xid = nullptr);
 
   /**
    * @brief	Sends OpenFlow Meter-Mod message to attached datapath element.
@@ -1561,10 +1579,11 @@ public:
    * @exception rofl::eRofBaseNotConnected
    * @exception rofl::eRofBaseCongested
    */
-  uint32_t
+  rofl::crofsock::msg_result_t
   send_meter_mod_message(const rofl::cauxid &auxid, uint16_t command,
                          uint16_t flags, uint32_t meter_id,
-                         const rofl::openflow::cofmeter_bands &meter_bands);
+                         const rofl::openflow::cofmeter_bands &meter_bands,
+                         uint32_t *xid = nullptr);
 
   /**
    * @brief	Sends OpenFlow Error message to attached datapath element.
@@ -1578,9 +1597,9 @@ public:
    * @exception rofl::eRofBaseNotConnected
    * @exception rofl::eRofBaseCongested
    */
-  void send_error_message(const rofl::cauxid &auxid, uint32_t xid,
-                          uint16_t type, uint16_t code, uint8_t *data = NULL,
-                          size_t datalen = 0);
+  rofl::crofsock::msg_result_t
+  send_error_message(const rofl::cauxid &auxid, uint32_t xid, uint16_t type,
+                     uint16_t code, uint8_t *data = NULL, size_t datalen = 0);
 
   /**
    * @brief	Sends OpenFlow Experimenter message to attached datapath
@@ -1596,7 +1615,7 @@ public:
    * @exception rofl::eRofBaseNotConnected
    * @exception rofl::eRofBaseCongested
    */
-  uint32_t
+  rofl::crofsock::msg_result_t
   send_experimenter_message(const rofl::cauxid &auxid, uint32_t xid,
                             uint32_t exp_id, uint32_t exp_type,
                             uint8_t *body = NULL, size_t bodylen = 0,

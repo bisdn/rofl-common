@@ -260,6 +260,16 @@ class crofsock : public cthread_env {
   };
 
 public:
+  enum msg_result_t {
+    MSG_IGNORED = 0,
+    MSG_QUEUED = 1,
+    MSG_QUEUED_CONGESTION = 2,
+    MSG_QUEUEING_FAILED_QUEUE_FULL = 3,
+    MSG_QUEUEING_FAILED_NOT_ESTABLISHED = 4,
+    MSG_QUEUEING_FAILED_SHUTDOWN_IN_PROGRESS = 5,
+  };
+
+public:
   /**
    *
    */
@@ -307,7 +317,8 @@ public:
   /**
    *
    */
-  void send_message(rofl::openflow::cofmsg *msg);
+  rofl::crofsock::msg_result_t send_message(rofl::openflow::cofmsg *msg,
+                                            bool enforce_queueing = false);
 
   /**
    *
