@@ -1510,10 +1510,10 @@ void crofsock::send_from_queue() {
               txqueue_size_tx_threshold = txqueue_pending_pkts / 2;
 
               VLOG(3) << __FUNCTION__ << " congestion occured"
-                      << " txqueue_pending_pkts" << txqueue_pending_pkts
-                      << " txqueue_size_congestion_occured"
+                      << " txqueue_pending_pkts: " << txqueue_pending_pkts
+                      << " txqueue_size_congestion_occured: "
                       << txqueue_size_congestion_occured
-                      << " txqueue_size_tx_threshold"
+                      << " txqueue_size_tx_threshold: "
                       << txqueue_size_tx_threshold << " laddr=" << laddr.str()
                       << " raddr=" << raddr.str();
 
