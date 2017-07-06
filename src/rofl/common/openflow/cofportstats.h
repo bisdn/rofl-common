@@ -470,8 +470,8 @@ public:
        << std::endl;
     os << "<tx-errors: " << (unsigned long long)r.get_tx_errors() << " >"
        << std::endl;
-    os << "<rx-frame-err: " << (unsigned long long)r.get_rx_frame_err()
-       << " >" << std::endl;
+    os << "<rx-frame-err: " << (unsigned long long)r.get_rx_frame_err() << " >"
+       << std::endl;
     os << "<rx-over-err: " << (unsigned long long)r.get_rx_over_err() << " >"
        << std::endl;
     os << "<rx-crc-err: " << (unsigned long long)r.get_rx_crc_err() << " >"

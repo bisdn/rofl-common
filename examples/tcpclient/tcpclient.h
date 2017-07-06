@@ -199,7 +199,7 @@ private:
    * @param auxid control connection identifier (main: 0)
    */
   virtual void handle_conn_congestion_occurred(rofl::crofctl &ctl,
-                                              const rofl::cauxid &auxid) {
+                                               const rofl::cauxid &auxid) {
     std::cerr << "channel congestion occured, ctlid=" << ctlid << std::endl;
   };
 

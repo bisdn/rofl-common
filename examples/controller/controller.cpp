@@ -237,7 +237,7 @@ void controller::handle_conn_terminated(rofl::crofdpt &dpt,
 }
 
 void controller::handle_conn_congestion_occurred(rofl::crofdpt &dpt,
-                                                const rofl::cauxid &auxid) {
+                                                 const rofl::cauxid &auxid) {
   std::cerr << "EVENT: congestion occured, auxid:" << (int)auxid.get_id()
             << std::endl;
 
