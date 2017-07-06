@@ -41,7 +41,7 @@ crofsock::crofsock(crofsock_env *env)
               "!EXP !PSK !SRP !DSS"),
       rx_fragment_pending(false), rxbuffer((size_t)65536), msg_bytes_read(0),
       max_pkts_rcvd_per_round(0), rx_disabled(false), tx_disabled(false),
-      txqueue_pending_pkts(0), txqueue_size_congestion_occured(0),
+      txqueue_pending_pkts(0), txqueue_size_congestion_occurred(0),
       txqueue_size_tx_threshold(0), txqueues(QUEUE_MAX), txweights(QUEUE_MAX),
       tx_is_running(false), tx_fragment_pending(false), txbuffer((size_t)65536),
       msg_bytes_sent(0), txlen(0) {
@@ -1492,7 +1492,7 @@ void crofsock::send_from_queue() {
             ::send(sd, txbuffer.somem() + msg_bytes_sent,
                    txlen - msg_bytes_sent, MSG_DONTWAIT | MSG_NOSIGNAL);
 
-        /* error occured */
+        /* error occurred */
         if (nbytes < 0) {
           switch (errno) {
           case EAGAIN: /* socket would block */ {
@@ -1504,16 +1504,16 @@ void crofsock::send_from_queue() {
             if (not flag_test(FLAG_TX_BLOCK_QUEUEING)) {
               /* block transmission of further packets */
               flag_set(FLAG_TX_BLOCK_QUEUEING, true);
-              /* remember queue size, when congestion occured */
-              txqueue_size_congestion_occured = txqueue_pending_pkts;
+              /* remember queue size, when congestion occurred */
+              txqueue_size_congestion_occurred = txqueue_pending_pkts;
               /* threshold for re-enabling acceptance of packets */
               txqueue_size_tx_threshold = txqueue_pending_pkts / 2;
 
-              VLOG(3) << __FUNCTION__ << " congestion occured"
-                      << " txqueue_pending_pkts" << txqueue_pending_pkts
-                      << " txqueue_size_congestion_occured"
-                      << txqueue_size_congestion_occured
-                      << " txqueue_size_tx_threshold"
+              VLOG(3) << __FUNCTION__ << " congestion occurred"
+                      << " txqueue_pending_pkts: " << txqueue_pending_pkts
+                      << " txqueue_size_congestion_occurred: "
+                      << txqueue_size_congestion_occurred
+                      << " txqueue_size_tx_threshold: "
                       << txqueue_size_tx_threshold << " laddr=" << laddr.str()
                       << " raddr=" << raddr.str();
 
@@ -1563,8 +1563,8 @@ void crofsock::send_from_queue() {
         flag_set(FLAG_TX_BLOCK_QUEUEING, false);
         VLOG(3) << __FUNCTION__ << " congestion solved"
                 << " txqueue_pending_pkts" << txqueue_pending_pkts
-                << " txqueue_size_congestion_occured"
-                << txqueue_size_congestion_occured
+                << " txqueue_size_congestion_occurred"
+                << txqueue_size_congestion_occurred
                 << " txqueue_size_tx_threshold" << txqueue_size_tx_threshold
                 << " laddr=" << laddr.str() << " raddr=" << raddr.str();
 

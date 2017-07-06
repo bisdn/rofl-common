@@ -237,8 +237,8 @@ void controller::handle_conn_terminated(rofl::crofdpt &dpt,
 }
 
 void controller::handle_conn_congestion_occurred(rofl::crofdpt &dpt,
-                                                const rofl::cauxid &auxid) {
-  std::cerr << "EVENT: congestion occured, auxid:" << (int)auxid.get_id()
+                                                 const rofl::cauxid &auxid) {
+  std::cerr << "EVENT: congestion occurred, auxid:" << (int)auxid.get_id()
             << std::endl;
 
   /* An OpenFlow control connection may suffer from insufficient
@@ -250,7 +250,7 @@ void controller::handle_conn_congestion_occurred(rofl::crofdpt &dpt,
    * Each connection's transmission buffer size adapts automatically to
    * the bandwidth offered by the underlying TCP connection. If the
    * TCP socket indicates a blocking condition, rofl-common will call
-   * method rofl::crofbase::handle_conn_congestion_occured(). The
+   * method rofl::crofbase::handle_conn_congestion_occurred(). The
    * application should stop sending further control messages via this
    * connection until a congestion resolution indication is received
    * from the library (see below). If an application persists on sending
@@ -479,7 +479,7 @@ void controller::handle_port_desc_stats_reply(
 
 void controller::handle_port_desc_stats_reply_timeout(rofl::crofdpt &dpt,
                                                       uint32_t xid) {
-  std::cerr << "Port-Desc-Stats timeout occured, xid: " << (unsigned int)xid
+  std::cerr << "Port-Desc-Stats timeout occurred, xid: " << (unsigned int)xid
             << std::endl;
 }
 
@@ -492,7 +492,7 @@ void controller::handle_table_features_stats_reply(
 
 void controller::handle_table_features_stats_reply_timeout(rofl::crofdpt &dpt,
                                                            uint32_t xid) {
-  std::cerr << "Table-Features-Stats timeout occured, xid: "
+  std::cerr << "Table-Features-Stats timeout occurred, xid: "
             << (unsigned int)xid << std::endl;
 }
 
@@ -504,6 +504,6 @@ void controller::handle_table_stats_reply(
 
 void controller::handle_table_stats_reply_timeout(rofl::crofdpt &dpt,
                                                   uint32_t xid) {
-  std::cerr << "Table-Stats timeout occured, xid: " << (unsigned int)xid
+  std::cerr << "Table-Stats timeout occurred, xid: " << (unsigned int)xid
             << std::endl;
 }

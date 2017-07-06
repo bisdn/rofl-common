@@ -383,14 +383,14 @@ public:
    * @brief	Returns capacity of transmission queues in messages
    */
   size_t get_txqueue_max_size() const {
-    return txqueue_size_congestion_occured;
+    return txqueue_size_congestion_occurred;
   };
 
   /**
    * @brief	Sets capacity of transmission queues in messages
    */
   crofsock &set_txqueue_max_size(size_t txqueue_max_size) {
-    this->txqueue_size_congestion_occured = txqueue_max_size;
+    this->txqueue_size_congestion_occurred = txqueue_max_size;
     for (unsigned int queue_id = 0; queue_id < QUEUE_MAX; queue_id++) {
       txqueues[queue_id].set_queue_max_size(txqueue_max_size);
     }
@@ -772,8 +772,8 @@ private:
   // number of packets waiting for transmission
   std::atomic_uint txqueue_pending_pkts;
 
-  // size of tx queue when congestion occured
-  unsigned int txqueue_size_congestion_occured;
+  // size of tx queue when congestion occurred
+  unsigned int txqueue_size_congestion_occurred;
 
   // size of tx queue for reallowing transmissions
   unsigned int txqueue_size_tx_threshold;
