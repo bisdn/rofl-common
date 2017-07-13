@@ -1,7 +1,7 @@
 #Detecting crypto and ssl
 ssl_detected="yes"
  
-AC_CHECK_LIB(ssl, SSL_library_init, , ssl_detected="no")
+AC_CHECK_LIB(ssl, SSL_accept, , ssl_detected="no")
 AC_CHECK_LIB(crypto, ERR_get_error, , ssl_detected="no")
 
 AC_MSG_CHECKING(for availability of openssl and crypto libraries(SSL/TLS))
