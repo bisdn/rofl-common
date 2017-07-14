@@ -73,7 +73,7 @@ private:
   rofl::cdptid dptid;
 
   // keep test running
-  bool __keep_running;
+  std::atomic_bool __keep_running;
 };
 
 class cdatapath : public rofl::crofbase {
