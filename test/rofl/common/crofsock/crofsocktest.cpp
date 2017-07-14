@@ -66,15 +66,9 @@ void crofsocktest::test() {
 
       CPPUNIT_ASSERT(timeout > 0);
 
-      slisten->close();
-      sclient->close();
-      sserver->close();
-
-      sleep(5);
-
-      delete slisten;
       delete sclient;
       delete sserver;
+      delete slisten;
     }
 
   } catch (rofl::eSysCall &e) {

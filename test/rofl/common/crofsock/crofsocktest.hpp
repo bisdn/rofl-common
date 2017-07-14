@@ -71,7 +71,7 @@ private:
   int timeout;
   int msg_counter;
   std::atomic_int server_msg_counter;
-  int client_msg_counter;
+  std::atomic_int client_msg_counter;
   rofl::crandom rand;
   uint16_t listening_port;
   rofl::csockaddr baddr;
