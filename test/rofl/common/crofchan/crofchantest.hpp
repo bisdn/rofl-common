@@ -44,7 +44,7 @@ public:
 
 private:
   uint16_t listening_port;
-  bool keep_running;
+  std::atomic_bool keep_running;
   rofl::openflow::cofhello_elem_versionbitmap versionbitmap;
   uint64_t dpid;
   uint32_t xid;
@@ -64,12 +64,12 @@ private:
   rofl::crwlock plock;
   std::set<rofl::crofconn *> pending_conns;
 
-  int num_of_pkts_sent;
-  int num_of_pkts_rcvd;
+  std::atomic_int num_of_pkts_sent;
+  std::atomic_int num_of_pkts_rcvd;
   std::atomic_bool congested;
 
   rofl::cthread thread;
-  int max_congestion_rounds;
+  std::atomic_int max_congestion_rounds;
 
 private:
   enum crofchantest_timer_t {
