@@ -102,24 +102,24 @@ private:
   rofl::crofsock *slisten;
   rofl::crofconn *sclient;
   rofl::crofconn *sserver;
-  uint32_t xid_server;
+  std::atomic_uint_fast32_t xid_server;
   uint32_t xid_client;
   uint16_t listening_port;
   rofl::crandom rand;
   rofl::csockaddr baddr;
 
   uint32_t xid;
-  uint64_t dpid;
-  uint8_t auxid;
-  uint32_t n_buffers;
-  uint8_t n_tables;
+  std::atomic_uint_fast64_t dpid;
+  std::atomic_uint_fast8_t auxid;
+  std::atomic_uint_fast32_t n_buffers;
+  std::atomic_uint_fast8_t n_tables;
   rofl::openflow::cofports ports;
 
-  int num_of_packets;
-  int srv_pkts_rcvd;
-  int srv_pkts_sent;
-  int cli_pkts_rcvd;
-  int cli_pkts_sent;
+  std::atomic_int num_of_packets;
+  std::atomic_int srv_pkts_rcvd;
+  std::atomic_int srv_pkts_sent;
+  std::atomic_int cli_pkts_rcvd;
+  std::atomic_int cli_pkts_sent;
 };
 
 #endif /* TEST_SRC_ROFL_COMMON_OPENFLOW_MESSAGES_COFMSGAGGRSTATS_TEST_HPP_ */

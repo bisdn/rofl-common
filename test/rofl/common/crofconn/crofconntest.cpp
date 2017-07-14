@@ -82,10 +82,6 @@ void crofconntest::test() {
     }
     std::cerr << std::endl;
 
-    slisten->close();
-    sclient->close();
-    sserver->close();
-
     std::cerr << "s:" << srv_pkts_rcvd << "(" << cli_pkts_sent << "), ";
     std::cerr << "c:" << cli_pkts_rcvd << "(" << srv_pkts_sent << "), "
               << std::endl;
