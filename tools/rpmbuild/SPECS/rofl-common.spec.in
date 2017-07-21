@@ -69,6 +69,16 @@ make install DESTDIR=$RPM_BUILD_ROOT
 rm -rf $RPM_BUILD_ROOT 
 
 %changelog
+* Fri Jul 21 2017 Tobias Jungel <tobias.jungel@bisdn.de> - v0.12.0
+- [+] crofsock: revised tx-queueing strategy (default txqueue size limited
+      to 128 messages), API changes to crofctl and crofdpt: all transmission
+      methods return the queueing result when sending an openflow message:
+      MSG_QUEUED, MSG_QUEUED_CONGESTION, MSG_QUEUEING_FAILED_*
+- [B] crofchantest: thread sanitizer friendly
+- [B] build-system: update OpenSSL dependency
+- [A] typos in functions fixed
+
+
 * Thu Jun 22 2017 Tobias Jungel <tobias.jungel@bisdn.de> - v0.11.3
 - [B] remove ambiguous get_time
 

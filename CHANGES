@@ -14,6 +14,9 @@ v0.12.0
     to 128 messages), API changes to crofctl and crofdpt: all transmission
     methods return the queueing result when sending an openflow message:
     MSG_QUEUED, MSG_QUEUED_CONGESTION, MSG_QUEUEING_FAILED_*
+[B] crofchantest: thread sanitizer friendly
+[B] build-system: update OpenSSL dependency
+[A] typos in functions fixed
 
 v0.11.2
 [B] cofmsg: fix copy of cofmsg_features_reply
