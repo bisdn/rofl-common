@@ -16,9 +16,6 @@
 
 using namespace rofl;
 
-/*static*/ const int cthread::PIPE_READ_FD = 0;
-/*static*/ const int cthread::PIPE_WRITE_FD = 1;
-
 void cthread::initialize() {
   running = false;
   tid = 0;

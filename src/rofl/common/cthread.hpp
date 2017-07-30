@@ -223,8 +223,6 @@ private:
   cthread_env *env;
 
   // thread related variables
-  static const int PIPE_READ_FD;
-  static const int PIPE_WRITE_FD;
   int event_fd;  // event fd for worker thread
   pthread_t tid; // pthread_t for worker thread
   // bool				run_thread;	// true: continue to run
