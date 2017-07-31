@@ -15,6 +15,7 @@
 
 #include <atomic>
 #include <bitset>
+#include <glog/logging.h>
 #include <inttypes.h>
 #include <list>
 #include <map>
@@ -128,7 +129,7 @@ private:
  * @brief	An OpenFlow control channel grouping multiple control
  * connections
  */
-class crofchan : public cthread_env, public rofl::crofconn_env {
+class crofchan : public cthread_timeout_event, rofl::crofconn_env {
   enum crofchan_timer_t {
     TIMER_ID_ROFCONN_DESTROY = 1,
   };
@@ -138,8 +139,6 @@ public:
    *
    */
   virtual ~crofchan() {
-    /* stop management thread */
-    thread.stop();
     /* drop connections scheduled for removal */
     __drop_conns_deletion();
     /* drop active connections */
@@ -149,11 +148,9 @@ public:
   /**
    *
    */
-  crofchan(crofchan_env *env)
-      : env(env), thread(this), last_auxid(0),
-        ofp_version(rofl::openflow::OFP_VERSION_UNKNOWN) {
-    thread.start("crofchan");
-  };
+  crofchan(cthread *thread, crofchan_env *env)
+      : env(env), thread(thread), last_auxid(0),
+        ofp_version(rofl::openflow::OFP_VERSION_UNKNOWN){};
 
 public:
   /**
@@ -225,8 +222,9 @@ public:
       conns_deletion.insert(it.second);
     }
     conns.clear();
-    if (not thread.has_timer(TIMER_ID_ROFCONN_DESTROY)) {
-      thread.add_timer(TIMER_ID_ROFCONN_DESTROY, ctimespec().expire_in(8));
+    if (not thread->has_timer(this, TIMER_ID_ROFCONN_DESTROY)) {
+      thread->add_timer(this, TIMER_ID_ROFCONN_DESTROY,
+                        ctimespec().expire_in(8));
     }
   };
 
@@ -245,7 +243,8 @@ public:
           .set_file(__FILE__)
           .set_line(__LINE__);
     }
-    (conns[last_auxid] = new crofconn(this))->set_auxid(cauxid(last_auxid));
+    (conns[last_auxid] = new crofconn(thread, this))
+        ->set_auxid(cauxid(last_auxid));
     return *(conns[last_auxid]);
   };
 
@@ -257,7 +256,7 @@ public:
     if (conns.find(auxid) != conns.end()) {
       delete conns[auxid];
     }
-    (conns[auxid] = new crofconn(this))->set_auxid(auxid);
+    (conns[auxid] = new crofconn(thread, this))->set_auxid(auxid);
     return *(conns[auxid]);
   };
 
@@ -280,8 +279,9 @@ public:
       AcquireReadWriteLock lock(conns_deletion_rwlock);
       conns[auxid]->set_env(nullptr);
       conns_deletion.insert(conns[auxid]);
-      if (not thread.has_timer(TIMER_ID_ROFCONN_DESTROY)) {
-        thread.add_timer(TIMER_ID_ROFCONN_DESTROY, ctimespec().expire_in(8));
+      if (not thread->has_timer(this, TIMER_ID_ROFCONN_DESTROY)) {
+        thread->add_timer(this, TIMER_ID_ROFCONN_DESTROY,
+                          ctimespec().expire_in(8));
       }
     }
     (conns[auxid] = conn)->set_env(this);
@@ -297,7 +297,7 @@ public:
   crofconn &set_conn(const cauxid &auxid) {
     AcquireReadWriteLock rwlock(conns_rwlock);
     if (conns.find(auxid) == conns.end()) {
-      (conns[auxid] = new crofconn(this))->set_auxid(auxid);
+      (conns[auxid] = new crofconn(thread, this))->set_auxid(auxid);
     }
     return *(conns[auxid]);
   };
@@ -353,8 +353,9 @@ public:
       conns.erase(auxid);
     }
     /* trigger management thread for doing the clean-up work */
-    if (not thread.has_timer(TIMER_ID_ROFCONN_DESTROY)) {
-      thread.add_timer(TIMER_ID_ROFCONN_DESTROY, ctimespec().expire_in(8));
+    if (not thread->has_timer(this, TIMER_ID_ROFCONN_DESTROY)) {
+      thread->add_timer(this, TIMER_ID_ROFCONN_DESTROY,
+                        ctimespec().expire_in(8));
     }
     return true;
   };
@@ -407,6 +408,8 @@ private:
    */
   void __drop_conns_deletion() {
     AcquireReadWriteLock lock(conns_deletion_rwlock);
+    VLOG(3) << __FUNCTION__
+            << ": conns_deletion.size=" << conns_deletion.size();
     for (auto conn : conns_deletion) {
       // std::cerr << "__drop_conns_deletion: deleting conn (" <<
       // (int)conn->get_auxid().get_id() << ") 0x" << conn << std::endl;
@@ -449,7 +452,7 @@ public:
   };
 
 private:
-  virtual void handle_established(crofconn &conn, uint8_t ofp_version) {
+  void handle_established(crofconn &conn, uint8_t ofp_version) override {
     if (conn.get_auxid() == cauxid(0)) {
       this->ofp_version = ofp_version;
       crofchan_env::call_env(env).handle_established(*this, ofp_version);
@@ -457,7 +460,7 @@ private:
     crofchan_env::call_env(env).handle_established(*this, conn, ofp_version);
   };
 
-  virtual void handle_closed(crofconn &conn) {
+  void handle_closed(crofconn &conn) override {
     if (conn.get_auxid().get_id() == 0) {
       { /* acquire rwlock */
         AcquireReadLock rwlock(conns_rwlock);
@@ -474,9 +477,9 @@ private:
           }
         }
         if (not to_be_removed.empty()) {
-          if (not thread.has_timer(TIMER_ID_ROFCONN_DESTROY)) {
-            thread.add_timer(TIMER_ID_ROFCONN_DESTROY,
-                             ctimespec().expire_in(8));
+          if (not thread->has_timer(this, TIMER_ID_ROFCONN_DESTROY)) {
+            thread->add_timer(this, TIMER_ID_ROFCONN_DESTROY,
+                              ctimespec().expire_in(8));
           }
         }
         for (auto auxid : to_be_removed) {
@@ -499,52 +502,52 @@ private:
           AcquireReadWriteLock lock(conns_deletion_rwlock);
           conns_deletion.insert(&conn);
         }
-        if (not thread.has_timer(TIMER_ID_ROFCONN_DESTROY)) {
-          thread.add_timer(TIMER_ID_ROFCONN_DESTROY, ctimespec().expire_in(8));
+        if (not thread->has_timer(this, TIMER_ID_ROFCONN_DESTROY)) {
+          thread->add_timer(this, TIMER_ID_ROFCONN_DESTROY,
+                            ctimespec().expire_in(8));
         }
       }
       crofchan_env::call_env(env).handle_closed(*this, conn);
     }
   };
 
-  virtual void handle_connect_refused(crofconn &conn) {
+  void handle_connect_refused(crofconn &conn) override {
     crofchan_env::call_env(env).handle_connect_refused(*this, conn);
   };
 
-  virtual void handle_connect_failed(crofconn &conn) {
+  void handle_connect_failed(crofconn &conn) override {
     crofchan_env::call_env(env).handle_connect_failed(*this, conn);
   };
 
-  virtual void handle_accept_failed(crofconn &conn) {
+  void handle_accept_failed(crofconn &conn) override {
     crofchan_env::call_env(env).handle_accept_failed(*this, conn);
   };
 
-  virtual void handle_negotiation_failed(crofconn &conn) {
+  void handle_negotiation_failed(crofconn &conn) override {
     crofchan_env::call_env(env).handle_negotiation_failed(*this, conn);
   };
 
-  virtual void handle_recv(crofconn &conn, rofl::openflow::cofmsg *msg) {
+  void handle_recv(crofconn &conn, rofl::openflow::cofmsg *msg) override {
     crofchan_env::call_env(env).handle_recv(*this, conn, msg);
   };
 
-  virtual void congestion_occurred_indication(crofconn &conn) {
+  void congestion_occurred_indication(crofconn &conn) override {
     crofchan_env::call_env(env).congestion_occurred_indication(*this, conn);
   };
 
-  virtual void congestion_solved_indication(crofconn &conn) {
+  void congestion_solved_indication(crofconn &conn) override {
     crofchan_env::call_env(env).congestion_solved_indication(*this, conn);
   };
 
-  virtual void handle_transaction_timeout(crofconn &conn, uint32_t xid,
-                                          uint8_t type, uint16_t sub_type = 0) {
+  void handle_transaction_timeout(crofconn &conn, uint32_t xid, uint8_t type,
+                                  uint16_t sub_type = 0) override {
     crofchan_env::call_env(env).handle_transaction_timeout(*this, conn, xid,
                                                            type, sub_type);
   };
 
 private:
-  virtual void handle_wakeup(cthread &thread){};
-
-  virtual void handle_timeout(cthread &thread, uint32_t timer_id) {
+  void handle_timeout(void *userdata) override {
+    int timer_id = (long)userdata;
     switch (timer_id) {
     case TIMER_ID_ROFCONN_DESTROY: {
       __drop_conns_deletion();
@@ -553,16 +556,12 @@ private:
     }
   };
 
-  virtual void handle_read_event(cthread &thread, int fd){};
-
-  virtual void handle_write_event(cthread &thread, int fd){};
-
 private:
   // owner of this crofchan instance
   crofchan_env *env;
 
   // management thread
-  cthread thread;
+  cthread *thread;
 
   // main and auxiliary connections
   std::map<cauxid, crofconn *> conns;

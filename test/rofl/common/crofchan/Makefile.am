@@ -12,6 +12,6 @@ crofchantest_LDADD= $(top_builddir)/src/rofl/librofl_common.la -lcppunit
 
 #Tests
 
-AM_TESTS_ENVIRONMENT = GLOG_logtostderr=1
+AM_TESTS_ENVIRONMENT = GLOG_logtostderr=1 GLOG_v=2
 check_PROGRAMS= crofchantest
 TESTS = crofchantest

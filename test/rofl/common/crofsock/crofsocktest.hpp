@@ -78,6 +78,8 @@ private:
   rofl::crofsock *slisten;
   rofl::crofsock *sclient;
   rofl::crofsock *sserver;
+  rofl::cthread tclient;
+  rofl::cthread tserver;
 };
 
 #endif /* TEST_SRC_ROFL_COMMON_OPENFLOW_MESSAGES_COFMSGAGGRSTATS_TEST_HPP_ */

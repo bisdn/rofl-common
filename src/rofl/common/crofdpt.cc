@@ -20,8 +20,9 @@ using namespace rofl;
 
 crofdpt::~crofdpt(){};
 
-crofdpt::crofdpt(rofl::crofdpt_env *env, const rofl::cdptid &dptid)
-    : env(env), dptid(dptid), snoop(true), rofchan(this),
+crofdpt::crofdpt(cthread *thread, rofl::crofdpt_env *env,
+                 const rofl::cdptid &dptid)
+    : env(env), dptid(dptid), snoop(true), rofchan(thread, this),
       xid_last(random.uint32()), n_buffers(0), n_tables(0), capabilities(0),
       miss_send_len(0), flags(0){};
 

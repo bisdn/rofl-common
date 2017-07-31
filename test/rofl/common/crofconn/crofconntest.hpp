@@ -14,6 +14,7 @@
 #include "rofl/common/cmemory.h"
 #include "rofl/common/crofconn.h"
 #include "rofl/common/crofsock.h"
+#include "rofl/common/cthread.hpp"
 
 class crofconntest : public CppUnit::TestFixture,
                      public rofl::crofconn_env,
@@ -102,6 +103,8 @@ private:
   rofl::crofsock *slisten;
   rofl::crofconn *sclient;
   rofl::crofconn *sserver;
+  rofl::cthread tclient;
+  rofl::cthread tserver;
   std::atomic_uint_fast32_t xid_server;
   uint32_t xid_client;
   uint16_t listening_port;

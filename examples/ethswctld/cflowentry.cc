@@ -13,9 +13,9 @@ cflowentry::cflowentry(cflowentry_env *flowenv, const rofl::cdptid &dptid,
                        const rofl::caddress_ll &src,
                        const rofl::caddress_ll &dst, uint32_t port_no)
     : env(flowenv), dptid(dptid), port_no(port_no), src(src), dst(dst),
-      entry_timeout(CFLOWENTRY_DEFAULT_TIMEOUT), thread(this) {
+      entry_timeout(CFLOWENTRY_DEFAULT_TIMEOUT) {
   flow_mod_add();
-  thread.add_timer(CFLOWENTRY_ENTRY_EXPIRED,
+  thread.add_timer(this, CFLOWENTRY_ENTRY_EXPIRED,
                    rofl::ctimespec().expire_in(entry_timeout));
   std::cerr << "[cflowentry] created" << std::endl << *this;
   thread.start("cflowentry");
@@ -26,7 +26,8 @@ cflowentry::~cflowentry() {
   flow_mod_delete();
 }
 
-void cflowentry::handle_timeout(cthread &thread, uint32_t timer_id) {
+void cflowentry::handle_timeout(void *userdata) {
+  int timer_id = (long)userdata;
   switch (timer_id) {
   case CFLOWENTRY_ENTRY_EXPIRED: {
     env->flow_timer_expired(*this);
@@ -40,7 +41,7 @@ void cflowentry::set_out_port_no(uint32_t port_no) {
     flow_mod_modify();
   }
 
-  thread.add_timer(CFLOWENTRY_ENTRY_EXPIRED,
+  thread.add_timer(this, CFLOWENTRY_ENTRY_EXPIRED,
                    rofl::ctimespec().expire_in(entry_timeout));
 }
 

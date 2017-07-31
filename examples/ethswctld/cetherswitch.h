@@ -25,9 +25,7 @@ namespace ethswctld {
  * A simple controller application capable of switching Ethernet
  * frames in a flow-based manner.
  */
-class cetherswitch : public cflowtable_env,
-                     public rofl::crofbase,
-                     public virtual rofl::cthread_env {
+class cetherswitch : public cflowtable_env, public rofl::crofbase {
 public:
   /**
    * @brief	Static main routine for class cetherswitch
@@ -69,7 +67,7 @@ private:
    *
    * @param dpt datapath instance
    */
-  virtual void handle_dpt_open(rofl::crofdpt &dpt);
+  void handle_dpt_open(rofl::crofdpt &dpt) override;
 
   /**
    * @brief	Called after termination of associated OpenFlow control channel.
@@ -82,7 +80,7 @@ private:
    *
    * @param dpt datapath instance
    */
-  virtual void handle_dpt_close(const rofl::cdptid &dptid);
+  void handle_dpt_close(const rofl::cdptid &dptid) override;
 
   /**
    * @brief	OpenFlow Packet-In message received.
@@ -91,8 +89,8 @@ private:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void handle_packet_in(rofl::crofdpt &dpt, const rofl::cauxid &auxid,
-                                rofl::openflow::cofmsg_packet_in &msg);
+  void handle_packet_in(rofl::crofdpt &dpt, const rofl::cauxid &auxid,
+                        rofl::openflow::cofmsg_packet_in &msg) override;
 
   /**
    * @brief	OpenFlow Flow-Stats-Reply message received.
@@ -101,9 +99,9 @@ private:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void
-  handle_flow_stats_reply(rofl::crofdpt &dpt, const rofl::cauxid &auxid,
-                          rofl::openflow::cofmsg_flow_stats_reply &msg);
+  void handle_flow_stats_reply(
+      rofl::crofdpt &dpt, const rofl::cauxid &auxid,
+      rofl::openflow::cofmsg_flow_stats_reply &msg) override;
 
   /**
    * @brief	Timer expired while waiting for OpenFlow Flow-Stats-Reply
@@ -115,8 +113,8 @@ private:
    * @param dpt datapath instance
    * @param xid OpenFlow transaction identifier
    */
-  virtual void handle_flow_stats_reply_timeout(rofl::crofdpt &dpt,
-                                               uint32_t xid);
+  void handle_flow_stats_reply_timeout(rofl::crofdpt &dpt,
+                                       uint32_t xid) override;
 
   /** @endcond */
 
@@ -129,7 +127,7 @@ private:
    * @param opaque expired timer type
    * @param data pointer to opaque data
    */
-  virtual void handle_timeout(cthread &thread, uint32_t timer_id);
+  void handle_timeout(void *userdata) override;
 
   /**
    * @brief	Dump an Ethernet frame received via an OpenFlow Packet-In
@@ -141,7 +139,7 @@ private:
   /**
    *
    */
-  virtual rofl::crofdpt &set_dpt(const rofl::cdptid &dptid) {
+  rofl::crofdpt &set_dpt(const rofl::cdptid &dptid) override {
     return rofl::crofbase::set_dpt(dptid);
   };
 

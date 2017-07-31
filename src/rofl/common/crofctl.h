@@ -304,8 +304,9 @@ protected:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  void handle_stats_request(rofl::crofctl &ctl, const rofl::cauxid &auxid,
-                            rofl::openflow::cofmsg_stats_request &msg){};
+  virtual void
+  handle_stats_request(rofl::crofctl &ctl, const rofl::cauxid &auxid,
+                       rofl::openflow::cofmsg_stats_request &msg){};
 
   /**
    * @brief	OpenFlow Desc-Stats-Request message received.
@@ -667,7 +668,7 @@ public:
    * for this object
    * @param ctlid rofl-common's internal identifier for this instance
    */
-  crofctl(crofctl_env *env, const cctlid &ctlid);
+  crofctl(cthread *thread, crofctl_env *env, const cctlid &ctlid);
 
 public:
   /**

@@ -13,8 +13,8 @@ using namespace rofl::examples::ethswctld;
 cfibentry::cfibentry(cfibentry_env *fibenv, const rofl::caddress_ll &hwaddr,
                      uint32_t port_no)
     : env(fibenv), port_no(port_no), hwaddr(hwaddr),
-      entry_timeout(CFIBENTRY_DEFAULT_TIMEOUT), thread(this) {
-  thread.add_timer(TIMER_ID_ENTRY_EXPIRED,
+      entry_timeout(CFIBENTRY_DEFAULT_TIMEOUT) {
+  thread.add_timer(this, TIMER_ID_ENTRY_EXPIRED,
                    rofl::ctimespec().expire_in(entry_timeout));
   std::cerr << "[cfibentry] created" << std::endl << *this;
   thread.start("cfibentry");
@@ -24,7 +24,8 @@ cfibentry::~cfibentry() {
   std::cerr << "[cfibentry] deleted" << std::endl << *this;
 }
 
-void cfibentry::handle_timeout(cthread &thread, uint32_t timer_id) {
+void cfibentry::handle_timeout(void *userdata) {
+  int timer_id = (long)userdata;
   switch (timer_id) {
   case TIMER_ID_ENTRY_EXPIRED: {
     env->fib_timer_expired(hwaddr);
@@ -39,6 +40,6 @@ void cfibentry::set_port_no(uint32_t port_no) {
     env->fib_port_update(*this);
   }
 
-  thread.add_timer(TIMER_ID_ENTRY_EXPIRED,
+  thread.add_timer(this, TIMER_ID_ENTRY_EXPIRED,
                    rofl::ctimespec().expire_in(entry_timeout));
 }

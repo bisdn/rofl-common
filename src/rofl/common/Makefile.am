@@ -5,52 +5,51 @@ SUBDIRS = openflow
 noinst_LTLIBRARIES = librofl_common_base.la
 
 librofl_common_base_la_SOURCES = \
-		rofcommon.h \
-		exception.hpp \
-		locking.hpp \
+		callbacks.hpp \
+		caddress.cc \
+		caddress.h \
+		caddrinfo.cc \
+		caddrinfo.h \
+		caddrinfos.cc \
+		caddrinfos.h \
+		cauxid.h \
+		cctlid.h \
+		cdpid.h \
+		cdptid.h \
+		cindex.h \
+		cmemory.cc \
+		cmemory.h \
+		cpacket.cc \
+		cpacket.h \
+		crandom.cc \
+		crandom.h \
 		crofbase.cc \
 		crofbase.h \
-		crofdpt.cc \
-		crofdpt.h \
-		crofctl.cc \
-		crofctl.h \
 		crofchan.cc \
 		crofchan.h \
 		crofconn.cc \
 		crofconn.h \
+		crofctl.cc \
+		crofctl.h \
+		crofdpt.cc \
+		crofdpt.h \
+		crofqueue.h \
 		crofsock.cc \
 		crofsock.h \
-		crofqueue.h \
-		ctimespec.cpp \
-		ctimespec.hpp \
-		ctimer.cpp \
-		ctimer.hpp \
+		csegment.cpp \
+		csegment.hpp \
+		csockaddr.cc \
+		csockaddr.h \
 		cthread.cpp \
 		cthread.hpp \
+		ctimer.cpp \
+		ctimer.hpp \
+		ctimespec.cpp \
+		ctimespec.hpp \
 		endian_conversion.h \
-		caddress.h \
-		caddress.cc \
-		cpacket.h \
-		cpacket.cc \
-		crandom.h \
-		crandom.cc \
-		cmemory.h \
-		cmemory.cc \
-		cauxid.h \
-		cctlid.h \
-		cdptid.h \
-		csockaddr.h \
-		csockaddr.cc \
-		caddrinfo.h \
-		caddrinfo.cc \
-		caddrinfos.h \
-		caddrinfos.cc \
-		cindex.h \
-		cdpid.h \
-		csegment.hpp \
-		csegment.cpp
-
-		
+		exception.hpp \
+		locking.hpp \
+		rofcommon.h
 
 librofl_common_base_la_LIBADD=openflow/libopenflow.la -lrt
 

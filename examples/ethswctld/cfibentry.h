@@ -98,7 +98,7 @@ protected:
  * has become stale. For timer support, cfibentry derives from class
  * rofl::ciosrv.
  */
-class cfibentry : public rofl::cthread_env {
+class cfibentry : public cthread_timeout_event {
 public:
   /**
    * @brief	cfibentry constructor
@@ -159,10 +159,7 @@ private:
    *
    * @see rofl::ciosrv
    */
-  void handle_timeout(cthread &thread, uint32_t timer_id) override;
-  void handle_read_event(cthread &thread, int fd) override {}
-  void handle_write_event(cthread &thread, int fd) override {}
-  void handle_wakeup(cthread &thread) override {}
+  void handle_timeout(void *userdata) override;
 
 public:
   /**

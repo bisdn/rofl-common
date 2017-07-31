@@ -18,6 +18,7 @@
 #include <ostream>
 #include <time.h>
 
+#include "rofl/common/callbacks.hpp"
 #include "rofl/common/ctimespec.hpp"
 #include "rofl/common/exception.hpp"
 #include "rofl/common/locking.hpp"
@@ -39,22 +40,14 @@ public:
   /**
    *
    */
-  static const ctimespec now(cclockid clk_id = cclockid(CLOCK_MONOTONIC)) {
-    return ctimespec::now(clk_id);
-  };
-
-public:
-  /**
-   *
-   */
   ~ctimer(){};
 
   /**
    *
    */
-  ctimer(uint32_t timer_id = 0,
+  ctimer(cthread_timeout_event *e = nullptr, uint32_t timer_id = 0,
          const ctimespec &tspec = ctimespec(::timespec{0, 0}))
-      : timer_id(timer_id), tspec(tspec){};
+      : timer_id(timer_id), tspec(tspec), e(e){};
 
   /**
    *
@@ -70,6 +63,7 @@ public:
 
     timer_id = ts.timer_id;
     tspec = ts.tspec;
+    e = ts.e;
 
     return *this;
   };
@@ -92,6 +86,10 @@ public:
    */
   const ctimespec &get_tspec() const { return tspec; };
 
+  cthread_timeout_event *get_callback() { return e; }
+
+  const cthread_timeout_event *get_callback() const { return e; }
+
   /**
    *
    */
@@ -106,7 +104,6 @@ public:
     return get_tspec().get_relative_timeout();
   };
 
-public:
   /**
    *
    */
@@ -118,17 +115,22 @@ public:
 private:
   uint32_t timer_id;
   ctimespec tspec;
+  cthread_timeout_event *e;
 };
 
 /**
  *
  */
-class ctimer_find_by_timer_id {
+class ctimer_find_by_timer_and_event {
+  cthread_timeout_event *e;
   uint32_t timer_id;
 
 public:
-  ctimer_find_by_timer_id(uint32_t timer_id) : timer_id(timer_id) {}
-  bool operator()(const ctimer &t) { return (t.get_timer_id() == timer_id); }
+  ctimer_find_by_timer_and_event(cthread_timeout_event *e, uint32_t timer_id)
+      : e(e), timer_id(timer_id) {}
+  bool operator()(const ctimer &t) {
+    return (t.get_callback() == e && t.get_timer_id() == timer_id);
+  }
 };
 
 }; // end of namespace rofl

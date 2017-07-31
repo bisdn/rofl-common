@@ -17,9 +17,36 @@ using namespace rofl::openflow;
 
 CPPUNIT_TEST_SUITE_REGISTRATION(crofsocktest);
 
-void crofsocktest::setUp() { baddr = rofl::csockaddr(AF_INET, "0.0.0.0", 0); }
+void crofsocktest::setUp() {
+  tclient.start("tclient");
+  tserver.start("tserver");
+  baddr = rofl::csockaddr(AF_INET, "0.0.0.0", 0);
 
-void crofsocktest::tearDown() {}
+  slisten = new rofl::crofsock(&tserver, this);
+  /* try to find idle port for test */
+  bool lookup_idle_port = true;
+  while (lookup_idle_port) {
+    do {
+      listening_port = rand.uint16();
+    } while ((listening_port < 10000) || (listening_port > 49000));
+    try {
+      LOG(INFO) << "trying listening port=" << (int)listening_port << std::endl;
+      baddr = rofl::csockaddr(rofl::caddress_in4("127.0.0.1"), listening_port);
+      /* try to bind address first */
+      slisten->set_baddr(baddr).listen();
+      LOG(INFO) << "binding to " << baddr.str() << std::endl;
+      lookup_idle_port = false;
+    } catch (rofl::eSysCall &e) {
+      /* port in use, try another one */
+    }
+  }
+}
+
+void crofsocktest::tearDown() {
+  tclient.stop();
+  tserver.stop();
+  delete slisten;
+}
 
 void crofsocktest::test() {
   try {
@@ -28,34 +55,9 @@ void crofsocktest::test() {
       keep_running = true;
       timeout = 60;
       msg_counter = 0;
-      listening_port = 0;
 
-      slisten = new rofl::crofsock(this);
-      sclient = new rofl::crofsock(this);
-
-      /* try to find idle port for test */
-      bool lookup_idle_port = true;
-      while (lookup_idle_port) {
-        do {
-          listening_port = rand.uint16();
-        } while ((listening_port < 10000) || (listening_port > 49000));
-        try {
-          LOG(INFO) << "trying listening port=" << (int)listening_port
-                    << std::endl;
-          baddr =
-              rofl::csockaddr(rofl::caddress_in4("127.0.0.1"), listening_port);
-          /* try to bind address first */
-          slisten->set_baddr(baddr).listen();
-          LOG(INFO) << "binding to " << baddr.str() << std::endl;
-          lookup_idle_port = false;
-        } catch (rofl::eSysCall &e) {
-          /* port in use, try another one */
-        }
-      }
-
+      sclient = new rofl::crofsock(&tclient, this);
       sclient->set_raddr(baddr).tcp_connect(true);
-
-      sleep(1);
 
       while (keep_running && (--timeout > 0)) {
         struct timespec ts;
@@ -66,9 +68,13 @@ void crofsocktest::test() {
 
       CPPUNIT_ASSERT(timeout > 0);
 
+      sclient->close();
+      sserver->close();
+
+      sleep(2);
+
       delete sclient;
       delete sserver;
-      delete slisten;
     }
 
   } catch (rofl::eSysCall &e) {
@@ -87,29 +93,7 @@ void crofsocktest::test_tls() {
     timeout = 60;
     msg_counter = 0;
 
-    slisten = new rofl::crofsock(this);
-    sclient = new rofl::crofsock(this);
-
-    /* try to find idle port for test */
-    bool lookup_idle_port = true;
-    while (lookup_idle_port) {
-      do {
-        listening_port = rand.uint16();
-      } while ((listening_port < 10000) || (listening_port > 49000));
-      try {
-        LOG(INFO) << "trying listening port=" << (int)listening_port
-                  << std::endl;
-        baddr =
-            rofl::csockaddr(rofl::caddress_in4("127.0.0.1"), listening_port);
-        /* try to bind address first */
-        slisten->set_baddr(baddr).listen();
-        LOG(INFO) << "binding to " << baddr.str() << std::endl;
-        lookup_idle_port = false;
-      } catch (rofl::eSysCall &e) {
-        /* port in use, try another one */
-      }
-    }
-
+    sclient = new rofl::crofsock(&tclient, this);
     sclient->set_raddr(baddr)
         .set_tls_cafile("../../../../../tools/xca/ca.rofl-core.crt.pem")
         .set_tls_certfile("../../../../../tools/xca/client.crt.pem")
@@ -125,7 +109,11 @@ void crofsocktest::test_tls() {
 
     CPPUNIT_ASSERT(timeout > 0);
 
-    delete slisten;
+    sclient->close();
+    sserver->close();
+
+    sleep(2);
+
     delete sclient;
     delete sserver;
 
@@ -145,7 +133,7 @@ void crofsocktest::handle_listen(rofl::crofsock &socket) {
 
     LOG(INFO) << "crofsocktest::handle_listen() sd=" << sd << std::endl;
 
-    sserver = new rofl::crofsock(this);
+    sserver = new rofl::crofsock(&tserver, this);
 
     switch (test_mode) {
     case TEST_MODE_TCP: {
@@ -241,16 +229,17 @@ void crofsocktest::congestion_occurred_indication(rofl::crofsock &socket) {
 
 void crofsocktest::handle_recv(rofl::crofsock &socket,
                                rofl::openflow::cofmsg *msg) {
+  int rv;
   if (&socket == sserver) {
     LOG(INFO) << "sserver => handle recv " << std::endl << *msg;
-    delete msg;
 
     if (server_msg_counter < 10) {
       rofl::openflow::cofmsg_features_request *features =
           new cofmsg_features_request(rofl::openflow13::OFP_VERSION,
                                       0xb1b2b3b4);
 
-      sserver->send_message(features);
+      rv = sserver->send_message(features);
+      LOG(INFO) << __FUNCTION__ << ": send_message returned " << rv;
 
       server_msg_counter++;
     }
@@ -262,13 +251,13 @@ void crofsocktest::handle_recv(rofl::crofsock &socket,
 
   } else if (&socket == sclient) {
     LOG(INFO) << "sclient => handle recv " << std::endl << *msg;
-    delete msg;
 
     if (client_msg_counter < 10) {
       rofl::openflow::cofmsg_hello *hello =
           new cofmsg_hello(rofl::openflow13::OFP_VERSION, 0xa1a2a3a4);
 
-      sclient->send_message(hello);
+      rv = sclient->send_message(hello);
+      LOG(INFO) << __FUNCTION__ << ": send_message returned " << rv;
 
       client_msg_counter++;
     }
@@ -277,7 +266,11 @@ void crofsocktest::handle_recv(rofl::crofsock &socket,
       LOG(INFO) << "[sclient] test done" << std::endl;
       keep_running = false;
     }
+  } else {
+    LOG(FATAL) << __FUNCTION__;
   }
+
+  delete msg;
 }
 
 void crofsocktest::handle_tls_connect_failed(rofl::crofsock &socket) {

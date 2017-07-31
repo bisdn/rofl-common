@@ -142,35 +142,22 @@ private:
   rofl::openflow::cofports ports;
 };
 
-class crofbasetest : public CppUnit::TestFixture, public rofl::cthread_env {
+class crofbasetest : public CppUnit::TestFixture {
 
   CPPUNIT_TEST_SUITE(crofbasetest);
   CPPUNIT_TEST(test);
   CPPUNIT_TEST_SUITE_END();
 
-public:
-  void setUp();
-  void tearDown();
-
-public:
-  void test();
-
-private:
-  virtual void handle_wakeup(rofl::cthread &thread);
-
-  virtual void handle_timeout(rofl::cthread &thread, uint32_t timer_id);
-
-  virtual void handle_read_event(rofl::cthread &thread, int fd){};
-  virtual void handle_write_event(rofl::cthread &thread, int fd){};
-
-private:
   // test controller
   ccontroller controller;
 
   // test datapath
   cdatapath datapath;
 
-private:
+public:
+  void setUp();
+  void tearDown();
+  void test();
 };
 
 #endif /* TEST_USG_UNIT_TEST_HPP_ */

@@ -19,7 +19,7 @@ using namespace rofl;
 /*static*/ crwlock crofconn_env::connection_envs_lock;
 /*static*/ const int crofconn::RXQUEUE_MAX_SIZE_DEFAULT = 128;
 /*static*/ const unsigned int crofconn::DEFAULT_SEGMENTATION_THRESHOLD = 65535;
-/*static*/ const time_t crofconn::DEFAULT_HELLO_TIMEOUT = 3;
+/*static*/ const time_t crofconn::DEFAULT_HELLO_TIMEOUT = 30;
 /*static*/ const time_t crofconn::DEFAULT_FEATURES_TIMEOUT = 5;
 /*static*/ const time_t crofconn::DEFAULT_ECHO_TIMEOUT = 3;
 /*static*/ const time_t crofconn::DEFAULT_LIFECHECK_TIMEOUT = 1;
@@ -29,11 +29,11 @@ using namespace rofl;
 crofconn::~crofconn() {
   /* stop worker thread */
   set_state(STATE_CLOSING);
-  thread.stop();
+  thread->remove_wakeup_observer(this, wake_handle);
 }
 
-crofconn::crofconn(crofconn_env *env)
-    : env(env), thread(this), rofsock(this), dpid(0), auxid(0),
+crofconn::crofconn(cthread *thread, crofconn_env *env)
+    : env(env), thread(thread), rofsock(thread, this), dpid(0), auxid(0),
       ofp_version(rofl::openflow::OFP_VERSION_UNKNOWN), mode(MODE_UNKNOWN),
       state(STATE_DISCONNECTED), flag_hello_sent(false), flag_hello_rcvd(false),
       rxweights(QUEUE_MAX), rxqueues(QUEUE_MAX), rx_thread_working(false),
@@ -58,7 +58,7 @@ crofconn::crofconn(crofconn_env *env)
     rxqueues[queue_id].set_queue_max_size(rxqueue_max_size);
   }
   /* start worker thread */
-  thread.start("crofconn");
+  thread->add_wakeup_observer(this, &wake_handle);
 }
 
 void crofconn::close() { set_state(STATE_CLOSING); };
@@ -100,7 +100,8 @@ void crofconn::tls_connect(
   rofsock.tls_connect(reconnect);
 };
 
-void crofconn::handle_timeout(cthread &thread, uint32_t timer_id) {
+void crofconn::handle_timeout(void *userdata) {
+  int timer_id = (long)userdata;
   switch (timer_id) {
   case TIMER_ID_NEED_LIFE_CHECK: {
     send_echo_request();
@@ -153,7 +154,7 @@ void crofconn::set_state(enum crofconn_state_t new_state) {
               << " raddr=" << rofsock.get_raddr().str();
 
       /* stop periodic checks for connection state (OAM) */
-      thread.drop_timer(TIMER_ID_NEED_LIFE_CHECK);
+      thread->drop_timer(this, TIMER_ID_NEED_LIFE_CHECK);
 
       clear_pending_requests();
       clear_pending_segments();
@@ -194,8 +195,8 @@ void crofconn::set_state(enum crofconn_state_t new_state) {
               << " laddr=" << rofsock.get_laddr().str()
               << " raddr=" << rofsock.get_raddr().str();
       if (not flag_hello_rcvd) {
-        thread.add_timer(TIMER_ID_WAIT_FOR_HELLO,
-                         ctimespec().expire_in(timeout_hello));
+        thread->add_timer(this, TIMER_ID_WAIT_FOR_HELLO,
+                          ctimespec().expire_in(timeout_hello));
       }
       if (not flag_hello_sent) {
         send_hello_message();
@@ -207,7 +208,7 @@ void crofconn::set_state(enum crofconn_state_t new_state) {
               << versionbitmap_peer.str()
               << " laddr=" << rofsock.get_laddr().str()
               << " raddr=" << rofsock.get_raddr().str();
-      thread.drop_timer(TIMER_ID_WAIT_FOR_HELLO);
+      thread->drop_timer(this, TIMER_ID_WAIT_FOR_HELLO);
       send_features_request();
 
     } break;
@@ -216,10 +217,10 @@ void crofconn::set_state(enum crofconn_state_t new_state) {
               << static_cast<unsigned>(ofp_version.load())
               << " laddr=" << rofsock.get_laddr().str()
               << " raddr=" << rofsock.get_raddr().str();
-      thread.drop_timer(TIMER_ID_WAIT_FOR_HELLO);
+      thread->drop_timer(this, TIMER_ID_WAIT_FOR_HELLO);
       /* start periodic checks for connection state (OAM) */
-      thread.add_timer(TIMER_ID_NEED_LIFE_CHECK,
-                       ctimespec().expire_in(timeout_lifecheck));
+      thread->add_timer(this, TIMER_ID_NEED_LIFE_CHECK,
+                        ctimespec().expire_in(timeout_lifecheck));
       crofconn_env::call_env(env).handle_established(*this, ofp_version);
 
     } break;
@@ -241,7 +242,7 @@ void crofconn::error_rcvd(rofl::openflow::cofmsg *pmsg) {
     return;
   }
 
-  thread.drop_timer(TIMER_ID_WAIT_FOR_HELLO);
+  thread->drop_timer(this, TIMER_ID_WAIT_FOR_HELLO);
 
   try {
 
@@ -329,7 +330,9 @@ void crofconn::send_hello_message() {
             << " laddr=" << rofsock.get_laddr().str()
             << " raddr=" << rofsock.get_raddr().str();
 
-    rofsock.send_message(msg);
+    int rv = rofsock.send_message(
+        msg, true); // XXX(toanju): this might fail silently...
+    VLOG(2) << __FUNCTION__ << ": send_message returned rv=" << rv;
 
   } catch (rofl::exception &e) {
     VLOG(1) << __FUNCTION__ << " error: " << e.what();
@@ -354,7 +357,7 @@ void crofconn::hello_rcvd(rofl::openflow::cofmsg *pmsg) {
 
   flag_hello_rcvd = true;
 
-  thread.drop_timer(TIMER_ID_WAIT_FOR_HELLO);
+  thread->drop_timer(this, TIMER_ID_WAIT_FOR_HELLO);
 
   try {
 
@@ -506,7 +509,7 @@ void crofconn::hello_expired() {
           << " laddr=" << rofsock.get_laddr().str()
           << " raddr=" << rofsock.get_raddr().str();
 
-  switch (state) {
+  switch (state.load()) {
   case STATE_ESTABLISHED: {
     /* ignore event */
     VLOG(1) << __FUNCTION__
@@ -530,8 +533,8 @@ void crofconn::hello_expired() {
 
 void crofconn::send_features_request() {
   try {
-    thread.add_timer(TIMER_ID_WAIT_FOR_FEATURES,
-                     ctimespec().expire_in(timeout_features));
+    thread->add_timer(this, TIMER_ID_WAIT_FOR_FEATURES,
+                      ctimespec().expire_in(timeout_features));
 
     rofl::openflow::cofmsg_features_request *msg =
         new rofl::openflow::cofmsg_features_request(
@@ -562,7 +565,7 @@ void crofconn::features_reply_rcvd(rofl::openflow::cofmsg *pmsg) {
     return;
   }
 
-  thread.drop_timer(TIMER_ID_WAIT_FOR_FEATURES);
+  thread->drop_timer(this, TIMER_ID_WAIT_FOR_FEATURES);
 
   try {
     set_dpid(msg->get_dpid());
@@ -594,8 +597,8 @@ void crofconn::features_request_expired() {
 
 void crofconn::send_echo_request() {
   try {
-    thread.add_timer(TIMER_ID_WAIT_FOR_ECHO,
-                     ctimespec().expire_in(timeout_echo));
+    thread->add_timer(this, TIMER_ID_WAIT_FOR_ECHO,
+                      ctimespec().expire_in(timeout_echo));
 
     rofl::openflow::cofmsg_echo_request *msg =
         new rofl::openflow::cofmsg_echo_request(ofp_version,
@@ -620,13 +623,13 @@ void crofconn::echo_reply_rcvd(rofl::openflow::cofmsg *pmsg) {
 
   assert(nullptr != msg);
 
-  thread.drop_timer(TIMER_ID_WAIT_FOR_ECHO);
+  thread->drop_timer(this, TIMER_ID_WAIT_FOR_ECHO);
 
   try {
     delete msg;
 
-    thread.add_timer(TIMER_ID_NEED_LIFE_CHECK,
-                     ctimespec().expire_in(timeout_lifecheck));
+    thread->add_timer(this, TIMER_ID_NEED_LIFE_CHECK,
+                      ctimespec().expire_in(timeout_lifecheck));
 
   } catch (std::runtime_error &e) {
     VLOG(1) << __FUNCTION__ << " runtime error: " << e.what()
@@ -1160,18 +1163,18 @@ void crofconn::handle_recv(crofsock &socket, rofl::openflow::cofmsg *msg) {
   /* wakeup working thread in state ESTABLISHED; otherwise keep sleeping
    * and enqueue message until state ESTABLISHED is reached */
   if ((STATE_ESTABLISHED == state) && (not rx_thread_working)) {
-    thread.wakeup();
+    thread->notify_wake(wake_handle);
   }
 }
 
-void crofconn::handle_wakeup(cthread &thread) { handle_rx_messages(); }
+void crofconn::handle_wakeup(void *userdata) { handle_rx_messages(); }
 
 void crofconn::handle_rx_messages() {
   /* we start with handling incoming messages */
   rx_thread_working = true;
   rx_thread_scheduled = false;
 
-  thread.drop_timer(TIMER_ID_NEED_LIFE_CHECK);
+  thread->drop_timer(this, TIMER_ID_NEED_LIFE_CHECK);
 
   unsigned int keep_running = 1;
 
@@ -1232,7 +1235,7 @@ void crofconn::handle_rx_messages() {
 
         /* reschedule this method */
         if (not rxqueues[queue_id].empty()) {
-          thread.wakeup();
+          thread->notify_wake(wake_handle);
         }
       }
 
@@ -1256,8 +1259,8 @@ void crofconn::handle_rx_messages() {
 
   rx_thread_working = false;
 
-  thread.add_timer(TIMER_ID_NEED_LIFE_CHECK,
-                   ctimespec().expire_in(timeout_lifecheck));
+  thread->add_timer(this, TIMER_ID_NEED_LIFE_CHECK,
+                    ctimespec().expire_in(timeout_lifecheck));
 
   /* reenable reception of messages on socket */
   if (rofsock.is_rx_disabled()) {

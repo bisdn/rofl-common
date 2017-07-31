@@ -117,7 +117,9 @@ private:
  * @ingroup common_devel_workflow
  * @brief	A single OpenFlow control connection
  */
-class crofconn : public cthread_env, public crofsock_env {
+class crofconn : public cthread_timeout_event,
+                 cthread_wakeup_event,
+                 crofsock_env {
   enum msg_type_t {
     OFPT_HELLO = 0,
     OFPT_ERROR = 1,
@@ -174,7 +176,7 @@ public:
   /**
    *
    */
-  crofconn(crofconn_env *env);
+  crofconn(cthread *thread, crofconn_env *env);
 
 public:
   /**
@@ -668,44 +670,40 @@ private:
   void set_dpid(uint64_t dpid) { this->dpid = dpid; };
 
 private:
-  virtual void handle_listen(crofsock &socket){/* not used */};
+  void handle_listen(crofsock &socket) override{/* not used */};
 
-  virtual void handle_tcp_connect_refused(crofsock &rofsock);
+  void handle_tcp_connect_refused(crofsock &rofsock) override;
 
-  virtual void handle_tcp_connect_failed(crofsock &rofsock);
+  void handle_tcp_connect_failed(crofsock &rofsock) override;
 
-  virtual void handle_tcp_connected(crofsock &rofsock);
+  void handle_tcp_connected(crofsock &rofsock) override;
 
-  virtual void handle_tcp_accept_refused(crofsock &socket);
+  void handle_tcp_accept_refused(crofsock &socket) override;
 
-  virtual void handle_tcp_accept_failed(crofsock &socket);
+  void handle_tcp_accept_failed(crofsock &socket) override;
 
-  virtual void handle_tcp_accepted(crofsock &socket);
+  void handle_tcp_accepted(crofsock &socket) override;
 
-  virtual void handle_tls_connect_failed(crofsock &socket);
+  void handle_tls_connect_failed(crofsock &socket) override;
 
-  virtual void handle_tls_connected(crofsock &socket);
+  void handle_tls_connected(crofsock &socket) override;
 
-  virtual void handle_tls_accept_failed(crofsock &socket);
+  void handle_tls_accept_failed(crofsock &socket) override;
 
-  virtual void handle_tls_accepted(crofsock &socket);
+  void handle_tls_accepted(crofsock &socket) override;
 
-  virtual void handle_closed(crofsock &rofsock);
+  void handle_closed(crofsock &rofsock) override;
 
-  virtual void handle_recv(crofsock &socket, rofl::openflow::cofmsg *msg);
+  void handle_recv(crofsock &socket, rofl::openflow::cofmsg *msg) override;
 
-  virtual void congestion_occurred_indication(crofsock &socket);
+  void congestion_occurred_indication(crofsock &socket) override;
 
-  virtual void congestion_solved_indication(crofsock &rofsock);
+  void congestion_solved_indication(crofsock &rofsock) override;
 
 private:
-  virtual void handle_wakeup(cthread &thread);
+  void handle_wakeup(void *userdata) override;
 
-  virtual void handle_timeout(cthread &thread, uint32_t timer_id);
-
-  virtual void handle_read_event(cthread &thread, int fd){};
-
-  virtual void handle_write_event(cthread &thread, int fd){};
+  void handle_timeout(void *userdata) override;
 
 private:
   void handle_rx_messages();
@@ -885,7 +883,7 @@ private:
   void clear_pending_requests() {
     AcquireReadWriteLock rwlock(pending_requests_rwlock);
     pending_requests.clear();
-    thread.drop_timer(TIMER_ID_PENDING_REQUESTS);
+    thread->drop_timer(this, TIMER_ID_PENDING_REQUESTS);
   };
 
   /**
@@ -899,12 +897,12 @@ private:
       pending_requests.insert(ctransaction(xid, ts, type, sub_type));
       const ctransaction &ta_first = *(pending_requests.begin());
       if (xid_first != ta_first.get_xid()) {
-        thread.add_timer(TIMER_ID_PENDING_REQUESTS, ta_first.tspec);
+        thread->add_timer(this, TIMER_ID_PENDING_REQUESTS, ta_first.tspec);
       }
     } else {
       pending_requests.insert(ctransaction(xid, ts, type, sub_type));
-      thread.add_timer(TIMER_ID_PENDING_REQUESTS,
-                       pending_requests.begin()->tspec);
+      thread->add_timer(this, TIMER_ID_PENDING_REQUESTS,
+                        pending_requests.begin()->tspec);
     }
   };
 
@@ -948,7 +946,7 @@ private:
         }
         ta = *(pending_requests.begin());
         if (not ta.get_tspec().is_expired()) {
-          thread.add_timer(TIMER_ID_PENDING_REQUESTS, ta.get_tspec());
+          thread->add_timer(this, TIMER_ID_PENDING_REQUESTS, ta.get_tspec());
           return;
         }
         pending_requests.erase(pending_requests.begin());
@@ -969,7 +967,7 @@ private:
   void clear_pending_segments() {
     AcquireReadWriteLock rwlock(pending_segments_rwlock);
     pending_segments.clear();
-    thread.drop_timer(TIMER_ID_PENDING_SEGMENTS);
+    thread->drop_timer(this, TIMER_ID_PENDING_SEGMENTS);
   };
 
   /**
@@ -988,9 +986,9 @@ private:
     pending_segments[xid] =
         csegment(xid, ctimespec().expire_in(timeout_segments), msg_type,
                  msg_multipart_type);
-    if (not thread.has_timer(TIMER_ID_PENDING_SEGMENTS)) {
-      thread.add_timer(TIMER_ID_PENDING_SEGMENTS,
-                       ctimespec().expire_in(timeout_segments));
+    if (not thread->has_timer(this, TIMER_ID_PENDING_SEGMENTS)) {
+      thread->add_timer(this, TIMER_ID_PENDING_SEGMENTS,
+                        ctimespec().expire_in(timeout_segments));
     }
     return pending_segments[xid];
   };
@@ -1013,9 +1011,9 @@ private:
           csegment(xid, ctimespec().expire_in(timeout_segments), msg_type,
                    msg_multipart_type);
     }
-    if (not thread.has_timer(TIMER_ID_PENDING_SEGMENTS)) {
-      thread.add_timer(TIMER_ID_PENDING_SEGMENTS,
-                       ctimespec().expire_in(timeout_segments));
+    if (not thread->has_timer(this, TIMER_ID_PENDING_SEGMENTS)) {
+      thread->add_timer(this, TIMER_ID_PENDING_SEGMENTS,
+                        ctimespec().expire_in(timeout_segments));
     }
     return pending_segments[xid];
   };
@@ -1038,9 +1036,9 @@ private:
           .set_file(__FILE__)
           .set_line(__LINE__);
     }
-    if (not thread.has_timer(TIMER_ID_PENDING_SEGMENTS)) {
-      thread.add_timer(TIMER_ID_PENDING_SEGMENTS,
-                       ctimespec().expire_in(timeout_segments));
+    if (not thread->has_timer(this, TIMER_ID_PENDING_SEGMENTS)) {
+      thread->add_timer(this, TIMER_ID_PENDING_SEGMENTS,
+                        ctimespec().expire_in(timeout_segments));
     }
     return pending_segments[xid];
   };
@@ -1091,8 +1089,8 @@ private:
       pending_segments.erase(it);
     }
     if (not pending_segments.empty()) {
-      thread.add_timer(TIMER_ID_PENDING_SEGMENTS,
-                       ctimespec().expire_in(timeout_segments));
+      thread->add_timer(this, TIMER_ID_PENDING_SEGMENTS,
+                        ctimespec().expire_in(timeout_segments));
     }
   };
 
@@ -1100,11 +1098,11 @@ private:
   // environment for this instance
   rofl::crofconn_env *env;
 
-  // internal thread for application specific context
-  rofl::cthread thread;
+  cthread *thread;
+  int wake_handle;
 
   // crofsock instance
-  rofl::crofsock rofsock;
+  crofsock rofsock;
 
   // OpenFlow datapath id
   uint64_t dpid;
@@ -1122,13 +1120,13 @@ private:
   std::atomic_uint_fast8_t ofp_version;
 
   // random number generator
-  rofl::crandom random;
+  crandom random;
 
   // acts in controller or datapath mode (orthogonal to TCP client/server mode)
   enum crofconn_mode_t mode;
 
   // internal state of finite state machine
-  enum crofconn_state_t state;
+  std::atomic<enum crofconn_state_t> state;
 
   // hello message sent to peer
   std::atomic_bool flag_hello_sent;

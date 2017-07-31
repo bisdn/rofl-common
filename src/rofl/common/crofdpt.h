@@ -894,7 +894,7 @@ public:
    * for this object
    * @param dptid rofl-common's internal identifier for this instance
    */
-  crofdpt(rofl::crofdpt_env *env, const rofl::cdptid &dptid);
+  crofdpt(cthread *thread, rofl::crofdpt_env *env, const rofl::cdptid &dptid);
 
 public:
   /**
