@@ -16,7 +16,7 @@
 namespace rofl {
 namespace openflow {
 
-class cofhello_elem_versionbitmap : public cofhello_elem {
+class cofhello_elem_versionbitmap final : public cofhello_elem {
   std::vector<uint32_t> bitmaps;
 
   union {
