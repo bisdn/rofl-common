@@ -29,6 +29,7 @@ ctimespec ctimespec::operator+(const ctimespec &t) const {
 
 ctimespec ctimespec::operator-(const ctimespec &t) const {
   ctimespec timer(::timespec{0, 0});
+  // WARNING: this operator returns only >= ::timespec{0, 0}
 
   if (tspec.tv_sec > t.tspec.tv_sec) {
     if (t.tspec.tv_nsec > tspec.tv_nsec) {
@@ -39,6 +40,11 @@ ctimespec ctimespec::operator-(const ctimespec &t) const {
     } else {
       timer.tspec.tv_nsec = tspec.tv_nsec - t.tspec.tv_nsec;
       timer.tspec.tv_sec = tspec.tv_sec - t.tspec.tv_sec;
+    }
+  } else if (tspec.tv_sec == t.tspec.tv_sec) {
+    if (tspec.tv_nsec > t.tspec.tv_nsec) {
+      timer.tspec.tv_nsec = tspec.tv_nsec - t.tspec.tv_nsec;
+      //timer.tspec.tv_sec = tspec.tv_sec - t.tspec.tv_sec = 0
     }
   }
 
@@ -65,6 +71,11 @@ ctimespec &ctimespec::operator-=(const ctimespec &t) {
     } else {
       tspec.tv_nsec = tspec.tv_nsec - t.tspec.tv_nsec;
       tspec.tv_sec = tspec.tv_sec - t.tspec.tv_sec;
+    }
+  } else if (tspec.tv_sec == t.tspec.tv_sec) {
+    if (tspec.tv_nsec > t.tspec.tv_nsec) {
+      tspec.tv_nsec = tspec.tv_nsec - t.tspec.tv_nsec;
+      tspec.tv_sec = 0; // tspec.tv_sec - t.tspec.tv_sec = 0
     }
   }
 
