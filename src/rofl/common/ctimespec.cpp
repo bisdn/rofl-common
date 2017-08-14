@@ -44,7 +44,7 @@ ctimespec ctimespec::operator-(const ctimespec &t) const {
   } else if (tspec.tv_sec == t.tspec.tv_sec) {
     if (tspec.tv_nsec > t.tspec.tv_nsec) {
       timer.tspec.tv_nsec = tspec.tv_nsec - t.tspec.tv_nsec;
-      //timer.tspec.tv_sec = tspec.tv_sec - t.tspec.tv_sec = 0
+      // timer.tspec.tv_sec = tspec.tv_sec - t.tspec.tv_sec = 0
     }
   }
 
