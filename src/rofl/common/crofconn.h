@@ -118,14 +118,6 @@ private:
  * @brief	A single OpenFlow control connection
  */
 class crofconn : public cthread_env, public crofsock_env {
-  enum outqueue_type_t {
-    QUEUE_OAM = 0,  // Echo.request/Echo.reply
-    QUEUE_MGMT = 1, // all remaining packets, except ...
-    QUEUE_FLOW = 2, // Flow-Mod/Flow-Removed
-    QUEUE_PKT = 3,  // Packet-In/Packet-Out
-    QUEUE_MAX,      // do not use
-  };
-
   enum msg_type_t {
     OFPT_HELLO = 0,
     OFPT_ERROR = 1,
@@ -159,6 +151,14 @@ class crofconn : public cthread_env, public crofsock_env {
   };
 
 public:
+  enum outqueue_type_t {
+      QUEUE_OAM = 0,  // Echo.request/Echo.reply
+      QUEUE_MGMT = 1, // all remaining packets, except ...
+      QUEUE_FLOW = 2, // Flow-Mod/Flow-Removed
+      QUEUE_PKT = 3,  // Packet-In/Packet-Out
+      QUEUE_MAX,      // do not use
+    };
+
   enum crofconn_mode_t {
     MODE_UNKNOWN = 0,
     MODE_CONTROLLER = 1,
