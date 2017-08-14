@@ -1,23 +1,46 @@
-sudo: required
+sudo: false
 dist: trusty
 language: cpp
-compiler:
-  - gcc
-  - clang
 before_install:
-  - sudo apt-get update -qq
-  - sudo apt-get install -y -qq libssl-dev libcunit1-dev libcppunit-dev libgoogle-glog-dev clang-format-3.8
+  - eval "${MATRIX_EVAL}"
 install:
   - ./autogen.sh
-env:
-  - FLAGS="--disable-silent-rules --enable-debug"
-  - FLAGS="--disable-silent-rules"
+matrix:
+  include:
+    - os: linux
+      addons:
+        apt:
+          sources:
+          - ubuntu-toolchain-r-test
+          packages:
+          - g++-4.9
+          - libssl-dev
+          - libcunit1-dev
+          - libcppunit-dev
+          - libgoogle-glog-dev
+      env:
+        - MATRIX_EVAL="CC=gcc-4.9 && CXX=g++-4.9"
+
+    - os: linux
+      addons:
+        apt:
+          sources:
+          - llvm-toolchain-trusty-4.0
+          packages:
+          - clang-4.0
+          - clang-format-4.0
+          - libssl-dev
+          - libcunit1-dev
+          - libcppunit-dev
+          - libgoogle-glog-dev
+      env:
+        - MATRIX_EVAL="CC=clang-4.0 && CXX=clang++-4.0"
+
 script:
+  - if [[ "${CC}" = "clang-4.0" ]]; then find . -regex '.*\.\(hh?\|cc?\|hpp\|cpp\)$' | xargs clang-format-4.0 -i -style=file && git diff --exit-code ; fi
   - mkdir -p build
   - cd build
   - ../configure $FLAGS 
-  - find .. -regex '.*\.\(hh?\|cc?\|hpp\|cpp\)$$' | xargs clang-format-3.8 -i -style=file
-  - git diff --exit-code
   - make -j 2
   - VERBOSE=yes make -j 2 check
 branches:
