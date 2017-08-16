@@ -27,3 +27,5 @@ branches:
 notifications:
   email:
     - andreas.koepsel@bisdn.de
+  slack:
+    secure: XATCKlM3rAr3QUQ5DycBN14CzlMuP1G/lt5kZon8hSM5gweN+GjhK10ypG0cjpZomwEYiDcmH9hCWAolrUQaIU4QMNFYyiy6w2BARJiC7LMo5YhOT+8jOLGAdOUjOjGC2xEyYP/VAolyYGYq5wiRkHi6fhoseQ0+FWRDZtCM64g=
