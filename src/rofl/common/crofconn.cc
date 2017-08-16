@@ -22,12 +22,12 @@ using namespace rofl;
 /*static*/ const time_t crofconn::DEFAULT_HELLO_TIMEOUT = 30;
 /*static*/ const time_t crofconn::DEFAULT_FEATURES_TIMEOUT = 5;
 /*static*/ const time_t crofconn::DEFAULT_ECHO_TIMEOUT = 3;
+/*static*/ const time_t crofconn::DEFAULT_ECHO_TIMEOUT_MISS_MAX = 3;
 /*static*/ const time_t crofconn::DEFAULT_LIFECHECK_TIMEOUT = 1;
 /*static*/ const time_t crofconn::DEFAULT_SEGMENTS_TIMEOUT = 60;
 /*static*/ const unsigned int crofconn::DEFAULT_PENDING_SEGMENTS_MAX = 256;
 
 crofconn::~crofconn() {
-  /* stop worker thread */
   set_state(STATE_CLOSING);
   thread->remove_wakeup_observer(this, wake_handle);
 }
@@ -41,7 +41,7 @@ crofconn::crofconn(cthread *thread, crofconn_env *env)
       segmentation_threshold(DEFAULT_SEGMENTATION_THRESHOLD),
       timeout_hello(DEFAULT_HELLO_TIMEOUT),
       timeout_features(DEFAULT_FEATURES_TIMEOUT),
-      timeout_echo(DEFAULT_ECHO_TIMEOUT),
+      timeout_echo(DEFAULT_ECHO_TIMEOUT), missed_echo(0),
       timeout_lifecheck(DEFAULT_LIFECHECK_TIMEOUT),
       xid_hello_last(random.uint32()),
       xid_features_request_last(random.uint32()),
@@ -57,7 +57,6 @@ crofconn::crofconn(cthread *thread, crofconn_env *env)
   for (unsigned int queue_id = 0; queue_id < QUEUE_MAX; queue_id++) {
     rxqueues[queue_id].set_queue_max_size(rxqueue_max_size);
   }
-  /* start worker thread */
   thread->add_wakeup_observer(this, &wake_handle);
 }
 
@@ -623,7 +622,13 @@ void crofconn::echo_reply_rcvd(rofl::openflow::cofmsg *pmsg) {
 
   assert(nullptr != msg);
 
+  VLOG(2) << __FUNCTION__
+          << " Echo Reply rcvd laddr=" << rofsock.get_laddr().str()
+          << " raddr=" << rofsock.get_raddr().str()
+          << " missed_echo=" << missed_echo;
+
   thread->drop_timer(this, TIMER_ID_WAIT_FOR_ECHO);
+  missed_echo = 0;
 
   try {
     delete msg;
@@ -641,10 +646,23 @@ void crofconn::echo_reply_rcvd(rofl::openflow::cofmsg *pmsg) {
 void crofconn::echo_request_expired() {
   VLOG(1) << __FUNCTION__
           << " Echo Request expired laddr=" << rofsock.get_laddr().str()
-          << " raddr=" << rofsock.get_raddr().str();
+          << " raddr=" << rofsock.get_raddr().str()
+          << " missed_echo=" << missed_echo;
 
-  set_state(STATE_CLOSING);
-  handle_closed(rofsock);
+  if (++missed_echo < DEFAULT_ECHO_TIMEOUT_MISS_MAX) {
+    try {
+      thread->add_timer(this, TIMER_ID_NEED_LIFE_CHECK,
+                        ctimespec().expire_in(timeout_lifecheck));
+
+    } catch (std::runtime_error &e) {
+      VLOG(1) << __FUNCTION__ << " runtime error: " << e.what()
+              << " laddr=" << rofsock.get_laddr().str()
+              << " raddr=" << rofsock.get_raddr().str();
+    }
+  } else {
+    set_state(STATE_CLOSING);
+    handle_closed(rofsock);
+  }
 }
 
 void crofconn::echo_request_rcvd(rofl::openflow::cofmsg *pmsg) {

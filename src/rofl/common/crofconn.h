@@ -1170,6 +1170,8 @@ private:
   // timeout value for ECHO.request messages
   time_t timeout_echo;
   static const time_t DEFAULT_ECHO_TIMEOUT;
+  static const time_t DEFAULT_ECHO_TIMEOUT_MISS_MAX;
+  int missed_echo;
 
   // timeout value for lifecheck
   time_t timeout_lifecheck;
