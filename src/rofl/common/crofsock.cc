@@ -1424,128 +1424,124 @@ void crofsock::send_from_queue() {
 
   tx_is_running = true;
 
-  bool reschedule;
-  do {
-    reschedule = false;
-    for (unsigned int queue_id = 0; queue_id < QUEUE_MAX; ++queue_id) {
-      for (unsigned int num = 0; num < txweights[queue_id]; ++num) {
+  for (unsigned int queue_id = 0; queue_id < QUEUE_MAX; ++queue_id) {
+    for (unsigned int num = 0; num < txweights[queue_id]; ++num) {
 
-        if ((tx_disabled) || (state < STATE_TCP_ESTABLISHED)) {
+      if ((tx_disabled) || (state < STATE_TCP_ESTABLISHED)) {
+        VLOG(4) << __FUNCTION__
+                << " : returning due to tx_disabled=" << tx_disabled
+                << " state=" << state;
+        tx_is_running = false;
+        return;
+      }
+
+      /* no pending fragment */
+      if (not tx_fragment_pending) {
+        rofl::openflow::cofmsg *msg = nullptr;
+
+        /* fetch a new message for transmission from tx queue */
+        if ((msg = txqueues[queue_id].retrieve()) == NULL) {
+          VLOG(4) << __FUNCTION__ << ": skipping queue_id=" << queue_id
+                  << " (empty)";
+          break;
+        }
+
+        /* bytes of this message sent so far */
+        msg_bytes_sent = 0;
+
+        /* overall length of this message */
+        txlen = msg->length();
+
+        memset(txbuffer.somem(), 0, txlen);
+
+        /* pack message into txbuffer */
+        msg->pack(txbuffer.somem(), txlen);
+
+        VLOG(3) << __FUNCTION__ << ": message sent: " << msg->str().c_str()
+                << " laddr=" << laddr.str() << " raddr=" << raddr.str();
+
+        /* remove C++ message object from heap */
+        delete msg;
+      }
+
+      /* send memory block via socket in non-blocking mode */
+      int nbytes = ::send(sd, txbuffer.somem() + msg_bytes_sent,
+                          txlen - msg_bytes_sent, MSG_DONTWAIT | MSG_NOSIGNAL);
+
+      /* error occurred */
+      if (nbytes < 0) {
+        switch (errno) {
+        case EAGAIN: /* socket would block */
+          tx_is_running = false;
+          tx_fragment_pending = true;
+          flag_set(FLAG_CONGESTED, true);
+
+          if (not flag_test(FLAG_TX_BLOCK_QUEUEING)) {
+            /* block transmission of further packets */
+            flag_set(FLAG_TX_BLOCK_QUEUEING, true);
+            /* remember queue size, when congestion occurred */
+            txqueue_size_congestion_occurred = txqueue_pending_pkts;
+            /* threshold for re-enabling acceptance of packets */
+            txqueue_size_tx_threshold = txqueue_pending_pkts / 2;
+
+            VLOG(2) << __FUNCTION__ << " congestion occurred"
+                    << " txqueue_pending_pkts: " << txqueue_pending_pkts
+                    << " txqueue_size_congestion_occurred: "
+                    << txqueue_size_congestion_occurred
+                    << " txqueue_size_tx_threshold: "
+                    << txqueue_size_tx_threshold << " laddr=" << laddr.str()
+                    << " raddr=" << raddr.str();
+
+            crofsock_env::call_env(env).congestion_occurred_indication(*this);
+          }
+
+          VLOG(2) << __FUNCTION__ << ": not send EAGAIN";
+          return;
+
+        case SIGPIPE:
+        default:
+          VLOG(1) << __FUNCTION__
+                  << " ::send() syscall failed, error: " << errno << ": "
+                  << strerror(errno);
           tx_is_running = false;
           return;
         }
+      } else { /* at least some bytes were sent successfully */
+        msg_bytes_sent += nbytes;
+        flag_set(FLAG_CONGESTED, false);
 
-        /* no pending fragment */
-        if (not tx_fragment_pending) {
-          rofl::openflow::cofmsg *msg = nullptr;
+        /* short write */
+        if (msg_bytes_sent < txlen) {
+          tx_fragment_pending = true;
 
-          /* fetch a new message for transmission from tx queue */
-          if ((msg = txqueues[queue_id].retrieve()) == NULL)
-            break;
-
-          /* bytes of this message sent so far */
-          msg_bytes_sent = 0;
-
-          /* overall length of this message */
-          txlen = msg->length();
-
-          memset(txbuffer.somem(), 0, txlen);
-
-          /* pack message into txbuffer */
-          msg->pack(txbuffer.somem(), txlen);
-
-          VLOG(3) << __FUNCTION__ << ": message sent: " << msg->str().c_str()
-                  << " laddr=" << laddr.str() << " raddr=" << raddr.str();
-
-          /* remove C++ message object from heap */
-          delete msg;
+          /* packet successfully sent */
+        } else {
+          tx_fragment_pending = false;
+          txqueue_pending_pkts--;
         }
 
-        /* send memory block via socket in non-blocking mode */
-        int nbytes =
-            ::send(sd, txbuffer.somem() + msg_bytes_sent,
-                   txlen - msg_bytes_sent, MSG_DONTWAIT | MSG_NOSIGNAL);
-
-        /* error occurred */
-        if (nbytes < 0) {
-          switch (errno) {
-          case EAGAIN: /* socket would block */
-            tx_is_running = false;
-            tx_fragment_pending = true;
-            flag_set(FLAG_CONGESTED, true);
-
-            if (not flag_test(FLAG_TX_BLOCK_QUEUEING)) {
-              /* block transmission of further packets */
-              flag_set(FLAG_TX_BLOCK_QUEUEING, true);
-              /* remember queue size, when congestion occurred */
-              txqueue_size_congestion_occurred = txqueue_pending_pkts;
-              /* threshold for re-enabling acceptance of packets */
-              txqueue_size_tx_threshold = txqueue_pending_pkts / 2;
-
-              VLOG(2) << __FUNCTION__ << " congestion occurred"
-                      << " txqueue_pending_pkts: " << txqueue_pending_pkts
-                      << " txqueue_size_congestion_occurred: "
-                      << txqueue_size_congestion_occurred
-                      << " txqueue_size_tx_threshold: "
-                      << txqueue_size_tx_threshold << " laddr=" << laddr.str()
-                      << " raddr=" << raddr.str();
-
-              crofsock_env::call_env(env).congestion_occurred_indication(*this);
-            }
-
-            VLOG(2) << __FUNCTION__ << ": not send EAGAIN";
-            return;
-
-          case SIGPIPE:
-          default:
-            VLOG(1) << __FUNCTION__
-                    << " ::send() syscall failed, error: " << errno << ": "
-                    << strerror(errno);
-            tx_is_running = false;
-            return;
-          }
-        } else { /* at least some bytes were sent successfully */
-          msg_bytes_sent += nbytes;
-          flag_set(FLAG_CONGESTED, false);
-
-          /* short write */
-          if (msg_bytes_sent < txlen) {
-            tx_fragment_pending = true;
-
-            /* packet successfully sent */
-          } else {
-            tx_fragment_pending = false;
-            txqueue_pending_pkts--;
-          }
-
-          VLOG(3) << __FUNCTION__ << ": sent " << nbytes
-                  << " bytes msg_bytes_sent=" << msg_bytes_sent
-                  << " tx_fragment_pending=" << tx_fragment_pending
-                  << " txqueue_pending_pkts=" << txqueue_pending_pkts
-                  << " queue_id=" << queue_id;
-        }
-      }
-
-      if (not txqueues[queue_id].empty()) {
-        reschedule = true;
+        VLOG(3) << __FUNCTION__ << ": sent " << nbytes
+                << " bytes msg_bytes_sent=" << msg_bytes_sent
+                << " tx_fragment_pending=" << tx_fragment_pending
+                << " txqueue_pending_pkts=" << txqueue_pending_pkts
+                << " queue_id=" << queue_id;
       }
     }
+  }
 
-    if ((not flag_test(FLAG_CONGESTED)) && flag_test(FLAG_TX_BLOCK_QUEUEING)) {
-      if (txqueue_pending_pkts <= txqueue_size_tx_threshold) {
-        flag_set(FLAG_TX_BLOCK_QUEUEING, false);
-        VLOG(3) << __FUNCTION__ << " congestion solved"
-                << " txqueue_pending_pkts" << txqueue_pending_pkts
-                << " txqueue_size_congestion_occurred"
-                << txqueue_size_congestion_occurred
-                << " txqueue_size_tx_threshold" << txqueue_size_tx_threshold
-                << " laddr=" << laddr.str() << " raddr=" << raddr.str();
+  if ((not flag_test(FLAG_CONGESTED)) && flag_test(FLAG_TX_BLOCK_QUEUEING)) {
+    if (txqueue_pending_pkts <= txqueue_size_tx_threshold) {
+      flag_set(FLAG_TX_BLOCK_QUEUEING, false);
+      VLOG(3) << __FUNCTION__ << " congestion solved"
+              << " txqueue_pending_pkts" << txqueue_pending_pkts
+              << " txqueue_size_congestion_occurred"
+              << txqueue_size_congestion_occurred
+              << " txqueue_size_tx_threshold" << txqueue_size_tx_threshold
+              << " laddr=" << laddr.str() << " raddr=" << raddr.str();
 
-        crofsock_env::call_env(env).congestion_solved_indication(*this);
-      }
+      crofsock_env::call_env(env).congestion_solved_indication(*this);
     }
-
-  } while (reschedule); // XXX(toanju): FIXME can't run forever...
+  }
 
   tx_is_running = false;
 
@@ -1683,7 +1679,8 @@ void crofsock::handle_read_event_rxthread(int fd) {
 }
 
 void crofsock::recv_message() {
-  while (not rx_disabled) { // XXX(toanju): FIXME can't run forever
+  int recv_msg_cnt = 50;
+  while (not rx_disabled && recv_msg_cnt--) {
     VLOG(4) << __FUNCTION__ << ": fd=" << sd << " laddr=" << laddr.str()
             << " raddr=" << raddr.str() << " state=" << state;
 
@@ -1760,6 +1757,9 @@ void crofsock::recv_message() {
       }
     }
   }
+
+  // reschedule recv
+  thread->notify_wake(wh_rx);
 
   return;
 
