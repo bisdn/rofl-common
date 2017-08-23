@@ -56,8 +56,8 @@ private:
   rofl::crofsock *rofsock;
   rofl::crofchan *channel1;
   rofl::crofchan *channel2;
-  rofl::cthread tchan1;
-  rofl::cthread tchan2;
+  rofl::cthread *tchan1;
+  rofl::cthread *tchan2;
   rofl::crwlock rwlock;
 
   rofl::crwlock plock;
@@ -167,11 +167,11 @@ private:
     LOG(INFO) << ">>>>>>>>>>>>> auxid=" << (int)conn.get_auxid().get_id()
               << " <<<<<<<<<<<<<<";
     CPPUNIT_ASSERT(false);
-  };
+  }
 
   void handle_recv(rofl::crofconn &conn, rofl::openflow::cofmsg *msg) override {
-    LOG(INFO) << "crofconn::handle_recv";
-  };
+    LOG(INFO) << "crofconn::handle_recv XXXX";
+  }
 
   void congestion_occurred_indication(rofl::crofconn &conn) override {
     LOG(INFO) << "crofconn::congestion_occurred_indication";

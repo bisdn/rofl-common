@@ -48,16 +48,19 @@ event::event(cthread_wakeup_event *wake, void *userdata)
   }
   VLOG(3) << __FUNCTION__ << ": event_fd=" << event_fd;
 }
+
 event::~event() {
   if (event_fd != -1)
     close(event_fd);
 }
+
 void event::notifiy_one() {
-  // XXX(toanju): notify invalid initilization
+  // XXX(toanju): notify invalid initilization by returning the rv
   uint64_t c = 1;
   ssize_t rv = write(event_fd, &c, sizeof(c));
   (void)rv;
 }
+
 void event::handle_read(int fd, void *userdata) {
   assert(fd == event_fd);
   assert(userdata == this->userdata);
@@ -307,29 +310,33 @@ void cthread::add_read_fd(int fd, cthread_read_event *cb, void *userdata,
                           bool exception, bool edge_triggered) {
 
   if ((unsigned)fd >= events_reg.capacity()) {
-    VLOG(2) << "XXX";
+    VLOG(1) << __FUNCTION__ << ": maximum capacity of fd events is reached";
     return; // XXX(toanju): return values should be added
   }
 
-  io_event *ioev = static_cast<io_event *>(events_reg[fd]);
+  {
+    AcquireReadWriteLock lock(events_lock);
+    io_event *ioev = static_cast<io_event *>(events_reg[fd]);
 
-  if (ioev == nullptr) {
-    io_event *e = new io_event();
-    e->fd = fd;
-    e->re = cb;
-    e->userdata_re = userdata;
-    events_reg[fd] = e;
-    VLOG(2) << __FUNCTION__ << ": fd=" << fd << " cb=" << cb
-            << " userdata=" << userdata;
-  } else if (ioev->re == nullptr) {
-    ioev->re = cb;
-    ioev->userdata_re = userdata;
-    VLOG(2) << __FUNCTION__ << ": fd=" << fd << " cb=" << cb
-            << " userdata=" << userdata;
-  } else {
-    // XXX(toanju): log error?
-    VLOG(2) << __FUNCTION__ << ": already registered fd=" << fd << " cb=" << cb;
-    assert(cb == ioev->re);
+    if (ioev == nullptr) {
+      io_event *e = new io_event();
+      e->fd = fd;
+      e->re = cb;
+      e->userdata_re = userdata;
+      events_reg[fd] = e;
+      VLOG(2) << __FUNCTION__ << ": fd=" << fd << " cb=" << cb
+              << " userdata=" << userdata;
+    } else if (ioev->re == nullptr) {
+      ioev->re = cb;
+      ioev->userdata_re = userdata;
+      VLOG(2) << __FUNCTION__ << ": fd=" << fd << " cb=" << cb
+              << " userdata=" << userdata;
+    } else {
+      // XXX(toanju): log error?
+      VLOG(2) << __FUNCTION__ << ": already registered fd=" << fd
+              << " cb=" << cb;
+      assert(cb == ioev->re);
+    }
   }
 
   add_fd(fd, exception, edge_triggered);
@@ -405,28 +412,32 @@ void cthread::add_write_fd(int fd, cthread_write_event *cb, void *userdata,
                            bool exception, bool edge_triggered) {
 
   if ((unsigned)fd >= events_reg.capacity()) {
-    VLOG(2) << __FUNCTION__ << ": XXX";
+    VLOG(1) << __FUNCTION__ << ": maximum capacity of fd events is reached";
     return; // XXX(toanju): return values should be added
   }
 
-  io_event *ioev = static_cast<io_event *>(events_reg[fd]);
+  {
+    AcquireReadWriteLock lock(events_lock);
+    io_event *ioev = static_cast<io_event *>(events_reg[fd]);
 
-  if (ioev == nullptr) {
-    ioev = new io_event();
-    ioev->fd = fd;
-    ioev->we = cb;
-    ioev->userdata_we = userdata;
-    events_reg[fd] = ioev;
-    VLOG(2) << __FUNCTION__ << ": fd=" << fd << " cb=" << cb
-            << " userdata=" << userdata;
-  } else if (ioev->we == nullptr) {
-    ioev->we = cb;
-    ioev->userdata_we = userdata;
-    VLOG(2) << __FUNCTION__ << ": fd=" << fd << " cb=" << cb
-            << " userdata=" << userdata;
-  } else {
-    // XXX(toanju): log error?
-    VLOG(2) << __FUNCTION__ << ": already registered fd=" << fd << " cb=" << cb;
+    if (ioev == nullptr) {
+      ioev = new io_event();
+      ioev->fd = fd;
+      ioev->we = cb;
+      ioev->userdata_we = userdata;
+      events_reg[fd] = ioev;
+      VLOG(2) << __FUNCTION__ << ": fd=" << fd << " cb=" << cb
+              << " userdata=" << userdata;
+    } else if (ioev->we == nullptr) {
+      ioev->we = cb;
+      ioev->userdata_we = userdata;
+      VLOG(2) << __FUNCTION__ << ": fd=" << fd << " cb=" << cb
+              << " userdata=" << userdata;
+    } else {
+      // XXX(toanju): log error?
+      VLOG(2) << __FUNCTION__ << ": already registered fd=" << fd
+              << " cb=" << cb;
+    }
   }
 
   add_fd(fd, exception, edge_triggered);
@@ -522,10 +533,9 @@ bool cthread::add_timer(cthread_timeout_event *e, uint32_t timer_id,
                             ctimer_find_by_timer_and_event(e, timer_id));
     if (timer_it != ordered_timers.end()) {
       ordered_timers.erase(timer_it);
-      rv = ordered_timers.emplace(e, timer_id, tspec);
-    } else {
-      rv = ordered_timers.emplace(e, timer_id, tspec);
     }
+
+    rv = ordered_timers.emplace(e, timer_id, tspec);
   }
 
   // rearm timer
@@ -600,6 +610,7 @@ void cthread::stop() {
 
     /* deletion of thread not initiated within this thread */
     if (pthread_self() == tid) {
+      assert(0 && "stoping thread within thread");
       return;
     }
 
@@ -636,21 +647,24 @@ void *cthread::run_loop() {
         }
       }
 
+      VLOG(5) << __FUNCTION__ << " timeout=" << timeout;
       rc = epoll_pwait(epfd, events, 64, timeout, &signal_set);
 
       if (not running)
         goto out;
 
+      ctimer timer;
+      ctimespec now = timer.get_created();
       while (true) {
         /* handle expired timers */
-        ctimer timer;
         {
           AcquireReadWriteLock lock(tlock);
           if (ordered_timers.empty()) {
             break;
           }
           timer = *(ordered_timers.begin());
-          if (not timer.get_tspec().is_expired()) {
+          if (now < timer.get_tspec() /* created after the loop started*/ ||
+              not timer.get_tspec().is_expired()) {
             break;
           }
           ordered_timers.erase(ordered_timers.begin());
@@ -658,6 +672,9 @@ void *cthread::run_loop() {
         if (not running)
           goto out;
 
+        VLOG(3) << __FUNCTION__
+                << ": calling handle_timeout for id=" << timer.get_timer_id()
+                << " on cb=" << timer.get_callback();
         timer.get_callback()->handle_timeout(
             (void *)((intptr_t)timer.get_timer_id()));
       }
@@ -686,12 +703,12 @@ void *cthread::run_loop() {
               continue;
           }
 
-          if (events[i].events & EPOLLIN) {
+          if (events[i].events & EPOLLIN && ioev->re) {
             VLOG(1) << "call handle_read on fd=" << events[i].data.fd;
             ioev->re->handle_read(events[i].data.fd, ioev->userdata_re);
           }
 
-          if (events[i].events & EPOLLOUT) {
+          if (events[i].events & EPOLLOUT && ioev->we) {
             VLOG(1) << "call handle_write on fd=" << events[i].data.fd;
             ioev->we->handle_write(events[i].data.fd, ioev->userdata_we);
           }

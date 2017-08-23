@@ -1166,10 +1166,10 @@ void crofconn::handle_recv(crofsock &socket, rofl::openflow::cofmsg *msg) {
       };
       }
     } break;
-    default: {
+    default:
+      VLOG(3) << __FUNCTION__ << ": invalid version, droppping msg=" << msg;
       delete msg;
       return;
-    };
     }
 
   } catch (eRofQueueFull &e) {

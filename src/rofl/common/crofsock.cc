@@ -1204,6 +1204,8 @@ void crofsock::rx_disable() {
   switch (state.load()) {
   case STATE_TCP_ESTABLISHED:
   case STATE_TLS_ESTABLISHED: {
+    thread->drop_read_fd(sd);  // rx
+    thread->drop_write_fd(sd); // tx
     VLOG(2) << __FUNCTION__ << " disable reception laddr=" << laddr.str()
             << " raddr=" << raddr.str();
   } break;
@@ -1680,7 +1682,7 @@ void crofsock::handle_read_event_rxthread(int fd) {
 
 void crofsock::recv_message() {
   int recv_msg_cnt = 50;
-  while (not rx_disabled && recv_msg_cnt--) {
+  while (not rx_disabled && state > STATE_TCP_CONNECTING && recv_msg_cnt--) {
     VLOG(4) << __FUNCTION__ << ": fd=" << sd << " laddr=" << laddr.str()
             << " raddr=" << raddr.str() << " state=" << state;
 

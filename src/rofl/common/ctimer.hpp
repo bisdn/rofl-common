@@ -69,22 +69,20 @@ public:
   };
 
   bool operator<(const ctimer &t) const {
-    if (tspec == t.tspec) {
-      return timer_id < t.timer_id;
-    } else {
+    if (tspec != t.tspec)
       return tspec < t.tspec;
-    }
+    // tspec == t.tspec
+    if (timer_id != t.timer_id)
+      return timer_id < t.timer_id;
+    // timer_id == t.timer_id
+    return e < t.e;
   }
 
-  /**
-   *
-   */
-  uint32_t get_timer_id() const { return timer_id; };
+  uint32_t get_timer_id() const { return timer_id; }
 
-  /**
-   *
-   */
-  const ctimespec &get_tspec() const { return tspec; };
+  const ctimespec &get_tspec() const { return tspec; }
+
+  const ctimespec &get_created() const { return created; }
 
   cthread_timeout_event *get_callback() { return e; }
 
@@ -95,14 +93,14 @@ public:
    */
   void expire_in(time_t tv_sec = 0, long tv_nsec = 0) {
     tspec.expire_in(tv_sec, tv_nsec);
-  };
+  }
 
   /**
    *
    */
   int get_relative_timeout() const {
     return get_tspec().get_relative_timeout();
-  };
+  }
 
   /**
    *
@@ -110,11 +108,12 @@ public:
   friend std::ostream &operator<<(std::ostream &os, const ctimer &ts) {
     os << "<ctimer: >";
     return os;
-  };
+  }
 
 private:
   uint32_t timer_id;
   ctimespec tspec;
+  ctimespec created;
   cthread_timeout_event *e;
 };
 

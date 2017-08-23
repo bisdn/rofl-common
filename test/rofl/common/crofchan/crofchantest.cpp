@@ -17,16 +17,19 @@ using namespace rofl::openflow;
 CPPUNIT_TEST_SUITE_REGISTRATION(crofchantest);
 
 void crofchantest::setUp() {
+  LOG(INFO) << __FUNCTION__;
   versionbitmap.add_ofp_version(rofl::openflow13::OFP_VERSION);
   baddr = rofl::csockaddr(AF_INET, "127.0.0.1", 16455);
   dpid = 0xa1a2a3a4a5a6a7a8;
   xid = 0xb1b2b3b4;
 
-  tchan1.start("channel1");
-  tchan2.start("channel2");
-  rofsock = new rofl::crofsock(&tchan1, this);
-  channel1 = new rofl::crofchan(&tchan1, this);
-  channel2 = new rofl::crofchan(&tchan2, this);
+  tchan1 = new rofl::cthread();
+  tchan2 = new rofl::cthread();
+  tchan1->start("channel1");
+  tchan2->start("channel2");
+  rofsock = new rofl::crofsock(tchan2, this);
+  channel1 = new rofl::crofchan(tchan1, this);
+  channel2 = new rofl::crofchan(tchan2, this);
 
   /* try to find idle port for test */
   bool lookup_idle_port = true;
@@ -45,11 +48,13 @@ void crofchantest::setUp() {
       /* port in use, try another one */
     }
   }
+  LOG(INFO) << __FUNCTION__ << ": done";
 }
 
 void crofchantest::tearDown() {
-  tchan1.stop();
-  tchan2.stop();
+  LOG(INFO) << __FUNCTION__;
+  tchan1->stop();
+  tchan2->stop();
 
   channel2->close();
   channel1->close();
@@ -60,6 +65,10 @@ void crofchantest::tearDown() {
   delete channel2;
   delete channel1;
   delete rofsock;
+  sleep(2);
+  delete tchan1;
+  delete tchan2;
+  LOG(INFO) << __FUNCTION__ << ": done";
 }
 
 void crofchantest::test_connections() {
@@ -67,7 +76,6 @@ void crofchantest::test_connections() {
   LOG(INFO) << "Starting: " << __FUNCTION__;
 
   int seconds = 20;
-
   congested = false;
   keep_running = true;
   num_of_accepts = 0;
@@ -92,7 +100,7 @@ void crofchantest::test_connections() {
 
   while (keep_running && (seconds-- > 0)) {
     struct timespec ts;
-    ts.tv_sec = 2;
+    ts.tv_sec = 1;
     ts.tv_nsec = 0;
     pselect(0, NULL, NULL, NULL, &ts, NULL);
     LOG(INFO) << ".";
@@ -100,6 +108,8 @@ void crofchantest::test_connections() {
       break;
     }
   }
+
+  keep_running = false;
 
   LOG(INFO) << ">>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<" << std::endl
             << ">>>          TERMINATING          <<<" << std::endl
@@ -120,11 +130,11 @@ void crofchantest::test_connections() {
   CPPUNIT_ASSERT(channel2->keys().size() == num_of_conns);
 
   for (auto auxid : channel1->keys()) {
-    LOG(INFO) << ">>>>>>>>>>>>> client(" << (int)auxid.get_id()
-              << ") <<<<<<<<<<<<<<" << std::endl;
     if (not channel1->has_conn(auxid)) {
       continue;
     }
+    LOG(INFO) << ">>>>>>>>>>>>> client(" << (int)auxid.get_id()
+              << ") <<<<<<<<<<<<<<" << std::endl;
   }
 
   for (auto auxid : channel2->keys()) {
@@ -152,6 +162,8 @@ void crofchantest::test_connections() {
   CPPUNIT_ASSERT(channel2->keys().size() == 0);
 
   sleep(10);
+
+  LOG(INFO) << __FUNCTION__ << ": done";
 }
 
 void crofchantest::test_congestion() {
@@ -184,7 +196,7 @@ void crofchantest::test_congestion() {
 
   while (keep_running && (seconds-- > 0)) {
     struct timespec ts;
-    ts.tv_sec = 2;
+    ts.tv_sec = 1;
     ts.tv_nsec = 0;
     pselect(0, NULL, NULL, NULL, &ts, NULL);
   }
@@ -201,6 +213,7 @@ void crofchantest::test_congestion() {
 
   CPPUNIT_ASSERT(channel1->keys().size() == num_of_conns);
   CPPUNIT_ASSERT(channel2->keys().size() == num_of_conns);
+
   keep_running = false;
 
   for (auto auxid : channel1->keys()) {
@@ -234,7 +247,7 @@ void crofchantest::test_congestion() {
             << " channel1.size() = " << channel1->keys().size()
             << " channel2.size() = " << channel2->keys().size();
 
-  sleep(2);
+  sleep(10);
 
   CPPUNIT_ASSERT(channel1->keys().size() == 0);
   CPPUNIT_ASSERT(channel2->keys().size() == 0);
@@ -245,7 +258,7 @@ void crofchantest::handle_listen(rofl::crofsock &socket) {
     num_of_accepts++;
     LOG(INFO) << "num_of_accepts = " << num_of_accepts << std::endl;
 
-    rofl::crofconn *conn = new rofl::crofconn(&tchan2, this);
+    rofl::crofconn *conn = new rofl::crofconn(tchan2, this);
     {
       rofl::AcquireReadWriteLock lock(plock);
       pending_conns.insert(conn);
@@ -306,8 +319,8 @@ void crofchantest::handle_established(rofl::crofchan &chan,
   }
 
   if (send_packets && conn.get_auxid() == rofl::cauxid(0)) {
-    tchan1.add_timer(this, TIMER_ID_START_SENDING_PACKET_INS,
-                     rofl::ctimespec().expire_in(1));
+    tchan1->add_timer(this, TIMER_ID_START_SENDING_PACKET_INS,
+                      rofl::ctimespec().expire_in(1));
   }
 }
 
@@ -341,9 +354,9 @@ void crofchantest::handle_timeout(void *userdata) {
         switch (channel1->set_conn(rofl::cauxid(0)).send_message(msg)) {
         case rofl::crofsock::MSG_QUEUED: {
           num_of_pkts_sent++;
-          if ((num_of_pkts_sent & 0xff) == 0) {
-            tchan1.add_timer(this, TIMER_ID_START_SENDING_PACKET_INS,
-                             rofl::ctimespec().expire_in(0));
+          if ((num_of_pkts_sent & 0x3f) == 0) {
+            tchan1->add_timer(this, TIMER_ID_START_SENDING_PACKET_INS,
+                              rofl::ctimespec().expire_in(0));
             return;
           }
         } break;
@@ -352,16 +365,16 @@ void crofchantest::handle_timeout(void *userdata) {
           VLOG(1) << "MSG-QUEUED-CONGESTION";
           LOG(INFO) << "<C> ";
           /* stop queueing and reschedule this function */
-          tchan1.add_timer(this, TIMER_ID_START_SENDING_PACKET_INS,
-                           rofl::ctimespec().expire_in(1));
+          tchan1->add_timer(this, TIMER_ID_START_SENDING_PACKET_INS,
+                            rofl::ctimespec().expire_in(1));
         }
           return;
         case rofl::crofsock::MSG_QUEUEING_FAILED_QUEUE_FULL: {
           VLOG(1) << "MSG-DROPPED-QUEUE-FULL";
           LOG(INFO) << "<Q> ";
           /* stop queueing and reschedule this function */
-          tchan1.add_timer(this, TIMER_ID_START_SENDING_PACKET_INS,
-                           rofl::ctimespec().expire_in(1));
+          tchan1->add_timer(this, TIMER_ID_START_SENDING_PACKET_INS,
+                            rofl::ctimespec().expire_in(1));
         }
           return;
         case rofl::crofsock::MSG_QUEUEING_FAILED_NOT_ESTABLISHED: {
@@ -393,12 +406,12 @@ void crofchantest::handle_timeout(void *userdata) {
 
     } catch (rofl::eRofQueueFull &e) {
       LOG(INFO) << "exception caught: eRofQueueFull";
-      tchan1.add_timer(this, TIMER_ID_START_SENDING_PACKET_INS,
-                       rofl::ctimespec().expire_in(4));
+      tchan1->add_timer(this, TIMER_ID_START_SENDING_PACKET_INS,
+                        rofl::ctimespec().expire_in(4));
     } catch (rofl::eRofSockNotEstablished &e) {
       LOG(INFO) << "exception caught: eRofSockNotEstablished" << std::endl;
-      tchan1.add_timer(this, TIMER_ID_START_SENDING_PACKET_INS,
-                       rofl::ctimespec().expire_in(4));
+      tchan1->add_timer(this, TIMER_ID_START_SENDING_PACKET_INS,
+                        rofl::ctimespec().expire_in(4));
     }
   } break;
   default:
@@ -412,8 +425,8 @@ void crofchantest::handle_recv(rofl::crofchan &chan, rofl::crofconn &conn,
   switch (pmsg->get_type()) {
   case rofl::openflow13::OFPT_FEATURES_REQUEST: {
 
-    LOG(INFO) << "crofchantest::handle_recv() message: " << std::endl
-              << *pmsg << "sending FEATURES-REPLY auxid: "
+    LOG(INFO) << __FUNCTION__ << ": message: " << *pmsg
+              << "sending FEATURES-REPLY auxid: "
               << (int)conn.get_auxid().get_id() << std::endl;
 
     rofl::openflow::cofmsg_features_reply *msg =
@@ -425,6 +438,7 @@ void crofchantest::handle_recv(rofl::crofchan &chan, rofl::crofconn &conn,
 
   } break;
   case rofl::openflow13::OFPT_PACKET_IN: {
+    VLOG(1) << __FUNCTION__ << " pkt-in";
     num_of_pkts_rcvd++;
     if ((num_of_pkts_sent == num_of_pkts_rcvd) &&
         (max_congestion_rounds <= 0)) {
@@ -448,8 +462,8 @@ void crofchantest::congestion_solved_indication(rofl::crofchan &chan,
             << " max_congestion_rounds=" << max_congestion_rounds << std::endl;
 
   if (--max_congestion_rounds > 0) {
-    tchan1.add_timer(this, TIMER_ID_START_SENDING_PACKET_INS,
-                     rofl::ctimespec().expire_in(1));
+    tchan1->add_timer(this, TIMER_ID_START_SENDING_PACKET_INS,
+                      rofl::ctimespec().expire_in(1));
   } else {
     keep_running = false;
   }

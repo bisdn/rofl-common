@@ -18,11 +18,13 @@ using namespace rofl::openflow;
 CPPUNIT_TEST_SUITE_REGISTRATION(crofsocktest);
 
 void crofsocktest::setUp() {
-  tclient.start("tclient");
-  tserver.start("tserver");
+  tclient = new rofl::cthread();
+  tserver = new rofl::cthread();
+  tclient->start("tclient");
+  tserver->start("tserver");
   baddr = rofl::csockaddr(AF_INET, "0.0.0.0", 0);
 
-  slisten = new rofl::crofsock(&tserver, this);
+  slisten = new rofl::crofsock(tserver, this);
   /* try to find idle port for test */
   bool lookup_idle_port = true;
   while (lookup_idle_port) {
@@ -43,9 +45,11 @@ void crofsocktest::setUp() {
 }
 
 void crofsocktest::tearDown() {
-  tclient.stop();
-  tserver.stop();
+  tclient->stop();
+  tserver->stop();
   delete slisten;
+  delete tclient;
+  delete tserver;
 }
 
 void crofsocktest::test() {
@@ -56,7 +60,7 @@ void crofsocktest::test() {
       timeout = 60;
       msg_counter = 0;
 
-      sclient = new rofl::crofsock(&tclient, this);
+      sclient = new rofl::crofsock(tclient, this);
       sclient->set_raddr(baddr).tcp_connect(true);
 
       while (keep_running && (--timeout > 0)) {
@@ -93,7 +97,7 @@ void crofsocktest::test_tls() {
     timeout = 60;
     msg_counter = 0;
 
-    sclient = new rofl::crofsock(&tclient, this);
+    sclient = new rofl::crofsock(tclient, this);
     sclient->set_raddr(baddr)
         .set_tls_cafile("../../../../../tools/xca/ca.rofl-core.crt.pem")
         .set_tls_certfile("../../../../../tools/xca/client.crt.pem")
@@ -133,7 +137,7 @@ void crofsocktest::handle_listen(rofl::crofsock &socket) {
 
     LOG(INFO) << "crofsocktest::handle_listen() sd=" << sd << std::endl;
 
-    sserver = new rofl::crofsock(&tserver, this);
+    sserver = new rofl::crofsock(tserver, this);
 
     switch (test_mode) {
     case TEST_MODE_TCP: {

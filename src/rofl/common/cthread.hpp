@@ -222,7 +222,8 @@ private:
 
   std::map<int, uint32_t> fds;     // set of registered file descriptors
   std::set<ctimer> ordered_timers; // ordered set of timers
-  int max_fds; // XXX(toanju): currently fixed to 1024, but should be read
+  int max_fds; // XXX(toanju): currently set constant to 1024, should be
+               // configureable and match the system specs though
   std::vector<event_base *> events_reg;
 
   enum thread_state_t {
