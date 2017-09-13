@@ -9,6 +9,10 @@ Legend:
 Change log
 ==========
 
+v0.12.1
+[A] queue_type be public enum
+[B] fix ctimespec operator
+
 v0.12.0
 [+] crofsock: revised tx-queueing strategy (default txqueue size limited 
     to 128 messages), API changes to crofctl and crofdpt: all transmission

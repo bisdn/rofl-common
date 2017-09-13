@@ -69,6 +69,10 @@ make install DESTDIR=$RPM_BUILD_ROOT
 rm -rf $RPM_BUILD_ROOT 
 
 %changelog
+* Wed Sep 13 2017 Tobias Jungel <tobias.jungel@bisdn.de> - v0.12.1
+- [A] queue_type be public enum
+- [B] fix ctimespec operator
+ 
 * Fri Jul 21 2017 Tobias Jungel <tobias.jungel@bisdn.de> - v0.12.0
 - [+] crofsock: revised tx-queueing strategy (default txqueue size limited
       to 128 messages), API changes to crofctl and crofdpt: all transmission
