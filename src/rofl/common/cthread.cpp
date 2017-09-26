@@ -559,12 +559,28 @@ const ctimer &cthread::get_timer(cthread_timeout_event *e,
 
 bool cthread::drop_timer(cthread_timeout_event *e, uint32_t timer_id) {
   AcquireReadWriteLock lock(tlock);
-  auto timer_it = find_if(ordered_timers.begin(), ordered_timers.end(),
-                          ctimer_find_by_timer_and_event(e, timer_id));
-  if (timer_it == ordered_timers.end()) {
-    return false;
+
+  if (timer_id != ALL_TIMERS) {
+    // erase timer event with timer_id
+    auto timer_it = find_if(ordered_timers.begin(), ordered_timers.end(),
+                            ctimer_find_by_timer_and_event(e, timer_id));
+
+    if (timer_it == ordered_timers.end()) {
+      return false;
+    }
+
+    ordered_timers.erase(timer_it);
+  } else {
+    // erase all timer events
+    auto ot_iter = ordered_timers.begin();
+    while (ot_iter != ordered_timers.end()) {
+      if (ot_iter->get_callback() == e) {
+        ordered_timers.erase(ot_iter++);
+      } else {
+        ++ot_iter;
+      }
+    }
   }
-  ordered_timers.erase(timer_it);
 
   if (tid != pthread_self()) {
     notify_wake(wake_handle);

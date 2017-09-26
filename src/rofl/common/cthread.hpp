@@ -53,6 +53,8 @@ public:
 
 class cthread {
 public:
+  static const uint32_t ALL_TIMERS = -1;
+
   /**
    *
    */

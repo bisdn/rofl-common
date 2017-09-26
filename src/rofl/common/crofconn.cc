@@ -30,6 +30,7 @@ using namespace rofl;
 crofconn::~crofconn() {
   set_state(STATE_CLOSING);
   thread->remove_wakeup_observer(this, wake_handle);
+  thread->drop_timer(this, cthread::ALL_TIMERS);
 }
 
 crofconn::crofconn(cthread *thread, crofconn_env *env)

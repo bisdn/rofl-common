@@ -26,7 +26,10 @@ enum sock_use { sock_rx = 1, sock_tx = 2 };
 /*static*/ crwlock crofsock::rwlock;
 /*static*/ bool crofsock::tls_initialized = false;
 
-crofsock::~crofsock() { close(); }
+crofsock::~crofsock() {
+  thread->drop_timer(this, cthread::ALL_TIMERS);
+  close();
+}
 
 crofsock::crofsock(cthread *thread, crofsock_env *env)
     : env(env), state(STATE_IDLE), mode(MODE_UNKNOWN), thread(thread), wh_rx(0),

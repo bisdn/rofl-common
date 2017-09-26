@@ -19,6 +19,9 @@ using namespace rofl;
 /*static*/ crwlock crofbase::rofbases_rwlock;
 
 crofbase::~crofbase() {
+  /* drop all timers */
+  thread.drop_timer(this, cthread::ALL_TIMERS);
+
   /* close listening sockets */
   close_dpt_socks();
   close_ctl_socks();

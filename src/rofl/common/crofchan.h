@@ -139,6 +139,8 @@ public:
    *
    */
   virtual ~crofchan() {
+    /* drop all timers */
+    thread->drop_timer(this, cthread::ALL_TIMERS);
     /* drop connections scheduled for removal */
     __drop_conns_deletion();
     /* drop active connections */

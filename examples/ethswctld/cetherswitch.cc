@@ -80,7 +80,9 @@ cetherswitch::cetherswitch(
   thread.start("cetherswitch");
 }
 
-cetherswitch::~cetherswitch() {}
+cetherswitch::~cetherswitch() {
+  thread.drop_timer(this, rofl::cthread::ALL_TIMERS);
+}
 
 void cetherswitch::handle_timeout(void *userdata) {
   try {

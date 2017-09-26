@@ -24,6 +24,7 @@ cflowentry::cflowentry(cflowentry_env *flowenv, const rofl::cdptid &dptid,
 cflowentry::~cflowentry() {
   std::cerr << "[cflowentry] deleted" << std::endl << *this;
   flow_mod_delete();
+  thread.drop_timer(this, rofl::cthread::ALL_TIMERS);
 }
 
 void cflowentry::handle_timeout(void *userdata) {

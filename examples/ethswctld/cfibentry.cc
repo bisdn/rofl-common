@@ -22,6 +22,7 @@ cfibentry::cfibentry(cfibentry_env *fibenv, const rofl::caddress_ll &hwaddr,
 
 cfibentry::~cfibentry() {
   std::cerr << "[cfibentry] deleted" << std::endl << *this;
+  thread.drop_timer(this, rofl::cthread::ALL_TIMERS);
 }
 
 void cfibentry::handle_timeout(void *userdata) {

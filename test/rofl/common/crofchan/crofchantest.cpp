@@ -53,6 +53,7 @@ void crofchantest::setUp() {
 
 void crofchantest::tearDown() {
   LOG(INFO) << __FUNCTION__;
+  tchan1->drop_timer(this, rofl::cthread::ALL_TIMERS);
   tchan1->stop();
   tchan2->stop();
 
