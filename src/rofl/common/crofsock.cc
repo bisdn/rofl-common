@@ -27,6 +27,9 @@ enum sock_use { sock_rx = 1, sock_tx = 2 };
 /*static*/ bool crofsock::tls_initialized = false;
 
 crofsock::~crofsock() {
+  thread->remove_wakeup_observer(this, wh_rx); // rx
+  thread->remove_wakeup_observer(this, wh_tx); // tx
+  wh_tx = wh_rx = 0;
   thread->drop_timer(this, cthread::ALL_TIMERS);
   close();
 }
@@ -60,9 +63,6 @@ crofsock::crofsock(cthread *thread, crofsock_env *env)
 }
 
 void crofsock::close_sockets() {
-  thread->remove_wakeup_observer(this, wh_rx); // rx
-  thread->remove_wakeup_observer(this, wh_tx); // tx
-  wh_tx = wh_rx = 0;
   if (sd > 0) {
     thread->drop_read_fd(sd);  // rx
     thread->drop_write_fd(sd); // tx
