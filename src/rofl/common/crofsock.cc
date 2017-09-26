@@ -37,7 +37,7 @@ crofsock::crofsock(cthread *thread, crofsock_env *env)
       reconnect_backoff_start(1 /*secs*/),
       reconnect_backoff_current(1 /*secs*/), reconnect_counter(0), sd(-1),
       domain(AF_INET), type(SOCK_STREAM), protocol(IPPROTO_TCP), backlog(64),
-      ctx(NULL), ssl(NULL), bio(NULL), capath("."), cafile("ca.pem"),
+      ctx(nullptr), ssl(nullptr), bio(nullptr), capath("."), cafile("ca.pem"),
       certfile("crt.pem"), keyfile("key.pem"), password(""),
       verify_mode("PEER"), verify_depth("1"),
       ciphers("EECDH+ECDSA+AESGCM EECDH+aRSA+AESGCM EECDH+ECDSA+SHA256 "
@@ -145,7 +145,7 @@ void crofsock::close() {
 
     if (ssl) {
       SSL_free(ssl);
-      ssl = NULL;
+      ssl = nullptr;
     }
     tls_destroy_context();
     flag_set(FLAG_TLS_IN_USE, false);
@@ -162,7 +162,7 @@ void crofsock::close() {
 
     if (ssl) {
       SSL_free(ssl);
-      ssl = NULL;
+      ssl = nullptr;
     }
     tls_destroy_context();
     flag_set(FLAG_TLS_IN_USE, false);
@@ -184,7 +184,7 @@ void crofsock::close() {
     if (ssl) {
       SSL_shutdown(ssl);
       SSL_free(ssl);
-      ssl = NULL;
+      ssl = nullptr;
     }
     tls_destroy_context();
     flag_set(FLAG_TLS_IN_USE, false);
@@ -655,8 +655,8 @@ void crofsock::tls_init_context() {
 
   // capath/cafile
   if (!SSL_CTX_load_verify_locations(ctx,
-                                     cafile.empty() ? NULL : cafile.c_str(),
-                                     capath.empty() ? NULL : capath.c_str())) {
+                                     cafile.empty() ? nullptr : cafile.c_str(),
+                                     capath.empty() ? nullptr : capath.c_str())) {
     throw eLibCall("eLibCall", "SSL_CTX_load_verify_locations", __FILE__,
                    __FUNCTION__, __LINE__)
         .set_key("cafile", cafile)
@@ -670,7 +670,7 @@ void crofsock::tls_init_context() {
     mode = SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT;
   }
 
-  SSL_CTX_set_verify(ctx, mode, NULL);
+  SSL_CTX_set_verify(ctx, mode, nullptr);
 
   int depth;
   std::istringstream(verify_depth) >> depth;
@@ -681,14 +681,14 @@ void crofsock::tls_init_context() {
 void crofsock::tls_destroy_context() {
   if (ctx) {
     SSL_CTX_free(ctx);
-    ctx = NULL;
+    ctx = nullptr;
   }
 
   tls_destroy();
 }
 
 int crofsock::tls_pswd_cb(char *buf, int size, int rwflag, void *userdata) {
-  if (userdata == NULL)
+  if (userdata == nullptr)
     return 0;
 
   crofsock &socket = *(static_cast<crofsock *>(userdata));
@@ -717,11 +717,11 @@ void crofsock::tls_accept(int sockfd) {
 
     tls_init_context();
 
-    if ((ssl = SSL_new(ctx)) == NULL) {
+    if ((ssl = SSL_new(ctx)) == nullptr) {
       throw eLibCall("eLibCall", "SSL_new", __FILE__, __FUNCTION__, __LINE__);
     }
 
-    if ((bio = BIO_new(BIO_s_socket())) == NULL) {
+    if ((bio = BIO_new(BIO_s_socket())) == nullptr) {
       throw eLibCall("eLibCall", "BIO_new", __FILE__, __FUNCTION__, __LINE__);
     }
 
@@ -776,8 +776,8 @@ void crofsock::tls_accept(int sockfd) {
       tls_log_errors();
 
       SSL_free(ssl);
-      ssl = NULL;
-      bio = NULL;
+      ssl = nullptr;
+      bio = nullptr;
 
       tls_destroy_context();
 
@@ -793,8 +793,8 @@ void crofsock::tls_accept(int sockfd) {
         tls_log_errors();
 
         SSL_free(ssl);
-        ssl = NULL;
-        bio = NULL;
+        ssl = nullptr;
+        bio = nullptr;
 
         tls_destroy_context();
 
@@ -838,11 +838,11 @@ void crofsock::tls_connect(bool reconnect) {
 
     tls_init_context();
 
-    if ((ssl = SSL_new(ctx)) == NULL) {
+    if ((ssl = SSL_new(ctx)) == nullptr) {
       throw eLibCall("eLibCall", "SSL_new", __FILE__, __FUNCTION__, __LINE__);
     }
 
-    if ((bio = BIO_new(BIO_s_socket())) == NULL) {
+    if ((bio = BIO_new(BIO_s_socket())) == nullptr) {
       throw eLibCall("eLibCall", "BIO_new", __FILE__, __FUNCTION__, __LINE__);
     }
 
@@ -899,8 +899,8 @@ void crofsock::tls_connect(bool reconnect) {
       tls_log_errors();
 
       SSL_free(ssl);
-      ssl = NULL;
-      bio = NULL;
+      ssl = nullptr;
+      bio = nullptr;
 
       tls_destroy_context();
 
@@ -916,8 +916,8 @@ void crofsock::tls_connect(bool reconnect) {
         tls_log_errors();
 
         SSL_free(ssl);
-        ssl = NULL;
-        bio = NULL;
+        ssl = nullptr;
+        bio = nullptr;
 
         tls_destroy_context();
 
@@ -957,15 +957,15 @@ bool crofsock::tls_verify_ok() {
     /*
      * there must be a certificate presented by the peer in mode SSL_VERIFY_PEER
      */
-    X509 *cert = (X509 *)NULL;
-    if ((cert = SSL_get_peer_certificate(ssl)) == NULL) {
+    X509 *cert = (X509 *)nullptr;
+    if ((cert = SSL_get_peer_certificate(ssl)) == nullptr) {
 
       VLOG(2) << __FUNCTION__ << " TLS: no certificate presented by peer";
       tls_log_errors();
 
       SSL_free(ssl);
-      ssl = NULL;
-      bio = NULL;
+      ssl = nullptr;
+      bio = nullptr;
 
       tls_destroy_context();
 
@@ -1445,7 +1445,7 @@ void crofsock::send_from_queue() {
         rofl::openflow::cofmsg *msg = nullptr;
 
         /* fetch a new message for transmission from tx queue */
-        if ((msg = txqueues[queue_id].retrieve()) == NULL) {
+        if ((msg = txqueues[queue_id].retrieve()) == nullptr) {
           VLOG(4) << __FUNCTION__ << ": skipping queue_id=" << queue_id
                   << " (empty)";
           break;

@@ -56,7 +56,7 @@ void cdaemon::daemonize(std::string const &pidfile,
     if (sigfillset(&sigset) < 0) {
       throw rofl::eSysCall("sigfillset()");
     }
-    if (sigprocmask(SIG_UNBLOCK, &sigset, NULL) < 0) {
+    if (sigprocmask(SIG_UNBLOCK, &sigset, nullptr) < 0) {
       throw rofl::eSysCall("sigprocmask()");
     }
 

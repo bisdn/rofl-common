@@ -31,7 +31,7 @@ public:
     }
   };
   crwlock() {
-    if (pthread_rwlock_init(&rwlock, NULL) < 0) {
+    if (pthread_rwlock_init(&rwlock, nullptr) < 0) {
       throw eSysCall("pthread_rwlock_init syscall failed")
           .set_func(__FUNCTION__)
           .set_line(__LINE__);

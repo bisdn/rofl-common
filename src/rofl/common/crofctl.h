@@ -1121,7 +1121,7 @@ public:
    */
   rofl::crofsock::msg_result_t
   send_error_message(const rofl::cauxid &auxid, uint32_t xid, uint16_t type,
-                     uint16_t code, uint8_t *data = NULL, size_t datalen = 0);
+                     uint16_t code, uint8_t *data = nullptr, size_t datalen = 0);
 
   /**
    * @brief	Sends OpenFlow Experimenter message to attached controller
@@ -1137,7 +1137,7 @@ public:
   rofl::crofsock::msg_result_t
   send_experimenter_message(const rofl::cauxid &auxid, uint32_t xid,
                             uint32_t experimenter_id, uint32_t exp_type,
-                            uint8_t *body = NULL, size_t bodylen = 0,
+                            uint8_t *body = nullptr, size_t bodylen = 0,
                             int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT);
 
   /**

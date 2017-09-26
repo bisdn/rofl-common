@@ -11,11 +11,11 @@ using namespace rofl;
 /*static*/ int cmemory::memlockcnt = 0;
 
 cmemory::cmemory(size_t len)
-    : data(std::make_pair<uint8_t *, size_t>(NULL, 0)) {
+    : data(std::make_pair<uint8_t *, size_t>(nullptr, 0)) {
 #if 0
 	if (0 == cmemory::memlockcnt)
 	{
-		pthread_mutex_init(&cmemory::memlock, NULL);
+		pthread_mutex_init(&cmemory::memlock, nullptr);
 	}
 	++cmemory::memlockcnt;
 #endif
@@ -26,11 +26,11 @@ cmemory::cmemory(size_t len)
 }
 
 cmemory::cmemory(uint8_t *data, size_t datalen)
-    : data(std::make_pair<uint8_t *, size_t>(NULL, 0)) {
+    : data(std::make_pair<uint8_t *, size_t>(nullptr, 0)) {
 #if 0
 	if (0 == cmemory::memlockcnt)
 	{
-		pthread_mutex_init(&cmemory::memlock, NULL);
+		pthread_mutex_init(&cmemory::memlock, nullptr);
 	}
 	++cmemory::memlockcnt;
 #endif
@@ -42,11 +42,11 @@ cmemory::cmemory(uint8_t *data, size_t datalen)
 }
 
 cmemory::cmemory(const cmemory &m)
-    : data(std::make_pair<uint8_t *, size_t>(NULL, 0)) {
+    : data(std::make_pair<uint8_t *, size_t>(nullptr, 0)) {
 #if 0
 	if (0 == cmemory::memlockcnt)
 	{
-		pthread_mutex_init(&cmemory::memlock, NULL);
+		pthread_mutex_init(&cmemory::memlock, nullptr);
 	}
 	++cmemory::memlockcnt;
 #endif
@@ -243,7 +243,7 @@ void cmemory::mfree() {
     memset(data.first, 0, data.second);
     free(data.first);
   }
-  data = std::make_pair<uint8_t *, size_t>(NULL, 0);
+  data = std::make_pair<uint8_t *, size_t>(nullptr, 0);
 }
 
 uint8_t *cmemory::insert(uint8_t *ptr, size_t len) {
@@ -268,7 +268,7 @@ uint8_t *cmemory::insert(unsigned int offset, size_t len) {
     return somem();
   }
 
-  uint8_t *p_ptr = (uint8_t *)0;
+  uint8_t *p_ptr = nullptr;
   size_t p_len = data.second + len;
 
   if ((p_ptr = (uint8_t *)calloc(1, p_len)) == 0) {

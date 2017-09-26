@@ -56,7 +56,7 @@ public:
   /**
    *
    */
-  virtual void pack(uint8_t *buf = (uint8_t *)0, size_t buflen = 0);
+  virtual void pack(uint8_t *buf = nullptr, size_t buflen = 0);
 
   /**
    *
@@ -117,7 +117,7 @@ public:
   /**
    *
    */
-  virtual void pack(uint8_t *buf = (uint8_t *)0, size_t buflen = 0);
+  virtual void pack(uint8_t *buf = nullptr, size_t buflen = 0);
 
   /**
    *

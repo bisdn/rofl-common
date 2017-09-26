@@ -90,7 +90,9 @@ public:
   void *userdata_re;
   void *userdata_we;
   event *ev;
-  io_event() : re(nullptr), we(nullptr), ev(nullptr) {}
+  io_event()
+      : re(nullptr), we(nullptr), userdata_re(nullptr), userdata_we(nullptr),
+        ev(nullptr) {}
   io_event(const io_event &e) : event_base(e) {
     this->re = e.re;
     this->we = e.we;
@@ -601,7 +603,7 @@ void cthread::start(const std::string &thread_name) {
   case STATE_IDLE: {
 
     running = true;
-    if (pthread_create(&tid, NULL, &(cthread::start_loop), this) < 0) {
+    if (pthread_create(&tid, nullptr, &(cthread::start_loop), this) < 0) {
       throw eSysCall("eSysCall", "pthread_create", __FILE__, __FUNCTION__,
                      __LINE__);
     }
@@ -630,7 +632,7 @@ void cthread::stop() {
       return;
     }
 
-    int rv = pthread_join(tid, NULL);
+    int rv = pthread_join(tid, nullptr);
     if (rv != 0) {
       pthread_cancel(tid);
     }

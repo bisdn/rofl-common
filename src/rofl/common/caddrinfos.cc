@@ -16,13 +16,13 @@ void caddrinfos::resolve() {
   ai_hints.ai_socktype = hints.get_ai_socktype();
   ai_hints.ai_flags = hints.get_ai_flags();
   ai_hints.ai_protocol = hints.get_ai_protocol();
-  ai_hints.ai_addr = NULL;
+  ai_hints.ai_addr = nullptr;
   ai_hints.ai_addrlen = 0;
 
   struct addrinfo *result, *rp = (struct addrinfo *)0;
 
-  int rc = getaddrinfo((node.empty()) ? NULL : node.c_str(),
-                       (service.empty()) ? NULL : service.c_str(), &ai_hints,
+  int rc = getaddrinfo((node.empty()) ? nullptr : node.c_str(),
+                       (service.empty()) ? nullptr : service.c_str(), &ai_hints,
                        &result);
   if (rc != 0) {
     switch (rc) {
@@ -48,7 +48,7 @@ void caddrinfos::resolve() {
 
   unsigned int index = 0;
 
-  for (rp = result; rp != NULL; rp = rp->ai_next) {
+  for (rp = result; rp != nullptr; rp = rp->ai_next) {
     add_addr_info(index++).unpack(rp, sizeof(*rp));
   }
 

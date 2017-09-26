@@ -32,7 +32,7 @@ public:
       uint8_t version = 0, uint32_t xid = 0, uint32_t buffer_id = 0,
       uint32_t in_port = 0,
       const rofl::openflow::cofactions &actions = rofl::openflow::cofactions(),
-      uint8_t *data = (uint8_t *)0, size_t datalen = 0)
+      uint8_t *data = nullptr, size_t datalen = 0)
       : cofmsg(version, rofl::openflow::OFPT_PACKET_OUT, xid),
         buffer_id(buffer_id), in_port(in_port), actions(actions),
         packet(data, datalen){};
@@ -65,7 +65,7 @@ public:
   /**
    *
    */
-  virtual void pack(uint8_t *buf = (uint8_t *)0, size_t buflen = 0);
+  virtual void pack(uint8_t *buf = nullptr, size_t buflen = 0);
 
   /**
    *

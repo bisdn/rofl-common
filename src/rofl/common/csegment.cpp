@@ -14,9 +14,9 @@
 using namespace rofl;
 
 void csegment::clone(const rofl::openflow::cofmsg &msg_stats) {
-  if (NULL != msg) {
+  if (nullptr != msg) {
     delete msg;
-    msg = NULL;
+    msg = nullptr;
   }
 
   uint16_t stats_type = 0;
@@ -111,7 +111,7 @@ void csegment::clone(const rofl::openflow::cofmsg &msg_stats) {
     };
     }
 
-    if (NULL != msg) {
+    if (nullptr != msg) {
       if (dynamic_cast<rofl::openflow::cofmsg_stats_request *>(msg)) {
         rofl::openflow::cofmsg_stats_request &req =
             dynamic_cast<rofl::openflow::cofmsg_stats_request &>(*msg);
@@ -204,7 +204,7 @@ void csegment::clone(const rofl::openflow::cofmsg &msg_stats) {
     };
     }
 
-    if (NULL != msg) {
+    if (nullptr != msg) {
       if (dynamic_cast<rofl::openflow::cofmsg_stats_request *>(msg)) {
         rofl::openflow::cofmsg_stats_request &req =
             dynamic_cast<rofl::openflow::cofmsg_stats_request &>(*msg);
@@ -226,7 +226,7 @@ void csegment::clone(const rofl::openflow::cofmsg &msg_stats) {
 }
 
 void csegment::store_and_merge_msg(const rofl::openflow::cofmsg &msg_stats) {
-  if (NULL == msg) {
+  if (nullptr == msg) {
 
     csegment::clone(msg_stats);
 
@@ -440,6 +440,6 @@ void csegment::store_and_merge_msg(const rofl::openflow::cofmsg &msg_stats) {
 
 rofl::openflow::cofmsg *csegment::retrieve_and_detach_msg() {
   rofl::openflow::cofmsg *tmp = msg;
-  msg = NULL;
+  msg = nullptr;
   return tmp;
 }

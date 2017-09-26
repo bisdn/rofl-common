@@ -77,7 +77,7 @@ void crofconntest::test() {
       struct timespec ts;
       ts.tv_sec = 1;
       ts.tv_nsec = 0;
-      pselect(0, NULL, NULL, NULL, &ts, NULL);
+      pselect(0, nullptr, nullptr, nullptr, &ts, nullptr);
       std::cerr << "s:" << srv_pkts_rcvd << "(" << cli_pkts_sent << "), ";
       std::cerr << "c:" << cli_pkts_rcvd << "(" << srv_pkts_sent << "), "
                 << std::endl;

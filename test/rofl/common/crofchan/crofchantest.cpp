@@ -103,7 +103,7 @@ void crofchantest::test_connections() {
     struct timespec ts;
     ts.tv_sec = 1;
     ts.tv_nsec = 0;
-    pselect(0, NULL, NULL, NULL, &ts, NULL);
+    pselect(0, nullptr, nullptr, nullptr, &ts, nullptr);
     LOG(INFO) << ".";
     if (num_of_ctl_established == num_of_conns) {
       break;
@@ -199,7 +199,7 @@ void crofchantest::test_congestion() {
     struct timespec ts;
     ts.tv_sec = 1;
     ts.tv_nsec = 0;
-    pselect(0, NULL, NULL, NULL, &ts, NULL);
+    pselect(0, nullptr, nullptr, nullptr, &ts, nullptr);
   }
 
   LOG(INFO) << ">>>>>TERMINATING(listen): num_of_ctl_established = "

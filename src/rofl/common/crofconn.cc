@@ -1222,7 +1222,7 @@ void crofconn::handle_rx_messages() {
             return;
           }
 
-          if ((msg = rxqueues[queue_id].retrieve()) == NULL) {
+          if ((msg = rxqueues[queue_id].retrieve()) == nullptr) {
             break; // no further messages in this queue
           }
 
@@ -1298,7 +1298,7 @@ void crofconn::handle_rx_multipart_message(rofl::openflow::cofmsg *msg) {
     rofl::openflow::cofmsg_stats_request *stats =
         dynamic_cast<rofl::openflow::cofmsg_stats_request *>(msg);
 
-    if (NULL == stats) {
+    if (nullptr == stats) {
       VLOG(1) << __FUNCTION__
               << " dropping multipart request, invalid message type";
       delete msg;
@@ -1345,7 +1345,7 @@ void crofconn::handle_rx_multipart_message(rofl::openflow::cofmsg *msg) {
     rofl::openflow::cofmsg_stats_reply *stats =
         dynamic_cast<rofl::openflow::cofmsg_stats_reply *>(msg);
 
-    if (NULL == stats) {
+    if (nullptr == stats) {
       VLOG(1) << __FUNCTION__
               << " dropping multipart reply, invalid message type";
       delete msg;

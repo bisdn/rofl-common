@@ -461,7 +461,7 @@ void crofdpt::multipart_reply_rcvd(const rofl::cauxid &auxid,
                                    rofl::openflow::cofmsg *msg) {
   rofl::openflow::cofmsg_stats_reply *reply =
       dynamic_cast<rofl::openflow::cofmsg_stats_reply *>(msg);
-  assert(reply != NULL);
+  assert(reply != nullptr);
 
   switch (reply->get_stats_type()) {
   case rofl::openflow13::OFPMP_DESC: {

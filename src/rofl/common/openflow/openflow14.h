@@ -2155,7 +2155,7 @@ struct ofp_multipart_reply {
 };
 OFP_ASSERT(sizeof(struct ofp_multipart_reply) == 16);
 
-/* Body of reply to OFPMP_DESC request.  Each entry is a NULL-terminated
+/* Body of reply to OFPMP_DESC request.  Each entry is a nullptr-terminated
  * ASCII string. */
 struct ofp_desc {
   char mfr_desc[DESC_STR_LEN];     /* Manufacturer description. */
