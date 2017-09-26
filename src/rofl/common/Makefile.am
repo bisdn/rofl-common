@@ -85,4 +85,4 @@ library_include_HEADERS= \
 
 
 
-AM_CPPFLAGS=-fPIC -Wno-error=deprecated-declarations
+AM_CPPFLAGS=-fPIC
