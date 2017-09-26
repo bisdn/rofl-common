@@ -145,9 +145,8 @@ void cthread::release() {
 
 int cthread::add_wakeup_observer(cthread_wakeup_event *cb, int *handle,
                                  void *userdata) {
-  assert(handle);
-
-  VLOG(2) << __FUNCTION__ << ": cb=" << cb << " handle=" << *handle;
+  if (handle == nullptr)
+    LOG(FATAL) << __FUNCTION__ << ": handle cannot be null";
 
   event *ev = new event(cb, userdata);
   if (ev->get_fd() == -1) {
@@ -193,6 +192,8 @@ int cthread::add_wakeup_observer(cthread_wakeup_event *cb, int *handle,
   }
 
   *handle = ev->get_fd();
+  VLOG(2) << __FUNCTION__ << ": added cb=" << cb << " fd=" << *handle
+          << " (handle)";
 
   return 0;
 }
