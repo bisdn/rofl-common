@@ -5,8 +5,8 @@
  *      Author: andi
  */
 
-#ifndef TEST_SRC_ROFL_COMMON_OPENFLOW_MESSAGES_COFMSGAGGRSTATS_TEST_HPP_
-#define TEST_SRC_ROFL_COMMON_OPENFLOW_MESSAGES_COFMSGAGGRSTATS_TEST_HPP_
+#ifndef TEST_SRC_ROFL_COMMON_CROFSOCK_TEST_HPP_
+#define TEST_SRC_ROFL_COMMON_CROFSOCK_TEST_HPP_
 
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
@@ -18,7 +18,7 @@
 class crofsocktest : public CppUnit::TestFixture, public rofl::crofsock_env {
   CPPUNIT_TEST_SUITE(crofsocktest);
   CPPUNIT_TEST(test);
-  //	CPPUNIT_TEST( test_tls );
+  CPPUNIT_TEST(test_tls);
   CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -78,6 +78,7 @@ private:
   rofl::crofsock *slisten;
   rofl::crofsock *sclient;
   rofl::crofsock *sserver;
+  rofl::crwlock tlock;
 };
 
-#endif /* TEST_SRC_ROFL_COMMON_OPENFLOW_MESSAGES_COFMSGAGGRSTATS_TEST_HPP_ */
+#endif /* TEST_SRC_ROFL_COMMON_CROFSOCK_TEST_HPP_ */

@@ -120,6 +120,10 @@ private:
   std::atomic_int srv_pkts_sent;
   std::atomic_int cli_pkts_rcvd;
   std::atomic_int cli_pkts_sent;
+
+  rofl::crwlock tlock;
+  std::atomic_bool client_is_closed;
+  std::atomic_bool server_is_closed;
 };
 
 #endif /* TEST_SRC_ROFL_COMMON_OPENFLOW_MESSAGES_COFMSGAGGRSTATS_TEST_HPP_ */

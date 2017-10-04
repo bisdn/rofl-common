@@ -19,7 +19,6 @@
 #include <bitset>
 #include <deque>
 #include <fcntl.h>
-#include <fcntl.h>
 #include <inttypes.h>
 #include <iostream>
 #include <list>
@@ -57,7 +56,6 @@
 #include "rofl/common/openflow/messages/cofmsg_echo.h"
 #include "rofl/common/openflow/messages/cofmsg_error.h"
 #include "rofl/common/openflow/messages/cofmsg_experimenter.h"
-#include "rofl/common/openflow/messages/cofmsg_experimenter_stats.h"
 #include "rofl/common/openflow/messages/cofmsg_experimenter_stats.h"
 #include "rofl/common/openflow/messages/cofmsg_features.h"
 #include "rofl/common/openflow/messages/cofmsg_flow_mod.h"
@@ -232,6 +230,7 @@ class crofsock : public cthread_env {
     FLAG_TX_BLOCK_QUEUEING = 2,
     FLAG_RECONNECT_ON_FAILURE = 3,
     FLAG_TLS_IN_USE = 4,
+    FLAG_CLOSING = 5,
   };
 
   enum socket_mode_t {
@@ -376,6 +375,14 @@ public:
   crofsock &set_backlog(int backlog) {
     this->backlog = backlog;
     return *this;
+  };
+
+  /**
+   * @brief Return state
+   */
+  enum socket_state_t get_state() const {
+    AcquireReadLock lock(tlock);
+    return state;
   };
 
 public:
@@ -557,7 +564,7 @@ public:
 
   std::string str() const {
     std::stringstream ss;
-    switch (state) {
+    switch (state.load()) {
     case STATE_IDLE: {
       ss << "state: -IDLE- ";
     } break;
@@ -612,6 +619,11 @@ private:
     return flags.test(__flag);
   };
 
+  void set_state(enum socket_state_t state) {
+    AcquireReadWriteLock lock(tlock);
+    this->state = state;
+  };
+
 private:
   virtual void handle_wakeup(cthread &thread);
 
@@ -664,19 +676,22 @@ private:
   std::bitset<32> flags;
 
   // and the associated rwlock
-  rofl::crwlock flags_lock;
+  mutable rofl::crwlock flags_lock;
+
+  // rwlock for internal state
+  mutable rofl::crwlock tlock;
 
   // connection state
-  enum socket_state_t state;
+  std::atomic<socket_state_t> state;
 
   // socket mode (TCP_SERVER, TCP CLIENT)
-  enum socket_mode_t mode;
+  std::atomic<socket_mode_t> mode;
 
   // RX thread
-  cthread rxthread;
+  uint32_t rx_thread_num;
 
   // TX thread
-  cthread txthread;
+  uint32_t tx_thread_num;
 
   /*
    * reconnect

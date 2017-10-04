@@ -191,7 +191,7 @@ private:
   time_t entry_timeout;
   static const time_t CFIBENTRY_DEFAULT_TIMEOUT;
 
-  rofl::cthread thread;
+  uint32_t thread_num;
 };
 
 }; // namespace ethswctld

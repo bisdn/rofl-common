@@ -16,15 +16,24 @@ using namespace rofl;
 
 CPPUNIT_TEST_SUITE_REGISTRATION(crofbasetest);
 
-void crofbasetest::setUp() {}
+void crofbasetest::setUp() {
+  rofl::cthread::pool_initialize(/*#threads=*/16);
+  datapath = new cdatapath();
+  controller = new ccontroller();
+}
 
-void crofbasetest::tearDown() {}
+void crofbasetest::tearDown() {
+  rofl::cthread::pool_stop_all_threads();
+  delete controller;
+  delete datapath;
+  rofl::cthread::pool_terminate();
+}
 
 void crofbasetest::test() {
   unsigned int seconds = 10;
-  datapath.test_start();
+  datapath->test_start();
 
-  while (controller.keep_running() && (seconds-- > 0)) {
+  while (controller->keep_running() && (seconds-- > 0)) {
     struct timespec ts;
     ts.tv_sec = 1;
     ts.tv_nsec = 0;
@@ -32,10 +41,6 @@ void crofbasetest::test() {
     LOG(INFO) << "#";
   }
   LOG(INFO) << std::endl;
-
-  datapath.set_ctl(datapath.get_ctlid()).set_conn(0).close();
-
-  sleep(2);
 }
 
 void crofbasetest::handle_wakeup(rofl::cthread &thread) {}
@@ -183,5 +188,5 @@ void ccontroller::handle_barrier_reply_timeout(rofl::crofdpt &dpt,
                                                uint32_t xid) {
   LOG(INFO) << ">>> XXX -Barrier-Reply-Timeout- rcvd" << std::endl;
 
-  __keep_running = false;
+  set_keep_running(false);
 }

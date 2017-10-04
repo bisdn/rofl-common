@@ -22,15 +22,16 @@ using namespace rofl;
 /*static*/ bool crofsock::tls_initialized = false;
 
 crofsock::~crofsock() {
-  txthread.stop();
-  rxthread.stop();
+  cthread::thread(tx_thread_num).drop(this);
+  cthread::thread(rx_thread_num).drop(this);
   close();
 }
 
 crofsock::crofsock(crofsock_env *env)
-    : env(env), state(STATE_IDLE), mode(MODE_UNKNOWN), rxthread(this),
-      txthread(this), reconnect_backoff_max(60 /*secs*/),
-      reconnect_backoff_start(1 /*secs*/),
+    : env(env), state(STATE_IDLE), mode(MODE_UNKNOWN),
+      rx_thread_num(cthread::get_io_thread_num_from_pool()),
+      tx_thread_num(cthread::get_io_thread_num_from_pool()),
+      reconnect_backoff_max(60 /*secs*/), reconnect_backoff_start(1 /*secs*/),
       reconnect_backoff_current(1 /*secs*/), reconnect_counter(0), sd(-1),
       domain(AF_INET), type(SOCK_STREAM), protocol(IPPROTO_TCP), backlog(64),
       ctx(NULL), ssl(NULL), bio(NULL), capath("."), cafile("ca.pem"),
@@ -50,125 +51,26 @@ crofsock::crofsock(crofsock_env *env)
   txweights[QUEUE_MGMT] = 32;
   txweights[QUEUE_FLOW] = 16;
   txweights[QUEUE_PKT] = 8;
-
-  rxthread.start("crofsock_rx");
-  txthread.start("crofsock_tx");
+  VLOG(1) << __FUNCTION__ << " "
+          << "RX thread: " << cthread::thread(rx_thread_num).get_thread_name()
+          << " "
+          << "TX thread: " << cthread::thread(tx_thread_num).get_thread_name()
+          << " ";
 }
 
 void crofsock::close() {
-  switch (state) {
-  case STATE_IDLE: {
+  if (flag_test(FLAG_CLOSING)) {
+    return;
+  }
+  flag_set(FLAG_CLOSING, true);
+  AcquireReadWriteLock lock(tlock);
 
-    VLOG(2) << __FUNCTION__ << " STATE_IDLE laddr=" << laddr.str()
-            << " raddr=" << raddr.str();
-
-    /* TLS down, TCP down => set rx_disabled flag back to false */
-    rx_disabled = false;
-    tx_disabled = false;
-
-  } break;
-  case STATE_CLOSED: {
-
-    VLOG(2) << __FUNCTION__ << " STATE_CLOSED laddr=" << laddr.str()
-            << " raddr=" << raddr.str();
-
-    state = STATE_IDLE;
-
-    crofsock::close();
-
-  } break;
-  case STATE_LISTENING: {
-
-    VLOG(2) << __FUNCTION__ << " STATE_LISTENING laddr=" << laddr.str()
-            << " raddr=" << raddr.str();
-
-    if (sd > 0) {
-      rxthread.drop_read_fd(sd);
-      rxthread.drop_fd(sd);
-      txthread.drop_fd(sd);
-      ::close(sd);
-      sd = -1;
-    }
-
-    state = STATE_CLOSED;
-
-    crofsock::close();
-
-  } break;
-  case STATE_TCP_CONNECTING: {
-
-    VLOG(2) << __FUNCTION__ << " STATE_TCP_CONNECTING laddr=" << laddr.str()
-            << " raddr=" << raddr.str();
-
-    txthread.drop_timer(TIMER_ID_RECONNECT);
-
-    if (sd > 0) {
-      rxthread.drop_write_fd(sd);
-      rxthread.drop_fd(sd);
-      txthread.drop_fd(sd);
-      ::close(sd);
-      sd = -1;
-    }
-
-    state = STATE_CLOSED;
-
-    crofsock::close();
-
-  } break;
-  case STATE_TCP_ACCEPTING: {
-
-    VLOG(2) << __FUNCTION__ << " STATE_TCP_ACCEPTING laddr=" << laddr.str()
-            << " raddr=" << raddr.str();
-
-    if (sd > 0) {
-      rxthread.drop_read_fd(sd, false);
-      if (flag_test(FLAG_CONGESTED)) {
-        txthread.drop_write_fd(sd);
-      }
-      rxthread.drop_fd(sd);
-      txthread.drop_fd(sd);
-      ::close(sd);
-      sd = -1;
-    }
-
-    state = STATE_CLOSED;
-
-    crofsock::close();
-
-  } break;
-  case STATE_TCP_ESTABLISHED: {
-
-    VLOG(2) << __FUNCTION__ << " STATE_TCP_ESTABLISHED laddr=" << laddr.str()
-            << " raddr=" << raddr.str();
-
-    /* block reception of any further data from remote side */
-    rx_disable();
-    tx_disable();
-
-    rxthread.drop_read_fd(sd, false);
-    if (flag_test(FLAG_CONGESTED)) {
-      txthread.drop_write_fd(sd);
-    }
-    shutdown(sd, O_RDWR);
-
-    /* allow socket to send shutdown notification to peer */
-    /* sleep(1); // use SO_LINGER option instead */
-    if (sd > 0) {
-      rxthread.drop_fd(sd);
-      txthread.drop_fd(sd);
-      ::close(sd);
-    }
-    sd = -1;
-
-    state = STATE_CLOSED;
-
-    crofsock::close();
-
-  } break;
+  /* shutdown TLS */
+  switch (state.load()) {
   case STATE_TLS_CONNECTING: {
 
-    VLOG(2) << __FUNCTION__ << " STATE_TLS_CONNECTING laddr=" << laddr.str()
-            << " raddr=" << raddr.str();
+    VLOG(2) << __FUNCTION__ << " STATE_TLS_CONNECTING sd=" << sd
+            << " laddr=" << laddr.str() << " raddr=" << raddr.str();
 
     if (ssl) {
       SSL_free(ssl);
@@ -178,14 +80,12 @@ void crofsock::close() {
     flag_set(FLAG_TLS_IN_USE, false);
 
     state = STATE_TCP_ESTABLISHED;
-
-    crofsock::close();
 
   } break;
   case STATE_TLS_ACCEPTING: {
 
-    VLOG(2) << __FUNCTION__ << " STATE_TLS_ACCEPTING laddr=" << laddr.str()
-            << " raddr=" << raddr.str();
+    VLOG(2) << __FUNCTION__ << " STATE_TLS_ACCEPTING sd=" << sd
+            << " laddr=" << laddr.str() << " raddr=" << raddr.str();
 
     if (ssl) {
       SSL_free(ssl);
@@ -196,13 +96,11 @@ void crofsock::close() {
 
     state = STATE_TCP_ESTABLISHED;
 
-    crofsock::close();
-
   } break;
   case STATE_TLS_ESTABLISHED: {
 
-    VLOG(2) << __FUNCTION__ << " STATE_TLS_ESTABLISHED laddr=" << laddr.str()
-            << " raddr=" << raddr.str();
+    VLOG(2) << __FUNCTION__ << " STATE_TLS_ESTABLISHED sd=" << sd
+            << " laddr=" << laddr.str() << " raddr=" << raddr.str();
 
     /* block reception of any further data from remote side */
     rx_disable();
@@ -218,9 +116,124 @@ void crofsock::close() {
 
     state = STATE_TCP_ESTABLISHED;
 
-    crofsock::close();
+  } break;
+  default: {};
+  }
+
+  /* shutdown TCP */
+  switch (state.load()) {
+  case STATE_LISTENING: {
+
+    VLOG(2) << __FUNCTION__ << " STATE_LISTENING sd=" << sd
+            << " baddr=" << baddr.str();
+
+    if (sd > 0) {
+      cthread::thread(rx_thread_num).drop_read_fd(sd);
+      cthread::thread(rx_thread_num).drop_fd(sd);
+      cthread::thread(tx_thread_num).drop_fd(sd);
+      ::close(sd);
+      sd = -1;
+    }
+
+    state = STATE_CLOSED;
 
   } break;
+  case STATE_TCP_CONNECTING: {
+
+    VLOG(2) << __FUNCTION__ << " STATE_TCP_CONNECTING sd=" << sd
+            << " laddr=" << laddr.str() << " raddr=" << raddr.str();
+
+    cthread::thread(tx_thread_num).drop_timer(this, TIMER_ID_RECONNECT);
+
+    if (sd > 0) {
+      cthread::thread(rx_thread_num).drop_write_fd(sd);
+      cthread::thread(rx_thread_num).drop_fd(sd);
+      cthread::thread(tx_thread_num).drop_fd(sd);
+      ::close(sd);
+      sd = -1;
+    }
+
+    state = STATE_CLOSED;
+
+  } break;
+  case STATE_TCP_ACCEPTING: {
+
+    VLOG(2) << __FUNCTION__ << " STATE_TCP_ACCEPTING sd=" << sd
+            << " laddr=" << laddr.str() << " raddr=" << raddr.str();
+
+    if (sd > 0) {
+      cthread::thread(rx_thread_num).drop_read_fd(sd, false);
+      if (flag_test(FLAG_CONGESTED)) {
+        cthread::thread(tx_thread_num).drop_write_fd(sd);
+      }
+      cthread::thread(rx_thread_num).drop_fd(sd);
+      cthread::thread(tx_thread_num).drop_fd(sd);
+      ::close(sd);
+      sd = -1;
+    }
+
+    state = STATE_CLOSED;
+
+  } break;
+  case STATE_TCP_ESTABLISHED: {
+
+    VLOG(2) << __FUNCTION__ << " STATE_TCP_ESTABLISHED sd=" << sd
+            << " laddr=" << laddr.str() << " raddr=" << raddr.str();
+
+    /* block reception of any further data from remote side */
+    rx_disable();
+    tx_disable();
+
+    cthread::thread(rx_thread_num).drop_read_fd(sd, false);
+    if (flag_test(FLAG_CONGESTED)) {
+      cthread::thread(tx_thread_num).drop_write_fd(sd);
+    }
+    shutdown(sd, O_RDWR);
+
+    /* allow socket to send shutdown notification to peer */
+    /* sleep(1); // use SO_LINGER option instead */
+    if (sd > 0) {
+      cthread::thread(rx_thread_num).drop_fd(sd);
+      cthread::thread(tx_thread_num).drop_fd(sd);
+      ::close(sd);
+    }
+    sd = -1;
+
+    state = STATE_CLOSED;
+
+  } break;
+  default: {};
+  }
+
+  /* where is the difference between CLOSED and IDLE? */
+  switch (state.load()) {
+  case STATE_CLOSED: {
+
+    VLOG(2) << __FUNCTION__ << " STATE_CLOSED sd=" << sd
+            << " laddr=" << laddr.str() << " raddr=" << raddr.str()
+            << " baddr=" << baddr.str();
+
+    state = STATE_IDLE;
+
+  } break;
+  default: {};
+  }
+
+  /* reset internal variables for next round */
+  switch (state.load()) {
+  case STATE_IDLE: {
+
+    VLOG(2) << __FUNCTION__ << " STATE_IDLE sd=" << sd
+            << " laddr=" << laddr.str() << " raddr=" << raddr.str()
+            << " baddr=" << baddr.str();
+
+    /* TLS down, TCP down => set rx_disabled flag back to false */
+    rx_disabled = false;
+    tx_disabled = false;
+
+    flag_set(FLAG_CLOSING, false);
+  }
+    return; // leave while loop
   default: {};
   }
 }
@@ -238,7 +251,7 @@ void crofsock::listen() {
   }
 
   /* cancel potentially pending reconnect timer */
-  rxthread.drop_timer(TIMER_ID_RECONNECT);
+  cthread::thread(rx_thread_num).drop_timer(this, TIMER_ID_RECONNECT);
 
   /* socket in server mode */
   mode = MODE_LISTEN;
@@ -316,11 +329,12 @@ void crofsock::listen() {
 
   state = STATE_LISTENING;
 
-  VLOG(2) << __FUNCTION__ << " STATE_LISTENING";
+  VLOG(2) << __FUNCTION__ << " STATE_LISTENING sd=" << sd
+          << " baddr=" << baddr.str();
 
-  /* instruct rxthread to read from socket descriptor */
-  rxthread.add_fd(sd);
-  rxthread.add_read_fd(sd);
+  /* instruct cthread::thread(rx_thread_num) to read from socket descriptor */
+  cthread::thread(rx_thread_num).add_fd(this, sd);
+  cthread::thread(rx_thread_num).add_read_fd(this, sd);
 }
 
 std::list<int> crofsock::accept() {
@@ -329,6 +343,11 @@ std::list<int> crofsock::accept() {
   bool read_more = true;
   while (read_more) {
     int sockfd;
+
+    if (flag_test(FLAG_CLOSING)) {
+      sockfds.clear();
+      return sockfds;
+    }
 
     /* extract new connection from listening queue */
     if ((sockfd = ::accept(this->sd, raddr.ca_saddr, &(raddr.salen))) < 0) {
@@ -360,7 +379,7 @@ void crofsock::tcp_accept(int sd) {
   }
 
   /* cancel potentially pending reconnect timer */
-  rxthread.drop_timer(TIMER_ID_RECONNECT);
+  cthread::thread(rx_thread_num).drop_timer(this, TIMER_ID_RECONNECT);
 
   /* socket in server mode */
   mode = MODE_SERVER;
@@ -371,8 +390,8 @@ void crofsock::tcp_accept(int sd) {
   /* new state */
   state = STATE_TCP_ACCEPTING;
 
-  VLOG(2) << __FUNCTION__ << " STATE_TCP_ACCEPTING laddr=" << laddr.str()
-          << " raddr=" << raddr.str();
+  VLOG(2) << __FUNCTION__ << " STATE_TCP_ACCEPTING sd=" << sd
+          << " laddr=" << laddr.str() << " raddr=" << raddr.str();
 
   /* make socket non-blocking, as this status is not inherited */
   int sockflags;
@@ -456,8 +475,8 @@ void crofsock::tcp_accept(int sd) {
 
   state = STATE_TCP_ESTABLISHED;
 
-  VLOG(2) << __FUNCTION__ << " STATE_TCP_ESTABLISHED laddr=" << laddr.str()
-          << " raddr=" << raddr.str();
+  VLOG(2) << __FUNCTION__ << " STATE_TCP_ESTABLISHED sd=" << sd
+          << " laddr=" << laddr.str() << " raddr=" << raddr.str();
 
   if (flag_test(FLAG_TLS_IN_USE)) {
     crofsock::tls_accept(sd);
@@ -465,11 +484,11 @@ void crofsock::tcp_accept(int sd) {
     crofsock_env::call_env(env).handle_tcp_accepted(*this);
   }
 
-  /* instruct rxthread to read from socket descriptor */
-  rxthread.add_fd(sd);
-  rxthread.add_read_fd(sd);
+  /* instruct cthread::thread(rx_thread_num) to read from socket descriptor */
+  cthread::thread(rx_thread_num).add_fd(this, sd);
+  cthread::thread(rx_thread_num).add_read_fd(this, sd);
 
-  rxthread.wakeup();
+  cthread::thread(rx_thread_num).wakeup(this);
 }
 
 void crofsock::tcp_connect(bool reconnect) {
@@ -485,7 +504,7 @@ void crofsock::tcp_connect(bool reconnect) {
   }
 
   /* cancel potentially pending reconnect timer */
-  rxthread.drop_timer(TIMER_ID_RECONNECT);
+  cthread::thread(rx_thread_num).drop_timer(this, TIMER_ID_RECONNECT);
 
   /* we do an active connect */
   mode = MODE_CLIENT;
@@ -496,13 +515,13 @@ void crofsock::tcp_connect(bool reconnect) {
   /* new state */
   state = STATE_TCP_CONNECTING;
 
-  VLOG(2) << __FUNCTION__ << " STATE_TCP_CONNECTING laddr=" << laddr.str()
-          << " raddr=" << raddr.str();
-
   /* open socket */
   if ((sd = ::socket(raddr.get_family(), type, protocol)) < 0) {
     throw eSysCall("eSysCall", "socket", __FILE__, __FUNCTION__, __LINE__);
   }
+
+  VLOG(2) << __FUNCTION__ << " STATE_TCP_CONNECTING sd=" << sd
+          << " laddr=" << laddr.str() << " raddr=" << raddr.str();
 
   /* make socket non-blocking */
   int sockflags;
@@ -564,12 +583,12 @@ void crofsock::tcp_connect(bool reconnect) {
     /* connect did not succeed, handle error */
     switch (errno) {
     case EINPROGRESS: {
-      VLOG(2) << __FUNCTION__ << " TCP: EINPROGRESS";
+      VLOG(2) << __FUNCTION__ << " TCP: EINPROGRESS sd=" << sd;
       /* register socket descriptor for write operations */
-      rxthread.add_write_fd(sd);
+      cthread::thread(rx_thread_num).add_write_fd(this, sd);
     } break;
     case ECONNREFUSED: {
-      VLOG(2) << __FUNCTION__ << " TCP: ECONNREFUSED";
+      VLOG(2) << __FUNCTION__ << " TCP: ECONNREFUSED sd=" << sd;
       close();
 
       crofsock_env::call_env(env).handle_tcp_connect_refused(*this);
@@ -580,7 +599,7 @@ void crofsock::tcp_connect(bool reconnect) {
     } break;
     default: {
       VLOG(2) << __FUNCTION__ << " TCP: connect error: " << errno << ": "
-              << strerror(errno);
+              << strerror(errno) << " sd=" << sd;
       close();
 
       crofsock_env::call_env(env).handle_tcp_connect_failed(*this);
@@ -605,14 +624,14 @@ void crofsock::tcp_connect(bool reconnect) {
 
     state = STATE_TCP_ESTABLISHED;
 
-    VLOG(2) << __FUNCTION__ << " STATE_TCP_ESTABLISHED laddr=" << laddr.str()
-            << " raddr=" << raddr.str();
+    VLOG(2) << __FUNCTION__ << " STATE_TCP_ESTABLISHED sd=" << sd
+            << " laddr=" << laddr.str() << " raddr=" << raddr.str();
 
     /* register socket descriptor for read operations */
-    rxthread.add_fd(sd);
-    rxthread.add_read_fd(sd);
+    cthread::thread(rx_thread_num).add_fd(this, sd);
+    cthread::thread(rx_thread_num).add_read_fd(this, sd);
 
-    rxthread.wakeup();
+    cthread::thread(rx_thread_num).wakeup(this);
 
     if (flag_test(FLAG_TLS_IN_USE)) {
       crofsock::tls_connect(flag_test(FLAG_RECONNECT_ON_FAILURE));
@@ -656,7 +675,7 @@ void crofsock::tls_init_context() {
     tls_destroy_context();
   }
 
-  ctx = SSL_CTX_new(TLSv1_2_method());
+  ctx = SSL_CTX_new(TLS_method());
 
   // certificate
   if (!SSL_CTX_use_certificate_file(ctx, certfile.c_str(), SSL_FILETYPE_PEM)) {
@@ -733,7 +752,7 @@ int crofsock::tls_pswd_cb(char *buf, int size, int rwflag, void *userdata) {
 }
 
 void crofsock::tls_accept(int sockfd) {
-  switch (state) {
+  switch (state.load()) {
   case STATE_IDLE:
   case STATE_CLOSED:
   case STATE_TCP_ACCEPTING: {
@@ -763,7 +782,7 @@ void crofsock::tls_accept(int sockfd) {
 
     state = STATE_TLS_ACCEPTING;
 
-    VLOG(2) << __FUNCTION__ << " TLS: start passive connection";
+    VLOG(2) << __FUNCTION__ << " TLS: start passive connection sd=" << sd;
   } break;
   case STATE_TLS_ACCEPTING: {
 
@@ -772,35 +791,37 @@ void crofsock::tls_accept(int sockfd) {
     if ((rc = SSL_accept(ssl)) <= 0) {
       switch (err_code = SSL_get_error(ssl, rc)) {
       case SSL_ERROR_WANT_READ: {
-        VLOG(2) << __FUNCTION__ << " TLS: accept WANT READ";
+        VLOG(2) << __FUNCTION__ << " TLS: accept WANT READ sd=" << sd;
       }
         return;
       case SSL_ERROR_WANT_WRITE: {
-        VLOG(2) << __FUNCTION__ << " TLS: accept WANT WRITE";
+        VLOG(2) << __FUNCTION__ << " TLS: accept WANT WRITE sd=" << sd;
       }
         return;
       case SSL_ERROR_WANT_ACCEPT: {
-        VLOG(2) << __FUNCTION__ << " TLS: accept WANT ACCEPT";
+        VLOG(2) << __FUNCTION__ << " TLS: accept WANT ACCEPT sd=" << sd;
       }
         return;
       case SSL_ERROR_WANT_CONNECT: {
-        VLOG(2) << __FUNCTION__ << " TLS: accept WANT CONNECT";
+        VLOG(2) << __FUNCTION__ << " TLS: accept WANT CONNECT sd=" << sd;
       }
         return;
 
       case SSL_ERROR_NONE: {
-        VLOG(2) << __FUNCTION__ << " TLS: accept failed ERROR NONE";
+        VLOG(2) << __FUNCTION__ << " TLS: accept failed ERROR NONE sd=" << sd;
       } break;
       case SSL_ERROR_SSL: {
-        VLOG(2) << __FUNCTION__ << " TLS: accept failed ERROR SSL";
+        VLOG(2) << __FUNCTION__ << " TLS: accept failed ERROR SSL sd=" << sd;
       } break;
       case SSL_ERROR_SYSCALL: {
-        VLOG(2) << __FUNCTION__ << " TLS: accept failed ERROR SYSCALL";
+        VLOG(2) << __FUNCTION__
+                << " TLS: accept failed ERROR SYSCALL sd=" << sd;
       } break;
       case SSL_ERROR_ZERO_RETURN: {
-        VLOG(2) << __FUNCTION__ << " TLS: accept failed ERROR ZERO RETURN";
+        VLOG(2) << __FUNCTION__
+                << " TLS: accept failed ERROR ZERO RETURN sd=" << sd;
       } break;
-      default: { VLOG(2) << __FUNCTION__ << " TLS: accept failed"; };
+      default: { VLOG(2) << __FUNCTION__ << " TLS: accept failed sd=" << sd; };
       }
 
       tls_log_errors();
@@ -818,7 +839,8 @@ void crofsock::tls_accept(int sockfd) {
     } else if (rc == 1) {
 
       if (not tls_verify_ok()) {
-        VLOG(2) << __FUNCTION__ << " TLS: accept peer verification failed";
+        VLOG(2) << __FUNCTION__
+                << " TLS: accept peer verification failed sd=" << sd;
 
         tls_log_errors();
 
@@ -835,7 +857,7 @@ void crofsock::tls_accept(int sockfd) {
         return;
       }
 
-      VLOG(2) << __FUNCTION__ << " TLS: accept succeeded";
+      VLOG(2) << __FUNCTION__ << " TLS: accept succeeded sd=" << sd;
 
       state = STATE_TLS_ESTABLISHED;
 
@@ -854,7 +876,7 @@ void crofsock::tls_accept(int sockfd) {
 }
 
 void crofsock::tls_connect(bool reconnect) {
-  switch (state) {
+  switch (state.load()) {
   case STATE_IDLE:
   case STATE_CLOSED:
   case STATE_TCP_CONNECTING: {
@@ -884,7 +906,7 @@ void crofsock::tls_connect(bool reconnect) {
 
     state = STATE_TLS_CONNECTING;
 
-    VLOG(2) << __FUNCTION__ << " TLS: start active connection";
+    VLOG(2) << __FUNCTION__ << " TLS: start active connection sd=" << sd;
     crofsock::tls_connect(reconnect);
 
   } break;
@@ -895,35 +917,37 @@ void crofsock::tls_connect(bool reconnect) {
     if ((rc = SSL_connect(ssl)) <= 0) {
       switch (err_code = SSL_get_error(ssl, rc)) {
       case SSL_ERROR_WANT_READ: {
-        VLOG(2) << __FUNCTION__ << " TLS: connect WANT READ";
+        VLOG(2) << __FUNCTION__ << " TLS: connect WANT READ sd=" << sd;
       }
         return;
       case SSL_ERROR_WANT_WRITE: {
-        VLOG(2) << __FUNCTION__ << " TLS: connect WANT WRITE";
+        VLOG(2) << __FUNCTION__ << " TLS: connect WANT WRITE sd=" << sd;
       }
         return;
       case SSL_ERROR_WANT_ACCEPT: {
-        VLOG(2) << __FUNCTION__ << " TLS: connect WANT ACCEPT";
+        VLOG(2) << __FUNCTION__ << " TLS: connect WANT ACCEPT sd=" << sd;
       }
         return;
       case SSL_ERROR_WANT_CONNECT: {
-        VLOG(2) << __FUNCTION__ << " TLS: connect WANT CONNECT";
+        VLOG(2) << __FUNCTION__ << " TLS: connect WANT CONNECT sd=" << sd;
       }
         return;
 
       case SSL_ERROR_NONE: {
-        VLOG(2) << __FUNCTION__ << " TLS: connect failed ERROR NONE";
+        VLOG(2) << __FUNCTION__ << " TLS: connect failed ERROR NONE sd=" << sd;
       } break;
       case SSL_ERROR_SSL: {
-        VLOG(2) << __FUNCTION__ << " TLS: connect failed ERROR SSL";
+        VLOG(2) << __FUNCTION__ << " TLS: connect failed ERROR SSL sd=" << sd;
       } break;
       case SSL_ERROR_SYSCALL: {
-        VLOG(2) << __FUNCTION__ << " TLS: connect failed ERROR SYSCALL";
+        VLOG(2) << __FUNCTION__
+                << " TLS: connect failed ERROR SYSCALL sd=" << sd;
       } break;
       case SSL_ERROR_ZERO_RETURN: {
-        VLOG(2) << __FUNCTION__ << " TLS: connect failed ERROR ZERO RETURN";
+        VLOG(2) << __FUNCTION__
+                << " TLS: connect failed ERROR ZERO RETURN sd=" << sd;
       } break;
-      default: { VLOG(2) << __FUNCTION__ << " TLS: connect failed"; };
+      default: { VLOG(2) << __FUNCTION__ << " TLS: connect failed sd=" << sd; };
       }
 
       tls_log_errors();
@@ -941,7 +965,8 @@ void crofsock::tls_connect(bool reconnect) {
     } else if (rc == 1) {
 
       if (not tls_verify_ok()) {
-        VLOG(2) << __FUNCTION__ << " TLS: connect peer verification failed";
+        VLOG(2) << __FUNCTION__
+                << " TLS: connect peer verification failed sd=" << sd;
 
         tls_log_errors();
 
@@ -958,7 +983,7 @@ void crofsock::tls_connect(bool reconnect) {
         return;
       }
 
-      VLOG(2) << __FUNCTION__ << " TLS: connect succeeded";
+      VLOG(2) << __FUNCTION__ << " TLS: connect succeeded sd=" << sd;
 
       state = STATE_TLS_ESTABLISHED;
 
@@ -990,7 +1015,8 @@ bool crofsock::tls_verify_ok() {
     X509 *cert = (X509 *)NULL;
     if ((cert = SSL_get_peer_certificate(ssl)) == NULL) {
 
-      VLOG(2) << __FUNCTION__ << " TLS: no certificate presented by peer";
+      VLOG(2) << __FUNCTION__
+              << " TLS: no certificate presented by peer sd=" << sd;
       tls_log_errors();
 
       SSL_free(ssl);
@@ -1013,159 +1039,199 @@ bool crofsock::tls_verify_ok() {
 
       switch (result) {
       case X509_V_OK: {
-        VLOG(2) << __FUNCTION__ << " TLS: peer certificate verification: ok";
+        VLOG(2) << __FUNCTION__
+                << " TLS: peer certificate verification: ok sd=" << sd;
       } break;
       case X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT: {
         VLOG(2) << __FUNCTION__
                 << " TLS: peer certificate verification: unable to get issuer "
-                   "certificate";
+                   "certificate sd="
+                << sd;
       } break;
       case X509_V_ERR_UNABLE_TO_GET_CRL: {
         VLOG(2) << __FUNCTION__
                 << " TLS: peer certificate verification: unable to get "
-                   "certificate CRL";
+                   "certificate CRL sd="
+                << sd;
       } break;
       case X509_V_ERR_UNABLE_TO_DECRYPT_CERT_SIGNATURE: {
         VLOG(2) << __FUNCTION__
                 << " TLS: peer certificate verification: unable to decrypt "
-                   "certificate's signature";
+                   "certificate's signature sd="
+                << sd;
       } break;
       case X509_V_ERR_UNABLE_TO_DECRYPT_CRL_SIGNATURE: {
         VLOG(2) << __FUNCTION__
                 << " TLS: peer certificate verification: unable to decrypt "
-                   "CRL's signature";
+                   "CRL's signature sd="
+                << sd;
       } break;
       case X509_V_ERR_UNABLE_TO_DECODE_ISSUER_PUBLIC_KEY: {
         VLOG(2) << __FUNCTION__
                 << " TLS: peer certificate verification: unable to decode "
-                   "issuer public key";
+                   "issuer public key sd="
+                << sd;
       } break;
       case X509_V_ERR_CERT_SIGNATURE_FAILURE: {
         VLOG(2) << __FUNCTION__
                 << " TLS: peer certificate verification: certificate signature "
-                   "failure";
+                   "failure sd="
+                << sd;
       } break;
       case X509_V_ERR_CRL_SIGNATURE_FAILURE: {
-        VLOG(2) << __FUNCTION__
-                << " TLS: peer certificate verification: CRL signature failure";
+        VLOG(2)
+            << __FUNCTION__
+            << " TLS: peer certificate verification: CRL signature failure sd="
+            << sd;
       } break;
       case X509_V_ERR_CERT_NOT_YET_VALID: {
         VLOG(2)
             << __FUNCTION__
             << " TLS: peer certificate verification: certificate is not yet "
-               "valid";
+               "valid sd="
+            << sd;
       } break;
       case X509_V_ERR_CERT_HAS_EXPIRED: {
         VLOG(2)
-            << "TLS: peer certificate verification: certificate has expired";
+            << "TLS: peer certificate verification: certificate has expired sd="
+            << sd;
       } break;
       case X509_V_ERR_CRL_NOT_YET_VALID: {
-        VLOG(2) << __FUNCTION__
-                << " TLS: peer certificate verification: CRL is not yet valid";
+        VLOG(2)
+            << __FUNCTION__
+            << " TLS: peer certificate verification: CRL is not yet valid sd="
+            << sd;
       } break;
       case X509_V_ERR_CRL_HAS_EXPIRED: {
         VLOG(2) << __FUNCTION__
-                << " TLS: peer certificate verification: CRL has expired";
+                << " TLS: peer certificate verification: CRL has expired sd="
+                << sd;
       } break;
       case X509_V_ERR_ERROR_IN_CERT_NOT_BEFORE_FIELD: {
         VLOG(2) << __FUNCTION__
                 << " TLS: peer certificate verification: format error in "
-                   "certificate's notBefore field";
+                   "certificate's notBefore field sd="
+                << sd;
       } break;
       case X509_V_ERR_ERROR_IN_CERT_NOT_AFTER_FIELD: {
         VLOG(2) << __FUNCTION__
                 << " TLS: peer certificate verification: format error in "
-                   "certificate's notAfter field";
+                   "certificate's notAfter field sd="
+                << sd;
       } break;
       case X509_V_ERR_ERROR_IN_CRL_LAST_UPDATE_FIELD: {
         VLOG(2) << __FUNCTION__
                 << " TLS: peer certificate verification: format error in CRL's "
-                   "lastUpdate field";
+                   "lastUpdate field sd="
+                << sd;
       } break;
       case X509_V_ERR_ERROR_IN_CRL_NEXT_UPDATE_FIELD: {
         VLOG(2) << __FUNCTION__
                 << " TLS: peer certificate verification: format error in CRL's "
-                   "nextUpdate field";
+                   "nextUpdate field sd="
+                << sd;
       } break;
       case X509_V_ERR_OUT_OF_MEM: {
         VLOG(2) << __FUNCTION__
-                << " TLS: peer certificate verification: out of memory";
+                << " TLS: peer certificate verification: out of memory sd="
+                << sd;
       } break;
       case X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT: {
         VLOG(2)
-            << "TLS: peer certificate verification: self signed certificate";
+            << "TLS: peer certificate verification: self signed certificate sd="
+            << sd;
       } break;
       case X509_V_ERR_SELF_SIGNED_CERT_IN_CHAIN: {
         VLOG(2) << __FUNCTION__
                 << " TLS: peer certificate verification: self signed "
-                   "certificate in certificate chain";
+                   "certificate in certificate chain sd="
+                << sd;
       } break;
       case X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT_LOCALLY: {
         VLOG(2) << __FUNCTION__
                 << " TLS: peer certificate verification: unable to get local "
-                   "issuer certificate";
+                   "issuer certificate sd="
+                << sd;
       } break;
       case X509_V_ERR_UNABLE_TO_VERIFY_LEAF_SIGNATURE: {
         VLOG(2) << __FUNCTION__
                 << " TLS: peer certificate verification: unable to verify the "
-                   "first certificate";
+                   "first certificate sd="
+                << sd;
       } break;
       case X509_V_ERR_CERT_CHAIN_TOO_LONG: {
-        VLOG(2)
-            << "TLS: peer certificate verification: certificate chain too long";
+        VLOG(2) << "TLS: peer certificate verification: certificate chain too "
+                   "long sd="
+                << sd;
       } break;
       case X509_V_ERR_CERT_REVOKED: {
-        VLOG(2) << __FUNCTION__
-                << " TLS: peer certificate verification: certificate revoked";
+        VLOG(2)
+            << __FUNCTION__
+            << " TLS: peer certificate verification: certificate revoked sd="
+            << sd;
       } break;
       case X509_V_ERR_INVALID_CA: {
         VLOG(2)
             << __FUNCTION__
-            << " TLS: peer certificate verification: invalid CA certificate";
+            << " TLS: peer certificate verification: invalid CA certificate sd="
+            << sd;
       } break;
       case X509_V_ERR_PATH_LENGTH_EXCEEDED: {
-        VLOG(2) << __FUNCTION__
-                << " TLS: peer certificate verification: path length exceeded";
+        VLOG(2)
+            << __FUNCTION__
+            << " TLS: peer certificate verification: path length exceeded sd="
+            << sd;
       } break;
       case X509_V_ERR_INVALID_PURPOSE: {
         VLOG(2) << __FUNCTION__
-                << " TLS: peer certificate verification: invalid purpose";
+                << " TLS: peer certificate verification: invalid purpose sd="
+                << sd;
       } break;
       case X509_V_ERR_CERT_UNTRUSTED: {
-        VLOG(2) << __FUNCTION__
-                << " TLS: peer certificate verification: certificate untrusted";
+        VLOG(2)
+            << __FUNCTION__
+            << " TLS: peer certificate verification: certificate untrusted sd="
+            << sd;
       } break;
       case X509_V_ERR_CERT_REJECTED: {
-        VLOG(2) << __FUNCTION__
-                << " TLS: peer certificate verification: certificate rejected";
+        VLOG(2)
+            << __FUNCTION__
+            << " TLS: peer certificate verification: certificate rejected sd="
+            << sd;
       } break;
       case X509_V_ERR_SUBJECT_ISSUER_MISMATCH: {
         VLOG(2)
-            << "TLS: peer certificate verification: subject issuer mismatch";
+            << "TLS: peer certificate verification: subject issuer mismatch sd="
+            << sd;
       } break;
       case X509_V_ERR_AKID_SKID_MISMATCH: {
         VLOG(2) << __FUNCTION__
                 << " TLS: peer certificate verification: authority key id and "
-                   "subject key id mismatch";
+                   "subject key id mismatch sd="
+                << sd;
       } break;
       case X509_V_ERR_AKID_ISSUER_SERIAL_MISMATCH: {
         VLOG(2) << __FUNCTION__
                 << " TLS: peer certificate verification: authority and issuer "
-                   "serial number mismatch";
+                   "serial number mismatch sd="
+                << sd;
       } break;
       case X509_V_ERR_KEYUSAGE_NO_CERTSIGN: {
         VLOG(2) << __FUNCTION__
                 << " TLS: peer certificate verification: key usage does not "
-                   "include certificate signing";
+                   "include certificate signing sd="
+                << sd;
       } break;
       case X509_V_ERR_APPLICATION_VERIFICATION: {
         VLOG(2) << __FUNCTION__
                 << " TLS: peer certificate verification: application "
-                   "verification failure";
+                   "verification failure sd="
+                << sd;
       } break;
       default: {
         VLOG(2) << __FUNCTION__
-                << " TLS: peer certificate verification: unknown error";
+                << " TLS: peer certificate verification: unknown error sd="
+                << sd;
       };
       }
 
@@ -1192,7 +1258,7 @@ void crofsock::tls_log_errors() {
 }
 
 void crofsock::backoff_reconnect(bool reset_timeout) {
-  if (rxthread.has_timer(TIMER_ID_RECONNECT)) {
+  if (cthread::thread(rx_thread_num).has_timer(this, TIMER_ID_RECONNECT)) {
     return;
   }
 
@@ -1214,8 +1280,9 @@ void crofsock::backoff_reconnect(bool reset_timeout) {
           << " scheduled reconnect in: " << reconnect_backoff_current << " secs"
           << " laddr" << laddr.str() << " raddr=" << raddr.str();
 
-  rxthread.add_timer(TIMER_ID_RECONNECT,
-                     ctimespec().expire_in(reconnect_backoff_current, 0));
+  cthread::thread(rx_thread_num)
+      .add_timer(this, TIMER_ID_RECONNECT,
+                 ctimespec().expire_in(reconnect_backoff_current, 0));
 
   ++reconnect_counter;
 }
@@ -1234,11 +1301,12 @@ bool crofsock::is_rx_disabled() const { return rx_disabled; }
 
 void crofsock::rx_disable() {
   rx_disabled = true;
-  switch (state) {
+  switch (state.load()) {
   case STATE_TCP_ESTABLISHED:
   case STATE_TLS_ESTABLISHED: {
-    rxthread.drop_read_fd(sd, false);
-    VLOG(2) << __FUNCTION__ << " disable reception laddr=" << laddr.str()
+    cthread::thread(rx_thread_num).drop_read_fd(sd, false);
+    VLOG(2) << __FUNCTION__ << " disable reception"
+            << " sd=" << sd << " laddr=" << laddr.str()
             << " raddr=" << raddr.str();
   } break;
   default: {};
@@ -1247,13 +1315,14 @@ void crofsock::rx_disable() {
 
 void crofsock::rx_enable() {
   rx_disabled = false;
-  switch (state) {
+  switch (state.load()) {
   case STATE_TCP_ESTABLISHED:
   case STATE_TLS_ESTABLISHED: {
-    rxthread.add_read_fd(sd, false);
+    cthread::thread(rx_thread_num).add_read_fd(this, sd, false);
     VLOG(2) << __FUNCTION__ << " enable reception"
-            << " laddr=" << laddr.str() << " raddr=" << raddr.str();
-    rxthread.wakeup();
+            << " sd=" << sd << " laddr=" << laddr.str()
+            << " raddr=" << raddr.str();
+    cthread::thread(rx_thread_num).wakeup(this);
   } break;
   default: {};
   }
@@ -1261,22 +1330,25 @@ void crofsock::rx_enable() {
 
 void crofsock::tx_disable() {
   tx_disabled = true;
-  VLOG(2) << __FUNCTION__ << " disable transmission laddr=" << laddr.str()
-          << " raddr=" << raddr.str();
+  VLOG(2) << __FUNCTION__ << " disable transmission sd=" << sd
+          << " laddr=" << laddr.str() << " raddr=" << raddr.str();
 }
 
 void crofsock::tx_enable() {
   tx_disabled = false;
-  VLOG(2) << __FUNCTION__ << " enable transmission laddr=" << laddr.str()
-          << " raddr=" << raddr.str();
-  txthread.wakeup();
+  VLOG(2) << __FUNCTION__ << " enable transmission sd=" << sd
+          << " laddr=" << laddr.str() << " raddr=" << raddr.str();
+  cthread::thread(tx_thread_num).wakeup(this);
 }
 
 void crofsock::handle_timeout(cthread &thread, uint32_t timer_id) {
+  if (get_state() <= STATE_CLOSED) {
+    return;
+  }
   switch (timer_id) {
   case TIMER_ID_RECONNECT: {
-    VLOG(2) << __FUNCTION__ << " TCP: reconnecting laddr=" << laddr.str()
-            << " raddr=" << raddr.str();
+    VLOG(2) << __FUNCTION__ << " TCP: reconnecting sd=" << sd
+            << " laddr=" << laddr.str() << " raddr=" << raddr.str();
     if (flag_test(FLAG_TLS_IN_USE)) {
       tls_connect(true);
     } else {
@@ -1291,7 +1363,7 @@ void crofsock::handle_timeout(cthread &thread, uint32_t timer_id) {
 crofsock::msg_result_t crofsock::send_message(rofl::openflow::cofmsg *msg,
                                               bool enforce_queueing) {
 
-  VLOG(3) << __FUNCTION__ << " msg=" << msg
+  VLOG(3) << __FUNCTION__ << " sd=" << sd << " msg=" << msg
           << " txqueue_pending_pkts=" << txqueue_pending_pkts
           << " tx_disabled=" << tx_disabled
           << " tx_is_running=" << tx_is_running;
@@ -1390,7 +1462,7 @@ crofsock::msg_result_t crofsock::send_message(rofl::openflow::cofmsg *msg,
     txqueue_pending_pkts++;
 
     if (not tx_is_running) {
-      txthread.wakeup();
+      cthread::thread(tx_thread_num).wakeup(this);
     }
 
     if (flag_test(FLAG_TX_BLOCK_QUEUEING)) {
@@ -1414,33 +1486,35 @@ crofsock::msg_result_t crofsock::send_message(rofl::openflow::cofmsg *msg,
 }
 
 void crofsock::handle_wakeup(cthread &thread) {
-  if (&thread == &rxthread) {
+  if (flag_test(FLAG_CLOSING)) {
+    return;
+  }
+  if (&thread == &cthread::thread(rx_thread_num)) {
     recv_message();
-  } else if (&thread == &txthread) {
+  } else if (&thread == &cthread::thread(tx_thread_num)) {
     send_from_queue();
   }
 }
 
 void crofsock::handle_write_event(cthread &thread, int fd) {
-  if (state <= STATE_CLOSED) {
+  if (flag_test(FLAG_CLOSING)) {
     return;
   }
-
-  if (&thread == &txthread) {
+  if (&thread == &cthread::thread(tx_thread_num)) {
     assert(fd == sd);
     flag_set(FLAG_CONGESTED, false);
-    txthread.drop_write_fd(sd);
+    cthread::thread(tx_thread_num).drop_write_fd(sd);
     send_from_queue();
-  } else if (&thread == &rxthread) {
+  } else if (&thread == &cthread::thread(rx_thread_num)) {
     assert(fd == sd);
     handle_read_event_rxthread(thread, fd);
   }
 }
 
 void crofsock::send_from_queue() {
-  if (state <= STATE_CLOSED) {
-    VLOG(3) << __FUNCTION__
-            << " crofsock::send_from_queue() dropping message, no connection "
+  if (get_state() <= STATE_CLOSED) {
+    VLOG(3) << __FUNCTION__ << " sd=" << sd
+            << " dropping message, no connection "
                "established"
             << " laddr=" << laddr.str() << " raddr=" << raddr.str();
     return;
@@ -1455,7 +1529,7 @@ void crofsock::send_from_queue() {
 
       for (unsigned int num = 0; num < txweights[queue_id]; ++num) {
 
-        if ((tx_disabled) || (state < STATE_TCP_ESTABLISHED)) {
+        if ((tx_disabled) || (get_state() < STATE_TCP_ESTABLISHED)) {
           tx_is_running = false;
           return;
         }
@@ -1480,7 +1554,8 @@ void crofsock::send_from_queue() {
           /* pack message into txbuffer */
           msg->pack(txbuffer.somem(), txlen);
 
-          VLOG(3) << __FUNCTION__ << " message sent: " << msg->str().c_str()
+          VLOG(3) << __FUNCTION__ << " sd=" << sd
+                  << " message sent: " << msg->str().c_str()
                   << " laddr=" << laddr.str() << " raddr=" << raddr.str();
 
           /* remove C++ message object from heap */
@@ -1499,7 +1574,7 @@ void crofsock::send_from_queue() {
             tx_is_running = false;
             tx_fragment_pending = true;
             flag_set(FLAG_CONGESTED, true);
-            txthread.add_write_fd(sd);
+            cthread::thread(tx_thread_num).add_write_fd(this, sd);
 
             if (not flag_test(FLAG_TX_BLOCK_QUEUEING)) {
               /* block transmission of further packets */
@@ -1509,7 +1584,7 @@ void crofsock::send_from_queue() {
               /* threshold for re-enabling acceptance of packets */
               txqueue_size_tx_threshold = txqueue_pending_pkts / 2;
 
-              VLOG(3) << __FUNCTION__ << " congestion occurred"
+              VLOG(3) << __FUNCTION__ << " sd=" << sd << " congestion occurred"
                       << " txqueue_pending_pkts: " << txqueue_pending_pkts
                       << " txqueue_size_congestion_occurred: "
                       << txqueue_size_congestion_occurred
@@ -1523,7 +1598,7 @@ void crofsock::send_from_queue() {
             return;
           case SIGPIPE:
           default: {
-            VLOG(1) << __FUNCTION__
+            VLOG(1) << __FUNCTION__ << " sd=" << sd
                     << " ::send() syscall failed, error: " << errno << ": "
                     << strerror(errno);
             tx_is_running = false;
@@ -1546,7 +1621,7 @@ void crofsock::send_from_queue() {
             txqueue_pending_pkts--;
           }
 
-          VLOG(3) << __FUNCTION__ << ": sent " << nbytes
+          VLOG(3) << __FUNCTION__ << " sd=" << sd << " sent " << nbytes
                   << " bytes msg_bytes_sent=" << msg_bytes_sent
                   << " tx_fragment_pending=" << tx_fragment_pending
                   << " txqueue_pending_pkts=" << txqueue_pending_pkts;
@@ -1561,7 +1636,7 @@ void crofsock::send_from_queue() {
     if ((not flag_test(FLAG_CONGESTED)) && flag_test(FLAG_TX_BLOCK_QUEUEING)) {
       if (txqueue_pending_pkts <= txqueue_size_tx_threshold) {
         flag_set(FLAG_TX_BLOCK_QUEUEING, false);
-        VLOG(3) << __FUNCTION__ << " congestion solved"
+        VLOG(3) << __FUNCTION__ << " sd=" << sd << " congestion solved"
                 << " txqueue_pending_pkts" << txqueue_pending_pkts
                 << " txqueue_size_congestion_occurred"
                 << txqueue_size_congestion_occurred
@@ -1577,19 +1652,22 @@ void crofsock::send_from_queue() {
   tx_is_running = false;
 
   if ((txqueue_pending_pkts > 0) && (not flag_test(FLAG_TX_BLOCK_QUEUEING))) {
-    txthread.wakeup();
+    cthread::thread(tx_thread_num).wakeup(this);
   }
 }
 
 void crofsock::handle_read_event(cthread &thread, int fd) {
-  if (&thread == &rxthread) {
+  if (flag_test(FLAG_CLOSING)) {
+    return;
+  }
+  if (&thread == &cthread::thread(rx_thread_num)) {
     handle_read_event_rxthread(thread, fd);
   }
 }
 
 void crofsock::handle_read_event_rxthread(cthread &thread, int fd) {
   try {
-    switch (state) {
+    switch (state.load()) {
     case STATE_LISTENING: {
 
       VLOG(2) << __FUNCTION__
@@ -1613,7 +1691,7 @@ void crofsock::handle_read_event_rxthread(cthread &thread, int fd) {
       switch (optval) {
       case 0:
       case EISCONN: {
-        rxthread.drop_write_fd(sd);
+        cthread::thread(rx_thread_num).drop_write_fd(sd);
 
         if ((getsockname(sd, laddr.ca_saddr, &(laddr.salen))) < 0) {
           throw eSysCall("eSysCall", "getsockname", __FILE__, __FUNCTION__,
@@ -1627,13 +1705,12 @@ void crofsock::handle_read_event_rxthread(cthread &thread, int fd) {
 
         state = STATE_TCP_ESTABLISHED;
 
-        VLOG(2) << __FUNCTION__
-                << " STATE_TCP_ESTABLISHED laddr=" << laddr.str()
-                << " raddr=" << raddr.str();
+        VLOG(2) << __FUNCTION__ << " STATE_TCP_ESTABLISHED sd=" << sd
+                << " laddr=" << laddr.str() << " raddr=" << raddr.str();
 
         /* register socket descriptor for read operations */
-        rxthread.add_fd(sd);
-        rxthread.add_read_fd(sd);
+        cthread::thread(rx_thread_num).add_fd(this, sd);
+        cthread::thread(rx_thread_num).add_read_fd(this, sd);
 
         if (flag_test(FLAG_TLS_IN_USE)) {
           crofsock::tls_connect(flag_test(FLAG_RECONNECT_ON_FAILURE));
@@ -1641,17 +1718,17 @@ void crofsock::handle_read_event_rxthread(cthread &thread, int fd) {
           crofsock_env::call_env(env).handle_tcp_connected(*this);
         }
 
-        rxthread.wakeup();
+        cthread::thread(rx_thread_num).wakeup(this);
 
       } break;
       case EINPROGRESS: {
         /* connect still pending, just wait */
-        VLOG(2) << __FUNCTION__ << " TCP: EINPROGRESS laddr=" << laddr.str()
-                << " raddr=" << raddr.str();
+        VLOG(2) << __FUNCTION__ << " TCP: EINPROGRESS sd=" << sd
+                << " laddr=" << laddr.str() << " raddr=" << raddr.str();
       } break;
       case ECONNREFUSED: {
-        VLOG(2) << __FUNCTION__ << " TCP: ECONNREFUSED laddr=" << laddr.str()
-                << " raddr=" << raddr.str();
+        VLOG(2) << __FUNCTION__ << " TCP: ECONNREFUSED sd=" << sd
+                << " laddr=" << laddr.str() << " raddr=" << raddr.str();
         close();
 
         crofsock_env::call_env(env).handle_tcp_connect_refused(*this);
@@ -1662,7 +1739,7 @@ void crofsock::handle_read_event_rxthread(cthread &thread, int fd) {
       } break;
       default: {
         VLOG(2) << __FUNCTION__ << " TCP: connect error: " << errno << ": "
-                << strerror(errno) << " laddr=" << laddr.str()
+                << strerror(errno) << " sd=" << sd << " laddr=" << laddr.str()
                 << " raddr=" << raddr.str();
         close();
 
@@ -1724,9 +1801,10 @@ void crofsock::handle_read_event_rxthread(cthread &thread, int fd) {
 void crofsock::recv_message() {
   while (not rx_disabled) {
 
-    if (state <= STATE_CLOSED) {
-      VLOG(3) << __FUNCTION__ << "() ignoring message laddr=" << laddr.str()
-              << " raddr=" << raddr.str() << " state=" << state;
+    if (get_state() <= STATE_CLOSED) {
+      VLOG(3) << __FUNCTION__ << "() ignoring message sd=" << sd
+              << " laddr=" << laddr.str() << " raddr=" << raddr.str()
+              << " state=" << state;
       return;
     }
 
@@ -1748,9 +1826,8 @@ void crofsock::recv_message() {
     /* sanity check: 8 <= msg_len <= 2^16 */
     if (msg_len < sizeof(struct openflow::ofp_header)) {
       /* out-of-sync => enforce reconnect in client mode */
-      VLOG(2) << __FUNCTION__
-              << " TCP: openflow out-of-sync laddr=" << laddr.str()
-              << " raddr=" << raddr.str();
+      VLOG(2) << __FUNCTION__ << " TCP: openflow out-of-sync sd=" << sd
+              << " laddr=" << laddr.str() << " raddr=" << raddr.str();
       goto on_error;
     }
 
@@ -1775,8 +1852,8 @@ void crofsock::recv_message() {
       }
     } else if (rc == 0) {
       /* shutdown from peer */
-      VLOG(2) << __FUNCTION__ << " TCP: peer shutdown laddr=" << laddr.str()
-              << " raddr=" << raddr.str();
+      VLOG(2) << __FUNCTION__ << " TCP: peer shutdown sd=" << sd
+              << " laddr=" << laddr.str() << " raddr=" << raddr.str();
       goto on_error;
     }
 
@@ -1803,10 +1880,10 @@ void crofsock::recv_message() {
 
 on_error:
 
-  switch (state) {
+  switch (state.load()) {
   case STATE_TCP_ESTABLISHED: {
-    VLOG(2) << __FUNCTION__ << " TCP: peer shutdown laddr=" << laddr.str()
-            << " raddr=" << raddr.str();
+    VLOG(2) << __FUNCTION__ << " TCP: peer shutdown sd=" << sd
+            << " laddr=" << laddr.str() << " raddr=" << raddr.str();
     close();
 
     if (flag_test(FLAG_RECONNECT_ON_FAILURE)) {
@@ -1816,7 +1893,8 @@ on_error:
     try {
       crofsock_env::call_env(env).handle_closed(*this);
     } catch (std::runtime_error &e) {
-      VLOG(1) << __FUNCTION__ << "() caught runtime error, what: %s" << e.what()
+      VLOG(1) << __FUNCTION__ << " sd=" << sd
+              << " caught runtime error, what: %s" << e.what()
               << " laddr=" << laddr.str() << " raddr=" << raddr.str();
     }
     // WARNING: handle_closed might delete this socket, don't call anything here
@@ -1853,11 +1931,12 @@ void crofsock::parse_message() {
     };
     }
 
-    if (state <= STATE_CLOSED) {
+    if (get_state() <= STATE_CLOSED) {
       return;
     }
 
-    VLOG(3) << __FUNCTION__ << " message rcvd: " << msg->str().c_str()
+    VLOG(3) << __FUNCTION__ << " sd=" << sd
+            << " message rcvd: " << msg->str().c_str()
             << " laddr=" << laddr.str() << " raddr=" << raddr.str();
 
     crofsock_env::call_env(env).handle_recv(*this, msg);
@@ -1894,7 +1973,8 @@ void crofsock::parse_message() {
 
   } catch (eBadRequestBadLen &e) {
 
-    VLOG(1) << __FUNCTION__ << " dropping message xid=" << be32toh(hdr->xid)
+    VLOG(1) << __FUNCTION__ << " sd=" << sd
+            << " dropping message xid=" << be32toh(hdr->xid)
             << " laddr=" << laddr.str() << " raddr=" << raddr.str();
 
     if (msg)
@@ -1906,14 +1986,15 @@ void crofsock::parse_message() {
 
   } catch (rofl::exception &e) {
 
-    VLOG(1) << __FUNCTION__ << " dropping message xid=" << be32toh(hdr->xid)
+    VLOG(1) << __FUNCTION__ << " sd=" << sd
+            << " dropping message xid=" << be32toh(hdr->xid)
             << " laddr=" << laddr.str() << " raddr=" << raddr.str();
 
     // if (msg) delete msg;
 
   } catch (std::runtime_error &e) {
-    VLOG(1) << __FUNCTION__ << " std::runtime_error: %s" << e.what()
-            << " laddr=" << laddr.str() << " raddr=" << raddr.str();
+    VLOG(1) << __FUNCTION__ << " sd=" << sd << " std::runtime_error: %s"
+            << e.what() << " laddr=" << laddr.str() << " raddr=" << raddr.str();
   }
 }
 

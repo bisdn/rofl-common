@@ -18,6 +18,9 @@ using namespace rofl::openflow;
 CPPUNIT_TEST_SUITE_REGISTRATION(crofchantest);
 
 void crofchantest::setUp() {
+  rofl::cthread::pool_terminate(); // in case it was initialized by crofchantest
+                                   // itself
+  rofl::cthread::pool_initialize(/*hnd*/ 1, /*io*/ 2, /*mgt*/ 1);
   versionbitmap.add_ofp_version(rofl::openflow13::OFP_VERSION);
   baddr = rofl::csockaddr(AF_INET, "127.0.0.1", 16455);
   dpid = 0xa1a2a3a4a5a6a7a8;
@@ -29,30 +32,31 @@ void crofchantest::setUp() {
 }
 
 void crofchantest::tearDown() {
+  rofl::cthread::pool_stop_all_threads();
   delete channel2;
   delete channel1;
   delete rofsock;
+  rofl::cthread::pool_terminate();
 }
 
 void crofchantest::test_connections() {
   congested = false;
   keep_running = true;
-  num_of_conns = 32;
+  num_of_conns = 4;
   num_of_accepts = 0;
   num_of_dpt_established = 0;
   num_of_ctl_established = 0;
   num_of_pkts_rcvd = 0;
   num_of_pkts_sent = 0;
   int seconds = 20;
+  listening_port = 6653;
+  testname = std::string("test_connections");
 
-  listening_port = 0;
+  LOG(INFO) << "TEST: <== crofchantest::test_connections() ==>" << std::endl;
 
   /* try to find idle port for test */
   bool lookup_idle_port = true;
   while (lookup_idle_port) {
-    do {
-      listening_port = rand.uint16();
-    } while ((listening_port < 10000) || (listening_port > 49000));
     try {
       LOG(INFO) << "trying listening port=" << (int)listening_port << std::endl;
       baddr = rofl::csockaddr(rofl::caddress_in4("127.0.0.1"), listening_port);
@@ -64,6 +68,9 @@ void crofchantest::test_connections() {
     } catch (rofl::eSysCall &e) {
       /* port in use, try another one */
     }
+    do {
+      listening_port = rand.uint16();
+    } while ((listening_port < 10000) || (listening_port > 49000));
   }
 
   for (unsigned int i = 0; i < num_of_conns; i++) {
@@ -90,44 +97,26 @@ void crofchantest::test_connections() {
   }
   sleep(2);
 
-  LOG(INFO) << ">>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<" << std::endl
-            << ">>>          TERMINATING          <<<" << std::endl
-            << ">>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<" << std::endl
+  LOG(INFO) << "TEST: status" << std::endl;
 
-            << ">>>>>>>>>>>>> listen <<<<<<<<<<<<<<" << std::endl
-
-            << "num_of_ctl_established = " << num_of_ctl_established
-            << std::endl
-            << "num_of_dpt_established = " << num_of_dpt_established
-            << std::endl
-            << "num_of_conns = " << num_of_conns << std::endl
-            << "num_of_accepts = " << num_of_accepts << std::endl
-            << "channel1.size() = " << channel1->keys().size() << std::endl
-            << "channel2.size() = " << channel2->keys().size() << std::endl;
+  LOG(INFO) << "num_of_ctl_established = " << num_of_ctl_established
+            << std::endl;
+  LOG(INFO) << "num_of_dpt_established = " << num_of_dpt_established
+            << std::endl;
+  LOG(INFO) << "num_of_conns = " << num_of_conns << std::endl;
+  LOG(INFO) << "num_of_accepts = " << num_of_accepts << std::endl;
+  LOG(INFO) << "channel1.size() = " << channel1->keys().size() << std::endl;
+  LOG(INFO) << "channel2.size() = " << channel2->keys().size() << std::endl;
   CPPUNIT_ASSERT(channel1->keys().size() == num_of_conns);
   CPPUNIT_ASSERT(channel2->keys().size() == num_of_conns);
 
-  for (auto auxid : channel1->keys()) {
-    LOG(INFO) << ">>>>>>>>>>>>> client(" << (int)auxid.get_id()
-              << ") <<<<<<<<<<<<<<" << std::endl;
-    if (not channel1->has_conn(auxid)) {
-      continue;
-    }
-  }
+  LOG(INFO) << "TEST: shutdown" << std::endl;
 
-  for (auto auxid : channel2->keys()) {
-    if (not channel2->has_conn(auxid)) {
-      continue;
-    }
-    channel2->drop_conn(auxid);
-  }
+  channel2->drop_conn(rofl::cauxid(0));
 
-  for (auto auxid : channel1->keys()) {
-    if (not channel1->has_conn(auxid)) {
-      continue;
-    }
-    channel1->drop_conn(auxid);
-  }
+  sleep(2);
+
+  channel1->drop_conn(rofl::cauxid(0));
 
   LOG(INFO) << "num_of_ctl_established = " << num_of_ctl_established
             << std::endl
@@ -139,27 +128,27 @@ void crofchantest::test_connections() {
             << "channel2.size() = " << channel2->keys().size() << std::endl;
   CPPUNIT_ASSERT(channel1->keys().size() == 0);
   CPPUNIT_ASSERT(channel2->keys().size() == 0);
+
+  LOG(INFO) << "TEST: done" << std::endl;
 }
 
 void crofchantest::test_congestion() {
   congested = false;
   keep_running = true;
-  num_of_conns = 1;
+  num_of_conns = 32;
   num_of_accepts = 0;
   num_of_dpt_established = 0;
   num_of_ctl_established = 0;
   int seconds = 30;
-  listening_port = 0;
+  listening_port = 6653;
   max_congestion_rounds = 16;
+  testname = std::string("test_congestion");
 
-  thread.start();
+  LOG(INFO) << "<== crofchantest::test_congestion() ==>" << std::endl;
 
   /* try to find idle port for test */
   bool lookup_idle_port = true;
   while (lookup_idle_port) {
-    do {
-      listening_port = rand.uint16();
-    } while ((listening_port < 10000) || (listening_port > 49000));
     try {
       LOG(INFO) << "trying listening port=" << (int)listening_port << std::endl;
       baddr = rofl::csockaddr(rofl::caddress_in4("127.0.0.1"), listening_port);
@@ -171,6 +160,9 @@ void crofchantest::test_congestion() {
     } catch (rofl::eSysCall &e) {
       /* port in use, try another one */
     }
+    do {
+      listening_port = rand.uint16();
+    } while ((listening_port < 10000) || (listening_port > 49000));
   }
 
   num_of_pkts_rcvd = 0;
@@ -193,69 +185,50 @@ void crofchantest::test_congestion() {
     ts.tv_sec = 2;
     ts.tv_nsec = 0;
     pselect(0, NULL, NULL, NULL, &ts, NULL);
-    // LOG(INFO) << ".";
+    LOG(INFO) << ".";
   }
   keep_running = false;
   sleep(2);
 
-  LOG(INFO) << ">>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<" << std::endl
-            << ">>>          TERMINATING          <<<" << std::endl
-            << ">>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<" << std::endl
+  LOG(INFO) << "TEST: status" << std::endl;
 
-            << ">>>>>>>>>>>>> listen <<<<<<<<<<<<<<" << std::endl
-
-            << "num_of_ctl_established = " << num_of_ctl_established
-            << std::endl
-            << "num_of_dpt_established = " << num_of_dpt_established
-            << std::endl
-            << "num_of_conns = " << num_of_conns << std::endl
-            << "num_of_accepts = " << num_of_accepts << std::endl
-            << "channel1.size() = " << channel1->keys().size() << std::endl
-            << "channel2.size() = " << channel2->keys().size() << std::endl
-            << "num_of_pkts_sent = " << num_of_pkts_sent << std::endl
-            << "num_of_pkts_rcvd = " << num_of_pkts_rcvd << std::endl;
+  LOG(INFO) << "num_of_ctl_established = " << num_of_ctl_established
+            << std::endl;
+  LOG(INFO) << "num_of_dpt_established = " << num_of_dpt_established
+            << std::endl;
+  LOG(INFO) << "num_of_conns = " << num_of_conns << std::endl;
+  LOG(INFO) << "num_of_accepts = " << num_of_accepts << std::endl;
+  LOG(INFO) << "channel1.size() = " << channel1->keys().size() << std::endl;
+  LOG(INFO) << "channel2.size() = " << channel2->keys().size() << std::endl;
+  LOG(INFO) << "num_of_pkts_sent = " << num_of_pkts_sent << std::endl;
+  LOG(INFO) << "num_of_pkts_rcvd = " << num_of_pkts_rcvd << std::endl;
   CPPUNIT_ASSERT(channel1->keys().size() == num_of_conns);
   CPPUNIT_ASSERT(channel2->keys().size() == num_of_conns);
 
-  for (auto auxid : channel1->keys()) {
-    LOG(INFO) << ">>>>>>>>>>>>> client(" << (int)auxid.get_id()
-              << ") <<<<<<<<<<<<<<" << std::endl;
-    if (not channel1->has_conn(auxid)) {
-      continue;
-    }
-  }
+  LOG(INFO) << "TEST: shutdown" << std::endl;
 
-  for (auto auxid : channel2->keys()) {
-    if (not channel2->has_conn(auxid)) {
-      continue;
-    }
-    LOG(INFO) << "dropping channel2 auxid=" << auxid << std::endl;
-    channel2->drop_conn(auxid);
-  }
-
-  for (auto auxid : channel1->keys()) {
-    if (not channel1->has_conn(auxid)) {
-      continue;
-    }
-    LOG(INFO) << "dropping channel1 auxid=" << auxid << std::endl;
-    channel1->drop_conn(auxid);
-  }
+  channel2->drop_conn(rofl::cauxid(0));
 
   sleep(2);
 
+  channel1->drop_conn(rofl::cauxid(0));
+
   LOG(INFO) << "num_of_ctl_established = " << num_of_ctl_established
-            << std::endl
-            << "num_of_dpt_established = " << num_of_dpt_established
-            << std::endl
-            << "num_of_conns = " << num_of_conns << std::endl
-            << "num_of_accepts = " << num_of_accepts << std::endl
-            << "channel1.size() = " << channel1->keys().size() << std::endl
-            << "channel2.size() = " << channel2->keys().size() << std::endl;
+            << std::endl;
+  LOG(INFO) << "num_of_dpt_established = " << num_of_dpt_established
+            << std::endl;
+  LOG(INFO) << "num_of_conns = " << num_of_conns << std::endl;
+  LOG(INFO) << "num_of_accepts = " << num_of_accepts << std::endl;
+  LOG(INFO) << "channel1.size() = " << channel1->keys().size() << std::endl;
+  LOG(INFO) << "channel2.size() = " << channel2->keys().size() << std::endl;
   CPPUNIT_ASSERT(channel1->keys().size() == 0);
   CPPUNIT_ASSERT(channel2->keys().size() == 0);
+
+  LOG(INFO) << "TEST: done" << std::endl;
 }
 
 void crofchantest::handle_listen(rofl::crofsock &socket) {
+  rofl::AcquireReadWriteLock lock(tlock);
   for (auto sd : socket.accept()) {
     num_of_accepts++;
     LOG(INFO) << "num_of_accepts = " << num_of_accepts << std::endl;
@@ -279,16 +252,12 @@ void crofchantest::handle_established(rofl::crofconn &conn,
     LOG(INFO) << "crofchantest::handle_established() pending_conns: "
               << pending_conns.size() << std::endl;
   }
-
+  rofl::AcquireReadWriteLock lock(tlock);
   channel2->add_conn(&conn);
 
-  LOG(INFO) << ">>>>>>>>>>>>> server(" << (int)conn.get_auxid().get_id()
-            << ") <<<<<<<<<<<<<<" << std::endl
-            << ">>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<" << std::endl
-            << ">>> crofchantest::handle_established() -conn-" << std::endl
-            << ">>> conn.get_auxid() = " << (int)conn.get_auxid().get_id()
-            << std::endl
-            << ">>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<" << std::endl;
+  LOG(INFO) << "TEST: crofchantest::handle_established() server via -conn-, "
+            << "conn.get_auxid() = " << (int)conn.get_auxid().get_id()
+            << std::endl;
 
   CPPUNIT_ASSERT(conn.is_established());
 
@@ -300,32 +269,36 @@ void crofchantest::handle_established(rofl::crofconn &conn,
 void crofchantest::handle_established(rofl::crofchan &chan,
                                       rofl::crofconn &conn,
                                       uint8_t ofp_version) {
-  LOG(INFO) << ">>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<" << std::endl
-            << ">>> crofchantest::handle_established() -chan-" << std::endl
-            << ">>> num_of_accepts = " << num_of_accepts << std::endl
-            << ">>> num_of_conns   = " << num_of_conns << std::endl
-            << ">>> channel1.size() = " << channel1->size() << std::endl
-            << ">>> channel2.size() = " << channel2->size() << std::endl
-            << ">>> conn.get_auxid() = " << (int)conn.get_auxid().get_id()
-            << std::endl
-            << ">>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<" << std::endl
-            << std::endl
-            << "crofchan::handle_established" << std::endl;
+
+  rofl::AcquireReadWriteLock lock(tlock);
+  LOG(INFO) << std::endl;
+  LOG(INFO) << "TEST: crofchantest::handle_established() -chan-, "
+            << "num_of_accepts = " << num_of_accepts << ", "
+            << "num_of_conns = " << num_of_conns << ", "
+            << "channel1.size() = " << channel1->size() << ", "
+            << "channel2.size() = " << channel2->size() << ", "
+            << "conn.get_auxid() = " << (int)conn.get_auxid().get_id()
+            << std::endl;
 
   CPPUNIT_ASSERT(conn.is_established());
 
-  /* we need a large queue size to force a loopback socket into congestion */
-  if (channel1 == &chan) {
-    conn.set_txqueue_max_size(65536);
-  }
+  if (testname == std::string("test_congestion")) {
 
-  if (conn.get_auxid() == rofl::cauxid(0)) {
-    thread.add_timer(TIMER_ID_START_SENDING_PACKET_INS,
+    /* we need a large queue size to force a loopback socket into congestion */
+    if (channel1 == &chan) {
+      conn.set_txqueue_max_size(65536);
+    }
+
+    if (conn.get_auxid() == rofl::cauxid(0)) {
+      rofl::cthread::thread(thread_num)
+          .add_timer(this, TIMER_ID_START_SENDING_PACKET_INS,
                      rofl::ctimespec().expire_in(1));
+    }
   }
 }
 
 void crofchantest::handle_timeout(rofl::cthread &thread, uint32_t timer_id) {
+  rofl::AcquireReadWriteLock lock(tlock);
   rofl::openflow::cofmsg_packet_in *msg = nullptr;
   switch (timer_id) {
   case TIMER_ID_START_SENDING_PACKET_INS: {
@@ -338,9 +311,9 @@ void crofchantest::handle_timeout(rofl::cthread &thread, uint32_t timer_id) {
       match.set_eth_type(0x0806);
       rofl::cmemory packet(1500);
 
-      LOG(INFO) << "crofchantest::handle_timeout() starting to overload "
-                   "control connection"
-                << std::endl;
+      LOG(INFO) << std::endl
+                << "TEST: crofchantest::handle_timeout() starting round "
+                << max_congestion_rounds << std::endl;
 
       while (keep_running) {
         msg = new rofl::openflow::cofmsg_packet_in(
@@ -354,43 +327,46 @@ void crofchantest::handle_timeout(rofl::cthread &thread, uint32_t timer_id) {
         switch (channel1->set_conn(rofl::cauxid(0)).send_message(msg)) {
         case rofl::crofsock::MSG_QUEUED: {
           num_of_pkts_sent++;
-          // LOG(INFO) << "MSG-QUEUED" << std::endl;
+          // std::cerr << "MSG-QUEUED" << std::endl;
+          std::cerr << "s";
           /* keep going */
         } break;
         case rofl::crofsock::MSG_QUEUED_CONGESTION: {
           num_of_pkts_sent++;
-          // LOG(INFO) << "MSG-QUEUED-CONGESTION" << std::endl;
-          LOG(INFO) << "<C> " << std::endl;
+          // std::cerr << "MSG-QUEUED-CONGESTION" << std::endl;
+          std::cerr << "<C>";
           /* stop queueing and reschedule this function */
-          thread.add_timer(TIMER_ID_START_SENDING_PACKET_INS,
-                           rofl::ctimespec().expire_in(1));
+          rofl::cthread::thread(thread_num)
+              .add_timer(this, TIMER_ID_START_SENDING_PACKET_INS,
+                         rofl::ctimespec().expire_in(1));
         }
           return;
         case rofl::crofsock::MSG_QUEUEING_FAILED_QUEUE_FULL: {
-          // LOG(INFO) << "MSG-DROPPED-QUEUE-FULL" << std::endl;
-          LOG(INFO) << "<Q> " << std::endl;
+          // std::cerr << "MSG-DROPPED-QUEUE-FULL" << std::endl;
+          std::cerr << "<Q>";
           /* stop queueing and reschedule this function */
-          thread.add_timer(TIMER_ID_START_SENDING_PACKET_INS,
-                           rofl::ctimespec().expire_in(1));
+          rofl::cthread::thread(thread_num)
+              .add_timer(this, TIMER_ID_START_SENDING_PACKET_INS,
+                         rofl::ctimespec().expire_in(1));
         }
           return;
         case rofl::crofsock::MSG_QUEUEING_FAILED_NOT_ESTABLISHED: {
-          // LOG(INFO) << "MSG-DROPPED-NOT-ESTABLISHED" << std::endl;
-          LOG(INFO) << "<N> " << std::endl;
-          // LOG(INFO) << "ERROR: crofsock::send_message() dropped message due
+          // std::cerr << "MSG-DROPPED-NOT-ESTABLISHED" << std::endl;
+          std::cerr << "<N>" << std::endl;
+          // std::cerr << "ERROR: crofsock::send_message() dropped message due
           // to connection now established" << std::endl;
           /* stop this test, something failed */
           keep_running = false;
         }
           return;
         case rofl::crofsock::MSG_QUEUEING_FAILED_SHUTDOWN_IN_PROGRESS: {
-          LOG(INFO) << "<S> " << std::endl;
-          // LOG(INFO) << "MSG-DROPPED-SHUTDOWN-IN-PROGRESS" << std::endl;
+          std::cerr << "<S>" << std::endl;
+          // std::cerr << "MSG-DROPPED-SHUTDOWN-IN-PROGRESS" << std::endl;
           /* stop this test, something failed */
           keep_running = false;
         } break;
         default: {
-          // LOG(INFO) << "ERROR: received unhandled return value from
+          // std::cerr << "ERROR: received unhandled return value from
           // crofsock::send_message()" << std::endl;
           /* stop this test, something failed */
           keep_running = false;
@@ -403,12 +379,14 @@ void crofchantest::handle_timeout(rofl::cthread &thread, uint32_t timer_id) {
 
     } catch (rofl::eRofQueueFull &e) {
       LOG(INFO) << "exception caught: eRofQueueFull" << std::endl;
-      thread.add_timer(TIMER_ID_START_SENDING_PACKET_INS,
-                       rofl::ctimespec().expire_in(4));
+      rofl::cthread::thread(thread_num)
+          .add_timer(this, TIMER_ID_START_SENDING_PACKET_INS,
+                     rofl::ctimespec().expire_in(4));
     } catch (rofl::eRofSockNotEstablished &e) {
       LOG(INFO) << "exception caught: eRofSockNotEstablished" << std::endl;
-      thread.add_timer(TIMER_ID_START_SENDING_PACKET_INS,
-                       rofl::ctimespec().expire_in(4));
+      rofl::cthread::thread(thread_num)
+          .add_timer(this, TIMER_ID_START_SENDING_PACKET_INS,
+                     rofl::ctimespec().expire_in(4));
     }
   } break;
   default: {};
@@ -417,7 +395,7 @@ void crofchantest::handle_timeout(rofl::cthread &thread, uint32_t timer_id) {
 
 void crofchantest::handle_recv(rofl::crofchan &chan, rofl::crofconn &conn,
                                rofl::openflow::cofmsg *pmsg) {
-
+  rofl::AcquireReadWriteLock lock(tlock);
   switch (pmsg->get_type()) {
   case rofl::openflow13::OFPT_FEATURES_REQUEST: {
 
@@ -434,9 +412,14 @@ void crofchantest::handle_recv(rofl::crofchan &chan, rofl::crofconn &conn,
 
   } break;
   case rofl::openflow13::OFPT_PACKET_IN: {
+    std::cerr << "r";
     num_of_pkts_rcvd++;
     if ((num_of_pkts_sent == num_of_pkts_rcvd) &&
         (max_congestion_rounds <= 0)) {
+      LOG(INFO) << "TEST: received all packets, initiating test shutdown "
+                << std::endl;
+      LOG(INFO) << "sent: " << num_of_pkts_sent << std::endl;
+      LOG(INFO) << "rcvd: " << num_of_pkts_rcvd << std::endl;
       keep_running = false;
     }
   } break;
@@ -451,14 +434,14 @@ void crofchantest::handle_recv(rofl::crofchan &chan, rofl::crofconn &conn,
 
 void crofchantest::congestion_solved_indication(rofl::crofchan &chan,
                                                 rofl::crofconn &conn) {
-  LOG(INFO) << "crofchan::congestion_solved_indication: "
-            << "num_of_pkts_sent=" << num_of_pkts_sent
-            << " num_of_pkts_rcvd=" << num_of_pkts_rcvd
-            << " max_congestion_rounds=" << max_congestion_rounds << std::endl;
+  rofl::AcquireReadWriteLock lock(tlock);
+  std::cerr << "<CSI(" << max_congestion_rounds << ") s:" << num_of_pkts_sent
+            << " r:" << num_of_pkts_rcvd << ">" << std::endl;
 
   if (--max_congestion_rounds > 0) {
-    thread.add_timer(TIMER_ID_START_SENDING_PACKET_INS,
-                     rofl::ctimespec().expire_in(1));
+    rofl::cthread::thread(thread_num)
+        .add_timer(this, TIMER_ID_START_SENDING_PACKET_INS,
+                   rofl::ctimespec().expire_in(1));
   } else {
     // keep_running = false;
   }
@@ -466,9 +449,9 @@ void crofchantest::congestion_solved_indication(rofl::crofchan &chan,
 
 void crofchantest::congestion_occurred_indication(rofl::crofchan &chan,
                                                   rofl::crofconn &conn) {
+  rofl::AcquireReadWriteLock lock(tlock);
   congested = true;
-  LOG(INFO) << "crofchan::congestion_occurred_indication: "
-            << "num_of_pkts_sent=" << num_of_pkts_sent
-            << " num_of_pkts_rcvd=" << num_of_pkts_rcvd
-            << " max_congestion_rounds=" << max_congestion_rounds << std::endl;
+  LOG(INFO) << std::endl
+            << "<COI(" << max_congestion_rounds << ") s:" << num_of_pkts_sent
+            << " r:" << num_of_pkts_rcvd << ">" << std::endl;
 }

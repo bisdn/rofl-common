@@ -31,7 +31,18 @@ public:
   /**
    *
    */
-  bool keep_running() const { return __keep_running; };
+  bool keep_running() const {
+    rofl::AcquireReadLock lock(tlock);
+    return __keep_running;
+  };
+
+  /**
+   *
+   */
+  void set_keep_running(bool keep_running) {
+    rofl::AcquireReadWriteLock lock(tlock);
+    __keep_running = keep_running;
+  };
 
   /**
    *
@@ -74,6 +85,9 @@ private:
 
   // keep test running
   std::atomic_bool __keep_running;
+
+  // rwlock
+  rofl::crwlock tlock;
 };
 
 class cdatapath : public rofl::crofbase {
@@ -165,10 +179,10 @@ private:
 
 private:
   // test controller
-  ccontroller controller;
+  ccontroller *controller;
 
   // test datapath
-  cdatapath datapath;
+  cdatapath *datapath;
 
 private:
 };

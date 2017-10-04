@@ -75,6 +75,24 @@ public:
   };
 };
 
+class AcquireTryReadWriteLock {
+  pthread_rwlock_t *rwlock;
+
+public:
+  ~AcquireTryReadWriteLock() {
+    if (pthread_rwlock_unlock(rwlock) < 0) {
+      kill(getpid(), SIGINT);
+    }
+  };
+  AcquireTryReadWriteLock(const crwlock &lock) : rwlock(&(lock.rwlock)) {
+    if (pthread_rwlock_trywrlock(rwlock) < 0) {
+      throw eSysCall("pthread_rwlock_trywrlock syscall failed")
+          .set_func(__FUNCTION__)
+          .set_line(__LINE__);
+    }
+  };
+};
+
 }; // end of namespace rofl
 
 #endif /* SRC_ROFL_COMMON_LOCKING_HPP_ */

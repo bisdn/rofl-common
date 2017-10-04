@@ -19,6 +19,11 @@ using namespace rofl;
 /*static*/ crwlock crofbase::rofbases_rwlock;
 
 crofbase::~crofbase() {
+  state = STATE_DELETE_IN_PROGRESS;
+
+  /* stop background management thread */
+  cthread::thread(thread_num).drop(this);
+
   /* close listening sockets */
   close_dpt_socks();
   close_ctl_socks();
@@ -29,9 +34,6 @@ crofbase::~crofbase() {
   /* close all crofctl instances */
   __drop_ctls();
 
-  /* stop background management thread */
-  thread.stop();
-
   AcquireReadWriteLock rwlock(rofbases_rwlock);
   crofbase::rofbases.erase(this);
   if (crofbase::rofbases.empty()) {
@@ -40,22 +42,25 @@ crofbase::~crofbase() {
 }
 
 crofbase::crofbase()
-    : thread(this), generation_is_defined(false),
+    : thread_num(cthread::get_mgt_thread_num_from_pool()), state(STATE_RUNNING),
+      generation_is_defined(false),
       cached_generation_id((uint64_t)((int64_t)-1)), enforce_tls(false) {
   AcquireReadWriteLock rwlock(rofbases_rwlock);
   if (crofbase::rofbases.empty()) {
     crofbase::initialize();
   }
   crofbase::rofbases.insert(this);
-  /* start background management thread */
-  thread.start("crofbase");
+  VLOG(1) << __FUNCTION__
+          << "thread: " << cthread::thread(thread_num).get_thread_name();
 }
 
 /*static*/
-void crofbase::initialize() {}
+void crofbase::initialize(uint32_t pool_max_num_threads) {
+  cthread::pool_initialize(pool_max_num_threads);
+}
 
 /*static*/
-void crofbase::terminate() {}
+void crofbase::terminate() { cthread::pool_terminate(); }
 
 void crofbase::role_request_rcvd(crofctl &ctl, uint32_t role,
                                  uint64_t rcvd_generation_id) {
@@ -275,6 +280,8 @@ int crofbase::listen(const csockaddr &baddr) {
 void crofbase::handle_wakeup(cthread &thread) {}
 
 void crofbase::handle_timeout(cthread &thread, uint32_t timer_id) {
+  if (delete_in_progress())
+    return;
   switch (timer_id) {
   case TIMER_ID_ROFCTL_DESTROY: {
     AcquireReadWriteLock rwlock(rofctls_rwlock);
@@ -297,6 +304,8 @@ void crofbase::handle_timeout(cthread &thread, uint32_t timer_id) {
 }
 
 void crofbase::handle_read_event(cthread &thread, int fd) {
+  if (delete_in_progress())
+    return;
   std::map<csockaddr, int>::iterator it;
 
   {
@@ -387,6 +396,8 @@ void crofbase::handle_read_event(cthread &thread, int fd) {
 }
 
 void crofbase::handle_established(crofconn &conn, uint8_t ofp_version) {
+  if (delete_in_progress())
+    return;
   /* openflow connection has been established */
 
   switch (conn.get_mode()) {
@@ -445,13 +456,27 @@ void crofbase::handle_established(crofconn &conn, uint8_t ofp_version) {
   }
 }
 
-void crofbase::handle_accept_failed(crofconn &conn) { delete &conn; }
+void crofbase::handle_accept_failed(crofconn &conn) {
+  if (delete_in_progress())
+    return;
+  delete &conn;
+}
 
-void crofbase::handle_negotiation_failed(crofconn &conn) { delete &conn; }
+void crofbase::handle_negotiation_failed(crofconn &conn) {
+  if (delete_in_progress())
+    return;
+  delete &conn;
+}
 
-void crofbase::handle_closed(crofconn &conn) { delete &conn; }
+void crofbase::handle_closed(crofconn &conn) {
+  if (delete_in_progress())
+    return;
+  delete &conn;
+}
 
 void crofbase::handle_established(crofctl &ctl, uint8_t ofp_version) {
+  if (delete_in_progress())
+    return;
   VLOG(2) << __FUNCTION__
           << " controller attached ctlid=" << ctl.get_ctlid().str()
           << " version=" << static_cast<unsigned>(ctl.get_version());
@@ -459,6 +484,8 @@ void crofbase::handle_established(crofctl &ctl, uint8_t ofp_version) {
 }
 
 void crofbase::handle_closed(crofctl &ctl) {
+  if (delete_in_progress())
+    return;
   VLOG(2) << __FUNCTION__
           << " controller detached ctlid=" << ctl.get_ctlid().str();
   handle_ctl_close(rofl::cctlid(ctl.get_ctlid()));
@@ -471,6 +498,8 @@ void crofbase::handle_closed(crofctl &ctl) {
 
 void crofbase::handle_established(crofctl &ctl, crofconn &conn,
                                   uint8_t ofp_version) {
+  if (delete_in_progress())
+    return;
   VLOG(2) << __FUNCTION__
           << " connection established ctlid=" << ctl.get_ctlid().str()
           << " auxid=" << conn.get_auxid().str()
@@ -481,6 +510,8 @@ void crofbase::handle_established(crofctl &ctl, crofconn &conn,
 }
 
 void crofbase::handle_closed(crofctl &ctl, crofconn &conn) {
+  if (delete_in_progress())
+    return;
   VLOG(2) << __FUNCTION__
           << " connection terminated ctlid=" << ctl.get_ctlid().str()
           << " auxid=" << conn.get_auxid().str()
@@ -491,6 +522,8 @@ void crofbase::handle_closed(crofctl &ctl, crofconn &conn) {
 }
 
 void crofbase::handle_connect_refused(crofctl &ctl, crofconn &conn) {
+  if (delete_in_progress())
+    return;
   VLOG(2) << __FUNCTION__
           << " connection refused: ctlid=" << ctl.get_ctlid().str().c_str()
           << ", auxid=" << conn.get_auxid().str().c_str()
@@ -499,6 +532,8 @@ void crofbase::handle_connect_refused(crofctl &ctl, crofconn &conn) {
 }
 
 void crofbase::handle_connect_failed(crofctl &ctl, crofconn &conn) {
+  if (delete_in_progress())
+    return;
   VLOG(2) << __FUNCTION__
           << " connection failed: ctlid=" << ctl.get_ctlid().str().c_str()
           << ", auxid=" << conn.get_auxid().str().c_str()
@@ -511,6 +546,8 @@ void crofbase::handle_accept_failed(crofctl &ctl,
 }
 
 void crofbase::handle_negotiation_failed(crofctl &ctl, crofconn &conn) {
+  if (delete_in_progress())
+    return;
   VLOG(2) << __FUNCTION__ << " connection negotiation failed: ctlid="
           << ctl.get_ctlid().str().c_str()
           << ", auxid=" << conn.get_auxid().str().c_str()
@@ -519,6 +556,8 @@ void crofbase::handle_negotiation_failed(crofctl &ctl, crofconn &conn) {
 }
 
 void crofbase::congestion_occurred_indication(crofctl &ctl, crofconn &conn) {
+  if (delete_in_progress())
+    return;
   VLOG(2) << __FUNCTION__ << " connection negotiation failed: ctlid="
           << ctl.get_ctlid().str().c_str()
           << ", auxid=" << conn.get_auxid().str().c_str()
@@ -527,6 +566,8 @@ void crofbase::congestion_occurred_indication(crofctl &ctl, crofconn &conn) {
 }
 
 void crofbase::congestion_solved_indication(crofctl &ctl, crofconn &conn) {
+  if (delete_in_progress())
+    return;
   VLOG(2) << __FUNCTION__ << " connection congestion solved: ctlid="
           << ctl.get_ctlid().str().c_str()
           << ", auxid=" << conn.get_auxid().str().c_str()
@@ -535,6 +576,8 @@ void crofbase::congestion_solved_indication(crofctl &ctl, crofconn &conn) {
 }
 
 void crofbase::handle_established(crofdpt &dpt, uint8_t ofp_version) {
+  if (delete_in_progress())
+    return;
   VLOG(2) << __FUNCTION__ << " datapath attached dptid=" << dpt.get_dptid()
           << " dpid=" << dpt.get_dpid()
           << " version=" << static_cast<unsigned>(dpt.get_version());
@@ -542,6 +585,8 @@ void crofbase::handle_established(crofdpt &dpt, uint8_t ofp_version) {
 }
 
 void crofbase::handle_closed(crofdpt &dpt) {
+  if (delete_in_progress())
+    return;
   VLOG(2) << __FUNCTION__ << " datapath detached dptid=" << dpt.get_dptid()
           << " dpid=" << dpt.get_dpid();
   handle_dpt_close(dpt.get_dptid());
@@ -551,6 +596,8 @@ void crofbase::handle_closed(crofdpt &dpt) {
 
 void crofbase::handle_established(crofdpt &dpt, crofconn &conn,
                                   uint8_t ofp_version) {
+  if (delete_in_progress())
+    return;
   VLOG(2) << __FUNCTION__ << " connection established dptid=" << dpt.get_dptid()
           << " auxid=" << conn.get_auxid().str()
           << " laddr=" << conn.get_laddr().str()
@@ -560,6 +607,8 @@ void crofbase::handle_established(crofdpt &dpt, crofconn &conn,
 }
 
 void crofbase::handle_closed(crofdpt &dpt, crofconn &conn) {
+  if (delete_in_progress())
+    return;
   VLOG(2) << __FUNCTION__ << " connection terminated dptid=" << dpt.get_dptid()
           << " auxid=" << conn.get_auxid().str()
           << " laddr=" << conn.get_laddr().str()
@@ -569,6 +618,8 @@ void crofbase::handle_closed(crofdpt &dpt, crofconn &conn) {
 }
 
 void crofbase::handle_connect_refused(crofdpt &dpt, crofconn &conn) {
+  if (delete_in_progress())
+    return;
   VLOG(2) << __FUNCTION__ << " connection refused: dptid=" << dpt.get_dptid()
           << ", auxid=" << conn.get_auxid().str().c_str()
           << ", raddr=" << conn.get_raddr().str().c_str();
@@ -576,6 +627,8 @@ void crofbase::handle_connect_refused(crofdpt &dpt, crofconn &conn) {
 }
 
 void crofbase::handle_connect_failed(crofdpt &dpt, crofconn &conn) {
+  if (delete_in_progress())
+    return;
   VLOG(2) << __FUNCTION__ << " connection failed: dptid=" << dpt.get_dptid()
           << ", auxid=" << conn.get_auxid().str().c_str()
           << ", raddr=" << conn.get_raddr().str().c_str();
@@ -587,6 +640,8 @@ void crofbase::handle_accept_failed(crofdpt &dpt,
 }
 
 void crofbase::handle_negotiation_failed(crofdpt &dpt, crofconn &conn) {
+  if (delete_in_progress())
+    return;
   VLOG(2) << __FUNCTION__
           << " connection negotiation failed: dptid=" << dpt.get_dptid()
           << ", auxid=" << conn.get_auxid().str().c_str()
@@ -595,6 +650,8 @@ void crofbase::handle_negotiation_failed(crofdpt &dpt, crofconn &conn) {
 }
 
 void crofbase::congestion_occurred_indication(crofdpt &dpt, crofconn &conn) {
+  if (delete_in_progress())
+    return;
   VLOG(2) << __FUNCTION__
           << " connection congestion occurred: dptid=" << dpt.get_dptid()
           << ", auxid=" << conn.get_auxid().str().c_str()
@@ -603,6 +660,8 @@ void crofbase::congestion_occurred_indication(crofdpt &dpt, crofconn &conn) {
 }
 
 void crofbase::congestion_solved_indication(crofdpt &dpt, crofconn &conn) {
+  if (delete_in_progress())
+    return;
   VLOG(2) << __FUNCTION__
           << " connection congestion solved: dptid=" << dpt.get_dptid()
           << ", auxid=" << conn.get_auxid().str().c_str()

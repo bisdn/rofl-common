@@ -170,7 +170,7 @@ private:
 
   static bool keep_on_running;
 
-  rofl::cthread thread;
+  uint32_t thread_num;
 
   rofl::cdptid dptid;
 

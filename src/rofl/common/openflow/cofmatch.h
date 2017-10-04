@@ -7,7 +7,6 @@
 
 #include <bitset>
 #include <endian.h>
-#include <endian.h>
 #include <stdio.h>
 #include <string.h>
 #include <string>
@@ -15,7 +14,6 @@
 #include "../endian_conversion.h"
 #endif
 
-#include "rofl/common/caddress.h"
 #include "rofl/common/caddress.h"
 #include "rofl/common/cmemory.h"
 #include "rofl/common/exception.hpp"

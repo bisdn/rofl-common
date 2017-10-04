@@ -18,10 +18,11 @@ using namespace rofl;
 /*static*/ std::set<crofctl_env *> crofctl_env::rofctl_envs;
 /*static*/ crwlock crofctl_env::rofctl_envs_lock;
 
-crofctl::~crofctl(){};
+crofctl::~crofctl() { state = STATE_DELETE_IN_PROGRESS; };
 
 crofctl::crofctl(crofctl_env *env, const cctlid &ctlid)
-    : env(env), ctlid(ctlid), rofchan(this), xid_last(random.uint32()),
+    : env(env), state(STATE_RUNNING), ctlid(ctlid), rofchan(this),
+      xid_last(random.uint32()),
       async_config_role_default_template(rofl::openflow13::OFP_VERSION),
       async_config(rofl::openflow13::OFP_VERSION) {
   init_async_config_role_default_template();
@@ -30,6 +31,8 @@ crofctl::crofctl(crofctl_env *env, const cctlid &ctlid)
 
 void crofctl::handle_recv(crofchan &chan, crofconn &conn,
                           rofl::openflow::cofmsg *msg) {
+  if (delete_in_progress())
+    return;
   try {
     switch (msg->get_version()) {
     case rofl::openflow10::OFP_VERSION: {
@@ -2133,6 +2136,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
 void crofctl::handle_transaction_timeout(crofchan &chan, crofconn &conn,
                                          uint32_t xid, uint8_t type,
                                          uint16_t sub_type) {
+  if (delete_in_progress())
+    return;
   VLOG(2) << __FUNCTION__ << ": transaction xid=" << (unsigned int)xid;
 
   try {

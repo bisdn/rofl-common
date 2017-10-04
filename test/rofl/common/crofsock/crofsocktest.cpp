@@ -17,13 +17,17 @@ using namespace rofl::openflow;
 
 CPPUNIT_TEST_SUITE_REGISTRATION(crofsocktest);
 
-void crofsocktest::setUp() { baddr = rofl::csockaddr(AF_INET, "0.0.0.0", 0); }
+void crofsocktest::setUp() {
+  rofl::cthread::pool_initialize();
+  baddr = rofl::csockaddr(AF_INET, "0.0.0.0", 0);
+}
 
 void crofsocktest::tearDown() {}
 
 void crofsocktest::test() {
   try {
     for (unsigned int i = 0; i < 2; i++) {
+      std::cerr << "ROUND (" << i << ") START" << std::endl;
       test_mode = TEST_MODE_TCP;
       keep_running = true;
       timeout = 60;
@@ -62,13 +66,22 @@ void crofsocktest::test() {
         ts.tv_sec = 1;
         ts.tv_nsec = 0;
         pselect(0, NULL, NULL, NULL, &ts, NULL);
+        std::cerr << ".";
       }
 
       CPPUNIT_ASSERT(timeout > 0);
 
+      slisten->close();
+      sclient->close();
+      sserver->close();
+
+      // sleep(5);
+
+      delete slisten;
       delete sclient;
       delete sserver;
-      delete slisten;
+
+      std::cerr << "ROUND (" << i << ") END" << std::endl;
     }
 
   } catch (rofl::eSysCall &e) {
@@ -116,6 +129,8 @@ void crofsocktest::test_tls() {
         .set_tls_keyfile("../../../../../tools/xca/client.key.pem")
         .tls_connect(true);
 
+    sleep(1);
+
     while (keep_running && (--timeout > 0)) {
       struct timespec ts;
       ts.tv_sec = 1;
@@ -124,6 +139,10 @@ void crofsocktest::test_tls() {
     }
 
     CPPUNIT_ASSERT(timeout > 0);
+
+    slisten->close();
+    sclient->close();
+    sserver->close();
 
     delete slisten;
     delete sclient;
@@ -241,6 +260,7 @@ void crofsocktest::congestion_occurred_indication(rofl::crofsock &socket) {
 
 void crofsocktest::handle_recv(rofl::crofsock &socket,
                                rofl::openflow::cofmsg *msg) {
+  rofl::AcquireReadWriteLock lock(tlock);
   if (&socket == sserver) {
     LOG(INFO) << "sserver => handle recv " << std::endl << *msg;
     delete msg;

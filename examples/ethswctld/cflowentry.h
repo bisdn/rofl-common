@@ -201,7 +201,7 @@ private:
   rofl::caddress_ll src;
   rofl::caddress_ll dst;
   int entry_timeout;
-  rofl::cthread thread;
+  uint32_t thread_num;
 };
 
 }; // namespace ethswctld
