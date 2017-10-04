@@ -9,6 +9,7 @@
 
 #include <cppunit/extensions/TestFactoryRegistry.h>
 #include <cppunit/ui/text/TestRunner.h>
+#include <glog/logging.h>
 
 #include "crofsocktest.hpp"
 
@@ -39,13 +40,13 @@ void crofsocktest::test() {
           listening_port = rand.uint16();
         } while ((listening_port < 10000) || (listening_port > 49000));
         try {
-          std::cerr << "trying listening port=" << (int)listening_port
+          LOG(INFO) << "trying listening port=" << (int)listening_port
                     << std::endl;
           baddr =
               rofl::csockaddr(rofl::caddress_in4("127.0.0.1"), listening_port);
           /* try to bind address first */
           slisten->set_baddr(baddr).listen();
-          std::cerr << "binding to " << baddr.str() << std::endl;
+          LOG(INFO) << "binding to " << baddr.str() << std::endl;
           lookup_idle_port = false;
         } catch (rofl::eSysCall &e) {
           /* port in use, try another one */
@@ -65,22 +66,16 @@ void crofsocktest::test() {
 
       CPPUNIT_ASSERT(timeout > 0);
 
-      slisten->close();
-      sclient->close();
-      sserver->close();
-
-      sleep(5);
-
-      delete slisten;
       delete sclient;
       delete sserver;
+      delete slisten;
     }
 
   } catch (rofl::eSysCall &e) {
-    std::cerr << "crofsocktest::test() exception, what: " << e.what()
+    LOG(INFO) << "crofsocktest::test() exception, what: " << e.what()
               << std::endl;
   } catch (std::runtime_error &e) {
-    std::cerr << "crofsocktest::test() exception, what: " << e.what()
+    LOG(INFO) << "crofsocktest::test() exception, what: " << e.what()
               << std::endl;
   }
 }
@@ -102,13 +97,13 @@ void crofsocktest::test_tls() {
         listening_port = rand.uint16();
       } while ((listening_port < 10000) || (listening_port > 49000));
       try {
-        std::cerr << "trying listening port=" << (int)listening_port
+        LOG(INFO) << "trying listening port=" << (int)listening_port
                   << std::endl;
         baddr =
             rofl::csockaddr(rofl::caddress_in4("127.0.0.1"), listening_port);
         /* try to bind address first */
         slisten->set_baddr(baddr).listen();
-        std::cerr << "binding to " << baddr.str() << std::endl;
+        LOG(INFO) << "binding to " << baddr.str() << std::endl;
         lookup_idle_port = false;
       } catch (rofl::eSysCall &e) {
         /* port in use, try another one */
@@ -135,20 +130,20 @@ void crofsocktest::test_tls() {
     delete sserver;
 
   } catch (rofl::eSysCall &e) {
-    std::cerr << "crofsocktest::test() exception, what: " << e.what()
+    LOG(INFO) << "crofsocktest::test() exception, what: " << e.what()
               << std::endl;
   } catch (std::runtime_error &e) {
-    std::cerr << "crofsocktest::test() exception, what: " << e.what()
+    LOG(INFO) << "crofsocktest::test() exception, what: " << e.what()
               << std::endl;
   }
 }
 
 void crofsocktest::handle_listen(rofl::crofsock &socket) {
-  std::cerr << "crofsocktest::handle_listen()" << std::endl;
+  LOG(INFO) << "crofsocktest::handle_listen()" << std::endl;
 
   for (auto sd : socket.accept()) {
 
-    std::cerr << "crofsocktest::handle_listen() sd=" << sd << std::endl;
+    LOG(INFO) << "crofsocktest::handle_listen() sd=" << sd << std::endl;
 
     sserver = new rofl::crofsock(this);
 
@@ -169,15 +164,15 @@ void crofsocktest::handle_listen(rofl::crofsock &socket) {
 }
 
 void crofsocktest::handle_tcp_connect_refused(rofl::crofsock &socket) {
-  std::cerr << "handle tcp connect refused" << std::endl;
+  LOG(INFO) << "handle tcp connect refused" << std::endl;
 }
 
 void crofsocktest::handle_tcp_connect_failed(rofl::crofsock &socket) {
-  std::cerr << "handle tcp connect failed" << std::endl;
+  LOG(INFO) << "handle tcp connect failed" << std::endl;
 }
 
 void crofsocktest::handle_tcp_connected(rofl::crofsock &socket) {
-  std::cerr << "handle connected" << std::endl;
+  LOG(INFO) << "handle connected" << std::endl;
 
   switch (test_mode) {
   case TEST_MODE_TCP: {
@@ -201,15 +196,15 @@ void crofsocktest::handle_tcp_connected(rofl::crofsock &socket) {
 }
 
 void crofsocktest::handle_tcp_accept_refused(rofl::crofsock &socket) {
-  std::cerr << "handle tcp accept refused" << std::endl;
+  LOG(INFO) << "handle tcp accept refused" << std::endl;
 }
 
 void crofsocktest::handle_tcp_accept_failed(rofl::crofsock &socket) {
-  std::cerr << "handle tcp accept failed" << std::endl;
+  LOG(INFO) << "handle tcp accept failed" << std::endl;
 }
 
 void crofsocktest::handle_tcp_accepted(rofl::crofsock &socket) {
-  std::cerr << "handle tcp accepted" << std::endl;
+  LOG(INFO) << "handle tcp accepted" << std::endl;
 
   switch (test_mode) {
   case TEST_MODE_TCP: {
@@ -233,21 +228,21 @@ void crofsocktest::handle_tcp_accepted(rofl::crofsock &socket) {
 }
 
 void crofsocktest::handle_closed(rofl::crofsock &socket) {
-  std::cerr << "handle closed" << std::endl;
+  LOG(INFO) << "handle closed" << std::endl;
 }
 
 void crofsocktest::congestion_solved_indication(rofl::crofsock &socket) {
-  std::cerr << "handle send" << std::endl;
+  LOG(INFO) << "handle send" << std::endl;
 }
 
 void crofsocktest::congestion_occurred_indication(rofl::crofsock &socket) {
-  std::cerr << "congestion indication" << std::endl;
+  LOG(INFO) << "congestion indication" << std::endl;
 }
 
 void crofsocktest::handle_recv(rofl::crofsock &socket,
                                rofl::openflow::cofmsg *msg) {
   if (&socket == sserver) {
-    std::cerr << "sserver => handle recv " << std::endl << *msg;
+    LOG(INFO) << "sserver => handle recv " << std::endl << *msg;
     delete msg;
 
     if (server_msg_counter < 10) {
@@ -261,12 +256,12 @@ void crofsocktest::handle_recv(rofl::crofsock &socket,
     }
 
     if ((server_msg_counter >= 10) && (client_msg_counter >= 10)) {
-      std::cerr << "[sserver] test done" << std::endl;
+      LOG(INFO) << "[sserver] test done" << std::endl;
       keep_running = false;
     }
 
   } else if (&socket == sclient) {
-    std::cerr << "sclient => handle recv " << std::endl << *msg;
+    LOG(INFO) << "sclient => handle recv " << std::endl << *msg;
     delete msg;
 
     if (client_msg_counter < 10) {
@@ -279,18 +274,18 @@ void crofsocktest::handle_recv(rofl::crofsock &socket,
     }
 
     if ((server_msg_counter >= 10) && (client_msg_counter >= 10)) {
-      std::cerr << "[sclient] test done" << std::endl;
+      LOG(INFO) << "[sclient] test done" << std::endl;
       keep_running = false;
     }
   }
 }
 
 void crofsocktest::handle_tls_connect_failed(rofl::crofsock &socket) {
-  std::cerr << "handle tls connect failed" << std::endl;
+  LOG(INFO) << "handle tls connect failed" << std::endl;
 }
 
 void crofsocktest::handle_tls_connected(rofl::crofsock &socket) {
-  std::cerr << "handle tls connected" << std::endl;
+  LOG(INFO) << "handle tls connected" << std::endl;
 
   rofl::openflow::cofmsg_hello *hello =
       new cofmsg_hello(rofl::openflow13::OFP_VERSION, 0xa1a2a3a4);
@@ -299,11 +294,11 @@ void crofsocktest::handle_tls_connected(rofl::crofsock &socket) {
 }
 
 void crofsocktest::handle_tls_accept_failed(rofl::crofsock &socket) {
-  std::cerr << "handle tls accept failed" << std::endl;
+  LOG(INFO) << "handle tls accept failed" << std::endl;
 }
 
 void crofsocktest::handle_tls_accepted(rofl::crofsock &socket) {
-  std::cerr << "handle tls accepted" << std::endl;
+  LOG(INFO) << "handle tls accepted" << std::endl;
 
   rofl::openflow::cofmsg_features_request *features =
       new cofmsg_features_request(rofl::openflow13::OFP_VERSION, 0xb1b2b3b4);
