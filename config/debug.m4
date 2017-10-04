@@ -5,8 +5,8 @@ AC_ARG_ENABLE(debug,
 	AS_HELP_STRING([--enable-debug], [turn on debug mode [default=no]])
 		, , enable_debug=$debug_default)
 if test "$enable_debug" = "yes"; then
-	CFLAGS="$CFLAGS -g -O0 -fsanitize=thread"
-	CXXFLAGS="$CXXFLAGS -g -O0 -fsanitize=thread -fno-inline"
+	CFLAGS="$CFLAGS -g -O0 "
+	CXXFLAGS="$CXXFLAGS -g -O0 -fno-inline "
 	AC_DEFINE([DEBUG], [], [Description])
 	AC_MSG_RESULT(yes)
 else
