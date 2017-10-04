@@ -675,7 +675,12 @@ void crofsock::tls_init_context() {
     tls_destroy_context();
   }
 
+#if (OPENSSL_VERSION_NUMBER >= 0x1010000fL)
+  // openssl 1.1.0
   ctx = SSL_CTX_new(TLS_method());
+#else
+  ctx = SSL_CTX_new(TLSv1_2_method());
+#endif
 
   // certificate
   if (!SSL_CTX_use_certificate_file(ctx, certfile.c_str(), SSL_FILETYPE_PEM)) {

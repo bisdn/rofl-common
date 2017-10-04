@@ -490,7 +490,7 @@ void crofconn::hello_rcvd(rofl::openflow::cofmsg *pmsg) {
       run_finite_state_machine(STATE_DISCONNECTED);
 
     } else {
-      switch (mode) {
+      switch (mode.load()) {
       case MODE_CONTROLLER: {
         /* get auxid via FEATURES.request for OFP1.3 and above */
         if (ofp_version >= rofl::openflow13::OFP_VERSION) {

@@ -38,6 +38,7 @@
 #include <openssl/bio.h>
 #include <openssl/err.h>
 #include <openssl/ssl.h>
+#include <openssl/opensslv.h>
 
 #include "rofl/common/cmemory.h"
 
