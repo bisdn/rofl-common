@@ -894,7 +894,7 @@ public:
    * for this object
    * @param dptid rofl-common's internal identifier for this instance
    */
-  crofdpt(rofl::crofdpt_env *env, const rofl::cdptid &dptid);
+  crofdpt(cthread *thread, rofl::crofdpt_env *env, const rofl::cdptid &dptid);
 
 public:
   /**
@@ -1032,7 +1032,7 @@ public:
   void drop_buffer(const rofl::cauxid &auxid, uint32_t buffer_id,
                    uint32_t inport = rofl::openflow::OFPP_CONTROLLER) {
     rofl::openflow::cofactions actions(get_version());
-    send_packet_out_message(auxid, buffer_id, inport, actions, NULL, 0);
+    send_packet_out_message(auxid, buffer_id, inport, actions, nullptr, 0);
   };
 
   /**@}*/
@@ -1412,7 +1412,7 @@ public:
    */
   rofl::crofsock::msg_result_t send_packet_out_message(
       const rofl::cauxid &auxid, uint32_t buffer_id, uint32_t in_port,
-      const rofl::openflow::cofactions &actions, uint8_t *data = NULL,
+      const rofl::openflow::cofactions &actions, uint8_t *data = nullptr,
       size_t datalen = 0, uint32_t *xid = nullptr);
 
   /**
@@ -1599,7 +1599,7 @@ public:
    */
   rofl::crofsock::msg_result_t
   send_error_message(const rofl::cauxid &auxid, uint32_t xid, uint16_t type,
-                     uint16_t code, uint8_t *data = NULL, size_t datalen = 0);
+                     uint16_t code, uint8_t *data = nullptr, size_t datalen = 0);
 
   /**
    * @brief	Sends OpenFlow Experimenter message to attached datapath
@@ -1618,7 +1618,7 @@ public:
   rofl::crofsock::msg_result_t
   send_experimenter_message(const rofl::cauxid &auxid, uint32_t xid,
                             uint32_t exp_id, uint32_t exp_type,
-                            uint8_t *body = NULL, size_t bodylen = 0,
+                            uint8_t *body = nullptr, size_t bodylen = 0,
                             int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT);
 
   /**@}*/

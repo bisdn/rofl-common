@@ -785,7 +785,7 @@ OFP_ASSERT(sizeof(struct ofp_stats_reply) == 12);
 
 #define DESC_STR_LEN 256
 #define SERIAL_NUM_LEN 32
-/* Body of reply to OFPST_DESC request.  Each entry is a NULL-terminated
+/* Body of reply to OFPST_DESC request.  Each entry is a nullptr-terminated
  * ASCII string. */
 struct ofp_desc_stats {
   char mfr_desc[DESC_STR_LEN];     /* Manufacturer description. */

@@ -20,8 +20,8 @@ using namespace rofl;
 
 crofctl::~crofctl(){};
 
-crofctl::crofctl(crofctl_env *env, const cctlid &ctlid)
-    : env(env), ctlid(ctlid), rofchan(this), xid_last(random.uint32()),
+crofctl::crofctl(cthread *thread, crofctl_env *env, const cctlid &ctlid)
+    : env(env), ctlid(ctlid), rofchan(thread, this), xid_last(random.uint32()),
       async_config_role_default_template(rofl::openflow13::OFP_VERSION),
       async_config(rofl::openflow13::OFP_VERSION) {
   init_async_config_role_default_template();

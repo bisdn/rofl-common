@@ -42,10 +42,12 @@ public:
   eRofBaseNotConnected(const std::string &__arg) : eRofBaseBase(__arg){};
 };
 
-class crofbase : public virtual rofl::cthread_env,
-                 public rofl::crofconn_env,
-                 public rofl::crofctl_env,
-                 public rofl::crofdpt_env {
+class crofbase : public cthread_read_event,
+                 /*cthread_write_event,*/
+                 public cthread_timeout_event,
+                 public crofconn_env,
+                 public crofctl_env,
+                 public crofdpt_env {
   // map of active crofbase instances
   static std::set<crofbase *> rofbases;
 
@@ -221,8 +223,7 @@ public:
     dpt_sockets[baddr] = listen(baddr);
 
     /* instruct thread to read from socket descriptor */
-    thread.add_fd(dpt_sockets[baddr]);
-    thread.add_read_fd(dpt_sockets[baddr], false);
+    thread.add_read_fd(dpt_sockets[baddr], this, nullptr, false);
   };
 
   /**
@@ -291,8 +292,7 @@ public:
     ctl_sockets[baddr] = listen(baddr);
 
     /* instruct thread to read from socket descriptor */
-    thread.add_fd(ctl_sockets[baddr]);
-    thread.add_read_fd(ctl_sockets[baddr], false);
+    thread.add_read_fd(ctl_sockets[baddr], this, nullptr, false);
   };
 
   /**
@@ -357,8 +357,8 @@ public:
       rofdpts_deletion.insert(it.second);
     }
     rofdpts.clear();
-    if (not thread.has_timer(TIMER_ID_ROFDPT_DESTROY)) {
-      thread.add_timer(TIMER_ID_ROFDPT_DESTROY, ctimespec().expire_in(8));
+    if (not thread.has_timer(this, TIMER_ID_ROFDPT_DESTROY)) {
+      thread.add_timer(this, TIMER_ID_ROFDPT_DESTROY, ctimespec().expire_in(8));
     }
   };
 
@@ -389,7 +389,7 @@ public:
     while (rofdpts.find(id) != rofdpts.end()) {
       id++;
     }
-    rofdpts[id] = new crofdpt(this, id);
+    rofdpts[id] = new crofdpt(&thread, this, id);
     return *(rofdpts[id]);
   };
 
@@ -420,7 +420,7 @@ public:
       delete rofdpts[dptid];
       rofdpts.erase(dptid);
     }
-    rofdpts[dptid] = new crofdpt(this, dptid);
+    rofdpts[dptid] = new crofdpt(&thread, this, dptid);
     return *(rofdpts[dptid]);
   };
 
@@ -443,7 +443,7 @@ public:
     if (rofdpts.find(dptid) == rofdpts.end()) {
       if (raise)
         throw eRofBaseNotFound("rofl::crofbase::set_dpt() dptid not found");
-      rofdpts[dptid] = new crofdpt(this, dptid);
+      rofdpts[dptid] = new crofdpt(&thread, this, dptid);
     }
     return *(rofdpts[dptid]);
   };
@@ -487,8 +487,8 @@ public:
     /* mark its dptid as free */
     rofdpts.erase(dptid);
     /* trigger management thread for doing the clean-up work */
-    if (not thread.has_timer(TIMER_ID_ROFDPT_DESTROY)) {
-      thread.add_timer(TIMER_ID_ROFDPT_DESTROY, ctimespec().expire_in(8));
+    if (not thread.has_timer(this, TIMER_ID_ROFDPT_DESTROY)) {
+      thread.add_timer(this, TIMER_ID_ROFDPT_DESTROY, ctimespec().expire_in(8));
     }
     return true;
   };
@@ -536,7 +536,7 @@ public:
     while (rofdpts.find(id) != rofdpts.end()) {
       id++;
     }
-    rofdpts[id] = new crofdpt(this, id);
+    rofdpts[id] = new crofdpt(&thread, this, id);
     return *(rofdpts[id]);
   };
 
@@ -593,8 +593,8 @@ public:
       rofctls_deletion.insert(it.second);
     }
     rofctls.clear();
-    if (not thread.has_timer(TIMER_ID_ROFCTL_DESTROY)) {
-      thread.add_timer(TIMER_ID_ROFCTL_DESTROY, ctimespec().expire_in(8));
+    if (not thread.has_timer(this, TIMER_ID_ROFCTL_DESTROY)) {
+      thread.add_timer(this, TIMER_ID_ROFCTL_DESTROY, ctimespec().expire_in(8));
     }
   };
 
@@ -624,7 +624,7 @@ public:
     while (rofctls.find(cctlid(id)) != rofctls.end()) {
       id++;
     }
-    rofctls[cctlid(id)] = new crofctl(this, cctlid(id));
+    rofctls[cctlid(id)] = new crofctl(&thread, this, cctlid(id));
     return *(rofctls[cctlid(id)]);
   };
 
@@ -655,7 +655,7 @@ public:
       delete rofctls[ctlid];
       rofctls.erase(ctlid);
     }
-    rofctls[ctlid] = new crofctl(this, ctlid);
+    rofctls[ctlid] = new crofctl(&thread, this, ctlid);
     return *(rofctls[ctlid]);
   };
 
@@ -678,7 +678,7 @@ public:
     if (rofctls.find(ctlid) == rofctls.end()) {
       if (raise)
         throw eRofBaseNotFound("rofl::crofbase::set_ctl() ctlid not found");
-      rofctls[ctlid] = new crofctl(this, ctlid);
+      rofctls[ctlid] = new crofctl(&thread, this, ctlid);
     }
     return *(rofctls[ctlid]);
   };
@@ -722,8 +722,8 @@ public:
     /* mark its ctlid as free */
     rofctls.erase(ctlid);
     /* trigger management thread for doing the clean-up work */
-    if (not thread.has_timer(TIMER_ID_ROFCTL_DESTROY)) {
-      thread.add_timer(TIMER_ID_ROFCTL_DESTROY, ctimespec().expire_in(8));
+    if (not thread.has_timer(this, TIMER_ID_ROFCTL_DESTROY)) {
+      thread.add_timer(this, TIMER_ID_ROFCTL_DESTROY, ctimespec().expire_in(8));
     }
     return true;
   };
@@ -880,8 +880,8 @@ public:
   /**@}*/
 
 private:
-  virtual void role_request_rcvd(rofl::crofctl &ctl, uint32_t role,
-                                 uint64_t rcvd_generation_id);
+  void role_request_rcvd(crofctl &ctl, uint32_t role,
+                         uint64_t rcvd_generation_id) override;
 
 public:
   /**
@@ -1146,9 +1146,8 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void
-  handle_features_reply(rofl::crofdpt &dpt, const rofl::cauxid &auxid,
-                        rofl::openflow::cofmsg_features_reply &msg){};
+  void handle_features_reply(crofdpt &dpt, const cauxid &auxid,
+                             openflow::cofmsg_features_reply &msg) override{};
 
   /**
    * @brief	Timer expired while waiting for OpenFlow Features-Reply message.
@@ -1159,8 +1158,7 @@ public:
    * @param dpt datapath instance
    * @param xid OpenFlow transaction identifier
    */
-  virtual void handle_features_reply_timeout(rofl::crofdpt &dpt,
-                                             uint32_t xid){};
+  void handle_features_reply_timeout(crofdpt &dpt, uint32_t xid) override{};
 
   /**
    * @brief	OpenFlow Get-Config-Reply message received.
@@ -1169,9 +1167,9 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void
-  handle_get_config_reply(rofl::crofdpt &dpt, const rofl::cauxid &auxid,
-                          rofl::openflow::cofmsg_get_config_reply &msg){};
+  void
+  handle_get_config_reply(crofdpt &dpt, const cauxid &auxid,
+                          openflow::cofmsg_get_config_reply &msg) override{};
 
   /**
    * @brief	Timer expired while waiting for OpenFlow Get-Config-Reply
@@ -1183,8 +1181,7 @@ public:
    * @param dpt datapath instance
    * @param xid OpenFlow transaction identifier
    */
-  virtual void handle_get_config_reply_timeout(rofl::crofdpt &dpt,
-                                               uint32_t xid){};
+  void handle_get_config_reply_timeout(crofdpt &dpt, uint32_t xid) override{};
 
   /**
    * @brief	OpenFlow Stats-Reply message received.
@@ -1193,8 +1190,8 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void handle_stats_reply(rofl::crofdpt &dpt, const rofl::cauxid &auxid,
-                                  rofl::openflow::cofmsg_stats_reply &msg){};
+  void handle_stats_reply(crofdpt &dpt, const cauxid &auxid,
+                          openflow::cofmsg_stats_reply &msg) override{};
 
   /**
    * @brief	Timer expired while waiting for OpenFlow Stats-Reply message.
@@ -1206,8 +1203,8 @@ public:
    * @param xid OpenFlow transaction identifier
    * @param stats_type statistics message subtype
    */
-  virtual void handle_stats_reply_timeout(rofl::crofdpt &dpt, uint32_t xid,
-                                          uint8_t stats_type){};
+  void handle_stats_reply_timeout(rofl::crofdpt &dpt, uint32_t xid,
+                                  uint8_t stats_type) override{};
 
   /**
    * @brief	OpenFlow Desc-Stats-Reply message received.
@@ -1216,9 +1213,9 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void
-  handle_desc_stats_reply(rofl::crofdpt &dpt, const rofl::cauxid &auxid,
-                          rofl::openflow::cofmsg_desc_stats_reply &msg){};
+  void
+  handle_desc_stats_reply(crofdpt &dpt, const cauxid &auxid,
+                          openflow::cofmsg_desc_stats_reply &msg) override{};
 
   /**
    * @brief	Timer expired while waiting for OpenFlow Desc-Stats-Reply
@@ -1230,8 +1227,7 @@ public:
    * @param dpt datapath instance
    * @param xid OpenFlow transaction identifier
    */
-  virtual void handle_desc_stats_reply_timeout(rofl::crofdpt &dpt,
-                                               uint32_t xid){};
+  void handle_desc_stats_reply_timeout(crofdpt &dpt, uint32_t xid) override{};
 
   /**
    * @brief	OpenFlow Table-Stats-Reply message received.
@@ -1240,9 +1236,9 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void
-  handle_table_stats_reply(rofl::crofdpt &dpt, const rofl::cauxid &auxid,
-                           rofl::openflow::cofmsg_table_stats_reply &msg){};
+  void handle_table_stats_reply(
+      rofl::crofdpt &dpt, const rofl::cauxid &auxid,
+      rofl::openflow::cofmsg_table_stats_reply &msg) override{};
 
   /**
    * @brief	Timer expired while waiting for OpenFlow Table-Stats-Reply
@@ -1254,8 +1250,8 @@ public:
    * @param dpt datapath instance
    * @param xid OpenFlow transaction identifier
    */
-  virtual void handle_table_stats_reply_timeout(rofl::crofdpt &dpt,
-                                                uint32_t xid){};
+  void handle_table_stats_reply_timeout(rofl::crofdpt &dpt,
+                                        uint32_t xid) override{};
 
   /**
    * @brief	OpenFlow Port-Stats-Reply message received.
@@ -1264,9 +1260,9 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void
-  handle_port_stats_reply(rofl::crofdpt &dpt, const rofl::cauxid &auxid,
-                          rofl::openflow::cofmsg_port_stats_reply &msg){};
+  void handle_port_stats_reply(
+      rofl::crofdpt &dpt, const rofl::cauxid &auxid,
+      rofl::openflow::cofmsg_port_stats_reply &msg) override{};
 
   /**
    * @brief	Timer expired while waiting for OpenFlow Port-Stats-Reply
@@ -1278,8 +1274,8 @@ public:
    * @param dpt datapath instance
    * @param xid OpenFlow transaction identifier
    */
-  virtual void handle_port_stats_reply_timeout(rofl::crofdpt &dpt,
-                                               uint32_t xid){};
+  void handle_port_stats_reply_timeout(rofl::crofdpt &dpt,
+                                       uint32_t xid) override{};
 
   /**
    * @brief	OpenFlow Flow-Stats-Reply message received.
@@ -1288,9 +1284,9 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void
-  handle_flow_stats_reply(rofl::crofdpt &dpt, const rofl::cauxid &auxid,
-                          rofl::openflow::cofmsg_flow_stats_reply &msg){};
+  void handle_flow_stats_reply(
+      rofl::crofdpt &dpt, const rofl::cauxid &auxid,
+      rofl::openflow::cofmsg_flow_stats_reply &msg) override{};
 
   /**
    * @brief	Timer expired while waiting for OpenFlow Flow-Stats-Reply
@@ -1302,8 +1298,8 @@ public:
    * @param dpt datapath instance
    * @param xid OpenFlow transaction identifier
    */
-  virtual void handle_flow_stats_reply_timeout(rofl::crofdpt &dpt,
-                                               uint32_t xid){};
+  void handle_flow_stats_reply_timeout(rofl::crofdpt &dpt,
+                                       uint32_t xid) override{};
 
   /**
    * @brief	OpenFlow Aggregate-Stats-Reply message received.
@@ -1312,9 +1308,9 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void
-  handle_aggregate_stats_reply(rofl::crofdpt &dpt, const rofl::cauxid &auxid,
-                               rofl::openflow::cofmsg_aggr_stats_reply &msg){};
+  void handle_aggregate_stats_reply(
+      rofl::crofdpt &dpt, const rofl::cauxid &auxid,
+      rofl::openflow::cofmsg_aggr_stats_reply &msg) override{};
 
   /**
    * @brief	Timer expired while waiting for OpenFlow Aggregate-Stats-Reply
@@ -1327,8 +1323,8 @@ public:
    * @param dpt datapath instance
    * @param xid OpenFlow transaction identifier
    */
-  virtual void handle_aggregate_stats_reply_timeout(rofl::crofdpt &dpt,
-                                                    uint32_t xid){};
+  void handle_aggregate_stats_reply_timeout(rofl::crofdpt &dpt,
+                                            uint32_t xid) override{};
 
   /**
    * @brief	OpenFlow Queue-Stats-Reply message received.
@@ -1337,9 +1333,9 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void
-  handle_queue_stats_reply(rofl::crofdpt &dpt, const rofl::cauxid &auxid,
-                           rofl::openflow::cofmsg_queue_stats_reply &msg){};
+  void handle_queue_stats_reply(
+      rofl::crofdpt &dpt, const rofl::cauxid &auxid,
+      rofl::openflow::cofmsg_queue_stats_reply &msg) override{};
 
   /**
    * @brief	Timer expired while waiting for OpenFlow Queue-Stats-Reply
@@ -1351,8 +1347,8 @@ public:
    * @param dpt datapath instance
    * @param xid OpenFlow transaction identifier
    */
-  virtual void handle_queue_stats_reply_timeout(rofl::crofdpt &dpt,
-                                                uint32_t xid){};
+  void handle_queue_stats_reply_timeout(rofl::crofdpt &dpt,
+                                        uint32_t xid) override{};
 
   /**
    * @brief	OpenFlow Group-Stats-Reply message received.
@@ -1361,9 +1357,9 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void
-  handle_group_stats_reply(rofl::crofdpt &dpt, const rofl::cauxid &auxid,
-                           rofl::openflow::cofmsg_group_stats_reply &msg){};
+  void handle_group_stats_reply(
+      rofl::crofdpt &dpt, const rofl::cauxid &auxid,
+      rofl::openflow::cofmsg_group_stats_reply &msg) override{};
 
   /**
    * @brief	Timer expired while waiting for OpenFlow Group-Stats-Reply
@@ -1375,8 +1371,8 @@ public:
    * @param dpt datapath instance
    * @param xid OpenFlow transaction identifier
    */
-  virtual void handle_group_stats_reply_timeout(rofl::crofdpt &dpt,
-                                                uint32_t xid){};
+  void handle_group_stats_reply_timeout(rofl::crofdpt &dpt,
+                                        uint32_t xid) override{};
 
   /**
    * @brief	OpenFlow Group-Desc-Stats-Reply message received.
@@ -1385,9 +1381,9 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void handle_group_desc_stats_reply(
+  void handle_group_desc_stats_reply(
       rofl::crofdpt &dpt, const rofl::cauxid &auxid,
-      rofl::openflow::cofmsg_group_desc_stats_reply &msg){};
+      rofl::openflow::cofmsg_group_desc_stats_reply &msg) override{};
 
   /**
    * @brief	Timer expired while waiting for OpenFlow Group-Desc-Stats-Reply
@@ -1400,8 +1396,8 @@ public:
    * @param dpt datapath instance
    * @param xid OpenFlow transaction identifier
    */
-  virtual void handle_group_desc_stats_reply_timeout(rofl::crofdpt &dpt,
-                                                     uint32_t xid){};
+  void handle_group_desc_stats_reply_timeout(rofl::crofdpt &dpt,
+                                             uint32_t xid) override{};
 
   /**
    * @brief	OpenFlow Group-Features-Stats-Reply message received.
@@ -1410,9 +1406,9 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void handle_group_features_stats_reply(
+  void handle_group_features_stats_reply(
       rofl::crofdpt &dpt, const rofl::cauxid &auxid,
-      rofl::openflow::cofmsg_group_features_stats_reply &msg){};
+      rofl::openflow::cofmsg_group_features_stats_reply &msg) override{};
 
   /**
    * @brief	Timer expired while waiting for OpenFlow
@@ -1425,8 +1421,8 @@ public:
    * @param dpt datapath instance
    * @param xid OpenFlow transaction identifier
    */
-  virtual void handle_group_features_stats_reply_timeout(rofl::crofdpt &dpt,
-                                                         uint32_t xid){};
+  void handle_group_features_stats_reply_timeout(rofl::crofdpt &dpt,
+                                                 uint32_t xid) override{};
 
   /**
    * @brief	OpenFlow Meter-Stats-Reply message received.
@@ -1435,9 +1431,9 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void
-  handle_meter_stats_reply(rofl::crofdpt &dpt, const rofl::cauxid &auxid,
-                           rofl::openflow::cofmsg_meter_stats_reply &msg){};
+  void handle_meter_stats_reply(
+      rofl::crofdpt &dpt, const rofl::cauxid &auxid,
+      rofl::openflow::cofmsg_meter_stats_reply &msg) override{};
 
   /**
    * @brief	Timer expired while waiting for OpenFlow Meter-Stats-Reply
@@ -1449,8 +1445,8 @@ public:
    * @param dpt datapath instance
    * @param xid OpenFlow transaction identifier
    */
-  virtual void handle_meter_stats_reply_timeout(rofl::crofdpt &dpt,
-                                                uint32_t xid){};
+  void handle_meter_stats_reply_timeout(rofl::crofdpt &dpt,
+                                        uint32_t xid) override{};
 
   /**
    * @brief	OpenFlow Meter-Config-Stats-Reply message received.
@@ -1459,9 +1455,9 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void handle_meter_config_stats_reply(
+  void handle_meter_config_stats_reply(
       rofl::crofdpt &dpt, const rofl::cauxid &auxid,
-      rofl::openflow::cofmsg_meter_config_stats_reply &msg){};
+      rofl::openflow::cofmsg_meter_config_stats_reply &msg) override{};
 
   /**
    * @brief	Timer expired while waiting for OpenFlow
@@ -1475,8 +1471,8 @@ public:
    * @param dpt datapath instance
    * @param xid OpenFlow transaction identifier
    */
-  virtual void handle_meter_config_stats_reply_timeout(rofl::crofdpt &dpt,
-                                                       uint32_t xid){};
+  void handle_meter_config_stats_reply_timeout(rofl::crofdpt &dpt,
+                                               uint32_t xid) override{};
 
   /**
    * @brief	OpenFlow Meter-Features-Stats-Reply message received.
@@ -1485,9 +1481,9 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void handle_meter_features_stats_reply(
+  void handle_meter_features_stats_reply(
       rofl::crofdpt &dpt, const rofl::cauxid &auxid,
-      rofl::openflow::cofmsg_meter_features_stats_reply &msg){};
+      rofl::openflow::cofmsg_meter_features_stats_reply &msg) override{};
 
   /**
    * @brief	Timer expired while waiting for OpenFlow
@@ -1500,8 +1496,8 @@ public:
    * @param dpt datapath instance
    * @param xid OpenFlow transaction identifier
    */
-  virtual void handle_meter_features_stats_reply_timeout(rofl::crofdpt &dpt,
-                                                         uint32_t xid){};
+  void handle_meter_features_stats_reply_timeout(rofl::crofdpt &dpt,
+                                                 uint32_t xid) override{};
 
   /**
    * @brief	OpenFlow Table-Features-Stats-Reply message received.
@@ -1510,9 +1506,9 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void handle_table_features_stats_reply(
+  void handle_table_features_stats_reply(
       rofl::crofdpt &dpt, const rofl::cauxid &auxid,
-      rofl::openflow::cofmsg_table_features_stats_reply &msg){};
+      rofl::openflow::cofmsg_table_features_stats_reply &msg) override{};
 
   /**
    * @brief	Timer expired while waiting for OpenFlow
@@ -1525,8 +1521,8 @@ public:
    * @param dpt datapath instance
    * @param xid OpenFlow transaction identifier
    */
-  virtual void handle_table_features_stats_reply_timeout(rofl::crofdpt &dpt,
-                                                         uint32_t xid){};
+  void handle_table_features_stats_reply_timeout(rofl::crofdpt &dpt,
+                                                 uint32_t xid) override{};
 
   /**
    * @brief	OpenFlow Port-Desc-Stats-Reply message received.
@@ -1535,9 +1531,9 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void handle_port_desc_stats_reply(
+  void handle_port_desc_stats_reply(
       rofl::crofdpt &dpt, const rofl::cauxid &auxid,
-      rofl::openflow::cofmsg_port_desc_stats_reply &msg){};
+      rofl::openflow::cofmsg_port_desc_stats_reply &msg) override{};
 
   /**
    * @brief	Timer expired while waiting for OpenFlow Port-Desc-Stats-Reply
@@ -1550,8 +1546,8 @@ public:
    * @param dpt datapath instance
    * @param xid OpenFlow transaction identifier
    */
-  virtual void handle_port_desc_stats_reply_timeout(rofl::crofdpt &dpt,
-                                                    uint32_t xid){};
+  void handle_port_desc_stats_reply_timeout(rofl::crofdpt &dpt,
+                                            uint32_t xid) override{};
 
   /**
    * @brief	OpenFlow Experimenter-Stats-Reply message received.
@@ -1560,9 +1556,9 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void handle_experimenter_stats_reply(
+  void handle_experimenter_stats_reply(
       rofl::crofdpt &dpt, const rofl::cauxid &auxid,
-      rofl::openflow::cofmsg_experimenter_stats_reply &msg){};
+      rofl::openflow::cofmsg_experimenter_stats_reply &msg) override{};
 
   /**
    * @brief	Timer expired while waiting for OpenFlow
@@ -1576,8 +1572,8 @@ public:
    * @param dpt datapath instance
    * @param xid OpenFlow transaction identifier
    */
-  virtual void handle_experimenter_stats_reply_timeout(rofl::crofdpt &dpt,
-                                                       uint32_t xid){};
+  void handle_experimenter_stats_reply_timeout(rofl::crofdpt &dpt,
+                                               uint32_t xid) override{};
 
   /**
    * @brief	OpenFlow Packet-In message received.
@@ -1586,8 +1582,8 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void handle_packet_in(rofl::crofdpt &dpt, const rofl::cauxid &auxid,
-                                rofl::openflow::cofmsg_packet_in &msg){};
+  void handle_packet_in(rofl::crofdpt &dpt, const rofl::cauxid &auxid,
+                        rofl::openflow::cofmsg_packet_in &msg) override{};
 
   /**
    * @brief	OpenFlow Barrier-Reply message received.
@@ -1596,9 +1592,9 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void
+  void
   handle_barrier_reply(rofl::crofdpt &dpt, const rofl::cauxid &auxid,
-                       rofl::openflow::cofmsg_barrier_reply &msg){};
+                       rofl::openflow::cofmsg_barrier_reply &msg) override{};
 
   /**
    * @brief	Timer expired while waiting for OpenFlow Barrier-Reply message.
@@ -1609,7 +1605,8 @@ public:
    * @param dpt datapath instance
    * @param xid OpenFlow transaction identifier
    */
-  virtual void handle_barrier_reply_timeout(rofl::crofdpt &dpt, uint32_t xid){};
+  void handle_barrier_reply_timeout(rofl::crofdpt &dpt,
+                                    uint32_t xid) override{};
 
   /**
    * @brief	OpenFlow Flow-Removed message received.
@@ -1618,9 +1615,8 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void handle_flow_removed(rofl::crofdpt &dpt,
-                                   const rofl::cauxid &auxid,
-                                   rofl::openflow::cofmsg_flow_removed &msg){};
+  void handle_flow_removed(rofl::crofdpt &dpt, const rofl::cauxid &auxid,
+                           rofl::openflow::cofmsg_flow_removed &msg) override{};
 
   /**
    * @brief	OpenFlow Port-Status-Reply message received.
@@ -1629,8 +1625,8 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void handle_port_status(rofl::crofdpt &dpt, const rofl::cauxid &auxid,
-                                  rofl::openflow::cofmsg_port_status &msg){};
+  void handle_port_status(rofl::crofdpt &dpt, const rofl::cauxid &auxid,
+                          rofl::openflow::cofmsg_port_status &msg) override{};
 
   /**
    * @brief	OpenFlow Queue-Get-Config-Reply message received.
@@ -1639,9 +1635,9 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void handle_queue_get_config_reply(
+  void handle_queue_get_config_reply(
       rofl::crofdpt &dpt, const rofl::cauxid &auxid,
-      rofl::openflow::cofmsg_queue_get_config_reply &msg){};
+      rofl::openflow::cofmsg_queue_get_config_reply &msg) override{};
 
   /**
    * @brief	Timer expired while waiting for OpenFlow Table-Stats-Reply
@@ -1653,8 +1649,8 @@ public:
    * @param dpt datapath instance
    * @param xid OpenFlow transaction identifier
    */
-  virtual void handle_queue_get_config_reply_timeout(rofl::crofdpt &dpt,
-                                                     uint32_t xid){};
+  void handle_queue_get_config_reply_timeout(rofl::crofdpt &dpt,
+                                             uint32_t xid) override{};
 
   /**
    * @brief	OpenFlow Error message received.
@@ -1663,9 +1659,8 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void handle_error_message(rofl::crofdpt &dpt,
-                                    const rofl::cauxid &auxid,
-                                    rofl::openflow::cofmsg_error &msg){};
+  void handle_error_message(rofl::crofdpt &dpt, const rofl::cauxid &auxid,
+                            rofl::openflow::cofmsg_error &msg) override{};
 
   /**
    * @brief	OpenFlow Experimenter message received.
@@ -1674,9 +1669,9 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void
-  handle_experimenter_message(rofl::crofdpt &dpt, const rofl::cauxid &auxid,
-                              rofl::openflow::cofmsg_experimenter &msg){};
+  void handle_experimenter_message(
+      rofl::crofdpt &dpt, const rofl::cauxid &auxid,
+      rofl::openflow::cofmsg_experimenter &msg) override{};
 
   /**
    * @brief	Timer expired while waiting for OpenFlow Experimenter message.
@@ -1687,7 +1682,7 @@ public:
    * @param dpt datapath instance
    * @param xid OpenFlow transaction identifier
    */
-  virtual void handle_experimenter_timeout(rofl::crofdpt &dpt, uint32_t xid){};
+  void handle_experimenter_timeout(rofl::crofdpt &dpt, uint32_t xid) override{};
 
   /**
    * @brief	OpenFlow Role-Reply message received.
@@ -1696,8 +1691,8 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void handle_role_reply(rofl::crofdpt &dpt, const rofl::cauxid &auxid,
-                                 rofl::openflow::cofmsg_role_reply &msg){};
+  void handle_role_reply(rofl::crofdpt &dpt, const rofl::cauxid &auxid,
+                         rofl::openflow::cofmsg_role_reply &msg) override{};
 
   /**
    * @brief	Timer expired while waiting for OpenFlow Role-Reply message.
@@ -1708,7 +1703,7 @@ public:
    * @param dpt datapath instance
    * @param xid OpenFlow transaction identifier
    */
-  virtual void handle_role_reply_timeout(rofl::crofdpt &dpt, uint32_t xid){};
+  void handle_role_reply_timeout(rofl::crofdpt &dpt, uint32_t xid) override{};
 
   /**
    * @brief	OpenFlow Get-Async-Config-Reply message received.
@@ -1717,9 +1712,9 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void handle_get_async_config_reply(
+  void handle_get_async_config_reply(
       rofl::crofdpt &dpt, const rofl::cauxid &auxid,
-      rofl::openflow::cofmsg_get_async_config_reply &msg){};
+      rofl::openflow::cofmsg_get_async_config_reply &msg) override{};
 
   /**
    * @brief	Timer expired while waiting for OpenFlow Get-Async-Config-Reply
@@ -1732,8 +1727,8 @@ public:
    * @param dpt datapath instance
    * @param xid OpenFlow transaction identifier
    */
-  virtual void handle_get_async_config_reply_timeout(rofl::crofdpt &dpt,
-                                                     uint32_t xid){};
+  void handle_get_async_config_reply_timeout(rofl::crofdpt &dpt,
+                                             uint32_t xid) override{};
 
   /**@}*/
 
@@ -1773,9 +1768,9 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void
-  handle_features_request(rofl::crofctl &ctl, const rofl::cauxid &auxid,
-                          rofl::openflow::cofmsg_features_request &msg){};
+  void handle_features_request(
+      rofl::crofctl &ctl, const rofl::cauxid &auxid,
+      rofl::openflow::cofmsg_features_request &msg) override{};
 
   /**
    * @brief	OpenFlow Get-Config-Request message received.
@@ -1784,9 +1779,9 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void
-  handle_get_config_request(rofl::crofctl &ctl, const rofl::cauxid &auxid,
-                            rofl::openflow::cofmsg_get_config_request &msg){};
+  void handle_get_config_request(
+      rofl::crofctl &ctl, const rofl::cauxid &auxid,
+      rofl::openflow::cofmsg_get_config_request &msg) override{};
 
   /**
    * @brief	OpenFlow Stats-Request message received.
@@ -1795,9 +1790,9 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void
+  void
   handle_stats_request(rofl::crofctl &ctl, const rofl::cauxid &auxid,
-                       rofl::openflow::cofmsg_stats_request &msg){};
+                       rofl::openflow::cofmsg_stats_request &msg) override{};
 
   /**
    * @brief	OpenFlow Desc-Stats-Request message received.
@@ -1806,9 +1801,9 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void
-  handle_desc_stats_request(rofl::crofctl &ctl, const rofl::cauxid &auxid,
-                            rofl::openflow::cofmsg_desc_stats_request &msg){};
+  void handle_desc_stats_request(
+      rofl::crofctl &ctl, const rofl::cauxid &auxid,
+      rofl::openflow::cofmsg_desc_stats_request &msg) override{};
 
   /**
    * @brief	OpenFlow Table-Stats-Request message received.
@@ -1817,9 +1812,9 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void
-  handle_table_stats_request(rofl::crofctl &ctl, const rofl::cauxid &auxid,
-                             rofl::openflow::cofmsg_table_stats_request &msg){};
+  void handle_table_stats_request(
+      rofl::crofctl &ctl, const rofl::cauxid &auxid,
+      rofl::openflow::cofmsg_table_stats_request &msg) override{};
 
   /**
    * @brief	OpenFlow Port-Stats-Request message received.
@@ -1828,9 +1823,9 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void
-  handle_port_stats_request(rofl::crofctl &ctl, const rofl::cauxid &auxid,
-                            rofl::openflow::cofmsg_port_stats_request &msg){};
+  void handle_port_stats_request(
+      rofl::crofctl &ctl, const rofl::cauxid &auxid,
+      rofl::openflow::cofmsg_port_stats_request &msg) override{};
 
   /**
    * @brief	OpenFlow Flow-Stats-Request message received.
@@ -1839,9 +1834,9 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void
-  handle_flow_stats_request(rofl::crofctl &ctl, const rofl::cauxid &auxid,
-                            rofl::openflow::cofmsg_flow_stats_request &msg){};
+  void handle_flow_stats_request(
+      rofl::crofctl &ctl, const rofl::cauxid &auxid,
+      rofl::openflow::cofmsg_flow_stats_request &msg) override{};
 
   /**
    * @brief	OpenFlow Aggregate-Stats-Request message received.
@@ -1850,9 +1845,9 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void handle_aggregate_stats_request(
+  void handle_aggregate_stats_request(
       rofl::crofctl &ctl, const rofl::cauxid &auxid,
-      rofl::openflow::cofmsg_aggr_stats_request &msg){};
+      rofl::openflow::cofmsg_aggr_stats_request &msg) override{};
 
   /**
    * @brief	OpenFlow Queue-Stats-Request message received.
@@ -1861,9 +1856,9 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void
-  handle_queue_stats_request(rofl::crofctl &ctl, const rofl::cauxid &auxid,
-                             rofl::openflow::cofmsg_queue_stats_request &msg){};
+  void handle_queue_stats_request(
+      rofl::crofctl &ctl, const rofl::cauxid &auxid,
+      rofl::openflow::cofmsg_queue_stats_request &msg) override{};
 
   /**
    * @brief	OpenFlow Group-Stats-Request message received.
@@ -1872,9 +1867,9 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void
-  handle_group_stats_request(rofl::crofctl &ctl, const rofl::cauxid &auxid,
-                             rofl::openflow::cofmsg_group_stats_request &msg){};
+  void handle_group_stats_request(
+      rofl::crofctl &ctl, const rofl::cauxid &auxid,
+      rofl::openflow::cofmsg_group_stats_request &msg) override{};
 
   /**
    * @brief	OpenFlow Group-Desc-Stats-Request message received.
@@ -1883,9 +1878,9 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void handle_group_desc_stats_request(
+  void handle_group_desc_stats_request(
       rofl::crofctl &ctl, const rofl::cauxid &auxid,
-      rofl::openflow::cofmsg_group_desc_stats_request &msg){};
+      rofl::openflow::cofmsg_group_desc_stats_request &msg) override{};
 
   /**
    * @brief	OpenFlow Group-Features-Stats-Request message received.
@@ -1894,9 +1889,9 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void handle_group_features_stats_request(
+  void handle_group_features_stats_request(
       rofl::crofctl &ctl, const rofl::cauxid &auxid,
-      rofl::openflow::cofmsg_group_features_stats_request &msg){};
+      rofl::openflow::cofmsg_group_features_stats_request &msg) override{};
 
   /**
    * @brief	OpenFlow Meter-Stats-Request message received.
@@ -1905,9 +1900,9 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void
-  handle_meter_stats_request(rofl::crofctl &ctl, const rofl::cauxid &auxid,
-                             rofl::openflow::cofmsg_meter_stats_request &msg){};
+  void handle_meter_stats_request(
+      rofl::crofctl &ctl, const rofl::cauxid &auxid,
+      rofl::openflow::cofmsg_meter_stats_request &msg) override{};
 
   /**
    * @brief	OpenFlow Meter-Config-Stats-Request message received.
@@ -1916,9 +1911,9 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void handle_meter_config_stats_request(
+  void handle_meter_config_stats_request(
       rofl::crofctl &ctl, const rofl::cauxid &auxid,
-      rofl::openflow::cofmsg_meter_config_stats_request &msg){};
+      rofl::openflow::cofmsg_meter_config_stats_request &msg) override{};
 
   /**
    * @brief	OpenFlow Meter-Features-Stats-Request message received.
@@ -1927,9 +1922,9 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void handle_meter_features_stats_request(
+  void handle_meter_features_stats_request(
       rofl::crofctl &ctl, const rofl::cauxid &auxid,
-      rofl::openflow::cofmsg_meter_features_stats_request &msg){};
+      rofl::openflow::cofmsg_meter_features_stats_request &msg) override{};
 
   /**
    * @brief	OpenFlow Table-Features-Stats-Request message received.
@@ -1938,9 +1933,9 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void handle_table_features_stats_request(
+  void handle_table_features_stats_request(
       rofl::crofctl &ctl, const rofl::cauxid &auxid,
-      rofl::openflow::cofmsg_table_features_stats_request &msg){};
+      rofl::openflow::cofmsg_table_features_stats_request &msg) override{};
 
   /**
    * @brief	OpenFlow Port-Desc-Stats-Request message received.
@@ -1949,9 +1944,9 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void handle_port_desc_stats_request(
+  void handle_port_desc_stats_request(
       rofl::crofctl &ctl, const rofl::cauxid &auxid,
-      rofl::openflow::cofmsg_port_desc_stats_request &msg){};
+      rofl::openflow::cofmsg_port_desc_stats_request &msg) override{};
 
   /**
    * @brief	OpenFlow Experimenter-Stats-Request message received.
@@ -1960,9 +1955,9 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void handle_experimenter_stats_request(
+  void handle_experimenter_stats_request(
       rofl::crofctl &ctl, const rofl::cauxid &auxid,
-      rofl::openflow::cofmsg_experimenter_stats_request &msg){};
+      rofl::openflow::cofmsg_experimenter_stats_request &msg) override{};
 
   /**
    * @brief	OpenFlow Packet-Out message received.
@@ -1971,8 +1966,8 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void handle_packet_out(rofl::crofctl &ctl, const rofl::cauxid &auxid,
-                                 rofl::openflow::cofmsg_packet_out &msg){};
+  void handle_packet_out(rofl::crofctl &ctl, const rofl::cauxid &auxid,
+                         rofl::openflow::cofmsg_packet_out &msg) override{};
 
   /**
    * @brief	OpenFlow Barrier-Request message received.
@@ -1981,9 +1976,9 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void
-  handle_barrier_request(rofl::crofctl &ctl, const rofl::cauxid &auxid,
-                         rofl::openflow::cofmsg_barrier_request &msg){};
+  void handle_barrier_request(
+      rofl::crofctl &ctl, const rofl::cauxid &auxid,
+      rofl::openflow::cofmsg_barrier_request &msg) override{};
 
   /**
    * @brief	OpenFlow Flow-Mod message received.
@@ -1992,8 +1987,8 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void handle_flow_mod(rofl::crofctl &ctl, const rofl::cauxid &auxid,
-                               rofl::openflow::cofmsg_flow_mod &msg){};
+  void handle_flow_mod(rofl::crofctl &ctl, const rofl::cauxid &auxid,
+                       rofl::openflow::cofmsg_flow_mod &msg) override{};
 
   /**
    * @brief	OpenFlow Group-Mod message received.
@@ -2002,8 +1997,8 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void handle_group_mod(rofl::crofctl &ctl, const rofl::cauxid &auxid,
-                                rofl::openflow::cofmsg_group_mod &msg){};
+  void handle_group_mod(rofl::crofctl &ctl, const rofl::cauxid &auxid,
+                        rofl::openflow::cofmsg_group_mod &msg) override{};
 
   /**
    * @brief	OpenFlow Table-Mod message received.
@@ -2012,8 +2007,8 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void handle_table_mod(rofl::crofctl &ctl, const rofl::cauxid &auxid,
-                                rofl::openflow::cofmsg_table_mod &msg){};
+  void handle_table_mod(rofl::crofctl &ctl, const rofl::cauxid &auxid,
+                        rofl::openflow::cofmsg_table_mod &msg) override{};
 
   /**
    * @brief	OpenFlow Port-Mod message received.
@@ -2022,8 +2017,8 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void handle_port_mod(rofl::crofctl &ctl, const rofl::cauxid &auxid,
-                               rofl::openflow::cofmsg_port_mod &msg){};
+  void handle_port_mod(rofl::crofctl &ctl, const rofl::cauxid &auxid,
+                       rofl::openflow::cofmsg_port_mod &msg) override{};
 
   /**
    * @brief	OpenFlow Queue-Get-Config-Request message received.
@@ -2032,9 +2027,9 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void handle_queue_get_config_request(
+  void handle_queue_get_config_request(
       rofl::crofctl &ctl, const rofl::cauxid &auxid,
-      rofl::openflow::cofmsg_queue_get_config_request &msg){};
+      rofl::openflow::cofmsg_queue_get_config_request &msg) override{};
 
   /**
    * @brief	OpenFlow Set-Config message received.
@@ -2043,8 +2038,8 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void handle_set_config(rofl::crofctl &ctl, const rofl::cauxid &auxid,
-                                 rofl::openflow::cofmsg_set_config &msg){};
+  void handle_set_config(rofl::crofctl &ctl, const rofl::cauxid &auxid,
+                         rofl::openflow::cofmsg_set_config &msg) override{};
 
   /**
    * @brief	OpenFlow Experimenter message received.
@@ -2053,9 +2048,9 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void
-  handle_experimenter_message(rofl::crofctl &ctl, const rofl::cauxid &auxid,
-                              rofl::openflow::cofmsg_experimenter &msg){};
+  void handle_experimenter_message(
+      rofl::crofctl &ctl, const rofl::cauxid &auxid,
+      rofl::openflow::cofmsg_experimenter &msg) override{};
 
   /**
    * @brief	Timer expired while waiting for OpenFlow Experimenter message.
@@ -2066,7 +2061,7 @@ public:
    * @param ctl controller instance
    * @param xid OpenFlow transaction identifier
    */
-  virtual void handle_experimenter_timeout(rofl::crofctl &ctl, uint32_t xid){};
+  void handle_experimenter_timeout(rofl::crofctl &ctl, uint32_t xid) override{};
 
   /**
    * @brief	OpenFlow error message received.
@@ -2075,9 +2070,8 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void handle_error_message(rofl::crofctl &ctl,
-                                    const rofl::cauxid &auxid,
-                                    rofl::openflow::cofmsg_error &msg){};
+  void handle_error_message(rofl::crofctl &ctl, const rofl::cauxid &auxid,
+                            rofl::openflow::cofmsg_error &msg) override{};
 
   /**
    * @brief	OpenFlow Role-Request message received.
@@ -2086,9 +2080,8 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void handle_role_request(rofl::crofctl &ctl,
-                                   const rofl::cauxid &auxid,
-                                   rofl::openflow::cofmsg_role_request &msg){};
+  void handle_role_request(rofl::crofctl &ctl, const rofl::cauxid &auxid,
+                           rofl::openflow::cofmsg_role_request &msg) override{};
 
   /**
    * @brief	OpenFlow Get-Async-Config-Request message received.
@@ -2097,9 +2090,9 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void handle_get_async_config_request(
+  void handle_get_async_config_request(
       rofl::crofctl &ctl, const rofl::cauxid &auxid,
-      rofl::openflow::cofmsg_get_async_config_request &msg){};
+      rofl::openflow::cofmsg_get_async_config_request &msg) override{};
 
   /**
    * @brief	OpenFlow Set-Async-Config message received.
@@ -2108,9 +2101,9 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void
-  handle_set_async_config(rofl::crofctl &ctl, const rofl::cauxid &auxid,
-                          rofl::openflow::cofmsg_set_async_config &msg){};
+  void handle_set_async_config(
+      rofl::crofctl &ctl, const rofl::cauxid &auxid,
+      rofl::openflow::cofmsg_set_async_config &msg) override{};
 
   /**
    * @brief	OpenFlow Meter-Mod message received.
@@ -2119,8 +2112,8 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void handle_meter_mod(rofl::crofctl &ctl, const rofl::cauxid &auxid,
-                                rofl::openflow::cofmsg_meter_mod &msg){};
+  void handle_meter_mod(rofl::crofctl &ctl, const rofl::cauxid &auxid,
+                        rofl::openflow::cofmsg_meter_mod &msg) override{};
 
   /**@}*/
 
@@ -2154,82 +2147,79 @@ private:
   static void terminate();
 
 protected:
-  virtual void handle_wakeup(cthread &thread);
+  void handle_timeout(void *userdata) override;
 
-  virtual void handle_timeout(cthread &thread, uint32_t timer_id);
-
-  virtual void handle_read_event(cthread &thread, int fd);
-
-  virtual void handle_write_event(cthread &thread, int fd){/* not in use */};
+  void handle_read(int fd, void *userdata) override;
 
 private:
-  virtual void handle_established(crofdpt &dpt, uint8_t ofp_version);
+  void handle_established(crofdpt &dpt, uint8_t ofp_version) override;
 
-  virtual void handle_closed(crofdpt &dpt);
+  void handle_closed(crofdpt &dpt) override;
 
-  virtual void handle_established(crofdpt &dpt, crofconn &conn,
-                                  uint8_t ofp_version);
+  void handle_established(crofdpt &dpt, crofconn &conn,
+                          uint8_t ofp_version) override;
 
-  virtual void handle_closed(crofdpt &dpt, crofconn &conn);
+  void handle_closed(crofdpt &dpt, crofconn &conn) override;
 
-  virtual void handle_connect_refused(crofdpt &dpt, crofconn &conn);
+  void handle_connect_refused(crofdpt &dpt, crofconn &conn) override;
 
-  virtual void handle_connect_failed(crofdpt &dpt, crofconn &conn);
+  void handle_connect_failed(crofdpt &dpt, crofconn &conn) override;
 
-  virtual void handle_accept_failed(crofdpt &dpt, crofconn &conn);
+  void handle_accept_failed(crofdpt &dpt, crofconn &conn) override;
 
-  virtual void handle_negotiation_failed(crofdpt &dpt, crofconn &conn);
+  void handle_negotiation_failed(crofdpt &dpt, crofconn &conn) override;
 
-  virtual void congestion_occurred_indication(crofdpt &dpt, crofconn &conn);
+  void congestion_occurred_indication(crofdpt &dpt, crofconn &conn) override;
 
-  virtual void congestion_solved_indication(crofdpt &dpt, crofconn &conn);
-
-private:
-  virtual void handle_established(crofctl &ctl, uint8_t ofp_version);
-
-  virtual void handle_closed(crofctl &ctl);
-
-  virtual void handle_established(crofctl &ctl, crofconn &conn,
-                                  uint8_t ofp_version);
-
-  virtual void handle_closed(crofctl &ctl, crofconn &conn);
-
-  virtual void handle_connect_refused(crofctl &ctl, crofconn &conn);
-
-  virtual void handle_connect_failed(crofctl &ctl, crofconn &conn);
-
-  virtual void handle_accept_failed(crofctl &ctl, crofconn &conn);
-
-  virtual void handle_negotiation_failed(crofctl &ctl, crofconn &conn);
-
-  virtual void congestion_occurred_indication(crofctl &ctl, crofconn &conn);
-
-  virtual void congestion_solved_indication(crofctl &ctl, crofconn &conn);
+  void congestion_solved_indication(crofdpt &dpt, crofconn &conn) override;
 
 private:
-  virtual void handle_established(crofconn &conn, uint8_t ofp_version);
+  void handle_established(crofctl &ctl, uint8_t ofp_version) override;
 
-  virtual void handle_connect_refused(crofconn &conn){/* not used */};
+  void handle_closed(crofctl &ctl) override;
 
-  virtual void handle_connect_failed(crofconn &conn){/* not used */};
+  void handle_established(crofctl &ctl, crofconn &conn,
+                          uint8_t ofp_version) override;
 
-  virtual void handle_accept_failed(crofconn &conn);
+  void handle_closed(crofctl &ctl, crofconn &conn) override;
 
-  virtual void handle_negotiation_failed(crofconn &conn);
+  void handle_connect_refused(crofctl &ctl, crofconn &conn) override;
 
-  virtual void handle_closed(crofconn &conn);
+  void handle_connect_failed(crofctl &ctl, crofconn &conn) override;
 
-  virtual void handle_recv(crofconn &conn, rofl::openflow::cofmsg *msg) {
+  void handle_accept_failed(crofctl &ctl, crofconn &conn) override;
+
+  void handle_negotiation_failed(crofctl &ctl, crofconn &conn) override;
+
+  void congestion_occurred_indication(crofctl &ctl, crofconn &conn) override;
+
+  void congestion_solved_indication(crofctl &ctl, crofconn &conn) override;
+
+private:
+  void handle_established(crofconn &conn, uint8_t ofp_version) override;
+
+  void handle_connect_refused(crofconn &conn) override { /* not used */
+  }
+
+  void handle_connect_failed(crofconn &conn) override { /* not used */
+  }
+
+  void handle_accept_failed(crofconn &conn) override;
+
+  void handle_negotiation_failed(crofconn &conn) override;
+
+  void handle_closed(crofconn &conn) override;
+
+  void handle_recv(crofconn &conn, rofl::openflow::cofmsg *msg) override {
     delete msg;
   };
 
-  virtual void congestion_occurred_indication(crofconn &conn){};
+  void congestion_occurred_indication(crofconn &conn) override{};
 
-  virtual void congestion_solved_indication(crofconn &conn){};
+  void congestion_solved_indication(crofconn &conn) override{};
 
-  virtual void handle_transaction_timeout(crofconn &conn, uint32_t xid,
-                                          uint8_t type,
-                                          uint16_t sub_type = 0){};
+  void handle_transaction_timeout(crofconn &conn, uint32_t xid, uint8_t type,
+                                  uint16_t sub_type = 0) override{};
 
 private:
   /**

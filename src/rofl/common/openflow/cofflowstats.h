@@ -50,7 +50,7 @@ public:
    */
   cofflow_stats_request(
       uint8_t of_version = rofl::openflow::OFP_VERSION_UNKNOWN,
-      uint8_t *buf = (uint8_t *)0, size_t buflen = 0)
+      uint8_t *buf = nullptr, size_t buflen = 0)
       : of_version(of_version), match(of_version), table_id(0xff),
         out_port(rofl::openflow::OFPP_ANY), out_group(rofl::openflow::OFPG_ANY),
         cookie(0), cookie_mask(0) {
@@ -275,7 +275,7 @@ public:
   /**
    *
    */
-  cofflow_stats_reply(uint8_t of_version = 0, uint8_t *buf = (uint8_t *)0,
+  cofflow_stats_reply(uint8_t of_version = 0, uint8_t *buf = nullptr,
                       size_t buflen = 0)
       : of_version(of_version), table_id(0), duration_sec(0), duration_nsec(0),
         priority(0), idle_timeout(0), hard_timeout(0), flags(0), cookie(0),

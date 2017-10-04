@@ -9,7 +9,7 @@ class cthread_test : public CppUnit::TestFixture {
   CPPUNIT_TEST_SUITE_END();
 
 private:
-  class cobject : public rofl::cthread_env {
+  class cobject : public rofl::cthread_timeout_event {
   public:
     /**
      *
@@ -19,13 +19,10 @@ private:
     /**
      *
      */
-    cobject() : thread(this), cnt(0), error(false) { thread.start(); };
+    cobject() : cnt(0), error(false) { thread.start(); };
 
   protected:
-    virtual void handle_wakeup(rofl::cthread &thread){};
-    virtual void handle_timeout(rofl::cthread &thread, uint32_t timer_id);
-    virtual void handle_read_event(rofl::cthread &thread, int fd){};
-    virtual void handle_write_event(rofl::cthread &thread, int fd){};
+    void handle_timeout(void *userdata) override;
 
   public:
     rofl::cthread thread;

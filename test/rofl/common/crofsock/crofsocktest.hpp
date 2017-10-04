@@ -5,8 +5,7 @@
  *      Author: andi
  */
 
-#ifndef TEST_SRC_ROFL_COMMON_OPENFLOW_MESSAGES_COFMSGAGGRSTATS_TEST_HPP_
-#define TEST_SRC_ROFL_COMMON_OPENFLOW_MESSAGES_COFMSGAGGRSTATS_TEST_HPP_
+#pragma once
 
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
@@ -22,43 +21,44 @@ class crofsocktest : public CppUnit::TestFixture, public rofl::crofsock_env {
   CPPUNIT_TEST_SUITE_END();
 
 public:
-  void setUp();
-  void tearDown();
+  void setUp() override;
+  void tearDown() override;
 
 public:
   void test();
   void test_tls();
 
 private:
-  virtual void handle_listen(rofl::crofsock &socket);
+  void handle_listen(rofl::crofsock &socket) override;
 
-  virtual void handle_tcp_connect_refused(rofl::crofsock &socket);
+  void handle_tcp_connect_refused(rofl::crofsock &socket) override;
 
-  virtual void handle_tcp_connect_failed(rofl::crofsock &socket);
+  void handle_tcp_connect_failed(rofl::crofsock &socket) override;
 
-  virtual void handle_tcp_connected(rofl::crofsock &socket);
+  void handle_tcp_connected(rofl::crofsock &socket) override;
 
-  virtual void handle_tcp_accept_refused(rofl::crofsock &socket);
+  void handle_tcp_accept_refused(rofl::crofsock &socket) override;
 
-  virtual void handle_tcp_accept_failed(rofl::crofsock &socket);
+  void handle_tcp_accept_failed(rofl::crofsock &socket) override;
 
-  virtual void handle_tcp_accepted(rofl::crofsock &socket);
+  void handle_tcp_accepted(rofl::crofsock &socket) override;
 
-  virtual void handle_tls_connect_failed(rofl::crofsock &socket);
+  void handle_tls_connect_failed(rofl::crofsock &socket) override;
 
-  virtual void handle_tls_connected(rofl::crofsock &socket);
+  void handle_tls_connected(rofl::crofsock &socket) override;
 
-  virtual void handle_tls_accept_failed(rofl::crofsock &socket);
+  void handle_tls_accept_failed(rofl::crofsock &socket) override;
 
-  virtual void handle_tls_accepted(rofl::crofsock &socket);
+  void handle_tls_accepted(rofl::crofsock &socket) override;
 
-  virtual void handle_closed(rofl::crofsock &socket);
+  void handle_closed(rofl::crofsock &socket) override;
 
-  virtual void congestion_solved_indication(rofl::crofsock &socket);
+  void congestion_solved_indication(rofl::crofsock &socket) override;
 
-  virtual void handle_recv(rofl::crofsock &socket, rofl::openflow::cofmsg *msg);
+  void handle_recv(rofl::crofsock &socket,
+                   rofl::openflow::cofmsg *msg) override;
 
-  virtual void congestion_occurred_indication(rofl::crofsock &socket);
+  void congestion_occurred_indication(rofl::crofsock &socket) override;
 
 private:
   enum crofsock_test_mode_t {
@@ -78,6 +78,6 @@ private:
   rofl::crofsock *slisten;
   rofl::crofsock *sclient;
   rofl::crofsock *sserver;
+  rofl::cthread *tclient;
+  rofl::cthread *tserver;
 };
-
-#endif /* TEST_SRC_ROFL_COMMON_OPENFLOW_MESSAGES_COFMSGAGGRSTATS_TEST_HPP_ */

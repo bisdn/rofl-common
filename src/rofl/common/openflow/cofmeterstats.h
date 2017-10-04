@@ -47,7 +47,7 @@ public:
    */
   cofmeter_stats_request(
       uint8_t of_version = rofl::openflow::OFP_VERSION_UNKNOWN,
-      uint8_t *buf = (uint8_t *)0, size_t buflen = 0)
+      uint8_t *buf = nullptr, size_t buflen = 0)
       : of_version(of_version), meter_id(0) {
     if ((buflen == 0) || (nullptr == buf)) {
       return;
@@ -154,7 +154,7 @@ public:
    *
    */
   cofmeter_stats_reply(uint8_t of_version = rofl::openflow::OFP_VERSION_UNKNOWN,
-                       uint8_t *buf = (uint8_t *)0, size_t buflen = 0)
+                       uint8_t *buf = nullptr, size_t buflen = 0)
       : of_version(of_version), meter_id(0), flow_count(0), packet_in_count(0),
         byte_in_count(0), duration_sec(0), duration_nsec(0),
         mbstats(of_version) {

@@ -7,8 +7,8 @@
 
 #include <cppunit/extensions/TestFactoryRegistry.h>
 #include <cppunit/ui/text/TestRunner.h>
-#include <stdlib.h>
 #include <glog/logging.h>
+#include <stdlib.h>
 
 int main(int argc, char **argv) {
   google::InitGoogleLogging(argv[0]);

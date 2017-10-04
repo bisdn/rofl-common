@@ -19,6 +19,9 @@ using namespace rofl;
 /*static*/ crwlock crofbase::rofbases_rwlock;
 
 crofbase::~crofbase() {
+  /* drop all timers */
+  thread.drop_timer(this, cthread::ALL_TIMERS);
+
   /* close listening sockets */
   close_dpt_socks();
   close_ctl_socks();
@@ -40,7 +43,7 @@ crofbase::~crofbase() {
 }
 
 crofbase::crofbase()
-    : thread(this), generation_is_defined(false),
+    : generation_is_defined(false),
       cached_generation_id((uint64_t)((int64_t)-1)), enforce_tls(false) {
   AcquireReadWriteLock rwlock(rofbases_rwlock);
   if (crofbase::rofbases.empty()) {
@@ -272,9 +275,8 @@ int crofbase::listen(const csockaddr &baddr) {
   return sd;
 }
 
-void crofbase::handle_wakeup(cthread &thread) {}
-
-void crofbase::handle_timeout(cthread &thread, uint32_t timer_id) {
+void crofbase::handle_timeout(void *userdata) {
+  int timer_id = (long)userdata;
   switch (timer_id) {
   case TIMER_ID_ROFCTL_DESTROY: {
     AcquireReadWriteLock rwlock(rofctls_rwlock);
@@ -296,7 +298,7 @@ void crofbase::handle_timeout(cthread &thread, uint32_t timer_id) {
   }
 }
 
-void crofbase::handle_read_event(cthread &thread, int fd) {
+void crofbase::handle_read(int fd, void *userdata) {
   std::map<csockaddr, int>::iterator it;
 
   {
@@ -324,7 +326,7 @@ void crofbase::handle_read_event(cthread &thread, int fd) {
         }
 
         if (enforce_tls) {
-          (new crofconn(this))
+          (new crofconn(&thread, this))
               ->set_tls_capath(capath)
               .set_tls_cafile(cafile)
               .set_tls_certfile(certfile)
@@ -335,7 +337,7 @@ void crofbase::handle_read_event(cthread &thread, int fd) {
               .set_tls_ciphers(ciphers)
               .tls_accept(sockfd, versionbitmap, crofconn::MODE_CONTROLLER);
         } else {
-          (new crofconn(this))
+          (new crofconn(&thread, this))
               ->tcp_accept(sockfd, versionbitmap, crofconn::MODE_CONTROLLER);
         }
       }
@@ -367,7 +369,7 @@ void crofbase::handle_read_event(cthread &thread, int fd) {
         }
 
         if (enforce_tls) {
-          (new crofconn(this))
+          (new crofconn(&thread, this))
               ->set_tls_capath(capath)
               .set_tls_cafile(cafile)
               .set_tls_certfile(certfile)
@@ -378,7 +380,7 @@ void crofbase::handle_read_event(cthread &thread, int fd) {
               .set_tls_ciphers(ciphers)
               .tls_accept(sockfd, versionbitmap, crofconn::MODE_DATAPATH);
         } else {
-          (new crofconn(this))
+          (new crofconn(&thread, this))
               ->tcp_accept(sockfd, versionbitmap, crofconn::MODE_DATAPATH);
         }
       }

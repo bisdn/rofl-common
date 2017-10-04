@@ -33,7 +33,7 @@ public:
       uint16_t total_len = 0, uint8_t reason = 0, uint8_t table_id = 0,
       uint64_t cookie = 0, uint16_t in_port = 0,
       const rofl::openflow::cofmatch &match = rofl::openflow::cofmatch(),
-      uint8_t *data = (uint8_t *)0, size_t datalen = 0)
+      uint8_t *data = nullptr, size_t datalen = 0)
       : cofmsg(version, rofl::openflow::OFPT_PACKET_IN, xid),
         buffer_id(buffer_id), total_len(total_len), in_port(in_port),
         reason(reason), table_id(table_id), cookie(cookie), match(match),
@@ -73,7 +73,7 @@ public:
   /**
    *
    */
-  virtual void pack(uint8_t *buf = (uint8_t *)0, size_t buflen = 0);
+  virtual void pack(uint8_t *buf = nullptr, size_t buflen = 0);
 
   /**
    *

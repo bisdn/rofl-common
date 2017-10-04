@@ -21,7 +21,6 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include <unistd.h>
 
 #include <atomic>
 #include <cassert>
@@ -31,12 +30,17 @@
 #include <map>
 #include <set>
 
+#include "rofl/common/callbacks.hpp"
 #include "rofl/common/ctimer.hpp"
 #include "rofl/common/exception.hpp"
 #include "rofl/common/locking.hpp"
 
 namespace rofl {
 
+// forward declarations
+class event_base;
+
+// exceptions
 class eThreadBase : public exception {
 public:
   eThreadBase(const std::string &__arg) : exception(__arg){};
@@ -47,24 +51,10 @@ public:
   eThreadNotFound(const std::string &__arg) : eThreadBase(__arg){};
 };
 
-class cthread; // forward declaration
-
-class cthread_env {
-  friend class cthread;
-
-public:
-  cthread_env() {}
-  virtual ~cthread_env() {}
-
-protected:
-  virtual void handle_wakeup(cthread &thread) = 0;
-  virtual void handle_timeout(cthread &thread, uint32_t timer_id) = 0;
-  virtual void handle_read_event(cthread &thread, int fd) = 0;
-  virtual void handle_write_event(cthread &thread, int fd) = 0;
-};
-
 class cthread {
 public:
+  static const uint32_t ALL_TIMERS = -1;
+
   /**
    *
    */
@@ -79,9 +69,8 @@ public:
   /**
    *
    */
-  cthread(cthread_env *env) : env(env), state(STATE_IDLE) { initialize(); };
+  cthread() : max_fds(1024), state(STATE_IDLE) { initialize(); };
 
-public:
   /**
    *
    */
@@ -90,22 +79,18 @@ public:
   /**
    * @brief	Wake up RX thread via rx pipe
    */
-  void wakeup();
+  int add_wakeup_observer(cthread_wakeup_event *cb, int *handle,
+                          void *userdata = nullptr);
 
-  /**
-   * @brief	Register file descriptor
-   */
-  void add_fd(int fd, bool exception = false, bool edge_triggered = true);
+  int remove_wakeup_observer(cthread_wakeup_event *cb, int handle);
 
-  /**
-   * @brief	Deregister file descriptor
-   */
-  void drop_fd(int fd, bool exception = false);
+  int notify_wake(int handle);
 
   /**
    * @brief	Add file descriptor to set of observed fds
    */
-  void add_read_fd(int fd, bool exception = true, bool edge_triggered = true);
+  void add_read_fd(int fd, cthread_read_event *cb, void *userdata,
+                   bool exception = true, bool edge_triggered = true);
 
   /**
    * @brief	Drop file descriptor from set of observed fds
@@ -115,14 +100,14 @@ public:
   /**
    * @brief	Add file descriptor to set of observed fds
    */
-  void add_write_fd(int fd, bool exception = true, bool edge_triggered = true);
+  void add_write_fd(int fd, cthread_write_event *cb, void *userdata,
+                    bool exception = true, bool edge_triggered = true);
 
   /**
    * @brief	Drop file descriptor from set of observed fds
    */
   void drop_write_fd(int fd, bool exception = true);
 
-public:
   /**
    *
    */
@@ -131,24 +116,24 @@ public:
   /**
    *
    */
-  bool add_timer(uint32_t timer_id, const ctimespec &tspec);
+  bool add_timer(cthread_timeout_event *e, uint32_t timer_id,
+                 const ctimespec &tspec);
 
   /**
    *
    */
-  const ctimer &get_timer(uint32_t timer_id) const;
+  const ctimer &get_timer(cthread_timeout_event *e, uint32_t timer_id) const;
 
   /**
    *
    */
-  bool drop_timer(uint32_t timer_id);
+  bool drop_timer(cthread_timeout_event *e, uint32_t timer_id);
 
   /**
    *
    */
-  bool has_timer(uint32_t timer_id) const;
+  bool has_timer(cthread_timeout_event *e, uint32_t timer_id) const;
 
-public:
   /**
    * @brief	Starts worker thread
    *
@@ -168,7 +153,6 @@ public:
    */
   void stop();
 
-public:
   friend std::ostream &operator<<(std::ostream &os, const cthread &thread) {
     os << "cthread, tid: " << &thread << std::endl;
     if (not thread.ordered_timers.empty()) {
@@ -184,6 +168,16 @@ public:
   };
 
 private:
+  /**
+   * @brief	Register file descriptor
+   */
+  void add_fd(int fd, bool exception = false, bool edge_triggered = true);
+
+  /**
+   * @brief	Deregister file descriptor
+   */
+  void drop_fd(int fd, bool exception = false);
+
   /**
    * @brief	Initialize data structures for running TX and RX threads
    *
@@ -219,22 +213,20 @@ private:
   // true: continue to run worker thread
   std::atomic_bool running;
 
-  // thread environment
-  cthread_env *env;
-
   // thread related variables
-  int event_fd;  // event fd for worker thread
   pthread_t tid; // pthread_t for worker thread
-  // bool				run_thread;	// true: continue to run
-  // worker
-  // thread
-  int retval; // worker thread return value
-  int epfd;   // worker thread epoll fd
+  int retval;    // worker thread return value
+  int epfd;      // worker thread epoll fd
+  int wake_handle;
 
-  crwlock tlock; // thread lock
+  crwlock tlock;       // thread lock
+  crwlock events_lock; // events lock
 
   std::map<int, uint32_t> fds;     // set of registered file descriptors
   std::set<ctimer> ordered_timers; // ordered set of timers
+  int max_fds; // XXX(toanju): currently set constant to 1024, should be
+               // configureable and match the system specs though
+  std::vector<event_base *> events_reg;
 
   enum thread_state_t {
     STATE_IDLE = 0,

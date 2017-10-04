@@ -88,10 +88,10 @@ public:
       return *this;
     tspec = segment.tspec;
     xid = segment.xid;
-    if (NULL != segment.msg) {
+    if (nullptr != segment.msg) {
       csegment::clone(*(segment.msg));
     } else {
-      msg = NULL;
+      msg = nullptr;
     }
     msg_type = segment.msg_type;
     msg_multipart_type = segment.msg_multipart_type;

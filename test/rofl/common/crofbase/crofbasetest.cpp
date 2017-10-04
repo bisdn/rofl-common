@@ -28,19 +28,15 @@ void crofbasetest::test() {
     struct timespec ts;
     ts.tv_sec = 1;
     ts.tv_nsec = 0;
-    pselect(0, NULL, NULL, NULL, &ts, NULL);
+    pselect(0, nullptr, nullptr, nullptr, &ts, nullptr);
     LOG(INFO) << "#";
   }
-  LOG(INFO) << std::endl;
 
   datapath.set_ctl(datapath.get_ctlid()).set_conn(0).close();
 
-  sleep(2);
+  sleep(10); // enough time to safely delete everything to exit without
+             // complains of asan
 }
-
-void crofbasetest::handle_wakeup(rofl::cthread &thread) {}
-
-void crofbasetest::handle_timeout(rofl::cthread &thread, uint32_t timer_id) {}
 
 ccontroller::~ccontroller() {}
 

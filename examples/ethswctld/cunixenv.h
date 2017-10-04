@@ -16,7 +16,6 @@
 #include <string>
 #include <sys/resource.h>
 #include <sys/stat.h>
-#include <sys/stat.h>
 #include <sys/time.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -69,7 +68,7 @@ public:
   /**
    * Constructor
    */
-  cunixenv(int argc = 0, char **argv = NULL);
+  cunixenv(int argc = 0, char **argv = nullptr);
 
   /**
    * Destructor

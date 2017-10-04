@@ -103,7 +103,7 @@ public:
  *
  * @see cflowentry_env
  */
-class cflowentry : public rofl::cthread_env {
+class cflowentry : public cthread_timeout_event {
 public:
   /**
    * @brief	cflowentry constructor
@@ -170,10 +170,7 @@ private:
   void flow_mod_modify();
 
 private:
-  void handle_timeout(cthread &thread, uint32_t timer_id) override;
-  void handle_read_event(cthread &thread, int fd) override {}
-  void handle_write_event(cthread &thread, int fd) override {}
-  void handle_wakeup(cthread &thread) override {}
+  void handle_timeout(void *userdata) override;
 
 public:
   /**

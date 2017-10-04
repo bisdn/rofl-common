@@ -111,7 +111,7 @@ public:
    *
    */
   rofl::openflow::cofmsg *retrieve() {
-    rofl::openflow::cofmsg *msg = (rofl::openflow::cofmsg *)0;
+    rofl::openflow::cofmsg *msg = nullptr;
     AcquireReadWriteLock rwlock(queue_lock);
     if (queue.empty()) {
       return msg;
@@ -125,7 +125,7 @@ public:
    *
    */
   rofl::openflow::cofmsg *front() {
-    rofl::openflow::cofmsg *msg = (rofl::openflow::cofmsg *)0;
+    rofl::openflow::cofmsg *msg = nullptr;
     AcquireReadWriteLock rwlock(queue_lock);
     if (queue.empty()) {
       return msg;

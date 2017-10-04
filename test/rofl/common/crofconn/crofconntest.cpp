@@ -16,9 +16,15 @@ using namespace rofl::openflow;
 
 CPPUNIT_TEST_SUITE_REGISTRATION(crofconntest);
 
-void crofconntest::setUp() {}
+void crofconntest::setUp() {
+  tclient.start("client");
+  tserver.start("server");
+}
 
-void crofconntest::tearDown() {}
+void crofconntest::tearDown() {
+  tclient.stop();
+  tserver.stop();
+}
 
 void crofconntest::test() {
   try {
@@ -34,8 +40,8 @@ void crofconntest::test() {
     xid_client = 0;
     xid_server = 0;
 
-    slisten = new rofl::crofsock(this);
-    sclient = new rofl::crofconn(this);
+    slisten = new rofl::crofsock(&tserver, this);
+    sclient = new rofl::crofconn(&tclient, this);
 
     listening_port = 0;
 
@@ -71,7 +77,7 @@ void crofconntest::test() {
       struct timespec ts;
       ts.tv_sec = 1;
       ts.tv_nsec = 0;
-      pselect(0, NULL, NULL, NULL, &ts, NULL);
+      pselect(0, nullptr, nullptr, nullptr, &ts, nullptr);
       std::cerr << "s:" << srv_pkts_rcvd << "(" << cli_pkts_sent << "), ";
       std::cerr << "c:" << cli_pkts_rcvd << "(" << srv_pkts_sent << "), "
                 << std::endl;
@@ -85,6 +91,12 @@ void crofconntest::test() {
     std::cerr << "s:" << srv_pkts_rcvd << "(" << cli_pkts_sent << "), ";
     std::cerr << "c:" << cli_pkts_rcvd << "(" << srv_pkts_sent << "), "
               << std::endl;
+
+    slisten->close();
+    sclient->close();
+    sserver->close();
+
+    sleep(2);
 
     delete slisten;
     delete sclient;
@@ -114,7 +126,7 @@ void crofconntest::handle_listen(rofl::crofsock &socket) {
       versionbitmap_ctl.add_ofp_version(rofl::openflow12::OFP_VERSION);
       versionbitmap_ctl.add_ofp_version(rofl::openflow13::OFP_VERSION);
 
-      sserver = new rofl::crofconn(this);
+      sserver = new rofl::crofconn(&tserver, this);
       sserver->tcp_accept(sd, versionbitmap_ctl,
                           rofl::crofconn::MODE_CONTROLLER);
 

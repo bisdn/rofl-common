@@ -60,7 +60,7 @@ int controller::run(int argc, char **argv) {
     struct timespec ts;
     ts.tv_sec = 2;
     ts.tv_nsec = 0;
-    pselect(0, NULL, NULL, NULL, &ts, NULL);
+    pselect(0, nullptr, nullptr, nullptr, &ts, nullptr);
   }
 
   return 0;

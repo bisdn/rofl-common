@@ -1228,7 +1228,7 @@ enum ofp_multipart_types {
  * 7.3.5.1 Description
  */
 
-/* Body of reply to OFPMP_DESC request. Each entry is a NULL-terminated
+/* Body of reply to OFPMP_DESC request. Each entry is a nullptr-terminated
 * ASCII string. */
 struct ofp_desc {
   char mfr_desc[DESC_STR_LEN];     /* Manufacturer description. */

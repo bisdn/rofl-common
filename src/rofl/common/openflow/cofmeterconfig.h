@@ -47,7 +47,7 @@ public:
    */
   cofmeter_config_request(
       uint8_t of_version = rofl::openflow::OFP_VERSION_UNKNOWN,
-      uint8_t *buf = (uint8_t *)0, size_t buflen = 0)
+      uint8_t *buf = nullptr, size_t buflen = 0)
       : of_version(of_version), meter_id(0) {
     if ((buflen == 0) || (nullptr == buf)) {
       return;
@@ -155,7 +155,7 @@ public:
    */
   cofmeter_config_reply(
       uint8_t of_version = rofl::openflow::OFP_VERSION_UNKNOWN,
-      uint8_t *buf = (uint8_t *)0, size_t buflen = 0)
+      uint8_t *buf = nullptr, size_t buflen = 0)
       : of_version(of_version), flags(0), meter_id(0), mbands(of_version) {
     if ((buflen == 0) || (nullptr == buf)) {
       return;

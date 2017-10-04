@@ -19,7 +19,6 @@
 #include <bitset>
 #include <deque>
 #include <fcntl.h>
-#include <fcntl.h>
 #include <inttypes.h>
 #include <iostream>
 #include <list>
@@ -57,7 +56,6 @@
 #include "rofl/common/openflow/messages/cofmsg_echo.h"
 #include "rofl/common/openflow/messages/cofmsg_error.h"
 #include "rofl/common/openflow/messages/cofmsg_experimenter.h"
-#include "rofl/common/openflow/messages/cofmsg_experimenter_stats.h"
 #include "rofl/common/openflow/messages/cofmsg_experimenter_stats.h"
 #include "rofl/common/openflow/messages/cofmsg_features.h"
 #include "rofl/common/openflow/messages/cofmsg_flow_mod.h"
@@ -218,7 +216,10 @@ private:
  * @ingroup common_devel_workflow
  * @brief	A socket capable of talking OpenFlow via TCP and vice versa
  */
-class crofsock : public cthread_env {
+class crofsock : public cthread_read_event,
+                 cthread_write_event,
+                 cthread_timeout_event,
+                 cthread_wakeup_event {
   enum outqueue_type_t {
     QUEUE_OAM = 0,  // Echo.request/Echo.reply
     QUEUE_MGMT = 1, // all remaining packets, except ...
@@ -278,7 +279,7 @@ public:
   /**
    *
    */
-  crofsock(crofsock_env *env);
+  crofsock(cthread *thread, crofsock_env *env);
 
 public:
   /**
@@ -557,7 +558,7 @@ public:
 
   std::string str() const {
     std::stringstream ss;
-    switch (state) {
+    switch (state.load()) {
     case STATE_IDLE: {
       ss << "state: -IDLE- ";
     } break;
@@ -591,6 +592,8 @@ public:
   };
 
 private:
+  void close_sockets();
+
   /**
    * @brief	Private copy constructor for suppressing any copy attempt.
    */
@@ -613,13 +616,13 @@ private:
   };
 
 private:
-  virtual void handle_wakeup(cthread &thread);
+  void handle_wakeup(void *userdata) override;
 
-  virtual void handle_timeout(cthread &thread, uint32_t timer_id);
+  void handle_timeout(void *userdata) override;
 
-  virtual void handle_read_event(cthread &thread, int fd);
+  void handle_read(int fd, void *userdata) override;
 
-  virtual void handle_write_event(cthread &thread, int fd);
+  void handle_write(int fd, void *userdata) override;
 
 private:
   void tls_init();
@@ -652,9 +655,9 @@ private:
 private:
   void backoff_reconnect(bool reset_timeout = false);
 
-  void handle_read_event_rxthread(cthread &thread, int fd);
+  void handle_read_event_rxthread(int fd);
 
-  void handle_write_event_rxthread(cthread &thread, int fd);
+  void handle_write_event_rxthread(int fd);
 
 private:
   // environment for this crofsock instance
@@ -667,16 +670,14 @@ private:
   rofl::crwlock flags_lock;
 
   // connection state
-  enum socket_state_t state;
+  std::atomic<enum socket_state_t> state;
 
   // socket mode (TCP_SERVER, TCP CLIENT)
   enum socket_mode_t mode;
 
-  // RX thread
-  cthread rxthread;
-
-  // TX thread
-  cthread txthread;
+  cthread *thread;
+  int wh_rx;
+  int wh_tx;
 
   /*
    * reconnect

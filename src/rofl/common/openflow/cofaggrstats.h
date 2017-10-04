@@ -33,7 +33,7 @@ public:
    *
    */
   cofaggr_stats_request(uint8_t of_version = openflow::OFP_VERSION_UNKNOWN,
-                        uint8_t *buf = (uint8_t *)0, size_t buflen = 0)
+                        uint8_t *buf = nullptr, size_t buflen = 0)
       : of_version(of_version), match(of_version), table_id(0), out_port(0),
         out_group(0), cookie(0), cookie_mask(0) {
     if ((buflen == 0) || (nullptr == buf)) {
@@ -277,7 +277,7 @@ public:
   /**
    *
    */
-  cofaggr_stats_reply(uint8_t of_version = 0, uint8_t *buf = (uint8_t *)0,
+  cofaggr_stats_reply(uint8_t of_version = 0, uint8_t *buf = nullptr,
                       size_t buflen = 0)
       : of_version(of_version), packet_count(0), byte_count(0), flow_count(0) {
     if ((buflen == 0) || (nullptr == buf)) {

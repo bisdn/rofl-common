@@ -62,7 +62,7 @@ int cetherswitch::run(int argc, char **argv) {
       struct timespec ts;
       ts.tv_sec = 1;
       ts.tv_nsec = 0;
-      pselect(0, NULL, NULL, NULL, &ts, NULL);
+      pselect(0, nullptr, nullptr, nullptr, &ts, nullptr);
     } catch (std::runtime_error &e) {
       std::cerr << "exception caught, what: " << e.what() << std::endl;
     }
@@ -73,22 +73,25 @@ int cetherswitch::run(int argc, char **argv) {
 
 cetherswitch::cetherswitch(
     const rofl::openflow::cofhello_elem_versionbitmap &versionbitmap)
-    : thread(this), dump_fib_interval(DUMP_FIB_DEFAULT_INTERVAL),
+    : dump_fib_interval(DUMP_FIB_DEFAULT_INTERVAL),
       get_flow_stats_interval(GET_FLOW_STATS_DEFAULT_INTERVAL) {
   rofl::crofbase::set_versionbitmap(versionbitmap);
 
   thread.start("cetherswitch");
 }
 
-cetherswitch::~cetherswitch() {}
+cetherswitch::~cetherswitch() {
+  thread.drop_timer(this, rofl::cthread::ALL_TIMERS);
+}
 
-void cetherswitch::handle_timeout(cthread &thread, uint32_t timer_id) {
+void cetherswitch::handle_timeout(void *userdata) {
   try {
+    int timer_id = (long)userdata;
     switch (timer_id) {
     case TIMER_ID_DUMP_FIB: {
 
       // re-register timer for next round
-      thread.add_timer(TIMER_ID_DUMP_FIB,
+      thread.add_timer(this, TIMER_ID_DUMP_FIB,
                        rofl::ctimespec().expire_in(dump_fib_interval));
 
       std::cerr << "****************************************" << std::endl;
@@ -99,7 +102,7 @@ void cetherswitch::handle_timeout(cthread &thread, uint32_t timer_id) {
     case TIMER_ID_GET_FLOW_STATS: {
 
       // re-register timer for next round
-      thread.add_timer(TIMER_ID_GET_FLOW_STATS,
+      thread.add_timer(this, TIMER_ID_GET_FLOW_STATS,
                        rofl::ctimespec().expire_in(get_flow_stats_interval));
 
       rofl::crofdpt &dpt = rofl::crofbase::set_dpt(dptid);
@@ -132,11 +135,11 @@ void cetherswitch::handle_timeout(cthread &thread, uint32_t timer_id) {
  */
 void cetherswitch::handle_dpt_open(rofl::crofdpt &dpt) {
   // register timer for dumping ethswitch's internal state
-  thread.add_timer(TIMER_ID_DUMP_FIB,
+  thread.add_timer(this, TIMER_ID_DUMP_FIB,
                    rofl::ctimespec().expire_in(dump_fib_interval));
 
   // start periodic timer for querying datapath for all flow table entries
-  thread.add_timer(TIMER_ID_GET_FLOW_STATS,
+  thread.add_timer(this, TIMER_ID_GET_FLOW_STATS,
                    rofl::ctimespec().expire_in(get_flow_stats_interval));
 
   dptid = dpt.get_dptid();
@@ -183,9 +186,9 @@ void cetherswitch::handle_dpt_open(rofl::crofdpt &dpt) {
 }
 
 void cetherswitch::handle_dpt_close(const rofl::cdptid &dptid) {
-  thread.drop_timer(TIMER_ID_DUMP_FIB);
+  thread.drop_timer(this, TIMER_ID_DUMP_FIB);
 
-  thread.drop_timer(TIMER_ID_GET_FLOW_STATS);
+  thread.drop_timer(this, TIMER_ID_GET_FLOW_STATS);
 
   std::cerr << "[cetherswitch] datapath detached, dptid: " << dptid << std::endl
             << cfibtable::get_fib(dptid);

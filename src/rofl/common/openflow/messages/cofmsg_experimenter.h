@@ -29,7 +29,7 @@ public:
    */
   cofmsg_experimenter(uint8_t version = 0, uint32_t xid = 0,
                       uint32_t exp_id = 0, uint32_t exp_type = 0,
-                      uint8_t *data = (uint8_t *)0, size_t datalen = 0)
+                      uint8_t *data = nullptr, size_t datalen = 0)
       : cofmsg(version, rofl::openflow::OFPT_EXPERIMENTER, xid), exp_id(exp_id),
         exp_type(exp_type), body(data, datalen){};
 
@@ -59,7 +59,7 @@ public:
   /**
    *
    */
-  virtual void pack(uint8_t *buf = (uint8_t *)0, size_t buflen = 0);
+  virtual void pack(uint8_t *buf = nullptr, size_t buflen = 0);
 
   /**
    *

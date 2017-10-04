@@ -33,7 +33,7 @@ public:
    *
    */
   cofgroup_features_stats_reply(uint8_t of_version = 0,
-                                uint8_t *buf = (uint8_t *)0, size_t buflen = 0)
+                                uint8_t *buf = nullptr, size_t buflen = 0)
       : of_version(of_version), types(0), capabilities(0) {
     max_groups.resize(4);
     actions.resize(4);

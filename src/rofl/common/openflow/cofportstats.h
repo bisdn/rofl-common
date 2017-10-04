@@ -47,7 +47,7 @@ public:
    */
   cofport_stats_request(
       uint8_t of_version = rofl::openflow::OFP_VERSION_UNKNOWN,
-      uint8_t *buf = (uint8_t *)0, size_t buflen = 0)
+      uint8_t *buf = nullptr, size_t buflen = 0)
       : of_version(of_version), port_no(rofl::openflow13::OFPP_ALL) {
     if ((buflen == 0) || (nullptr == buf)) {
       return;
@@ -147,7 +147,7 @@ public:
    *
    */
   cofport_stats_reply(uint8_t of_version = rofl::openflow::OFP_VERSION_UNKNOWN,
-                      uint8_t *buf = (uint8_t *)0, size_t buflen = 0)
+                      uint8_t *buf = nullptr, size_t buflen = 0)
       : of_version(of_version), port_no(0), rx_packets(0), tx_packets(0),
         rx_bytes(0), tx_bytes(0), rx_dropped(0), tx_dropped(0), rx_errors(0),
         tx_errors(0), rx_frame_err(0), rx_over_err(0), rx_crc_err(0),

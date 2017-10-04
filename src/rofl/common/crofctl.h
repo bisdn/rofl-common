@@ -304,8 +304,9 @@ protected:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  void handle_stats_request(rofl::crofctl &ctl, const rofl::cauxid &auxid,
-                            rofl::openflow::cofmsg_stats_request &msg){};
+  virtual void
+  handle_stats_request(rofl::crofctl &ctl, const rofl::cauxid &auxid,
+                       rofl::openflow::cofmsg_stats_request &msg){};
 
   /**
    * @brief	OpenFlow Desc-Stats-Request message received.
@@ -667,7 +668,7 @@ public:
    * for this object
    * @param ctlid rofl-common's internal identifier for this instance
    */
-  crofctl(crofctl_env *env, const cctlid &ctlid);
+  crofctl(cthread *thread, crofctl_env *env, const cctlid &ctlid);
 
 public:
   /**
@@ -1120,7 +1121,7 @@ public:
    */
   rofl::crofsock::msg_result_t
   send_error_message(const rofl::cauxid &auxid, uint32_t xid, uint16_t type,
-                     uint16_t code, uint8_t *data = NULL, size_t datalen = 0);
+                     uint16_t code, uint8_t *data = nullptr, size_t datalen = 0);
 
   /**
    * @brief	Sends OpenFlow Experimenter message to attached controller
@@ -1136,7 +1137,7 @@ public:
   rofl::crofsock::msg_result_t
   send_experimenter_message(const rofl::cauxid &auxid, uint32_t xid,
                             uint32_t experimenter_id, uint32_t exp_type,
-                            uint8_t *body = NULL, size_t bodylen = 0,
+                            uint8_t *body = nullptr, size_t bodylen = 0,
                             int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT);
 
   /**
