@@ -18,19 +18,24 @@ addons:
 compiler:
   - gcc
   - clang
-before_install:
-  - sudo apt-get update -qq
-install:
-  - if [[ "$CXX" == "clang++" ]]; then export CXX="clang++-4.0" CC="clang-4.0"; fi
-  - if [[ "$ASAN" == "true" ]]; then export CXXFLAGS="-g -fno-omit-frame-pointer -fsanitize=address"; export CFLAGS="$CXXFLAGS"; fi
-  - ./autogen.sh
+
 env:
   - FLAGS="--disable-silent-rules --enable-debug"
   - FLAGS="--disable-silent-rules"
+
 matrix:
   include:
   - compiler: clang
     env: FLAGS="--disable-silent-rules" ASAN=true
+
+before_install:
+  - sudo apt-get update -qq
+
+install:
+  - if [[ "$CXX" == "clang++" ]]; then export CXX="clang++-4.0" CC="clang-4.0"; fi
+  - if [[ "$ASAN" == "true" ]]; then export CXXFLAGS="-g -fno-omit-frame-pointer -fsanitize=address"; export CFLAGS="$CXXFLAGS"; fi
+  - ./autogen.sh
+
 script:
   - mkdir -p build
   - cd build
@@ -39,10 +44,12 @@ script:
   - git diff --exit-code
   - make -j 2
   - VERBOSE=yes make -j 2 check
+
 branches:
   only:
     - master
     - stable
+
 notifications:
   email:
     - andreas.koepsel@bisdn.de
