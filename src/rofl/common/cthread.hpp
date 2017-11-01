@@ -30,6 +30,13 @@
 #include <map>
 #include <set>
 
+#include <openssl/bio.h>
+#include <openssl/conf.h>
+#include <openssl/engine.h>
+#include <openssl/err.h>
+#include <openssl/opensslv.h>
+#include <openssl/ssl.h>
+
 #include "rofl/common/ctimer.hpp"
 #include "rofl/common/exception.hpp"
 #include "rofl/common/locking.hpp"
@@ -128,6 +135,10 @@ public:
    */
   virtual ~cthread() {
     try { // don't throw in destructor
+#if (OPENSSL_VERSION_NUMBER < 0x1010000fL)
+      ERR_remove_thread_state(NULL);
+#endif
+      CRYPTO_cleanup_all_ex_data();
       release();
     } catch (std::exception &e) {
       std::cerr << __FUNCTION__ << "(): failed with " << e.what() << std::endl;
@@ -346,6 +357,16 @@ private:
    */
   void handle_wakeup();
 
+  /**
+   * @brief	Global initialization of OpenSSL libraries
+   */
+  static void openssl_initialize();
+
+  /**
+   * @brief	Global termination of OpenSSL libraries
+   */
+  static void openssl_terminate();
+
 private:
   /* thread pool strategy:
    * we have a pipeline of classes run by multiple threads
@@ -389,6 +410,9 @@ private:
   static uint32_t pool_num_hnd_threads;
   static const uint32_t DEFAULT_POOL_NUM_HND_THREADS = 4;
   static uint32_t pool_hnd_loop_index;
+
+  // OpenSSL BIO stderr
+  static BIO *bio_stderr;
 
   // thread name
   std::string thread_name;

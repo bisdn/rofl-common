@@ -17,27 +17,16 @@ using namespace rofl::openflow;
 
 CPPUNIT_TEST_SUITE_REGISTRATION(crofchantest);
 
-void crofchantest::setUp() {
-  rofl::cthread::pool_terminate(); // in case it was initialized by crofchantest
-                                   // itself
+void crofchantest::setUp() {}
+
+void crofchantest::tearDown() {}
+
+void crofchantest::global_initialize() {
   rofl::cthread::pool_initialize(/*hnd*/ 1, /*io*/ 2, /*mgt*/ 1);
-  versionbitmap.add_ofp_version(rofl::openflow13::OFP_VERSION);
-  baddr = rofl::csockaddr(AF_INET, "127.0.0.1", 16455);
-  dpid = 0xa1a2a3a4a5a6a7a8;
-  xid = 0xb1b2b3b4;
-
-  rofsock = new rofl::crofsock(this);
-  channel1 = new rofl::crofchan(this);
-  channel2 = new rofl::crofchan(this);
+  thread_num = rofl::cthread::get_mgt_thread_num_from_pool();
 }
 
-void crofchantest::tearDown() {
-  rofl::cthread::pool_stop_all_threads();
-  delete channel2;
-  delete channel1;
-  delete rofsock;
-  rofl::cthread::pool_terminate();
-}
+void crofchantest::global_terminate() { rofl::cthread::pool_terminate(); }
 
 void crofchantest::test_connections() {
   congested = false;
@@ -52,6 +41,15 @@ void crofchantest::test_connections() {
   listening_port = 6653;
   testname = std::string("test_connections");
 
+  versionbitmap.add_ofp_version(rofl::openflow13::OFP_VERSION);
+  baddr = rofl::csockaddr(AF_INET, "127.0.0.1", 16455);
+  dpid = 0xa1a2a3a4a5a6a7a8;
+  xid = 0xb1b2b3b4;
+
+  rofsock = new rofl::crofsock(this);
+  channel1 = new rofl::crofchan(this);
+  channel2 = new rofl::crofchan(this);
+
   LOG(INFO) << "TEST: <== crofchantest::test_connections() ==>" << std::endl;
 
   /* try to find idle port for test */
@@ -65,6 +63,7 @@ void crofchantest::test_connections() {
       rofsock->set_baddr(baddr).listen();
       LOG(INFO) << "binding to " << baddr.str() << std::endl;
       lookup_idle_port = false;
+      break;
     } catch (rofl::eSysCall &e) {
       /* port in use, try another one */
     }
@@ -130,6 +129,10 @@ void crofchantest::test_connections() {
   CPPUNIT_ASSERT(channel2->keys().size() == 0);
 
   LOG(INFO) << "TEST: done" << std::endl;
+
+  delete channel2;
+  delete channel1;
+  delete rofsock;
 }
 
 void crofchantest::test_congestion() {
@@ -144,6 +147,15 @@ void crofchantest::test_congestion() {
   max_congestion_rounds = 16;
   testname = std::string("test_congestion");
 
+  versionbitmap.add_ofp_version(rofl::openflow13::OFP_VERSION);
+  baddr = rofl::csockaddr(AF_INET, "127.0.0.1", 16455);
+  dpid = 0xa1a2a3a4a5a6a7a8;
+  xid = 0xb1b2b3b4;
+
+  rofsock = new rofl::crofsock(this);
+  channel1 = new rofl::crofchan(this);
+  channel2 = new rofl::crofchan(this);
+
   LOG(INFO) << "<== crofchantest::test_congestion() ==>" << std::endl;
 
   /* try to find idle port for test */
@@ -157,6 +169,7 @@ void crofchantest::test_congestion() {
       rofsock->set_baddr(baddr).listen();
       LOG(INFO) << "binding to " << baddr.str() << std::endl;
       lookup_idle_port = false;
+      break;
     } catch (rofl::eSysCall &e) {
       /* port in use, try another one */
     }
@@ -225,6 +238,10 @@ void crofchantest::test_congestion() {
   CPPUNIT_ASSERT(channel2->keys().size() == 0);
 
   LOG(INFO) << "TEST: done" << std::endl;
+
+  delete channel2;
+  delete channel1;
+  delete rofsock;
 }
 
 void crofchantest::handle_listen(rofl::crofsock &socket) {

@@ -19,9 +19,9 @@ using namespace rofl;
 /*static*/ std::set<crofsock_env *> crofsock_env::socket_envs;
 /*static*/ crwlock crofsock_env::socket_envs_lock;
 /*static*/ crwlock crofsock::rwlock;
-/*static*/ bool crofsock::tls_initialized = false;
 
 crofsock::~crofsock() {
+  flag_set(FLAG_DELETE_IN_PROGRESS, true);
   cthread::thread(tx_thread_num).drop(this);
   cthread::thread(rx_thread_num).drop(this);
   close();
@@ -102,12 +102,61 @@ void crofsock::close() {
     VLOG(2) << __FUNCTION__ << " STATE_TLS_ESTABLISHED sd=" << sd
             << " laddr=" << laddr.str() << " raddr=" << raddr.str();
 
-    /* block reception of any further data from remote side */
-    rx_disable();
-    tx_disable();
-
     if (ssl) {
-      SSL_shutdown(ssl);
+      int rc = 0;
+      int err_code = 0;
+
+      VLOG(2) << __FUNCTION__ << " TLS: shutdown sd=" << sd;
+
+      while ((rc = SSL_shutdown(ssl)) <= 0) {
+        switch (err_code = SSL_get_error(ssl, rc)) {
+        case SSL_ERROR_WANT_READ: {
+          VLOG(2) << __FUNCTION__ << " TLS: shutdown WANT READ sd=" << sd;
+          pthread_yield();
+        } break;
+        case SSL_ERROR_WANT_WRITE: {
+          VLOG(2) << __FUNCTION__ << " TLS: shutdown WANT WRITE sd=" << sd;
+          pthread_yield();
+        } break;
+        case SSL_ERROR_NONE: {
+          VLOG(2) << __FUNCTION__
+                  << " TLS: shutdown succeeded ERROR NONE sd=" << sd;
+        }
+          goto out;
+        case SSL_ERROR_SSL: {
+          VLOG(2) << __FUNCTION__
+                  << " TLS: shutdown failed ERROR SSL sd=" << sd;
+        }
+          goto out;
+        case SSL_ERROR_SYSCALL: {
+          VLOG(2) << __FUNCTION__
+                  << " TLS: shutdown failed ERROR SYSCALL sd=" << sd
+                  << " errno: " << errno << " (" << strerror(errno) << ")";
+          unsigned long e;
+          char error_s[256];
+          while ((e = ERR_get_error()) > 0) {
+            memset(error_s, 0, sizeof(error_s));
+            ERR_error_string_n(e, error_s, sizeof(error_s) - 1);
+            VLOG(2) << __FUNCTION__ << " TLS: error queue: " << error_s;
+          }
+        }
+          goto out;
+        case SSL_ERROR_ZERO_RETURN: {
+          VLOG(2) << __FUNCTION__
+                  << " TLS: shutdown succeeded ERROR ZERO RETURN sd=" << sd;
+        }
+          goto out;
+        default: {
+          VLOG(2) << __FUNCTION__ << " TLS: shutdown failed sd=" << sd;
+        };
+        }
+      }
+    out:
+
+      /* block reception of any further data from remote side */
+      rx_disable();
+      tx_disable();
+
       SSL_free(ssl);
       ssl = NULL;
     }
@@ -135,7 +184,7 @@ void crofsock::close() {
       sd = -1;
     }
 
-    state = STATE_CLOSED;
+    state = STATE_IDLE;
 
   } break;
   case STATE_TCP_CONNECTING: {
@@ -153,7 +202,7 @@ void crofsock::close() {
       sd = -1;
     }
 
-    state = STATE_CLOSED;
+    state = STATE_IDLE;
 
   } break;
   case STATE_TCP_ACCEPTING: {
@@ -172,7 +221,7 @@ void crofsock::close() {
       sd = -1;
     }
 
-    state = STATE_CLOSED;
+    state = STATE_IDLE;
 
   } break;
   case STATE_TCP_ESTABLISHED: {
@@ -198,20 +247,6 @@ void crofsock::close() {
       ::close(sd);
     }
     sd = -1;
-
-    state = STATE_CLOSED;
-
-  } break;
-  default: {};
-  }
-
-  /* where is the difference between CLOSED and IDLE? */
-  switch (state.load()) {
-  case STATE_CLOSED: {
-
-    VLOG(2) << __FUNCTION__ << " STATE_CLOSED sd=" << sd
-            << " laddr=" << laddr.str() << " raddr=" << raddr.str()
-            << " baddr=" << baddr.str();
 
     state = STATE_IDLE;
 
@@ -333,7 +368,6 @@ void crofsock::listen() {
           << " baddr=" << baddr.str();
 
   /* instruct cthread::thread(rx_thread_num) to read from socket descriptor */
-  cthread::thread(rx_thread_num).add_fd(this, sd);
   cthread::thread(rx_thread_num).add_read_fd(this, sd);
 }
 
@@ -368,7 +402,7 @@ std::list<int> crofsock::accept() {
 }
 
 void crofsock::tcp_accept(int sd) {
-  if (this->sd >= 0) {
+  if (get_state() != STATE_IDLE) {
     close();
   }
   this->sd = sd;
@@ -478,23 +512,22 @@ void crofsock::tcp_accept(int sd) {
   VLOG(2) << __FUNCTION__ << " STATE_TCP_ESTABLISHED sd=" << sd
           << " laddr=" << laddr.str() << " raddr=" << raddr.str();
 
+  /* instruct cthread::thread(rx_thread_num) to read from socket descriptor */
+  cthread::thread(rx_thread_num).add_read_fd(this, sd, true, false);
+
+  cthread::thread(rx_thread_num).wakeup(this);
+
   if (flag_test(FLAG_TLS_IN_USE)) {
     crofsock::tls_accept(sd);
   } else {
     crofsock_env::call_env(env).handle_tcp_accepted(*this);
   }
-
-  /* instruct cthread::thread(rx_thread_num) to read from socket descriptor */
-  cthread::thread(rx_thread_num).add_fd(this, sd);
-  cthread::thread(rx_thread_num).add_read_fd(this, sd);
-
-  cthread::thread(rx_thread_num).wakeup(this);
 }
 
 void crofsock::tcp_connect(bool reconnect) {
   int rc;
 
-  if (sd > 0) {
+  if (get_state() != STATE_IDLE) {
     close();
   }
 
@@ -628,8 +661,7 @@ void crofsock::tcp_connect(bool reconnect) {
             << " laddr=" << laddr.str() << " raddr=" << raddr.str();
 
     /* register socket descriptor for read operations */
-    cthread::thread(rx_thread_num).add_fd(this, sd);
-    cthread::thread(rx_thread_num).add_read_fd(this, sd);
+    cthread::thread(rx_thread_num).add_read_fd(this, sd, true, false);
 
     cthread::thread(rx_thread_num).wakeup(this);
 
@@ -641,36 +673,7 @@ void crofsock::tcp_connect(bool reconnect) {
   }
 }
 
-void crofsock::tls_init() {
-  AcquireReadWriteLock lock(crofsock::rwlock);
-  if (crofsock::tls_initialized)
-    return;
-
-  SSL_library_init();
-  SSL_load_error_strings();
-  ERR_load_ERR_strings();
-  ERR_load_BIO_strings();
-  OpenSSL_add_all_algorithms();
-  OpenSSL_add_all_ciphers();
-  OpenSSL_add_all_digests();
-  BIO_new_fp(stderr, BIO_NOCLOSE);
-
-  crofsock::tls_initialized = true;
-}
-
-void crofsock::tls_destroy() {
-  AcquireReadWriteLock lock(crofsock::rwlock);
-  if (not crofsock::tls_initialized)
-    return;
-
-  ERR_free_strings();
-
-  crofsock::tls_initialized = false;
-}
-
 void crofsock::tls_init_context() {
-  tls_init();
-
   if (ctx) {
     tls_destroy_context();
   }
@@ -698,7 +701,6 @@ void crofsock::tls_init_context() {
                    __FUNCTION__, __LINE__)
         .set_key("keyfile", keyfile);
   }
-
   // ciphers
   if ((not ciphers.empty()) &&
       (0 == SSL_CTX_set_cipher_list(ctx, ciphers.c_str()))) {
@@ -733,12 +735,14 @@ void crofsock::tls_init_context() {
 }
 
 void crofsock::tls_destroy_context() {
+  if (ssl) {
+    SSL_free(ssl);
+    ssl = NULL;
+  }
   if (ctx) {
     SSL_CTX_free(ctx);
     ctx = NULL;
   }
-
-  tls_destroy();
 }
 
 int crofsock::tls_pswd_cb(char *buf, int size, int rwflag, void *userdata) {
@@ -759,7 +763,6 @@ int crofsock::tls_pswd_cb(char *buf, int size, int rwflag, void *userdata) {
 void crofsock::tls_accept(int sockfd) {
   switch (state.load()) {
   case STATE_IDLE:
-  case STATE_CLOSED:
   case STATE_TCP_ACCEPTING: {
 
     flag_set(FLAG_TLS_IN_USE, true);
@@ -813,8 +816,10 @@ void crofsock::tls_accept(int sockfd) {
         return;
 
       case SSL_ERROR_NONE: {
-        VLOG(2) << __FUNCTION__ << " TLS: accept failed ERROR NONE sd=" << sd;
-      } break;
+        VLOG(2) << __FUNCTION__
+                << " TLS: accept succeeded ERROR NONE sd=" << sd;
+      }
+        return;
       case SSL_ERROR_SSL: {
         VLOG(2) << __FUNCTION__ << " TLS: accept failed ERROR SSL sd=" << sd;
       } break;
@@ -883,7 +888,6 @@ void crofsock::tls_accept(int sockfd) {
 void crofsock::tls_connect(bool reconnect) {
   switch (state.load()) {
   case STATE_IDLE:
-  case STATE_CLOSED:
   case STATE_TCP_CONNECTING: {
 
     flag_set(FLAG_TLS_IN_USE, true);
@@ -939,7 +943,8 @@ void crofsock::tls_connect(bool reconnect) {
         return;
 
       case SSL_ERROR_NONE: {
-        VLOG(2) << __FUNCTION__ << " TLS: connect failed ERROR NONE sd=" << sd;
+        VLOG(2) << __FUNCTION__
+                << " TLS: connect succeeded ERROR NONE sd=" << sd;
       } break;
       case SSL_ERROR_SSL: {
         VLOG(2) << __FUNCTION__ << " TLS: connect failed ERROR SSL sd=" << sd;
@@ -1347,7 +1352,7 @@ void crofsock::tx_enable() {
 }
 
 void crofsock::handle_timeout(cthread &thread, uint32_t timer_id) {
-  if (get_state() <= STATE_CLOSED) {
+  if ((get_state() <= STATE_IDLE) || delete_in_progress()) {
     return;
   }
   switch (timer_id) {
@@ -1491,7 +1496,7 @@ crofsock::msg_result_t crofsock::send_message(rofl::openflow::cofmsg *msg,
 }
 
 void crofsock::handle_wakeup(cthread &thread) {
-  if (flag_test(FLAG_CLOSING)) {
+  if (flag_test(FLAG_CLOSING) || delete_in_progress()) {
     return;
   }
   if (&thread == &cthread::thread(rx_thread_num)) {
@@ -1502,7 +1507,7 @@ void crofsock::handle_wakeup(cthread &thread) {
 }
 
 void crofsock::handle_write_event(cthread &thread, int fd) {
-  if (flag_test(FLAG_CLOSING)) {
+  if (flag_test(FLAG_CLOSING) || delete_in_progress()) {
     return;
   }
   if (&thread == &cthread::thread(tx_thread_num)) {
@@ -1517,7 +1522,7 @@ void crofsock::handle_write_event(cthread &thread, int fd) {
 }
 
 void crofsock::send_from_queue() {
-  if (get_state() <= STATE_CLOSED) {
+  if ((get_state() <= STATE_IDLE) || delete_in_progress()) {
     VLOG(3) << __FUNCTION__ << " sd=" << sd
             << " dropping message, no connection "
                "established"
@@ -1662,7 +1667,7 @@ void crofsock::send_from_queue() {
 }
 
 void crofsock::handle_read_event(cthread &thread, int fd) {
-  if (flag_test(FLAG_CLOSING)) {
+  if (flag_test(FLAG_CLOSING) || delete_in_progress()) {
     return;
   }
   if (&thread == &cthread::thread(rx_thread_num)) {
@@ -1714,8 +1719,7 @@ void crofsock::handle_read_event_rxthread(cthread &thread, int fd) {
                 << " laddr=" << laddr.str() << " raddr=" << raddr.str();
 
         /* register socket descriptor for read operations */
-        cthread::thread(rx_thread_num).add_fd(this, sd);
-        cthread::thread(rx_thread_num).add_read_fd(this, sd);
+        cthread::thread(rx_thread_num).add_read_fd(this, sd, true, false);
 
         if (flag_test(FLAG_TLS_IN_USE)) {
           crofsock::tls_connect(flag_test(FLAG_RECONNECT_ON_FAILURE));
@@ -1806,7 +1810,7 @@ void crofsock::handle_read_event_rxthread(cthread &thread, int fd) {
 void crofsock::recv_message() {
   while (not rx_disabled) {
 
-    if (get_state() <= STATE_CLOSED) {
+    if ((get_state() <= STATE_IDLE) || delete_in_progress()) {
       VLOG(3) << __FUNCTION__ << "() ignoring message sd=" << sd
               << " laddr=" << laddr.str() << " raddr=" << raddr.str()
               << " state=" << state;
@@ -1886,7 +1890,8 @@ void crofsock::recv_message() {
 on_error:
 
   switch (state.load()) {
-  case STATE_TCP_ESTABLISHED: {
+  case STATE_TCP_ESTABLISHED:
+  case STATE_TLS_ESTABLISHED: {
     VLOG(2) << __FUNCTION__ << " TCP: peer shutdown sd=" << sd
             << " laddr=" << laddr.str() << " raddr=" << raddr.str();
     close();
@@ -1904,7 +1909,7 @@ on_error:
     }
     // WARNING: handle_closed might delete this socket, don't call anything here
   } break;
-  default: { VLOG(2) << __FUNCTION__ << " error in state=" << state; };
+  default: { VLOG(2) << __FUNCTION__ << " error in state=" << str(); };
   }
 }
 
@@ -1936,7 +1941,7 @@ void crofsock::parse_message() {
     };
     }
 
-    if (get_state() <= STATE_CLOSED) {
+    if ((get_state() <= STATE_IDLE) || delete_in_progress()) {
       return;
     }
 

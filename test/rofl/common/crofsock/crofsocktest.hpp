@@ -17,8 +17,20 @@
 
 class crofsocktest : public CppUnit::TestFixture, public rofl::crofsock_env {
   CPPUNIT_TEST_SUITE(crofsocktest);
+  CPPUNIT_TEST(global_initialize);
   CPPUNIT_TEST(test);
+/* Google's address sanitizer complains about lots of openssl's
+ * code fragments upon shutdown of the test application.
+ * We have to rewrite the clean-up code for openssl to cope with
+ * the various versions of openssl to be found on various Linux flavours:
+ * Fedora, CentOS, Ubuntu, Debian, ... Seeking volunteers for this bleak effort.
+ * For now, we disable the TLS test when ASAN is enabled.
+ * See [1] for further information regarding openssl's init/deinit blocks.
+ * [1] https://wiki.openssl.org/index.php/Library_Initialization */
+#ifndef ASAN
   CPPUNIT_TEST(test_tls);
+#endif
+  CPPUNIT_TEST(global_terminate);
   CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -26,8 +38,10 @@ public:
   void tearDown();
 
 public:
+  void global_initialize();
   void test();
   void test_tls();
+  void global_terminate();
 
 private:
   virtual void handle_listen(rofl::crofsock &socket);
@@ -79,6 +93,12 @@ private:
   rofl::crofsock *sclient;
   rofl::crofsock *sserver;
   rofl::crwlock tlock;
+
+  static std::string cacert;
+  static std::string clicert;
+  static std::string clikey;
+  static std::string srvcert;
+  static std::string srvkey;
 };
 
 #endif /* TEST_SRC_ROFL_COMMON_CROFSOCK_TEST_HPP_ */

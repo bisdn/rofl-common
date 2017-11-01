@@ -23,8 +23,10 @@ class crofchantest : public CppUnit::TestFixture,
                      public rofl::crofsock_env,
                      public rofl::cthread_env {
   CPPUNIT_TEST_SUITE(crofchantest);
+  CPPUNIT_TEST(global_initialize);
   CPPUNIT_TEST(test_connections);
   CPPUNIT_TEST(test_congestion);
+  CPPUNIT_TEST(global_terminate);
   CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -34,13 +36,14 @@ public:
       : listening_port(0), keep_running(true), dpid(0), xid(0), num_of_conns(0),
         num_of_accepts(0), num_of_dpt_established(0), num_of_ctl_established(0),
         rofsock(nullptr), channel1(nullptr), channel2(nullptr),
-        num_of_pkts_sent(0), num_of_pkts_rcvd(0),
-        thread_num(rofl::cthread::get_mgt_thread_num_from_pool()),
+        num_of_pkts_sent(0), num_of_pkts_rcvd(0), thread_num(0),
         max_congestion_rounds(16){};
 
 public:
+  void global_initialize();
   void setUp();
   void tearDown();
+  void global_terminate();
 
 public:
   void test_connections();

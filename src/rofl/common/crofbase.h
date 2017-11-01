@@ -53,8 +53,8 @@ class crofbase : public virtual rofl::cthread_env,
   static crwlock rofbases_rwlock;
 
   enum crofbase_state_t {
-    STATE_RUNNING = 0,
-    STATE_DELETE_IN_PROGRESS = 1,
+    STATE_RUNNING,
+    STATE_DELETE_IN_PROGRESS,
   };
 
 public:
@@ -2295,8 +2295,8 @@ private:
 
 private:
   enum crofbase_timer_t {
-    TIMER_ID_ROFCTL_DESTROY = 1,
-    TIMER_ID_ROFDPT_DESTROY = 2,
+    TIMER_ID_ROFCTL_DESTROY,
+    TIMER_ID_ROFDPT_DESTROY,
   };
 
   // management thread

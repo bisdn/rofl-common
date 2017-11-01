@@ -29,12 +29,50 @@ using namespace rofl;
 /*static*/ std::set<cthread_env *> cthread_env::envs;
 /*static*/ crwlock cthread_env::envs_lock;
 
+/*static*/ BIO *cthread::bio_stderr;
+
+/*static*/ void cthread::openssl_initialize() {
+  SSL_library_init();
+  SSL_load_error_strings();
+  ERR_load_ERR_strings();
+  ERR_load_BIO_strings();
+  OpenSSL_add_all_algorithms();
+  OpenSSL_add_all_ciphers();
+  OpenSSL_add_all_digests();
+  bio_stderr = BIO_new_fp(stderr, BIO_NOCLOSE);
+}
+
+/*static*/ void cthread::openssl_terminate() {
+  BIO_free_all(bio_stderr);
+#if 0
+  FIPS_mode_set(0);
+  ENGINE_cleanup();
+  CONF_modules_unload(1);
+  CONF_modules_free();
+  ERR_clear_error();
+  RAND_cleanup();
+  EVP_cleanup();
+  CRYPTO_cleanup_all_ex_data();
+  ERR_free_strings();
+  OPENSSL_cleanup();
+  ASN1_STRING_TABLE_cleanup();
+#endif
+  FIPS_mode_set(0);
+  ENGINE_cleanup();
+  CONF_modules_unload(1);
+  EVP_cleanup();
+  CRYPTO_cleanup_all_ex_data();
+  ERR_free_strings();
+}
+
 /*static*/ void cthread::pool_initialize(uint32_t pool_num_hnd_threads,
                                          uint32_t pool_num_io_threads,
                                          uint32_t pool_num_mgt_threads) {
   AcquireReadWriteLock lock(cthread::pool_lock);
   if (cthread::pool_initialized)
     return;
+
+  openssl_initialize();
 
   /* sanity check for thread numbers */
   cthread::pool_num_mgt_threads =
@@ -91,6 +129,7 @@ using namespace rofl;
     cthread::pool.clear();
     cthread::pool_initialized = false;
   }
+  openssl_terminate();
 }
 
 /*static*/ void cthread::pool_stop_all_threads() {

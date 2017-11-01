@@ -36,9 +36,11 @@
 #include <unistd.h>
 
 #include <openssl/bio.h>
+#include <openssl/conf.h>
+#include <openssl/engine.h>
 #include <openssl/err.h>
-#include <openssl/ssl.h>
 #include <openssl/opensslv.h>
+#include <openssl/ssl.h>
 
 #include "rofl/common/cmemory.h"
 
@@ -227,46 +229,46 @@ class crofsock : public cthread_env {
   };
 
   enum crofsock_flag_t {
-    FLAG_CONGESTED = 1,
-    FLAG_TX_BLOCK_QUEUEING = 2,
-    FLAG_RECONNECT_ON_FAILURE = 3,
-    FLAG_TLS_IN_USE = 4,
-    FLAG_CLOSING = 5,
+    FLAG_DELETE_IN_PROGRESS,
+    FLAG_CONGESTED,
+    FLAG_TX_BLOCK_QUEUEING,
+    FLAG_RECONNECT_ON_FAILURE,
+    FLAG_TLS_IN_USE,
+    FLAG_CLOSING,
   };
 
   enum socket_mode_t {
-    MODE_UNKNOWN = 0,
-    MODE_LISTEN = 1,
-    MODE_CLIENT = 2,
-    MODE_SERVER = 3,
+    MODE_UNKNOWN,
+    MODE_LISTEN,
+    MODE_CLIENT,
+    MODE_SERVER,
   };
 
   enum socket_state_t {
-    STATE_IDLE = 0,
-    STATE_CLOSED = 1,
-    STATE_LISTENING = 2,
-    STATE_TCP_CONNECTING = 3,
-    STATE_TLS_CONNECTING = 4,
-    STATE_TCP_ACCEPTING = 5,
-    STATE_TLS_ACCEPTING = 6,
-    STATE_TCP_ESTABLISHED = 7,
-    STATE_TLS_ESTABLISHED = 8,
+    STATE_IDLE,
+    STATE_LISTENING,
+    STATE_TCP_CONNECTING,
+    STATE_TLS_CONNECTING,
+    STATE_TCP_ACCEPTING,
+    STATE_TLS_ACCEPTING,
+    STATE_TCP_ESTABLISHED,
+    STATE_TLS_ESTABLISHED,
   };
 
-  enum crofsockimer_t {
-    TIMER_ID_UNKNOWN = 0,
-    TIMER_ID_RECONNECT = 1,
-    TIMER_ID_PEER_SHUTDOWN = 2,
+  enum crofsock_timer_t {
+    TIMER_ID_UNKNOWN,
+    TIMER_ID_RECONNECT,
+    TIMER_ID_PEER_SHUTDOWN,
   };
 
 public:
   enum msg_result_t {
-    MSG_IGNORED = 0,
-    MSG_QUEUED = 1,
-    MSG_QUEUED_CONGESTION = 2,
-    MSG_QUEUEING_FAILED_QUEUE_FULL = 3,
-    MSG_QUEUEING_FAILED_NOT_ESTABLISHED = 4,
-    MSG_QUEUEING_FAILED_SHUTDOWN_IN_PROGRESS = 5,
+    MSG_IGNORED,
+    MSG_QUEUED,
+    MSG_QUEUED_CONGESTION,
+    MSG_QUEUEING_FAILED_QUEUE_FULL,
+    MSG_QUEUEING_FAILED_NOT_ESTABLISHED,
+    MSG_QUEUEING_FAILED_SHUTDOWN_IN_PROGRESS,
   };
 
 public:
@@ -569,9 +571,6 @@ public:
     case STATE_IDLE: {
       ss << "state: -IDLE- ";
     } break;
-    case STATE_CLOSED: {
-      ss << "state: -CLOSED- ";
-    } break;
     case STATE_LISTENING: {
       ss << "state: -LISTENING- ";
     } break;
@@ -620,6 +619,10 @@ private:
     return flags.test(__flag);
   };
 
+  bool delete_in_progress() const {
+    return (flag_test(FLAG_DELETE_IN_PROGRESS));
+  };
+
   void set_state(enum socket_state_t state) {
     AcquireReadWriteLock lock(tlock);
     this->state = state;
@@ -635,10 +638,6 @@ private:
   virtual void handle_write_event(cthread &thread, int fd);
 
 private:
-  void tls_init();
-
-  void tls_destroy();
-
   void tls_init_context();
 
   void tls_destroy_context();
@@ -734,9 +733,6 @@ private:
 
   // read write lock
   static crwlock rwlock;
-
-  // OpenSSL initialized
-  static bool tls_initialized;
 
   // SSL context
   SSL_CTX *ctx;

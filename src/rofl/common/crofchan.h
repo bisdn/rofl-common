@@ -132,15 +132,15 @@ private:
  */
 class crofchan : public cthread_env, public rofl::crofconn_env {
   enum crofchan_timer_t {
-    TIMER_ID_ROFCONN_DESTROY = 1,
+    TIMER_ID_ROFCONN_DESTROY,
   };
 
   enum crofchan_state_t {
-    STATE_DISCONNECTED = 0,
-    STATE_CONNECTING = 1,
-    STATE_ESTABLISHED = 2,
-    STATE_DISCONNECTING = 3,
-    STATE_DELETE_IN_PROGRESS = 4,
+    STATE_DISCONNECTED,
+    STATE_CONNECTING,
+    STATE_ESTABLISHED,
+    STATE_DISCONNECTING,
+    STATE_DELETE_IN_PROGRESS,
   };
 
 public:
@@ -480,7 +480,7 @@ public:
 
 private:
   virtual void handle_established(crofconn &conn, uint8_t ofp_version) {
-    if (STATE_DELETE_IN_PROGRESS == state)
+    if (delete_in_progress())
       return;
     try {
       if (conn.get_auxid() == cauxid(0)) {
@@ -494,7 +494,7 @@ private:
   };
 
   virtual void handle_closed(crofconn &conn) {
-    if (STATE_DELETE_IN_PROGRESS == state)
+    if (delete_in_progress())
       return;
     if (conn.get_auxid().get_id() == 0) {
       { /* acquire rwlock */
@@ -552,7 +552,7 @@ private:
   };
 
   virtual void handle_connect_refused(crofconn &conn) {
-    if (STATE_DELETE_IN_PROGRESS == state)
+    if (delete_in_progress())
       return;
     try {
       crofchan_env::call_env(env).handle_connect_refused(*this, conn);
@@ -562,7 +562,7 @@ private:
   };
 
   virtual void handle_connect_failed(crofconn &conn) {
-    if (STATE_DELETE_IN_PROGRESS == state)
+    if (delete_in_progress())
       return;
     try {
       crofchan_env::call_env(env).handle_connect_failed(*this, conn);
@@ -572,7 +572,7 @@ private:
   };
 
   virtual void handle_accept_failed(crofconn &conn) {
-    if (STATE_DELETE_IN_PROGRESS == state)
+    if (delete_in_progress())
       return;
     try {
       crofchan_env::call_env(env).handle_accept_failed(*this, conn);
@@ -582,7 +582,7 @@ private:
   };
 
   virtual void handle_negotiation_failed(crofconn &conn) {
-    if (STATE_DELETE_IN_PROGRESS == state)
+    if (delete_in_progress())
       return;
     try {
       crofchan_env::call_env(env).handle_negotiation_failed(*this, conn);
@@ -592,7 +592,7 @@ private:
   };
 
   virtual void handle_recv(crofconn &conn, rofl::openflow::cofmsg *msg) {
-    if (STATE_DELETE_IN_PROGRESS == state)
+    if (delete_in_progress())
       return;
     try {
       crofchan_env::call_env(env).handle_recv(*this, conn, msg);
@@ -602,7 +602,7 @@ private:
   };
 
   virtual void congestion_occurred_indication(crofconn &conn) {
-    if (STATE_DELETE_IN_PROGRESS == state)
+    if (delete_in_progress())
       return;
     try {
       crofchan_env::call_env(env).congestion_occurred_indication(*this, conn);
@@ -612,7 +612,7 @@ private:
   };
 
   virtual void congestion_solved_indication(crofconn &conn) {
-    if (STATE_DELETE_IN_PROGRESS == state)
+    if (delete_in_progress())
       return;
     try {
       crofchan_env::call_env(env).congestion_solved_indication(*this, conn);
@@ -623,7 +623,7 @@ private:
 
   virtual void handle_transaction_timeout(crofconn &conn, uint32_t xid,
                                           uint8_t type, uint16_t sub_type = 0) {
-    if (STATE_DELETE_IN_PROGRESS == state)
+    if (delete_in_progress())
       return;
     try {
       crofchan_env::call_env(env).handle_transaction_timeout(*this, conn, xid,
@@ -634,10 +634,17 @@ private:
   };
 
 private:
+  /**
+   * @brief Check for state delete in progress
+   */
+  bool delete_in_progress() const {
+    return (state == STATE_DELETE_IN_PROGRESS);
+  };
+
   virtual void handle_wakeup(cthread &thread){};
 
   virtual void handle_timeout(cthread &thread, uint32_t timer_id) {
-    if (STATE_DELETE_IN_PROGRESS == state)
+    if (delete_in_progress())
       return;
     switch (timer_id) {
     case TIMER_ID_ROFCONN_DESTROY: {

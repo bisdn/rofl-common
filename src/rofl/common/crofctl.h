@@ -654,8 +654,8 @@ protected:
 class crofctl : public rofl::crofchan_env {
 
   enum crofctl_state_t {
-    STATE_RUNNING = 0,
-    STATE_DELETE_IN_PROGRESS = 1,
+    STATE_RUNNING,
+    STATE_DELETE_IN_PROGRESS,
   };
 
 public:

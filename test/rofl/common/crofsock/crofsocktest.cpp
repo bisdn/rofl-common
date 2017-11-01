@@ -15,24 +15,56 @@
 
 using namespace rofl::openflow;
 
+#ifdef CACERT
+/*static*/ std::string crofsocktest::cacert(CACERT);
+#else
+/*static*/ std::string
+    crofsocktest::cacert("../../../../../tools/xca/ca.rofl-core.crt.pem");
+#endif
+#ifdef CLICERT
+/*static*/ std::string crofsocktest::clicert(CLICERT);
+#else
+/*static*/ std::string
+    crofsocktest::clicert("../../../../../tools/xca/client.crt.pem");
+#endif
+#ifdef CLIKEY
+/*static*/ std::string crofsocktest::clikey(CLIKEY);
+#else
+/*static*/ std::string
+    crofsocktest::clikey("../../../../../tools/xca/client.key.pem");
+#endif
+#ifdef SRVCERT
+/*static*/ std::string crofsocktest::srvcert(SRVCERT);
+#else
+/*static*/ std::string
+    crofsocktest::srvcert("../../../../../tools/xca/server.crt.pem");
+#endif
+#ifdef SRVKEY
+/*static*/ std::string crofsocktest::srvkey(SRVKEY);
+#else
+/*static*/ std::string
+    crofsocktest::srvkey("../../../../../tools/xca/server.key.pem");
+#endif
+
 CPPUNIT_TEST_SUITE_REGISTRATION(crofsocktest);
 
-void crofsocktest::setUp() {
-  rofl::cthread::pool_initialize();
-  baddr = rofl::csockaddr(AF_INET, "0.0.0.0", 0);
-}
+void crofsocktest::setUp() { baddr = rofl::csockaddr(AF_INET, "0.0.0.0", 0); }
 
 void crofsocktest::tearDown() {}
+
+void crofsocktest::global_initialize() { rofl::cthread::pool_initialize(); }
+
+void crofsocktest::global_terminate() { rofl::cthread::pool_terminate(); }
 
 void crofsocktest::test() {
   try {
     for (unsigned int i = 0; i < 2; i++) {
-      std::cerr << "ROUND (" << i << ") START" << std::endl;
+      std::cerr << "TCP ROUND (" << i << ") START" << std::endl;
       test_mode = TEST_MODE_TCP;
       keep_running = true;
       timeout = 60;
       msg_counter = 0;
-      listening_port = 0;
+      listening_port = 6653;
 
       slisten = new rofl::crofsock(this);
       sclient = new rofl::crofsock(this);
@@ -40,9 +72,6 @@ void crofsocktest::test() {
       /* try to find idle port for test */
       bool lookup_idle_port = true;
       while (lookup_idle_port) {
-        do {
-          listening_port = rand.uint16();
-        } while ((listening_port < 10000) || (listening_port > 49000));
         try {
           LOG(INFO) << "trying listening port=" << (int)listening_port
                     << std::endl;
@@ -52,14 +81,18 @@ void crofsocktest::test() {
           slisten->set_baddr(baddr).listen();
           LOG(INFO) << "binding to " << baddr.str() << std::endl;
           lookup_idle_port = false;
+          break;
         } catch (rofl::eSysCall &e) {
           /* port in use, try another one */
         }
+        do {
+          listening_port = rand.uint16();
+        } while ((listening_port < 10000) || (listening_port > 49000));
       }
 
-      sclient->set_raddr(baddr).tcp_connect(true);
+      sclient->set_raddr(baddr).tcp_connect(false);
 
-      sleep(1);
+      pthread_yield();
 
       while (keep_running && (--timeout > 0)) {
         struct timespec ts;
@@ -71,17 +104,21 @@ void crofsocktest::test() {
 
       CPPUNIT_ASSERT(timeout > 0);
 
+      //sleep(1);
+
       slisten->close();
       sclient->close();
       sserver->close();
 
-      // sleep(5);
+      sleep(1);
 
       delete slisten;
       delete sclient;
       delete sserver;
 
-      std::cerr << "ROUND (" << i << ") END" << std::endl;
+      pthread_yield();
+
+      std::cerr << "TCP ROUND (" << i << ") END" << std::endl;
     }
 
   } catch (rofl::eSysCall &e) {
@@ -95,59 +132,71 @@ void crofsocktest::test() {
 
 void crofsocktest::test_tls() {
   try {
-    test_mode = TEST_MODE_TLS;
-    keep_running = true;
-    timeout = 60;
-    msg_counter = 0;
+    for (unsigned int i = 0; i < 2; i++) {
+      std::cerr << "TLS ROUND (" << i << ") START" << std::endl;
+      test_mode = TEST_MODE_TLS;
+      keep_running = true;
+      timeout = 60;
+      msg_counter = 0;
+      listening_port = 6653;
 
-    slisten = new rofl::crofsock(this);
-    sclient = new rofl::crofsock(this);
+      slisten = new rofl::crofsock(this);
+      sclient = new rofl::crofsock(this);
 
-    /* try to find idle port for test */
-    bool lookup_idle_port = true;
-    while (lookup_idle_port) {
-      do {
-        listening_port = rand.uint16();
-      } while ((listening_port < 10000) || (listening_port > 49000));
-      try {
-        LOG(INFO) << "trying listening port=" << (int)listening_port
-                  << std::endl;
-        baddr =
-            rofl::csockaddr(rofl::caddress_in4("127.0.0.1"), listening_port);
-        /* try to bind address first */
-        slisten->set_baddr(baddr).listen();
-        LOG(INFO) << "binding to " << baddr.str() << std::endl;
-        lookup_idle_port = false;
-      } catch (rofl::eSysCall &e) {
-        /* port in use, try another one */
+      /* try to find idle port for test */
+      bool lookup_idle_port = true;
+      while (lookup_idle_port) {
+        try {
+          LOG(INFO) << "trying listening port=" << (int)listening_port
+                    << std::endl;
+          baddr =
+              rofl::csockaddr(rofl::caddress_in4("127.0.0.1"), listening_port);
+          /* try to bind address first */
+          slisten->set_baddr(baddr).listen();
+          LOG(INFO) << "binding to " << baddr.str() << std::endl;
+          lookup_idle_port = false;
+          break;
+        } catch (rofl::eSysCall &e) {
+          /* port in use, try another one */
+        }
+        do {
+          listening_port = rand.uint16();
+        } while ((listening_port < 10000) || (listening_port > 49000));
       }
+
+      sclient->set_raddr(baddr)
+          .set_tls_cafile(cacert)
+          .set_tls_certfile(clicert)
+          .set_tls_keyfile(clikey)
+          .tls_connect(false);
+
+      sleep(1);
+
+      while (keep_running && (--timeout > 0)) {
+        struct timespec ts;
+        ts.tv_sec = 1;
+        ts.tv_nsec = 0;
+        pselect(0, NULL, NULL, NULL, &ts, NULL);
+      }
+
+      CPPUNIT_ASSERT(timeout > 0);
+
+      //sleep(1);
+
+      slisten->close();
+      sclient->close();
+      sserver->close();
+
+      sleep(1);
+
+      delete slisten;
+      delete sclient;
+      delete sserver;
+
+      pthread_yield();
+
+      std::cerr << "TLS ROUND (" << i << ") END" << std::endl;
     }
-
-    sclient->set_raddr(baddr)
-        .set_tls_cafile("../../../../../tools/xca/ca.rofl-core.crt.pem")
-        .set_tls_certfile("../../../../../tools/xca/client.crt.pem")
-        .set_tls_keyfile("../../../../../tools/xca/client.key.pem")
-        .tls_connect(true);
-
-    sleep(1);
-
-    while (keep_running && (--timeout > 0)) {
-      struct timespec ts;
-      ts.tv_sec = 1;
-      ts.tv_nsec = 0;
-      pselect(0, NULL, NULL, NULL, &ts, NULL);
-    }
-
-    CPPUNIT_ASSERT(timeout > 0);
-
-    slisten->close();
-    sclient->close();
-    sserver->close();
-
-    delete slisten;
-    delete sclient;
-    delete sserver;
-
   } catch (rofl::eSysCall &e) {
     LOG(INFO) << "crofsocktest::test() exception, what: " << e.what()
               << std::endl;
@@ -172,9 +221,9 @@ void crofsocktest::handle_listen(rofl::crofsock &socket) {
 
     } break;
     case TEST_MODE_TLS: {
-      sserver->set_tls_cafile("../../../../../tools/xca/ca.rofl-core.crt.pem")
-          .set_tls_certfile("../../../../../tools/xca/server.crt.pem")
-          .set_tls_keyfile("../../../../../tools/xca/server.key.pem")
+      sserver->set_tls_cafile(cacert)
+          .set_tls_certfile(srvcert)
+          .set_tls_keyfile(srvkey)
           .tls_accept(sd);
     } break;
     default: {};
