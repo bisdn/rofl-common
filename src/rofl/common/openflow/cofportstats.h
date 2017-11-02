@@ -48,7 +48,7 @@ public:
   cofport_stats_request(
       uint8_t of_version = rofl::openflow::OFP_VERSION_UNKNOWN,
       uint8_t *buf = (uint8_t *)0, size_t buflen = 0)
-      : of_version(of_version), port_no(rofl::openflow13::OFPP_ALL) {
+      : of_version(of_version), port_no(rofl::openflow13::OFPP_ANY) {
     if ((buflen == 0) || (nullptr == buf)) {
       return;
     }
