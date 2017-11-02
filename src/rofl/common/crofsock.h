@@ -651,6 +651,8 @@ private:
 private:
   void recv_message();
 
+  void recv_message_tls();
+
   void parse_message();
 
   void parse_of10_message(rofl::openflow::cofmsg **pmsg);
@@ -660,6 +662,8 @@ private:
   void parse_of13_message(rofl::openflow::cofmsg **pmsg);
 
   void send_from_queue();
+
+  void send_from_queue_tls();
 
 private:
   void backoff_reconnect(bool reset_timeout = false);

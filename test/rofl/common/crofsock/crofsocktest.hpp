@@ -28,7 +28,7 @@ class crofsocktest : public CppUnit::TestFixture, public rofl::crofsock_env {
  * See [1] for further information regarding openssl's init/deinit blocks.
  * [1] https://wiki.openssl.org/index.php/Library_Initialization */
 #ifndef ASAN
-  CPPUNIT_TEST(test_tls);
+  //CPPUNIT_TEST(test_tls);
 #endif
   CPPUNIT_TEST(global_terminate);
   CPPUNIT_TEST_SUITE_END();
