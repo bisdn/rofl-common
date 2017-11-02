@@ -104,7 +104,7 @@ void crofsocktest::test() {
 
       CPPUNIT_ASSERT(timeout > 0);
 
-      //sleep(1);
+      // sleep(1);
 
       slisten->close();
       sclient->close();
@@ -116,7 +116,7 @@ void crofsocktest::test() {
       delete sclient;
       delete sserver;
 
-      pthread_yield();
+      sleep(1);
 
       std::cerr << "TCP ROUND (" << i << ") END" << std::endl;
     }
@@ -181,7 +181,7 @@ void crofsocktest::test_tls() {
 
       CPPUNIT_ASSERT(timeout > 0);
 
-      //sleep(1);
+      // sleep(1);
 
       slisten->close();
       sclient->close();
@@ -193,7 +193,7 @@ void crofsocktest::test_tls() {
       delete sclient;
       delete sserver;
 
-      pthread_yield();
+      sleep(1);
 
       std::cerr << "TLS ROUND (" << i << ") END" << std::endl;
     }

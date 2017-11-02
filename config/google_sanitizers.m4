@@ -5,9 +5,9 @@ AC_ARG_ENABLE(asan,
 	AS_HELP_STRING([--enable-asan], [compile with google's address sanitizer [default=no]])
 		, , enable_asan=$asan_default)
 if test "$enable_asan" = "yes"; then
-	CFLAGS="$CFLAGS -fsanitize=address -fomit-frame-pointer"
-	CXXFLAGS="$CXXFLAGS -fno-inline -fsanitize=address -fomit-frame-pointer"
-        LDFLAGS="$LDFLAGS -fsanitize=address -fomit-frame-pointer"
+	CFLAGS="$CFLAGS -g -fsanitize=address -fno-omit-frame-pointer"
+	CXXFLAGS="$CXXFLAGS -g -fno-inline -fsanitize=address -fno-omit-frame-pointer"
+        LDFLAGS="$LDFLAGS -g -fsanitize=address -fno-omit-frame-pointer"
 	AC_DEFINE([ASAN], [], [Description])
 	AC_MSG_RESULT(yes)
 else
@@ -23,9 +23,9 @@ AC_ARG_ENABLE(tsan,
 	AS_HELP_STRING([--enable-tsan], [compile with google's thread sanitizer [default=no]])
 		, , enable_tsan=$tsan_default)
 if test "$enable_tsan" = "yes"; then
-	CFLAGS="$CFLAGS -fsanitize=thread"
-	CXXFLAGS="$CXXFLAGS -fno-inline -fsanitize=thread"
-        LDFLAGS="$LDFLAGS -fsanitize=thread"
+	CFLAGS="$CFLAGS -g -fsanitize=thread"
+	CXXFLAGS="$CXXFLAGS -g -fno-inline -fsanitize=thread"
+        LDFLAGS="$LDFLAGS -g -fsanitize=thread"
 	AC_DEFINE([TSAN], [], [Description])
 	AC_MSG_RESULT(yes)
 else

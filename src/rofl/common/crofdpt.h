@@ -880,7 +880,10 @@ protected:
  */
 class crofdpt : public rofl::crofchan_env {
 
-  enum crofdpt_state_t { STATE_RUNNING, STATE_DELETE_IN_PROGRESS, };
+  enum crofdpt_state_t {
+    STATE_RUNNING,
+    STATE_DELETE_IN_PROGRESS,
+  };
 
 public:
   /**

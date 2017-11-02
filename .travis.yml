@@ -1,29 +1,54 @@
 sudo: required
 dist: trusty
 language: cpp
+
+addons:
+  apt:
+    packages:
+      - clang-4.0
+      - clang-format-4.0
+      - libcppunit-dev
+      - libcunit1-dev
+      - libgoogle-glog-dev
+      - libssl-dev
+    sources:
+      - llvm-toolchain-trusty-4.0
+      - ubuntu-toolchain-r-test
+
 compiler:
   - gcc
   - clang
-before_install:
-  - sudo apt-get update -qq
-  - sudo apt-get install -y -qq libssl-dev libcunit1-dev libcppunit-dev libgoogle-glog-dev clang-format-3.8
-install:
-  - ./autogen.sh
+
 env:
   - FLAGS="--disable-silent-rules --enable-debug"
   - FLAGS="--disable-silent-rules"
+
+matrix:
+  include:
+  - compiler: clang
+    env: FLAGS="--disable-silent-rules --enable-asan"
+
+before_install:
+  - sudo apt-get update -qq
+
+install:
+  - if [[ "$CXX" == "clang++" ]]; then export CXX="clang++-4.0" CC="clang-4.0"; fi
+  - ./autogen.sh
+
 script:
   - mkdir -p build
   - cd build
   - ../configure $FLAGS 
-  - find .. -regex '.*\.\(hh?\|cc?\|hpp\|cpp\)$$' | xargs clang-format-3.8 -i -style=file
+  - find .. -regex '.*\.\(hh?\|cc?\|hpp\|cpp\)$$' | xargs clang-format-4.0 -i -style=file
   - git diff --exit-code
   - make -j 2
   - VERBOSE=yes make -j 2 check
+
 branches:
   only:
     - master
     - stable
+
 notifications:
   email:
     - andreas.koepsel@bisdn.de
