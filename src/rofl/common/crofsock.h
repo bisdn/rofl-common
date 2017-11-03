@@ -640,7 +640,7 @@ private:
 private:
   void tls_init_context();
 
-  void tls_destroy_context();
+  void tls_term_context();
 
   static int tls_pswd_cb(char *buf, int size, int rwflag, void *userdata);
 
@@ -651,8 +651,6 @@ private:
 private:
   void recv_message();
 
-  void recv_message_tls();
-
   void parse_message();
 
   void parse_of10_message(rofl::openflow::cofmsg **pmsg);
@@ -662,8 +660,6 @@ private:
   void parse_of13_message(rofl::openflow::cofmsg **pmsg);
 
   void send_from_queue();
-
-  void send_from_queue_tls();
 
 private:
   void backoff_reconnect(bool reset_timeout = false);
@@ -735,9 +731,6 @@ private:
    * OpenSSL related structures
    */
 
-  // read write lock
-  static crwlock rwlock;
-
   // SSL context
   SSL_CTX *ctx;
 
@@ -746,6 +739,9 @@ private:
 
   // basic input/output
   BIO *bio;
+
+  // openssl rwlock
+  crwlock sslock;
 
   std::string capath;
   std::string cafile;

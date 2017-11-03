@@ -240,7 +240,7 @@ void crofsocktest::handle_tcp_connect_failed(rofl::crofsock &socket) {
 }
 
 void crofsocktest::handle_tcp_connected(rofl::crofsock &socket) {
-  LOG(INFO) << "handle connected" << std::endl;
+  LOG(INFO) << "handle tcp connected" << std::endl;
 
   switch (test_mode) {
   case TEST_MODE_TCP: {
@@ -253,10 +253,7 @@ void crofsocktest::handle_tcp_connected(rofl::crofsock &socket) {
   } break;
   case TEST_MODE_TLS: {
 
-    rofl::openflow::cofmsg_hello *hello =
-        new cofmsg_hello(rofl::openflow13::OFP_VERSION, 0xa1a2a3a4);
-
-    sclient->send_message(hello);
+    /* do nothing, wait for handle_tls_connected */
 
   } break;
   default: {};
@@ -285,10 +282,7 @@ void crofsocktest::handle_tcp_accepted(rofl::crofsock &socket) {
   } break;
   case TEST_MODE_TLS: {
 
-    rofl::openflow::cofmsg_features_request *features =
-        new cofmsg_features_request(rofl::openflow13::OFP_VERSION, 0xb1b2b3b4);
-
-    sserver->send_message(features);
+    /* do nothing, wait for handle_tls_accepted */
 
   } break;
   default: {};
@@ -356,6 +350,8 @@ void crofsocktest::handle_tls_connect_failed(rofl::crofsock &socket) {
 void crofsocktest::handle_tls_connected(rofl::crofsock &socket) {
   LOG(INFO) << "handle tls connected" << std::endl;
 
+  sleep(1);
+
   rofl::openflow::cofmsg_hello *hello =
       new cofmsg_hello(rofl::openflow13::OFP_VERSION, 0xa1a2a3a4);
 
@@ -368,6 +364,8 @@ void crofsocktest::handle_tls_accept_failed(rofl::crofsock &socket) {
 
 void crofsocktest::handle_tls_accepted(rofl::crofsock &socket) {
   LOG(INFO) << "handle tls accepted" << std::endl;
+
+  sleep(1);
 
   rofl::openflow::cofmsg_features_request *features =
       new cofmsg_features_request(rofl::openflow13::OFP_VERSION, 0xb1b2b3b4);

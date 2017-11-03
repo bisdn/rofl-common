@@ -18,7 +18,6 @@ using namespace rofl;
 
 /*static*/ std::set<crofsock_env *> crofsock_env::socket_envs;
 /*static*/ crwlock crofsock_env::socket_envs_lock;
-/*static*/ crwlock crofsock::rwlock;
 
 crofsock::~crofsock() {
   flag_set(FLAG_DELETE_IN_PROGRESS, true);
@@ -72,11 +71,7 @@ void crofsock::close() {
     VLOG(2) << __FUNCTION__ << " STATE_TLS_CONNECTING sd=" << sd
             << " laddr=" << laddr.str() << " raddr=" << raddr.str();
 
-    if (ssl) {
-      SSL_free(ssl);
-      ssl = NULL;
-    }
-    tls_destroy_context();
+    tls_term_context();
     flag_set(FLAG_TLS_IN_USE, false);
 
     state = STATE_TCP_ESTABLISHED;
@@ -87,11 +82,7 @@ void crofsock::close() {
     VLOG(2) << __FUNCTION__ << " STATE_TLS_ACCEPTING sd=" << sd
             << " laddr=" << laddr.str() << " raddr=" << raddr.str();
 
-    if (ssl) {
-      SSL_free(ssl);
-      ssl = NULL;
-    }
-    tls_destroy_context();
+    tls_term_context();
     flag_set(FLAG_TLS_IN_USE, false);
 
     state = STATE_TCP_ESTABLISHED;
@@ -101,6 +92,8 @@ void crofsock::close() {
 
     VLOG(2) << __FUNCTION__ << " STATE_TLS_ESTABLISHED sd=" << sd
             << " laddr=" << laddr.str() << " raddr=" << raddr.str();
+
+    AcquireReadWriteLock lock(sslock);
 
     if (ssl) {
       int rc = 0;
@@ -160,7 +153,7 @@ void crofsock::close() {
       SSL_free(ssl);
       ssl = NULL;
     }
-    tls_destroy_context();
+    tls_term_context();
     flag_set(FLAG_TLS_IN_USE, false);
 
     state = STATE_TCP_ESTABLISHED;
@@ -674,8 +667,10 @@ void crofsock::tcp_connect(bool reconnect) {
 void crofsock::tls_init_context() {
 
   if (ctx) {
-    tls_destroy_context();
+    tls_term_context();
   }
+
+  AcquireReadWriteLock lock(sslock);
 
 #if (OPENSSL_VERSION_NUMBER >= 0x1010000fL)
   // openssl 1.1.0
@@ -733,7 +728,8 @@ void crofsock::tls_init_context() {
   SSL_CTX_set_verify_depth(ctx, depth);
 }
 
-void crofsock::tls_destroy_context() {
+void crofsock::tls_term_context() {
+  AcquireReadWriteLock lock(sslock);
   if (ssl) {
     SSL_free(ssl);
     ssl = NULL;
@@ -776,68 +772,83 @@ void crofsock::tls_accept(int sockfd) {
 
     tls_init_context();
 
-    if ((ssl = SSL_new(ctx)) == NULL) {
-      throw eLibCall("eLibCall", "SSL_new", __FILE__, __FUNCTION__, __LINE__);
+    {
+      AcquireReadWriteLock lock(sslock);
+
+      if ((ssl = SSL_new(ctx)) == NULL) {
+        throw eLibCall("eLibCall", "SSL_new", __FILE__, __FUNCTION__, __LINE__);
+      }
+
+      SSL_set_mode(ssl, SSL_MODE_ENABLE_PARTIAL_WRITE);
+
+      if ((bio = BIO_new(BIO_s_socket())) == NULL) {
+        throw eLibCall("eLibCall", "BIO_new", __FILE__, __FUNCTION__, __LINE__);
+      }
+
+      BIO_set_fd(bio, sd, BIO_NOCLOSE);
+
+      SSL_set_bio(ssl, /*rbio*/ bio, /*wbio*/ bio);
+
+      SSL_set_accept_state(ssl);
+
+      state = STATE_TLS_ACCEPTING;
     }
-
-    if ((bio = BIO_new(BIO_s_socket())) == NULL) {
-      throw eLibCall("eLibCall", "BIO_new", __FILE__, __FUNCTION__, __LINE__);
-    }
-
-    BIO_set_fd(bio, sd, BIO_NOCLOSE);
-
-    SSL_set_bio(ssl, /*rbio*/ bio, /*wbio*/ bio);
-
-    SSL_set_accept_state(ssl);
-
-    state = STATE_TLS_ACCEPTING;
 
     VLOG(2) << __FUNCTION__ << " TLS: start passive connection sd=" << sd;
     crofsock::tls_accept(sd);
   } break;
   case STATE_TLS_ACCEPTING: {
+    int rc = 0;
 
-    int rc = 0, err_code = 0;
+    AcquireReadWriteLock lock(sslock);
 
     VLOG(2) << __FUNCTION__
             << " TLS: run SSL_accept on passive connection sd=" << sd;
 
-    if ((rc = SSL_accept(ssl)) <= 0) {
-      switch (err_code = SSL_get_error(ssl, rc)) {
+    rc = SSL_accept(ssl);
+
+    VLOG(3) << __FUNCTION__ << " TLS: SSL_accept on sd=" << sd << " rc: " << rc
+            << " errno: " << errno << " (" << strerror(errno) << ")";
+
+    if (rc <= 0) {
+      switch (SSL_get_error(ssl, rc)) {
       case SSL_ERROR_WANT_READ: {
-        VLOG(2) << __FUNCTION__ << " TLS: accept WANT READ sd=" << sd;
+        VLOG(2) << __FUNCTION__ << " TLS: SSL_accept WANT READ on sd=" << sd;
       }
         return;
       case SSL_ERROR_WANT_WRITE: {
-        VLOG(2) << __FUNCTION__ << " TLS: accept WANT WRITE sd=" << sd;
+        VLOG(2) << __FUNCTION__ << " TLS: SSL_accept WANT WRITE on sd=" << sd;
       }
         return;
       case SSL_ERROR_WANT_ACCEPT: {
-        VLOG(2) << __FUNCTION__ << " TLS: accept WANT ACCEPT sd=" << sd;
+        VLOG(2) << __FUNCTION__ << " TLS: SSL_accept WANT ACCEPT on sd=" << sd;
       }
         return;
       case SSL_ERROR_WANT_CONNECT: {
-        VLOG(2) << __FUNCTION__ << " TLS: accept WANT CONNECT sd=" << sd;
+        VLOG(2) << __FUNCTION__ << " TLS: SSL_accept WANT CONNECT on sd=" << sd;
       }
         return;
 
       case SSL_ERROR_NONE: {
         VLOG(2) << __FUNCTION__
-                << " TLS: accept succeeded ERROR NONE sd=" << sd;
+                << " TLS: SSL_accept succeeded ERROR NONE on sd=" << sd;
       }
         return;
       case SSL_ERROR_SSL: {
-        VLOG(2) << __FUNCTION__ << " TLS: accept failed ERROR SSL sd=" << sd;
+        VLOG(2) << __FUNCTION__
+                << " TLS: SSL_accept failed ERROR SSL on sd=" << sd;
       } break;
       case SSL_ERROR_SYSCALL: {
         VLOG(2) << __FUNCTION__
-                << " TLS: accept failed ERROR SYSCALL sd=" << sd;
+                << " TLS: SSL_accept failed ERROR SYSCALL on sd=" << sd;
       } break;
       case SSL_ERROR_ZERO_RETURN: {
         VLOG(2) << __FUNCTION__
-                << " TLS: accept failed ERROR ZERO RETURN sd=" << sd;
+                << " TLS: SSL_accept failed ERROR ZERO RETURN on sd=" << sd;
       } break;
-      default: { VLOG(2) << __FUNCTION__ << " TLS: accept failed sd=" << sd; };
+      default: {
+        VLOG(2) << __FUNCTION__ << " TLS: SSL_accept failed on sd=" << sd;
+      };
       }
 
       tls_log_errors();
@@ -846,11 +857,13 @@ void crofsock::tls_accept(int sockfd) {
       ssl = NULL;
       bio = NULL;
 
-      tls_destroy_context();
+      tls_term_context();
 
       crofsock::close();
 
       crofsock_env::call_env(env).handle_tls_accept_failed(*this);
+
+      return;
 
     } else if (rc == 1) {
 
@@ -864,7 +877,7 @@ void crofsock::tls_accept(int sockfd) {
         ssl = NULL;
         bio = NULL;
 
-        tls_destroy_context();
+        tls_term_context();
 
         crofsock::close();
 
@@ -873,7 +886,7 @@ void crofsock::tls_accept(int sockfd) {
         return;
       }
 
-      VLOG(2) << __FUNCTION__ << " TLS: accept succeeded sd=" << sd;
+      VLOG(2) << __FUNCTION__ << " TLS: SSL_accept succeeded on sd=" << sd;
 
       state = STATE_TLS_ESTABLISHED;
 
@@ -914,6 +927,8 @@ void crofsock::tls_connect(bool reconnect) {
       throw eLibCall("eLibCall", "SSL_new", __FILE__, __FUNCTION__, __LINE__);
     }
 
+    SSL_set_mode(ssl, SSL_MODE_ENABLE_PARTIAL_WRITE);
+
     if ((bio = BIO_new(BIO_s_socket())) == NULL) {
       throw eLibCall("eLibCall", "BIO_new", __FILE__, __FUNCTION__, __LINE__);
     }
@@ -931,46 +946,57 @@ void crofsock::tls_connect(bool reconnect) {
 
   } break;
   case STATE_TLS_CONNECTING: {
-    int rc = 0, err_code = 0;
+    int rc = 0;
+
+    AcquireReadWriteLock lock(sslock);
 
     VLOG(2) << __FUNCTION__
             << " TLS: run SSL_connect on active connection sd=" << sd;
 
-    if ((rc = SSL_connect(ssl)) <= 0) {
-      switch (err_code = SSL_get_error(ssl, rc)) {
+    rc = SSL_connect(ssl);
+
+    VLOG(3) << __FUNCTION__ << " TLS: SSL_connect on sd=" << sd << " rc: " << rc
+            << " errno: " << errno << " (" << strerror(errno) << ")";
+
+    if (rc <= 0) {
+      switch (SSL_get_error(ssl, rc)) {
       case SSL_ERROR_WANT_READ: {
-        VLOG(2) << __FUNCTION__ << " TLS: connect WANT READ sd=" << sd;
+        VLOG(2) << __FUNCTION__ << " TLS: SSL_connect WANT READ on sd=" << sd;
       }
         return;
       case SSL_ERROR_WANT_WRITE: {
-        VLOG(2) << __FUNCTION__ << " TLS: connect WANT WRITE sd=" << sd;
+        VLOG(2) << __FUNCTION__ << " TLS: SSL_connect WANT WRITE on sd=" << sd;
       }
         return;
       case SSL_ERROR_WANT_ACCEPT: {
-        VLOG(2) << __FUNCTION__ << " TLS: connect WANT ACCEPT sd=" << sd;
+        VLOG(2) << __FUNCTION__ << " TLS: SSL_connect WANT ACCEPT on sd=" << sd;
       }
         return;
       case SSL_ERROR_WANT_CONNECT: {
-        VLOG(2) << __FUNCTION__ << " TLS: connect WANT CONNECT sd=" << sd;
+        VLOG(2) << __FUNCTION__
+                << " TLS: SSL_connect WANT CONNECT on sd=" << sd;
       }
         return;
 
       case SSL_ERROR_NONE: {
         VLOG(2) << __FUNCTION__
-                << " TLS: connect succeeded ERROR NONE sd=" << sd;
+                << " TLS: SSL_connect succeeded ERROR NONE on sd=" << sd;
       } break;
       case SSL_ERROR_SSL: {
-        VLOG(2) << __FUNCTION__ << " TLS: connect failed ERROR SSL sd=" << sd;
+        VLOG(2) << __FUNCTION__
+                << " TLS: SSL_connect failed ERROR SSL on sd=" << sd;
       } break;
       case SSL_ERROR_SYSCALL: {
         VLOG(2) << __FUNCTION__
-                << " TLS: connect failed ERROR SYSCALL sd=" << sd;
+                << " TLS: SSL_connect failed ERROR SYSCALL on sd=" << sd;
       } break;
       case SSL_ERROR_ZERO_RETURN: {
         VLOG(2) << __FUNCTION__
-                << " TLS: connect failed ERROR ZERO RETURN sd=" << sd;
+                << " TLS: SSL_connect failed ERROR ZERO RETURN on sd=" << sd;
       } break;
-      default: { VLOG(2) << __FUNCTION__ << " TLS: connect failed sd=" << sd; };
+      default: {
+        VLOG(2) << __FUNCTION__ << " TLS: connect failed on sd=" << sd;
+      };
       }
 
       tls_log_errors();
@@ -979,17 +1005,19 @@ void crofsock::tls_connect(bool reconnect) {
       ssl = NULL;
       bio = NULL;
 
-      tls_destroy_context();
+      tls_term_context();
 
       crofsock::close();
 
       crofsock_env::call_env(env).handle_tls_connect_failed(*this);
 
+      return;
+
     } else if (rc == 1) {
 
       if (not tls_verify_ok()) {
         VLOG(2) << __FUNCTION__
-                << " TLS: connect peer verification failed sd=" << sd;
+                << " TLS: SSL_connect peer verification failed on sd=" << sd;
 
         tls_log_errors();
 
@@ -997,7 +1025,7 @@ void crofsock::tls_connect(bool reconnect) {
         ssl = NULL;
         bio = NULL;
 
-        tls_destroy_context();
+        tls_term_context();
 
         crofsock::close();
 
@@ -1006,7 +1034,7 @@ void crofsock::tls_connect(bool reconnect) {
         return;
       }
 
-      VLOG(2) << __FUNCTION__ << " TLS: connect succeeded sd=" << sd;
+      VLOG(2) << __FUNCTION__ << " TLS: SSL_connect succeeded on sd=" << sd;
 
       state = STATE_TLS_ESTABLISHED;
 
@@ -1048,7 +1076,7 @@ bool crofsock::tls_verify_ok() {
       ssl = NULL;
       bio = NULL;
 
-      tls_destroy_context();
+      tls_term_context();
 
       crofsock::close();
 
@@ -1515,21 +1543,11 @@ void crofsock::handle_wakeup(cthread &thread) {
     return;
   }
 
-  switch (state.load()) {
-  case STATE_TLS_ESTABLISHED: {
-    if (&thread == &cthread::thread(rx_thread_num)) {
-      recv_message_tls();
-    } else if (&thread == &cthread::thread(tx_thread_num)) {
-      send_from_queue_tls();
-    }
-  } break;
-  default: {
-    if (&thread == &cthread::thread(rx_thread_num)) {
-      recv_message();
-    } else if (&thread == &cthread::thread(tx_thread_num)) {
-      send_from_queue();
-    }
-  }
+  if (&thread == &cthread::thread(rx_thread_num)) {
+    // recv_message();
+    handle_read_event_rxthread(thread, sd);
+  } else if (&thread == &cthread::thread(tx_thread_num)) {
+    send_from_queue();
   }
 }
 
@@ -1542,214 +1560,10 @@ void crofsock::handle_write_event(cthread &thread, int fd) {
     assert(fd == sd);
     flag_set(FLAG_CONGESTED, false);
     cthread::thread(tx_thread_num).drop_write_fd(sd);
-    switch (state.load()) {
-    case STATE_TLS_ESTABLISHED: {
-      send_from_queue_tls();
-    } break;
-    default: { send_from_queue(); }
-    }
-
+    send_from_queue();
   } else if (&thread == &cthread::thread(rx_thread_num)) {
     assert(fd == sd);
     handle_read_event_rxthread(thread, fd);
-  }
-}
-
-void crofsock::send_from_queue_tls() {
-  if ((get_state() <= STATE_IDLE) || delete_in_progress()) {
-    VLOG(3) << __FUNCTION__ << " sd=" << sd
-            << " dropping message, no connection "
-               "established"
-            << " laddr=" << laddr.str() << " raddr=" << raddr.str();
-    return;
-  }
-
-  tx_is_running = true;
-
-  bool reschedule;
-  do {
-    reschedule = false;
-    for (unsigned int queue_id = 0; queue_id < QUEUE_MAX; ++queue_id) {
-
-      for (unsigned int num = 0; num < txweights[queue_id]; ++num) {
-
-        if ((tx_disabled) || (get_state() < STATE_TCP_ESTABLISHED)) {
-          tx_is_running = false;
-          return;
-        }
-
-        /* no pending fragment */
-        if (not tx_fragment_pending) {
-          rofl::openflow::cofmsg *msg = nullptr;
-
-          /* fetch a new message for transmission from tx queue */
-          if ((msg = txqueues[queue_id].retrieve()) == NULL)
-            break;
-          // txqueues[queue_id].pop();
-
-          /* bytes of this message sent so far */
-          msg_bytes_sent = 0;
-
-          /* overall length of this message */
-          txlen = msg->length();
-
-          memset(txbuffer.somem(), 0, txlen);
-
-          /* pack message into txbuffer */
-          msg->pack(txbuffer.somem(), txlen);
-
-          VLOG(3) << __FUNCTION__ << " sd=" << sd
-                  << " message sent: " << msg->str().c_str()
-                  << " laddr=" << laddr.str() << " raddr=" << raddr.str();
-
-          /* remove C++ message object from heap */
-          delete msg;
-        }
-
-        int nbytes = SSL_write(ssl, txbuffer.somem() + msg_bytes_sent,
-                               txlen - msg_bytes_sent);
-
-        if (nbytes <= 0) {
-          int err_code;
-          switch (err_code = SSL_get_error(ssl, nbytes)) {
-          case SSL_ERROR_WANT_READ: {
-            VLOG(2) << __FUNCTION__ << " TLS: SSL_write WANT READ sd=" << sd;
-          }
-            return;
-          case SSL_ERROR_WANT_WRITE: {
-            VLOG(2) << __FUNCTION__ << " TLS: SSL_write WANT WRITE sd=" << sd;
-          }
-            return;
-          case SSL_ERROR_WANT_ACCEPT: {
-            VLOG(2) << __FUNCTION__ << " TLS: SSL_write WANT ACCEPT sd=" << sd;
-          }
-            return;
-          case SSL_ERROR_WANT_CONNECT: {
-            VLOG(2) << __FUNCTION__ << " TLS: SSL_write WANT CONNECT sd=" << sd;
-          }
-            return;
-
-          case SSL_ERROR_NONE: {
-            VLOG(2) << __FUNCTION__
-                    << " TLS: SSL_write succeeded ERROR NONE sd=" << sd;
-          } break;
-          case SSL_ERROR_SSL: {
-            VLOG(2) << __FUNCTION__
-                    << " TLS: SSL_write failed ERROR SSL sd=" << sd;
-          }
-            return;
-          case SSL_ERROR_SYSCALL: {
-            VLOG(2) << __FUNCTION__
-                    << " TLS: SSL_write failed ERROR SYSCALL sd=" << sd;
-          }
-            return;
-          case SSL_ERROR_ZERO_RETURN: {
-            VLOG(2) << __FUNCTION__
-                    << " TLS: SSL_write failed ERROR ZERO RETURN sd=" << sd;
-          }
-            return;
-          default: {
-            VLOG(2) << __FUNCTION__ << " TLS: SSL_write failed sd=" << sd;
-          }
-            return;
-          }
-        }
-
-        cmemory rawbytes(2048);
-        /* TODO: check return value and handle errors properly */
-        int rbytes =
-            BIO_read(bio, (void *)(rawbytes.somem()), rawbytes.length());
-
-        /* send memory block via socket in non-blocking mode */
-        nbytes = ::send(sd, rawbytes.somem() + msg_bytes_sent,
-                        txlen - msg_bytes_sent, MSG_DONTWAIT | MSG_NOSIGNAL);
-
-        /* error occurred */
-        if (nbytes < 0) {
-          switch (errno) {
-          case EAGAIN: /* socket would block */ {
-            tx_is_running = false;
-            tx_fragment_pending = true;
-            flag_set(FLAG_CONGESTED, true);
-            cthread::thread(tx_thread_num).add_write_fd(this, sd);
-
-            if (not flag_test(FLAG_TX_BLOCK_QUEUEING)) {
-              /* block transmission of further packets */
-              flag_set(FLAG_TX_BLOCK_QUEUEING, true);
-              /* remember queue size, when congestion occurred */
-              txqueue_size_congestion_occurred = txqueue_pending_pkts;
-              /* threshold for re-enabling acceptance of packets */
-              txqueue_size_tx_threshold = txqueue_pending_pkts / 2;
-
-              VLOG(3) << __FUNCTION__ << " sd=" << sd << " congestion occurred"
-                      << " txqueue_pending_pkts: " << txqueue_pending_pkts
-                      << " txqueue_size_congestion_occurred: "
-                      << txqueue_size_congestion_occurred
-                      << " txqueue_size_tx_threshold: "
-                      << txqueue_size_tx_threshold << " laddr=" << laddr.str()
-                      << " raddr=" << raddr.str();
-
-              crofsock_env::call_env(env).congestion_occurred_indication(*this);
-            }
-          }
-            return;
-          case SIGPIPE:
-          default: {
-            VLOG(1) << __FUNCTION__ << " sd=" << sd
-                    << " ::send() syscall failed, error: " << errno << ": "
-                    << strerror(errno);
-            tx_is_running = false;
-          }
-            return;
-          }
-
-          /* at least some bytes were sent successfully */
-        } else {
-          msg_bytes_sent += nbytes;
-          flag_set(FLAG_CONGESTED, false);
-
-          /* short write */
-          if (msg_bytes_sent < txlen) {
-            tx_fragment_pending = true;
-
-            /* packet successfully sent */
-          } else {
-            tx_fragment_pending = false;
-            txqueue_pending_pkts--;
-          }
-
-          VLOG(3) << __FUNCTION__ << " sd=" << sd << " sent " << nbytes
-                  << " bytes msg_bytes_sent=" << msg_bytes_sent
-                  << " tx_fragment_pending=" << tx_fragment_pending
-                  << " txqueue_pending_pkts=" << txqueue_pending_pkts;
-        }
-      }
-
-      if (not txqueues[queue_id].empty()) {
-        reschedule = true;
-      }
-    }
-
-    if ((not flag_test(FLAG_CONGESTED)) && flag_test(FLAG_TX_BLOCK_QUEUEING)) {
-      if (txqueue_pending_pkts <= txqueue_size_tx_threshold) {
-        flag_set(FLAG_TX_BLOCK_QUEUEING, false);
-        VLOG(3) << __FUNCTION__ << " sd=" << sd << " congestion solved"
-                << " txqueue_pending_pkts" << txqueue_pending_pkts
-                << " txqueue_size_congestion_occurred"
-                << txqueue_size_congestion_occurred
-                << " txqueue_size_tx_threshold" << txqueue_size_tx_threshold
-                << " laddr=" << laddr.str() << " raddr=" << raddr.str();
-
-        crofsock_env::call_env(env).congestion_solved_indication(*this);
-      }
-    }
-
-  } while (reschedule);
-
-  tx_is_running = false;
-
-  if ((txqueue_pending_pkts > 0) && (not flag_test(FLAG_TX_BLOCK_QUEUEING))) {
-    cthread::thread(tx_thread_num).wakeup(this);
   }
 }
 
@@ -1804,69 +1618,206 @@ void crofsock::send_from_queue() {
           delete msg;
         }
 
-        /* send memory block via socket in non-blocking mode */
-        int nbytes =
-            ::send(sd, txbuffer.somem() + msg_bytes_sent,
-                   txlen - msg_bytes_sent, MSG_DONTWAIT | MSG_NOSIGNAL);
+        switch (state.load()) {
+        case STATE_TCP_ESTABLISHED: {
 
-        /* error occurred */
-        if (nbytes < 0) {
-          switch (errno) {
-          case EAGAIN: /* socket would block */ {
-            tx_is_running = false;
-            tx_fragment_pending = true;
-            flag_set(FLAG_CONGESTED, true);
-            cthread::thread(tx_thread_num).add_write_fd(this, sd);
+          /* send memory block via socket in non-blocking mode */
+          int nbytes =
+              ::send(sd, txbuffer.somem() + msg_bytes_sent,
+                     txlen - msg_bytes_sent, MSG_DONTWAIT | MSG_NOSIGNAL);
 
-            if (not flag_test(FLAG_TX_BLOCK_QUEUEING)) {
-              /* block transmission of further packets */
-              flag_set(FLAG_TX_BLOCK_QUEUEING, true);
-              /* remember queue size, when congestion occurred */
-              txqueue_size_congestion_occurred = txqueue_pending_pkts;
-              /* threshold for re-enabling acceptance of packets */
-              txqueue_size_tx_threshold = txqueue_pending_pkts / 2;
+          /* error occurred */
+          if (nbytes < 0) {
+            switch (errno) {
+            case EAGAIN: /* socket would block */ {
+              tx_is_running = false;
+              tx_fragment_pending = true;
+              flag_set(FLAG_CONGESTED, true);
+              cthread::thread(tx_thread_num).add_write_fd(this, sd);
 
-              VLOG(3) << __FUNCTION__ << " sd=" << sd << " congestion occurred"
-                      << " txqueue_pending_pkts: " << txqueue_pending_pkts
-                      << " txqueue_size_congestion_occurred: "
-                      << txqueue_size_congestion_occurred
-                      << " txqueue_size_tx_threshold: "
-                      << txqueue_size_tx_threshold << " laddr=" << laddr.str()
-                      << " raddr=" << raddr.str();
+              if (not flag_test(FLAG_TX_BLOCK_QUEUEING)) {
+                /* block transmission of further packets */
+                flag_set(FLAG_TX_BLOCK_QUEUEING, true);
+                /* remember queue size, when congestion occurred */
+                txqueue_size_congestion_occurred = txqueue_pending_pkts;
+                /* threshold for re-enabling acceptance of packets */
+                txqueue_size_tx_threshold = txqueue_pending_pkts / 2;
 
-              crofsock_env::call_env(env).congestion_occurred_indication(*this);
+                VLOG(3) << __FUNCTION__ << " sd=" << sd
+                        << " congestion occurred"
+                        << " txqueue_pending_pkts: " << txqueue_pending_pkts
+                        << " txqueue_size_congestion_occurred: "
+                        << txqueue_size_congestion_occurred
+                        << " txqueue_size_tx_threshold: "
+                        << txqueue_size_tx_threshold << " laddr=" << laddr.str()
+                        << " raddr=" << raddr.str();
+
+                crofsock_env::call_env(env).congestion_occurred_indication(
+                    *this);
+              }
             }
-          }
-            return;
-          case SIGPIPE:
-          default: {
-            VLOG(1) << __FUNCTION__ << " sd=" << sd
-                    << " ::send() syscall failed, error: " << errno << ": "
-                    << strerror(errno);
-            tx_is_running = false;
-          }
-            return;
-          }
+              return;
+            case SIGPIPE:
+            default: {
+              VLOG(1) << __FUNCTION__ << " sd=" << sd
+                      << " ::send() syscall failed, error: " << errno << ": "
+                      << strerror(errno);
+              tx_is_running = false;
+            }
+              return;
+            }
 
-          /* at least some bytes were sent successfully */
-        } else {
-          msg_bytes_sent += nbytes;
-          flag_set(FLAG_CONGESTED, false);
-
-          /* short write */
-          if (msg_bytes_sent < txlen) {
-            tx_fragment_pending = true;
-
-            /* packet successfully sent */
+            /* at least some bytes were sent successfully */
           } else {
-            tx_fragment_pending = false;
-            txqueue_pending_pkts--;
+            msg_bytes_sent += nbytes;
+            flag_set(FLAG_CONGESTED, false);
+
+            /* short write */
+            if (msg_bytes_sent < txlen) {
+              tx_fragment_pending = true;
+
+              /* packet successfully sent */
+            } else {
+              tx_fragment_pending = false;
+              txqueue_pending_pkts--;
+            }
+
+            VLOG(3) << __FUNCTION__ << " sd=" << sd << " sent " << nbytes
+                    << " bytes msg_bytes_sent=" << msg_bytes_sent
+                    << " tx_fragment_pending=" << tx_fragment_pending
+                    << " txqueue_pending_pkts=" << txqueue_pending_pkts;
           }
 
-          VLOG(3) << __FUNCTION__ << " sd=" << sd << " sent " << nbytes
-                  << " bytes msg_bytes_sent=" << msg_bytes_sent
-                  << " tx_fragment_pending=" << tx_fragment_pending
-                  << " txqueue_pending_pkts=" << txqueue_pending_pkts;
+        } break;
+        case STATE_TLS_ESTABLISHED: {
+
+          AcquireReadWriteLock lock(sslock);
+
+          /* send memory block via OpenSSL structure in non-blocking mode */
+          int nbytes = SSL_write(ssl, txbuffer.somem() + msg_bytes_sent,
+                                 txlen - msg_bytes_sent);
+
+          VLOG(3) << __FUNCTION__ << " TLS: SSL_write on sd=" << sd
+                  << " nbytes: " << nbytes << " errno: " << errno << " ("
+                  << strerror(errno) << ")";
+
+          if (nbytes < 0) {
+            switch (SSL_get_error(ssl, nbytes)) {
+            case SSL_ERROR_WANT_READ: { /* waiting for more data, stop
+                                           processing for now */
+              VLOG(2) << __FUNCTION__ << " TLS: SSL_write WANT READ sd=" << sd;
+              // add_read_fd(sd) is always active, so we can skip it here
+            }
+              return;
+            case SSL_ERROR_WANT_WRITE: { /* assumption: underlying socket is
+                                            blocking */
+              VLOG(2) << __FUNCTION__ << " TLS: SSL_write WANT WRITE sd=" << sd;
+              tx_is_running = false;
+              tx_fragment_pending = true;
+              flag_set(FLAG_CONGESTED, true);
+              cthread::thread(tx_thread_num).add_write_fd(this, sd);
+
+              if (not flag_test(FLAG_TX_BLOCK_QUEUEING)) {
+                /* block transmission of further packets */
+                flag_set(FLAG_TX_BLOCK_QUEUEING, true);
+                /* remember queue size, when congestion occurred */
+                txqueue_size_congestion_occurred = txqueue_pending_pkts;
+                /* threshold for re-enabling acceptance of packets */
+                txqueue_size_tx_threshold = txqueue_pending_pkts / 2;
+
+                VLOG(3) << __FUNCTION__ << " sd=" << sd
+                        << " congestion occurred"
+                        << " txqueue_pending_pkts: " << txqueue_pending_pkts
+                        << " txqueue_size_congestion_occurred: "
+                        << txqueue_size_congestion_occurred
+                        << " txqueue_size_tx_threshold: "
+                        << txqueue_size_tx_threshold << " laddr=" << laddr.str()
+                        << " raddr=" << raddr.str();
+
+                crofsock_env::call_env(env).congestion_occurred_indication(
+                    *this);
+              }
+            }
+              return;
+            case SSL_ERROR_WANT_ACCEPT: { /* should never happen here, though */
+              VLOG(3) << __FUNCTION__
+                      << " TLS: SSL_write WANT ACCEPT on sd=" << sd;
+              tx_is_running = false;
+            }
+              return;
+            case SSL_ERROR_WANT_CONNECT: { /* should never happen here, though
+                                              */
+              VLOG(3) << __FUNCTION__
+                      << " TLS: SSL_write WANT CONNECT on sd=" << sd;
+              tx_is_running = false;
+            }
+              return;
+
+            case SSL_ERROR_NONE: { /* no error occured, just continue */
+              VLOG(3) << __FUNCTION__
+                      << " TLS: SSL_write succeeded ERROR NONE on sd=" << sd;
+            } break;
+            case SSL_ERROR_SSL: { /* error on SSL layer */
+              VLOG(3) << __FUNCTION__
+                      << " TLS: SSL_write failed ERROR SSL on sd=" << sd;
+              tx_is_running = false;
+            }
+              return;
+            case SSL_ERROR_SYSCALL: { /* error on underlying system call */
+              VLOG(3) << __FUNCTION__
+                      << " TLS: SSL_write failed ERROR SYSCALL on sd=" << sd
+                      << " nbytes: " << nbytes << " errno: " << errno << " ("
+                      << strerror(errno) << ")";
+              tx_is_running = false;
+            }
+              return;
+            case SSL_ERROR_ZERO_RETURN: { /* peer initiated shutdown */
+              VLOG(3) << __FUNCTION__
+                      << " TLS: SSL_write failed ERROR ZERO RETURN on sd="
+                      << sd;
+              tx_is_running = false;
+            }
+              return;
+            default: {
+              VLOG(3) << __FUNCTION__ << " TLS: SSL_write failed on sd=" << sd;
+              tx_is_running = false;
+            }
+              return;
+            }
+
+            /* peer shutdown */
+          } else if (nbytes == 0) {
+
+            close();
+            return;
+
+            /* at least some bytes were sent successfully */
+          } else {
+            msg_bytes_sent += nbytes;
+            flag_set(FLAG_CONGESTED, false);
+
+            /* short write */
+            if (msg_bytes_sent < txlen) {
+              tx_fragment_pending = true;
+
+              /* packet successfully sent */
+            } else {
+              tx_fragment_pending = false;
+              txqueue_pending_pkts--;
+            }
+
+            VLOG(3) << __FUNCTION__ << " sd=" << sd << " sent " << nbytes
+                    << " bytes msg_bytes_sent=" << msg_bytes_sent
+                    << " tx_fragment_pending=" << tx_fragment_pending
+                    << " txqueue_pending_pkts=" << txqueue_pending_pkts;
+          }
+
+        } break;
+        default: {
+
+          VLOG(2) << __FUNCTION__ << " unable to send in state=" << str()
+                  << " on sd=" << sd;
+        };
         }
       }
 
@@ -2000,7 +1951,7 @@ void crofsock::handle_read_event_rxthread(cthread &thread, int fd) {
 
       tls_connect(flag_test(FLAG_RECONNECT_ON_FAILURE));
       if (STATE_TLS_ESTABLISHED == state) {
-        recv_message_tls();
+        recv_message();
       }
 
     } break;
@@ -2008,7 +1959,7 @@ void crofsock::handle_read_event_rxthread(cthread &thread, int fd) {
 
       tls_accept(fd);
       if (STATE_TLS_ESTABLISHED == state) {
-        recv_message_tls();
+        recv_message();
       }
 
     } break;
@@ -2023,7 +1974,7 @@ void crofsock::handle_read_event_rxthread(cthread &thread, int fd) {
 
       if (not flag_test(FLAG_TLS_IN_USE))
         return;
-      recv_message_tls();
+      recv_message();
 
     } break;
     default: /* do nothing */
@@ -2039,164 +1990,8 @@ void crofsock::handle_read_event_rxthread(cthread &thread, int fd) {
   }
 }
 
-void crofsock::recv_message_tls() {
-  while (not rx_disabled) {
-
-    if ((get_state() <= STATE_IDLE) || delete_in_progress()) {
-      VLOG(3) << __FUNCTION__ << "() ignoring message sd=" << sd
-              << " laddr=" << laddr.str() << " raddr=" << raddr.str()
-              << " state=" << state;
-      return;
-    }
-
-    cmemory rawbytes(2048);
-    /* read a chunk of encrypted data from socket */
-    int rc =
-        ::recv(sd, (void *)(rawbytes.somem()), rawbytes.length(), MSG_DONTWAIT);
-
-    if (rc < 0) {
-      switch (errno) {
-      case EAGAIN: {
-        /* do not continue and let kernel inform us, once more data is available
-     */
-        VLOG(3) << __FUNCTION__ << " EAGAIN on fd=" << sd;
-        return;
-      } break;
-      default: {
-        VLOG(1) << __FUNCTION__ << " ::recv() syscall failed, error: " << errno
-                << ": " << strerror(errno) << " laddr=" << laddr.str()
-                << " raddr=" << raddr.str();
-        goto on_error;
-      };
-      }
-    } else if (rc == 0) {
-      /* shutdown from peer */
-      VLOG(2) << __FUNCTION__ << " TCP: peer shutdown sd=" << sd
-              << " laddr=" << laddr.str() << " raddr=" << raddr.str();
-      goto on_error;
-    }
-
-    /* TODO: check return value and handle any errors properly */
-    BIO_write(bio, rawbytes.somem(), rc);
-
-    if (not rx_fragment_pending) {
-      msg_bytes_read = 0;
-    }
-
-    uint16_t msg_len = 0;
-
-    /* how many bytes do we have to read? */
-    if (msg_bytes_read < sizeof(struct openflow::ofp_header)) {
-      msg_len = sizeof(struct openflow::ofp_header);
-    } else {
-      struct openflow::ofp_header *header =
-          (struct openflow::ofp_header *)(rxbuffer.somem());
-      msg_len = be16toh(header->length);
-    }
-
-    /* sanity check: 8 <= msg_len <= 2^16 */
-    if (msg_len < sizeof(struct openflow::ofp_header)) {
-      /* out-of-sync => enforce reconnect in client mode */
-      VLOG(2) << __FUNCTION__ << " TCP: openflow out-of-sync sd=" << sd
-              << " laddr=" << laddr.str() << " raddr=" << raddr.str();
-      goto on_error;
-    }
-
-    int bytes_available = SSL_pending(ssl);
-
-    int read_bytes = (msg_len - msg_bytes_read) < bytes_available
-                         ? (msg_len - msg_bytes_read)
-                         : bytes_available;
-
-    /* read from socket more bytes, at most "msg_len - msg_bytes_read" */
-    if ((rc = SSL_read(ssl, (void *)(rxbuffer.somem() + msg_bytes_read),
-                       read_bytes)) <= 0) {
-      int err_code;
-      switch (err_code = SSL_get_error(ssl, rc)) {
-      case SSL_ERROR_WANT_READ: {
-        VLOG(2) << __FUNCTION__ << " TLS: recv WANT READ sd=" << sd;
-      }
-        return;
-      case SSL_ERROR_WANT_WRITE: {
-        VLOG(2) << __FUNCTION__ << " TLS: recv WANT WRITE sd=" << sd;
-      }
-        return;
-      case SSL_ERROR_WANT_ACCEPT: {
-        VLOG(2) << __FUNCTION__ << " TLS: recv WANT ACCEPT sd=" << sd;
-      }
-        return;
-      case SSL_ERROR_WANT_CONNECT: {
-        VLOG(2) << __FUNCTION__ << " TLS: recv WANT CONNECT sd=" << sd;
-      }
-        return;
-
-      case SSL_ERROR_NONE: {
-        VLOG(2) << __FUNCTION__ << " TLS: recv succeeded ERROR NONE sd=" << sd;
-      } break;
-      case SSL_ERROR_SSL: {
-        VLOG(2) << __FUNCTION__ << " TLS: recv failed ERROR SSL sd=" << sd;
-      }
-        goto on_error;
-      case SSL_ERROR_SYSCALL: {
-        VLOG(2) << __FUNCTION__ << " TLS: recv failed ERROR SYSCALL sd=" << sd;
-      }
-        goto on_error;
-      case SSL_ERROR_ZERO_RETURN: {
-        VLOG(2) << __FUNCTION__
-                << " TLS: recv failed ERROR ZERO RETURN sd=" << sd;
-      }
-        goto on_error;
-      default: { VLOG(2) << __FUNCTION__ << " TLS: recv failed sd=" << sd; }
-        return;
-      }
-    }
-
-    msg_bytes_read += rc;
-
-    /* minimum message length received, check completeness of message */
-    if (msg_bytes_read >= sizeof(struct openflow::ofp_header)) {
-      struct openflow::ofp_header *header =
-          (struct openflow::ofp_header *)(rxbuffer.somem());
-      uint16_t msg_len = be16toh(header->length);
-
-      /* ok, message was received completely */
-      if (msg_len == msg_bytes_read) {
-        rx_fragment_pending = false;
-        parse_message();
-        msg_bytes_read = 0;
-      } else {
-        rx_fragment_pending = true;
-      }
-    }
-  }
-  return;
-
-on_error:
-
-  switch (state.load()) {
-  case STATE_TLS_ESTABLISHED: {
-    VLOG(2) << __FUNCTION__ << " TLS: peer shutdown sd=" << sd
-            << " laddr=" << laddr.str() << " raddr=" << raddr.str();
-    close();
-
-    if (flag_test(FLAG_RECONNECT_ON_FAILURE)) {
-      backoff_reconnect(true);
-    }
-
-    try {
-      crofsock_env::call_env(env).handle_closed(*this);
-    } catch (std::runtime_error &e) {
-      VLOG(1) << __FUNCTION__ << " sd=" << sd
-              << " caught runtime error, what: %s" << e.what()
-              << " laddr=" << laddr.str() << " raddr=" << raddr.str();
-    }
-    // WARNING: handle_closed might delete this socket, don't call anything here
-  } break;
-  default: { VLOG(2) << __FUNCTION__ << " error in state=" << str(); };
-  }
-}
-
 void crofsock::recv_message() {
+  int nbytes = 0;
   while (not rx_disabled) {
 
     if ((get_state() <= STATE_IDLE) || delete_in_progress()) {
@@ -2229,33 +2024,146 @@ void crofsock::recv_message() {
       goto on_error;
     }
 
-    /* read from socket more bytes, at most "msg_len - msg_bytes_read" */
-    int rc = ::recv(sd, (void *)(rxbuffer.somem() + msg_bytes_read),
-                    msg_len - msg_bytes_read, MSG_DONTWAIT);
+    switch (state.load()) {
+    case STATE_TCP_ESTABLISHED: {
+      /* read from socket more bytes, at most "msg_len - msg_bytes_read" */
+      nbytes = ::recv(sd, (void *)(rxbuffer.somem() + msg_bytes_read),
+                      msg_len - msg_bytes_read, MSG_DONTWAIT);
 
-    if (rc < 0) {
-      switch (errno) {
-      case EAGAIN: {
-        /* do not continue and let kernel inform us, once more data is available
-         */
-        VLOG(3) << __FUNCTION__ << " EAGAIN on fd=" << sd;
-        return;
-      } break;
-      default: {
-        VLOG(1) << __FUNCTION__ << " ::recv() syscall failed, error: " << errno
-                << ": " << strerror(errno) << " laddr=" << laddr.str()
-                << " raddr=" << raddr.str();
+      if (nbytes < 0) {
+        switch (errno) {
+        case EAGAIN: {
+          /* do not continue and let kernel inform us, once more data is
+           * available
+           */
+          VLOG(3) << __FUNCTION__ << " EAGAIN on sd=" << sd;
+          return;
+        } break;
+        default: {
+          VLOG(1) << __FUNCTION__
+                  << " ::recv() syscall failed, error: " << errno << ": "
+                  << strerror(errno) << " laddr=" << laddr.str()
+                  << " raddr=" << raddr.str();
+          goto on_error;
+        };
+        }
+      } else if (nbytes == 0) {
+        /* shutdown from peer */
+        VLOG(2) << __FUNCTION__ << " TCP: peer shutdown sd=" << sd
+                << " laddr=" << laddr.str() << " raddr=" << raddr.str();
         goto on_error;
-      };
       }
-    } else if (rc == 0) {
-      /* shutdown from peer */
-      VLOG(2) << __FUNCTION__ << " TCP: peer shutdown sd=" << sd
-              << " laddr=" << laddr.str() << " raddr=" << raddr.str();
-      goto on_error;
+    } break;
+    case STATE_TLS_ESTABLISHED: {
+
+      AcquireReadWriteLock lock(sslock);
+
+      unsigned int bytes_available = SSL_pending(ssl);
+
+      int read_num_bytes = (msg_len - msg_bytes_read) < bytes_available
+                               ? (msg_len - msg_bytes_read)
+                               : bytes_available;
+
+      /* read from socket more bytes, at most "msg_len - msg_bytes_read" */
+      nbytes = SSL_read(ssl, (void *)(rxbuffer.somem() + msg_bytes_read),
+                        read_num_bytes);
+
+      VLOG(3) << __FUNCTION__ << " TLS: SSL_read on sd=" << sd
+              << " SSL_pending: " << bytes_available
+              << " bytes to be read: " << read_num_bytes
+              << " nbytes: " << nbytes << " errno: " << errno << " ("
+              << strerror(errno) << ")";
+
+      if (nbytes < 0) {
+        int ssl_errno = SSL_get_error(ssl, nbytes);
+
+        cmemory err_m(1024);
+        ERR_error_string_n(ssl_errno, (char *)err_m.somem(), err_m.length());
+        std::string err_s((char *)err_m.somem(), err_m.length());
+
+        switch (ssl_errno) {
+        case SSL_ERROR_WANT_READ: {
+          /* do not continue and let kernel inform us, once more data is
+           * available
+           */
+          VLOG(3) << __FUNCTION__ << " TLS: SSL_read WANT READ on sd=" << sd
+                  << " error: " << ERR_reason_error_string(ssl_errno);
+          // add_read_fd(sd) is always active, so we can skip it here
+        }
+          return;
+        case SSL_ERROR_WANT_WRITE: {
+          VLOG(3) << __FUNCTION__ << " TLS: SSL_read WANT WRITE on sd=" << sd;
+          /* we call SSL_write in the TX thread. Is this solving a
+           * SSL_ERROR_WANT_WRITE on the receiving side? */
+          cthread::thread(tx_thread_num).add_write_fd(this, sd);
+        }
+          return;
+        case SSL_ERROR_WANT_ACCEPT: { /* should never happen here, though */
+          VLOG(3) << __FUNCTION__ << " TLS: SSL_read WANT ACCEPT on sd=" << sd;
+        }
+          return;
+        case SSL_ERROR_WANT_CONNECT: { /* should never happen here, though */
+          VLOG(3) << __FUNCTION__ << " TLS: SSL_read WANT CONNECT on sd=" << sd;
+        }
+          return;
+
+        case SSL_ERROR_NONE: { /* successful reception */
+          VLOG(3) << __FUNCTION__
+                  << " TLS: SSL_read succeeded ERROR NONE on sd=" << sd;
+        } break;
+        case SSL_ERROR_SSL: { /* error on SSL layer */
+          VLOG(3) << __FUNCTION__
+                  << " TLS: SSL_read failed ERROR SSL on sd=" << sd;
+        }
+          goto on_error;
+        case SSL_ERROR_SYSCALL: { /* error on underlying system call */
+          VLOG(3) << __FUNCTION__
+                  << " TLS: SSL_read failed ERROR SYSCALL on sd=" << sd
+                  << " error: " << ERR_reason_error_string(ssl_errno)
+                  << " nbytes: " << nbytes << " errno: " << errno << " ("
+                  << strerror(errno) << ")";
+
+          switch (errno) {
+          case 0: {
+            /* no error occured, SSL requires probably more data just return and
+             * wait for more data */
+          }
+            return;
+          default: {
+            /* some error on a system call occured, close connection */
+          };
+          }
+        }
+          goto on_error;
+        case SSL_ERROR_ZERO_RETURN: { /* peer initiated shutdown */
+          VLOG(3) << __FUNCTION__
+                  << " TLS: SSL_read failed ERROR ZERO RETURN on sd=" << sd;
+
+          VLOG(3) << __FUNCTION__ << " TLS: peer shutdown on sd=" << sd
+                  << " laddr=" << laddr.str() << " raddr=" << raddr.str();
+        }
+          goto on_error;
+        default: {
+          VLOG(2) << __FUNCTION__ << " TLS: SSL_read failed sd=" << sd;
+        }
+          return;
+        }
+      } else if (nbytes == 0) {
+        /* shutdown from peer */
+        VLOG(2) << __FUNCTION__ << " TLS: peer shutdown sd=" << sd
+                << " laddr=" << laddr.str() << " raddr=" << raddr.str();
+        goto on_error;
+      }
+
+    } break;
+    default: {
+
+      VLOG(3) << __FUNCTION__ << " unable to receive in state=" << str()
+              << " on sd=" << sd;
+    };
     }
 
-    msg_bytes_read += rc;
+    msg_bytes_read += nbytes;
 
     /* minimum message length received, check completeness of message */
     if (msg_bytes_read >= sizeof(struct openflow::ofp_header)) {
@@ -2279,9 +2187,8 @@ void crofsock::recv_message() {
 on_error:
 
   switch (state.load()) {
-  case STATE_TCP_ESTABLISHED: {
-    VLOG(2) << __FUNCTION__ << " TCP: peer shutdown sd=" << sd
-            << " laddr=" << laddr.str() << " raddr=" << raddr.str();
+  case STATE_TCP_ESTABLISHED:
+  case STATE_TLS_ESTABLISHED: {
     close();
 
     if (flag_test(FLAG_RECONNECT_ON_FAILURE)) {
