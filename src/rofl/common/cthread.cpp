@@ -285,7 +285,7 @@ void cthread::add_fd(cthread_env *env, int fd, bool exception,
   epev.events = events;
   epev.data.fd = fd;
 
-  VLOG(3) << __FUNCTION__ << " fd=" << fd << " env=" << env
+  VLOG(7) << __FUNCTION__ << " fd=" << fd << " env=" << env
           << " edge-triggered=" << edge_triggered << " thread: "
           << " tid=0x" << std::hex << thread_tid << std::dec
           << " num=" << thread_num << " name=" << thread_name
@@ -317,7 +317,7 @@ void cthread::drop_fd(int fd, bool exception) {
   memset((uint8_t *)&epev, 0, sizeof(struct epoll_event));
   epev.data.fd = fd;
 
-  VLOG(3) << __FUNCTION__ << " fd=" << fd << " thread: "
+  VLOG(7) << __FUNCTION__ << " fd=" << fd << " thread: "
           << " tid=0x" << std::hex << thread_tid << std::dec
           << " num=" << thread_num << " name=" << thread_name
           << " ptr=" << this;
@@ -351,7 +351,7 @@ void cthread::add_read_fd(cthread_env *env, int fd, bool exception,
   epev.events = fds[fd].events;
   epev.data.fd = fd;
 
-  VLOG(3) << __FUNCTION__ << " fd=" << fd << " env=" << env
+  VLOG(7) << __FUNCTION__ << " fd=" << fd << " env=" << env
           << " edge-triggered=" << edge_triggered << " thread: "
           << " tid=0x" << std::hex << thread_tid << std::dec
           << " num=" << thread_num << " name=" << thread_name
@@ -383,7 +383,7 @@ void cthread::drop_read_fd(int fd, bool exception) {
   epev.events = fds[fd].events;
   epev.data.fd = fd;
 
-  VLOG(3) << __FUNCTION__ << " fd=" << fd << " thread: "
+  VLOG(7) << __FUNCTION__ << " fd=" << fd << " thread: "
           << " tid=0x" << std::hex << thread_tid << std::dec
           << " num=" << thread_num << " name=" << thread_name
           << " ptr=" << this;
@@ -415,7 +415,7 @@ void cthread::add_write_fd(cthread_env *env, int fd, bool exception,
   epev.events = fds[fd].events;
   epev.data.fd = fd;
 
-  VLOG(3) << __FUNCTION__ << " fd=" << fd << " env=" << env
+  VLOG(7) << __FUNCTION__ << " fd=" << fd << " env=" << env
           << " edge-triggered=" << edge_triggered << " thread: "
           << " tid=0x" << std::hex << thread_tid << std::dec
           << " num=" << thread_num << " name=" << thread_name
@@ -447,7 +447,7 @@ void cthread::drop_write_fd(int fd, bool exception) {
   epev.events = fds[fd].events;
   epev.data.fd = fd;
 
-  VLOG(3) << __FUNCTION__ << " fd=" << fd << " thread: "
+  VLOG(7) << __FUNCTION__ << " fd=" << fd << " thread: "
           << " tid=0x" << std::hex << thread_tid << std::dec
           << " num=" << thread_num << " name=" << thread_name
           << " ptr=" << this;

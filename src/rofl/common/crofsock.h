@@ -42,6 +42,7 @@
 #include <openssl/opensslv.h>
 #include <openssl/ssl.h>
 
+#include "rofl/common/cbuffer.hpp"
 #include "rofl/common/cmemory.h"
 
 #include "rofl/common/crandom.h"
@@ -756,26 +757,24 @@ private:
    * receiving messages
    */
 
-  // fragment pending
-  bool rx_fragment_pending;
-
   // incomplete fragment message fragment received in last round
-  cmemory rxbuffer;
-
-  // number of bytes already received for current message fragment
-  unsigned int msg_bytes_read;
-
-  // read not more than this number of packets per round before rescheduling
-  unsigned int max_pkts_rcvd_per_round;
-
-  // default value for max_pkts_rcvd_per_round
-  static unsigned int const DEFAULT_MAX_PKTS_RVCD_PER_ROUND = 16;
+  cbuffer rxbuffer;
 
   // flag for RX reception on socket
   std::atomic_bool rx_disabled;
 
+  /*
+   * sending messages
+   */
+
+  // transmission buffer for packing cofmsg instances
+  cbuffer txbuffer;
+
   // flag for TX reception on socket
   std::atomic_bool tx_disabled;
+
+  // txthread is actively sending messages
+  std::atomic_bool tx_is_running;
 
   /*
    * scheduler and txqueues
@@ -795,25 +794,6 @@ private:
 
   // relative scheduling weights for txqueues
   std::vector<unsigned int> txweights;
-
-  /*
-   * sending messages
-   */
-
-  // txthread is actively sending messages
-  std::atomic_bool tx_is_running;
-
-  // fragment pending
-  bool tx_fragment_pending;
-
-  // transmission buffer for packing cofmsg instances
-  cmemory txbuffer;
-
-  // number of bytes already sent for current message fragment
-  unsigned int msg_bytes_sent;
-
-  // message length of current tx-fragment
-  size_t txlen;
 };
 
 } /* namespace rofl */

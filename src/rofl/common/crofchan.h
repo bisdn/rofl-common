@@ -164,7 +164,7 @@ public:
       : env(env), thread_num(cthread::get_mgt_thread_num_from_pool()),
         state(STATE_DISCONNECTED), last_auxid(0),
         ofp_version(rofl::openflow::OFP_VERSION_UNKNOWN) {
-    VLOG(1) << __FUNCTION__
+    VLOG(4) << __FUNCTION__
             << "thread: " << cthread::thread(thread_num).get_thread_name();
   };
 
@@ -489,7 +489,7 @@ private:
       }
       crofchan_env::call_env(env).handle_established(*this, conn, ofp_version);
     } catch (eRofChanNotFound &e) {
-      VLOG(1) << __FUNCTION__ << "crofchan_env not found";
+      VLOG(4) << __FUNCTION__ << "crofchan_env not found";
     }
   };
 
@@ -557,7 +557,7 @@ private:
     try {
       crofchan_env::call_env(env).handle_connect_refused(*this, conn);
     } catch (eRofChanNotFound &e) {
-      VLOG(1) << __FUNCTION__ << "crofchan_env not found";
+      VLOG(4) << __FUNCTION__ << "crofchan_env not found";
     }
   };
 
@@ -567,7 +567,7 @@ private:
     try {
       crofchan_env::call_env(env).handle_connect_failed(*this, conn);
     } catch (eRofChanNotFound &e) {
-      VLOG(1) << __FUNCTION__ << "crofchan_env not found";
+      VLOG(4) << __FUNCTION__ << "crofchan_env not found";
     }
   };
 
@@ -577,7 +577,7 @@ private:
     try {
       crofchan_env::call_env(env).handle_accept_failed(*this, conn);
     } catch (eRofChanNotFound &e) {
-      VLOG(1) << __FUNCTION__ << "crofchan_env not found";
+      VLOG(4) << __FUNCTION__ << "crofchan_env not found";
     }
   };
 
@@ -587,7 +587,7 @@ private:
     try {
       crofchan_env::call_env(env).handle_negotiation_failed(*this, conn);
     } catch (eRofChanNotFound &e) {
-      VLOG(1) << __FUNCTION__ << "crofchan_env not found";
+      VLOG(4) << __FUNCTION__ << "crofchan_env not found";
     }
   };
 
@@ -597,7 +597,7 @@ private:
     try {
       crofchan_env::call_env(env).handle_recv(*this, conn, msg);
     } catch (eRofChanNotFound &e) {
-      VLOG(1) << __FUNCTION__ << "crofchan_env not found";
+      VLOG(4) << __FUNCTION__ << "crofchan_env not found";
     }
   };
 
@@ -607,7 +607,7 @@ private:
     try {
       crofchan_env::call_env(env).congestion_occurred_indication(*this, conn);
     } catch (eRofChanNotFound &e) {
-      VLOG(1) << __FUNCTION__ << "crofchan_env not found";
+      VLOG(4) << __FUNCTION__ << "crofchan_env not found";
     }
   };
 
@@ -617,7 +617,7 @@ private:
     try {
       crofchan_env::call_env(env).congestion_solved_indication(*this, conn);
     } catch (eRofChanNotFound &e) {
-      VLOG(1) << __FUNCTION__ << "crofchan_env not found";
+      VLOG(4) << __FUNCTION__ << "crofchan_env not found";
     }
   };
 
@@ -629,7 +629,7 @@ private:
       crofchan_env::call_env(env).handle_transaction_timeout(*this, conn, xid,
                                                              type, sub_type);
     } catch (eRofChanNotFound &e) {
-      VLOG(1) << __FUNCTION__ << "crofchan_env not found";
+      VLOG(4) << __FUNCTION__ << "crofchan_env not found";
     }
   };
 

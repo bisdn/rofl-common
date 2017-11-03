@@ -48,7 +48,11 @@ using namespace rofl::openflow;
 
 CPPUNIT_TEST_SUITE_REGISTRATION(crofsocktest);
 
-void crofsocktest::setUp() { baddr = rofl::csockaddr(AF_INET, "0.0.0.0", 0); }
+void crofsocktest::setUp() {
+  baddr = rofl::csockaddr(AF_INET, "0.0.0.0", 0);
+  server_msg_counter = 0;
+  client_msg_counter = 0;
+}
 
 void crofsocktest::tearDown() {}
 
@@ -65,6 +69,8 @@ void crofsocktest::test() {
       timeout = 60;
       msg_counter = 0;
       listening_port = 6653;
+      server_msg_counter = 0;
+      client_msg_counter = 0;
 
       slisten = new rofl::crofsock(this);
       sclient = new rofl::crofsock(this);
@@ -139,6 +145,8 @@ void crofsocktest::test_tls() {
       timeout = 60;
       msg_counter = 0;
       listening_port = 6653;
+      server_msg_counter = 0;
+      client_msg_counter = 0;
 
       slisten = new rofl::crofsock(this);
       sclient = new rofl::crofsock(this);
