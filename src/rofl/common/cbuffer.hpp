@@ -117,10 +117,7 @@ public:
    *
    * wseek(0, SEEK_SET) resets the write pointer
    */
-  cbuffer &wseek(int offset = 0, int whence = SEEK_CUR) {
-    if (offset < 0) {
-      throw eBufInval("negative offset");
-    }
+  cbuffer &wseek(off_t offset = 0, int whence = SEEK_CUR) {
     switch (whence) {
     case SEEK_SET: {
       if (offset > cmemory::length()) {
@@ -130,7 +127,7 @@ public:
       rseek();
     } break;
     case SEEK_CUR: {
-      if (((size_t)(wbytes + offset)) > cmemory::length()) {
+      if ((wbytes + offset) > cmemory::length()) {
         cmemory::resize(wbytes + offset);
       }
       wbytes += offset;
@@ -145,10 +142,7 @@ public:
    *
    * rseek(0, SEEK_SET) resets the read pointer
    */
-  cbuffer &rseek(int offset = 0, int whence = SEEK_CUR) {
-    if (offset < 0) {
-      throw eBufInval("negative offset");
-    }
+  cbuffer &rseek(off_t offset = 0, int whence = SEEK_CUR) {
     switch (whence) {
     case SEEK_SET: {
       if (offset < wbytes) {
@@ -204,10 +198,10 @@ public:
 
 private:
   // bytes written to this buffer
-  int wbytes;
+  unsigned int wbytes;
 
   // bytes read from this buffer
-  int rbytes;
+  unsigned int rbytes;
 };
 
 }; // end of namespace
