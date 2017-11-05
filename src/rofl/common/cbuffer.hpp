@@ -117,7 +117,7 @@ public:
    *
    * wseek(0, SEEK_SET) resets the write pointer
    */
-  cbuffer &wseek(off_t offset = 0, int whence = SEEK_CUR) {
+  cbuffer &wseek(unsigned int offset = 0, int whence = SEEK_CUR) {
     switch (whence) {
     case SEEK_SET: {
       if (offset > cmemory::length()) {
@@ -142,7 +142,7 @@ public:
    *
    * rseek(0, SEEK_SET) resets the read pointer
    */
-  cbuffer &rseek(off_t offset = 0, int whence = SEEK_CUR) {
+  cbuffer &rseek(unsigned int offset = 0, int whence = SEEK_CUR) {
     switch (whence) {
     case SEEK_SET: {
       if (offset < wbytes) {
