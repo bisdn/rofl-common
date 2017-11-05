@@ -130,7 +130,7 @@ public:
       rseek();
     } break;
     case SEEK_CUR: {
-      if ((wbytes + offset) > cmemory::length()) {
+      if (((size_t)(wbytes + offset)) > cmemory::length()) {
         cmemory::resize(wbytes + offset);
       }
       wbytes += offset;
