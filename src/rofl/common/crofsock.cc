@@ -501,7 +501,7 @@ void crofsock::tcp_accept(int sd) {
           << " laddr=" << laddr.str() << " raddr=" << raddr.str();
 
   /* instruct cthread::thread(rx_thread_num) to read from socket descriptor */
-  cthread::thread(rx_thread_num).add_read_fd(this, sd, true, false);
+  cthread::thread(rx_thread_num).add_read_fd(this, sd, true, true);
   cthread::thread(rx_thread_num).wakeup(this);
 
   if (flag_test(FLAG_TLS_IN_USE)) {
@@ -648,7 +648,7 @@ void crofsock::tcp_connect(bool reconnect) {
             << " laddr=" << laddr.str() << " raddr=" << raddr.str();
 
     /* register socket descriptor for read operations */
-    cthread::thread(rx_thread_num).add_read_fd(this, sd, true, false);
+    cthread::thread(rx_thread_num).add_read_fd(this, sd, true, true);
     cthread::thread(rx_thread_num).wakeup(this);
 
     if (flag_test(FLAG_TLS_IN_USE)) {
@@ -1872,7 +1872,7 @@ void crofsock::handle_read_event_rxthread(cthread &thread, int fd) {
                 << " laddr=" << laddr.str() << " raddr=" << raddr.str();
 
         /* register socket descriptor for read operations */
-        cthread::thread(rx_thread_num).add_read_fd(this, sd, true, false);
+        cthread::thread(rx_thread_num).add_read_fd(this, sd, true, true);
 
         if (flag_test(FLAG_TLS_IN_USE)) {
           crofsock::tls_connect(flag_test(FLAG_RECONNECT_ON_FAILURE));
