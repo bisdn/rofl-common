@@ -118,6 +118,11 @@ private:
  * @brief	A single OpenFlow control connection
  */
 class crofconn : public cthread_env, public crofsock_env {
+
+  enum crofconn_flag_t {
+    FLAG_DELETE_IN_PROGRESS,
+  };
+
   enum msg_type_t {
     OFPT_HELLO = 0,
     OFPT_ERROR = 1,
@@ -130,24 +135,28 @@ class crofconn : public cthread_env, public crofsock_env {
   };
 
   enum crofconn_state_t {
-    STATE_NEGOTIATION_FAILED = -2,
-    STATE_CLOSING = -1,
-    STATE_DISCONNECTED = 0,
-    STATE_CONNECT_PENDING = 1,
-    STATE_ACCEPT_PENDING = 2,
-    STATE_NEGOTIATING = 3,
-    STATE_NEGOTIATING2 = 4,
-    STATE_ESTABLISHED = 5,
+    STATE_NEGOTIATION_FAILED,
+    STATE_CLOSING,
+    STATE_DISCONNECTED,
+    STATE_CONNECT_PENDING,
+    STATE_CONNECT_REFUSED,
+    STATE_CONNECT_FAILED,
+    STATE_ACCEPT_PENDING,
+    STATE_ACCEPT_REFUSED,
+    STATE_ACCEPT_FAILED,
+    STATE_NEGOTIATING,
+    STATE_NEGOTIATING2,
+    STATE_ESTABLISHED,
   };
 
   enum crofconn_timer_t {
-    TIMER_ID_WAIT_FOR_HELLO = 1,
-    TIMER_ID_WAIT_FOR_FEATURES = 2,
-    TIMER_ID_WAIT_FOR_ECHO = 3,
-    TIMER_ID_NEED_LIFE_CHECK = 4,
-    TIMER_ID_RX_THREAD = 5,
-    TIMER_ID_PENDING_REQUESTS = 6,
-    TIMER_ID_PENDING_SEGMENTS = 7,
+    TIMER_ID_WAIT_FOR_HELLO,
+    TIMER_ID_WAIT_FOR_FEATURES,
+    TIMER_ID_WAIT_FOR_ECHO,
+    TIMER_ID_NEED_LIFE_CHECK,
+    TIMER_ID_RX_THREAD,
+    TIMER_ID_PENDING_REQUESTS,
+    TIMER_ID_PENDING_SEGMENTS,
   };
 
 public:
@@ -226,7 +235,7 @@ public:
   /**
    * @brief	Returns true for an established connection
    */
-  bool is_established() const { return (STATE_ESTABLISHED == state); }
+  bool is_established() const { return (STATE_ESTABLISHED == get_state()); }
 
   /**
    * @brief	Returns true in case of a congested underlying TCP connection
@@ -594,21 +603,21 @@ public:
        << " transport-connection-established: "
        << conn.is_transport_established() << " >" << std::endl;
     { os << conn.get_auxid(); }
-    if (conn.state == STATE_NEGOTIATION_FAILED) {
+    if (conn.get_state() == STATE_NEGOTIATION_FAILED) {
       os << "<state: -NEGOTIATION-FAILED- >" << std::endl;
-    } else if (conn.state == STATE_CLOSING) {
+    } else if (conn.get_state() == STATE_CLOSING) {
       os << "<state: -CLOSING- >" << std::endl;
-    } else if (conn.state == STATE_DISCONNECTED) {
+    } else if (conn.get_state() == STATE_DISCONNECTED) {
       os << "<state: -DISCONNECTED- >" << std::endl;
-    } else if (conn.state == STATE_CONNECT_PENDING) {
+    } else if (conn.get_state() == STATE_CONNECT_PENDING) {
       os << "<state: -CONNECT-PENDING- >" << std::endl;
-    } else if (conn.state == STATE_ACCEPT_PENDING) {
+    } else if (conn.get_state() == STATE_ACCEPT_PENDING) {
       os << "<state: -ACCEPT-PENDING- >" << std::endl;
-    } else if (conn.state == STATE_NEGOTIATING) {
+    } else if (conn.get_state() == STATE_NEGOTIATING) {
       os << "<state: -NEGOTIATING- >" << std::endl;
-    } else if (conn.state == STATE_NEGOTIATING2) {
+    } else if (conn.get_state() == STATE_NEGOTIATING2) {
       os << "<state: -NEGOTIATING2- >" << std::endl;
-    } else if (conn.state == STATE_ESTABLISHED) {
+    } else if (conn.get_state() == STATE_ESTABLISHED) {
       os << "<state: -ESTABLISHED- >" << std::endl;
     }
     return os;
@@ -619,21 +628,21 @@ public:
     ss << "<crofconn ofp-version:" << (int)ofp_version
        << " openflow-connection-established: " << is_established()
        << " transport-connection-established: " << is_transport_established();
-    if (state == STATE_NEGOTIATION_FAILED) {
+    if (get_state() == STATE_NEGOTIATION_FAILED) {
       ss << "state: -NEGOTIATION-FAILED- ";
-    } else if (state == STATE_CLOSING) {
+    } else if (get_state() == STATE_CLOSING) {
       ss << "state: -CLOSING- ";
-    } else if (state == STATE_DISCONNECTED) {
+    } else if (get_state() == STATE_DISCONNECTED) {
       ss << "state: -DISCONNECTED- ";
-    } else if (state == STATE_CONNECT_PENDING) {
+    } else if (get_state() == STATE_CONNECT_PENDING) {
       ss << "state: -CONNECT-PENDING- ";
-    } else if (state == STATE_ACCEPT_PENDING) {
+    } else if (get_state() == STATE_ACCEPT_PENDING) {
       ss << "state: -ACCEPT-PENDING- ";
-    } else if (state == STATE_NEGOTIATING) {
+    } else if (get_state() == STATE_NEGOTIATING) {
       ss << "state: -NEGOTIATING- ";
-    } else if (state == STATE_NEGOTIATING2) {
+    } else if (get_state() == STATE_NEGOTIATING2) {
       ss << "state: -NEGOTIATING2- ";
-    } else if (state == STATE_ESTABLISHED) {
+    } else if (get_state() == STATE_ESTABLISHED) {
       ss << "state: -ESTABLISHED- ";
     }
     ss << ">";
@@ -643,7 +652,9 @@ public:
 private:
   void set_mode(enum crofconn_mode_t mode) { this->mode = mode; };
 
-  void set_state(enum crofconn_state_t state);
+  void set_state(enum crofconn_state_t state) { this->state = state; };
+
+  void run_finite_state_machine(enum crofconn_state_t state);
 
   void set_versionbitmap(
       const rofl::openflow::cofhello_elem_versionbitmap &versionbitmap) {
@@ -697,6 +708,16 @@ private:
   virtual void congestion_occurred_indication(crofsock &socket);
 
   virtual void congestion_solved_indication(crofsock &rofsock);
+
+  void flag_set(crofconn_flag_t __flag, bool value) {
+    AcquireReadWriteLock lock(flags_lock);
+    flags.set(__flag, value);
+  };
+
+  bool flag_test(crofconn_flag_t __flag) const {
+    AcquireReadLock lock(flags_lock);
+    return flags.test(__flag);
+  };
 
 private:
   virtual void handle_wakeup(cthread &thread);
@@ -885,7 +906,7 @@ private:
   void clear_pending_requests() {
     AcquireReadWriteLock rwlock(pending_requests_rwlock);
     pending_requests.clear();
-    thread.drop_timer(TIMER_ID_PENDING_REQUESTS);
+    cthread::thread(thread_num).drop_timer(this, TIMER_ID_PENDING_REQUESTS);
   };
 
   /**
@@ -899,12 +920,14 @@ private:
       pending_requests.insert(ctransaction(xid, ts, type, sub_type));
       const ctransaction &ta_first = *(pending_requests.begin());
       if (xid_first != ta_first.get_xid()) {
-        thread.add_timer(TIMER_ID_PENDING_REQUESTS, ta_first.tspec);
+        cthread::thread(thread_num)
+            .add_timer(this, TIMER_ID_PENDING_REQUESTS, ta_first.tspec);
       }
     } else {
       pending_requests.insert(ctransaction(xid, ts, type, sub_type));
-      thread.add_timer(TIMER_ID_PENDING_REQUESTS,
-                       pending_requests.begin()->tspec);
+      cthread::thread(thread_num)
+          .add_timer(this, TIMER_ID_PENDING_REQUESTS,
+                     pending_requests.begin()->tspec);
     }
   };
 
@@ -948,7 +971,8 @@ private:
         }
         ta = *(pending_requests.begin());
         if (not ta.get_tspec().is_expired()) {
-          thread.add_timer(TIMER_ID_PENDING_REQUESTS, ta.get_tspec());
+          cthread::thread(thread_num)
+              .add_timer(this, TIMER_ID_PENDING_REQUESTS, ta.get_tspec());
           return;
         }
         pending_requests.erase(pending_requests.begin());
@@ -969,7 +993,7 @@ private:
   void clear_pending_segments() {
     AcquireReadWriteLock rwlock(pending_segments_rwlock);
     pending_segments.clear();
-    thread.drop_timer(TIMER_ID_PENDING_SEGMENTS);
+    cthread::thread(thread_num).drop_timer(this, TIMER_ID_PENDING_SEGMENTS);
   };
 
   /**
@@ -988,9 +1012,11 @@ private:
     pending_segments[xid] =
         csegment(xid, ctimespec().expire_in(timeout_segments), msg_type,
                  msg_multipart_type);
-    if (not thread.has_timer(TIMER_ID_PENDING_SEGMENTS)) {
-      thread.add_timer(TIMER_ID_PENDING_SEGMENTS,
-                       ctimespec().expire_in(timeout_segments));
+    if (not cthread::thread(thread_num)
+                .has_timer(this, TIMER_ID_PENDING_SEGMENTS)) {
+      cthread::thread(thread_num)
+          .add_timer(this, TIMER_ID_PENDING_SEGMENTS,
+                     ctimespec().expire_in(timeout_segments));
     }
     return pending_segments[xid];
   };
@@ -1013,9 +1039,11 @@ private:
           csegment(xid, ctimespec().expire_in(timeout_segments), msg_type,
                    msg_multipart_type);
     }
-    if (not thread.has_timer(TIMER_ID_PENDING_SEGMENTS)) {
-      thread.add_timer(TIMER_ID_PENDING_SEGMENTS,
-                       ctimespec().expire_in(timeout_segments));
+    if (not cthread::thread(thread_num)
+                .has_timer(this, TIMER_ID_PENDING_SEGMENTS)) {
+      cthread::thread(thread_num)
+          .add_timer(this, TIMER_ID_PENDING_SEGMENTS,
+                     ctimespec().expire_in(timeout_segments));
     }
     return pending_segments[xid];
   };
@@ -1038,9 +1066,11 @@ private:
           .set_file(__FILE__)
           .set_line(__LINE__);
     }
-    if (not thread.has_timer(TIMER_ID_PENDING_SEGMENTS)) {
-      thread.add_timer(TIMER_ID_PENDING_SEGMENTS,
-                       ctimespec().expire_in(timeout_segments));
+    if (not cthread::thread(thread_num)
+                .has_timer(this, TIMER_ID_PENDING_SEGMENTS)) {
+      cthread::thread(thread_num)
+          .add_timer(this, TIMER_ID_PENDING_SEGMENTS,
+                     ctimespec().expire_in(timeout_segments));
     }
     return pending_segments[xid];
   };
@@ -1091,8 +1121,9 @@ private:
       pending_segments.erase(it);
     }
     if (not pending_segments.empty()) {
-      thread.add_timer(TIMER_ID_PENDING_SEGMENTS,
-                       ctimespec().expire_in(timeout_segments));
+      cthread::thread(thread_num)
+          .add_timer(this, TIMER_ID_PENDING_SEGMENTS,
+                     ctimespec().expire_in(timeout_segments));
     }
   };
 
@@ -1100,8 +1131,17 @@ private:
   // environment for this instance
   rofl::crofconn_env *env;
 
+  // crofconn rwlock
+  mutable rofl::crwlock tlock;
+
+  // various flags for this crofsock instance
+  std::bitset<32> flags;
+
+  // and the associated rwlock
+  mutable rofl::crwlock flags_lock;
+
   // internal thread for application specific context
-  rofl::cthread thread;
+  uint32_t thread_num;
 
   // crofsock instance
   rofl::crofsock rofsock;
@@ -1125,10 +1165,10 @@ private:
   rofl::crandom random;
 
   // acts in controller or datapath mode (orthogonal to TCP client/server mode)
-  enum crofconn_mode_t mode;
+  std::atomic<crofconn_mode_t> mode;
 
   // internal state of finite state machine
-  enum crofconn_state_t state;
+  std::atomic<crofconn_state_t> state;
 
   // hello message sent to peer
   std::atomic_bool flag_hello_sent;
@@ -1146,10 +1186,10 @@ private:
   std::vector<crofqueue> rxqueues;
 
   // internal thread is working on pending messages
-  bool rx_thread_working;
+  std::atomic_bool rx_thread_working;
 
   // internal thread is scheduled for working on pending messages
-  bool rx_thread_scheduled;
+  std::atomic_bool rx_thread_scheduled;
 
   // max size of rx queue
   size_t rxqueue_max_size;

@@ -9,6 +9,9 @@ Legend:
 Change log
 ==========
 
+v0.13.0
+[+] thread pool
+
 v0.12.1
 [A] queue_type be public enum
 [B] fix ctimespec operator

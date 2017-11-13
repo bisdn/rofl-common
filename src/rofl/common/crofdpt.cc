@@ -18,15 +18,17 @@ using namespace rofl;
 /*static*/ std::set<crofdpt_env *> crofdpt_env::rofdpt_envs;
 /*static*/ crwlock crofdpt_env::rofdpt_envs_lock;
 
-crofdpt::~crofdpt(){};
+crofdpt::~crofdpt() { state = STATE_DELETE_IN_PROGRESS; };
 
 crofdpt::crofdpt(rofl::crofdpt_env *env, const rofl::cdptid &dptid)
-    : env(env), dptid(dptid), snoop(true), rofchan(this),
+    : env(env), state(STATE_RUNNING), dptid(dptid), snoop(true), rofchan(this),
       xid_last(random.uint32()), n_buffers(0), n_tables(0), capabilities(0),
       miss_send_len(0), flags(0){};
 
 void crofdpt::handle_recv(rofl::crofchan &chan, rofl::crofconn &conn,
                           rofl::openflow::cofmsg *msg) {
+  if (delete_in_progress())
+    return;
   try {
     switch (msg->get_version()) {
     case rofl::openflow10::OFP_VERSION: {
@@ -162,6 +164,8 @@ void crofdpt::handle_recv(rofl::crofchan &chan, rofl::crofconn &conn,
 void crofdpt::handle_transaction_timeout(crofchan &chan, crofconn &conn,
                                          uint32_t xid, uint8_t type,
                                          uint16_t sub_type) {
+  if (delete_in_progress())
+    return;
   VLOG(2) << __FUNCTION__ << " transaction xid=" << (unsigned int)xid;
 
   try {
@@ -1423,11 +1427,6 @@ rofl::crofsock::msg_result_t crofdpt::send_port_mod_message(
     msg = new rofl::openflow::cofmsg_port_mod(
         rofchan.get_version(), __xid, port_no, hwaddr, config, mask, advertise);
 
-    if (xid != nullptr) {
-      *xid = __xid;
-    }
-    return rofchan.send_message(auxid, msg);
-
     if (snoop) {
       if (ports.has_port(port_no)) {
         ports.set_port(port_no).set_hwaddr(hwaddr);
@@ -1436,6 +1435,11 @@ rofl::crofsock::msg_result_t crofdpt::send_port_mod_message(
         // TODO: mask
       }
     }
+
+    if (xid != nullptr) {
+      *xid = __xid;
+    }
+    return rofchan.send_message(auxid, msg);
 
   } catch (eRofConnNotConnected &e) {
     VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();
@@ -1457,15 +1461,15 @@ crofdpt::send_set_config_message(const rofl::cauxid &auxid, uint16_t flags,
     msg = new rofl::openflow::cofmsg_set_config(rofchan.get_version(), __xid,
                                                 flags, miss_send_len);
 
-    if (xid != nullptr) {
-      *xid = __xid;
-    }
-    return rofchan.send_message(auxid, msg);
-
     if (snoop) {
       this->flags = flags;
       this->miss_send_len = miss_send_len;
     }
+
+    if (xid != nullptr) {
+      *xid = __xid;
+    }
+    return rofchan.send_message(auxid, msg);
 
   } catch (eRofConnNotConnected &e) {
     VLOG(1) << __FUNCTION__ << " dropping mesage " << e.what();

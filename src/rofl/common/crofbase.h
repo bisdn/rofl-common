@@ -52,6 +52,11 @@ class crofbase : public virtual rofl::cthread_env,
   // rwlock for rofbases
   static crwlock rofbases_rwlock;
 
+  enum crofbase_state_t {
+    STATE_RUNNING,
+    STATE_DELETE_IN_PROGRESS,
+  };
+
 public:
   /**
    * @brief	crofbase destructor
@@ -201,7 +206,7 @@ public:
     AcquireReadWriteLock rwlock(dpt_sockets_rwlock);
     for (auto it : dpt_sockets) {
       ::close(it.second);
-      thread.drop_read_fd(it.second, false);
+      cthread::thread(thread_num).drop_read_fd(it.second, false);
     }
     dpt_sockets.clear();
   };
@@ -221,8 +226,8 @@ public:
     dpt_sockets[baddr] = listen(baddr);
 
     /* instruct thread to read from socket descriptor */
-    thread.add_fd(dpt_sockets[baddr]);
-    thread.add_read_fd(dpt_sockets[baddr], false);
+    cthread::thread(thread_num).add_fd(this, dpt_sockets[baddr]);
+    cthread::thread(thread_num).add_read_fd(this, dpt_sockets[baddr], false);
   };
 
   /**
@@ -236,7 +241,7 @@ public:
       return false;
     }
     ::close(dpt_sockets[baddr]);
-    thread.drop_read_fd(dpt_sockets[baddr], false);
+    cthread::thread(thread_num).drop_read_fd(dpt_sockets[baddr], false);
     dpt_sockets.erase(baddr);
     return true;
   };
@@ -271,7 +276,7 @@ public:
     AcquireReadWriteLock rwlock(ctl_sockets_rwlock);
     for (auto it : ctl_sockets) {
       ::close(it.second);
-      thread.drop_read_fd(it.second, false);
+      cthread::thread(thread_num).drop_read_fd(it.second, false);
     }
     ctl_sockets.clear();
   };
@@ -291,8 +296,8 @@ public:
     ctl_sockets[baddr] = listen(baddr);
 
     /* instruct thread to read from socket descriptor */
-    thread.add_fd(ctl_sockets[baddr]);
-    thread.add_read_fd(ctl_sockets[baddr], false);
+    cthread::thread(thread_num).add_fd(this, ctl_sockets[baddr]);
+    cthread::thread(thread_num).add_read_fd(this, ctl_sockets[baddr], false);
   };
 
   /**
@@ -306,7 +311,7 @@ public:
       return false;
     }
     ::close(dpt_sockets[baddr]);
-    thread.drop_read_fd(ctl_sockets[baddr], false);
+    cthread::thread(thread_num).drop_read_fd(ctl_sockets[baddr], false);
     ctl_sockets.erase(baddr);
     return true;
   };
@@ -346,6 +351,8 @@ public:
    * @brief	Deletes all existing rofl::crofdpt instances
    */
   void drop_dpts() {
+    if (delete_in_progress())
+      return;
     AcquireReadWriteLock rwlock(rofdpts_rwlock);
     for (auto it : rofdpts) {
       /* redirect environment */
@@ -357,8 +364,10 @@ public:
       rofdpts_deletion.insert(it.second);
     }
     rofdpts.clear();
-    if (not thread.has_timer(TIMER_ID_ROFDPT_DESTROY)) {
-      thread.add_timer(TIMER_ID_ROFDPT_DESTROY, ctimespec().expire_in(8));
+    if (not cthread::thread(thread_num)
+                .has_timer(this, TIMER_ID_ROFDPT_DESTROY)) {
+      cthread::thread(thread_num)
+          .add_timer(this, TIMER_ID_ROFDPT_DESTROY, ctimespec().expire_in(60));
     }
   };
 
@@ -473,6 +482,8 @@ public:
    */
   bool drop_dpt(
       rofl::cdptid dptid) { // make a copy here, do not use a const reference
+    if (delete_in_progress())
+      return true;
     AcquireReadLock rlock(rofdpts_rwlock);
     if (rofdpts.find(dptid) == rofdpts.end()) {
       return false;
@@ -487,8 +498,10 @@ public:
     /* mark its dptid as free */
     rofdpts.erase(dptid);
     /* trigger management thread for doing the clean-up work */
-    if (not thread.has_timer(TIMER_ID_ROFDPT_DESTROY)) {
-      thread.add_timer(TIMER_ID_ROFDPT_DESTROY, ctimespec().expire_in(8));
+    if (not cthread::thread(thread_num)
+                .has_timer(this, TIMER_ID_ROFDPT_DESTROY)) {
+      cthread::thread(thread_num)
+          .add_timer(this, TIMER_ID_ROFDPT_DESTROY, ctimespec().expire_in(60));
     }
     return true;
   };
@@ -582,6 +595,8 @@ public:
    * @brief	Deletes all existing rofl::crofctl instances
    */
   void drop_ctls() {
+    if (delete_in_progress())
+      return;
     AcquireReadWriteLock rwlock(rofctls_rwlock);
     for (auto it : rofctls) {
       /* redirect environment */
@@ -593,8 +608,10 @@ public:
       rofctls_deletion.insert(it.second);
     }
     rofctls.clear();
-    if (not thread.has_timer(TIMER_ID_ROFCTL_DESTROY)) {
-      thread.add_timer(TIMER_ID_ROFCTL_DESTROY, ctimespec().expire_in(8));
+    if (not cthread::thread(thread_num)
+                .has_timer(this, TIMER_ID_ROFCTL_DESTROY)) {
+      cthread::thread(thread_num)
+          .add_timer(this, TIMER_ID_ROFCTL_DESTROY, ctimespec().expire_in(60));
     }
   };
 
@@ -708,6 +725,8 @@ public:
    */
   bool drop_ctl(
       rofl::cctlid ctlid) { // make a copy here, do not use a const reference
+    if (delete_in_progress())
+      return true;
     AcquireReadLock rlock(rofctls_rwlock);
     if (rofctls.find(ctlid) == rofctls.end()) {
       return false;
@@ -722,8 +741,10 @@ public:
     /* mark its ctlid as free */
     rofctls.erase(ctlid);
     /* trigger management thread for doing the clean-up work */
-    if (not thread.has_timer(TIMER_ID_ROFCTL_DESTROY)) {
-      thread.add_timer(TIMER_ID_ROFCTL_DESTROY, ctimespec().expire_in(8));
+    if (not cthread::thread(thread_num)
+                .has_timer(this, TIMER_ID_ROFCTL_DESTROY)) {
+      cthread::thread(thread_num)
+          .add_timer(this, TIMER_ID_ROFCTL_DESTROY, ctimespec().expire_in(60));
     }
     return true;
   };
@@ -2149,7 +2170,10 @@ public:
   };
 
 private:
-  static void initialize();
+  static const uint32_t DEFAULT_POOL_MAX_NUM_THREADS = 16;
+
+  static void
+  initialize(uint32_t pool_max_num_threads = DEFAULT_POOL_MAX_NUM_THREADS);
 
   static void terminate();
 
@@ -2239,6 +2263,13 @@ private:
    */
   int listen(const csockaddr &baddr);
 
+  /**
+   * @brief Check for state delete in progress
+   */
+  bool delete_in_progress() const {
+    return (state == STATE_DELETE_IN_PROGRESS);
+  };
+
 private:
   /**
    * @brief	Deletes all existing rofl::crofdpt instances
@@ -2264,12 +2295,15 @@ private:
 
 private:
   enum crofbase_timer_t {
-    TIMER_ID_ROFCTL_DESTROY = 1,
-    TIMER_ID_ROFDPT_DESTROY = 2,
+    TIMER_ID_ROFCTL_DESTROY,
+    TIMER_ID_ROFDPT_DESTROY,
   };
 
   // management thread
-  cthread thread;
+  uint32_t thread_num;
+
+  // state
+  std::atomic<crofbase_state_t> state;
 
   // peer controllers
   std::map<cctlid, crofctl *> rofctls;

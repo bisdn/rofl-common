@@ -14,12 +14,14 @@ private:
     /**
      *
      */
-    virtual ~cobject() { thread.stop(); };
+    virtual ~cobject() { rofl::cthread::thread(thread_num).drop(this); };
 
     /**
      *
      */
-    cobject() : thread(this), cnt(0), error(false) { thread.start(); };
+    cobject()
+        : thread_num(rofl::cthread::get_mgt_thread_num_from_pool()), cnt(0),
+          error(false){};
 
   protected:
     virtual void handle_wakeup(rofl::cthread &thread){};
@@ -28,7 +30,7 @@ private:
     virtual void handle_write_event(rofl::cthread &thread, int fd){};
 
   public:
-    rofl::cthread thread;
+    uint32_t thread_num;
 
     unsigned int cnt;
 

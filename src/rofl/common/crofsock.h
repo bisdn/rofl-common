@@ -19,7 +19,6 @@
 #include <bitset>
 #include <deque>
 #include <fcntl.h>
-#include <fcntl.h>
 #include <inttypes.h>
 #include <iostream>
 #include <list>
@@ -37,9 +36,13 @@
 #include <unistd.h>
 
 #include <openssl/bio.h>
+#include <openssl/conf.h>
+#include <openssl/engine.h>
 #include <openssl/err.h>
+#include <openssl/opensslv.h>
 #include <openssl/ssl.h>
 
+#include "rofl/common/cbuffer.hpp"
 #include "rofl/common/cmemory.h"
 
 #include "rofl/common/crandom.h"
@@ -57,7 +60,6 @@
 #include "rofl/common/openflow/messages/cofmsg_echo.h"
 #include "rofl/common/openflow/messages/cofmsg_error.h"
 #include "rofl/common/openflow/messages/cofmsg_experimenter.h"
-#include "rofl/common/openflow/messages/cofmsg_experimenter_stats.h"
 #include "rofl/common/openflow/messages/cofmsg_experimenter_stats.h"
 #include "rofl/common/openflow/messages/cofmsg_features.h"
 #include "rofl/common/openflow/messages/cofmsg_flow_mod.h"
@@ -228,45 +230,46 @@ class crofsock : public cthread_env {
   };
 
   enum crofsock_flag_t {
-    FLAG_CONGESTED = 1,
-    FLAG_TX_BLOCK_QUEUEING = 2,
-    FLAG_RECONNECT_ON_FAILURE = 3,
-    FLAG_TLS_IN_USE = 4,
+    FLAG_DELETE_IN_PROGRESS,
+    FLAG_CONGESTED,
+    FLAG_TX_BLOCK_QUEUEING,
+    FLAG_RECONNECT_ON_FAILURE,
+    FLAG_TLS_IN_USE,
+    FLAG_CLOSING,
   };
 
   enum socket_mode_t {
-    MODE_UNKNOWN = 0,
-    MODE_LISTEN = 1,
-    MODE_CLIENT = 2,
-    MODE_SERVER = 3,
+    MODE_UNKNOWN,
+    MODE_LISTEN,
+    MODE_CLIENT,
+    MODE_SERVER,
   };
 
   enum socket_state_t {
-    STATE_IDLE = 0,
-    STATE_CLOSED = 1,
-    STATE_LISTENING = 2,
-    STATE_TCP_CONNECTING = 3,
-    STATE_TLS_CONNECTING = 4,
-    STATE_TCP_ACCEPTING = 5,
-    STATE_TLS_ACCEPTING = 6,
-    STATE_TCP_ESTABLISHED = 7,
-    STATE_TLS_ESTABLISHED = 8,
+    STATE_IDLE,
+    STATE_LISTENING,
+    STATE_TCP_CONNECTING,
+    STATE_TLS_CONNECTING,
+    STATE_TCP_ACCEPTING,
+    STATE_TLS_ACCEPTING,
+    STATE_TCP_ESTABLISHED,
+    STATE_TLS_ESTABLISHED,
   };
 
-  enum crofsockimer_t {
-    TIMER_ID_UNKNOWN = 0,
-    TIMER_ID_RECONNECT = 1,
-    TIMER_ID_PEER_SHUTDOWN = 2,
+  enum crofsock_timer_t {
+    TIMER_ID_UNKNOWN,
+    TIMER_ID_RECONNECT,
+    TIMER_ID_PEER_SHUTDOWN,
   };
 
 public:
   enum msg_result_t {
-    MSG_IGNORED = 0,
-    MSG_QUEUED = 1,
-    MSG_QUEUED_CONGESTION = 2,
-    MSG_QUEUEING_FAILED_QUEUE_FULL = 3,
-    MSG_QUEUEING_FAILED_NOT_ESTABLISHED = 4,
-    MSG_QUEUEING_FAILED_SHUTDOWN_IN_PROGRESS = 5,
+    MSG_IGNORED,
+    MSG_QUEUED,
+    MSG_QUEUED_CONGESTION,
+    MSG_QUEUEING_FAILED_QUEUE_FULL,
+    MSG_QUEUEING_FAILED_NOT_ESTABLISHED,
+    MSG_QUEUEING_FAILED_SHUTDOWN_IN_PROGRESS,
   };
 
 public:
@@ -376,6 +379,14 @@ public:
   crofsock &set_backlog(int backlog) {
     this->backlog = backlog;
     return *this;
+  };
+
+  /**
+   * @brief Return state
+   */
+  enum socket_state_t get_state() const {
+    AcquireReadLock lock(tlock);
+    return state;
   };
 
 public:
@@ -557,12 +568,9 @@ public:
 
   std::string str() const {
     std::stringstream ss;
-    switch (state) {
+    switch (state.load()) {
     case STATE_IDLE: {
       ss << "state: -IDLE- ";
-    } break;
-    case STATE_CLOSED: {
-      ss << "state: -CLOSED- ";
     } break;
     case STATE_LISTENING: {
       ss << "state: -LISTENING- ";
@@ -612,6 +620,15 @@ private:
     return flags.test(__flag);
   };
 
+  bool delete_in_progress() const {
+    return (flag_test(FLAG_DELETE_IN_PROGRESS));
+  };
+
+  void set_state(enum socket_state_t state) {
+    AcquireReadWriteLock lock(tlock);
+    this->state = state;
+  };
+
 private:
   virtual void handle_wakeup(cthread &thread);
 
@@ -622,13 +639,9 @@ private:
   virtual void handle_write_event(cthread &thread, int fd);
 
 private:
-  void tls_init();
-
-  void tls_destroy();
-
   void tls_init_context();
 
-  void tls_destroy_context();
+  void tls_term_context();
 
   static int tls_pswd_cb(char *buf, int size, int rwflag, void *userdata);
 
@@ -664,19 +677,22 @@ private:
   std::bitset<32> flags;
 
   // and the associated rwlock
-  rofl::crwlock flags_lock;
+  mutable rofl::crwlock flags_lock;
+
+  // rwlock for internal state
+  mutable rofl::crwlock tlock;
 
   // connection state
-  enum socket_state_t state;
+  std::atomic<socket_state_t> state;
 
   // socket mode (TCP_SERVER, TCP CLIENT)
-  enum socket_mode_t mode;
+  std::atomic<socket_mode_t> mode;
 
   // RX thread
-  cthread rxthread;
+  uint32_t rx_thread_num;
 
   // TX thread
-  cthread txthread;
+  uint32_t tx_thread_num;
 
   /*
    * reconnect
@@ -716,12 +732,6 @@ private:
    * OpenSSL related structures
    */
 
-  // read write lock
-  static crwlock rwlock;
-
-  // OpenSSL initialized
-  static bool tls_initialized;
-
   // SSL context
   SSL_CTX *ctx;
 
@@ -730,6 +740,9 @@ private:
 
   // basic input/output
   BIO *bio;
+
+  // openssl rwlock
+  crwlock sslock;
 
   std::string capath;
   std::string cafile;
@@ -744,26 +757,24 @@ private:
    * receiving messages
    */
 
-  // fragment pending
-  bool rx_fragment_pending;
-
   // incomplete fragment message fragment received in last round
-  cmemory rxbuffer;
-
-  // number of bytes already received for current message fragment
-  unsigned int msg_bytes_read;
-
-  // read not more than this number of packets per round before rescheduling
-  unsigned int max_pkts_rcvd_per_round;
-
-  // default value for max_pkts_rcvd_per_round
-  static unsigned int const DEFAULT_MAX_PKTS_RVCD_PER_ROUND = 16;
+  cbuffer rxbuffer;
 
   // flag for RX reception on socket
   std::atomic_bool rx_disabled;
 
+  /*
+   * sending messages
+   */
+
+  // transmission buffer for packing cofmsg instances
+  cbuffer txbuffer;
+
   // flag for TX reception on socket
   std::atomic_bool tx_disabled;
+
+  // txthread is actively sending messages
+  std::atomic_bool tx_is_running;
 
   /*
    * scheduler and txqueues
@@ -783,25 +794,6 @@ private:
 
   // relative scheduling weights for txqueues
   std::vector<unsigned int> txweights;
-
-  /*
-   * sending messages
-   */
-
-  // txthread is actively sending messages
-  std::atomic_bool tx_is_running;
-
-  // fragment pending
-  bool tx_fragment_pending;
-
-  // transmission buffer for packing cofmsg instances
-  cmemory txbuffer;
-
-  // number of bytes already sent for current message fragment
-  unsigned int msg_bytes_sent;
-
-  // message length of current tx-fragment
-  size_t txlen;
 };
 
 } /* namespace rofl */

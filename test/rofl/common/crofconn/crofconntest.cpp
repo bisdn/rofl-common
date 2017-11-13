@@ -9,6 +9,7 @@
 
 #include <cppunit/extensions/TestFactoryRegistry.h>
 #include <cppunit/ui/text/TestRunner.h>
+#include <glog/logging.h>
 
 #include "crofconntest.hpp"
 
@@ -36,6 +37,8 @@ void crofconntest::test() {
 
     slisten = new rofl::crofsock(this);
     sclient = new rofl::crofconn(this);
+    client_is_closed = false;
+    server_is_closed = false;
 
     listening_port = 0;
 
@@ -46,13 +49,13 @@ void crofconntest::test() {
         listening_port = rand.uint16();
       } while ((listening_port < 10000) || (listening_port > 49000));
       try {
-        std::cerr << "trying listening port=" << (int)listening_port
+        LOG(INFO) << "trying listening port=" << (int)listening_port
                   << std::endl;
         baddr =
             rofl::csockaddr(rofl::caddress_in4("127.0.0.1"), listening_port);
         /* try to bind address first */
         slisten->set_baddr(baddr).listen();
-        std::cerr << "binding to " << baddr.str() << std::endl;
+        LOG(INFO) << "binding to " << baddr.str() << std::endl;
         lookup_idle_port = false;
       } catch (rofl::eSysCall &e) {
         /* port in use, try another one */
@@ -63,7 +66,7 @@ void crofconntest::test() {
     versionbitmap_dpt.add_ofp_version(rofl::openflow10::OFP_VERSION);
     versionbitmap_dpt.add_ofp_version(rofl::openflow12::OFP_VERSION);
     versionbitmap_dpt.add_ofp_version(rofl::openflow13::OFP_VERSION);
-    std::cerr << "connecting to " << baddr.str() << std::endl;
+    LOG(INFO) << "connecting to " << baddr.str() << std::endl;
     sclient->set_raddr(baddr).tcp_connect(
         versionbitmap_dpt, rofl::crofconn::MODE_DATAPATH, /*reconnect=*/false);
 
@@ -72,32 +75,43 @@ void crofconntest::test() {
       ts.tv_sec = 1;
       ts.tv_nsec = 0;
       pselect(0, NULL, NULL, NULL, &ts, NULL);
-      std::cerr << "s:" << srv_pkts_rcvd << "(" << cli_pkts_sent << "), ";
-      std::cerr << "c:" << cli_pkts_rcvd << "(" << srv_pkts_sent << "), "
+      rofl::AcquireReadWriteLock lock(tlock);
+      LOG(INFO) << "s:" << srv_pkts_rcvd << "(" << cli_pkts_sent << "), ";
+      LOG(INFO) << "c:" << cli_pkts_rcvd << "(" << srv_pkts_sent << "), "
                 << std::endl;
       if ((cli_pkts_rcvd >= num_of_packets) &&
           (srv_pkts_rcvd >= num_of_packets)) {
         break;
       }
     }
-    std::cerr << std::endl;
+    LOG(INFO) << std::endl;
 
-    std::cerr << "s:" << srv_pkts_rcvd << "(" << cli_pkts_sent << "), ";
-    std::cerr << "c:" << cli_pkts_rcvd << "(" << srv_pkts_sent << "), "
+    slisten->close();
+    if (not client_is_closed)
+      sclient->close();
+    if (not server_is_closed)
+      sserver->close();
+
+    while (not server_is_closed and not client_is_closed) {
+      sleep(1);
+    }
+
+    LOG(INFO) << "s:" << srv_pkts_rcvd << "(" << cli_pkts_sent << "), ";
+    LOG(INFO) << "c:" << cli_pkts_rcvd << "(" << srv_pkts_sent << "), "
               << std::endl;
 
     delete slisten;
     delete sclient;
     delete sserver;
 
-    std::cerr << "======================================================"
+    LOG(INFO) << "======================================================"
               << std::endl;
 
   } catch (rofl::eSysCall &e) {
-    std::cerr << "crofconntest::test() exception, what: " << e.what()
+    LOG(INFO) << "crofconntest::test() exception, what: " << e.what()
               << std::endl;
   } catch (std::runtime_error &e) {
-    std::cerr << "crofconntest::test() exception, what: " << e.what()
+    LOG(INFO) << "crofconntest::test() exception, what: " << e.what()
               << std::endl;
   }
 }
@@ -106,7 +120,7 @@ void crofconntest::handle_listen(rofl::crofsock &socket) {
 
   for (auto sd : socket.accept()) {
 
-    std::cerr << "crofconntest::handle_listen() sd=" << sd << std::endl;
+    LOG(INFO) << "crofconntest::handle_listen() sd=" << sd << std::endl;
 
     switch (test_mode) {
     case TEST_MODE_TCP: {
@@ -126,20 +140,20 @@ void crofconntest::handle_listen(rofl::crofsock &socket) {
 
 void crofconntest::handle_established(rofl::crofconn &conn,
                                       uint8_t ofp_version) {
-  std::cerr << "crofconntest::handle_established()" << std::endl;
+  LOG(INFO) << "crofconntest::handle_established()" << std::endl;
 
   if (&conn == sserver) {
-    std::cerr << "[Ss], ";
+    LOG(INFO) << "[Ss], ";
     send_packet_out(ofp_version);
   } else if (&conn == sclient) {
-    std::cerr << "[Sc], ";
+    LOG(INFO) << "[Sc], ";
     send_packet_in(ofp_version);
   }
 }
 
 void crofconntest::handle_connect_refused(rofl::crofconn &conn) {
   try {
-    std::cerr << "crofconntest::handle_connect_refused()" << std::endl << conn;
+    LOG(INFO) << "crofconntest::handle_connect_refused()" << std::endl << conn;
   } catch (...) {
   }
   CPPUNIT_ASSERT(false);
@@ -147,7 +161,7 @@ void crofconntest::handle_connect_refused(rofl::crofconn &conn) {
 
 void crofconntest::handle_connect_failed(rofl::crofconn &conn) {
   try {
-    std::cerr << "crofconntest::handle_connect_failed()" << std::endl << conn;
+    LOG(INFO) << "crofconntest::handle_connect_failed()" << std::endl << conn;
   } catch (...) {
   }
   CPPUNIT_ASSERT(false);
@@ -155,7 +169,7 @@ void crofconntest::handle_connect_failed(rofl::crofconn &conn) {
 
 void crofconntest::handle_accept_failed(rofl::crofconn &conn) {
   try {
-    std::cerr << "crofconntest::handle_accept_failed()" << std::endl << conn;
+    LOG(INFO) << "crofconntest::handle_accept_failed()" << std::endl << conn;
   } catch (...) {
   }
   CPPUNIT_ASSERT(false);
@@ -163,7 +177,7 @@ void crofconntest::handle_accept_failed(rofl::crofconn &conn) {
 
 void crofconntest::handle_negotiation_failed(rofl::crofconn &conn) {
   try {
-    std::cerr << "crofconntest::handle_negotiation_failed()" << std::endl
+    LOG(INFO) << "crofconntest::handle_negotiation_failed()" << std::endl
               << conn;
   } catch (...) {
   }
@@ -172,22 +186,28 @@ void crofconntest::handle_negotiation_failed(rofl::crofconn &conn) {
 }
 
 void crofconntest::handle_closed(rofl::crofconn &conn) {
-  std::cerr << "crofconntest::handle_closed()" << std::endl << conn;
+  LOG(INFO) << "crofconntest::handle_closed()" << std::endl << conn;
+  if (&conn == sclient)
+    client_is_closed = true;
+  if (&conn == sserver)
+    server_is_closed = true;
 }
 
 void crofconntest::congestion_solved_indication(rofl::crofconn &conn) {
-  std::cerr << "crofconntest::handle_send()" << std::endl << conn;
+  LOG(INFO) << "crofconntest::handle_send()" << std::endl << conn;
 }
 
 void crofconntest::congestion_occurred_indication(rofl::crofconn &conn) {
-  std::cerr << "crofconntest::congestion_indication()" << std::endl << conn;
+  LOG(INFO) << "crofconntest::congestion_indication()" << std::endl << conn;
 }
 
 void crofconntest::handle_recv(rofl::crofconn &conn,
                                rofl::openflow::cofmsg *pmsg) {
   CPPUNIT_ASSERT(pmsg != nullptr);
 
-  // std::cerr << "crofconntest::handle_recv() " << std::endl << *pmsg;
+  rofl::AcquireReadWriteLock lock(tlock);
+
+  // LOG(INFO) << "crofconntest::handle_recv() " << std::endl << *pmsg;
 
   dpid = 0xc1c2c3c4c5c6c7c8;
   auxid = 0xd1;
@@ -204,8 +224,9 @@ void crofconntest::handle_recv(rofl::crofconn &conn,
   } break;
   case rofl::openflow::OFPT_PACKET_IN: {
     srv_pkts_rcvd++;
-    // std::cerr << "RECV(Packet-In): s:" << srv_pkts_rcvd << "(" <<
-    // cli_pkts_sent << "), ";
+    // LOG(INFO) << "RECV(Packet-In): s:" << srv_pkts_rcvd << "(" <<
+    // cli_pkts_sent
+    //          << "), ";
     if (srv_pkts_sent < num_of_packets) {
       send_packet_out(conn.get_version());
     }
@@ -213,8 +234,9 @@ void crofconntest::handle_recv(rofl::crofconn &conn,
   } break;
   case rofl::openflow::OFPT_PACKET_OUT: {
     cli_pkts_rcvd++;
-    // std::cerr << "RECV(Packet-Out): c:" << cli_pkts_rcvd << "(" <<
-    // srv_pkts_sent << "), ";
+    // LOG(INFO) << "RECV(Packet-Out): c:" << cli_pkts_rcvd << "(" <<
+    // srv_pkts_sent
+    //          << "), ";
     if (cli_pkts_sent < num_of_packets) {
       send_packet_in(conn.get_version());
     }

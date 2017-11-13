@@ -31,6 +31,9 @@ AC_DEFINE([__STDC_FORMAT_MACROS], [], [Description])
 # Perform GCC checkings
 m4_include([config/gcc.m4])
 
+# Google's sanitizers
+m4_include([config/google_sanitizers.m4])
+
 # Debug
 m4_include([config/debug.m4])
 

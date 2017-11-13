@@ -27,13 +27,14 @@ using namespace rofl;
 /*static*/ const unsigned int crofconn::DEFAULT_PENDING_SEGMENTS_MAX = 256;
 
 crofconn::~crofconn() {
+  flag_set(FLAG_DELETE_IN_PROGRESS, true);
   /* stop worker thread */
-  set_state(STATE_CLOSING);
-  thread.stop();
+  cthread::thread(thread_num).drop(this);
 }
 
 crofconn::crofconn(crofconn_env *env)
-    : env(env), thread(this), rofsock(this), dpid(0), auxid(0),
+    : env(env), thread_num(cthread::get_hnd_thread_num_from_pool()),
+      rofsock(this), dpid(0), auxid(0),
       ofp_version(rofl::openflow::OFP_VERSION_UNKNOWN), mode(MODE_UNKNOWN),
       state(STATE_DISCONNECTED), flag_hello_sent(false), flag_hello_rcvd(false),
       rxweights(QUEUE_MAX), rxqueues(QUEUE_MAX), rx_thread_working(false),
@@ -57,18 +58,18 @@ crofconn::crofconn(crofconn_env *env)
   for (unsigned int queue_id = 0; queue_id < QUEUE_MAX; queue_id++) {
     rxqueues[queue_id].set_queue_max_size(rxqueue_max_size);
   }
-  /* start worker thread */
-  thread.start("crofconn");
+  VLOG(5) << __FUNCTION__ << " "
+          << "thread: " << cthread::thread(thread_num).get_thread_name();
 }
 
-void crofconn::close() { set_state(STATE_CLOSING); };
+void crofconn::close() { run_finite_state_machine(STATE_CLOSING); };
 
 void crofconn::tcp_accept(
     int sd, const rofl::openflow::cofhello_elem_versionbitmap &versionbitmap,
     enum crofconn_mode_t mode) {
   set_versionbitmap(versionbitmap);
   set_mode(mode);
-  set_state(STATE_ACCEPT_PENDING);
+  run_finite_state_machine(STATE_ACCEPT_PENDING);
   rofsock.tcp_accept(sd);
 };
 
@@ -77,7 +78,7 @@ void crofconn::tcp_connect(
     enum crofconn_mode_t mode, bool reconnect) {
   set_versionbitmap(versionbitmap);
   set_mode(mode);
-  set_state(STATE_CONNECT_PENDING);
+  run_finite_state_machine(STATE_CONNECT_PENDING);
   rofsock.tcp_connect(reconnect);
 };
 
@@ -86,7 +87,7 @@ void crofconn::tls_accept(
     enum crofconn_mode_t mode) {
   set_versionbitmap(versionbitmap);
   set_mode(mode);
-  set_state(STATE_ACCEPT_PENDING);
+  run_finite_state_machine(STATE_ACCEPT_PENDING);
   rofsock.tls_accept(sd);
 };
 
@@ -96,11 +97,13 @@ void crofconn::tls_connect(
   set_auxid(auxid);
   set_versionbitmap(versionbitmap);
   set_mode(mode);
-  set_state(STATE_CONNECT_PENDING);
+  run_finite_state_machine(STATE_CONNECT_PENDING);
   rofsock.tls_connect(reconnect);
 };
 
 void crofconn::handle_timeout(cthread &thread, uint32_t timer_id) {
+  if (flag_test(FLAG_DELETE_IN_PROGRESS))
+    return;
   switch (timer_id) {
   case TIMER_ID_NEED_LIFE_CHECK: {
     send_echo_request();
@@ -121,112 +124,183 @@ void crofconn::handle_timeout(cthread &thread, uint32_t timer_id) {
     check_pending_segments();
   } break;
   default: {
-    VLOG(1) << __FUNCTION__ << " unknown timer type: " << (unsigned int)timer_id
+    VLOG(5) << __FUNCTION__ << " unknown timer type: " << (unsigned int)timer_id
             << " laddr=" << rofsock.get_laddr().str()
             << " raddr=" << rofsock.get_raddr().str();
   };
   }
 }
 
-void crofconn::set_state(enum crofconn_state_t new_state) {
-  try {
-    switch (state = new_state) {
-    case STATE_NEGOTIATION_FAILED: {
-      VLOG(2) << __FUNCTION__
-              << " STATE_NEGOTIATION_FAILED laddr=" << rofsock.get_laddr().str()
-              << " raddr=" << rofsock.get_raddr().str();
-      set_state(STATE_CLOSING);
-      crofconn_env::call_env(env).handle_negotiation_failed(*this);
+void crofconn::run_finite_state_machine(enum crofconn_state_t new_state) {
+  if (flag_test(FLAG_DELETE_IN_PROGRESS))
+    return;
+  if (get_state() == new_state)
+    return;
+  std::list<enum crofconn_state_t> calls;
+  {
+    AcquireReadWriteLock lock(tlock);
 
-    } break;
-    case STATE_CLOSING: {
-      VLOG(2) << __FUNCTION__
-              << " STATE_CLOSING laddr=" << rofsock.get_laddr().str()
-              << " raddr=" << rofsock.get_raddr().str();
-      rofsock.close();
-      set_state(STATE_DISCONNECTED);
+    try {
+      set_state(new_state);
+      switch (state.load()) {
+      case STATE_NEGOTIATION_FAILED: {
+        VLOG(2) << __FUNCTION__ << " STATE_NEGOTIATION_FAILED laddr="
+                << rofsock.get_laddr().str()
+                << " raddr=" << rofsock.get_raddr().str();
+        set_state(STATE_CLOSING);
+        calls.push_back(STATE_NEGOTIATION_FAILED);
 
-    } break;
-    case STATE_DISCONNECTED: {
-      VLOG(2) << __FUNCTION__
-              << " STATE_DISCONNECTED laddr=" << rofsock.get_laddr().str()
-              << " raddr=" << rofsock.get_raddr().str();
+      } /* FALLTHROUGH */
+      case STATE_CLOSING: {
+        VLOG(2) << __FUNCTION__
+                << " STATE_CLOSING laddr=" << rofsock.get_laddr().str()
+                << " raddr=" << rofsock.get_raddr().str();
+        rofsock.close();
+        set_state(STATE_DISCONNECTED);
 
-      /* stop periodic checks for connection state (OAM) */
-      thread.drop_timer(TIMER_ID_NEED_LIFE_CHECK);
+      } /* FALLTHROUGH */
+      case STATE_DISCONNECTED: {
+        VLOG(2) << __FUNCTION__
+                << " STATE_DISCONNECTED laddr=" << rofsock.get_laddr().str()
+                << " raddr=" << rofsock.get_raddr().str();
 
-      clear_pending_requests();
-      clear_pending_segments();
+        /* stop periodic checks for connection state (OAM) */
+        // cthread::thread(thread_num).drop_timer(this,
+        // TIMER_ID_NEED_LIFE_CHECK);
+        cthread::thread(thread_num).drop_timers(this);
 
-      versionbitmap_peer.clear();
-      set_version(rofl::openflow::OFP_VERSION_UNKNOWN);
-      flag_hello_sent = false;
-      flag_hello_rcvd = false;
+        clear_pending_requests();
+        clear_pending_segments();
 
-    } break;
-    case STATE_CONNECT_PENDING: {
-      VLOG(2) << __FUNCTION__
-              << " STATE_CONNECT_PENDING laddr=" << rofsock.get_laddr().str()
-              << " raddr=" << rofsock.get_raddr().str();
-      versionbitmap_peer.clear();
-      set_version(rofl::openflow::OFP_VERSION_UNKNOWN);
+        versionbitmap_peer.clear();
+        set_version(rofl::openflow::OFP_VERSION_UNKNOWN);
+        flag_hello_sent = false;
+        flag_hello_rcvd = false;
+        calls.push_back(STATE_DISCONNECTED);
 
-      for (auto rxqueue : rxqueues) {
-        rxqueue.clear();
-      }
+      } break;
+      case STATE_CONNECT_PENDING: {
+        VLOG(2) << __FUNCTION__
+                << " STATE_CONNECT_PENDING laddr=" << rofsock.get_laddr().str()
+                << " raddr=" << rofsock.get_raddr().str();
+        versionbitmap_peer.clear();
+        set_version(rofl::openflow::OFP_VERSION_UNKNOWN);
 
-    } break;
-    case STATE_ACCEPT_PENDING: {
-      VLOG(2) << __FUNCTION__
-              << " STATE_ACCEPT_PENDING laddr=" << rofsock.get_laddr().str()
-              << " raddr=" << rofsock.get_raddr().str();
-      versionbitmap_peer.clear();
-      set_version(rofl::openflow::OFP_VERSION_UNKNOWN);
+        for (auto rxqueue : rxqueues) {
+          rxqueue.clear();
+        }
 
-      for (auto rxqueue : rxqueues) {
-        rxqueue.clear();
-      }
+      } break;
+      case STATE_CONNECT_FAILED: {
+        VLOG(2) << __FUNCTION__ << " STATE_CONNECT_FAILED";
+        calls.push_back(STATE_CONNECT_FAILED);
+        set_state(STATE_DISCONNECTED);
+      } break;
+      case STATE_CONNECT_REFUSED: {
+        VLOG(2) << __FUNCTION__ << " STATE_CONNECT_REFUSED";
+        calls.push_back(STATE_CONNECT_REFUSED);
+        set_state(STATE_DISCONNECTED);
+      } break;
+      case STATE_ACCEPT_PENDING: {
+        VLOG(2) << __FUNCTION__
+                << " STATE_ACCEPT_PENDING laddr=" << rofsock.get_laddr().str()
+                << " raddr=" << rofsock.get_raddr().str();
+        versionbitmap_peer.clear();
+        set_version(rofl::openflow::OFP_VERSION_UNKNOWN);
 
-    } break;
-    case STATE_NEGOTIATING: {
-      VLOG(2) << __FUNCTION__
-              << " STATE_NEGOTIATING offered versions=" << versionbitmap.str()
-              << " laddr=" << rofsock.get_laddr().str()
-              << " raddr=" << rofsock.get_raddr().str();
-      if (not flag_hello_rcvd) {
-        thread.add_timer(TIMER_ID_WAIT_FOR_HELLO,
+        for (auto rxqueue : rxqueues) {
+          rxqueue.clear();
+        }
+
+      } break;
+      case STATE_ACCEPT_FAILED: {
+        VLOG(2) << __FUNCTION__ << " STATE_ACCEPT_FAILED";
+        calls.push_back(STATE_ACCEPT_FAILED);
+        set_state(STATE_DISCONNECTED);
+      } break;
+      case STATE_ACCEPT_REFUSED: {
+        VLOG(2) << __FUNCTION__ << " STATE_ACCEPT_REFUSED";
+        calls.push_back(STATE_ACCEPT_REFUSED);
+        set_state(STATE_DISCONNECTED);
+      } break;
+      case STATE_NEGOTIATING: {
+        VLOG(2) << __FUNCTION__
+                << " STATE_NEGOTIATING offered versions=" << versionbitmap.str()
+                << " laddr=" << rofsock.get_laddr().str()
+                << " raddr=" << rofsock.get_raddr().str();
+        if (not flag_hello_rcvd) {
+          cthread::thread(thread_num)
+              .add_timer(this, TIMER_ID_WAIT_FOR_HELLO,
                          ctimespec().expire_in(timeout_hello));
-      }
-      if (not flag_hello_sent) {
-        send_hello_message();
-      }
+        }
+        if (not flag_hello_sent) {
+          send_hello_message();
+        }
 
-    } break;
-    case STATE_NEGOTIATING2: {
-      VLOG(2) << __FUNCTION__ << " STATE_NEGOTIATING2 peer versions="
-              << versionbitmap_peer.str()
-              << " laddr=" << rofsock.get_laddr().str()
-              << " raddr=" << rofsock.get_raddr().str();
-      thread.drop_timer(TIMER_ID_WAIT_FOR_HELLO);
-      send_features_request();
+      } break;
+      case STATE_NEGOTIATING2: {
+        VLOG(2) << __FUNCTION__ << " STATE_NEGOTIATING2 peer versions="
+                << versionbitmap_peer.str()
+                << " laddr=" << rofsock.get_laddr().str()
+                << " raddr=" << rofsock.get_raddr().str();
+        cthread::thread(thread_num).drop_timer(this, TIMER_ID_WAIT_FOR_HELLO);
+        send_features_request();
 
-    } break;
-    case STATE_ESTABLISHED: {
-      VLOG(2) << __FUNCTION__ << " STATE_ESTABLISHED negotiated version="
-              << static_cast<unsigned>(ofp_version.load())
-              << " laddr=" << rofsock.get_laddr().str()
-              << " raddr=" << rofsock.get_raddr().str();
-      thread.drop_timer(TIMER_ID_WAIT_FOR_HELLO);
-      /* start periodic checks for connection state (OAM) */
-      thread.add_timer(TIMER_ID_NEED_LIFE_CHECK,
+      } break;
+      case STATE_ESTABLISHED: {
+        VLOG(2) << __FUNCTION__ << " STATE_ESTABLISHED negotiated version="
+                << static_cast<unsigned>(ofp_version.load())
+                << " laddr=" << rofsock.get_laddr().str()
+                << " raddr=" << rofsock.get_raddr().str();
+        cthread::thread(thread_num).drop_timer(this, TIMER_ID_WAIT_FOR_HELLO);
+        /* start periodic checks for connection state (OAM) */
+        cthread::thread(thread_num)
+            .add_timer(this, TIMER_ID_NEED_LIFE_CHECK,
                        ctimespec().expire_in(timeout_lifecheck));
-      crofconn_env::call_env(env).handle_established(*this, ofp_version);
+        calls.push_back(STATE_ESTABLISHED);
 
-    } break;
+      } break;
+      }
+
+    } catch (std::runtime_error &e) {
+      VLOG(5) << __FUNCTION__ << " runtime error: " << e.what();
     }
 
-  } catch (std::runtime_error &e) {
-    VLOG(1) << __FUNCTION__ << " runtime error: " << e.what();
+    /* crofconn_env still available? */
+    if (env == nullptr)
+      return;
+  } /* releasing tlock */
+
+  /* run callbacks */
+  for (auto it : calls) {
+    try {
+      switch (it) {
+      case STATE_NEGOTIATION_FAILED: {
+        crofconn_env::call_env(env).handle_negotiation_failed(*this);
+      } break;
+      case STATE_ESTABLISHED: {
+        crofconn_env::call_env(env).handle_established(*this, ofp_version);
+      } break;
+      case STATE_DISCONNECTED: {
+        crofconn_env::call_env(env).handle_closed(*this);
+      } break;
+      case STATE_CONNECT_REFUSED: {
+        crofconn_env::call_env(env).handle_connect_refused(*this);
+      } break;
+      case STATE_CONNECT_FAILED: {
+        crofconn_env::call_env(env).handle_connect_failed(*this);
+      } break;
+      case STATE_ACCEPT_REFUSED: {
+        crofconn_env::call_env(env).handle_accept_failed(*this); /* indeed */
+      } break;
+      case STATE_ACCEPT_FAILED: {
+        crofconn_env::call_env(env).handle_accept_failed(*this);
+      } break;
+      default: {}
+      }
+    } catch (eRofConnNotFound &e) {
+      VLOG(5) << __FUNCTION__ << " error: " << e.what();
+    }
   }
 };
 
@@ -235,13 +309,13 @@ void crofconn::error_rcvd(rofl::openflow::cofmsg *pmsg) {
       dynamic_cast<rofl::openflow::cofmsg_error *>(pmsg);
 
   if (nullptr == msg) {
-    VLOG(1) << __FUNCTION__ << " msg is not of type cofmsg_error laddr="
+    VLOG(5) << __FUNCTION__ << " msg is not of type cofmsg_error laddr="
             << rofsock.get_laddr().str()
             << " raddr=" << rofsock.get_raddr().str();
     return;
   }
 
-  thread.drop_timer(TIMER_ID_WAIT_FOR_HELLO);
+  cthread::thread(thread_num).drop_timer(this, TIMER_ID_WAIT_FOR_HELLO);
 
   try {
 
@@ -253,21 +327,21 @@ void crofconn::error_rcvd(rofl::openflow::cofmsg *pmsg) {
 
         switch (msg->get_err_code()) {
         case rofl::openflow13::OFPHFC_INCOMPATIBLE: {
-          VLOG(1) << __FUNCTION__
+          VLOG(5) << __FUNCTION__
                   << "HELLO-INCOMPATIBLE.error rcvd in state NEGOTIATING, "
                      "closing connection laddr="
                   << rofsock.get_laddr().str()
                   << " raddr=" << rofsock.get_raddr().str();
         } break;
         case rofl::openflow13::OFPHFC_EPERM: {
-          VLOG(1) << __FUNCTION__
+          VLOG(5) << __FUNCTION__
                   << "HELLO-EPERM.error rcvd in state NEGOTIATING, closing "
                      "connection laddr="
                   << rofsock.get_laddr().str()
                   << " raddr=" << rofsock.get_raddr().str();
         } break;
         default: {
-          VLOG(1) << __FUNCTION__
+          VLOG(5) << __FUNCTION__
                   << "HELLO.error rcvd in state NEGOTIATING, closing "
                      "connection laddr="
                   << rofsock.get_laddr().str()
@@ -275,7 +349,7 @@ void crofconn::error_rcvd(rofl::openflow::cofmsg *pmsg) {
         };
         }
 
-        set_state(STATE_NEGOTIATION_FAILED);
+        run_finite_state_machine(STATE_NEGOTIATION_FAILED);
 
       } break;
       default: {};
@@ -287,13 +361,13 @@ void crofconn::error_rcvd(rofl::openflow::cofmsg *pmsg) {
       switch (msg->get_err_type()) {
       case rofl::openflow13::OFPET_BAD_REQUEST: {
 
-        VLOG(1) << __FUNCTION__
+        VLOG(5) << __FUNCTION__
                 << "BAD-REQUEST.error rcvd in state NEGOTIATING2, closing "
                    "connection laddr="
                 << rofsock.get_laddr().str()
                 << " raddr=" << rofsock.get_raddr().str();
 
-        set_state(STATE_NEGOTIATION_FAILED);
+        run_finite_state_machine(STATE_NEGOTIATION_FAILED);
 
       } break;
       default: {};
@@ -304,7 +378,7 @@ void crofconn::error_rcvd(rofl::openflow::cofmsg *pmsg) {
     }
 
   } catch (std::runtime_error &e) {
-    VLOG(1) << __FUNCTION__ << " runtime error: " << e.what()
+    VLOG(5) << __FUNCTION__ << " runtime error: " << e.what()
             << " laddr=" << rofsock.get_laddr().str()
             << " raddr=" << rofsock.get_raddr().str();
   }
@@ -324,7 +398,7 @@ void crofconn::send_hello_message() {
 
     rofl::openflow::cofmsg_hello *msg = new rofl::openflow::cofmsg_hello(
         versionbitmap.get_highest_ofp_version(), ++xid_hello_last, helloIEs);
-    VLOG(3) << __FUNCTION__ << " state: " << state
+    VLOG(5) << __FUNCTION__ << " state: " << state
             << " message sent: " << msg->str().c_str()
             << " laddr=" << rofsock.get_laddr().str()
             << " raddr=" << rofsock.get_raddr().str();
@@ -332,8 +406,8 @@ void crofconn::send_hello_message() {
     rofsock.send_message(msg);
 
   } catch (rofl::exception &e) {
-    VLOG(1) << __FUNCTION__ << " error: " << e.what();
-    set_state(STATE_NEGOTIATION_FAILED);
+    VLOG(5) << __FUNCTION__ << " error: " << e.what();
+    run_finite_state_machine(STATE_NEGOTIATION_FAILED);
   }
 }
 
@@ -342,7 +416,7 @@ void crofconn::hello_rcvd(rofl::openflow::cofmsg *pmsg) {
       dynamic_cast<rofl::openflow::cofmsg_hello *>(pmsg);
 
   if (nullptr == msg) {
-    VLOG(1) << __FUNCTION__ << " msg is not of type cofmsg_hello laddr="
+    VLOG(5) << __FUNCTION__ << " msg is not of type cofmsg_hello laddr="
             << rofsock.get_laddr().str()
             << " raddr=" << rofsock.get_raddr().str();
     return;
@@ -354,7 +428,7 @@ void crofconn::hello_rcvd(rofl::openflow::cofmsg *pmsg) {
 
   flag_hello_rcvd = true;
 
-  thread.drop_timer(TIMER_ID_WAIT_FOR_HELLO);
+  cthread::thread(thread_num).drop_timer(this, TIMER_ID_WAIT_FOR_HELLO);
 
   try {
 
@@ -375,7 +449,7 @@ void crofconn::hello_rcvd(rofl::openflow::cofmsg *pmsg) {
       rofl::openflow::cofhelloelems helloIEs(msg->get_helloelems());
 
       if (not helloIEs.has_hello_elem_versionbitmap()) {
-        VLOG(1) << __FUNCTION__
+        VLOG(5) << __FUNCTION__
                 << " HELLO message rcvd without HelloIE -VersionBitmap- laddr="
                 << rofsock.get_laddr().str()
                 << " raddr=" << rofsock.get_raddr().str();
@@ -385,7 +459,7 @@ void crofconn::hello_rcvd(rofl::openflow::cofmsg *pmsg) {
         versionbitmap_peer = helloIEs.get_hello_elem_versionbitmap();
         // sanity check
         if (not versionbitmap_peer.has_ofp_version(msg->get_version())) {
-          VLOG(1) << __FUNCTION__
+          VLOG(5) << __FUNCTION__
                   << " malformed HelloIE -VersionBitmap- => does not contain "
                      "version defined in OFP message header: "
                   << (int)msg->get_version()
@@ -413,30 +487,30 @@ void crofconn::hello_rcvd(rofl::openflow::cofmsg *pmsg) {
               << " no common OFP version supported, closing connection laddr="
               << rofsock.get_laddr().str()
               << " raddr=" << rofsock.get_raddr().str();
-      set_state(STATE_DISCONNECTED);
+      run_finite_state_machine(STATE_DISCONNECTED);
 
     } else {
-      switch (mode) {
+      switch (mode.load()) {
       case MODE_CONTROLLER: {
         /* get auxid via FEATURES.request for OFP1.3 and above */
         if (ofp_version >= rofl::openflow13::OFP_VERSION) {
-          set_state(STATE_NEGOTIATING2);
+          run_finite_state_machine(STATE_NEGOTIATING2);
           /* otherwise: connection establishment succeeded */
         } else {
-          set_state(STATE_ESTABLISHED);
+          run_finite_state_machine(STATE_ESTABLISHED);
         }
 
       } break;
       case MODE_DATAPATH: {
         /* connection establishment succeeded */
-        set_state(STATE_ESTABLISHED);
+        run_finite_state_machine(STATE_ESTABLISHED);
 
       } break;
       default: {
-        VLOG(1) << __FUNCTION__ << " unable to handle undefined mode laddr="
+        VLOG(5) << __FUNCTION__ << " unable to handle undefined mode laddr="
                 << rofsock.get_laddr().str()
                 << " raddr=" << rofsock.get_raddr().str();
-        set_state(STATE_CLOSING);
+        run_finite_state_machine(STATE_CLOSING);
       }
         return;
       }
@@ -459,7 +533,7 @@ void crofconn::hello_rcvd(rofl::openflow::cofmsg *pmsg) {
 
     sleep(1);
 
-    set_state(STATE_NEGOTIATION_FAILED);
+    run_finite_state_machine(STATE_NEGOTIATION_FAILED);
 
   } catch (eHelloEperm &e) {
 
@@ -476,7 +550,7 @@ void crofconn::hello_rcvd(rofl::openflow::cofmsg *pmsg) {
 
     sleep(1);
 
-    set_state(STATE_NEGOTIATION_FAILED);
+    run_finite_state_machine(STATE_NEGOTIATION_FAILED);
 
   } catch (std::runtime_error &e) {
 
@@ -495,49 +569,50 @@ void crofconn::hello_rcvd(rofl::openflow::cofmsg *pmsg) {
 
     sleep(1);
 
-    set_state(STATE_NEGOTIATION_FAILED);
+    run_finite_state_machine(STATE_NEGOTIATION_FAILED);
   }
 
   delete msg;
 }
 
 void crofconn::hello_expired() {
-  VLOG(1) << __FUNCTION__ << " HELLO expired state=" << state
+  VLOG(5) << __FUNCTION__ << " HELLO expired state=" << state
           << " laddr=" << rofsock.get_laddr().str()
           << " raddr=" << rofsock.get_raddr().str();
 
-  switch (state) {
+  switch (state.load()) {
   case STATE_ESTABLISHED: {
     /* ignore event */
-    VLOG(1) << __FUNCTION__
+    VLOG(5) << __FUNCTION__
             << " HELLO expired, ignoring event, already established laddr="
             << rofsock.get_laddr().str()
             << " raddr=" << rofsock.get_raddr().str();
   } break;
   default: {
     if (flag_hello_rcvd) {
-      VLOG(1)
+      VLOG(5)
           << __FUNCTION__
           << " HELLO expired, ignoring event, HELLO from peer received laddr="
           << rofsock.get_laddr().str()
           << " raddr=" << rofsock.get_raddr().str();
       return;
     }
-    set_state(STATE_NEGOTIATION_FAILED);
+    run_finite_state_machine(STATE_NEGOTIATION_FAILED);
   };
   }
 }
 
 void crofconn::send_features_request() {
   try {
-    thread.add_timer(TIMER_ID_WAIT_FOR_FEATURES,
-                     ctimespec().expire_in(timeout_features));
+    cthread::thread(thread_num)
+        .add_timer(this, TIMER_ID_WAIT_FOR_FEATURES,
+                   ctimespec().expire_in(timeout_features));
 
     rofl::openflow::cofmsg_features_request *msg =
         new rofl::openflow::cofmsg_features_request(
             ofp_version, ++xid_features_request_last);
 
-    VLOG(3) << __FUNCTION__ << " state: " << state
+    VLOG(5) << __FUNCTION__ << " state: " << state
             << " message sent: " << msg->str().c_str()
             << " laddr=" << rofsock.get_laddr().str()
             << " raddr=" << rofsock.get_raddr().str();
@@ -545,8 +620,8 @@ void crofconn::send_features_request() {
     rofsock.send_message(msg);
 
   } catch (rofl::exception &e) {
-    VLOG(1) << __FUNCTION__ << ": errormsg=" << e.what();
-    set_state(STATE_NEGOTIATION_FAILED);
+    VLOG(5) << __FUNCTION__ << ": errormsg=" << e.what();
+    run_finite_state_machine(STATE_NEGOTIATION_FAILED);
   }
 }
 
@@ -555,14 +630,14 @@ void crofconn::features_reply_rcvd(rofl::openflow::cofmsg *pmsg) {
       dynamic_cast<rofl::openflow::cofmsg_features_reply *>(pmsg);
 
   if (nullptr == msg) {
-    VLOG(1) << __FUNCTION__
+    VLOG(5) << __FUNCTION__
             << " msg is not of type cofmsg_features_reply laddr="
             << rofsock.get_laddr().str()
             << " raddr=" << rofsock.get_raddr().str();
     return;
   }
 
-  thread.drop_timer(TIMER_ID_WAIT_FOR_FEATURES);
+  cthread::thread(thread_num).drop_timer(this, TIMER_ID_WAIT_FOR_FEATURES);
 
   try {
     set_dpid(msg->get_dpid());
@@ -573,10 +648,10 @@ void crofconn::features_reply_rcvd(rofl::openflow::cofmsg *pmsg) {
       set_auxid(0);
     }
 
-    set_state(STATE_ESTABLISHED);
+    run_finite_state_machine(STATE_ESTABLISHED);
 
   } catch (std::runtime_error &e) {
-    VLOG(1) << __FUNCTION__ << " runtime error: " << e.what()
+    VLOG(5) << __FUNCTION__ << " runtime error: " << e.what()
             << " laddr=" << rofsock.get_laddr().str()
             << " raddr=" << rofsock.get_raddr().str();
   }
@@ -585,23 +660,35 @@ void crofconn::features_reply_rcvd(rofl::openflow::cofmsg *pmsg) {
 }
 
 void crofconn::features_request_expired() {
-  VLOG(1) << __FUNCTION__
+  VLOG(5) << __FUNCTION__
           << " Features Request expired laddr=" << rofsock.get_laddr().str()
           << " raddr=" << rofsock.get_raddr().str();
 
-  set_state(STATE_NEGOTIATION_FAILED);
+  run_finite_state_machine(STATE_NEGOTIATION_FAILED);
 }
 
 void crofconn::send_echo_request() {
   try {
-    thread.add_timer(TIMER_ID_WAIT_FOR_ECHO,
-                     ctimespec().expire_in(timeout_echo));
+    if (rofsock.is_congested()) {
+      VLOG(5) << __FUNCTION__
+              << " need life check while socket is congested, skipping check: "
+              << " laddr=" << rofsock.get_laddr().str()
+              << " raddr=" << rofsock.get_raddr().str();
+      cthread::thread(thread_num)
+          .add_timer(this, TIMER_ID_NEED_LIFE_CHECK,
+                     ctimespec().expire_in(timeout_lifecheck));
+      return;
+    }
+
+    cthread::thread(thread_num)
+        .add_timer(this, TIMER_ID_WAIT_FOR_ECHO,
+                   ctimespec().expire_in(timeout_echo));
 
     rofl::openflow::cofmsg_echo_request *msg =
         new rofl::openflow::cofmsg_echo_request(ofp_version,
                                                 ++xid_echo_request_last);
 
-    VLOG(3) << __FUNCTION__ << " state: " << state
+    VLOG(5) << __FUNCTION__ << " state: " << state
             << " message sent: " << msg->str().c_str()
             << " laddr=" << rofsock.get_laddr().str()
             << " raddr=" << rofsock.get_raddr().str();
@@ -609,7 +696,7 @@ void crofconn::send_echo_request() {
     rofsock.send_message(msg);
 
   } catch (rofl::exception &e) {
-    VLOG(1) << __FUNCTION__ << " laddr=" << rofsock.get_laddr().str()
+    VLOG(5) << __FUNCTION__ << " laddr=" << rofsock.get_laddr().str()
             << " raddr=" << rofsock.get_raddr().str() << " error=" << e.what();
   }
 }
@@ -620,27 +707,28 @@ void crofconn::echo_reply_rcvd(rofl::openflow::cofmsg *pmsg) {
 
   assert(nullptr != msg);
 
-  thread.drop_timer(TIMER_ID_WAIT_FOR_ECHO);
+  cthread::thread(thread_num).drop_timer(this, TIMER_ID_WAIT_FOR_ECHO);
 
   try {
     delete msg;
 
-    thread.add_timer(TIMER_ID_NEED_LIFE_CHECK,
-                     ctimespec().expire_in(timeout_lifecheck));
+    cthread::thread(thread_num)
+        .add_timer(this, TIMER_ID_NEED_LIFE_CHECK,
+                   ctimespec().expire_in(timeout_lifecheck));
 
   } catch (std::runtime_error &e) {
-    VLOG(1) << __FUNCTION__ << " runtime error: " << e.what()
+    VLOG(5) << __FUNCTION__ << " runtime error: " << e.what()
             << " laddr=" << rofsock.get_laddr().str()
             << " raddr=" << rofsock.get_raddr().str();
   }
 }
 
 void crofconn::echo_request_expired() {
-  VLOG(1) << __FUNCTION__
+  VLOG(5) << __FUNCTION__
           << " Echo Request expired laddr=" << rofsock.get_laddr().str()
           << " raddr=" << rofsock.get_raddr().str();
 
-  set_state(STATE_CLOSING);
+  run_finite_state_machine(STATE_CLOSING);
   handle_closed(rofsock);
 }
 
@@ -649,7 +737,7 @@ void crofconn::echo_request_rcvd(rofl::openflow::cofmsg *pmsg) {
       dynamic_cast<rofl::openflow::cofmsg_echo_request *>(pmsg);
 
   if (nullptr == msg) {
-    VLOG(1) << __FUNCTION__ << " msg is not of type cofmsg_echo_request laddr="
+    VLOG(5) << __FUNCTION__ << " msg is not of type cofmsg_echo_request laddr="
             << rofsock.get_laddr().str()
             << " raddr=" << rofsock.get_raddr().str();
     return;
@@ -661,7 +749,7 @@ void crofconn::echo_request_rcvd(rofl::openflow::cofmsg *pmsg) {
             msg->get_version(), msg->get_xid(), msg->get_body().somem(),
             msg->get_body().memlen());
 
-    VLOG(3) << __FUNCTION__ << " state: " << state
+    VLOG(5) << __FUNCTION__ << " state: " << state
             << " message sent: " << reply->str().c_str()
             << " laddr=" << rofsock.get_laddr().str()
             << " raddr=" << rofsock.get_raddr().str();
@@ -669,7 +757,7 @@ void crofconn::echo_request_rcvd(rofl::openflow::cofmsg *pmsg) {
     rofsock.send_message(reply);
 
   } catch (std::runtime_error &e) {
-    VLOG(1) << __FUNCTION__ << " runtime error: " << e.what()
+    VLOG(5) << __FUNCTION__ << " runtime error: " << e.what()
             << " laddr=" << rofsock.get_laddr().str()
             << " raddr=" << rofsock.get_raddr().str();
   }
@@ -682,11 +770,10 @@ void crofconn::handle_tcp_connect_refused(crofsock &rofsock) {
     VLOG(2) << __FUNCTION__
             << " socket indicates TCP connection -connect- refused";
 
-    set_state(STATE_DISCONNECTED);
-    crofconn_env::call_env(env).handle_connect_refused(*this);
+    run_finite_state_machine(STATE_CONNECT_REFUSED);
 
   } catch (eRofConnNotFound &e) {
-    VLOG(1) << __FUNCTION__ << " error: " << e.what();
+    VLOG(5) << __FUNCTION__ << " error: " << e.what();
   }
 };
 
@@ -695,11 +782,10 @@ void crofconn::handle_tcp_connect_failed(crofsock &rofsock) {
     VLOG(2) << __FUNCTION__
             << " socket indicates TCP connection -connect- failed";
 
-    set_state(STATE_DISCONNECTED);
-    crofconn_env::call_env(env).handle_connect_failed(*this);
+    run_finite_state_machine(STATE_CONNECT_FAILED);
 
   } catch (eRofConnNotFound &e) {
-    VLOG(1) << __FUNCTION__ << " error: " << e.what();
+    VLOG(5) << __FUNCTION__ << " error: " << e.what();
   }
 };
 
@@ -708,10 +794,10 @@ void crofconn::handle_tcp_connected(crofsock &rofsock) {
     VLOG(2) << __FUNCTION__
             << " socket indicates TCP connection -connect- established";
 
-    set_state(STATE_NEGOTIATING);
+    run_finite_state_machine(STATE_NEGOTIATING);
 
   } catch (eRofConnNotFound &e) {
-    VLOG(1) << __FUNCTION__ << " error: " << e.what();
+    VLOG(5) << __FUNCTION__ << " error: " << e.what();
   }
 };
 
@@ -720,11 +806,10 @@ void crofconn::handle_tcp_accept_refused(crofsock &socket) {
     VLOG(2) << __FUNCTION__
             << " socket indicates TCP connection -accept- refused";
 
-    set_state(STATE_DISCONNECTED);
-    crofconn_env::call_env(env).handle_accept_failed(*this);
+    run_finite_state_machine(STATE_ACCEPT_REFUSED);
 
   } catch (eRofConnNotFound &e) {
-    VLOG(1) << __FUNCTION__ << " error: " << e.what();
+    VLOG(5) << __FUNCTION__ << " error: " << e.what();
   }
 };
 
@@ -733,11 +818,10 @@ void crofconn::handle_tcp_accept_failed(crofsock &socket) {
     VLOG(2) << __FUNCTION__
             << " socket indicates TCP connection -accept- failed";
 
-    set_state(STATE_DISCONNECTED);
-    crofconn_env::call_env(env).handle_accept_failed(*this);
+    run_finite_state_machine(STATE_ACCEPT_FAILED);
 
   } catch (eRofConnNotFound &e) {
-    VLOG(1) << __FUNCTION__ << " error: " << e.what();
+    VLOG(5) << __FUNCTION__ << " error: " << e.what();
   }
 };
 
@@ -746,10 +830,10 @@ void crofconn::handle_tcp_accepted(crofsock &socket) {
     VLOG(2) << __FUNCTION__
             << " socket indicates TCP connection -accept- established";
 
-    set_state(STATE_NEGOTIATING);
+    run_finite_state_machine(STATE_NEGOTIATING);
 
   } catch (eRofConnNotFound &e) {
-    VLOG(1) << __FUNCTION__ << " error: " << e.what();
+    VLOG(5) << __FUNCTION__ << " error: " << e.what();
   }
 };
 
@@ -758,11 +842,11 @@ void crofconn::handle_tls_connect_failed(crofsock &socket) {
     VLOG(2) << __FUNCTION__
             << " socket indicates TLS connection -connect- failed";
 
-    set_state(STATE_DISCONNECTED);
+    run_finite_state_machine(STATE_DISCONNECTED);
     crofconn_env::call_env(env).handle_connect_failed(*this);
 
   } catch (eRofConnNotFound &e) {
-    VLOG(1) << __FUNCTION__ << " error: " << e.what();
+    VLOG(5) << __FUNCTION__ << " error: " << e.what();
   }
 };
 
@@ -771,10 +855,10 @@ void crofconn::handle_tls_connected(crofsock &socket) {
     VLOG(2) << __FUNCTION__
             << " socket indicates TLS connection -connect- established";
 
-    set_state(STATE_NEGOTIATING);
+    run_finite_state_machine(STATE_NEGOTIATING);
 
   } catch (eRofConnNotFound &e) {
-    VLOG(1) << __FUNCTION__ << " error: " << e.what();
+    VLOG(5) << __FUNCTION__ << " error: " << e.what();
   }
 };
 
@@ -783,11 +867,11 @@ void crofconn::handle_tls_accept_failed(crofsock &socket) {
     VLOG(2) << __FUNCTION__
             << " socket indicates TLS connection -accept- failed";
 
-    set_state(STATE_DISCONNECTED);
+    run_finite_state_machine(STATE_DISCONNECTED);
     crofconn_env::call_env(env).handle_accept_failed(*this);
 
   } catch (eRofConnNotFound &e) {
-    VLOG(1) << __FUNCTION__ << " error: " << e.what();
+    VLOG(5) << __FUNCTION__ << " error: " << e.what();
   }
 };
 
@@ -796,15 +880,18 @@ void crofconn::handle_tls_accepted(crofsock &socket) {
     VLOG(2) << __FUNCTION__
             << " socket indicates TLS connection -accept- established";
 
-    set_state(STATE_NEGOTIATING);
+    run_finite_state_machine(STATE_NEGOTIATING);
 
   } catch (eRofConnNotFound &e) {
-    VLOG(1) << __FUNCTION__ << " error: " << e.what();
+    VLOG(5) << __FUNCTION__ << " error: " << e.what();
   }
 };
 
 void crofconn::handle_closed(crofsock &rofsock) {
   try {
+    if (flag_test(FLAG_DELETE_IN_PROGRESS)) {
+      return;
+    }
     VLOG(2) << __FUNCTION__ << " socket indicates close";
 
     /* work on packets in reception queue first, then signal shutdown */
@@ -815,34 +902,51 @@ void crofconn::handle_closed(crofsock &rofsock) {
       sleep(1);
     }
 
-    set_state(STATE_DISCONNECTED);
-    crofconn_env::call_env(env).handle_closed(*this);
+    run_finite_state_machine(STATE_DISCONNECTED);
 
   } catch (eRofConnNotFound &e) {
-    VLOG(1) << __FUNCTION__ << " error: " << e.what();
+    VLOG(5) << __FUNCTION__ << " error: " << e.what();
   }
 };
 
 void crofconn::congestion_solved_indication(crofsock &rofsock) {
-  VLOG(2) << __FUNCTION__ << " congestion solved indication; action: "
-                             "message transmission unblocked";
-  crofconn_env::call_env(env).congestion_solved_indication(*this);
+  try {
+    if (flag_test(FLAG_DELETE_IN_PROGRESS)) {
+      return;
+    }
+    VLOG(2) << __FUNCTION__ << " congestion solved indication; action: "
+                               "message transmission unblocked";
+    crofconn_env::call_env(env).congestion_solved_indication(*this);
+  } catch (eRofConnNotFound &e) {
+    VLOG(5) << __FUNCTION__ << " error: " << e.what();
+  }
 };
 
 void crofconn::congestion_occurred_indication(crofsock &rofsock) {
-  VLOG(2) << __FUNCTION__ << " congestion occurred indication; action: message "
-                             "transmission blocked";
-  crofconn_env::call_env(env).congestion_occurred_indication(*this);
+  try {
+    if (flag_test(FLAG_DELETE_IN_PROGRESS)) {
+      return;
+    }
+    VLOG(2) << __FUNCTION__
+            << " congestion occurred indication; action: message "
+               "transmission blocked";
+    crofconn_env::call_env(env).congestion_occurred_indication(*this);
+  } catch (eRofConnNotFound &e) {
+    VLOG(5) << __FUNCTION__ << " error: " << e.what();
+  }
 };
 
 void crofconn::handle_recv(crofsock &socket, rofl::openflow::cofmsg *msg) {
+  if (flag_test(FLAG_DELETE_IN_PROGRESS)) {
+    return;
+  }
   /* This method is executed in crofsock's (not crofconn's!) rxthread context.
    * It deals with messages during connection establishment and negotiation
    * and handles incoming Echo-Requests directly. All other messages
    * are stored in the appropriate rxqueue and crofconn's internal
    * thread is called for handling these messages. */
 
-  VLOG(3) << __FUNCTION__ << " state: " << state
+  VLOG(5) << __FUNCTION__ << " state: " << state
           << " message rcvd: " << msg->str().c_str();
 
   switch (get_state()) {
@@ -1152,26 +1256,30 @@ void crofconn::handle_recv(crofsock &socket, rofl::openflow::cofmsg *msg) {
     }
 
   } catch (eRofQueueFull &e) {
-    VLOG(1) << __FUNCTION__ << " error: " << e.what();
+    VLOG(5) << __FUNCTION__ << " error: " << e.what();
     /* throttle reception of further messages */
     rofsock.rx_disable();
   }
 
   /* wakeup working thread in state ESTABLISHED; otherwise keep sleeping
    * and enqueue message until state ESTABLISHED is reached */
-  if ((STATE_ESTABLISHED == state) && (not rx_thread_working)) {
-    thread.wakeup();
+  if ((STATE_ESTABLISHED == get_state()) && (not rx_thread_working)) {
+    cthread::thread(thread_num).wakeup(this);
   }
 }
 
-void crofconn::handle_wakeup(cthread &thread) { handle_rx_messages(); }
+void crofconn::handle_wakeup(cthread &thread) {
+  if (flag_test(FLAG_DELETE_IN_PROGRESS))
+    return;
+  handle_rx_messages();
+}
 
 void crofconn::handle_rx_messages() {
   /* we start with handling incoming messages */
   rx_thread_working = true;
   rx_thread_scheduled = false;
 
-  thread.drop_timer(TIMER_ID_NEED_LIFE_CHECK);
+  cthread::thread(thread_num).drop_timer(this, TIMER_ID_NEED_LIFE_CHECK);
 
   unsigned int keep_running = 1;
 
@@ -1180,7 +1288,7 @@ void crofconn::handle_rx_messages() {
       /* iterate over all rxqueues */
       for (unsigned int queue_id = 0; queue_id < QUEUE_MAX; ++queue_id) {
 
-        if (STATE_ESTABLISHED != state) {
+        if (STATE_ESTABLISHED != get_state()) {
           rx_thread_working = false;
           return;
         }
@@ -1195,7 +1303,7 @@ void crofconn::handle_rx_messages() {
 
           rofl::openflow::cofmsg *msg = (rofl::openflow::cofmsg *)0;
 
-          if (STATE_ESTABLISHED != state) {
+          if (STATE_ESTABLISHED != get_state()) {
             rx_thread_working = false;
             return;
           }
@@ -1208,7 +1316,7 @@ void crofconn::handle_rx_messages() {
           switch (ofp_version.load()) {
           case rofl::openflow10::OFP_VERSION:
           case rofl::openflow12::OFP_VERSION: {
-            VLOG(3) << __FUNCTION__
+            VLOG(5) << __FUNCTION__
                     << " call application: " << msg->str().c_str();
             // no segmentation and reassembly below OFP1.3, so hand over message
             // directly to higher layers
@@ -1221,7 +1329,7 @@ void crofconn::handle_rx_messages() {
               handle_rx_multipart_message(msg);
             } break;
             default: {
-              VLOG(3) << __FUNCTION__
+              VLOG(5) << __FUNCTION__
                       << " call application: " << msg->str().c_str();
               crofconn_env::call_env(env).handle_recv(*this, msg);
             };
@@ -1232,12 +1340,12 @@ void crofconn::handle_rx_messages() {
 
         /* reschedule this method */
         if (not rxqueues[queue_id].empty()) {
-          thread.wakeup();
+          cthread::thread(thread_num).wakeup(this);
         }
       }
 
       /* not connected any more, stop running working thread */
-      if (STATE_ESTABLISHED != state) {
+      if (STATE_ESTABLISHED != get_state()) {
         rx_thread_working = false;
         rx_thread_scheduled = true;
         return;
@@ -1245,19 +1353,20 @@ void crofconn::handle_rx_messages() {
 
     } catch (eRofConnNotFound &e) {
       /* environment not found */
-      VLOG(1) << __FUNCTION__ << " error: " << e.what();
+      VLOG(5) << __FUNCTION__ << " error: " << e.what();
       keep_running = false;
 
     } catch (std::runtime_error &e) {
-      VLOG(1) << __FUNCTION__ << " runtime error: " << e.what();
+      VLOG(5) << __FUNCTION__ << " runtime error: " << e.what();
     }
 
   } while (keep_running--);
 
   rx_thread_working = false;
 
-  thread.add_timer(TIMER_ID_NEED_LIFE_CHECK,
-                   ctimespec().expire_in(timeout_lifecheck));
+  cthread::thread(thread_num)
+      .add_timer(this, TIMER_ID_NEED_LIFE_CHECK,
+                 ctimespec().expire_in(timeout_lifecheck));
 
   /* reenable reception of messages on socket */
   if (rofsock.is_rx_disabled()) {
@@ -1277,7 +1386,7 @@ void crofconn::handle_rx_multipart_message(rofl::openflow::cofmsg *msg) {
         dynamic_cast<rofl::openflow::cofmsg_stats_request *>(msg);
 
     if (NULL == stats) {
-      VLOG(1) << __FUNCTION__
+      VLOG(5) << __FUNCTION__
               << " dropping multipart request, invalid message type";
       delete msg;
       return;
@@ -1310,7 +1419,7 @@ void crofconn::handle_rx_multipart_message(rofl::openflow::cofmsg *msg) {
 
         crofconn_env::call_env(env).handle_recv(*this, reassembled_msg);
       } else {
-        VLOG(3) << __FUNCTION__ << " call application: " << msg->str().c_str();
+        VLOG(5) << __FUNCTION__ << " call application: " << msg->str().c_str();
         // do not delete msg here, will be done by higher layers
         crofconn_env::call_env(env).handle_recv(*this, msg);
       }
@@ -1324,7 +1433,7 @@ void crofconn::handle_rx_multipart_message(rofl::openflow::cofmsg *msg) {
         dynamic_cast<rofl::openflow::cofmsg_stats_reply *>(msg);
 
     if (NULL == stats) {
-      VLOG(1) << __FUNCTION__
+      VLOG(5) << __FUNCTION__
               << " dropping multipart reply, invalid message type";
       delete msg;
       return;
@@ -1357,7 +1466,7 @@ void crofconn::handle_rx_multipart_message(rofl::openflow::cofmsg *msg) {
 
         crofconn_env::call_env(env).handle_recv(*this, reassembled_msg);
       } else {
-        VLOG(3) << __FUNCTION__ << " call application: " << msg->str().c_str();
+        VLOG(5) << __FUNCTION__ << " call application: " << msg->str().c_str();
         // do not delete msg here, will be done by higher layers
         crofconn_env::call_env(env).handle_recv(*this, msg);
       }
@@ -1420,7 +1529,7 @@ rofl::crofsock::msg_result_t
 crofconn::segment_and_send_message(rofl::openflow::cofmsg *msg) {
   rofl::crofsock::msg_result_t msg_result = rofl::crofsock::MSG_IGNORED;
 
-  VLOG(3) << __FUNCTION__ << " state: " << state
+  VLOG(5) << __FUNCTION__ << " state: " << state
           << " message sent: " << msg->str().c_str();
 
   if (msg->length() <= segmentation_threshold) {

@@ -34,6 +34,16 @@ public:
   eTimerSysCall(const std::string &__arg) : eTimerBase(__arg){};
 };
 
+class ctimer;
+
+class ctimer_env {
+  friend class ctimer;
+
+public:
+  ctimer_env() {}
+  virtual ~ctimer_env() {}
+};
+
 class ctimer {
 public:
   /**
@@ -52,9 +62,9 @@ public:
   /**
    *
    */
-  ctimer(uint32_t timer_id = 0,
+  ctimer(ctimer_env *timer_env = nullptr, uint32_t timer_id = 0,
          const ctimespec &tspec = ctimespec(::timespec{0, 0}))
-      : timer_id(timer_id), tspec(tspec){};
+      : timer_env(timer_env), timer_id(timer_id), tspec(tspec){};
 
   /**
    *
@@ -68,6 +78,7 @@ public:
     if (this == &ts)
       return *this;
 
+    timer_env = ts.timer_env;
     timer_id = ts.timer_id;
     tspec = ts.tspec;
 
@@ -81,6 +92,16 @@ public:
       return tspec < t.tspec;
     }
   }
+
+  /**
+   *
+   */
+  ctimer_env *env() const { return timer_env; };
+
+  /**
+   *
+   */
+  const ctimer_env *get_timer_env() const { return timer_env; };
 
   /**
    *
@@ -116,6 +137,7 @@ public:
   };
 
 private:
+  ctimer_env *timer_env;
   uint32_t timer_id;
   ctimespec tspec;
 };
@@ -123,12 +145,29 @@ private:
 /**
  *
  */
-class ctimer_find_by_timer_id {
+class ctimer_find_by_timer_env {
+  ctimer_env *timer_env;
+
+public:
+  ctimer_find_by_timer_env(ctimer_env *timer_env) : timer_env(timer_env) {}
+  bool operator()(const ctimer &t) {
+    return ((t.get_timer_env() == timer_env));
+  };
+};
+
+/**
+ *
+ */
+class ctimer_find_by_timer_env_and_id {
+  ctimer_env *timer_env;
   uint32_t timer_id;
 
 public:
-  ctimer_find_by_timer_id(uint32_t timer_id) : timer_id(timer_id) {}
-  bool operator()(const ctimer &t) { return (t.get_timer_id() == timer_id); }
+  ctimer_find_by_timer_env_and_id(ctimer_env *timer_env, uint32_t timer_id)
+      : timer_env(timer_env), timer_id(timer_id) {}
+  bool operator()(const ctimer &t) {
+    return ((t.get_timer_env() == timer_env) && (t.get_timer_id() == timer_id));
+  };
 };
 
 }; // end of namespace rofl

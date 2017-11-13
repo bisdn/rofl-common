@@ -5,13 +5,11 @@ AC_ARG_ENABLE(debug,
 	AS_HELP_STRING([--enable-debug], [turn on debug mode [default=no]])
 		, , enable_debug=$debug_default)
 if test "$enable_debug" = "yes"; then
-	CFLAGS="$CFLAGS -g -O0"
-	CXXFLAGS="$CXXFLAGS -g -O0 -fno-inline"
+	CFLAGS="$CFLAGS -g "
+	CXXFLAGS="$CXXFLAGS -g "
 	AC_DEFINE([DEBUG], [], [Description])
 	AC_MSG_RESULT(yes)
 else
-	CFLAGS="$CFLAGS -O3" #--compiler-options -fno-strict-aliasing --compiler-options -fno-inline
-	CXXFLAGS="$CXXFLAGS -O3" #-fomit-frame-pointer"
 	AC_DEFINE([NDEBUG], [], [Description])
 	AC_MSG_RESULT(no)
 fi

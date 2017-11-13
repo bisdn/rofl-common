@@ -652,6 +652,12 @@ protected:
  *
  */
 class crofctl : public rofl::crofchan_env {
+
+  enum crofctl_state_t {
+    STATE_RUNNING,
+    STATE_DELETE_IN_PROGRESS,
+  };
+
 public:
   /**
    * @brief	crofctl destructor
@@ -1235,6 +1241,8 @@ public:
 
 private:
   virtual void handle_established(crofchan &chan, uint8_t ofp_version) {
+    if (delete_in_progress())
+      return;
     switch (ofp_version) {
     case rofl::openflow12::OFP_VERSION: {
       role.set_role(rofl::openflow12::OFPCR_ROLE_EQUAL);
@@ -1247,6 +1255,8 @@ private:
   };
 
   virtual void handle_closed(crofchan &chan) {
+    if (delete_in_progress())
+      return;
     switch (chan.get_version()) {
     case rofl::openflow12::OFP_VERSION: {
       role.set_role(rofl::openflow12::OFPCR_ROLE_EQUAL);
@@ -1260,34 +1270,50 @@ private:
 
   virtual void handle_established(crofchan &chan, crofconn &conn,
                                   uint8_t ofp_version) {
+    if (delete_in_progress())
+      return;
     crofctl_env::call_env(env).handle_established(*this, conn, ofp_version);
   };
 
   virtual void handle_closed(crofchan &chan, crofconn &conn) {
+    if (delete_in_progress())
+      return;
     crofctl_env::call_env(env).handle_closed(*this, conn);
   };
 
   virtual void handle_connect_refused(crofchan &chan, crofconn &conn) {
+    if (delete_in_progress())
+      return;
     crofctl_env::call_env(env).handle_connect_refused(*this, conn);
   };
 
   virtual void handle_connect_failed(crofchan &chan, crofconn &conn) {
+    if (delete_in_progress())
+      return;
     crofctl_env::call_env(env).handle_connect_failed(*this, conn);
   };
 
   virtual void handle_accept_failed(crofchan &chan, crofconn &conn) {
+    if (delete_in_progress())
+      return;
     crofctl_env::call_env(env).handle_accept_failed(*this, conn);
   };
 
   virtual void handle_negotiation_failed(crofchan &chan, crofconn &conn) {
+    if (delete_in_progress())
+      return;
     crofctl_env::call_env(env).handle_negotiation_failed(*this, conn);
   };
 
   virtual void congestion_occurred_indication(crofchan &chan, crofconn &conn) {
+    if (delete_in_progress())
+      return;
     crofctl_env::call_env(env).congestion_occurred_indication(*this, conn);
   };
 
   virtual void congestion_solved_indication(crofchan &chan, crofconn &conn) {
+    if (delete_in_progress())
+      return;
     crofctl_env::call_env(env).congestion_solved_indication(*this, conn);
   };
 
@@ -1302,9 +1328,16 @@ private:
 private:
   void init_async_config_role_default_template();
 
+  bool delete_in_progress() const {
+    return (STATE_DELETE_IN_PROGRESS == state);
+  };
+
 private:
   // environment
   rofl::crofctl_env *env;
+
+  // state
+  std::atomic<crofctl_state_t> state;
 
   // handle for this crofctl instance
   rofl::cctlid ctlid;

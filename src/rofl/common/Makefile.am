@@ -48,7 +48,9 @@ librofl_common_base_la_SOURCES = \
 		cindex.h \
 		cdpid.h \
 		csegment.hpp \
-		csegment.cpp
+		csegment.cpp \
+		cbuffer.hpp \
+		cbuffer.cpp
 
 		
 
@@ -82,7 +84,8 @@ library_include_HEADERS= \
 		caddrinfos.h \
 		cindex.h \
 		cdpid.h \
-		csegment.hpp
+		csegment.hpp \
+		cbuffer.hpp
 
 
 
