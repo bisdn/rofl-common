@@ -23,6 +23,6 @@ if test "$is_gcc" == "0"; then
 		AC_MSG_RESULT(compatible)
 	else
 		AC_MSG_RESULT(incompatible)
-		AC_ERROR([ERROR: your GCC version '$gcc_version' is in the list of blacklisted GCC vesions {$BLACKLISTED_GCC_VERSIONS}. This is due to bugs affecting -O3 optimizations. Please use another version. ])
+		AC_MSG_ERROR([ERROR: your GCC version '$gcc_version' is in the list of blacklisted GCC vesions {$BLACKLISTED_GCC_VERSIONS}. This is due to bugs affecting -O3 optimizations. Please use another version. ])
 	fi
 fi

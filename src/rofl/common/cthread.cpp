@@ -96,13 +96,13 @@ using namespace rofl;
   for (uint32_t i = cthread::pool_mgt_loop_index;
        i < cthread::pool_io_loop_index; ++i) {
     std::stringstream thread_name;
-    thread_name << "thread(" << (unsigned int)i << ")-mgt";
+    thread_name << "rofl-mgt-(" << (unsigned int)i << ")";
     (cthread::pool[i] = new cthread(i))->start(thread_name.str());
   }
   for (uint32_t i = cthread::pool_io_loop_index;
        i < (cthread::pool_hnd_loop_index); ++i) {
     std::stringstream thread_name;
-    thread_name << "thread(" << (unsigned int)i << ")-io";
+    thread_name << "rofl-io-(" << (unsigned int)i << ")";
     (cthread::pool[i] = new cthread(i))->start(thread_name.str());
   }
   for (uint32_t i = cthread::pool_hnd_loop_index;
@@ -110,7 +110,7 @@ using namespace rofl;
             cthread::pool_num_hnd_threads);
        ++i) {
     std::stringstream thread_name;
-    thread_name << "thread(" << (unsigned int)i << ")-hnd";
+    thread_name << "rofl-app-(" << (unsigned int)i << ")";
     (cthread::pool[i] = new cthread(i))->start(thread_name.str());
   }
   cthread::pool_initialized = true;

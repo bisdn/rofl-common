@@ -14,6 +14,7 @@ if test "$ssl_detected" = "yes"; then
 	AC_DEFINE_UNQUOTED([SRVKEY],["$(pwd)/../tools/xca/server.key.pem"], [""])
 else
 	AC_MSG_RESULT(not found)
+	AC_MSG_ERROR([openssl not found, aborting])
 fi
 
 AM_CONDITIONAL([HAVE_OPENSSL],  [test "$ssl_detected" = yes])
