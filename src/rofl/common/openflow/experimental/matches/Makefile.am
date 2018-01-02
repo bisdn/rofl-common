@@ -11,7 +11,9 @@ libopenflow_experimental_matches_la_SOURCES = \
 	wlan_matches.h \
 	wlan_matches.cc \
 	gre_matches.h \
-	gre_matches.cc
+	gre_matches.cc \
+	ofdpa_matches.h \
+	ofdpa_matches.cc
 
 
 library_includedir=$(includedir)/rofl/common/openflow/experimental/matches
