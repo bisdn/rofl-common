@@ -79,6 +79,25 @@ public:
   }
 };
 
+class coxmatch_ofb_ovid : public openflow::coxmatch_exp {
+public:
+	coxmatch_ofb_ovid(uint16_t ovid)
+      : coxmatch_exp(ofdpa::OXM_TLV_EXPR_OVID, ONF_EXP_ID_ONF, ovid) {}
+
+	coxmatch_ofb_ovid(const coxmatch_exp &oxm) : coxmatch_exp(oxm) {}
+
+  virtual ~coxmatch_ofb_ovid() {}
+
+  friend std::ostream &operator<<(std::ostream &os,
+                                  const coxmatch_ofb_ovid &oxm) {
+    os << dynamic_cast<const coxmatch &>(oxm);
+    os << "<coxmatch_ofb_ovid >" << std::endl;
+    os << "    <ovid: 0x" << std::hex << (int)oxm.get_u16value() << std::dec
+       << " >" << std::endl;
+    return os;
+  }
+};
+
 class coxmatch_ofb_allow_vlan_translation : public openflow::coxmatch_exp {
 public:
   coxmatch_ofb_allow_vlan_translation(uint8_t val)
