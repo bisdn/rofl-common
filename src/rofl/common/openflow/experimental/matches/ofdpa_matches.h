@@ -16,54 +16,53 @@ enum openflow_exp_ids {
 };
 
 /* OF-DPA Experimenter Match Field types */
-enum ofdpa_match_exp_type {
-  OFDPA_OXM_VRF = 1,
-  OFDPA_OXM_TRAFFIC_CLASS = 2,
-  OFDPA_OXM_COLOR = 3,
-  OFDPA_OXM_VLAN_DEI = 4,
-  OFDPA_OXM_QOS_INDEX = 5,
-  OFDPA_OXM_LMEP_ID = 6,
-  OFDPA_OXM_MPLS_TTL = 7,
-  OFDPA_OXM_MPLS_L2_PORT = 8,
-  OFDPA_OXM_L3_IN_PORT = 9,
-  OFDPA_OXM_OVID = 10,
-  OFDPA_OXM_MPLS_DATA_FIRST_NIBBLE = 11,
-  OFDPA_OXM_MPLS_ACH_CHANNEL = 12,
-  OFDPA_OXM_NEXT_LABEL_IS_GAL = 13,
-  OFDPA_OXM_OAM_Y1731_MDL = 14,
-  OFDPA_OXM_OAM_Y1731_OPCODE = 15,
-  OFDPA_OXM_COLOR_ACTIONS_INDEX = 16,
-  OFDPA_OXM_PROTECTION_INDEX = 21,
-  OFDPA_OXM_MPLS_TYPE = 23,
-  OFDPA_OXM_ALLOW_VLAN_TRANSLATION = 24,
-  OFDPA_OXM_ACTSET_OUTPUT = 43,
+enum oxm_ofx_match_fields_ofdpa {
+	OFPXMT_OFX_OFDPA_VRF = 1,
+	OFPXMT_OFX_OFDPA_TRAFFIC_CLASS = 2,
+	OFPXMT_OFX_OFDPA_COLOR = 3,
+    OFPXMT_OFX_OFDPA_VLAN_DEI = 4,
+    OFPXMT_OFX_OFDPA_QOS_INDEX = 5,
+    OFPXMT_OFX_OFDPA_LMEP_ID = 6,
+    OFPXMT_OFX_OFDPA_MPLS_TTL = 7,
+    OFPXMT_OFX_OFDPA_MPLS_L2_PORT = 8,
+    OFPXMT_OFX_OFDPA_L3_IN_PORT = 9,
+    OFPXMT_OFX_OFDPA_OVID = 10,
+    OFPXMT_OFX_OFDPA_MPLS_DATA_FIRST_NIBBLE = 11,
+    OFPXMT_OFX_OFDPA_MPLS_ACH_CHANNEL = 12,
+    OFPXMT_OFX_OFDPA_NEXT_LABEL_IS_GAL = 13,
+    OFPXMT_OFX_OFDPA_OAM_Y1731_MDL = 14,
+    OFPXMT_OFX_OFDPA_OAM_Y1731_OPCODE = 15,
+    OFPXMT_OFX_OFDPA_COLOR_ACTIONS_INDEX = 16,
+    OFPXMT_OFX_OFDPA_PROTECTION_INDEX = 21,
+    OFPXMT_OFX_OFDPA_MPLS_TYPE = 23,
+    OFPXMT_OFX_OFDPA_ALLOW_VLAN_TRANSLATION = 24,
+    OFPXMT_OFX_OFDPA_ACTSET_OUTPUT = 43,
 };
-
 /* OXM Flow match field types for OpenFlow experimenter class. */
-enum oxm_tlv_match_fields {
+enum oxm_tlv_match_fields_ofdpa {
   OXM_TLV_EXPR_VRF =
-      (openflow::OFPXMC_EXPERIMENTER << 16) | (OFDPA_OXM_VRF << 9) | 2,
+      (openflow::OFPXMC_EXPERIMENTER << 16) | (OFPXMT_OFX_OFDPA_VRF << 9) | 2,
 
   OXM_TLV_EXPR_VRF_MASK =
-	  (openflow::OFPXMC_EXPERIMENTER << 16) | (OFDPA_OXM_VRF << 9) | 4 | HAS_MASK_FLAG,
+	  (openflow::OFPXMC_EXPERIMENTER << 16) | (OFPXMT_OFX_OFDPA_VRF << 9) | 4 | HAS_MASK_FLAG,
 
   OXM_TLV_EXPR_OVID =
-	  (openflow::OFPXMC_EXPERIMENTER << 16) | (OFDPA_OXM_OVID << 9) | 2,
+	  (openflow::OFPXMC_EXPERIMENTER << 16) | (OFPXMT_OFX_OFDPA_OVID << 9) | 2,
 
   OXM_TLV_EXPR_ALLOW_VLAN_TRANSLATION =
-      (openflow::OFPXMC_EXPERIMENTER << 16) | (OFDPA_OXM_ALLOW_VLAN_TRANSLATION << 9) | 5,
+      (openflow::OFPXMC_EXPERIMENTER << 16) | (OFPXMT_OFX_OFDPA_ALLOW_VLAN_TRANSLATION << 9) | 5,
 
   OXM_TLV_EXPR_ACTSET_OUTPUT =
-	  (openflow::OFPXMC_EXPERIMENTER << 16) | (OFDPA_OXM_ACTSET_OUTPUT << 9) | 8,
+	  (openflow::OFPXMC_EXPERIMENTER << 16) | (OFPXMT_OFX_OFDPA_ACTSET_OUTPUT << 9) | 8,
 };
 
 class coxmatch_ofb_vrf : public openflow::coxmatch_exp {
 public:
   coxmatch_ofb_vrf(uint16_t vrf)
-      : coxmatch_exp(ofdpa::OXM_TLV_EXPR_VRF, EXP_ID_BCM, vrf) {}
+      : coxmatch_exp(OXM_TLV_EXPR_VRF, EXP_ID_BCM, vrf) {}
 
   coxmatch_ofb_vrf(uint16_t vrf, uint16_t mask)
-      : coxmatch_exp(ofdpa::OXM_TLV_EXPR_VRF_MASK, EXP_ID_BCM, vrf, mask) {}
+      : coxmatch_exp(OXM_TLV_EXPR_VRF_MASK, EXP_ID_BCM, vrf, mask) {}
 
   coxmatch_ofb_vrf(const coxmatch_exp &oxm) : coxmatch_exp(oxm) {}
 
@@ -82,7 +81,7 @@ public:
 class coxmatch_ofb_ovid : public openflow::coxmatch_exp {
 public:
 	coxmatch_ofb_ovid(uint16_t ovid)
-      : coxmatch_exp(ofdpa::OXM_TLV_EXPR_OVID, ONF_EXP_ID_ONF, ovid) {}
+      : coxmatch_exp(OXM_TLV_EXPR_OVID, ONF_EXP_ID_ONF, ovid) {}
 
 	coxmatch_ofb_ovid(const coxmatch_exp &oxm) : coxmatch_exp(oxm) {}
 
@@ -101,7 +100,7 @@ public:
 class coxmatch_ofb_allow_vlan_translation : public openflow::coxmatch_exp {
 public:
   coxmatch_ofb_allow_vlan_translation(uint8_t val)
-      : coxmatch_exp(ofdpa::OXM_TLV_EXPR_ALLOW_VLAN_TRANSLATION, EXP_ID_BCM,
+      : coxmatch_exp(OXM_TLV_EXPR_ALLOW_VLAN_TRANSLATION, EXP_ID_BCM,
                      val) {}
 
   coxmatch_ofb_allow_vlan_translation(const coxmatch_exp &oxm)
@@ -127,7 +126,7 @@ class coxmatch_ofb_actset_output : public openflow::coxmatch_exp {
 
 public:
   coxmatch_ofb_actset_output(uint32_t port)
-      : coxmatch_exp(ofdpa::OXM_TLV_EXPR_ACTSET_OUTPUT, ONF_EXP_ID_ONF, port) {}
+      : coxmatch_exp(OXM_TLV_EXPR_ACTSET_OUTPUT, ONF_EXP_ID_ONF, port) {}
 
   coxmatch_ofb_actset_output(const coxmatch_exp &oxm) : coxmatch_exp(oxm) {}
 
