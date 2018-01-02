@@ -1383,7 +1383,7 @@ void crofsock::tx_enable() {
 }
 
 void crofsock::handle_timeout(cthread &thread, uint32_t timer_id) {
-  if ((get_state() <= STATE_IDLE) || delete_in_progress()) {
+  if (delete_in_progress()) {
     return;
   }
   switch (timer_id) {
