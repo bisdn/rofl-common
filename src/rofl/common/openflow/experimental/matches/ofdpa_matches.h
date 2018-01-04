@@ -38,22 +38,25 @@ enum oxm_ofx_match_fields_ofdpa {
     OFPXMT_OFX_OFDPA_ALLOW_VLAN_TRANSLATION = 24,
     OFPXMT_OFX_OFDPA_ACTSET_OUTPUT = 43,
 };
+
+static unsigned int const OXM_EXP_ID_SIZE = sizeof(uint32_t); // length of experimenter id field
+
 /* OXM Flow match field types for OpenFlow experimenter class. */
 enum oxm_tlv_match_fields_ofdpa {
   OXM_TLV_EXPR_VRF =
-      (openflow::OFPXMC_EXPERIMENTER << 16) | (OFPXMT_OFX_OFDPA_VRF << 9) | 2,
+      (openflow::OFPXMC_EXPERIMENTER << 16) | (OFPXMT_OFX_OFDPA_VRF << 9) | (OXM_EXP_ID_SIZE + 2),
 
   OXM_TLV_EXPR_VRF_MASK =
-	  (openflow::OFPXMC_EXPERIMENTER << 16) | (OFPXMT_OFX_OFDPA_VRF << 9) | 4 | HAS_MASK_FLAG,
+	  (openflow::OFPXMC_EXPERIMENTER << 16) | (OFPXMT_OFX_OFDPA_VRF << 9) | (OXM_EXP_ID_SIZE + 4) | HAS_MASK_FLAG,
 
   OXM_TLV_EXPR_OVID =
-	  (openflow::OFPXMC_EXPERIMENTER << 16) | (OFPXMT_OFX_OFDPA_OVID << 9) | 2,
+	  (openflow::OFPXMC_EXPERIMENTER << 16) | (OFPXMT_OFX_OFDPA_OVID << 9) | (OXM_EXP_ID_SIZE + 2),
 
   OXM_TLV_EXPR_ALLOW_VLAN_TRANSLATION =
-      (openflow::OFPXMC_EXPERIMENTER << 16) | (OFPXMT_OFX_OFDPA_ALLOW_VLAN_TRANSLATION << 9) | 5,
+      (openflow::OFPXMC_EXPERIMENTER << 16) | (OFPXMT_OFX_OFDPA_ALLOW_VLAN_TRANSLATION << 9) | (OXM_EXP_ID_SIZE + 1),
 
   OXM_TLV_EXPR_ACTSET_OUTPUT =
-	  (openflow::OFPXMC_EXPERIMENTER << 16) | (OFPXMT_OFX_OFDPA_ACTSET_OUTPUT << 9) | 8,
+	  (openflow::OFPXMC_EXPERIMENTER << 16) | (OFPXMT_OFX_OFDPA_ACTSET_OUTPUT << 9) | (OXM_EXP_ID_SIZE + 4),
 };
 
 class coxmatch_ofb_vrf : public openflow::coxmatch_exp {

@@ -9,6 +9,11 @@ Legend:
 Change log
 ==========
 
+v0.13.1
+[+] added experimental matches from OFDPA-2: 
+    VRF, OVID, ALLOW_VLAN_TRANSLATION, ACTSET_OUTPUT
+[B] fixed invalid length fields for experimental OXM matches
+
 v0.13.0
 [+] thread pool
 
