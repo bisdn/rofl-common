@@ -19,16 +19,18 @@ enum oxm_ofx_match_fields {
   OFPXMT_OFX_PPP_PROT = 24,   /* PPP protocol */
 };
 
+static unsigned int const OXM_EXP_ID_SIZE = sizeof(uint32_t); // length of experimenter id field
+
 /* OXM Flow match field types for OpenFlow basic class. */
 enum oxm_tlv_match_fields {
   OXM_TLV_EXPR_PPPOE_CODE =
-      (OFPXMC_EXPERIMENTER << 16) | (OFPXMT_OFX_PPPOE_CODE << 9) | 1,
+      (OFPXMC_EXPERIMENTER << 16) | (OFPXMT_OFX_PPPOE_CODE << 9) | (OXM_EXP_ID_SIZE + 1),
   OXM_TLV_EXPR_PPPOE_TYPE =
-      (OFPXMC_EXPERIMENTER << 16) | (OFPXMT_OFX_PPPOE_TYPE << 9) | 1,
+      (OFPXMC_EXPERIMENTER << 16) | (OFPXMT_OFX_PPPOE_TYPE << 9) | (OXM_EXP_ID_SIZE + 1),
   OXM_TLV_EXPR_PPPOE_SID =
-      (OFPXMC_EXPERIMENTER << 16) | (OFPXMT_OFX_PPPOE_SID << 9) | 2,
+      (OFPXMC_EXPERIMENTER << 16) | (OFPXMT_OFX_PPPOE_SID << 9) | (OXM_EXP_ID_SIZE + 2),
   OXM_TLV_EXPR_PPP_PROT =
-      (OFPXMC_EXPERIMENTER << 16) | (OFPXMT_OFX_PPP_PROT << 9) | 2,
+      (OFPXMC_EXPERIMENTER << 16) | (OFPXMT_OFX_PPP_PROT << 9) | (OXM_EXP_ID_SIZE + 2),
 };
 
 /** OXM_OF_PPPOE_CODE

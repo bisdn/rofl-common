@@ -18,22 +18,24 @@ enum oxm_ofx_match_fields {
   OFPXMT_OFX_CAPWAP_FLAGS = 29,
 };
 
+static unsigned int const OXM_EXP_ID_SIZE = sizeof(uint32_t); // length of experimenter id field
+
 /* OXM Flow match field types for OpenFlow basic class. */
 enum oxm_tlv_match_fields {
   OXM_TLV_EXPR_CAPWAP_WBID =
-      (OFPXMC_EXPERIMENTER << 16) | (OFPXMT_OFX_CAPWAP_WBID << 9) | 1,
+      (OFPXMC_EXPERIMENTER << 16) | (OFPXMT_OFX_CAPWAP_WBID << 9) | (OXM_EXP_ID_SIZE + 1),
   OXM_TLV_EXPR_CAPWAP_WBID_MASK = (OFPXMC_EXPERIMENTER << 16) |
-                                  (OFPXMT_OFX_CAPWAP_WBID << 9) | 2 |
+                                  (OFPXMT_OFX_CAPWAP_WBID << 9) | (OXM_EXP_ID_SIZE + 2) |
                                   HAS_MASK_FLAG,
   OXM_TLV_EXPR_CAPWAP_RID =
-      (OFPXMC_EXPERIMENTER << 16) | (OFPXMT_OFX_CAPWAP_RID << 9) | 1,
+      (OFPXMC_EXPERIMENTER << 16) | (OFPXMT_OFX_CAPWAP_RID << 9) | (OXM_EXP_ID_SIZE + 1),
   OXM_TLV_EXPR_CAPWAP_RID_MASK = (OFPXMC_EXPERIMENTER << 16) |
-                                 (OFPXMT_OFX_CAPWAP_RID << 9) | 2 |
+                                 (OFPXMT_OFX_CAPWAP_RID << 9) | (OXM_EXP_ID_SIZE + 2) |
                                  HAS_MASK_FLAG,
   OXM_TLV_EXPR_CAPWAP_FLAGS =
-      (OFPXMC_EXPERIMENTER << 16) | (OFPXMT_OFX_CAPWAP_FLAGS << 9) | 2,
+      (OFPXMC_EXPERIMENTER << 16) | (OFPXMT_OFX_CAPWAP_FLAGS << 9) | (OXM_EXP_ID_SIZE + 2),
   OXM_TLV_EXPR_CAPWAP_FLAGS_MASK = (OFPXMC_EXPERIMENTER << 16) |
-                                   (OFPXMT_OFX_CAPWAP_FLAGS << 9) | 4 |
+                                   (OFPXMT_OFX_CAPWAP_FLAGS << 9) | (OXM_EXP_ID_SIZE + 4) |
                                    HAS_MASK_FLAG,
 };
 

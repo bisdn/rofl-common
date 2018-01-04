@@ -17,17 +17,19 @@ enum oxm_ofx_match_fields {
   OFPXMT_OFX_GTP_TEID = 26,    /* GTP tunnel endpoint identifier */
 };
 
+static unsigned int const OXM_EXP_ID_SIZE = sizeof(uint32_t); // length of experimenter id field
+
 /* OXM Flow match field types for OpenFlow basic class. */
 enum oxm_tlv_match_fields {
   OXM_TLV_EXPR_GTP_MSGTYPE =
-      (OFPXMC_EXPERIMENTER << 16) | (OFPXMT_OFX_GTP_MSGTYPE << 9) | 1,
+      (OFPXMC_EXPERIMENTER << 16) | (OFPXMT_OFX_GTP_MSGTYPE << 9) | (OXM_EXP_ID_SIZE + 1),
   OXM_TLV_EXPR_GTP_MSGTYPE_MASK = (OFPXMC_EXPERIMENTER << 16) |
-                                  (OFPXMT_OFX_GTP_MSGTYPE << 9) | 2 |
+                                  (OFPXMT_OFX_GTP_MSGTYPE << 9) | (OXM_EXP_ID_SIZE + 2) |
                                   HAS_MASK_FLAG,
   OXM_TLV_EXPR_GTP_TEID =
-      (OFPXMC_EXPERIMENTER << 16) | (OFPXMT_OFX_GTP_TEID << 9) | 4,
+      (OFPXMC_EXPERIMENTER << 16) | (OFPXMT_OFX_GTP_TEID << 9) | (OXM_EXP_ID_SIZE + 4),
   OXM_TLV_EXPR_GTP_TEID_MASK = (OFPXMC_EXPERIMENTER << 16) |
-                               (OFPXMT_OFX_GTP_TEID << 9) | 8 | HAS_MASK_FLAG,
+                               (OFPXMT_OFX_GTP_TEID << 9) | (OXM_EXP_ID_SIZE + 8) | HAS_MASK_FLAG,
 };
 
 /** OXM_OFX_GTP_TEID
