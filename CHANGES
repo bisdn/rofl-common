@@ -9,6 +9,10 @@ Legend:
 Change log
 ==========
 
+v0.12.2
+[B] cofport_stats default port_no fixed
+[O] improved testing on travis
+
 v0.12.1
 [A] queue_type be public enum
 [B] fix ctimespec operator

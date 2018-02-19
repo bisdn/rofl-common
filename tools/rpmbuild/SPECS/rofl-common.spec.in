@@ -69,6 +69,10 @@ make install DESTDIR=$RPM_BUILD_ROOT
 rm -rf $RPM_BUILD_ROOT 
 
 %changelog
+* Mon Feb 19 2018 Tobias Jungel <tobias.jungel@bisdn.de> - v0.12.2
+- [B] cofport_stats default port_no fixed
+- [O] improved testing on travis
+
 * Wed Sep 13 2017 Tobias Jungel <tobias.jungel@bisdn.de> - v0.12.1
 - [A] queue_type be public enum
 - [B] fix ctimespec operator
