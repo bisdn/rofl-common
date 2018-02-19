@@ -10,19 +10,23 @@ Change log
 ==========
 
 v0.13.1
-[+] added experimental matches from OFDPA-2: 
+[+] added experimental matches from OFDPA-2:
     VRF, OVID, ALLOW_VLAN_TRANSLATION, ACTSET_OUTPUT
 [B] fixed invalid length fields for experimental OXM matches
 
 v0.13.0
 [+] thread pool
 
+v0.12.2
+[B] cofport_stats default port_no fixed
+[O] improved testing on travis
+
 v0.12.1
 [A] queue_type be public enum
 [B] fix ctimespec operator
 
 v0.12.0
-[+] crofsock: revised tx-queueing strategy (default txqueue size limited 
+[+] crofsock: revised tx-queueing strategy (default txqueue size limited
     to 128 messages), API changes to crofctl and crofdpt: all transmission
     methods return the queueing result when sending an openflow message:
     MSG_QUEUED, MSG_QUEUED_CONGESTION, MSG_QUEUEING_FAILED_*
@@ -83,21 +87,21 @@ v0.10.7
 v0.10.6
 
 [B] crofsock: prevent infinite loop
-    In case txqueues are not empty tx is rescheduled. The 
-    flag to do so was not cleared and this would cause an 
+    In case txqueues are not empty tx is rescheduled. The
+    flag to do so was not cleared and this would cause an
     infinite loop. Reset the flag to prevent this.
 [B] crofsock: crofsock: set tx_fragment_pending in tx saturation
-    A packet in the txbuffer would not be sent in case tx 
-    was saturated tx_fragment_pending is set to resend the 
+    A packet in the txbuffer would not be sent in case tx
+    was saturated tx_fragment_pending is set to resend the
     packet, that was already cleared from the txqueues.
 [B] crofsock: txqueue_size_tx_threshold checking fixed
     If txqueue_pending_pkts == 1, the calculation of
     txqueue_size_tx_threshold might lead to a never cleared
     FLAG_TX_BLOCK_QUEUEING flag.
-[B] cthread: don't throw in destructor 
+[B] cthread: don't throw in destructor
 [B] crofchantest: fix increments done in threads
-    num_of_ctl_established and num_of_accepts are incremented 
-    from diffrent threads, hence the test randomly fails or 
+    num_of_ctl_established and num_of_accepts are incremented
+    from diffrent threads, hence the test randomly fails or
     succeeds.
 [B] crofsocktest: fix timeout
     timeout was already -1 in CPPUNIT_ASSERT
@@ -105,9 +109,9 @@ v0.10.6
     crofsocktest: disabling TLS test
 [B] cthread: fix edge-triggered behaviour of epoll
     pipe still uses level-triggered scheme
-[B] crofsock: don't let handle_write_event run at state STATE_CLOSED 
+[B] crofsock: don't let handle_write_event run at state STATE_CLOSED
 [B] crofsock: do not wakeup tx in case its blocked
-[B] crofconn: fixed potential race condition during connection 
+[B] crofconn: fixed potential race condition during connection
     establishment (HELLO negotiation)
 [B] crofsock: add rxthread wakeup handler
     call recv_message() after connect/EINPROGRESS continuation
@@ -123,17 +127,17 @@ v0.10.4
 [B] crofchan: fixed a bug introduced in v0.10.3 while fixing
     the other bug: actively established connections must not be
     removed upon handle_closed()
-[B] cthread: check timer for expiration again before calling 
+[B] cthread: check timer for expiration again before calling
     handle_timeout()
 [B] crofsock: allow transmission of Echo-Request/Reply messages
-    even when flow-control is blocking transmission of other 
+    even when flow-control is blocking transmission of other
     messages received from the application layer
 
 v0.10.3
 
 [O] added cclockid class to prevent invalid use of class ctimespec
 [+] crofsock: use SO_LINGER option for coordinated shutdown
-[+] crofsock: make backlog for listening mode configurable, defaults to 
+[+] crofsock: make backlog for listening mode configurable, defaults to
     64 established TCP connections
 [B] crofconn: fixed potential race condition causing a Hello expiration
 [A] crofchan: send CLOSE notification to application when replacing
@@ -161,7 +165,7 @@ v0.10.0
 
 v0.7.0
 
-[+] New internal threading model, running rofl's main ioloop by 
+[+] New internal threading model, running rofl's main ioloop by
     application not necessary any more
 [O] Revised API of classes cofmsg_group_mod and cofgroupmod
 
@@ -172,7 +176,7 @@ v0.6.2
 [B] making class indent thread aware
 [B] fixed buffer bloat like situation in crofqueue under high loads
 [O] fixed hex output in some coxmatch classes (Fixed issue #14)
-[O] fixed hex output for classes cofgroupmod and cofmsg_group_mod 
+[O] fixed hex output for classes cofgroupmod and cofmsg_group_mod
     for group-id. Fixes issue #13.
 
 v0.6.1
