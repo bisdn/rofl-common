@@ -32,7 +32,19 @@ void cofport::pack(uint8_t *buf, size_t buflen) {
 
     hdr->port_no = htobe16(portno & 0x0000ffff);
     memcpy(hdr->hw_addr, hwaddr.somem(), OFP_ETH_ALEN);
-    strncpy(hdr->name, name.c_str(), OFP_MAX_PORT_NAME_LEN);
+    static_assert(sizeof(hdr->name) == OFP_MAX_PORT_NAME_LEN, "invalid length of hdr->name");
+    // this is somewhat awkward
+#if __GNUC__ >= 8
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstringop-overflow"
+#endif
+    strncpy(hdr->name, name.c_str(), OFP_MAX_PORT_NAME_LEN - 1);
+#if __GNUC__ >= 8
+#pragma GCC diagnostic pop
+#endif
+    if (name.length() >= OFP_MAX_PORT_NAME_LEN) {
+      hdr->name[OFP_MAX_PORT_NAME_LEN - 1] = '\0';
+    }
     hdr->config = htobe32(config);
     hdr->state = htobe32(state);
     hdr->curr = htobe32(get_ethernet().get_curr());
@@ -49,7 +61,10 @@ void cofport::pack(uint8_t *buf, size_t buflen) {
 
     hdr->port_no = htobe32(portno);
     memcpy(hdr->hw_addr, hwaddr.somem(), OFP_ETH_ALEN);
-    strncpy(hdr->name, name.c_str(), OFP_MAX_PORT_NAME_LEN);
+    strncpy(hdr->name, name.c_str(), OFP_MAX_PORT_NAME_LEN - 1);
+    if (name.length() >= OFP_MAX_PORT_NAME_LEN) {
+      hdr->name[OFP_MAX_PORT_NAME_LEN - 1] = '\0';
+    }
     hdr->config = htobe32(config);
     hdr->state = htobe32(state);
     hdr->curr = htobe32(get_ethernet().get_curr());
@@ -67,7 +82,10 @@ void cofport::pack(uint8_t *buf, size_t buflen) {
 
     hdr->port_no = htobe32(portno);
     memcpy(hdr->hw_addr, hwaddr.somem(), OFP_ETH_ALEN);
-    strncpy(hdr->name, name.c_str(), OFP_MAX_PORT_NAME_LEN);
+    strncpy(hdr->name, name.c_str(), OFP_MAX_PORT_NAME_LEN - 1);
+    if (name.length() >= OFP_MAX_PORT_NAME_LEN) {
+      hdr->name[OFP_MAX_PORT_NAME_LEN - 1] = '\0';
+    }
     hdr->config = htobe32(config);
     hdr->state = htobe32(state);
 

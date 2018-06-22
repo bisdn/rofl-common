@@ -31,7 +31,10 @@ void coftable_features::pack(uint8_t *buf, size_t buflen) {
 
     hdr->length = htobe16(length());
     hdr->table_id = table_id;
-    strncpy(hdr->name, name.c_str(), OFP_MAX_TABLE_NAME_LEN);
+    strncpy(hdr->name, name.c_str(), OFP_MAX_TABLE_NAME_LEN - 1);
+    if (name.length() >= OFP_MAX_TABLE_NAME_LEN) {
+      hdr->name[OFP_MAX_TABLE_NAME_LEN - 1] = '\0';
+    }
     hdr->metadata_match = htobe64(metadata_match);
     hdr->metadata_write = htobe64(metadata_write);
     hdr->config = htobe32(config);
