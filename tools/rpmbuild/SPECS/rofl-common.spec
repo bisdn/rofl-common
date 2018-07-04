@@ -181,7 +181,7 @@ rm -rf $RPM_BUILD_ROOT
 * Wed Apr 06 2016 Andreas Koepsel <andreas.koepsel@bisdn.de> - v0.10.5
 - [B] version is broken, do not use
 
-* Tue Mar 02 2016 Andreas Koepsel <andreas.koepsel@bisdn.de> - v0.10.4
+* Wed Mar 02 2016 Andreas Koepsel <andreas.koepsel@bisdn.de> - v0.10.4
 - crofchan: corrected bugfix from v0.10.3 in handle_closed()
 
 * Tue Mar 01 2016 Andreas Koepsel <andreas.koepsel@bisdn.de> - v0.10.3
