@@ -36,7 +36,7 @@ Revised OpenFlow Library (ROFL) version %{version} - development files
 %setup -q
 
 %build
-sh autogen.sh
+sh ./autogen.sh
 mkdir -p build
 cd build/
 ../configure --prefix=/usr --disable-silent-rules --libdir=%{_libdir}
