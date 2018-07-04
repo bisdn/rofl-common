@@ -13,6 +13,7 @@ v0.13.1
 [+] added experimental matches from OFDPA-2:
     VRF, OVID, ALLOW_VLAN_TRANSLATION, ACTSET_OUTPUT
 [B] fixed invalid length fields for experimental OXM matches
+[B] ensure all padding fields are set to value 0
 
 v0.13.0
 [+] thread pool
