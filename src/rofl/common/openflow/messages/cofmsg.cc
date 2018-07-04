@@ -19,6 +19,8 @@ void cofmsg::pack(uint8_t *buf, size_t buflen) {
   if (buflen < cofmsg::length())
     throw eInvalid("eInvalid", __FILE__, __FUNCTION__, __LINE__);
 
+  memset(buf, 0, buflen); // ensure padding fields to be set to 0
+
   struct rofl::openflow::ofp_header *hdr =
       (struct rofl::openflow::ofp_header *)buf;
 
