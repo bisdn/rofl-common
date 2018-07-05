@@ -22,6 +22,7 @@ class cofmsgpacketouttest : public CppUnit::TestFixture {
   CPPUNIT_TEST(testPacketOutParser10);
   CPPUNIT_TEST(testPacketOutParser12);
   CPPUNIT_TEST(testPacketOutParser13);
+  CPPUNIT_TEST(testPacketOutPack13);
   CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -35,6 +36,7 @@ public:
   void testPacketOutParser10();
   void testPacketOutParser12();
   void testPacketOutParser13();
+  void testPacketOutPack13();
 
 private:
   void testPacketOut(uint8_t version, uint8_t type, uint32_t xid);
