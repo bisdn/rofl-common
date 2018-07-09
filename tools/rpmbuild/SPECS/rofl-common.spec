@@ -1,12 +1,12 @@
 Name:		rofl-common
-Version:	v0.13.1
+Version:	0.13.1
 Release:	1%{?dist}
 Summary:	Revised OpenFlow Library
 
 Group:		System Environment/Libraries
 License:	MPLv2.0
 URL:		https://github.com/bisdn/rofl-common
-Source0:	rofl-common-%{version}.tar.gz
+Source0:	https://github.com/bisdn/rofl-common/archive/v%{version}.tar.gz
 
 BuildRequires:	openssl-devel
 BuildRequires:	autoconf
