@@ -1,5 +1,5 @@
 Name:		rofl-common
-Version:	v0.13.1
+Version:	0.13.1
 Release:	1%{?dist}
 Summary:	Revised OpenFlow Library
 
