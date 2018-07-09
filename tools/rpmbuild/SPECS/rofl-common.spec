@@ -1,5 +1,5 @@
 Name:		rofl-common
-Version:	@ROFL_VERSION@
+Version:	v0.13.1
 Release:	1%{?dist}
 Summary:	Revised OpenFlow Library
 
@@ -19,7 +19,7 @@ Requires:	openssl
 Requires:	glog
 
 %description
-Revised OpenFlow Library (ROFL) version @ROFL_VERSION@
+Revised OpenFlow Library (ROFL) version %{version} - libraries
 
 %package        devel
 Summary:	Header files and libraries for revised openflow library
@@ -30,7 +30,7 @@ Requires:	glog-devel
 Requires:	gflags-devel
 
 %description    devel
-Revised OpenFlow Library (ROFL) version @ROFL_VERSION@ development files
+Revised OpenFlow Library (ROFL) version %{version} - development files
 
 %prep
 %setup -q

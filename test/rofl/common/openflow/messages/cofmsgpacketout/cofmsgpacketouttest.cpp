@@ -349,3 +349,29 @@ void cofmsgpacketouttest::testPacketOutParser13() {
     }
   }
 }
+
+void cofmsgpacketouttest::testPacketOutPack13() {
+
+	uint32_t xid = 0xa1a2a3a4;
+	uint32_t buffer_id = OFP_NO_BUFFER;
+	uint32_t in_port = OFPP_CONTROLLER;
+	uint16_t max_len = 0xb1b2;
+	rofl::openflow::cofactions actions(rofl::openflow13::OFP_VERSION);
+	actions.add_action_output(rofl::cindex(0)).set_port_no(OFPP_CONTROLLER);
+	actions.set_action_output(rofl::cindex(0)).set_max_len(max_len);
+	rofl::cmemory data(27);
+	for (unsigned int i = 0; i < data.length(); i++) {
+		data[i] = i;
+	}
+
+	cofmsg_packet_out msg(rofl::openflow13::OFP_VERSION, xid, buffer_id, in_port, actions, data.somem(), data.length());
+
+	rofl::cmemory mem(msg.length());
+	for (unsigned int i = 0; i < mem.length(); i++) {
+		mem[i] = 0xe8;
+	}
+	std::cerr << mem << std::endl;
+	msg.pack(mem.somem(), mem.length());
+	std::cerr << mem << std::endl;
+}
+
