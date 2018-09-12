@@ -8,6 +8,7 @@ License:	MPLv2.0
 URL:		https://github.com/bisdn/rofl-common
 Source0:	https://github.com/bisdn/rofl-common/archive/v%{version}.tar.gz
 
+BuildRequires:	gcc-c++
 BuildRequires:	openssl-devel
 BuildRequires:	autoconf
 BuildRequires:	automake
@@ -40,7 +41,7 @@ sh ./autogen.sh
 mkdir -p build
 cd build/
 ../configure --prefix=/usr --disable-silent-rules --libdir=%{_libdir}
-make %{?_smp_mflags} 
+make %{?_smp_mflags}
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -66,7 +67,7 @@ make install DESTDIR=$RPM_BUILD_ROOT
 %{_libdir}/pkgconfig/rofl_common.pc
 
 %clean
-rm -rf $RPM_BUILD_ROOT 
+rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Wed Jul 04 2018 Andreas Koepsel <andreas.koepsel@bisdn.de> - v0.13.1
@@ -85,7 +86,7 @@ rm -rf $RPM_BUILD_ROOT
 * Wed Sep 13 2017 Tobias Jungel <tobias.jungel@bisdn.de> - v0.12.1
 - [A] queue_type be public enum
 - [B] fix ctimespec operator
- 
+
 * Fri Jul 21 2017 Tobias Jungel <tobias.jungel@bisdn.de> - v0.12.0
 - [+] crofsock: revised tx-queueing strategy (default txqueue size limited
       to 128 messages), API changes to crofctl and crofdpt: all transmission
