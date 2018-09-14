@@ -1017,6 +1017,6 @@ public:
       : eTableFeaturesReqBase(__arg, __file, __func, __line){};
 };
 
-}; // end of namespace
+}; // namespace rofl
 
 #endif

@@ -11,7 +11,8 @@ cbuffer::cbuffer(size_t len) : cmemory(len), wbytes(0), rbytes(0) {}
 cbuffer::cbuffer(uint8_t *data, size_t datalen)
     : cmemory(data, datalen), wbytes(datalen), rbytes(0) {}
 
-cbuffer::cbuffer(const cbuffer &b) { *this = b; }
+cbuffer::cbuffer(const cbuffer &b)
+    : cmemory(b), wbytes(b.wbytes), rbytes(b.rbytes) {}
 
 cbuffer::~cbuffer() {}
 

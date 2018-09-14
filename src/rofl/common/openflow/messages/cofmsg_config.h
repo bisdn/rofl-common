@@ -32,9 +32,8 @@ public:
   /**
    *
    */
-  cofmsg_get_config_request(const cofmsg_get_config_request &msg) {
-    *this = msg;
-  };
+  cofmsg_get_config_request(const cofmsg_get_config_request &msg)
+      : cofmsg(msg) {}
 
   /**
    *
@@ -83,7 +82,8 @@ public:
   /**
    *
    */
-  cofmsg_get_config_reply(const cofmsg_get_config_reply &msg) { *this = msg; };
+  cofmsg_get_config_reply(const cofmsg_get_config_reply &msg)
+      : cofmsg(msg), flags(msg.flags), miss_send_len(msg.miss_send_len) {}
 
   /**
    *
@@ -216,7 +216,8 @@ public:
   /**
    *
    */
-  cofmsg_set_config(const cofmsg_set_config &msg) { *this = msg; };
+  cofmsg_set_config(const cofmsg_set_config &msg)
+      : cofmsg(msg), flags(msg.flags), miss_send_len(msg.miss_send_len) {}
 
   /**
    *

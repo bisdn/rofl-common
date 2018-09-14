@@ -24,9 +24,9 @@
 namespace rofl {
 
 /*
-* Helper class to manipulate easily arguments in C++ programs. Argmuents are
-* ALWAYS strings
-*/
+ * Helper class to manipulate easily arguments in C++ programs. Argmuents are
+ * ALWAYS strings
+ */
 
 #define NO_ARGUMENT no_argument
 #define REQUIRED_ARGUMENT required_argument
@@ -61,8 +61,8 @@ public:
 /* Forward declaration */
 
 /*
-* Unix parser class
-*/
+ * Unix parser class
+ */
 class cunixenv {
 public:
   /**
@@ -76,8 +76,8 @@ public:
   ~cunixenv();
 
   /*
-  * Add argument to current list of arguments to parse
-  */
+   * Add argument to current list of arguments to parse
+   */
   void add_option(const coption &arg);
 
   /**
@@ -110,6 +110,6 @@ private:
   std::vector<std::string> cargs;
 };
 
-}; // end of namespace
+}; // namespace rofl
 
 #endif

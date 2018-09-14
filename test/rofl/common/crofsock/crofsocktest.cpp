@@ -239,15 +239,18 @@ void crofsocktest::handle_listen(rofl::crofsock &socket) {
   }
 }
 
-void crofsocktest::handle_tcp_connect_refused(rofl::crofsock &socket) {
+void crofsocktest::handle_tcp_connect_refused(__attribute__((unused))
+                                              rofl::crofsock &socket) {
   LOG(INFO) << "handle tcp connect refused" << std::endl;
 }
 
-void crofsocktest::handle_tcp_connect_failed(rofl::crofsock &socket) {
+void crofsocktest::handle_tcp_connect_failed(__attribute__((unused))
+                                             rofl::crofsock &socket) {
   LOG(INFO) << "handle tcp connect failed" << std::endl;
 }
 
-void crofsocktest::handle_tcp_connected(rofl::crofsock &socket) {
+void crofsocktest::handle_tcp_connected(__attribute__((unused))
+                                        rofl::crofsock &socket) {
   LOG(INFO) << "handle tcp connected" << std::endl;
 
   switch (test_mode) {
@@ -268,15 +271,18 @@ void crofsocktest::handle_tcp_connected(rofl::crofsock &socket) {
   }
 }
 
-void crofsocktest::handle_tcp_accept_refused(rofl::crofsock &socket) {
+void crofsocktest::handle_tcp_accept_refused(__attribute__((unused))
+                                             rofl::crofsock &socket) {
   LOG(INFO) << "handle tcp accept refused" << std::endl;
 }
 
-void crofsocktest::handle_tcp_accept_failed(rofl::crofsock &socket) {
+void crofsocktest::handle_tcp_accept_failed(__attribute__((unused))
+                                            rofl::crofsock &socket) {
   LOG(INFO) << "handle tcp accept failed" << std::endl;
 }
 
-void crofsocktest::handle_tcp_accepted(rofl::crofsock &socket) {
+void crofsocktest::handle_tcp_accepted(__attribute__((unused))
+                                       rofl::crofsock &socket) {
   LOG(INFO) << "handle tcp accepted" << std::endl;
 
   switch (test_mode) {
@@ -297,15 +303,18 @@ void crofsocktest::handle_tcp_accepted(rofl::crofsock &socket) {
   }
 }
 
-void crofsocktest::handle_closed(rofl::crofsock &socket) {
+void crofsocktest::handle_closed(__attribute__((unused))
+                                 rofl::crofsock &socket) {
   LOG(INFO) << "handle closed" << std::endl;
 }
 
-void crofsocktest::congestion_solved_indication(rofl::crofsock &socket) {
+void crofsocktest::congestion_solved_indication(__attribute__((unused))
+                                                rofl::crofsock &socket) {
   LOG(INFO) << "handle send" << std::endl;
 }
 
-void crofsocktest::congestion_occurred_indication(rofl::crofsock &socket) {
+void crofsocktest::congestion_occurred_indication(__attribute__((unused))
+                                                  rofl::crofsock &socket) {
   LOG(INFO) << "congestion indication" << std::endl;
 }
 
@@ -351,11 +360,13 @@ void crofsocktest::handle_recv(rofl::crofsock &socket,
   }
 }
 
-void crofsocktest::handle_tls_connect_failed(rofl::crofsock &socket) {
+void crofsocktest::handle_tls_connect_failed(__attribute__((unused))
+                                             rofl::crofsock &socket) {
   LOG(INFO) << "handle tls connect failed" << std::endl;
 }
 
-void crofsocktest::handle_tls_connected(rofl::crofsock &socket) {
+void crofsocktest::handle_tls_connected(__attribute__((unused))
+                                        rofl::crofsock &socket) {
   LOG(INFO) << "handle tls connected" << std::endl;
 
   sleep(1);
@@ -366,11 +377,13 @@ void crofsocktest::handle_tls_connected(rofl::crofsock &socket) {
   sclient->send_message(hello);
 }
 
-void crofsocktest::handle_tls_accept_failed(rofl::crofsock &socket) {
+void crofsocktest::handle_tls_accept_failed(__attribute__((unused))
+                                            rofl::crofsock &socket) {
   LOG(INFO) << "handle tls accept failed" << std::endl;
 }
 
-void crofsocktest::handle_tls_accepted(rofl::crofsock &socket) {
+void crofsocktest::handle_tls_accepted(__attribute__((unused))
+                                       rofl::crofsock &socket) {
   LOG(INFO) << "handle tls accepted" << std::endl;
 
   sleep(1);

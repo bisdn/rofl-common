@@ -155,7 +155,8 @@ public:
   /**
    *
    */
-  cofqueue_prop_min_rate(const cofqueue_prop_min_rate &prop) { *this = prop; };
+  cofqueue_prop_min_rate(const cofqueue_prop_min_rate &prop)
+      : cofqueue_prop(prop), min_rate(prop.min_rate) {}
 
   /**
    *
@@ -229,7 +230,8 @@ public:
   /**
    *
    */
-  cofqueue_prop_max_rate(const cofqueue_prop_max_rate &prop) { *this = prop; };
+  cofqueue_prop_max_rate(const cofqueue_prop_max_rate &prop)
+      : cofqueue_prop(prop), max_rate(prop.max_rate) {}
 
   /**
    *
@@ -304,9 +306,8 @@ public:
   /**
    *
    */
-  cofqueue_prop_experimenter(const cofqueue_prop_experimenter &prop) {
-    *this = prop;
-  };
+  cofqueue_prop_experimenter(const cofqueue_prop_experimenter &prop)
+      : cofqueue_prop(prop), exp_id(prop.exp_id), exp_body(prop.exp_body) {}
 
   /**
    *

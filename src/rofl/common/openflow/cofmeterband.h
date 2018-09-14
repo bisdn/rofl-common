@@ -64,7 +64,7 @@ public:
   /**
    *
    */
-  const bool operator==(const cofmeter_band &mb) const;
+  bool operator==(const cofmeter_band &mb) const;
 
 public:
   /**
@@ -195,7 +195,7 @@ public:
   /**
    *
    */
-  const bool operator==(const cofmeter_band_drop &mb) const;
+  bool operator==(const cofmeter_band_drop &mb) const;
 
 public:
   friend std::ostream &operator<<(std::ostream &os,
@@ -232,7 +232,7 @@ public:
   /**
    *
    */
-  const bool operator==(const cofmeter_band_dscp_remark &mb) const;
+  bool operator==(const cofmeter_band_dscp_remark &mb) const;
 
 public:
   /**
@@ -301,7 +301,7 @@ public:
   /**
    *
    */
-  const bool operator==(const cofmeter_band_experimenter &mb) const;
+  bool operator==(const cofmeter_band_experimenter &mb) const;
 
 public:
   /**
@@ -365,7 +365,7 @@ private:
   uint32_t exp_id;
   rofl::cmemory exp_body;
 };
-}
-}
+} // namespace openflow
+} // namespace rofl
 
 #endif /* COFMETERBAND_H_ */

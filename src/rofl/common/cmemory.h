@@ -318,6 +318,6 @@ public:
   };
 };
 
-}; // end of namespace
+}; // namespace rofl
 
 #endif

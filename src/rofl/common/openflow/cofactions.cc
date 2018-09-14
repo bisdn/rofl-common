@@ -133,7 +133,8 @@ cofactions &cofactions::operator=(const cofactions &actions) {
   return *this;
 }
 
-bool cofactions::operator==(cofactions const &actions) const {
+bool cofactions::operator==(__attribute__((unused))
+                            cofactions const &actions) const {
 #if 0
 	if (ofp_version != actions.ofp_version) {
 		//FIXME: std::cerr << "PUNKT 1" << std::endl;

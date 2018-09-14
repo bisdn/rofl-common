@@ -13,7 +13,8 @@ cofmsg_table_mod::cofmsg_table_mod(uint8_t version, uint32_t xid,
     : cofmsg(version, rofl::openflow::OFPT_TABLE_MOD, xid), table_id(table_id),
       config(config) {}
 
-cofmsg_table_mod::cofmsg_table_mod(const cofmsg_table_mod &msg) { *this = msg; }
+cofmsg_table_mod::cofmsg_table_mod(const cofmsg_table_mod &msg)
+    : cofmsg(msg), table_id(msg.table_id), config(msg.config) {}
 
 cofmsg_table_mod &cofmsg_table_mod::operator=(const cofmsg_table_mod &msg) {
   if (this == &msg)

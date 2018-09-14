@@ -736,7 +736,8 @@ void crofsock::tls_term_context() {
   }
 }
 
-int crofsock::tls_pswd_cb(char *buf, int size, int rwflag, void *userdata) {
+int crofsock::tls_pswd_cb(char *buf, int size,
+                          __attribute__((unused)) int rwflag, void *userdata) {
   if (userdata == NULL)
     return 0;
 
@@ -775,9 +776,8 @@ void crofsock::tls_accept(int sockfd) {
         throw eLibCall("eLibCall", "SSL_new", __FILE__, __FUNCTION__, __LINE__);
       }
 
-      SSL_set_mode(ssl,
-                   SSL_MODE_ENABLE_PARTIAL_WRITE |
-                       SSL_MODE_ACCEPT_MOVING_WRITE_BUFFER);
+      SSL_set_mode(ssl, SSL_MODE_ENABLE_PARTIAL_WRITE |
+                            SSL_MODE_ACCEPT_MOVING_WRITE_BUFFER);
 
       if ((bio = BIO_new(BIO_s_socket())) == NULL) {
         throw eLibCall("eLibCall", "BIO_new", __FILE__, __FUNCTION__, __LINE__);
@@ -921,9 +921,8 @@ void crofsock::tls_connect(bool reconnect) {
       throw eLibCall("eLibCall", "SSL_new", __FILE__, __FUNCTION__, __LINE__);
     }
 
-    SSL_set_mode(ssl,
-                 SSL_MODE_ENABLE_PARTIAL_WRITE |
-                     SSL_MODE_ACCEPT_MOVING_WRITE_BUFFER);
+    SSL_set_mode(ssl, SSL_MODE_ENABLE_PARTIAL_WRITE |
+                          SSL_MODE_ACCEPT_MOVING_WRITE_BUFFER);
 
     if ((bio = BIO_new(BIO_s_socket())) == NULL) {
       throw eLibCall("eLibCall", "BIO_new", __FILE__, __FUNCTION__, __LINE__);
@@ -1382,7 +1381,8 @@ void crofsock::tx_enable() {
   cthread::thread(tx_thread_num).wakeup(this);
 }
 
-void crofsock::handle_timeout(cthread &thread, uint32_t timer_id) {
+void crofsock::handle_timeout(__attribute__((unused)) cthread &thread,
+                              uint32_t timer_id) {
   if (delete_in_progress()) {
     return;
   }
@@ -1724,7 +1724,7 @@ void crofsock::send_from_queue() {
             }
               return;
             case SSL_ERROR_WANT_CONNECT: { /* should never happen here, though
-                                              */
+                                            */
               VLOG(6) << __FUNCTION__
                       << " TLS: SSL_write WANT CONNECT on sd=" << sd;
               tx_is_running = false;
@@ -1825,7 +1825,9 @@ void crofsock::handle_read_event(cthread &thread, int fd) {
   }
 }
 
-void crofsock::handle_read_event_rxthread(cthread &thread, int fd) {
+void crofsock::handle_read_event_rxthread(__attribute__((unused))
+                                          cthread &thread,
+                                          int fd) {
   VLOG(6) << __FUNCTION__ << " RX event on sd=" << sd
           << " laddr=" << laddr.str() << " raddr=" << raddr.str();
 

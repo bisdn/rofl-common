@@ -10,7 +10,8 @@ cofmsg_flow_mod::cofmsg_flow_mod(uint8_t version, uint32_t xid,
   this->flowmod.set_version(version);
 }
 
-cofmsg_flow_mod::cofmsg_flow_mod(const cofmsg_flow_mod &msg) { *this = msg; }
+cofmsg_flow_mod::cofmsg_flow_mod(const cofmsg_flow_mod &msg)
+    : cofmsg(msg), flowmod(msg.flowmod) {}
 
 cofmsg_flow_mod &cofmsg_flow_mod::operator=(const cofmsg_flow_mod &msg) {
   if (this == &msg)

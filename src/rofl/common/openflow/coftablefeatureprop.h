@@ -907,7 +907,7 @@ public:
 /*
  * TODO: coftable_feature_prop_experimenter
  */
-};
-};
+}; // namespace openflow
+}; // namespace rofl
 
 #endif /* COFTABLEFEATUREPROP_H_ */

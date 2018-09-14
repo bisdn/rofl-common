@@ -262,6 +262,7 @@ void crofchantest::handle_listen(rofl::crofsock &socket) {
 }
 
 void crofchantest::handle_established(rofl::crofconn &conn,
+                                      __attribute__((unused))
                                       uint8_t ofp_version) {
   {
     rofl::AcquireReadWriteLock lock(plock);
@@ -285,6 +286,7 @@ void crofchantest::handle_established(rofl::crofconn &conn,
 
 void crofchantest::handle_established(rofl::crofchan &chan,
                                       rofl::crofconn &conn,
+                                      __attribute__((unused))
                                       uint8_t ofp_version) {
 
   rofl::AcquireReadWriteLock lock(tlock);
@@ -314,7 +316,8 @@ void crofchantest::handle_established(rofl::crofchan &chan,
   }
 }
 
-void crofchantest::handle_timeout(rofl::cthread &thread, uint32_t timer_id) {
+void crofchantest::handle_timeout(__attribute__((unused)) rofl::cthread &thread,
+                                  uint32_t timer_id) {
   rofl::AcquireReadWriteLock lock(tlock);
   rofl::openflow::cofmsg_packet_in *msg = nullptr;
   switch (timer_id) {
@@ -410,7 +413,8 @@ void crofchantest::handle_timeout(rofl::cthread &thread, uint32_t timer_id) {
   }
 }
 
-void crofchantest::handle_recv(rofl::crofchan &chan, rofl::crofconn &conn,
+void crofchantest::handle_recv(__attribute__((unused)) rofl::crofchan &chan,
+                               rofl::crofconn &conn,
                                rofl::openflow::cofmsg *pmsg) {
   rofl::AcquireReadWriteLock lock(tlock);
   switch (pmsg->get_type()) {
@@ -449,7 +453,9 @@ void crofchantest::handle_recv(rofl::crofchan &chan, rofl::crofconn &conn,
   delete pmsg;
 }
 
-void crofchantest::congestion_solved_indication(rofl::crofchan &chan,
+void crofchantest::congestion_solved_indication(__attribute__((unused))
+                                                rofl::crofchan &chan,
+                                                __attribute__((unused))
                                                 rofl::crofconn &conn) {
   rofl::AcquireReadWriteLock lock(tlock);
   std::cerr << "<CSI(" << max_congestion_rounds << ") s:" << num_of_pkts_sent
@@ -464,7 +470,9 @@ void crofchantest::congestion_solved_indication(rofl::crofchan &chan,
   }
 }
 
-void crofchantest::congestion_occurred_indication(rofl::crofchan &chan,
+void crofchantest::congestion_occurred_indication(__attribute__((unused))
+                                                  rofl::crofchan &chan,
+                                                  __attribute__((unused))
                                                   rofl::crofconn &conn) {
   rofl::AcquireReadWriteLock lock(tlock);
   congested = true;

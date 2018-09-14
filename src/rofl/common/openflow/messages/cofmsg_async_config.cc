@@ -13,9 +13,8 @@ cofmsg_get_async_config_request::cofmsg_get_async_config_request(
     : cofmsg(version, rofl::openflow::OFPT_GET_ASYNC_REQUEST, xid) {}
 
 cofmsg_get_async_config_request::cofmsg_get_async_config_request(
-    const cofmsg_get_async_config_request &msg) {
-  *this = msg;
-}
+    const cofmsg_get_async_config_request &msg)
+    : cofmsg(msg) {}
 
 cofmsg_get_async_config_request &cofmsg_get_async_config_request::
 operator=(const cofmsg_get_async_config_request &msg) {
@@ -79,9 +78,8 @@ cofmsg_get_async_config_reply::cofmsg_get_async_config_reply(
 }
 
 cofmsg_get_async_config_reply::cofmsg_get_async_config_reply(
-    const cofmsg_get_async_config_reply &msg) {
-  *this = msg;
-}
+    const cofmsg_get_async_config_reply &msg)
+    : cofmsg(msg), async_config(msg.async_config) {}
 
 cofmsg_get_async_config_reply &cofmsg_get_async_config_reply::
 operator=(const cofmsg_get_async_config_reply &msg) {
@@ -163,9 +161,8 @@ cofmsg_set_async_config::cofmsg_set_async_config(
 }
 
 cofmsg_set_async_config::cofmsg_set_async_config(
-    const cofmsg_set_async_config &msg) {
-  *this = msg;
-}
+    const cofmsg_set_async_config &msg)
+    : cofmsg(msg), async_config(msg.async_config) {}
 
 cofmsg_set_async_config &cofmsg_set_async_config::
 operator=(const cofmsg_set_async_config &msg) {

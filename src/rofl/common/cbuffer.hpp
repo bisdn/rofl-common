@@ -204,6 +204,6 @@ private:
   unsigned int rbytes;
 };
 
-}; // end of namespace
+}; // namespace rofl
 
 #endif

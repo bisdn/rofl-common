@@ -29,8 +29,8 @@ crofctl::crofctl(crofctl_env *env, const cctlid &ctlid)
   async_config = get_async_config_role_default_template();
 };
 
-void crofctl::handle_recv(crofchan &chan, crofconn &conn,
-                          rofl::openflow::cofmsg *msg) {
+void crofctl::handle_recv(__attribute__((unused)) crofchan &chan,
+                          crofconn &conn, rofl::openflow::cofmsg *msg) {
   if (delete_in_progress())
     return;
   try {
@@ -2133,8 +2133,10 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
   delete msg;
 }
 
-void crofctl::handle_transaction_timeout(crofchan &chan, crofconn &conn,
+void crofctl::handle_transaction_timeout(__attribute__((unused)) crofchan &chan,
+                                         __attribute__((unused)) crofconn &conn,
                                          uint32_t xid, uint8_t type,
+                                         __attribute__((unused))
                                          uint16_t sub_type) {
   if (delete_in_progress())
     return;

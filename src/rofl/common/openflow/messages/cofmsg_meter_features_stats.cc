@@ -14,9 +14,8 @@ cofmsg_meter_features_stats_request::cofmsg_meter_features_stats_request(
                            stats_flags) {}
 
 cofmsg_meter_features_stats_request::cofmsg_meter_features_stats_request(
-    const cofmsg_meter_features_stats_request &msg) {
-  *this = msg;
-}
+    const cofmsg_meter_features_stats_request &msg)
+    : cofmsg_stats_request(msg) {}
 
 cofmsg_meter_features_stats_request &cofmsg_meter_features_stats_request::
 operator=(const cofmsg_meter_features_stats_request &msg) {
@@ -78,9 +77,8 @@ cofmsg_meter_features_stats_reply::cofmsg_meter_features_stats_reply(
 }
 
 cofmsg_meter_features_stats_reply::cofmsg_meter_features_stats_reply(
-    const cofmsg_meter_features_stats_reply &msg) {
-  *this = msg;
-}
+    const cofmsg_meter_features_stats_reply &msg)
+    : cofmsg_stats_reply(msg) {}
 
 cofmsg_meter_features_stats_reply &cofmsg_meter_features_stats_reply::
 operator=(const cofmsg_meter_features_stats_reply &msg) {

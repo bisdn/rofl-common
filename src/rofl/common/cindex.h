@@ -75,7 +75,7 @@ public:
   /**
    *
    */
-  cindex operator++(int unused) { // postfix
+  cindex operator++(__attribute__((unused)) int unused) { // postfix
     cindex result = *this;
     ++index;
     return result;

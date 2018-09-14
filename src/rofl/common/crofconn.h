@@ -679,7 +679,7 @@ private:
   void set_dpid(uint64_t dpid) { this->dpid = dpid; };
 
 private:
-  virtual void handle_listen(crofsock &socket){/* not used */};
+  virtual void handle_listen(__attribute__((unused)) crofsock &socket) {}
 
   virtual void handle_tcp_connect_refused(crofsock &rofsock);
 
@@ -724,9 +724,11 @@ private:
 
   virtual void handle_timeout(cthread &thread, uint32_t timer_id);
 
-  virtual void handle_read_event(cthread &thread, int fd){};
+  virtual void handle_read_event(__attribute__((unused)) cthread &thread,
+                                 __attribute__((unused)) int fd) {}
 
-  virtual void handle_write_event(cthread &thread, int fd){};
+  virtual void handle_write_event(__attribute__((unused)) cthread &thread,
+                                  __attribute__((unused)) int fd) {}
 
 private:
   void handle_rx_messages();

@@ -155,9 +155,10 @@ public:
   /**
    *
    */
-  cofportdesc_prop_ethernet(const cofportdesc_prop_ethernet &prop) {
-    *this = prop;
-  };
+  cofportdesc_prop_ethernet(const cofportdesc_prop_ethernet &prop)
+      : cofportdesc_prop(prop), curr(prop.curr), advertised(prop.advertised),
+        supported(prop.supported), peer(prop.peer), curr_speed(prop.curr_speed),
+        max_speed(prop.max_speed) {}
 
   /**
    *
@@ -310,9 +311,15 @@ public:
   /**
    *
    */
-  cofportdesc_prop_optical(const cofportdesc_prop_optical &prop) {
-    *this = prop;
-  };
+  cofportdesc_prop_optical(const cofportdesc_prop_optical &prop)
+      : cofportdesc_prop(prop), supported(prop.supported),
+        tx_min_freq_lmda(prop.tx_min_freq_lmda),
+        tx_max_freq_lmda(prop.tx_max_freq_lmda),
+        tx_grid_freq_lmda(prop.tx_grid_freq_lmda),
+        rx_min_freq_lmda(prop.rx_min_freq_lmda),
+        rx_max_freq_lmda(prop.rx_max_freq_lmda),
+        rx_grid_freq_lmda(prop.rx_grid_freq_lmda), tx_pwr_min(prop.tx_pwr_min),
+        tx_pwr_max(prop.tx_pwr_max) {}
 
   /**
    *
@@ -523,9 +530,9 @@ public:
   /**
    *
    */
-  cofportdesc_prop_experimenter(const cofportdesc_prop_experimenter &prop) {
-    *this = prop;
-  };
+  cofportdesc_prop_experimenter(const cofportdesc_prop_experimenter &prop)
+      : cofportdesc_prop(prop), exp_id(prop.exp_id), exp_type(prop.exp_type),
+        exp_body(prop.exp_body) {}
 
   /**
    *

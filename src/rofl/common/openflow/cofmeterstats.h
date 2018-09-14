@@ -82,7 +82,7 @@ public:
   /**
    *
    */
-  const bool operator==(const cofmeter_stats_request &req) const {
+  bool operator==(const cofmeter_stats_request &req) const {
     return (meter_id == req.meter_id);
   };
 

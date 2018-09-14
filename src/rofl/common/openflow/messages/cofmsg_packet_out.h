@@ -40,7 +40,9 @@ public:
   /**
    *
    */
-  cofmsg_packet_out(const cofmsg_packet_out &msg) { *this = msg; };
+  cofmsg_packet_out(const cofmsg_packet_out &msg)
+      : cofmsg(msg), buffer_id(msg.buffer_id), in_port(msg.in_port),
+        actions(msg.actions), packet(msg.packet) {}
 
   /**
    *

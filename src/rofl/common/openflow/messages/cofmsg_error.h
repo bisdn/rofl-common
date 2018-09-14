@@ -37,7 +37,9 @@ public:
   /**
    *
    */
-  cofmsg_error(const cofmsg_error &msg) { *this = msg; };
+  cofmsg_error(const cofmsg_error &msg)
+      : cofmsg(msg), err_type(msg.err_type), err_code(msg.err_code),
+        body(msg.body) {}
 
   /**
    *

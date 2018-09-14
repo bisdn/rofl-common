@@ -10,7 +10,8 @@
 #include <glog/logging.h>
 #include <stdlib.h>
 
-int main(int argc, char **argv) {
+int main(__attribute__((unused)) int argc,
+         __attribute__((unused)) char **argv) {
   google::InitGoogleLogging(argv[0]);
 
   CppUnit::TextUi::TestRunner runner;

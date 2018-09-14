@@ -116,9 +116,12 @@ protected:
 
   virtual void congestion_solved_indication(crofchan &chan, crofconn &conn) = 0;
 
-  virtual void handle_transaction_timeout(crofchan &chan, crofconn &conn,
-                                          uint32_t xid, uint8_t type,
-                                          uint16_t sub_type = 0){};
+  virtual void
+  handle_transaction_timeout(__attribute__((unused)) crofchan &chan,
+                             __attribute__((unused)) crofconn &conn,
+                             __attribute__((unused)) uint32_t xid,
+                             __attribute__((unused)) uint8_t type,
+                             __attribute__((unused)) uint16_t sub_type = 0) {}
 
 private:
   static std::set<crofchan_env *> channel_envs;
@@ -641,9 +644,10 @@ private:
     return (state == STATE_DELETE_IN_PROGRESS);
   };
 
-  virtual void handle_wakeup(cthread &thread){};
+  virtual void handle_wakeup(__attribute__((unused)) cthread &thread) {}
 
-  virtual void handle_timeout(cthread &thread, uint32_t timer_id) {
+  virtual void handle_timeout(__attribute__((unused)) cthread &thread,
+                              uint32_t timer_id) {
     if (delete_in_progress())
       return;
     switch (timer_id) {
@@ -654,9 +658,11 @@ private:
     }
   };
 
-  virtual void handle_read_event(cthread &thread, int fd){};
+  virtual void handle_read_event(__attribute__((unused)) cthread &thread,
+                                 __attribute__((unused)) int fd) {}
 
-  virtual void handle_write_event(cthread &thread, int fd){};
+  virtual void handle_write_event(__attribute__((unused)) cthread &thread,
+                                  __attribute__((unused)) int fd) {}
 
 private:
   // owner of this crofchan instance

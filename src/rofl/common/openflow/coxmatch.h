@@ -345,7 +345,8 @@ public:
   /**
    *
    */
-  coxmatch_exp(const coxmatch_exp &oxm) { *this = oxm; };
+  coxmatch_exp(const coxmatch_exp &oxm)
+      : coxmatch(oxm), exp_id(oxm.exp_id), value(oxm.value), mask(oxm.mask) {}
 
   /**
    *

@@ -41,7 +41,8 @@ public:
   /**
    *
    */
-  int run(int argc, char **argv) {
+  int run(__attribute__((unused)) int argc,
+          __attribute__((unused)) char **argv) {
     start();
 
     while (keep_on_running) {
@@ -118,6 +119,7 @@ private:
    */
   virtual void handle_port_desc_stats_reply(
       rofl::crofdpt &dpt, const rofl::cauxid &auxid,
+      __attribute__((unused))
       rofl::openflow::cofmsg_port_desc_stats_reply &msg) {
     std::cerr << "port description received; " << dpt.get_ports() << std::endl;
 
@@ -144,7 +146,8 @@ private:
    * @param dpt datapath instance
    * @param xid OpenFlow transaction identifier
    */
-  virtual void handle_port_desc_stats_reply_timeout(rofl::crofdpt &dpt,
+  virtual void handle_port_desc_stats_reply_timeout(__attribute__((unused))
+                                                    rofl::crofdpt &dpt,
                                                     uint32_t xid) {
     std::cerr << "Port-Desc-Stats timeout occurred, xid: " << (unsigned int)xid
               << std::endl;
@@ -158,7 +161,9 @@ private:
    * @param msg OpenFlow message instance
    */
   virtual void handle_table_features_stats_reply(
-      rofl::crofdpt &dpt, const rofl::cauxid &auxid,
+      __attribute__((unused)) rofl::crofdpt &dpt,
+      __attribute__((unused)) const rofl::cauxid &auxid,
+      __attribute__((unused))
       rofl::openflow::cofmsg_table_features_stats_reply &msg) {
     std::cerr << "Table-Features-Stats received; " << dpt.get_tables()
               << std::endl;
@@ -175,7 +180,8 @@ private:
    * @param dpt datapath instance
    * @param xid OpenFlow transaction identifier
    */
-  virtual void handle_table_features_stats_reply_timeout(rofl::crofdpt &dpt,
+  virtual void handle_table_features_stats_reply_timeout(__attribute__((unused))
+                                                         rofl::crofdpt &dpt,
                                                          uint32_t xid) {
     std::cerr << "Table-Features-Stats timeout occurred, xid: "
               << (unsigned int)xid << std::endl;
@@ -188,9 +194,9 @@ private:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void
-  handle_table_stats_reply(rofl::crofdpt &dpt, const rofl::cauxid &auxid,
-                           rofl::openflow::cofmsg_table_stats_reply &msg) {
+  virtual void handle_table_stats_reply(
+      rofl::crofdpt &dpt, __attribute__((unused)) const rofl::cauxid &auxid,
+      __attribute__((unused)) rofl::openflow::cofmsg_table_stats_reply &msg) {
     std::cerr << "Table-Stats received; " << dpt.get_tables() << std::endl;
   };
 
@@ -204,7 +210,8 @@ private:
    * @param dpt datapath instance
    * @param xid OpenFlow transaction identifier
    */
-  virtual void handle_table_stats_reply_timeout(rofl::crofdpt &dpt,
+  virtual void handle_table_stats_reply_timeout(__attribute__((unused))
+                                                rofl::crofdpt &dpt,
                                                 uint32_t xid) {
     std::cerr << "Table-Stats timeout occurred, xid: " << (unsigned int)xid
               << std::endl;

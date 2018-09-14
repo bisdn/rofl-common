@@ -35,7 +35,8 @@ public:
   /**
    *
    */
-  cofmsg_echo_request(const cofmsg_echo_request &msg) { *this = msg; };
+  cofmsg_echo_request(const cofmsg_echo_request &msg)
+      : cofmsg(msg), body(msg.body) {}
 
   /**
    *
@@ -115,7 +116,8 @@ public:
   /**
    *
    */
-  cofmsg_echo_reply(const cofmsg_echo_reply &msg) { *this = msg; };
+  cofmsg_echo_reply(const cofmsg_echo_reply &msg)
+      : cofmsg(msg), body(msg.body) {}
 
   /**
    *

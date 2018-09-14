@@ -66,9 +66,8 @@ public:
   /**
    *
    */
-  cofaction_exp_body_wlan(const cofaction_exp_body_wlan &body) {
-    *this = body;
-  };
+  cofaction_exp_body_wlan(const cofaction_exp_body_wlan &body)
+      : cmemory(body) {}
 
   /**
    *
@@ -177,9 +176,8 @@ public:
   /**
    *
    */
-  cofaction_exp_body_push_wlan(const cofaction_exp_body_push_wlan &action) {
-    *this = action;
-  };
+  cofaction_exp_body_push_wlan(const cofaction_exp_body_push_wlan &action)
+      : cofaction_exp_body_wlan(action) {}
 
   /**
    *
@@ -266,9 +264,8 @@ public:
   /**
    *
    */
-  cofaction_exp_body_pop_wlan(const cofaction_exp_body_pop_wlan &action) {
-    *this = action;
-  };
+  cofaction_exp_body_pop_wlan(const cofaction_exp_body_pop_wlan &action)
+      : cofaction_exp_body_wlan(action) {}
 
   /**
    *

@@ -26,7 +26,8 @@ cfibentry::~cfibentry() {
   std::cerr << "[cfibentry] deleted" << std::endl << *this;
 }
 
-void cfibentry::handle_timeout(cthread &thread, uint32_t timer_id) {
+void cfibentry::handle_timeout(__attribute__((unused)) cthread &thread,
+                               uint32_t timer_id) {
   switch (timer_id) {
   case TIMER_ID_ENTRY_EXPIRED: {
     env->fib_timer_expired(hwaddr);

@@ -22,43 +22,51 @@ enum oxm_ofx_match_fields {
   OFPXMT_OFX_WLAN_ADDRESS_3 = 36,
 };
 
-static unsigned int const OXM_EXP_ID_SIZE = sizeof(uint32_t); // length of experimenter id field
+static unsigned int const OXM_EXP_ID_SIZE =
+    sizeof(uint32_t); // length of experimenter id field
 
 /* OXM Flow match field types for OpenFlow basic class. */
 enum oxm_tlv_match_fields {
-  OXM_TLV_EXPR_WLAN_FC =
-      (OFPXMC_EXPERIMENTER << 16) | (OFPXMT_OFX_WLAN_FC << 9) | (OXM_EXP_ID_SIZE + 2),
+  OXM_TLV_EXPR_WLAN_FC = (OFPXMC_EXPERIMENTER << 16) |
+                         (OFPXMT_OFX_WLAN_FC << 9) | (OXM_EXP_ID_SIZE + 2),
   OXM_TLV_EXPR_WLAN_FC_MASK = (OFPXMC_EXPERIMENTER << 16) |
-                              (OFPXMT_OFX_WLAN_FC << 9) | (OXM_EXP_ID_SIZE + 4) | HAS_MASK_FLAG,
-  OXM_TLV_EXPR_WLAN_TYPE =
-      (OFPXMC_EXPERIMENTER << 16) | (OFPXMT_OFX_WLAN_TYPE << 9) | (OXM_EXP_ID_SIZE + 1),
+                              (OFPXMT_OFX_WLAN_FC << 9) |
+                              (OXM_EXP_ID_SIZE + 4) | HAS_MASK_FLAG,
+  OXM_TLV_EXPR_WLAN_TYPE = (OFPXMC_EXPERIMENTER << 16) |
+                           (OFPXMT_OFX_WLAN_TYPE << 9) | (OXM_EXP_ID_SIZE + 1),
   OXM_TLV_EXPR_WLAN_TYPE_MASK = (OFPXMC_EXPERIMENTER << 16) |
-                                (OFPXMT_OFX_WLAN_TYPE << 9) | (OXM_EXP_ID_SIZE + 2) | HAS_MASK_FLAG,
-  OXM_TLV_EXPR_WLAN_SUBTYPE =
-      (OFPXMC_EXPERIMENTER << 16) | (OFPXMT_OFX_WLAN_SUBTYPE << 9) | (OXM_EXP_ID_SIZE + 1),
+                                (OFPXMT_OFX_WLAN_TYPE << 9) |
+                                (OXM_EXP_ID_SIZE + 2) | HAS_MASK_FLAG,
+  OXM_TLV_EXPR_WLAN_SUBTYPE = (OFPXMC_EXPERIMENTER << 16) |
+                              (OFPXMT_OFX_WLAN_SUBTYPE << 9) |
+                              (OXM_EXP_ID_SIZE + 1),
   OXM_TLV_EXPR_WLAN_SUBTYPE_MASK = (OFPXMC_EXPERIMENTER << 16) |
-                                   (OFPXMT_OFX_WLAN_SUBTYPE << 9) | (OXM_EXP_ID_SIZE + 2) |
-                                   HAS_MASK_FLAG,
-  OXM_TLV_EXPR_WLAN_DIRECTION =
-      (OFPXMC_EXPERIMENTER << 16) | (OFPXMT_OFX_WLAN_DIRECTION << 9) | (OXM_EXP_ID_SIZE + 1),
+                                   (OFPXMT_OFX_WLAN_SUBTYPE << 9) |
+                                   (OXM_EXP_ID_SIZE + 2) | HAS_MASK_FLAG,
+  OXM_TLV_EXPR_WLAN_DIRECTION = (OFPXMC_EXPERIMENTER << 16) |
+                                (OFPXMT_OFX_WLAN_DIRECTION << 9) |
+                                (OXM_EXP_ID_SIZE + 1),
   OXM_TLV_EXPR_WLAN_DIRECTION_MASK = (OFPXMC_EXPERIMENTER << 16) |
-                                     (OFPXMT_OFX_WLAN_DIRECTION << 9) | (OXM_EXP_ID_SIZE + 2) |
-                                     HAS_MASK_FLAG,
-  OXM_TLV_EXPR_WLAN_ADDRESS_1 =
-      (OFPXMC_EXPERIMENTER << 16) | (OFPXMT_OFX_WLAN_ADDRESS_1 << 9) | (OXM_EXP_ID_SIZE + 6),
+                                     (OFPXMT_OFX_WLAN_DIRECTION << 9) |
+                                     (OXM_EXP_ID_SIZE + 2) | HAS_MASK_FLAG,
+  OXM_TLV_EXPR_WLAN_ADDRESS_1 = (OFPXMC_EXPERIMENTER << 16) |
+                                (OFPXMT_OFX_WLAN_ADDRESS_1 << 9) |
+                                (OXM_EXP_ID_SIZE + 6),
   OXM_TLV_EXPR_WLAN_ADDRESS_1_MASK = (OFPXMC_EXPERIMENTER << 16) |
-                                     (OFPXMT_OFX_WLAN_ADDRESS_1 << 9) | (OXM_EXP_ID_SIZE + 12) |
-                                     HAS_MASK_FLAG,
-  OXM_TLV_EXPR_WLAN_ADDRESS_2 =
-      (OFPXMC_EXPERIMENTER << 16) | (OFPXMT_OFX_WLAN_ADDRESS_2 << 9) | (OXM_EXP_ID_SIZE + 6),
+                                     (OFPXMT_OFX_WLAN_ADDRESS_1 << 9) |
+                                     (OXM_EXP_ID_SIZE + 12) | HAS_MASK_FLAG,
+  OXM_TLV_EXPR_WLAN_ADDRESS_2 = (OFPXMC_EXPERIMENTER << 16) |
+                                (OFPXMT_OFX_WLAN_ADDRESS_2 << 9) |
+                                (OXM_EXP_ID_SIZE + 6),
   OXM_TLV_EXPR_WLAN_ADDRESS_2_MASK = (OFPXMC_EXPERIMENTER << 16) |
-                                     (OFPXMT_OFX_WLAN_ADDRESS_2 << 9) | (OXM_EXP_ID_SIZE + 12) |
-                                     HAS_MASK_FLAG,
-  OXM_TLV_EXPR_WLAN_ADDRESS_3 =
-      (OFPXMC_EXPERIMENTER << 16) | (OFPXMT_OFX_WLAN_ADDRESS_3 << 9) | (OXM_EXP_ID_SIZE + 6),
+                                     (OFPXMT_OFX_WLAN_ADDRESS_2 << 9) |
+                                     (OXM_EXP_ID_SIZE + 12) | HAS_MASK_FLAG,
+  OXM_TLV_EXPR_WLAN_ADDRESS_3 = (OFPXMC_EXPERIMENTER << 16) |
+                                (OFPXMT_OFX_WLAN_ADDRESS_3 << 9) |
+                                (OXM_EXP_ID_SIZE + 6),
   OXM_TLV_EXPR_WLAN_ADDRESS_3_MASK = (OFPXMC_EXPERIMENTER << 16) |
-                                     (OFPXMT_OFX_WLAN_ADDRESS_3 << 9) | (OXM_EXP_ID_SIZE + 12) |
-                                     HAS_MASK_FLAG,
+                                     (OFPXMT_OFX_WLAN_ADDRESS_3 << 9) |
+                                     (OXM_EXP_ID_SIZE + 12) | HAS_MASK_FLAG,
 };
 
 /** OXM_OFX_WLAN_FC

@@ -39,7 +39,8 @@ public:
   /**
    *
    */
-  cofmsg_port_status(const cofmsg_port_status &msg) { *this = msg; };
+  cofmsg_port_status(const cofmsg_port_status &msg)
+      : cofmsg(msg), reason(msg.reason), port(msg.port) {}
 
   /**
    *

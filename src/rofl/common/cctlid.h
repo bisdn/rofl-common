@@ -96,6 +96,6 @@ public:
   };
 };
 
-}; // end of namespace
+}; // namespace rofl
 
 #endif /* CCTLID_H_ */

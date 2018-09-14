@@ -154,7 +154,8 @@ public:
   /**
    *
    */
-  cofinstruction_actions(const cofinstruction_actions &inst) { *this = inst; };
+  cofinstruction_actions(const cofinstruction_actions &inst)
+      : cofinstruction(inst), actions(inst.actions) {}
 
   /**
    *
@@ -240,9 +241,8 @@ public:
   /**
    *
    */
-  cofinstruction_apply_actions(const cofinstruction_apply_actions &inst) {
-    *this = inst;
-  };
+  cofinstruction_apply_actions(const cofinstruction_apply_actions &inst)
+      : cofinstruction_actions(inst) {}
 
   /**
    *
@@ -283,9 +283,8 @@ public:
   /**
    *
    */
-  cofinstruction_write_actions(const cofinstruction_write_actions &inst) {
-    *this = inst;
-  };
+  cofinstruction_write_actions(const cofinstruction_write_actions &inst)
+      : cofinstruction_actions(inst) {}
 
   /**
    *
@@ -326,9 +325,8 @@ public:
   /**
    *
    */
-  cofinstruction_clear_actions(const cofinstruction_clear_actions &inst) {
-    *this = inst;
-  };
+  cofinstruction_clear_actions(const cofinstruction_clear_actions &inst)
+      : cofinstruction_actions(inst) {}
 
   /**
    *
@@ -369,9 +367,8 @@ public:
   /**
    *
    */
-  cofinstruction_goto_table(const cofinstruction_goto_table &inst) {
-    *this = inst;
-  };
+  cofinstruction_goto_table(const cofinstruction_goto_table &inst)
+      : cofinstruction(inst), table_id(inst.table_id) {}
 
   /**
    *
@@ -453,9 +450,9 @@ public:
   /**
    *
    */
-  cofinstruction_write_metadata(const cofinstruction_write_metadata &inst) {
-    *this = inst;
-  };
+  cofinstruction_write_metadata(const cofinstruction_write_metadata &inst)
+      : cofinstruction(inst), metadata(inst.metadata),
+        metadata_mask(inst.metadata_mask) {}
 
   /**
    *
@@ -554,9 +551,8 @@ public:
   /**
    *
    */
-  cofinstruction_experimenter(const cofinstruction_experimenter &inst) {
-    *this = inst;
-  };
+  cofinstruction_experimenter(const cofinstruction_experimenter &inst)
+      : cofinstruction(inst), exp_id(inst.exp_id), exp_body(inst.exp_body) {}
 
   /**
    *
@@ -656,7 +652,8 @@ public:
   /**
    *
    */
-  cofinstruction_meter(const cofinstruction_meter &inst) { *this = inst; };
+  cofinstruction_meter(const cofinstruction_meter &inst)
+      : cofinstruction(inst), meter_id(inst.meter_id) {}
 
   /**
    *

@@ -30,8 +30,7 @@ operator=(const cofmeter_band_stats &mbs) {
   return *this;
 }
 
-const bool cofmeter_band_stats::
-operator==(const cofmeter_band_stats &mbs) const {
+bool cofmeter_band_stats::operator==(const cofmeter_band_stats &mbs) const {
   return ((packet_band_count == mbs.packet_band_count) &&
           (byte_band_count == mbs.byte_band_count));
 }

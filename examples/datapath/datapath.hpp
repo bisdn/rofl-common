@@ -188,7 +188,8 @@ private:
   /** @endcond */
 
 public:
-  friend std::ostream &operator<<(std::ostream &os, const datapath &client) {
+  friend std::ostream &operator<<(std::ostream &os, __attribute__((unused))
+                                                    const datapath &client) {
 
     return os;
   };

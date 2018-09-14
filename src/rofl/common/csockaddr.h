@@ -81,7 +81,10 @@ public:
   /**
    *
    */
-  csockaddr(const csockaddr &sockaddr) { *this = sockaddr; };
+  csockaddr(const csockaddr &sockaddr)
+      : cmemory(sockaddr), salen(sockaddr.salen) {
+    ca_mem = cmemory::somem();
+  }
 
   /**
    *

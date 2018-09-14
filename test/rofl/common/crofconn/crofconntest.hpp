@@ -32,34 +32,47 @@ public:
 private:
   virtual void handle_listen(rofl::crofsock &socket);
 
-  virtual void handle_tcp_connect_refused(rofl::crofsock &socket){};
+  virtual void handle_tcp_connect_refused(__attribute__((unused))
+                                          rofl::crofsock &socket){};
 
-  virtual void handle_tcp_connect_failed(rofl::crofsock &socket){};
+  virtual void handle_tcp_connect_failed(__attribute__((unused))
+                                         rofl::crofsock &socket){};
 
-  virtual void handle_tcp_connected(rofl::crofsock &socket){};
+  virtual void handle_tcp_connected(__attribute__((unused))
+                                    rofl::crofsock &socket){};
 
-  virtual void handle_tcp_accept_refused(rofl::crofsock &socket){};
+  virtual void handle_tcp_accept_refused(__attribute__((unused))
+                                         rofl::crofsock &socket){};
 
-  virtual void handle_tcp_accept_failed(rofl::crofsock &socket){};
+  virtual void handle_tcp_accept_failed(__attribute__((unused))
+                                        rofl::crofsock &socket){};
 
-  virtual void handle_tcp_accepted(rofl::crofsock &socket){};
+  virtual void handle_tcp_accepted(__attribute__((unused))
+                                   rofl::crofsock &socket){};
 
-  virtual void handle_tls_connect_failed(rofl::crofsock &socket){};
+  virtual void handle_tls_connect_failed(__attribute__((unused))
+                                         rofl::crofsock &socket){};
 
-  virtual void handle_tls_connected(rofl::crofsock &socket){};
+  virtual void handle_tls_connected(__attribute__((unused))
+                                    rofl::crofsock &socket){};
 
-  virtual void handle_tls_accept_failed(rofl::crofsock &socket){};
+  virtual void handle_tls_accept_failed(__attribute__((unused))
+                                        rofl::crofsock &socket){};
 
-  virtual void handle_tls_accepted(rofl::crofsock &socket){};
+  virtual void handle_tls_accepted(__attribute__((unused))
+                                   rofl::crofsock &socket){};
 
-  virtual void handle_closed(rofl::crofsock &socket){};
+  virtual void handle_closed(__attribute__((unused)) rofl::crofsock &socket){};
 
-  virtual void congestion_solved_indication(rofl::crofsock &socket){};
+  virtual void congestion_solved_indication(__attribute__((unused))
+                                            rofl::crofsock &socket){};
 
-  virtual void handle_recv(rofl::crofsock &socket,
+  virtual void handle_recv(__attribute__((unused)) rofl::crofsock &socket,
+                           __attribute__((unused))
                            rofl::openflow::cofmsg *msg){};
 
-  virtual void congestion_occurred_indication(rofl::crofsock &socket){};
+  virtual void congestion_occurred_indication(__attribute__((unused))
+                                              rofl::crofsock &socket){};
 
 private:
   virtual void handle_established(rofl::crofconn &conn, uint8_t ofp_version);
@@ -80,9 +93,11 @@ private:
 
   virtual void congestion_occurred_indication(rofl::crofconn &conn);
 
-  virtual void handle_transaction_timeout(rofl::crofconn &conn, uint32_t xid,
-                                          uint8_t type,
-                                          uint16_t sub_type = 0){};
+  virtual void
+  handle_transaction_timeout(__attribute__((unused)) rofl::crofconn &conn,
+                             __attribute__((unused)) uint32_t xid,
+                             __attribute__((unused)) uint8_t type,
+                             __attribute__((unused)) uint16_t sub_type = 0){};
 
 private:
   void send_packet_in(uint8_t version);

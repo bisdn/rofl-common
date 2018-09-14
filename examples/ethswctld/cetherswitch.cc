@@ -20,8 +20,8 @@ int cetherswitch::run(int argc, char **argv) {
   signal(SIGINT, signal_handler);
 
   /*
-  * Parse parameters
-  */
+   * Parse parameters
+   */
   rofl::cunixenv env_parser(argc, argv);
 
   /* update defaults */
@@ -81,7 +81,8 @@ cetherswitch::cetherswitch(
 
 cetherswitch::~cetherswitch() {}
 
-void cetherswitch::handle_timeout(cthread &thread, uint32_t timer_id) {
+void cetherswitch::handle_timeout(__attribute__((unused)) cthread &thread,
+                                  uint32_t timer_id) {
   try {
     switch (timer_id) {
     case TIMER_ID_DUMP_FIB: {
@@ -291,12 +292,15 @@ void cetherswitch::handle_packet_in(rofl::crofdpt &dpt,
 }
 
 void cetherswitch::handle_flow_stats_reply(
-    rofl::crofdpt &dpt, const rofl::cauxid &auxid,
-    rofl::openflow::cofmsg_flow_stats_reply &msg) {
+    __attribute__((unused)) rofl::crofdpt &dpt,
+    __attribute__((unused)) const rofl::cauxid &auxid,
+    __attribute__((unused)) rofl::openflow::cofmsg_flow_stats_reply &msg) {
   std::cerr << "Flow-Stats-Reply rcvd:" << std::endl << msg;
 }
 
-void cetherswitch::handle_flow_stats_reply_timeout(rofl::crofdpt &dpt,
+void cetherswitch::handle_flow_stats_reply_timeout(__attribute__((unused))
+                                                   rofl::crofdpt &dpt,
+                                                   __attribute__((unused))
                                                    uint32_t xid) {
   std::cerr << "Flow-Stats-Reply timeout" << std::endl;
 }

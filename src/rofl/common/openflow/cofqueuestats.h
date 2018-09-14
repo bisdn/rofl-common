@@ -363,7 +363,7 @@ private:
   uint32_t duration_sec;
   uint32_t duration_nsec;
 };
-}
-}
+} // namespace openflow
+} // namespace rofl
 
 #endif /* ROFL_COMMON_OPENFLOW_COFQUEUESTATS_H */

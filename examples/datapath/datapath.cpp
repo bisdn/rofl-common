@@ -18,7 +18,8 @@ datapath::datapath()
     : ctlid(0), auxid(0), dpid(0x0102030405060708), n_buffers(0xffff),
       n_tables(8), capabilities(0xa1a2a3a4) {}
 
-int datapath::run(int argc, char **argv) {
+int datapath::run(__attribute__((unused)) int argc,
+                  __attribute__((unused)) char **argv) {
   /* rofl-common supports OpenFlow versions 1.0, 1.2 and 1.3
    * Specify acceptable versions in a versionbitmap element
    * and update the element stored in base class rofl::crofbase */
@@ -66,38 +67,49 @@ void datapath::handle_ctl_close(const rofl::cctlid &ctlid) {
   std::cerr << "controller detached ctlid=" << ctlid << std::endl;
 }
 
-void datapath::handle_conn_established(rofl::crofctl &ctl,
+void datapath::handle_conn_established(__attribute__((unused))
+                                       rofl::crofctl &ctl,
                                        const rofl::cauxid &auxid) {
   std::cerr << "connection established ctlid=" << ctlid.get_ctlid_s()
             << " auxid=" << (int)auxid.get_id() << std::endl;
 }
 
-void datapath::handle_conn_terminated(rofl::crofctl &ctl,
+void datapath::handle_conn_terminated(__attribute__((unused))
+                                      rofl::crofctl &ctl,
+                                      __attribute__((unused))
                                       const rofl::cauxid &auxid) {
   std::cerr << "channel terminated ctlid=" << ctlid << std::endl;
 }
 
-void datapath::handle_conn_refused(rofl::crofctl &ctl,
+void datapath::handle_conn_refused(__attribute__((unused)) rofl::crofctl &ctl,
+                                   __attribute__((unused))
                                    const rofl::cauxid &auxid) {
   std::cerr << "channel connect refused ctlid=" << ctlid << std::endl;
 }
 
-void datapath::handle_conn_failed(rofl::crofctl &ctl,
+void datapath::handle_conn_failed(__attribute__((unused)) rofl::crofctl &ctl,
+                                  __attribute__((unused))
                                   const rofl::cauxid &auxid) {
   std::cerr << "channel connect failed ctlid=" << ctlid << std::endl;
 }
 
-void datapath::handle_conn_negotiation_failed(rofl::crofctl &ctl,
+void datapath::handle_conn_negotiation_failed(__attribute__((unused))
+                                              rofl::crofctl &ctl,
+                                              __attribute__((unused))
                                               const rofl::cauxid &auxid) {
   std::cerr << "channel failed ctlid=" << ctlid << std::endl;
 }
 
-void datapath::handle_conn_congestion_occurred(rofl::crofctl &ctl,
+void datapath::handle_conn_congestion_occurred(__attribute__((unused))
+                                               rofl::crofctl &ctl,
+                                               __attribute__((unused))
                                                const rofl::cauxid &auxid) {
   std::cerr << "channel congestion occurred, ctlid=" << ctlid << std::endl;
 }
 
-void datapath::handle_conn_congestion_solved(rofl::crofctl &ctl,
+void datapath::handle_conn_congestion_solved(__attribute__((unused))
+                                             rofl::crofctl &ctl,
+                                             __attribute__((unused))
                                              const rofl::cauxid &auxid) {
   std::cerr << "channel congestion solved, ctlid=" << ctlid << std::endl;
 }

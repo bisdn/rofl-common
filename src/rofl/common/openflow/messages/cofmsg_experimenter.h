@@ -36,7 +36,9 @@ public:
   /**
    *
    */
-  cofmsg_experimenter(const cofmsg_experimenter &msg) { *this = msg; };
+  cofmsg_experimenter(const cofmsg_experimenter &msg)
+      : cofmsg(msg), exp_id(msg.exp_id), exp_type(msg.exp_type),
+        body(msg.body) {}
 
   /**
    *

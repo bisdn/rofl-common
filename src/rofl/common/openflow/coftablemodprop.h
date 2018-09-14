@@ -157,9 +157,8 @@ public:
   /**
    *
    */
-  coftablemod_prop_eviction(const coftablemod_prop_eviction &prop) {
-    *this = prop;
-  };
+  coftablemod_prop_eviction(const coftablemod_prop_eviction &prop)
+      : coftablemod_prop(prop), flags(prop.flags) {}
 
   /**
    *
@@ -242,9 +241,9 @@ public:
   /**
    *
    */
-  coftablemod_prop_vacancy(const coftablemod_prop_vacancy &prop) {
-    *this = prop;
-  };
+  coftablemod_prop_vacancy(const coftablemod_prop_vacancy &prop)
+      : coftablemod_prop(prop), vacancy_down(prop.vacancy_down),
+        vacancy_up(prop.vacancy_up), vacancy(prop.vacancy) {}
 
   /**
    *
@@ -358,9 +357,9 @@ public:
   /**
    *
    */
-  coftablemod_prop_experimenter(const coftablemod_prop_experimenter &prop) {
-    *this = prop;
-  };
+  coftablemod_prop_experimenter(const coftablemod_prop_experimenter &prop)
+      : coftablemod_prop(prop), exp_id(prop.exp_id), exp_type(prop.exp_type),
+        exp_body(prop.exp_body) {}
 
   /**
    *

@@ -23,8 +23,8 @@ LT_INIT
 AC_ENABLE_STATIC
 
 # default flags
-CFLAGS="-std=gnu89 -Werror -Wall $CFLAGS"
-CXXFLAGS="-std=c++11 -Werror -Wall $CXXFLAGS"
+CFLAGS="-std=gnu89 -Werror -Wall -Wextra $CFLAGS"
+CXXFLAGS="-std=c++11 -Werror -Wall -Wextra $CXXFLAGS"
 AC_DEFINE([__STDC_FORMAT_MACROS], [], [Description])
 
 
@@ -72,7 +72,7 @@ AC_CONFIG_FILES([
 	src/rofl/common/openflow/experimental/Makefile
 	src/rofl/common/openflow/experimental/actions/Makefile
 	src/rofl/common/openflow/experimental/matches/Makefile
-	
+
 	src/rofl/rofl_common.pc
 
 	examples/Makefile
@@ -172,10 +172,10 @@ AC_CONFIG_FILES([
 	test/rofl/common/openflow/messages/cofmsgqueueconfig/Makefile
 	test/rofl/common/openflow/messages/cofmsgrole/Makefile
 	test/rofl/common/openflow/messages/cofmsgtablemod/Makefile
-	
+
 	src/rofl_common_conf.h])
 
-# Doxygen (here to be the last Makefile) 
+# Doxygen (here to be the last Makefile)
 m4_include([config/doxygen.m4])
 
 AC_OUTPUT

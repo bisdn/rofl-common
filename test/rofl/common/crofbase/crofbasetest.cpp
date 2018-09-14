@@ -43,9 +43,11 @@ void crofbasetest::test() {
   LOG(INFO) << std::endl;
 }
 
-void crofbasetest::handle_wakeup(rofl::cthread &thread) {}
+void crofbasetest::handle_wakeup(__attribute__((unused))
+                                 rofl::cthread &thread) {}
 
-void crofbasetest::handle_timeout(rofl::cthread &thread, uint32_t timer_id) {}
+void crofbasetest::handle_timeout(__attribute__((unused)) rofl::cthread &thread,
+                                  __attribute__((unused)) uint32_t timer_id) {}
 
 ccontroller::~ccontroller() {}
 
@@ -95,7 +97,7 @@ void ccontroller::handle_dpt_open(rofl::crofdpt &dpt) {
   dpt.send_get_config_request(rofl::cauxid(0));
 }
 
-void cdatapath::handle_ctl_open(rofl::crofctl &ctl) {
+void cdatapath::handle_ctl_open(__attribute__((unused)) rofl::crofctl &ctl) {
   LOG(INFO) << ">>> XXX ctl connected: " << std::endl;
 }
 
@@ -111,7 +113,7 @@ void cdatapath::handle_features_request(
 
 void ccontroller::handle_features_reply(
     rofl::crofdpt &dpt, const rofl::cauxid &auxid,
-    rofl::openflow::cofmsg_features_reply &msg) {
+    __attribute__((unused)) rofl::openflow::cofmsg_features_reply &msg) {
   LOG(INFO) << ">>> XXX -Features-Reply- rcvd" << std::endl;
   dpt.send_get_config_request(auxid);
 }
@@ -125,8 +127,9 @@ void cdatapath::handle_get_config_request(
 }
 
 void cdatapath::handle_barrier_request(
-    rofl::crofctl &ctl, const rofl::cauxid &auxid,
-    rofl::openflow::cofmsg_barrier_request &msg) {
+    __attribute__((unused)) rofl::crofctl &ctl,
+    __attribute__((unused)) const rofl::cauxid &auxid,
+    __attribute__((unused)) rofl::openflow::cofmsg_barrier_request &msg) {
   LOG(INFO) << ">>> XXX -Barrier-Request- rcvd" << std::endl;
 
   /* do not send barrier-reply back => wait for request timeout at controller */
@@ -134,7 +137,7 @@ void cdatapath::handle_barrier_request(
 
 void ccontroller::handle_get_config_reply(
     rofl::crofdpt &dpt, const rofl::cauxid &auxid,
-    rofl::openflow::cofmsg_get_config_reply &msg) {
+    __attribute__((unused)) rofl::openflow::cofmsg_get_config_reply &msg) {
   LOG(INFO) << ">>> XXX -Get-Config-Reply- rcvd" << std::endl;
 
   uint16_t flags = 0;
@@ -151,6 +154,7 @@ void cdatapath::handle_table_features_stats_request(
 
 void ccontroller::handle_table_features_stats_reply(
     rofl::crofdpt &dpt, const rofl::cauxid &auxid,
+    __attribute__((unused))
     rofl::openflow::cofmsg_table_features_stats_reply &msg) {
   LOG(INFO) << ">>> XXX -Table-Features-Stats-Reply- rcvd" << std::endl;
 
@@ -168,7 +172,7 @@ void cdatapath::handle_port_desc_stats_request(
 
 void ccontroller::handle_port_desc_stats_reply(
     rofl::crofdpt &dpt, const rofl::cauxid &auxid,
-    rofl::openflow::cofmsg_port_desc_stats_reply &msg) {
+    __attribute__((unused)) rofl::openflow::cofmsg_port_desc_stats_reply &msg) {
   LOG(INFO) << ">>> XXX -Port-Desc-Stats-Reply- rcvd" << std::endl;
 
   for (int i = 0; i < 4; i++) {
@@ -177,14 +181,17 @@ void ccontroller::handle_port_desc_stats_reply(
 }
 
 void ccontroller::handle_barrier_reply(
-    rofl::crofdpt &dpt, const rofl::cauxid &auxid,
-    rofl::openflow::cofmsg_barrier_reply &msg) {
+    __attribute__((unused)) rofl::crofdpt &dpt,
+    __attribute__((unused)) const rofl::cauxid &auxid,
+    __attribute__((unused)) rofl::openflow::cofmsg_barrier_reply &msg) {
   LOG(INFO) << ">>> XXX -Barrier-Reply- rcvd" << std::endl;
 
   CPPUNIT_ASSERT(false);
 }
 
-void ccontroller::handle_barrier_reply_timeout(rofl::crofdpt &dpt,
+void ccontroller::handle_barrier_reply_timeout(__attribute__((unused))
+                                               rofl::crofdpt &dpt,
+                                               __attribute__((unused))
                                                uint32_t xid) {
   LOG(INFO) << ">>> XXX -Barrier-Reply-Timeout- rcvd" << std::endl;
 

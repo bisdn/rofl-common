@@ -31,7 +31,7 @@ cofmeter_band &cofmeter_band::operator=(cofmeter_band const &mb) {
   return *this;
 }
 
-const bool cofmeter_band::operator==(const cofmeter_band &mb) const {
+bool cofmeter_band::operator==(const cofmeter_band &mb) const {
   return ((of_version == mb.of_version) && (type == mb.type) &&
           (len == mb.len) && (rate == mb.rate) &&
           (burst_size == mb.burst_size) && (body == mb.body));
@@ -141,7 +141,7 @@ operator=(const cofmeter_band_drop &mb) {
   return *this;
 }
 
-const bool cofmeter_band_drop::operator==(const cofmeter_band_drop &mb) const {
+bool cofmeter_band_drop::operator==(const cofmeter_band_drop &mb) const {
   return (cofmeter_band::operator==(mb));
 }
 
@@ -162,9 +162,8 @@ cofmeter_band_dscp_remark::cofmeter_band_dscp_remark(uint8_t of_version)
 cofmeter_band_dscp_remark::~cofmeter_band_dscp_remark() {}
 
 cofmeter_band_dscp_remark::cofmeter_band_dscp_remark(
-    const cofmeter_band_dscp_remark &mb) {
-  *this = mb;
-}
+    const cofmeter_band_dscp_remark &mb)
+    : cofmeter_band(mb), prec_level(mb.prec_level) {}
 
 cofmeter_band_dscp_remark &cofmeter_band_dscp_remark::
 operator=(const cofmeter_band_dscp_remark &mb) {
@@ -177,7 +176,7 @@ operator=(const cofmeter_band_dscp_remark &mb) {
   return *this;
 }
 
-const bool cofmeter_band_dscp_remark::
+bool cofmeter_band_dscp_remark::
 operator==(const cofmeter_band_dscp_remark &mb) const {
   return (cofmeter_band::operator==(mb) && (prec_level == mb.prec_level));
 }
@@ -259,9 +258,8 @@ cofmeter_band_experimenter::cofmeter_band_experimenter(uint8_t of_version)
 cofmeter_band_experimenter::~cofmeter_band_experimenter() {}
 
 cofmeter_band_experimenter::cofmeter_band_experimenter(
-    const cofmeter_band_experimenter &mb) {
-  *this = mb;
-}
+    const cofmeter_band_experimenter &mb)
+    : cofmeter_band(mb), exp_id(mb.exp_id), exp_body(mb.exp_body) {}
 
 cofmeter_band_experimenter &cofmeter_band_experimenter::
 operator=(cofmeter_band_experimenter const &mb) {
@@ -276,7 +274,7 @@ operator=(cofmeter_band_experimenter const &mb) {
   return *this;
 }
 
-const bool cofmeter_band_experimenter::
+bool cofmeter_band_experimenter::
 operator==(const cofmeter_band_experimenter &mb) const {
   return (cofmeter_band::operator==(mb) && (exp_id == mb.exp_id) &&
           (exp_body == mb.exp_body));

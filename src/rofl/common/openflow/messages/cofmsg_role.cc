@@ -14,9 +14,8 @@ cofmsg_role_request::cofmsg_role_request(uint8_t version, uint32_t xid,
   this->role.set_version(version);
 }
 
-cofmsg_role_request::cofmsg_role_request(const cofmsg_role_request &msg) {
-  *this = msg;
-}
+cofmsg_role_request::cofmsg_role_request(const cofmsg_role_request &msg)
+    : cofmsg(msg), role(msg.role) {}
 
 cofmsg_role_request &cofmsg_role_request::
 operator=(const cofmsg_role_request &msg) {
@@ -96,9 +95,8 @@ cofmsg_role_reply::cofmsg_role_reply(uint8_t version, uint32_t xid,
   this->role.set_version(version);
 }
 
-cofmsg_role_reply::cofmsg_role_reply(const cofmsg_role_reply &msg) {
-  *this = msg;
-}
+cofmsg_role_reply::cofmsg_role_reply(const cofmsg_role_reply &msg)
+    : cofmsg(msg), role(msg.role) {}
 
 cofmsg_role_reply &cofmsg_role_reply::operator=(const cofmsg_role_reply &msg) {
   if (this == &msg)

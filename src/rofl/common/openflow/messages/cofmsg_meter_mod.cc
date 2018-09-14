@@ -16,7 +16,9 @@ cofmsg_meter_mod::cofmsg_meter_mod(
   this->meter_bands.set_version(version);
 }
 
-cofmsg_meter_mod::cofmsg_meter_mod(const cofmsg_meter_mod &msg) { *this = msg; }
+cofmsg_meter_mod::cofmsg_meter_mod(const cofmsg_meter_mod &msg)
+    : cofmsg(msg), command(msg.command), flags(msg.flags),
+      meter_id(msg.meter_id), meter_bands(msg.meter_bands) {}
 
 cofmsg_meter_mod &cofmsg_meter_mod::operator=(const cofmsg_meter_mod &msg) {
   if (this == &msg)

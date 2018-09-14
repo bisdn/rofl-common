@@ -66,9 +66,8 @@ public:
   /**
    *
    */
-  cofaction_exp_body_capwap(const cofaction_exp_body_capwap &body) {
-    *this = body;
-  };
+  cofaction_exp_body_capwap(const cofaction_exp_body_capwap &body)
+      : cmemory(body) {}
 
   /**
    *
@@ -177,9 +176,8 @@ public:
   /**
    *
    */
-  cofaction_exp_body_push_capwap(const cofaction_exp_body_push_capwap &action) {
-    *this = action;
-  };
+  cofaction_exp_body_push_capwap(const cofaction_exp_body_push_capwap &action)
+      : cofaction_exp_body_capwap(action) {}
 
   /**
    *
@@ -266,9 +264,8 @@ public:
   /**
    *
    */
-  cofaction_exp_body_pop_capwap(const cofaction_exp_body_pop_capwap &action) {
-    *this = action;
-  };
+  cofaction_exp_body_pop_capwap(const cofaction_exp_body_pop_capwap &action)
+      : cofaction_exp_body_capwap(action) {}
 
   /**
    *

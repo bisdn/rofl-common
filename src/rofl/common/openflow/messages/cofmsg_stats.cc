@@ -23,9 +23,8 @@ cofmsg_stats_request::cofmsg_stats_request(uint8_t version, uint32_t xid,
   }
 }
 
-cofmsg_stats_request::cofmsg_stats_request(const cofmsg_stats_request &msg) {
-  *this = msg;
-}
+cofmsg_stats_request::cofmsg_stats_request(const cofmsg_stats_request &msg)
+    : cofmsg(msg), stats_type(msg.stats_type), stats_flags(msg.stats_flags) {}
 
 cofmsg_stats_request &cofmsg_stats_request::
 operator=(const cofmsg_stats_request &msg) {
@@ -127,9 +126,8 @@ cofmsg_stats_reply::cofmsg_stats_reply(uint8_t version, uint32_t xid,
   }
 }
 
-cofmsg_stats_reply::cofmsg_stats_reply(const cofmsg_stats_reply &msg) {
-  *this = msg;
-}
+cofmsg_stats_reply::cofmsg_stats_reply(const cofmsg_stats_reply &msg)
+    : cofmsg(msg), stats_type(msg.stats_type), stats_flags(msg.stats_flags) {}
 
 cofmsg_stats_reply &cofmsg_stats_reply::
 operator=(const cofmsg_stats_reply &msg) {

@@ -280,7 +280,7 @@ private:
   mutable rofl::crwlock array_lock;
 };
 
-}; // end of openflow
-}; // end of rofl
+}; // namespace openflow
+}; // namespace rofl
 
 #endif /* ROFL_COMMON_OPENFLOW_COFQUEUESTATSARRAY_H */

@@ -925,7 +925,7 @@ public:
    *
    * @param dpt datapath instance
    */
-  virtual void handle_dpt_open(rofl::crofdpt &dpt){};
+  virtual void handle_dpt_open(__attribute__((unused)) rofl::crofdpt &dpt) {}
 
   /**
    * @brief	Called after termination of associated OpenFlow control channel.
@@ -938,7 +938,8 @@ public:
    *
    * @param dpt datapath instance
    */
-  virtual void handle_dpt_close(const rofl::cdptid &dptid){};
+  virtual void handle_dpt_close(__attribute__((unused))
+                                const rofl::cdptid &dptid) {}
 
   /**
    * @brief 	Called when a control connection (main or auxiliary) has been
@@ -947,8 +948,10 @@ public:
    * @param dpt datapath instance
    * @param auxid connection identifier (main: 0)
    */
-  virtual void handle_conn_established(rofl::crofdpt &dpt,
-                                       const rofl::cauxid &auxid){};
+  virtual void handle_conn_established(__attribute__((unused))
+                                       rofl::crofdpt &dpt,
+                                       __attribute__((unused))
+                                       const rofl::cauxid &auxid) {}
 
   /**
    * @brief 	Called when a control connection (main or auxiliary) has been
@@ -957,8 +960,10 @@ public:
    * @param dpt datapath instance
    * @param auxid connection identifier (main: 0)
    */
-  virtual void handle_conn_terminated(rofl::crofdpt &dpt,
-                                      const rofl::cauxid &auxid){};
+  virtual void handle_conn_terminated(__attribute__((unused))
+                                      rofl::crofdpt &dpt,
+                                      __attribute__((unused))
+                                      const rofl::cauxid &auxid) {}
 
   /**
    * @brief 	Called when an attempt to establish a control connection has
@@ -972,8 +977,9 @@ public:
    * @param dpt datapath instance
    * @param auxid connection identifier (main: 0)
    */
-  virtual void handle_conn_refused(rofl::crofdpt &dpt,
-                                   const rofl::cauxid &auxid){};
+  virtual void handle_conn_refused(__attribute__((unused)) rofl::crofdpt &dpt,
+                                   __attribute__((unused))
+                                   const rofl::cauxid &auxid) {}
 
   /**
    * @brief 	Called when an attempt to establish a control connection has
@@ -989,7 +995,8 @@ public:
    * @param dpt datapath instance
    * @param auxid connection identifier (main: 0)
    */
-  virtual void handle_conn_failed(rofl::crofdpt &dpt,
+  virtual void handle_conn_failed(__attribute__((unused)) rofl::crofdpt &dpt,
+                                  __attribute__((unused))
                                   const rofl::cauxid &auxid){};
 
   /**
@@ -998,7 +1005,9 @@ public:
    * @param dpt datapath instance
    * @param auxid control connection identifier (main: 0)
    */
-  virtual void handle_conn_negotiation_failed(rofl::crofdpt &dpt,
+  virtual void handle_conn_negotiation_failed(__attribute__((unused))
+                                              rofl::crofdpt &dpt,
+                                              __attribute__((unused))
                                               const rofl::cauxid &auxid){};
 
   /**
@@ -1008,7 +1017,9 @@ public:
    * @param dpt datapath instance
    * @param auxid control connection identifier (main: 0)
    */
-  virtual void handle_conn_congestion_occurred(rofl::crofdpt &dpt,
+  virtual void handle_conn_congestion_occurred(__attribute__((unused))
+                                               rofl::crofdpt &dpt,
+                                               __attribute__((unused))
                                                const rofl::cauxid &auxid){};
 
   /**
@@ -1018,7 +1029,9 @@ public:
    * @param dpt datapath instance
    * @param auxid control connection identifier (main: 0)
    */
-  virtual void handle_conn_congestion_solved(rofl::crofdpt &dpt,
+  virtual void handle_conn_congestion_solved(__attribute__((unused))
+                                             rofl::crofdpt &dpt,
+                                             __attribute__((unused))
                                              const rofl::cauxid &auxid){};
 
   /**@}*/
@@ -1044,7 +1057,7 @@ public:
    *
    * @param ctl controller instance
    */
-  virtual void handle_ctl_open(rofl::crofctl &ctl){};
+  virtual void handle_ctl_open(__attribute__((unused)) rofl::crofctl &ctl){};
 
   /**
    * @brief	Called after termination of associated OpenFlow control channel.
@@ -1057,7 +1070,8 @@ public:
    *
    * @param ctl controller instance
    */
-  virtual void handle_ctl_close(const rofl::cctlid &ctlid){};
+  virtual void handle_ctl_close(__attribute__((unused))
+                                const rofl::cctlid &ctlid){};
 
   /**
    * @brief 	Called when a control connection (main or auxiliary) has been
@@ -1066,7 +1080,9 @@ public:
    * @param ctl controller instance
    * @param auxid connection identifier (main: 0)
    */
-  virtual void handle_conn_established(rofl::crofctl &ctl,
+  virtual void handle_conn_established(__attribute__((unused))
+                                       rofl::crofctl &ctl,
+                                       __attribute__((unused))
                                        const rofl::cauxid &auxid){};
 
   /**
@@ -1076,7 +1092,9 @@ public:
    * @param ctl controller instance
    * @param auxid connection identifier (main: 0)
    */
-  virtual void handle_conn_terminated(rofl::crofctl &ctl,
+  virtual void handle_conn_terminated(__attribute__((unused))
+                                      rofl::crofctl &ctl,
+                                      __attribute__((unused))
                                       const rofl::cauxid &auxid){};
 
   /**
@@ -1091,7 +1109,8 @@ public:
    * @param ctl controller instance
    * @param auxid connection identifier (main: 0)
    */
-  virtual void handle_conn_refused(rofl::crofctl &ctl,
+  virtual void handle_conn_refused(__attribute__((unused)) rofl::crofctl &ctl,
+                                   __attribute__((unused))
                                    const rofl::cauxid &auxid){};
 
   /**
@@ -1108,7 +1127,8 @@ public:
    * @param ctl controller instance
    * @param auxid connection identifier (main: 0)
    */
-  virtual void handle_conn_failed(rofl::crofctl &ctl,
+  virtual void handle_conn_failed(__attribute__((unused)) rofl::crofctl &ctl,
+                                  __attribute__((unused))
                                   const rofl::cauxid &auxid){};
 
   /**
@@ -1117,7 +1137,9 @@ public:
    * @param ctl controller instance
    * @param auxid control connection identifier (main: 0)
    */
-  virtual void handle_conn_negotiation_failed(rofl::crofctl &ctl,
+  virtual void handle_conn_negotiation_failed(__attribute__((unused))
+                                              rofl::crofctl &ctl,
+                                              __attribute__((unused))
                                               const rofl::cauxid &auxid){};
 
   /**
@@ -1127,7 +1149,9 @@ public:
    * @param ctl controller instance
    * @param auxid control connection identifier (main: 0)
    */
-  virtual void handle_conn_congestion_occurred(rofl::crofctl &ctl,
+  virtual void handle_conn_congestion_occurred(__attribute__((unused))
+                                               rofl::crofctl &ctl,
+                                               __attribute__((unused))
                                                const rofl::cauxid &auxid){};
 
   /**
@@ -1137,7 +1161,9 @@ public:
    * @param ctl controller instance
    * @param auxid control connection identifier (main: 0)
    */
-  virtual void handle_conn_congestion_solved(rofl::crofctl &ctl,
+  virtual void handle_conn_congestion_solved(__attribute__((unused))
+                                             rofl::crofctl &ctl,
+                                             __attribute__((unused))
                                              const rofl::cauxid &auxid){};
 
   /**@}*/
@@ -1168,7 +1194,9 @@ public:
    * @param msg OpenFlow message instance
    */
   virtual void
-  handle_features_reply(rofl::crofdpt &dpt, const rofl::cauxid &auxid,
+  handle_features_reply(__attribute__((unused)) rofl::crofdpt &dpt,
+                        __attribute__((unused)) const rofl::cauxid &auxid,
+                        __attribute__((unused))
                         rofl::openflow::cofmsg_features_reply &msg){};
 
   /**
@@ -1180,7 +1208,9 @@ public:
    * @param dpt datapath instance
    * @param xid OpenFlow transaction identifier
    */
-  virtual void handle_features_reply_timeout(rofl::crofdpt &dpt,
+  virtual void handle_features_reply_timeout(__attribute__((unused))
+                                             rofl::crofdpt &dpt,
+                                             __attribute__((unused))
                                              uint32_t xid){};
 
   /**
@@ -1191,7 +1221,9 @@ public:
    * @param msg OpenFlow message instance
    */
   virtual void
-  handle_get_config_reply(rofl::crofdpt &dpt, const rofl::cauxid &auxid,
+  handle_get_config_reply(__attribute__((unused)) rofl::crofdpt &dpt,
+                          __attribute__((unused)) const rofl::cauxid &auxid,
+                          __attribute__((unused))
                           rofl::openflow::cofmsg_get_config_reply &msg){};
 
   /**
@@ -1204,7 +1236,9 @@ public:
    * @param dpt datapath instance
    * @param xid OpenFlow transaction identifier
    */
-  virtual void handle_get_config_reply_timeout(rofl::crofdpt &dpt,
+  virtual void handle_get_config_reply_timeout(__attribute__((unused))
+                                               rofl::crofdpt &dpt,
+                                               __attribute__((unused))
                                                uint32_t xid){};
 
   /**
@@ -1214,7 +1248,10 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void handle_stats_reply(rofl::crofdpt &dpt, const rofl::cauxid &auxid,
+  virtual void handle_stats_reply(__attribute__((unused)) rofl::crofdpt &dpt,
+                                  __attribute__((unused))
+                                  const rofl::cauxid &auxid,
+                                  __attribute__((unused))
                                   rofl::openflow::cofmsg_stats_reply &msg){};
 
   /**
@@ -1227,7 +1264,10 @@ public:
    * @param xid OpenFlow transaction identifier
    * @param stats_type statistics message subtype
    */
-  virtual void handle_stats_reply_timeout(rofl::crofdpt &dpt, uint32_t xid,
+  virtual void handle_stats_reply_timeout(__attribute__((unused))
+                                          rofl::crofdpt &dpt,
+                                          __attribute__((unused)) uint32_t xid,
+                                          __attribute__((unused))
                                           uint8_t stats_type){};
 
   /**
@@ -1238,7 +1278,9 @@ public:
    * @param msg OpenFlow message instance
    */
   virtual void
-  handle_desc_stats_reply(rofl::crofdpt &dpt, const rofl::cauxid &auxid,
+  handle_desc_stats_reply(__attribute__((unused)) rofl::crofdpt &dpt,
+                          __attribute__((unused)) const rofl::cauxid &auxid,
+                          __attribute__((unused))
                           rofl::openflow::cofmsg_desc_stats_reply &msg){};
 
   /**
@@ -1251,7 +1293,9 @@ public:
    * @param dpt datapath instance
    * @param xid OpenFlow transaction identifier
    */
-  virtual void handle_desc_stats_reply_timeout(rofl::crofdpt &dpt,
+  virtual void handle_desc_stats_reply_timeout(__attribute__((unused))
+                                               rofl::crofdpt &dpt,
+                                               __attribute__((unused))
                                                uint32_t xid){};
 
   /**
@@ -1262,7 +1306,9 @@ public:
    * @param msg OpenFlow message instance
    */
   virtual void
-  handle_table_stats_reply(rofl::crofdpt &dpt, const rofl::cauxid &auxid,
+  handle_table_stats_reply(__attribute__((unused)) rofl::crofdpt &dpt,
+                           __attribute__((unused)) const rofl::cauxid &auxid,
+                           __attribute__((unused))
                            rofl::openflow::cofmsg_table_stats_reply &msg){};
 
   /**
@@ -1275,7 +1321,9 @@ public:
    * @param dpt datapath instance
    * @param xid OpenFlow transaction identifier
    */
-  virtual void handle_table_stats_reply_timeout(rofl::crofdpt &dpt,
+  virtual void handle_table_stats_reply_timeout(__attribute__((unused))
+                                                rofl::crofdpt &dpt,
+                                                __attribute__((unused))
                                                 uint32_t xid){};
 
   /**
@@ -1286,7 +1334,9 @@ public:
    * @param msg OpenFlow message instance
    */
   virtual void
-  handle_port_stats_reply(rofl::crofdpt &dpt, const rofl::cauxid &auxid,
+  handle_port_stats_reply(__attribute__((unused)) rofl::crofdpt &dpt,
+                          __attribute__((unused)) const rofl::cauxid &auxid,
+                          __attribute__((unused))
                           rofl::openflow::cofmsg_port_stats_reply &msg){};
 
   /**
@@ -1299,7 +1349,9 @@ public:
    * @param dpt datapath instance
    * @param xid OpenFlow transaction identifier
    */
-  virtual void handle_port_stats_reply_timeout(rofl::crofdpt &dpt,
+  virtual void handle_port_stats_reply_timeout(__attribute__((unused))
+                                               rofl::crofdpt &dpt,
+                                               __attribute__((unused))
                                                uint32_t xid){};
 
   /**
@@ -1310,7 +1362,9 @@ public:
    * @param msg OpenFlow message instance
    */
   virtual void
-  handle_flow_stats_reply(rofl::crofdpt &dpt, const rofl::cauxid &auxid,
+  handle_flow_stats_reply(__attribute__((unused)) rofl::crofdpt &dpt,
+                          __attribute__((unused)) const rofl::cauxid &auxid,
+                          __attribute__((unused))
                           rofl::openflow::cofmsg_flow_stats_reply &msg){};
 
   /**
@@ -1323,7 +1377,9 @@ public:
    * @param dpt datapath instance
    * @param xid OpenFlow transaction identifier
    */
-  virtual void handle_flow_stats_reply_timeout(rofl::crofdpt &dpt,
+  virtual void handle_flow_stats_reply_timeout(__attribute__((unused))
+                                               rofl::crofdpt &dpt,
+                                               __attribute__((unused))
                                                uint32_t xid){};
 
   /**
@@ -1333,9 +1389,10 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void
-  handle_aggregate_stats_reply(rofl::crofdpt &dpt, const rofl::cauxid &auxid,
-                               rofl::openflow::cofmsg_aggr_stats_reply &msg){};
+  virtual void handle_aggregate_stats_reply(
+      __attribute__((unused)) rofl::crofdpt &dpt,
+      __attribute__((unused)) const rofl::cauxid &auxid,
+      __attribute__((unused)) rofl::openflow::cofmsg_aggr_stats_reply &msg){};
 
   /**
    * @brief	Timer expired while waiting for OpenFlow Aggregate-Stats-Reply
@@ -1348,7 +1405,9 @@ public:
    * @param dpt datapath instance
    * @param xid OpenFlow transaction identifier
    */
-  virtual void handle_aggregate_stats_reply_timeout(rofl::crofdpt &dpt,
+  virtual void handle_aggregate_stats_reply_timeout(__attribute__((unused))
+                                                    rofl::crofdpt &dpt,
+                                                    __attribute__((unused))
                                                     uint32_t xid){};
 
   /**
@@ -1359,7 +1418,9 @@ public:
    * @param msg OpenFlow message instance
    */
   virtual void
-  handle_queue_stats_reply(rofl::crofdpt &dpt, const rofl::cauxid &auxid,
+  handle_queue_stats_reply(__attribute__((unused)) rofl::crofdpt &dpt,
+                           __attribute__((unused)) const rofl::cauxid &auxid,
+                           __attribute__((unused))
                            rofl::openflow::cofmsg_queue_stats_reply &msg){};
 
   /**
@@ -1372,7 +1433,9 @@ public:
    * @param dpt datapath instance
    * @param xid OpenFlow transaction identifier
    */
-  virtual void handle_queue_stats_reply_timeout(rofl::crofdpt &dpt,
+  virtual void handle_queue_stats_reply_timeout(__attribute__((unused))
+                                                rofl::crofdpt &dpt,
+                                                __attribute__((unused))
                                                 uint32_t xid){};
 
   /**
@@ -1383,7 +1446,9 @@ public:
    * @param msg OpenFlow message instance
    */
   virtual void
-  handle_group_stats_reply(rofl::crofdpt &dpt, const rofl::cauxid &auxid,
+  handle_group_stats_reply(__attribute__((unused)) rofl::crofdpt &dpt,
+                           __attribute__((unused)) const rofl::cauxid &auxid,
+                           __attribute__((unused))
                            rofl::openflow::cofmsg_group_stats_reply &msg){};
 
   /**
@@ -1396,7 +1461,9 @@ public:
    * @param dpt datapath instance
    * @param xid OpenFlow transaction identifier
    */
-  virtual void handle_group_stats_reply_timeout(rofl::crofdpt &dpt,
+  virtual void handle_group_stats_reply_timeout(__attribute__((unused))
+                                                rofl::crofdpt &dpt,
+                                                __attribute__((unused))
                                                 uint32_t xid){};
 
   /**
@@ -1407,7 +1474,9 @@ public:
    * @param msg OpenFlow message instance
    */
   virtual void handle_group_desc_stats_reply(
-      rofl::crofdpt &dpt, const rofl::cauxid &auxid,
+      __attribute__((unused)) rofl::crofdpt &dpt,
+      __attribute__((unused)) const rofl::cauxid &auxid,
+      __attribute__((unused))
       rofl::openflow::cofmsg_group_desc_stats_reply &msg){};
 
   /**
@@ -1421,7 +1490,9 @@ public:
    * @param dpt datapath instance
    * @param xid OpenFlow transaction identifier
    */
-  virtual void handle_group_desc_stats_reply_timeout(rofl::crofdpt &dpt,
+  virtual void handle_group_desc_stats_reply_timeout(__attribute__((unused))
+                                                     rofl::crofdpt &dpt,
+                                                     __attribute__((unused))
                                                      uint32_t xid){};
 
   /**
@@ -1432,7 +1503,9 @@ public:
    * @param msg OpenFlow message instance
    */
   virtual void handle_group_features_stats_reply(
-      rofl::crofdpt &dpt, const rofl::cauxid &auxid,
+      __attribute__((unused)) rofl::crofdpt &dpt,
+      __attribute__((unused)) const rofl::cauxid &auxid,
+      __attribute__((unused))
       rofl::openflow::cofmsg_group_features_stats_reply &msg){};
 
   /**
@@ -1446,7 +1519,9 @@ public:
    * @param dpt datapath instance
    * @param xid OpenFlow transaction identifier
    */
-  virtual void handle_group_features_stats_reply_timeout(rofl::crofdpt &dpt,
+  virtual void handle_group_features_stats_reply_timeout(__attribute__((unused))
+                                                         rofl::crofdpt &dpt,
+                                                         __attribute__((unused))
                                                          uint32_t xid){};
 
   /**
@@ -1457,7 +1532,9 @@ public:
    * @param msg OpenFlow message instance
    */
   virtual void
-  handle_meter_stats_reply(rofl::crofdpt &dpt, const rofl::cauxid &auxid,
+  handle_meter_stats_reply(__attribute__((unused)) rofl::crofdpt &dpt,
+                           __attribute__((unused)) const rofl::cauxid &auxid,
+                           __attribute__((unused))
                            rofl::openflow::cofmsg_meter_stats_reply &msg){};
 
   /**
@@ -1470,7 +1547,9 @@ public:
    * @param dpt datapath instance
    * @param xid OpenFlow transaction identifier
    */
-  virtual void handle_meter_stats_reply_timeout(rofl::crofdpt &dpt,
+  virtual void handle_meter_stats_reply_timeout(__attribute__((unused))
+                                                rofl::crofdpt &dpt,
+                                                __attribute__((unused))
                                                 uint32_t xid){};
 
   /**
@@ -1481,7 +1560,9 @@ public:
    * @param msg OpenFlow message instance
    */
   virtual void handle_meter_config_stats_reply(
-      rofl::crofdpt &dpt, const rofl::cauxid &auxid,
+      __attribute__((unused)) rofl::crofdpt &dpt,
+      __attribute__((unused)) const rofl::cauxid &auxid,
+      __attribute__((unused))
       rofl::openflow::cofmsg_meter_config_stats_reply &msg){};
 
   /**
@@ -1496,7 +1577,9 @@ public:
    * @param dpt datapath instance
    * @param xid OpenFlow transaction identifier
    */
-  virtual void handle_meter_config_stats_reply_timeout(rofl::crofdpt &dpt,
+  virtual void handle_meter_config_stats_reply_timeout(__attribute__((unused))
+                                                       rofl::crofdpt &dpt,
+                                                       __attribute__((unused))
                                                        uint32_t xid){};
 
   /**
@@ -1507,7 +1590,9 @@ public:
    * @param msg OpenFlow message instance
    */
   virtual void handle_meter_features_stats_reply(
-      rofl::crofdpt &dpt, const rofl::cauxid &auxid,
+      __attribute__((unused)) rofl::crofdpt &dpt,
+      __attribute__((unused)) const rofl::cauxid &auxid,
+      __attribute__((unused))
       rofl::openflow::cofmsg_meter_features_stats_reply &msg){};
 
   /**
@@ -1521,7 +1606,9 @@ public:
    * @param dpt datapath instance
    * @param xid OpenFlow transaction identifier
    */
-  virtual void handle_meter_features_stats_reply_timeout(rofl::crofdpt &dpt,
+  virtual void handle_meter_features_stats_reply_timeout(__attribute__((unused))
+                                                         rofl::crofdpt &dpt,
+                                                         __attribute__((unused))
                                                          uint32_t xid){};
 
   /**
@@ -1532,7 +1619,9 @@ public:
    * @param msg OpenFlow message instance
    */
   virtual void handle_table_features_stats_reply(
-      rofl::crofdpt &dpt, const rofl::cauxid &auxid,
+      __attribute__((unused)) rofl::crofdpt &dpt,
+      __attribute__((unused)) const rofl::cauxid &auxid,
+      __attribute__((unused))
       rofl::openflow::cofmsg_table_features_stats_reply &msg){};
 
   /**
@@ -1546,7 +1635,9 @@ public:
    * @param dpt datapath instance
    * @param xid OpenFlow transaction identifier
    */
-  virtual void handle_table_features_stats_reply_timeout(rofl::crofdpt &dpt,
+  virtual void handle_table_features_stats_reply_timeout(__attribute__((unused))
+                                                         rofl::crofdpt &dpt,
+                                                         __attribute__((unused))
                                                          uint32_t xid){};
 
   /**
@@ -1557,7 +1648,9 @@ public:
    * @param msg OpenFlow message instance
    */
   virtual void handle_port_desc_stats_reply(
-      rofl::crofdpt &dpt, const rofl::cauxid &auxid,
+      __attribute__((unused)) rofl::crofdpt &dpt,
+      __attribute__((unused)) const rofl::cauxid &auxid,
+      __attribute__((unused))
       rofl::openflow::cofmsg_port_desc_stats_reply &msg){};
 
   /**
@@ -1571,7 +1664,9 @@ public:
    * @param dpt datapath instance
    * @param xid OpenFlow transaction identifier
    */
-  virtual void handle_port_desc_stats_reply_timeout(rofl::crofdpt &dpt,
+  virtual void handle_port_desc_stats_reply_timeout(__attribute__((unused))
+                                                    rofl::crofdpt &dpt,
+                                                    __attribute__((unused))
                                                     uint32_t xid){};
 
   /**
@@ -1582,7 +1677,9 @@ public:
    * @param msg OpenFlow message instance
    */
   virtual void handle_experimenter_stats_reply(
-      rofl::crofdpt &dpt, const rofl::cauxid &auxid,
+      __attribute__((unused)) rofl::crofdpt &dpt,
+      __attribute__((unused)) const rofl::cauxid &auxid,
+      __attribute__((unused))
       rofl::openflow::cofmsg_experimenter_stats_reply &msg){};
 
   /**
@@ -1597,7 +1694,9 @@ public:
    * @param dpt datapath instance
    * @param xid OpenFlow transaction identifier
    */
-  virtual void handle_experimenter_stats_reply_timeout(rofl::crofdpt &dpt,
+  virtual void handle_experimenter_stats_reply_timeout(__attribute__((unused))
+                                                       rofl::crofdpt &dpt,
+                                                       __attribute__((unused))
                                                        uint32_t xid){};
 
   /**
@@ -1607,7 +1706,10 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void handle_packet_in(rofl::crofdpt &dpt, const rofl::cauxid &auxid,
+  virtual void handle_packet_in(__attribute__((unused)) rofl::crofdpt &dpt,
+                                __attribute__((unused))
+                                const rofl::cauxid &auxid,
+                                __attribute__((unused))
                                 rofl::openflow::cofmsg_packet_in &msg){};
 
   /**
@@ -1618,7 +1720,9 @@ public:
    * @param msg OpenFlow message instance
    */
   virtual void
-  handle_barrier_reply(rofl::crofdpt &dpt, const rofl::cauxid &auxid,
+  handle_barrier_reply(__attribute__((unused)) rofl::crofdpt &dpt,
+                       __attribute__((unused)) const rofl::cauxid &auxid,
+                       __attribute__((unused))
                        rofl::openflow::cofmsg_barrier_reply &msg){};
 
   /**
@@ -1630,7 +1734,10 @@ public:
    * @param dpt datapath instance
    * @param xid OpenFlow transaction identifier
    */
-  virtual void handle_barrier_reply_timeout(rofl::crofdpt &dpt, uint32_t xid){};
+  virtual void handle_barrier_reply_timeout(__attribute__((unused))
+                                            rofl::crofdpt &dpt,
+                                            __attribute__((unused))
+                                            uint32_t xid){};
 
   /**
    * @brief	OpenFlow Flow-Removed message received.
@@ -1639,8 +1746,10 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void handle_flow_removed(rofl::crofdpt &dpt,
+  virtual void handle_flow_removed(__attribute__((unused)) rofl::crofdpt &dpt,
+                                   __attribute__((unused))
                                    const rofl::cauxid &auxid,
+                                   __attribute__((unused))
                                    rofl::openflow::cofmsg_flow_removed &msg){};
 
   /**
@@ -1650,7 +1759,10 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void handle_port_status(rofl::crofdpt &dpt, const rofl::cauxid &auxid,
+  virtual void handle_port_status(__attribute__((unused)) rofl::crofdpt &dpt,
+                                  __attribute__((unused))
+                                  const rofl::cauxid &auxid,
+                                  __attribute__((unused))
                                   rofl::openflow::cofmsg_port_status &msg){};
 
   /**
@@ -1661,7 +1773,9 @@ public:
    * @param msg OpenFlow message instance
    */
   virtual void handle_queue_get_config_reply(
-      rofl::crofdpt &dpt, const rofl::cauxid &auxid,
+      __attribute__((unused)) rofl::crofdpt &dpt,
+      __attribute__((unused)) const rofl::cauxid &auxid,
+      __attribute__((unused))
       rofl::openflow::cofmsg_queue_get_config_reply &msg){};
 
   /**
@@ -1674,7 +1788,9 @@ public:
    * @param dpt datapath instance
    * @param xid OpenFlow transaction identifier
    */
-  virtual void handle_queue_get_config_reply_timeout(rofl::crofdpt &dpt,
+  virtual void handle_queue_get_config_reply_timeout(__attribute__((unused))
+                                                     rofl::crofdpt &dpt,
+                                                     __attribute__((unused))
                                                      uint32_t xid){};
 
   /**
@@ -1684,8 +1800,10 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void handle_error_message(rofl::crofdpt &dpt,
+  virtual void handle_error_message(__attribute__((unused)) rofl::crofdpt &dpt,
+                                    __attribute__((unused))
                                     const rofl::cauxid &auxid,
+                                    __attribute__((unused))
                                     rofl::openflow::cofmsg_error &msg){};
 
   /**
@@ -1696,7 +1814,9 @@ public:
    * @param msg OpenFlow message instance
    */
   virtual void
-  handle_experimenter_message(rofl::crofdpt &dpt, const rofl::cauxid &auxid,
+  handle_experimenter_message(__attribute__((unused)) rofl::crofdpt &dpt,
+                              __attribute__((unused)) const rofl::cauxid &auxid,
+                              __attribute__((unused))
                               rofl::openflow::cofmsg_experimenter &msg){};
 
   /**
@@ -1708,7 +1828,10 @@ public:
    * @param dpt datapath instance
    * @param xid OpenFlow transaction identifier
    */
-  virtual void handle_experimenter_timeout(rofl::crofdpt &dpt, uint32_t xid){};
+  virtual void handle_experimenter_timeout(__attribute__((unused))
+                                           rofl::crofdpt &dpt,
+                                           __attribute__((unused))
+                                           uint32_t xid){};
 
   /**
    * @brief	OpenFlow Role-Reply message received.
@@ -1717,7 +1840,10 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void handle_role_reply(rofl::crofdpt &dpt, const rofl::cauxid &auxid,
+  virtual void handle_role_reply(__attribute__((unused)) rofl::crofdpt &dpt,
+                                 __attribute__((unused))
+                                 const rofl::cauxid &auxid,
+                                 __attribute__((unused))
                                  rofl::openflow::cofmsg_role_reply &msg){};
 
   /**
@@ -1729,7 +1855,10 @@ public:
    * @param dpt datapath instance
    * @param xid OpenFlow transaction identifier
    */
-  virtual void handle_role_reply_timeout(rofl::crofdpt &dpt, uint32_t xid){};
+  virtual void handle_role_reply_timeout(__attribute__((unused))
+                                         rofl::crofdpt &dpt,
+                                         __attribute__((unused))
+                                         uint32_t xid){};
 
   /**
    * @brief	OpenFlow Get-Async-Config-Reply message received.
@@ -1739,7 +1868,9 @@ public:
    * @param msg OpenFlow message instance
    */
   virtual void handle_get_async_config_reply(
-      rofl::crofdpt &dpt, const rofl::cauxid &auxid,
+      __attribute__((unused)) rofl::crofdpt &dpt,
+      __attribute__((unused)) const rofl::cauxid &auxid,
+      __attribute__((unused))
       rofl::openflow::cofmsg_get_async_config_reply &msg){};
 
   /**
@@ -1753,7 +1884,9 @@ public:
    * @param dpt datapath instance
    * @param xid OpenFlow transaction identifier
    */
-  virtual void handle_get_async_config_reply_timeout(rofl::crofdpt &dpt,
+  virtual void handle_get_async_config_reply_timeout(__attribute__((unused))
+                                                     rofl::crofdpt &dpt,
+                                                     __attribute__((unused))
                                                      uint32_t xid){};
 
   /**@}*/
@@ -1795,7 +1928,9 @@ public:
    * @param msg OpenFlow message instance
    */
   virtual void
-  handle_features_request(rofl::crofctl &ctl, const rofl::cauxid &auxid,
+  handle_features_request(__attribute__((unused)) rofl::crofctl &ctl,
+                          __attribute__((unused)) const rofl::cauxid &auxid,
+                          __attribute__((unused))
                           rofl::openflow::cofmsg_features_request &msg){};
 
   /**
@@ -1806,7 +1941,9 @@ public:
    * @param msg OpenFlow message instance
    */
   virtual void
-  handle_get_config_request(rofl::crofctl &ctl, const rofl::cauxid &auxid,
+  handle_get_config_request(__attribute__((unused)) rofl::crofctl &ctl,
+                            __attribute__((unused)) const rofl::cauxid &auxid,
+                            __attribute__((unused))
                             rofl::openflow::cofmsg_get_config_request &msg){};
 
   /**
@@ -1817,7 +1954,9 @@ public:
    * @param msg OpenFlow message instance
    */
   virtual void
-  handle_stats_request(rofl::crofctl &ctl, const rofl::cauxid &auxid,
+  handle_stats_request(__attribute__((unused)) rofl::crofctl &ctl,
+                       __attribute__((unused)) const rofl::cauxid &auxid,
+                       __attribute__((unused))
                        rofl::openflow::cofmsg_stats_request &msg){};
 
   /**
@@ -1828,7 +1967,9 @@ public:
    * @param msg OpenFlow message instance
    */
   virtual void
-  handle_desc_stats_request(rofl::crofctl &ctl, const rofl::cauxid &auxid,
+  handle_desc_stats_request(__attribute__((unused)) rofl::crofctl &ctl,
+                            __attribute__((unused)) const rofl::cauxid &auxid,
+                            __attribute__((unused))
                             rofl::openflow::cofmsg_desc_stats_request &msg){};
 
   /**
@@ -1839,7 +1980,9 @@ public:
    * @param msg OpenFlow message instance
    */
   virtual void
-  handle_table_stats_request(rofl::crofctl &ctl, const rofl::cauxid &auxid,
+  handle_table_stats_request(__attribute__((unused)) rofl::crofctl &ctl,
+                             __attribute__((unused)) const rofl::cauxid &auxid,
+                             __attribute__((unused))
                              rofl::openflow::cofmsg_table_stats_request &msg){};
 
   /**
@@ -1850,7 +1993,9 @@ public:
    * @param msg OpenFlow message instance
    */
   virtual void
-  handle_port_stats_request(rofl::crofctl &ctl, const rofl::cauxid &auxid,
+  handle_port_stats_request(__attribute__((unused)) rofl::crofctl &ctl,
+                            __attribute__((unused)) const rofl::cauxid &auxid,
+                            __attribute__((unused))
                             rofl::openflow::cofmsg_port_stats_request &msg){};
 
   /**
@@ -1861,7 +2006,9 @@ public:
    * @param msg OpenFlow message instance
    */
   virtual void
-  handle_flow_stats_request(rofl::crofctl &ctl, const rofl::cauxid &auxid,
+  handle_flow_stats_request(__attribute__((unused)) rofl::crofctl &ctl,
+                            __attribute__((unused)) const rofl::cauxid &auxid,
+                            __attribute__((unused))
                             rofl::openflow::cofmsg_flow_stats_request &msg){};
 
   /**
@@ -1872,8 +2019,9 @@ public:
    * @param msg OpenFlow message instance
    */
   virtual void handle_aggregate_stats_request(
-      rofl::crofctl &ctl, const rofl::cauxid &auxid,
-      rofl::openflow::cofmsg_aggr_stats_request &msg){};
+      __attribute__((unused)) rofl::crofctl &ctl,
+      __attribute__((unused)) const rofl::cauxid &auxid,
+      __attribute__((unused)) rofl::openflow::cofmsg_aggr_stats_request &msg){};
 
   /**
    * @brief	OpenFlow Queue-Stats-Request message received.
@@ -1883,7 +2031,9 @@ public:
    * @param msg OpenFlow message instance
    */
   virtual void
-  handle_queue_stats_request(rofl::crofctl &ctl, const rofl::cauxid &auxid,
+  handle_queue_stats_request(__attribute__((unused)) rofl::crofctl &ctl,
+                             __attribute__((unused)) const rofl::cauxid &auxid,
+                             __attribute__((unused))
                              rofl::openflow::cofmsg_queue_stats_request &msg){};
 
   /**
@@ -1894,7 +2044,9 @@ public:
    * @param msg OpenFlow message instance
    */
   virtual void
-  handle_group_stats_request(rofl::crofctl &ctl, const rofl::cauxid &auxid,
+  handle_group_stats_request(__attribute__((unused)) rofl::crofctl &ctl,
+                             __attribute__((unused)) const rofl::cauxid &auxid,
+                             __attribute__((unused))
                              rofl::openflow::cofmsg_group_stats_request &msg){};
 
   /**
@@ -1905,7 +2057,9 @@ public:
    * @param msg OpenFlow message instance
    */
   virtual void handle_group_desc_stats_request(
-      rofl::crofctl &ctl, const rofl::cauxid &auxid,
+      __attribute__((unused)) rofl::crofctl &ctl,
+      __attribute__((unused)) const rofl::cauxid &auxid,
+      __attribute__((unused))
       rofl::openflow::cofmsg_group_desc_stats_request &msg){};
 
   /**
@@ -1916,7 +2070,9 @@ public:
    * @param msg OpenFlow message instance
    */
   virtual void handle_group_features_stats_request(
-      rofl::crofctl &ctl, const rofl::cauxid &auxid,
+      __attribute__((unused)) rofl::crofctl &ctl,
+      __attribute__((unused)) const rofl::cauxid &auxid,
+      __attribute__((unused))
       rofl::openflow::cofmsg_group_features_stats_request &msg){};
 
   /**
@@ -1927,7 +2083,9 @@ public:
    * @param msg OpenFlow message instance
    */
   virtual void
-  handle_meter_stats_request(rofl::crofctl &ctl, const rofl::cauxid &auxid,
+  handle_meter_stats_request(__attribute__((unused)) rofl::crofctl &ctl,
+                             __attribute__((unused)) const rofl::cauxid &auxid,
+                             __attribute__((unused))
                              rofl::openflow::cofmsg_meter_stats_request &msg){};
 
   /**
@@ -1938,7 +2096,9 @@ public:
    * @param msg OpenFlow message instance
    */
   virtual void handle_meter_config_stats_request(
-      rofl::crofctl &ctl, const rofl::cauxid &auxid,
+      __attribute__((unused)) rofl::crofctl &ctl,
+      __attribute__((unused)) const rofl::cauxid &auxid,
+      __attribute__((unused))
       rofl::openflow::cofmsg_meter_config_stats_request &msg){};
 
   /**
@@ -1949,7 +2109,9 @@ public:
    * @param msg OpenFlow message instance
    */
   virtual void handle_meter_features_stats_request(
-      rofl::crofctl &ctl, const rofl::cauxid &auxid,
+      __attribute__((unused)) rofl::crofctl &ctl,
+      __attribute__((unused)) const rofl::cauxid &auxid,
+      __attribute__((unused))
       rofl::openflow::cofmsg_meter_features_stats_request &msg){};
 
   /**
@@ -1960,7 +2122,9 @@ public:
    * @param msg OpenFlow message instance
    */
   virtual void handle_table_features_stats_request(
-      rofl::crofctl &ctl, const rofl::cauxid &auxid,
+      __attribute__((unused)) rofl::crofctl &ctl,
+      __attribute__((unused)) const rofl::cauxid &auxid,
+      __attribute__((unused))
       rofl::openflow::cofmsg_table_features_stats_request &msg){};
 
   /**
@@ -1971,7 +2135,9 @@ public:
    * @param msg OpenFlow message instance
    */
   virtual void handle_port_desc_stats_request(
-      rofl::crofctl &ctl, const rofl::cauxid &auxid,
+      __attribute__((unused)) rofl::crofctl &ctl,
+      __attribute__((unused)) const rofl::cauxid &auxid,
+      __attribute__((unused))
       rofl::openflow::cofmsg_port_desc_stats_request &msg){};
 
   /**
@@ -1982,7 +2148,9 @@ public:
    * @param msg OpenFlow message instance
    */
   virtual void handle_experimenter_stats_request(
-      rofl::crofctl &ctl, const rofl::cauxid &auxid,
+      __attribute__((unused)) rofl::crofctl &ctl,
+      __attribute__((unused)) const rofl::cauxid &auxid,
+      __attribute__((unused))
       rofl::openflow::cofmsg_experimenter_stats_request &msg){};
 
   /**
@@ -1992,7 +2160,10 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void handle_packet_out(rofl::crofctl &ctl, const rofl::cauxid &auxid,
+  virtual void handle_packet_out(__attribute__((unused)) rofl::crofctl &ctl,
+                                 __attribute__((unused))
+                                 const rofl::cauxid &auxid,
+                                 __attribute__((unused))
                                  rofl::openflow::cofmsg_packet_out &msg){};
 
   /**
@@ -2003,7 +2174,9 @@ public:
    * @param msg OpenFlow message instance
    */
   virtual void
-  handle_barrier_request(rofl::crofctl &ctl, const rofl::cauxid &auxid,
+  handle_barrier_request(__attribute__((unused)) rofl::crofctl &ctl,
+                         __attribute__((unused)) const rofl::cauxid &auxid,
+                         __attribute__((unused))
                          rofl::openflow::cofmsg_barrier_request &msg){};
 
   /**
@@ -2013,7 +2186,10 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void handle_flow_mod(rofl::crofctl &ctl, const rofl::cauxid &auxid,
+  virtual void handle_flow_mod(__attribute__((unused)) rofl::crofctl &ctl,
+                               __attribute__((unused))
+                               const rofl::cauxid &auxid,
+                               __attribute__((unused))
                                rofl::openflow::cofmsg_flow_mod &msg){};
 
   /**
@@ -2023,7 +2199,10 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void handle_group_mod(rofl::crofctl &ctl, const rofl::cauxid &auxid,
+  virtual void handle_group_mod(__attribute__((unused)) rofl::crofctl &ctl,
+                                __attribute__((unused))
+                                const rofl::cauxid &auxid,
+                                __attribute__((unused))
                                 rofl::openflow::cofmsg_group_mod &msg){};
 
   /**
@@ -2033,7 +2212,10 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void handle_table_mod(rofl::crofctl &ctl, const rofl::cauxid &auxid,
+  virtual void handle_table_mod(__attribute__((unused)) rofl::crofctl &ctl,
+                                __attribute__((unused))
+                                const rofl::cauxid &auxid,
+                                __attribute__((unused))
                                 rofl::openflow::cofmsg_table_mod &msg){};
 
   /**
@@ -2043,7 +2225,10 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void handle_port_mod(rofl::crofctl &ctl, const rofl::cauxid &auxid,
+  virtual void handle_port_mod(__attribute__((unused)) rofl::crofctl &ctl,
+                               __attribute__((unused))
+                               const rofl::cauxid &auxid,
+                               __attribute__((unused))
                                rofl::openflow::cofmsg_port_mod &msg){};
 
   /**
@@ -2054,7 +2239,9 @@ public:
    * @param msg OpenFlow message instance
    */
   virtual void handle_queue_get_config_request(
-      rofl::crofctl &ctl, const rofl::cauxid &auxid,
+      __attribute__((unused)) rofl::crofctl &ctl,
+      __attribute__((unused)) const rofl::cauxid &auxid,
+      __attribute__((unused))
       rofl::openflow::cofmsg_queue_get_config_request &msg){};
 
   /**
@@ -2064,7 +2251,10 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void handle_set_config(rofl::crofctl &ctl, const rofl::cauxid &auxid,
+  virtual void handle_set_config(__attribute__((unused)) rofl::crofctl &ctl,
+                                 __attribute__((unused))
+                                 const rofl::cauxid &auxid,
+                                 __attribute__((unused))
                                  rofl::openflow::cofmsg_set_config &msg){};
 
   /**
@@ -2075,7 +2265,9 @@ public:
    * @param msg OpenFlow message instance
    */
   virtual void
-  handle_experimenter_message(rofl::crofctl &ctl, const rofl::cauxid &auxid,
+  handle_experimenter_message(__attribute__((unused)) rofl::crofctl &ctl,
+                              __attribute__((unused)) const rofl::cauxid &auxid,
+                              __attribute__((unused))
                               rofl::openflow::cofmsg_experimenter &msg){};
 
   /**
@@ -2087,7 +2279,10 @@ public:
    * @param ctl controller instance
    * @param xid OpenFlow transaction identifier
    */
-  virtual void handle_experimenter_timeout(rofl::crofctl &ctl, uint32_t xid){};
+  virtual void handle_experimenter_timeout(__attribute__((unused))
+                                           rofl::crofctl &ctl,
+                                           __attribute__((unused))
+                                           uint32_t xid){};
 
   /**
    * @brief	OpenFlow error message received.
@@ -2096,8 +2291,10 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void handle_error_message(rofl::crofctl &ctl,
+  virtual void handle_error_message(__attribute__((unused)) rofl::crofctl &ctl,
+                                    __attribute__((unused))
                                     const rofl::cauxid &auxid,
+                                    __attribute__((unused))
                                     rofl::openflow::cofmsg_error &msg){};
 
   /**
@@ -2107,8 +2304,10 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void handle_role_request(rofl::crofctl &ctl,
+  virtual void handle_role_request(__attribute__((unused)) rofl::crofctl &ctl,
+                                   __attribute__((unused))
                                    const rofl::cauxid &auxid,
+                                   __attribute__((unused))
                                    rofl::openflow::cofmsg_role_request &msg){};
 
   /**
@@ -2119,7 +2318,9 @@ public:
    * @param msg OpenFlow message instance
    */
   virtual void handle_get_async_config_request(
-      rofl::crofctl &ctl, const rofl::cauxid &auxid,
+      __attribute__((unused)) rofl::crofctl &ctl,
+      __attribute__((unused)) const rofl::cauxid &auxid,
+      __attribute__((unused))
       rofl::openflow::cofmsg_get_async_config_request &msg){};
 
   /**
@@ -2130,7 +2331,9 @@ public:
    * @param msg OpenFlow message instance
    */
   virtual void
-  handle_set_async_config(rofl::crofctl &ctl, const rofl::cauxid &auxid,
+  handle_set_async_config(__attribute__((unused)) rofl::crofctl &ctl,
+                          __attribute__((unused)) const rofl::cauxid &auxid,
+                          __attribute__((unused))
                           rofl::openflow::cofmsg_set_async_config &msg){};
 
   /**
@@ -2140,7 +2343,10 @@ public:
    * @param auxid control connection identifier
    * @param msg OpenFlow message instance
    */
-  virtual void handle_meter_mod(rofl::crofctl &ctl, const rofl::cauxid &auxid,
+  virtual void handle_meter_mod(__attribute__((unused)) rofl::crofctl &ctl,
+                                __attribute__((unused))
+                                const rofl::cauxid &auxid,
+                                __attribute__((unused))
                                 rofl::openflow::cofmsg_meter_mod &msg){};
 
   /**@}*/
@@ -2184,7 +2390,8 @@ protected:
 
   virtual void handle_read_event(cthread &thread, int fd);
 
-  virtual void handle_write_event(cthread &thread, int fd){/* not in use */};
+  virtual void handle_write_event(__attribute__((unused)) cthread &thread,
+                                  __attribute__((unused)) int fd){};
 
 private:
   virtual void handle_established(crofdpt &dpt, uint8_t ofp_version);
@@ -2233,9 +2440,11 @@ private:
 private:
   virtual void handle_established(crofconn &conn, uint8_t ofp_version);
 
-  virtual void handle_connect_refused(crofconn &conn){/* not used */};
+  virtual void handle_connect_refused(__attribute__((unused))
+                                      crofconn &conn){/* not used */};
 
-  virtual void handle_connect_failed(crofconn &conn){/* not used */};
+  virtual void handle_connect_failed(__attribute__((unused))
+                                     crofconn &conn){/* not used */};
 
   virtual void handle_accept_failed(crofconn &conn);
 
@@ -2243,17 +2452,22 @@ private:
 
   virtual void handle_closed(crofconn &conn);
 
-  virtual void handle_recv(crofconn &conn, rofl::openflow::cofmsg *msg) {
+  virtual void handle_recv(__attribute__((unused)) crofconn &conn,
+                           rofl::openflow::cofmsg *msg) {
     delete msg;
   };
 
-  virtual void congestion_occurred_indication(crofconn &conn){};
+  virtual void congestion_occurred_indication(__attribute__((unused))
+                                              crofconn &conn){};
 
-  virtual void congestion_solved_indication(crofconn &conn){};
+  virtual void congestion_solved_indication(__attribute__((unused))
+                                            crofconn &conn){};
 
-  virtual void handle_transaction_timeout(crofconn &conn, uint32_t xid,
-                                          uint8_t type,
-                                          uint16_t sub_type = 0){};
+  virtual void
+  handle_transaction_timeout(__attribute__((unused)) crofconn &conn,
+                             __attribute__((unused)) uint32_t xid,
+                             __attribute__((unused)) uint8_t type,
+                             __attribute__((unused)) uint16_t sub_type = 0){};
 
 private:
   /**
@@ -2364,6 +2578,6 @@ private:
   std::string ciphers;
 };
 
-}; // end of namespace
+}; // namespace rofl
 
 #endif

@@ -24,9 +24,8 @@ cofmsg_desc_stats_request::cofmsg_desc_stats_request(uint8_t version,
 }
 
 cofmsg_desc_stats_request::cofmsg_desc_stats_request(
-    const cofmsg_desc_stats_request &msg) {
-  *this = msg;
-}
+    const cofmsg_desc_stats_request &msg)
+    : cofmsg_stats_request(msg) {}
 
 cofmsg_desc_stats_request &cofmsg_desc_stats_request::
 operator=(const cofmsg_desc_stats_request &msg) {
@@ -105,9 +104,8 @@ cofmsg_desc_stats_reply::cofmsg_desc_stats_reply(
 }
 
 cofmsg_desc_stats_reply::cofmsg_desc_stats_reply(
-    const cofmsg_desc_stats_reply &msg) {
-  *this = msg;
-}
+    const cofmsg_desc_stats_reply &msg)
+    : cofmsg_stats_reply(msg), desc_stats(msg.desc_stats) {}
 
 cofmsg_desc_stats_reply &cofmsg_desc_stats_reply::
 operator=(const cofmsg_desc_stats_reply &msg) {

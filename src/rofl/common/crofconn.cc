@@ -101,7 +101,8 @@ void crofconn::tls_connect(
   rofsock.tls_connect(reconnect);
 };
 
-void crofconn::handle_timeout(cthread &thread, uint32_t timer_id) {
+void crofconn::handle_timeout(__attribute__((unused)) cthread &thread,
+                              uint32_t timer_id) {
   if (flag_test(FLAG_DELETE_IN_PROGRESS))
     return;
   switch (timer_id) {
@@ -765,7 +766,8 @@ void crofconn::echo_request_rcvd(rofl::openflow::cofmsg *pmsg) {
   delete msg;
 }
 
-void crofconn::handle_tcp_connect_refused(crofsock &rofsock) {
+void crofconn::handle_tcp_connect_refused(__attribute__((unused))
+                                          crofsock &rofsock) {
   try {
     VLOG(2) << __FUNCTION__
             << " socket indicates TCP connection -connect- refused";
@@ -777,7 +779,8 @@ void crofconn::handle_tcp_connect_refused(crofsock &rofsock) {
   }
 };
 
-void crofconn::handle_tcp_connect_failed(crofsock &rofsock) {
+void crofconn::handle_tcp_connect_failed(__attribute__((unused))
+                                         crofsock &rofsock) {
   try {
     VLOG(2) << __FUNCTION__
             << " socket indicates TCP connection -connect- failed";
@@ -789,7 +792,7 @@ void crofconn::handle_tcp_connect_failed(crofsock &rofsock) {
   }
 };
 
-void crofconn::handle_tcp_connected(crofsock &rofsock) {
+void crofconn::handle_tcp_connected(__attribute__((unused)) crofsock &rofsock) {
   try {
     VLOG(2) << __FUNCTION__
             << " socket indicates TCP connection -connect- established";
@@ -801,7 +804,8 @@ void crofconn::handle_tcp_connected(crofsock &rofsock) {
   }
 };
 
-void crofconn::handle_tcp_accept_refused(crofsock &socket) {
+void crofconn::handle_tcp_accept_refused(__attribute__((unused))
+                                         crofsock &socket) {
   try {
     VLOG(2) << __FUNCTION__
             << " socket indicates TCP connection -accept- refused";
@@ -813,7 +817,8 @@ void crofconn::handle_tcp_accept_refused(crofsock &socket) {
   }
 };
 
-void crofconn::handle_tcp_accept_failed(crofsock &socket) {
+void crofconn::handle_tcp_accept_failed(__attribute__((unused))
+                                        crofsock &socket) {
   try {
     VLOG(2) << __FUNCTION__
             << " socket indicates TCP connection -accept- failed";
@@ -825,7 +830,7 @@ void crofconn::handle_tcp_accept_failed(crofsock &socket) {
   }
 };
 
-void crofconn::handle_tcp_accepted(crofsock &socket) {
+void crofconn::handle_tcp_accepted(__attribute__((unused)) crofsock &socket) {
   try {
     VLOG(2) << __FUNCTION__
             << " socket indicates TCP connection -accept- established";
@@ -837,7 +842,8 @@ void crofconn::handle_tcp_accepted(crofsock &socket) {
   }
 };
 
-void crofconn::handle_tls_connect_failed(crofsock &socket) {
+void crofconn::handle_tls_connect_failed(__attribute__((unused))
+                                         crofsock &socket) {
   try {
     VLOG(2) << __FUNCTION__
             << " socket indicates TLS connection -connect- failed";
@@ -850,7 +856,7 @@ void crofconn::handle_tls_connect_failed(crofsock &socket) {
   }
 };
 
-void crofconn::handle_tls_connected(crofsock &socket) {
+void crofconn::handle_tls_connected(__attribute__((unused)) crofsock &socket) {
   try {
     VLOG(2) << __FUNCTION__
             << " socket indicates TLS connection -connect- established";
@@ -862,7 +868,8 @@ void crofconn::handle_tls_connected(crofsock &socket) {
   }
 };
 
-void crofconn::handle_tls_accept_failed(crofsock &socket) {
+void crofconn::handle_tls_accept_failed(__attribute__((unused))
+                                        crofsock &socket) {
   try {
     VLOG(2) << __FUNCTION__
             << " socket indicates TLS connection -accept- failed";
@@ -875,7 +882,7 @@ void crofconn::handle_tls_accept_failed(crofsock &socket) {
   }
 };
 
-void crofconn::handle_tls_accepted(crofsock &socket) {
+void crofconn::handle_tls_accepted(__attribute__((unused)) crofsock &socket) {
   try {
     VLOG(2) << __FUNCTION__
             << " socket indicates TLS connection -accept- established";
@@ -887,7 +894,7 @@ void crofconn::handle_tls_accepted(crofsock &socket) {
   }
 };
 
-void crofconn::handle_closed(crofsock &rofsock) {
+void crofconn::handle_closed(__attribute__((unused)) crofsock &rofsock) {
   try {
     if (flag_test(FLAG_DELETE_IN_PROGRESS)) {
       return;
@@ -909,20 +916,23 @@ void crofconn::handle_closed(crofsock &rofsock) {
   }
 };
 
-void crofconn::congestion_solved_indication(crofsock &rofsock) {
+void crofconn::congestion_solved_indication(__attribute__((unused))
+                                            crofsock &rofsock) {
   try {
     if (flag_test(FLAG_DELETE_IN_PROGRESS)) {
       return;
     }
-    VLOG(2) << __FUNCTION__ << " congestion solved indication; action: "
-                               "message transmission unblocked";
+    VLOG(2) << __FUNCTION__
+            << " congestion solved indication; action: "
+               "message transmission unblocked";
     crofconn_env::call_env(env).congestion_solved_indication(*this);
   } catch (eRofConnNotFound &e) {
     VLOG(5) << __FUNCTION__ << " error: " << e.what();
   }
 };
 
-void crofconn::congestion_occurred_indication(crofsock &rofsock) {
+void crofconn::congestion_occurred_indication(__attribute__((unused))
+                                              crofsock &rofsock) {
   try {
     if (flag_test(FLAG_DELETE_IN_PROGRESS)) {
       return;
@@ -936,7 +946,8 @@ void crofconn::congestion_occurred_indication(crofsock &rofsock) {
   }
 };
 
-void crofconn::handle_recv(crofsock &socket, rofl::openflow::cofmsg *msg) {
+void crofconn::handle_recv(__attribute__((unused)) crofsock &socket,
+                           rofl::openflow::cofmsg *msg) {
   if (flag_test(FLAG_DELETE_IN_PROGRESS)) {
     return;
   }
@@ -961,8 +972,9 @@ void crofconn::handle_recv(crofsock &socket, rofl::openflow::cofmsg *msg) {
      * will enter STATE_NEGOTIATING2 directly under these circumstances. */
 
     if (msg->get_version() == rofl::openflow::OFP_VERSION_UNKNOWN) {
-      VLOG(2) << __FUNCTION__ << " message with invalid version received "
-                                 "state=STATE_NEGOTIATING, rcvd version="
+      VLOG(2) << __FUNCTION__
+              << " message with invalid version received "
+                 "state=STATE_NEGOTIATING, rcvd version="
               << msg->get_version() << ", negotiated version=" << ofp_version;
 
       size_t len = msg->length() < 64 ? msg->length() : 64;
@@ -993,8 +1005,9 @@ void crofconn::handle_recv(crofsock &socket, rofl::openflow::cofmsg *msg) {
   case STATE_NEGOTIATING2: {
 
     if (msg->get_version() != ofp_version) {
-      VLOG(2) << __FUNCTION__ << " message with invalid version received "
-                                 "state=STATE_NEGOTIATING2, rcvd version="
+      VLOG(2) << __FUNCTION__
+              << " message with invalid version received "
+                 "state=STATE_NEGOTIATING2, rcvd version="
               << msg->get_version() << ", negotiated version=" << ofp_version;
 
       size_t len = msg->length() < 64 ? msg->length() : 64;
@@ -1026,8 +1039,9 @@ void crofconn::handle_recv(crofsock &socket, rofl::openflow::cofmsg *msg) {
 
     /* sanity check: message version must match negotiated version */
     if (msg->get_version() != ofp_version) {
-      VLOG(2) << __FUNCTION__ << "message with invalid version received "
-                                 "state=STATE_ESTABLISHED rcvd version="
+      VLOG(2) << __FUNCTION__
+              << "message with invalid version received "
+                 "state=STATE_ESTABLISHED rcvd version="
               << msg->get_version() << " negotiated version=" << ofp_version;
 
       rofl::cmemory mem(msg->length() < 64 ? msg->length() : 64);
@@ -1083,9 +1097,10 @@ void crofconn::handle_recv(crofsock &socket, rofl::openflow::cofmsg *msg) {
         rxqueues[QUEUE_PKT].store(msg, true);
         if (rxqueues[QUEUE_PKT].capacity() == 0) {
           if (not rofsock.is_rx_disabled()) {
-            VLOG(2) << __FUNCTION__ << " rxqueues[QUEUE_PKT] capacity "
-                                       "exhausted; action: disabling "
-                                       "reception of messages";
+            VLOG(2) << __FUNCTION__
+                    << " rxqueues[QUEUE_PKT] capacity "
+                       "exhausted; action: disabling "
+                       "reception of messages";
           }
           rofsock.rx_disable();
         }
@@ -1099,9 +1114,10 @@ void crofconn::handle_recv(crofsock &socket, rofl::openflow::cofmsg *msg) {
         rxqueues[QUEUE_FLOW].store(msg, true);
         if (rxqueues[QUEUE_FLOW].capacity() == 0) {
           if (not rofsock.is_rx_disabled()) {
-            VLOG(2) << __FUNCTION__ << " rxqueues[QUEUE_FLOW] capacity "
-                                       "exhausted; action: disabling "
-                                       "reception of messages";
+            VLOG(2) << __FUNCTION__
+                    << " rxqueues[QUEUE_FLOW] capacity "
+                       "exhausted; action: disabling "
+                       "reception of messages";
           }
           rofsock.rx_disable();
         }
@@ -1112,9 +1128,10 @@ void crofconn::handle_recv(crofsock &socket, rofl::openflow::cofmsg *msg) {
         rxqueues[QUEUE_OAM].store(msg, true);
         if (rxqueues[QUEUE_OAM].capacity() == 0) {
           if (not rofsock.is_rx_disabled()) {
-            VLOG(2) << __FUNCTION__ << " rxqueues[QUEUE_OAM] capacity "
-                                       "exhausted; action: disabling "
-                                       "reception of messages";
+            VLOG(2) << __FUNCTION__
+                    << " rxqueues[QUEUE_OAM] capacity "
+                       "exhausted; action: disabling "
+                       "reception of messages";
           }
           rofsock.rx_disable();
         }
@@ -1124,9 +1141,10 @@ void crofconn::handle_recv(crofsock &socket, rofl::openflow::cofmsg *msg) {
 
         if (rxqueues[QUEUE_MGMT].capacity() == 0) {
           if (not rofsock.is_rx_disabled()) {
-            VLOG(2) << __FUNCTION__ << " rxqueues[QUEUE_MGMT] capacity "
-                                       "exhausted; action: disabling "
-                                       "reception of messages";
+            VLOG(2) << __FUNCTION__
+                    << " rxqueues[QUEUE_MGMT] capacity "
+                       "exhausted; action: disabling "
+                       "reception of messages";
           }
           rofsock.rx_disable();
         }
@@ -1140,9 +1158,10 @@ void crofconn::handle_recv(crofsock &socket, rofl::openflow::cofmsg *msg) {
         rxqueues[QUEUE_PKT].store(msg, true);
         if (rxqueues[QUEUE_PKT].capacity() == 0) {
           if (not rofsock.is_rx_disabled()) {
-            VLOG(2) << __FUNCTION__ << " rxqueues[QUEUE_PKT] capacity "
-                                       "exhausted; action: disabling "
-                                       "reception of messages";
+            VLOG(2) << __FUNCTION__
+                    << " rxqueues[QUEUE_PKT] capacity "
+                       "exhausted; action: disabling "
+                       "reception of messages";
           }
           rofsock.rx_disable();
         }
@@ -1159,9 +1178,10 @@ void crofconn::handle_recv(crofsock &socket, rofl::openflow::cofmsg *msg) {
         rxqueues[QUEUE_FLOW].store(msg, true);
         if (rxqueues[QUEUE_FLOW].capacity() == 0) {
           if (not rofsock.is_rx_disabled()) {
-            VLOG(2) << __FUNCTION__ << " rxqueues[QUEUE_FLOW] capacity "
-                                       "exhausted; action: disabling "
-                                       "reception of messages";
+            VLOG(2) << __FUNCTION__
+                    << " rxqueues[QUEUE_FLOW] capacity "
+                       "exhausted; action: disabling "
+                       "reception of messages";
           }
           rofsock.rx_disable();
         }
@@ -1172,9 +1192,10 @@ void crofconn::handle_recv(crofsock &socket, rofl::openflow::cofmsg *msg) {
         rxqueues[QUEUE_OAM].store(msg, true);
         if (rxqueues[QUEUE_OAM].capacity() == 0) {
           if (not rofsock.is_rx_disabled()) {
-            VLOG(2) << __FUNCTION__ << " rxqueues[QUEUE_OAM] capacity "
-                                       "exhausted; action: disabling "
-                                       "reception of messages";
+            VLOG(2) << __FUNCTION__
+                    << " rxqueues[QUEUE_OAM] capacity "
+                       "exhausted; action: disabling "
+                       "reception of messages";
           }
           rofsock.rx_disable();
         }
@@ -1183,9 +1204,10 @@ void crofconn::handle_recv(crofsock &socket, rofl::openflow::cofmsg *msg) {
         rxqueues[QUEUE_MGMT].store(msg, true);
         if (rxqueues[QUEUE_MGMT].capacity() == 0) {
           if (not rofsock.is_rx_disabled()) {
-            VLOG(2) << __FUNCTION__ << " rxqueues[QUEUE_MGMT] capacity "
-                                       "exhausted; action: disabling "
-                                       "reception of messages";
+            VLOG(2) << __FUNCTION__
+                    << " rxqueues[QUEUE_MGMT] capacity "
+                       "exhausted; action: disabling "
+                       "reception of messages";
           }
           rofsock.rx_disable();
         }
@@ -1199,9 +1221,10 @@ void crofconn::handle_recv(crofsock &socket, rofl::openflow::cofmsg *msg) {
         rxqueues[QUEUE_PKT].store(msg, true);
         if (rxqueues[QUEUE_PKT].capacity() == 0) {
           if (not rofsock.is_rx_disabled()) {
-            VLOG(2) << __FUNCTION__ << " rxqueues[QUEUE_PKT] capacity "
-                                       "exhausted; action: disabling "
-                                       "reception of messages";
+            VLOG(2) << __FUNCTION__
+                    << " rxqueues[QUEUE_PKT] capacity "
+                       "exhausted; action: disabling "
+                       "reception of messages";
           }
           rofsock.rx_disable();
         }
@@ -1218,9 +1241,10 @@ void crofconn::handle_recv(crofsock &socket, rofl::openflow::cofmsg *msg) {
         rxqueues[QUEUE_FLOW].store(msg, true);
         if (rxqueues[QUEUE_FLOW].capacity() == 0) {
           if (not rofsock.is_rx_disabled()) {
-            VLOG(2) << __FUNCTION__ << " rxqueues[QUEUE_FLOW] capacity "
-                                       "exhausted; action: disabling "
-                                       "reception of messages";
+            VLOG(2) << __FUNCTION__
+                    << " rxqueues[QUEUE_FLOW] capacity "
+                       "exhausted; action: disabling "
+                       "reception of messages";
           }
           rofsock.rx_disable();
         }
@@ -1231,9 +1255,10 @@ void crofconn::handle_recv(crofsock &socket, rofl::openflow::cofmsg *msg) {
         rxqueues[QUEUE_OAM].store(msg, true);
         if (rxqueues[QUEUE_OAM].capacity() == 0) {
           if (not rofsock.is_rx_disabled()) {
-            VLOG(2) << __FUNCTION__ << " rxqueues[QUEUE_OAM] capacity "
-                                       "exhausted; action: disabling "
-                                       "reception of messages";
+            VLOG(2) << __FUNCTION__
+                    << " rxqueues[QUEUE_OAM] capacity "
+                       "exhausted; action: disabling "
+                       "reception of messages";
           }
           rofsock.rx_disable();
         }
@@ -1241,9 +1266,10 @@ void crofconn::handle_recv(crofsock &socket, rofl::openflow::cofmsg *msg) {
       default: {
         rxqueues[QUEUE_MGMT].store(msg, true);
         if (rxqueues[QUEUE_MGMT].capacity() == 0) {
-          VLOG(2) << __FUNCTION__ << " rxqueues[QUEUE_MGMT] capacity "
-                                     "exhausted; action: disabling "
-                                     "reception of messages";
+          VLOG(2) << __FUNCTION__
+                  << " rxqueues[QUEUE_MGMT] capacity "
+                     "exhausted; action: disabling "
+                     "reception of messages";
           rofsock.rx_disable();
         }
       };
@@ -1268,7 +1294,7 @@ void crofconn::handle_recv(crofsock &socket, rofl::openflow::cofmsg *msg) {
   }
 }
 
-void crofconn::handle_wakeup(cthread &thread) {
+void crofconn::handle_wakeup(__attribute__((unused)) cthread &thread) {
   if (flag_test(FLAG_DELETE_IN_PROGRESS))
     return;
   handle_rx_messages();
@@ -1638,9 +1664,9 @@ crofconn::segment_and_send_message(rofl::openflow::cofmsg *msg) {
         } break;
         case rofl::openflow13::OFPMP_METER_FEATURES: {
           // no array in meter-features, so no need to segment
-          msg_result = rofsock.send_message(
-              msg); // default behaviour for now: send message
-                    // directly to rofsock
+          msg_result =
+              rofsock.send_message(msg); // default behaviour for now: send
+                                         // message directly to rofsock
         } break;
         }
 

@@ -331,14 +331,12 @@ struct ofp_packet_in {
   uint16_t total_len; /* Full length of frame. */
   uint16_t in_port;   /* Port on which frame was received. */
   uint8_t reason;     /* Reason packet is being sent (one of OFPR_*) */
-  uint8_t pad;
-  uint8_t data
-      [0]; /* Ethernet frame, halfway through 32-bit word,
-                                      so the IP header is 32-bit aligned.  The
-                                      amount of data is inferred from the length
-                                      field in the header.  Because of padding,
-                                      offsetof(struct ofp_packet_in, data) ==
-                                      sizeof(struct ofp_packet_in) - 2. */
+  uint8_t pad;        /* Padding */
+  uint8_t data[0];    /* Ethernet frame, halfway through 32-bit word, so the IP
+                         header is 32-bit aligned. The amount of data is inferred
+                         from the length field in the header. Because of padding,
+                         offsetof(struct ofp_packet_in, data) == sizeof(struct
+                         ofp_packet_in) - 2. */
 };
 OFP_ASSERT(sizeof(struct ofp_packet_in) == 20);
 
@@ -368,12 +366,8 @@ enum ofp_action_type {
  * NB: The length of an action *must* always be a multiple of eight. */
 struct ofp_action_header {
   uint16_t type; /* One of OFPAT_*. */
-  uint16_t len;  /* Length of action, including this
-                                                    header.  This is the length
-                    of action,
-                                                    including any padding to make
-                    it
-                                                    64-bit aligned. */
+  uint16_t len;  /* Length of action, including this header.  This is the length
+               of action, including any padding to make it 64-bit aligned. */
   uint8_t pad[4];
 };
 OFP_ASSERT(sizeof(struct ofp_action_header) == 8);
@@ -554,7 +548,7 @@ struct ofp_match {
   uint16_t dl_type;             /* Ethernet frame type. */
   uint8_t nw_tos;               /* IP ToS (actually DSCP field, 6 bits). */
   uint8_t nw_proto;             /* IP protocol or lower 8 bits of
-                                                             * ARP opcode. */
+                                 * ARP opcode. */
   uint8_t pad2[2];              /* Align to 64-bits */
   uint32_t nw_src;              /* IP source address. */
   uint32_t nw_dst;              /* IP destination address. */
@@ -673,7 +667,7 @@ enum ofp_bad_request_code {
   OFPBRC_BAD_TYPE,      /* ofp_header.type not supported. */
   OFPBRC_BAD_STAT,      /* ofp_stats_request.type not supported. */
   OFPBRC_BAD_VENDOR,    /* Vendor not supported (in ofp_vendor_header
-                                                     * or ofp_stats_request or
+                         * or ofp_stats_request or
                          * ofp_stats_reply). */
   OFPBRC_BAD_SUBTYPE,   /* Vendor subtype not supported. */
   OFPBRC_EPERM,         /* Permissions error. */
@@ -701,13 +695,13 @@ enum ofp_bad_action_code {
 enum ofp_flow_mod_failed_code {
   OFPFMFC_ALL_TABLES_FULL,   /* Flow not added because of full tables. */
   OFPFMFC_OVERLAP,           /* Attempted to add overlapping flow with
-                                                          * CHECK_OVERLAP flag set. */
+                              * CHECK_OVERLAP flag set. */
   OFPFMFC_EPERM,             /* Permissions error. */
   OFPFMFC_BAD_EMERG_TIMEOUT, /* Flow not added because of non-zero idle/hard
-                                                          * timeout. */
+                              * timeout. */
   OFPFMFC_BAD_COMMAND,       /* Unknown command. */
   OFPFMFC_UNSUPPORTED        /* Unsupported action list - cannot process in
-                                                          * the order specified. */
+                              * the order specified. */
 };
 
 /* ofp_error_msg 'code' values for OFPET_PORT_MOD_FAILED.  'data' contains
@@ -873,11 +867,11 @@ OFP_ASSERT(sizeof(struct ofp_table_stats) == 64);
 /* Body for ofp_stats_request of type OFPST_PORT. */
 struct ofp_port_stats_request {
   uint16_t port_no; /* OFPST_PORT message must request statistics
-                                             * either for a single port
+                     * either for a single port
                      * (specified in
-                                             * port_no) or for all ports (if
+                     * port_no) or for all ports (if
                      * port_no ==
-                                             * OFPP_NONE). */
+                     * OFPP_NONE). */
   uint8_t pad[6];
 };
 OFP_ASSERT(sizeof(struct ofp_port_stats_request) == 8);
@@ -925,11 +919,11 @@ OFP_ASSERT(sizeof(struct ofp_vendor_stats_header) == 4);
 struct ofp_vendor_header {
   struct ofp_header header; /* Type OFPT_VENDOR. */
   uint32_t vendor;          /* Vendor ID:
-                                                         * - MSB 0: low-order bytes are
+                             * - MSB 0: low-order bytes are
                              * IEEE OUI.
-                                                         * - MSB != 0: defined by
+                             * - MSB != 0: defined by
                              * OpenFlow
-                                                         *   consortium. */
+                             *   consortium. */
   /* Vendor-defined arbitrary additional data. */
   uint8_t body[0];
 };

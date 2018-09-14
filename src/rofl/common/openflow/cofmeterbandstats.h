@@ -57,7 +57,7 @@ public:
   /**
    *
    */
-  const bool operator==(const cofmeter_band_stats &mbs) const;
+  bool operator==(const cofmeter_band_stats &mbs) const;
 
 public:
   /**

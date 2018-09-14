@@ -46,7 +46,7 @@ public:
   /**
    *
    */
-  const bool operator==(const cofmeter_bands &mbands);
+  bool operator==(const cofmeter_bands &mbands);
 
 public:
   /**

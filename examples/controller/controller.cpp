@@ -16,7 +16,8 @@ controller::~controller() {}
 
 controller::controller() : dptid(0) {}
 
-int controller::run(int argc, char **argv) {
+int controller::run(__attribute__((unused)) int argc,
+                    __attribute__((unused)) char **argv) {
   /* rofl-common supports OpenFlow versions 1.0, 1.2 and 1.3
    * Specify acceptable versions in a versionbitmap element
    * and update the element stored in base class rofl::crofbase */
@@ -119,7 +120,8 @@ void controller::handle_dpt_open(rofl::crofdpt &dpt) {
   (void)const_reference_to_dpt;
 }
 
-void controller::handle_dpt_close(const rofl::cdptid &dptid) {
+void controller::handle_dpt_close(__attribute__((unused))
+                                  const rofl::cdptid &dptid) {
   std::cerr << "EVENT: datapath detached" << std::endl;
 
   /* Don't access rofl::crofdpt instance referenced by 'dptid'
@@ -210,7 +212,8 @@ void controller::handle_conn_established(rofl::crofdpt &dpt,
   }
 }
 
-void controller::handle_conn_terminated(rofl::crofdpt &dpt,
+void controller::handle_conn_terminated(__attribute__((unused))
+                                        rofl::crofdpt &dpt,
                                         const rofl::cauxid &auxid) {
   std::cerr << "EVENT: connection terminated, auxid:" << (int)auxid.get_id()
             << std::endl;
@@ -236,7 +239,8 @@ void controller::handle_conn_terminated(rofl::crofdpt &dpt,
    */
 }
 
-void controller::handle_conn_congestion_occurred(rofl::crofdpt &dpt,
+void controller::handle_conn_congestion_occurred(__attribute__((unused))
+                                                 rofl::crofdpt &dpt,
                                                  const rofl::cauxid &auxid) {
   std::cerr << "EVENT: congestion occurred, auxid:" << (int)auxid.get_id()
             << std::endl;
@@ -260,7 +264,8 @@ void controller::handle_conn_congestion_occurred(rofl::crofdpt &dpt,
    * exceptions properly. */
 }
 
-void controller::handle_conn_congestion_solved(rofl::crofdpt &dpt,
+void controller::handle_conn_congestion_solved(__attribute__((unused))
+                                               rofl::crofdpt &dpt,
                                                const rofl::cauxid &auxid) {
   std::cerr << "EVENT: congestion resolved, auxid:" << (int)auxid.get_id()
             << std::endl;
@@ -273,7 +278,8 @@ void controller::handle_conn_congestion_solved(rofl::crofdpt &dpt,
 }
 
 void controller::handle_features_reply(
-    rofl::crofdpt &dpt, const rofl::cauxid &auxid,
+    __attribute__((unused)) rofl::crofdpt &dpt,
+    __attribute__((unused)) const rofl::cauxid &auxid,
     rofl::openflow::cofmsg_features_reply &msg) {
   /* rolf-common abstracts all OpenFlow messages in C++ classes
    * for simple and easy handling of their content.
@@ -335,7 +341,8 @@ void controller::handle_features_reply(
   (void)ports;
 }
 
-void controller::handle_features_reply_timeout(rofl::crofdpt &dpt,
+void controller::handle_features_reply_timeout(__attribute__((unused))
+                                               rofl::crofdpt &dpt,
                                                uint32_t xid) {
   /* rofl-common maintains timers for pending requests and provides
    * notification methods indicating timer expirations. Overwrite
@@ -347,8 +354,8 @@ void controller::handle_features_reply_timeout(rofl::crofdpt &dpt,
 }
 
 void controller::handle_get_config_reply(
-    rofl::crofdpt &dpt, const rofl::cauxid &auxid,
-    rofl::openflow::cofmsg_get_config_reply &msg) {
+    rofl::crofdpt &dpt, __attribute__((unused)) const rofl::cauxid &auxid,
+    __attribute__((unused)) rofl::openflow::cofmsg_get_config_reply &msg) {
   // the OpenFlow configuration flags, ...
   std::cerr << "configuration flags: " << (unsigned int)dpt.get_flags()
             << std::endl;
@@ -358,7 +365,8 @@ void controller::handle_get_config_reply(
             << std::endl;
 }
 
-void controller::handle_get_config_reply_timeout(rofl::crofdpt &dpt,
+void controller::handle_get_config_reply_timeout(__attribute__((unused))
+                                                 rofl::crofdpt &dpt,
                                                  uint32_t xid) {
   /* rofl-common maintains timers for pending requests and provides
    * notification methods indicating timer expirations. Overwrite
@@ -370,7 +378,7 @@ void controller::handle_get_config_reply_timeout(rofl::crofdpt &dpt,
 }
 
 void controller::handle_port_desc_stats_reply(
-    rofl::crofdpt &dpt, const rofl::cauxid &auxid,
+    rofl::crofdpt &dpt, __attribute__((unused)) const rofl::cauxid &auxid,
     rofl::openflow::cofmsg_port_desc_stats_reply &msg) {
   std::cerr << "port description received; " << dpt.get_ports() << std::endl;
 
@@ -477,32 +485,35 @@ void controller::handle_port_desc_stats_reply(
   (void)an_existing_port;
 }
 
-void controller::handle_port_desc_stats_reply_timeout(rofl::crofdpt &dpt,
+void controller::handle_port_desc_stats_reply_timeout(__attribute__((unused))
+                                                      rofl::crofdpt &dpt,
                                                       uint32_t xid) {
   std::cerr << "Port-Desc-Stats timeout occurred, xid: " << (unsigned int)xid
             << std::endl;
 }
 
 void controller::handle_table_features_stats_reply(
-    rofl::crofdpt &dpt, const rofl::cauxid &auxid,
+    rofl::crofdpt &dpt, __attribute__((unused)) const rofl::cauxid &auxid,
+    __attribute__((unused))
     rofl::openflow::cofmsg_table_features_stats_reply &msg) {
   std::cerr << "Table-Features-Stats received; " << dpt.get_tables()
             << std::endl;
 }
 
-void controller::handle_table_features_stats_reply_timeout(rofl::crofdpt &dpt,
-                                                           uint32_t xid) {
+void controller::handle_table_features_stats_reply_timeout(
+    __attribute__((unused)) rofl::crofdpt &dpt, uint32_t xid) {
   std::cerr << "Table-Features-Stats timeout occurred, xid: "
             << (unsigned int)xid << std::endl;
 }
 
 void controller::handle_table_stats_reply(
-    rofl::crofdpt &dpt, const rofl::cauxid &auxid,
-    rofl::openflow::cofmsg_table_stats_reply &msg) {
+    rofl::crofdpt &dpt, __attribute__((unused)) const rofl::cauxid &auxid,
+    __attribute__((unused)) rofl::openflow::cofmsg_table_stats_reply &msg) {
   std::cerr << "Table-Stats received; " << dpt.get_tables() << std::endl;
 }
 
-void controller::handle_table_stats_reply_timeout(rofl::crofdpt &dpt,
+void controller::handle_table_stats_reply_timeout(__attribute__((unused))
+                                                  rofl::crofdpt &dpt,
                                                   uint32_t xid) {
   std::cerr << "Table-Stats timeout occurred, xid: " << (unsigned int)xid
             << std::endl;

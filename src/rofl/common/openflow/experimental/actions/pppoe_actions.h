@@ -59,9 +59,8 @@ public:
   /**
    *
    */
-  cofaction_exp_body_pppoe(const cofaction_exp_body_pppoe &body) {
-    *this = body;
-  };
+  cofaction_exp_body_pppoe(const cofaction_exp_body_pppoe &body)
+      : cmemory(body) {}
 
   /**
    *
@@ -170,9 +169,8 @@ public:
   /**
    *
    */
-  cofaction_exp_body_push_pppoe(const cofaction_exp_body_push_pppoe &action) {
-    *this = action;
-  };
+  cofaction_exp_body_push_pppoe(const cofaction_exp_body_push_pppoe &action)
+      : cofaction_exp_body_pppoe(action) {}
 
   /**
    *
@@ -259,9 +257,8 @@ public:
   /**
    *
    */
-  cofaction_exp_body_pop_pppoe(const cofaction_exp_body_pop_pppoe &action) {
-    *this = action;
-  };
+  cofaction_exp_body_pop_pppoe(const cofaction_exp_body_pop_pppoe &action)
+      : cofaction_exp_body_pppoe(action) {}
 
   /**
    *

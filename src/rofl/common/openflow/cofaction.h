@@ -172,7 +172,8 @@ public:
   /**
    *
    */
-  cofaction_output(const cofaction_output &action) { *this = action; };
+  cofaction_output(const cofaction_output &action)
+      : cofaction(action), port_no(action.port_no), max_len(action.max_len) {}
 
   /**
    *
@@ -266,9 +267,8 @@ public:
   /**
    *
    */
-  cofaction_set_vlan_vid(const cofaction_set_vlan_vid &action) {
-    *this = action;
-  };
+  cofaction_set_vlan_vid(const cofaction_set_vlan_vid &action)
+      : cofaction(action), vlan_vid(action.vlan_vid) {}
 
   /**
    *
@@ -342,9 +342,8 @@ public:
   /**
    *
    */
-  cofaction_set_vlan_pcp(const cofaction_set_vlan_pcp &action) {
-    *this = action;
-  };
+  cofaction_set_vlan_pcp(const cofaction_set_vlan_pcp &action)
+      : cofaction(action), vlan_pcp(action.vlan_pcp) {}
 
   /**
    *
@@ -416,7 +415,8 @@ public:
   /**
    *
    */
-  cofaction_strip_vlan(const cofaction_strip_vlan &action) { *this = action; };
+  cofaction_strip_vlan(const cofaction_strip_vlan &action)
+      : cofaction(action) {}
 
   /**
    *
@@ -473,7 +473,8 @@ public:
   /**
    *
    */
-  cofaction_set_dl_src(const cofaction_set_dl_src &action) { *this = action; };
+  cofaction_set_dl_src(const cofaction_set_dl_src &action)
+      : cofaction(action), macaddr(action.macaddr) {}
 
   /**
    *
@@ -551,7 +552,8 @@ public:
   /**
    *
    */
-  cofaction_set_dl_dst(const cofaction_set_dl_dst &action) { *this = action; };
+  cofaction_set_dl_dst(const cofaction_set_dl_dst &action)
+      : cofaction(action), macaddr(action.macaddr) {}
 
   /**
    *
@@ -628,7 +630,8 @@ public:
   /**
    *
    */
-  cofaction_set_nw_src(const cofaction_set_nw_src &action) { *this = action; };
+  cofaction_set_nw_src(const cofaction_set_nw_src &action)
+      : cofaction(action), addr(action.addr) {}
 
   /**
    *
@@ -705,7 +708,8 @@ public:
   /**
    *
    */
-  cofaction_set_nw_dst(const cofaction_set_nw_dst &action) { *this = action; };
+  cofaction_set_nw_dst(const cofaction_set_nw_dst &action)
+      : cofaction(action), addr(action.addr) {}
 
   /**
    *
@@ -783,7 +787,8 @@ public:
   /**
    *
    */
-  cofaction_set_nw_tos(const cofaction_set_nw_tos &action) { *this = action; };
+  cofaction_set_nw_tos(const cofaction_set_nw_tos &action)
+      : cofaction(action), nw_tos(action.nw_tos) {}
 
   /**
    *
@@ -857,7 +862,8 @@ public:
   /**
    *
    */
-  cofaction_set_tp_src(const cofaction_set_tp_src &action) { *this = action; };
+  cofaction_set_tp_src(const cofaction_set_tp_src &action)
+      : cofaction(action), tp_src(action.tp_src) {}
 
   /**
    *
@@ -930,7 +936,8 @@ public:
   /**
    *
    */
-  cofaction_set_tp_dst(const cofaction_set_tp_dst &action) { *this = action; };
+  cofaction_set_tp_dst(const cofaction_set_tp_dst &action)
+      : cofaction(action), tp_dst(action.tp_dst) {}
 
   /**
    *
@@ -1002,7 +1009,8 @@ public:
   /**
    *
    */
-  cofaction_enqueue(const cofaction_enqueue &action) { *this = action; };
+  cofaction_enqueue(const cofaction_enqueue &action)
+      : cofaction(action), port_no(action.port_no), queue_id(action.queue_id) {}
 
   /**
    *
@@ -1087,7 +1095,8 @@ public:
   /**
    *
    */
-  cofaction_vendor(const cofaction_vendor &action) { *this = action; };
+  cofaction_vendor(const cofaction_vendor &action)
+      : cofaction(action), exp_id(action.exp_id), exp_body(action.exp_body) {}
 
   /**
    *
@@ -1172,9 +1181,8 @@ public:
   /**
    *
    */
-  cofaction_copy_ttl_out(const cofaction_copy_ttl_out &action) {
-    *this = action;
-  };
+  cofaction_copy_ttl_out(const cofaction_copy_ttl_out &action)
+      : cofaction(action) {}
 
   /**
    *
@@ -1229,9 +1237,8 @@ public:
   /**
    *
    */
-  cofaction_copy_ttl_in(const cofaction_copy_ttl_in &action) {
-    *this = action;
-  };
+  cofaction_copy_ttl_in(const cofaction_copy_ttl_in &action)
+      : cofaction(action) {}
 
   /**
    *
@@ -1288,9 +1295,8 @@ public:
   /**
    *
    */
-  cofaction_set_mpls_ttl(const cofaction_set_mpls_ttl &action) {
-    *this = action;
-  };
+  cofaction_set_mpls_ttl(const cofaction_set_mpls_ttl &action)
+      : cofaction(action), mpls_ttl(action.mpls_ttl) {}
 
   /**
    *
@@ -1362,9 +1368,8 @@ public:
   /**
    *
    */
-  cofaction_dec_mpls_ttl(const cofaction_dec_mpls_ttl &action) {
-    *this = action;
-  };
+  cofaction_dec_mpls_ttl(const cofaction_dec_mpls_ttl &action)
+      : cofaction(action) {}
 
   /**
    *
@@ -1420,7 +1425,8 @@ public:
   /**
    *
    */
-  cofaction_push_vlan(const cofaction_push_vlan &action) { *this = action; };
+  cofaction_push_vlan(const cofaction_push_vlan &action)
+      : cofaction(action), eth_type(action.eth_type) {}
 
   /**
    *
@@ -1491,7 +1497,7 @@ public:
   /**
    *
    */
-  cofaction_pop_vlan(const cofaction_pop_vlan &action) { *this = action; };
+  cofaction_pop_vlan(const cofaction_pop_vlan &action) : cofaction(action) {}
 
   /**
    *
@@ -1547,7 +1553,8 @@ public:
   /**
    *
    */
-  cofaction_push_mpls(const cofaction_push_mpls &action) { *this = action; };
+  cofaction_push_mpls(const cofaction_push_mpls &action)
+      : cofaction(action), eth_type(action.eth_type) {}
 
   /**
    *
@@ -1620,7 +1627,8 @@ public:
   /**
    *
    */
-  cofaction_pop_mpls(const cofaction_pop_mpls &action) { *this = action; };
+  cofaction_pop_mpls(const cofaction_pop_mpls &action)
+      : cofaction(action), eth_type(action.eth_type) {}
 
   /**
    *
@@ -1693,7 +1701,8 @@ public:
   /**
    *
    */
-  cofaction_group(const cofaction_group &action) { *this = action; };
+  cofaction_group(const cofaction_group &action)
+      : cofaction(action), group_id(action.group_id) {}
 
   /**
    *
@@ -1767,7 +1776,8 @@ public:
   /**
    *
    */
-  cofaction_set_nw_ttl(const cofaction_set_nw_ttl &action) { *this = action; };
+  cofaction_set_nw_ttl(const cofaction_set_nw_ttl &action)
+      : cofaction(action), nw_ttl(action.nw_ttl) {}
 
   /**
    *
@@ -1838,7 +1848,8 @@ public:
   /**
    *
    */
-  cofaction_dec_nw_ttl(const cofaction_dec_nw_ttl &action) { *this = action; };
+  cofaction_dec_nw_ttl(const cofaction_dec_nw_ttl &action)
+      : cofaction(action) {}
 
   /**
    *
@@ -1894,7 +1905,8 @@ public:
   /**
    *
    */
-  cofaction_set_queue(const cofaction_set_queue &action) { *this = action; };
+  cofaction_set_queue(const cofaction_set_queue &action)
+      : cofaction(action), queue_id(action.queue_id) {}
 
   /**
    *
@@ -1981,10 +1993,10 @@ public:
    *
    */
   cofaction_set_field(const cofaction_set_field &action)
-      : oxm_set_field_type(OXM_TYPE_UNKNOWN), oxm_8(0), oxm_16(0), oxm_24(0),
-        oxm_32(0), oxm_48(0), oxm_64(0), oxm_128(0) {
-    *this = action;
-  };
+      : cofaction(action), oxm_set_field_type(action.oxm_set_field_type),
+        oxm_8(action.oxm_8), oxm_16(action.oxm_16), oxm_24(action.oxm_24),
+        oxm_32(action.oxm_32), oxm_48(action.oxm_48), oxm_64(action.oxm_64),
+        oxm_128(action.oxm_128), oxm_exp(action.oxm_exp) {}
 
   /**
    *
@@ -2426,9 +2438,8 @@ public:
   /**
    *
    */
-  cofaction_experimenter(const cofaction_experimenter &action) {
-    *this = action;
-  };
+  cofaction_experimenter(const cofaction_experimenter &action)
+      : cofaction(action), exp_id(action.exp_id), exp_body(action.exp_body) {}
 
   /**
    *
@@ -2518,7 +2529,8 @@ public:
   /**
    *
    */
-  cofaction_push_pbb(const cofaction_push_pbb &action) { *this = action; };
+  cofaction_push_pbb(const cofaction_push_pbb &action)
+      : cofaction(action), eth_type(action.eth_type) {}
 
   /**
    *
@@ -2589,7 +2601,7 @@ public:
   /**
    *
    */
-  cofaction_pop_pbb(const cofaction_pop_pbb &action) { *this = action; };
+  cofaction_pop_pbb(const cofaction_pop_pbb &action) : cofaction(action) {}
 
   /**
    *

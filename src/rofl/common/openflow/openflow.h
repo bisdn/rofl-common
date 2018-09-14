@@ -31,7 +31,7 @@ public:
 
   static uint8_t get_ofptt_all(uint8_t ofp_version);
 };
-};
-};
+}; // namespace openflow
+}; // namespace rofl
 
 #endif /* OPENFLOW_H_ */

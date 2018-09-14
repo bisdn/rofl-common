@@ -18,9 +18,8 @@ cofmsg_table_features_stats_request::cofmsg_table_features_stats_request(
 }
 
 cofmsg_table_features_stats_request::cofmsg_table_features_stats_request(
-    const cofmsg_table_features_stats_request &msg) {
-  *this = msg;
-}
+    const cofmsg_table_features_stats_request &msg)
+    : cofmsg_stats_request(msg), tables(msg.tables) {}
 
 cofmsg_table_features_stats_request &cofmsg_table_features_stats_request::
 operator=(const cofmsg_table_features_stats_request &msg) {
@@ -106,9 +105,8 @@ cofmsg_table_features_stats_reply::cofmsg_table_features_stats_reply(
 }
 
 cofmsg_table_features_stats_reply::cofmsg_table_features_stats_reply(
-    const cofmsg_table_features_stats_reply &msg) {
-  *this = msg;
-}
+    const cofmsg_table_features_stats_reply &msg)
+    : cofmsg_stats_reply(msg), tables(msg.tables) {}
 
 cofmsg_table_features_stats_reply &cofmsg_table_features_stats_reply::
 operator=(const cofmsg_table_features_stats_reply &msg) {

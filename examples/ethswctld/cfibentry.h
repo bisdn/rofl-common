@@ -160,9 +160,11 @@ private:
    * @see rofl::ciosrv
    */
   void handle_timeout(cthread &thread, uint32_t timer_id) override;
-  void handle_read_event(cthread &thread, int fd) override {}
-  void handle_write_event(cthread &thread, int fd) override {}
-  void handle_wakeup(cthread &thread) override {}
+  void handle_read_event(__attribute__((unused)) cthread &thread,
+                         __attribute__((unused)) int fd) override {}
+  void handle_write_event(__attribute__((unused)) cthread &thread,
+                          __attribute__((unused)) int fd) override {}
+  void handle_wakeup(__attribute__((unused)) cthread &thread) override {}
 
 public:
   /**

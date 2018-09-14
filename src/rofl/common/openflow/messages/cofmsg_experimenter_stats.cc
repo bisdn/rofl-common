@@ -23,9 +23,9 @@ cofmsg_experimenter_stats_request::cofmsg_experimenter_stats_request(
 }
 
 cofmsg_experimenter_stats_request::cofmsg_experimenter_stats_request(
-    const cofmsg_experimenter_stats_request &msg) {
-  *this = msg;
-}
+    const cofmsg_experimenter_stats_request &msg)
+    : cofmsg_stats_request(msg), exp_id(msg.exp_id), exp_type(msg.exp_type),
+      exp_body(msg.exp_body) {}
 
 cofmsg_experimenter_stats_request &cofmsg_experimenter_stats_request::
 operator=(const cofmsg_experimenter_stats_request &msg) {
@@ -172,9 +172,9 @@ cofmsg_experimenter_stats_reply::cofmsg_experimenter_stats_reply(
 }
 
 cofmsg_experimenter_stats_reply::cofmsg_experimenter_stats_reply(
-    const cofmsg_experimenter_stats_reply &msg) {
-  *this = msg;
-}
+    const cofmsg_experimenter_stats_reply &msg)
+    : cofmsg_stats_reply(msg), exp_id(msg.exp_id), exp_type(msg.exp_type),
+      exp_body(msg.exp_body) {}
 
 cofmsg_experimenter_stats_reply &cofmsg_experimenter_stats_reply::
 operator=(const cofmsg_experimenter_stats_reply &msg) {

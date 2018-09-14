@@ -41,7 +41,9 @@ public:
   /**
    *
    */
-  cofmsg_barrier_request(const cofmsg_barrier_request &msg) { *this = msg; };
+  cofmsg_barrier_request(const cofmsg_barrier_request &msg) : cofmsg(msg) {
+    body = msg.body;
+  };
 
   /**
    *
@@ -128,7 +130,8 @@ public:
   /**
    *
    */
-  cofmsg_barrier_reply(const cofmsg_barrier_reply &msg) { *this = msg; };
+  cofmsg_barrier_reply(const cofmsg_barrier_reply &msg)
+      : cofmsg(msg), body(msg.body) {}
 
   /**
    *

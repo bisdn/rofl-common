@@ -45,7 +45,13 @@ public:
   /**
    *
    */
-  cofmsg_flow_removed(const cofmsg_flow_removed &msg) { *this = msg; };
+  cofmsg_flow_removed(const cofmsg_flow_removed &msg)
+      : cofmsg(msg), cookie(msg.cookie), priority(msg.priority),
+        reason(msg.reason), table_id(msg.table_id),
+        duration_sec(msg.duration_sec), duration_nsec(msg.duration_nsec),
+        idle_timeout(msg.idle_timeout), hard_timeout(msg.hard_timeout),
+        packet_count(msg.packet_count), byte_count(msg.byte_count),
+        match(msg.match) {}
 
   /**
    *

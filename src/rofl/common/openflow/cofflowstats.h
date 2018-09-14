@@ -648,7 +648,7 @@ private:
   cofinstructions instructions; // since OF1.2
 };
 
-} /* end of namespace */
-} /* end of namespace */
+} // namespace openflow
+} // namespace rofl
 
 #endif /* ROFL_COMMON_OPENFLOW_COFFLOWSTATS_H */

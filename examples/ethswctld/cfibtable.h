@@ -295,7 +295,8 @@ private:
   /**
    * @brief	Called when a cfibentry's assigned port has changed.
    */
-  virtual void fib_port_update(const cfibentry &entry){};
+  virtual void fib_port_update(__attribute__((unused)) const cfibentry &entry) {
+  }
 
 public:
   /**

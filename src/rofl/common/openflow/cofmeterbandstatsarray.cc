@@ -36,7 +36,7 @@ operator=(const cofmeter_band_stats_array &mbs) {
   return *this;
 }
 
-const bool cofmeter_band_stats_array::
+bool cofmeter_band_stats_array::
 operator==(const cofmeter_band_stats_array &mbs) const {
   if (array.size() != mbs.array.size())
     return false;
@@ -85,7 +85,7 @@ cofmeter_band_stats_array::get_mbstats(unsigned int index) const {
   return array.at(index);
 }
 
-const bool cofmeter_band_stats_array::has_mbstats(unsigned int index) const {
+bool cofmeter_band_stats_array::has_mbstats(unsigned int index) const {
   return (not(array.find(index) == array.end()));
 }
 

@@ -279,7 +279,7 @@ void cthread::add_fd(cthread_env *env, int fd, bool exception,
   if (fds.find(fd) != fds.end())
     return;
 
-  uint32_t events = edge_triggered ? EPOLLET : 0;
+  uint32_t events = edge_triggered ? (uint32_t)EPOLLET : 0;
   struct epoll_event epev;
   memset((uint8_t *)&epev, 0, sizeof(struct epoll_event));
   epev.events = events;

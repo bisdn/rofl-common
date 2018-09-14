@@ -44,7 +44,10 @@ public:
   /**
    *
    */
-  cofmsg_packet_in(const cofmsg_packet_in &msg) { *this = msg; };
+  cofmsg_packet_in(const cofmsg_packet_in &msg)
+      : cofmsg(msg), buffer_id(msg.buffer_id), total_len(msg.total_len),
+        in_port(msg.in_port), reason(msg.reason), table_id(msg.table_id),
+        cookie(msg.cookie), match(msg.match), packet(msg.packet) {}
 
   /**
    *

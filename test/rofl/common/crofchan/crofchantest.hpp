@@ -87,46 +87,57 @@ private:
     TIMER_ID_START_SENDING_PACKET_INS = 1,
   };
 
-  virtual void handle_wakeup(rofl::cthread &thread){};
+  virtual void handle_wakeup(__attribute__((unused)) rofl::cthread &thread){};
 
   virtual void handle_timeout(rofl::cthread &thread, uint32_t timer_id);
 
-  virtual void handle_read_event(rofl::cthread &thread, int fd){};
+  virtual void handle_read_event(__attribute__((unused)) rofl::cthread &thread,
+                                 __attribute__((unused)) int fd){};
 
-  virtual void handle_write_event(rofl::cthread &thread, int fd){};
+  virtual void handle_write_event(__attribute__((unused)) rofl::cthread &thread,
+                                  __attribute__((unused)) int fd){};
 
 private:
-  virtual void handle_established(rofl::crofchan &chan, uint8_t ofp_version) {
+  virtual void handle_established(__attribute__((unused)) rofl::crofchan &chan,
+                                  __attribute__((unused)) uint8_t ofp_version) {
     LOG(INFO) << "crofchan::handle_established" << std::endl;
   };
 
-  virtual void handle_closed(rofl::crofchan &chan) {
+  virtual void handle_closed(__attribute__((unused)) rofl::crofchan &chan) {
     LOG(INFO) << "crofchan::handle_closed" << std::endl;
   };
 
   virtual void handle_established(rofl::crofchan &chan, rofl::crofconn &conn,
                                   uint8_t ofp_version);
 
-  virtual void handle_closed(rofl::crofchan &chan, rofl::crofconn &conn) {
+  virtual void handle_closed(__attribute__((unused)) rofl::crofchan &chan,
+                             __attribute__((unused)) rofl::crofconn &conn) {
     LOG(INFO) << "crofchan::handle_closed" << std::endl;
   };
 
-  virtual void handle_connect_refused(rofl::crofchan &chan,
+  virtual void handle_connect_refused(__attribute__((unused))
+                                      rofl::crofchan &chan,
+                                      __attribute__((unused))
                                       rofl::crofconn &conn) {
     LOG(INFO) << "crofchan::handle_connect_refused" << std::endl;
   };
 
-  virtual void handle_connect_failed(rofl::crofchan &chan,
+  virtual void handle_connect_failed(__attribute__((unused))
+                                     rofl::crofchan &chan,
+                                     __attribute__((unused))
                                      rofl::crofconn &conn) {
     LOG(INFO) << "crofchan::handle_connect_failed" << std::endl;
   };
 
-  virtual void handle_accept_failed(rofl::crofchan &chan,
+  virtual void handle_accept_failed(__attribute__((unused))
+                                    rofl::crofchan &chan,
+                                    __attribute__((unused))
                                     rofl::crofconn &conn) {
     LOG(INFO) << "crofchan::handle_accept_failed" << std::endl;
   };
 
-  virtual void handle_negotiation_failed(rofl::crofchan &chan,
+  virtual void handle_negotiation_failed(__attribute__((unused))
+                                         rofl::crofchan &chan,
                                          rofl::crofconn &conn) {
     LOG(INFO) << "crofchan::handle_negotiation_failed: pending_conns: "
               << pending_conns.size() << std::endl;
@@ -143,38 +154,49 @@ private:
   virtual void handle_recv(rofl::crofchan &chan, rofl::crofconn &conn,
                            rofl::openflow::cofmsg *msg);
 
-  virtual uint32_t get_async_xid(rofl::crofchan &chan) { return 0; };
+  virtual uint32_t get_async_xid(__attribute__((unused)) rofl::crofchan &chan) {
+    return 0;
+  };
 
-  virtual uint32_t get_sync_xid(rofl::crofchan &chan, uint8_t msg_type = 0,
+  virtual uint32_t get_sync_xid(__attribute__((unused)) rofl::crofchan &chan,
+                                __attribute__((unused)) uint8_t msg_type = 0,
+                                __attribute__((unused))
                                 uint16_t msg_sub_type = 0) {
     return 0;
   };
 
-  virtual void release_sync_xid(rofl::crofchan &chan, uint32_t xid) {
+  virtual void release_sync_xid(__attribute__((unused)) rofl::crofchan &chan,
+                                __attribute__((unused)) uint32_t xid) {
     LOG(INFO) << "crofchan::release_sync_xid" << std::endl;
   };
 
   virtual void congestion_occurred_indication(rofl::crofchan &chan,
                                               rofl::crofconn &conn);
 
-  virtual void handle_transaction_timeout(rofl::crofchan &chan,
-                                          rofl::crofconn &conn, uint32_t xid,
-                                          uint8_t type, uint16_t sub_type = 0) {
+  virtual void
+  handle_transaction_timeout(__attribute__((unused)) rofl::crofchan &chan,
+                             __attribute__((unused)) rofl::crofconn &conn,
+                             __attribute__((unused)) uint32_t xid,
+                             __attribute__((unused)) uint8_t type,
+                             __attribute__((unused)) uint16_t sub_type = 0) {
     LOG(INFO) << "crofchan::handle_transaction_timeout" << std::endl;
   };
 
 private:
   virtual void handle_established(rofl::crofconn &conn, uint8_t ofp_version);
 
-  virtual void handle_connect_refused(rofl::crofconn &conn) {
+  virtual void handle_connect_refused(__attribute__((unused))
+                                      rofl::crofconn &conn) {
     LOG(INFO) << "crofconn::handle_connect_refused" << std::endl;
   };
 
-  virtual void handle_connect_failed(rofl::crofconn &conn) {
+  virtual void handle_connect_failed(__attribute__((unused))
+                                     rofl::crofconn &conn) {
     LOG(INFO) << "crofconn::handle_connect_failed" << std::endl;
   };
 
-  virtual void handle_accept_failed(rofl::crofconn &conn) {
+  virtual void handle_accept_failed(__attribute__((unused))
+                                    rofl::crofconn &conn) {
     LOG(INFO) << "crofconn::handle_accept_failed" << std::endl;
   };
 
@@ -192,80 +214,100 @@ private:
     CPPUNIT_ASSERT(false);
   };
 
-  virtual void handle_recv(rofl::crofconn &conn, rofl::openflow::cofmsg *msg) {
+  virtual void handle_recv(__attribute__((unused)) rofl::crofconn &conn,
+                           __attribute__((unused))
+                           rofl::openflow::cofmsg *msg) {
     LOG(INFO) << "crofconn::handle_recv" << std::endl;
   };
 
-  virtual void congestion_occurred_indication(rofl::crofconn &conn) {
+  virtual void congestion_occurred_indication(__attribute__((unused))
+                                              rofl::crofconn &conn) {
     LOG(INFO) << "crofconn::congestion_occurred_indication" << std::endl;
   };
 
-  virtual void congestion_solved_indication(rofl::crofconn &conn) {
+  virtual void congestion_solved_indication(__attribute__((unused))
+                                            rofl::crofconn &conn) {
     LOG(INFO) << "crofconn::congestion_solved_indication" << std::endl;
   };
 
-  virtual void handle_transaction_timeout(rofl::crofconn &conn, uint32_t xid,
-                                          uint8_t type, uint16_t sub_type = 0) {
+  virtual void
+  handle_transaction_timeout(__attribute__((unused)) rofl::crofconn &conn,
+                             __attribute__((unused)) uint32_t xid,
+                             __attribute__((unused)) uint8_t type,
+                             __attribute__((unused)) uint16_t sub_type = 0) {
     LOG(INFO) << "crofconn::handle_transaction_timeout" << std::endl;
   };
 
 private:
-  virtual void handle_listen(rofl::crofsock &socket);
+  virtual void handle_listen(__attribute__((unused)) rofl::crofsock &socket);
 
-  virtual void handle_tcp_connect_refused(rofl::crofsock &socket) {
+  virtual void handle_tcp_connect_refused(__attribute__((unused))
+                                          rofl::crofsock &socket) {
     LOG(INFO) << "crofsock::handle_tcp_connect_refused" << std::endl;
   };
 
-  virtual void handle_tcp_connect_failed(rofl::crofsock &socket) {
+  virtual void handle_tcp_connect_failed(__attribute__((unused))
+                                         rofl::crofsock &socket) {
     LOG(INFO) << "crofsock::handle_tcp_connect_failed" << std::endl;
   };
 
-  virtual void handle_tcp_connected(rofl::crofsock &socket) {
+  virtual void handle_tcp_connected(__attribute__((unused))
+                                    rofl::crofsock &socket) {
     LOG(INFO) << "crofsock::handle_tcp_connected" << std::endl;
   };
 
-  virtual void handle_tcp_accept_refused(rofl::crofsock &socket) {
+  virtual void handle_tcp_accept_refused(__attribute__((unused))
+                                         rofl::crofsock &socket) {
     LOG(INFO) << "crofsock::handle_tcp_accept_refused" << std::endl;
   };
 
-  virtual void handle_tcp_accept_failed(rofl::crofsock &socket) {
+  virtual void handle_tcp_accept_failed(__attribute__((unused))
+                                        rofl::crofsock &socket) {
     LOG(INFO) << "crofsock::handle_tcp_accept_failed" << std::endl;
   };
 
-  virtual void handle_tcp_accepted(rofl::crofsock &socket) {
+  virtual void handle_tcp_accepted(__attribute__((unused))
+                                   rofl::crofsock &socket) {
     LOG(INFO) << "crofsock::handle_tcp_accepted" << std::endl;
   };
 
-  virtual void handle_tls_connect_failed(rofl::crofsock &socket) {
+  virtual void handle_tls_connect_failed(__attribute__((unused))
+                                         rofl::crofsock &socket) {
     LOG(INFO) << "crofsock::handle_tls_connect_failed" << std::endl;
   };
 
-  virtual void handle_tls_connected(rofl::crofsock &socket) {
+  virtual void handle_tls_connected(__attribute__((unused))
+                                    rofl::crofsock &socket) {
     LOG(INFO) << "crofsock::handle_tls_connected" << std::endl;
   };
 
-  virtual void handle_tls_accept_failed(rofl::crofsock &socket) {
+  virtual void handle_tls_accept_failed(__attribute__((unused))
+                                        rofl::crofsock &socket) {
     LOG(INFO) << "crofsock::handle_tls_accept_failed" << std::endl;
   };
 
-  virtual void handle_tls_accepted(rofl::crofsock &socket) {
+  virtual void handle_tls_accepted(__attribute__((unused))
+                                   rofl::crofsock &socket) {
     LOG(INFO) << "crofsock::handle_tls_accepted" << std::endl;
   };
 
-  virtual void handle_closed(rofl::crofsock &socket) {
+  virtual void handle_closed(__attribute__((unused)) rofl::crofsock &socket) {
     LOG(INFO) << "crofsock::handle_closed" << std::endl;
   };
 
-  virtual void congestion_solved_indication(rofl::crofsock &socket) {
+  virtual void congestion_solved_indication(__attribute__((unused))
+                                            rofl::crofsock &socket) {
     LOG(INFO) << "congestion_solved_indication" << std::endl;
   };
 
-  virtual void handle_recv(rofl::crofsock &socket,
+  virtual void handle_recv(__attribute__((unused)) rofl::crofsock &socket,
+                           __attribute__((unused))
                            rofl::openflow::cofmsg *msg) {
     LOG(INFO) << "crofsock::handle_recv" << std::endl;
   };
 
-  virtual void congestion_occurred_indication(rofl::crofsock &socket) {
+  virtual void congestion_occurred_indication(__attribute__((unused))
+                                              rofl::crofsock &socket) {
     LOG(INFO) << "crofsock::congestion_occurred_indication" << std::endl;
   };
 };

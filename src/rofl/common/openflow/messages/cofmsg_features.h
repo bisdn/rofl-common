@@ -35,7 +35,7 @@ public:
   /**
    *
    */
-  cofmsg_features_request(const cofmsg_features_request &msg) { *this = msg; };
+  cofmsg_features_request(const cofmsg_features_request &msg) : cofmsg(msg) {}
 
   /**
    *
@@ -91,7 +91,11 @@ public:
   /**
    *
    */
-  cofmsg_features_reply(const cofmsg_features_reply &msg) { *this = msg; };
+  cofmsg_features_reply(const cofmsg_features_reply &msg)
+      : cofmsg(msg), dpid(msg.dpid), n_buffers(msg.n_buffers),
+        n_tables(msg.n_tables), auxid(msg.auxid),
+        capabilities(msg.capabilities), actions(msg.actions), ports(msg.ports) {
+  }
 
   /**
    *

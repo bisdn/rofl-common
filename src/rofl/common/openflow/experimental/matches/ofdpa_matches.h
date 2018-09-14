@@ -11,52 +11,56 @@ namespace ofdpa {
 static uint16_t const OFPXMC_EXPERIMENTER = 0xffff;
 
 enum openflow_exp_ids {
-	EXP_ID_BCM = 0x001018,       // Broadcom
-	ONF_EXP_ID_ONF = 0x4F4E4600, // ONF Extensions
+  EXP_ID_BCM = 0x001018,       // Broadcom
+  ONF_EXP_ID_ONF = 0x4F4E4600, // ONF Extensions
 };
 
 /* OF-DPA Experimenter Match Field types */
 enum oxm_ofx_match_fields_ofdpa {
-	OFPXMT_OFX_OFDPA_VRF = 1,
-	OFPXMT_OFX_OFDPA_TRAFFIC_CLASS = 2,
-	OFPXMT_OFX_OFDPA_COLOR = 3,
-    OFPXMT_OFX_OFDPA_VLAN_DEI = 4,
-    OFPXMT_OFX_OFDPA_QOS_INDEX = 5,
-    OFPXMT_OFX_OFDPA_LMEP_ID = 6,
-    OFPXMT_OFX_OFDPA_MPLS_TTL = 7,
-    OFPXMT_OFX_OFDPA_MPLS_L2_PORT = 8,
-    OFPXMT_OFX_OFDPA_L3_IN_PORT = 9,
-    OFPXMT_OFX_OFDPA_OVID = 10,
-    OFPXMT_OFX_OFDPA_MPLS_DATA_FIRST_NIBBLE = 11,
-    OFPXMT_OFX_OFDPA_MPLS_ACH_CHANNEL = 12,
-    OFPXMT_OFX_OFDPA_NEXT_LABEL_IS_GAL = 13,
-    OFPXMT_OFX_OFDPA_OAM_Y1731_MDL = 14,
-    OFPXMT_OFX_OFDPA_OAM_Y1731_OPCODE = 15,
-    OFPXMT_OFX_OFDPA_COLOR_ACTIONS_INDEX = 16,
-    OFPXMT_OFX_OFDPA_PROTECTION_INDEX = 21,
-    OFPXMT_OFX_OFDPA_MPLS_TYPE = 23,
-    OFPXMT_OFX_OFDPA_ALLOW_VLAN_TRANSLATION = 24,
-    OFPXMT_OFX_OFDPA_ACTSET_OUTPUT = 43,
+  OFPXMT_OFX_OFDPA_VRF = 1,
+  OFPXMT_OFX_OFDPA_TRAFFIC_CLASS = 2,
+  OFPXMT_OFX_OFDPA_COLOR = 3,
+  OFPXMT_OFX_OFDPA_VLAN_DEI = 4,
+  OFPXMT_OFX_OFDPA_QOS_INDEX = 5,
+  OFPXMT_OFX_OFDPA_LMEP_ID = 6,
+  OFPXMT_OFX_OFDPA_MPLS_TTL = 7,
+  OFPXMT_OFX_OFDPA_MPLS_L2_PORT = 8,
+  OFPXMT_OFX_OFDPA_L3_IN_PORT = 9,
+  OFPXMT_OFX_OFDPA_OVID = 10,
+  OFPXMT_OFX_OFDPA_MPLS_DATA_FIRST_NIBBLE = 11,
+  OFPXMT_OFX_OFDPA_MPLS_ACH_CHANNEL = 12,
+  OFPXMT_OFX_OFDPA_NEXT_LABEL_IS_GAL = 13,
+  OFPXMT_OFX_OFDPA_OAM_Y1731_MDL = 14,
+  OFPXMT_OFX_OFDPA_OAM_Y1731_OPCODE = 15,
+  OFPXMT_OFX_OFDPA_COLOR_ACTIONS_INDEX = 16,
+  OFPXMT_OFX_OFDPA_PROTECTION_INDEX = 21,
+  OFPXMT_OFX_OFDPA_MPLS_TYPE = 23,
+  OFPXMT_OFX_OFDPA_ALLOW_VLAN_TRANSLATION = 24,
+  OFPXMT_OFX_OFDPA_ACTSET_OUTPUT = 43,
 };
 
-static unsigned int const OXM_EXP_ID_SIZE = sizeof(uint32_t); // length of experimenter id field
+static unsigned int const OXM_EXP_ID_SIZE =
+    sizeof(uint32_t); // length of experimenter id field
 
 /* OXM Flow match field types for OpenFlow experimenter class. */
 enum oxm_tlv_match_fields_ofdpa {
-  OXM_TLV_EXPR_VRF =
-      (openflow::OFPXMC_EXPERIMENTER << 16) | (OFPXMT_OFX_OFDPA_VRF << 9) | (OXM_EXP_ID_SIZE + 2),
+  OXM_TLV_EXPR_VRF = (openflow::OFPXMC_EXPERIMENTER << 16) |
+                     (OFPXMT_OFX_OFDPA_VRF << 9) | (OXM_EXP_ID_SIZE + 2),
 
-  OXM_TLV_EXPR_VRF_MASK =
-	  (openflow::OFPXMC_EXPERIMENTER << 16) | (OFPXMT_OFX_OFDPA_VRF << 9) | (OXM_EXP_ID_SIZE + 4) | HAS_MASK_FLAG,
+  OXM_TLV_EXPR_VRF_MASK = (openflow::OFPXMC_EXPERIMENTER << 16) |
+                          (OFPXMT_OFX_OFDPA_VRF << 9) | (OXM_EXP_ID_SIZE + 4) |
+                          HAS_MASK_FLAG,
 
-  OXM_TLV_EXPR_OVID =
-	  (openflow::OFPXMC_EXPERIMENTER << 16) | (OFPXMT_OFX_OFDPA_OVID << 9) | (OXM_EXP_ID_SIZE + 2),
+  OXM_TLV_EXPR_OVID = (openflow::OFPXMC_EXPERIMENTER << 16) |
+                      (OFPXMT_OFX_OFDPA_OVID << 9) | (OXM_EXP_ID_SIZE + 2),
 
   OXM_TLV_EXPR_ALLOW_VLAN_TRANSLATION =
-      (openflow::OFPXMC_EXPERIMENTER << 16) | (OFPXMT_OFX_OFDPA_ALLOW_VLAN_TRANSLATION << 9) | (OXM_EXP_ID_SIZE + 1),
+      (openflow::OFPXMC_EXPERIMENTER << 16) |
+      (OFPXMT_OFX_OFDPA_ALLOW_VLAN_TRANSLATION << 9) | (OXM_EXP_ID_SIZE + 1),
 
-  OXM_TLV_EXPR_ACTSET_OUTPUT =
-	  (openflow::OFPXMC_EXPERIMENTER << 16) | (OFPXMT_OFX_OFDPA_ACTSET_OUTPUT << 9) | (OXM_EXP_ID_SIZE + 4),
+  OXM_TLV_EXPR_ACTSET_OUTPUT = (openflow::OFPXMC_EXPERIMENTER << 16) |
+                               (OFPXMT_OFX_OFDPA_ACTSET_OUTPUT << 9) |
+                               (OXM_EXP_ID_SIZE + 4),
 };
 
 class coxmatch_ofb_vrf : public openflow::coxmatch_exp {
@@ -83,10 +87,10 @@ public:
 
 class coxmatch_ofb_ovid : public openflow::coxmatch_exp {
 public:
-	coxmatch_ofb_ovid(uint16_t ovid)
+  coxmatch_ofb_ovid(uint16_t ovid)
       : coxmatch_exp(OXM_TLV_EXPR_OVID, ONF_EXP_ID_ONF, ovid) {}
 
-	coxmatch_ofb_ovid(const coxmatch_exp &oxm) : coxmatch_exp(oxm) {}
+  coxmatch_ofb_ovid(const coxmatch_exp &oxm) : coxmatch_exp(oxm) {}
 
   virtual ~coxmatch_ofb_ovid() {}
 
@@ -103,8 +107,7 @@ public:
 class coxmatch_ofb_allow_vlan_translation : public openflow::coxmatch_exp {
 public:
   coxmatch_ofb_allow_vlan_translation(uint8_t val)
-      : coxmatch_exp(OXM_TLV_EXPR_ALLOW_VLAN_TRANSLATION, EXP_ID_BCM,
-                     val) {}
+      : coxmatch_exp(OXM_TLV_EXPR_ALLOW_VLAN_TRANSLATION, EXP_ID_BCM, val) {}
 
   coxmatch_ofb_allow_vlan_translation(const coxmatch_exp &oxm)
       : coxmatch_exp(oxm) {}

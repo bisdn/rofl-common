@@ -39,7 +39,8 @@ public:
   /**
    *
    */
-  cofmsg_group_mod(const cofmsg_group_mod &msg) { *this = msg; };
+  cofmsg_group_mod(const cofmsg_group_mod &msg)
+      : cofmsg(msg), groupmod(msg.groupmod) {}
 
   /**
    *

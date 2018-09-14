@@ -83,7 +83,9 @@ public:
   /**
    *
    */
-  cpacket(const cpacket &pack) { *this = pack; };
+  cpacket(const cpacket &pack)
+      : cmemory(pack), head(pack.head), tail(pack.tail),
+        initial_head(pack.initial_head), initial_tail(pack.initial_tail) {}
 
   /**
    *

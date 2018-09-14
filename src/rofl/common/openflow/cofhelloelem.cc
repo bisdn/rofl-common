@@ -18,7 +18,9 @@ cofhello_elem::cofhello_elem(uint8_t *buf, size_t buflen)
   ofh_hello_elem_generic = somem();
 }
 
-cofhello_elem::cofhello_elem(cofhello_elem const &elem) { *this = elem; }
+cofhello_elem::cofhello_elem(cofhello_elem const &elem) : cmemory(elem) {
+  ofh_hello_elem_generic = somem();
+}
 
 cofhello_elem::~cofhello_elem() {}
 

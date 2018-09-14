@@ -18,9 +18,8 @@ cofmsg_port_stats_request::cofmsg_port_stats_request(
 }
 
 cofmsg_port_stats_request::cofmsg_port_stats_request(
-    const cofmsg_port_stats_request &msg) {
-  *this = msg;
-}
+    const cofmsg_port_stats_request &msg)
+    : cofmsg_stats_request(msg), port_stats(msg.port_stats) {}
 
 cofmsg_port_stats_request &cofmsg_port_stats_request::
 operator=(const cofmsg_port_stats_request &msg) {
@@ -132,9 +131,8 @@ cofmsg_port_stats_reply::cofmsg_port_stats_reply(
 }
 
 cofmsg_port_stats_reply::cofmsg_port_stats_reply(
-    const cofmsg_port_stats_reply &msg) {
-  *this = msg;
-}
+    const cofmsg_port_stats_reply &msg)
+    : cofmsg_stats_reply(msg), portstatsarray(msg.portstatsarray) {}
 
 cofmsg_port_stats_reply &cofmsg_port_stats_reply::
 operator=(const cofmsg_port_stats_reply &msg) {

@@ -41,7 +41,7 @@ public:
   /**
    *
    */
-  caddress(const caddress &addr) { *this = addr; };
+  caddress(const caddress &addr) : cmemory(addr) {}
 
   /**
    *
@@ -163,7 +163,7 @@ public:
   /**
    *
    */
-  caddress_ll(const caddress_ll &addr) { *this = addr; };
+  caddress_ll(const caddress_ll &addr) : caddress(addr) {}
 
   /**
    *
@@ -272,7 +272,7 @@ public:
   friend std::ostream &operator<<(std::ostream &os, const caddress_ll &addr) {
     os << "<caddress_ll " << addr.addr2str() << " >" << std::endl;
 #if 0
-		
+
 		os << dynamic_cast<const caddress&>( addr );
 #endif
     return os;
@@ -299,7 +299,7 @@ public:
   /**
    *
    */
-  caddress_in(const caddress_in &addr) { *this = addr; };
+  caddress_in(const caddress_in &addr) : caddress(addr) {}
 
   /**
    *
@@ -382,7 +382,7 @@ public:
   /**
    *
    */
-  caddress_in4(const caddress_in4 &addr) { *this = addr; };
+  caddress_in4(const caddress_in4 &addr) : caddress_in(addr) {}
 
   /**
    *
@@ -486,7 +486,7 @@ public:
   friend std::ostream &operator<<(std::ostream &os, const caddress_in4 &addr) {
     os << "<caddress_in4 " << addr.addr2str() << " >" << std::endl;
 #if 0
-		
+
 		os << dynamic_cast<const caddress&>( addr );
 #endif
     return os;
@@ -530,7 +530,7 @@ public:
   /**
    *
    */
-  caddress_in6(const caddress_in6 &addr) { *this = addr; };
+  caddress_in6(const caddress_in6 &addr) : caddress_in(addr) {}
 
   /**
    *
@@ -601,7 +601,7 @@ private:
   friend std::ostream &operator<<(std::ostream &os, const caddress_in6 &addr) {
     os << "<caddress_in6 " << addr.addr2str() << " >" << std::endl;
 #if 0
-		
+
 		os << dynamic_cast<const caddress&>( addr );
 #endif
     return os;

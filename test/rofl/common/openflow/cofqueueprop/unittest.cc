@@ -2,7 +2,8 @@
 #include <cppunit/ui/text/TestRunner.h>
 #include <stdlib.h>
 
-int main(int argc, char **argv) {
+int main(__attribute__((unused)) int argc,
+         __attribute__((unused)) char **argv) {
   CppUnit::TextUi::TestRunner runner;
   CppUnit::TestFactoryRegistry &registry =
       CppUnit::TestFactoryRegistry::getRegistry();

@@ -37,7 +37,8 @@ public:
   /**
    *
    */
-  cofmsg_hello(const cofmsg_hello &msg) { *this = msg; };
+  cofmsg_hello(const cofmsg_hello &msg)
+      : cofmsg(msg), helloelems(msg.helloelems) {}
 
   /**
    *

@@ -66,7 +66,7 @@ public:
   /**
    *
    */
-  cofaction_exp_body_gtp(const cofaction_exp_body_gtp &body) { *this = body; };
+  cofaction_exp_body_gtp(const cofaction_exp_body_gtp &body) : cmemory(body) {}
 
   /**
    *
@@ -174,9 +174,8 @@ public:
   /**
    *
    */
-  cofaction_exp_body_push_gtp(const cofaction_exp_body_push_gtp &action) {
-    *this = action;
-  };
+  cofaction_exp_body_push_gtp(const cofaction_exp_body_push_gtp &action)
+      : cofaction_exp_body_gtp(action) {}
 
   /**
    *
@@ -262,9 +261,8 @@ public:
   /**
    *
    */
-  cofaction_exp_body_pop_gtp(const cofaction_exp_body_pop_gtp &action) {
-    *this = action;
-  };
+  cofaction_exp_body_pop_gtp(const cofaction_exp_body_pop_gtp &action)
+      : cofaction_exp_body_gtp(action) {}
 
   /**
    *

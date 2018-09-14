@@ -174,8 +174,10 @@ private:
 
   virtual void handle_timeout(rofl::cthread &thread, uint32_t timer_id);
 
-  virtual void handle_read_event(rofl::cthread &thread, int fd){};
-  virtual void handle_write_event(rofl::cthread &thread, int fd){};
+  virtual void handle_read_event(__attribute__((unused)) rofl::cthread &thread,
+                                 __attribute__((unused)) int fd){};
+  virtual void handle_write_event(__attribute__((unused)) rofl::cthread &thread,
+                                  __attribute__((unused)) int fd){};
 
 private:
   // test controller

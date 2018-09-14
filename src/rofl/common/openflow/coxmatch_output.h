@@ -26,6 +26,7 @@ public:
   coxmatch_output(coxmatch const &oxm) : oxm(oxm){};
 
   friend std::ostream &operator<<(std::ostream &os,
+                                  __attribute__((unused))
                                   coxmatch_output const &oxm_output) {
 #if 0
 		coxmatch const& oxm = oxm_output.oxm;

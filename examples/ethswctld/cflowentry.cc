@@ -28,7 +28,8 @@ cflowentry::~cflowentry() {
   flow_mod_delete();
 }
 
-void cflowentry::handle_timeout(cthread &thread, uint32_t timer_id) {
+void cflowentry::handle_timeout(__attribute__((unused)) cthread &thread,
+                                uint32_t timer_id) {
   switch (timer_id) {
   case CFLOWENTRY_ENTRY_EXPIRED: {
     env->flow_timer_expired(*this);

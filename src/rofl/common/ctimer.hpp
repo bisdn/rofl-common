@@ -131,7 +131,8 @@ public:
   /**
    *
    */
-  friend std::ostream &operator<<(std::ostream &os, const ctimer &ts) {
+  friend std::ostream &operator<<(std::ostream &os,
+                                  __attribute__((unused)) const ctimer &ts) {
     os << "<ctimer: >";
     return os;
   };

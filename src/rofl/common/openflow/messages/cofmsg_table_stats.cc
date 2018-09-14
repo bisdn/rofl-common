@@ -15,9 +15,8 @@ cofmsg_table_stats_request::cofmsg_table_stats_request(uint8_t version,
                            stats_flags) {}
 
 cofmsg_table_stats_request::cofmsg_table_stats_request(
-    const cofmsg_table_stats_request &msg) {
-  *this = msg;
-}
+    const cofmsg_table_stats_request &msg)
+    : cofmsg_stats_request(msg) {}
 
 cofmsg_table_stats_request &cofmsg_table_stats_request::
 operator=(const cofmsg_table_stats_request &msg) {
@@ -94,9 +93,8 @@ cofmsg_table_stats_reply::cofmsg_table_stats_reply(
 }
 
 cofmsg_table_stats_reply::cofmsg_table_stats_reply(
-    const cofmsg_table_stats_reply &msg) {
-  *this = msg;
-}
+    const cofmsg_table_stats_reply &msg)
+    : cofmsg_stats_reply(msg), tablestatsarray(msg.tablestatsarray) {}
 
 cofmsg_table_stats_reply &cofmsg_table_stats_reply::
 operator=(const cofmsg_table_stats_reply &msg) {

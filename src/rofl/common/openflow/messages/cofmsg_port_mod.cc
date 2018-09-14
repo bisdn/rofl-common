@@ -24,7 +24,9 @@ cofmsg_port_mod::cofmsg_port_mod(uint8_t version, uint32_t xid, uint32_t portno,
   }
 }
 
-cofmsg_port_mod::cofmsg_port_mod(const cofmsg_port_mod &msg) { *this = msg; }
+cofmsg_port_mod::cofmsg_port_mod(const cofmsg_port_mod &msg)
+    : cofmsg(msg), portno(msg.portno), lladdr(msg.lladdr), config(msg.config),
+      mask(msg.mask), advertise(msg.advertise) {}
 
 cofmsg_port_mod &cofmsg_port_mod::operator=(const cofmsg_port_mod &msg) {
   if (this == &msg)

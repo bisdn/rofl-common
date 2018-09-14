@@ -24,8 +24,9 @@ coftable_feature_prop::coftable_feature_prop(uint8_t ofp_version, uint16_t type,
 
 coftable_feature_prop::~coftable_feature_prop() {}
 
-coftable_feature_prop::coftable_feature_prop(coftable_feature_prop const &tfp) {
-  *this = tfp;
+coftable_feature_prop::coftable_feature_prop(coftable_feature_prop const &tfp)
+    : cmemory(tfp) {
+  ofp_tfp = somem();
 }
 
 coftable_feature_prop &coftable_feature_prop::
@@ -102,8 +103,17 @@ coftable_feature_prop_instructions::coftable_feature_prop_instructions(
 coftable_feature_prop_instructions::~coftable_feature_prop_instructions() {}
 
 coftable_feature_prop_instructions::coftable_feature_prop_instructions(
-    coftable_feature_prop_instructions const &tfpi) {
-  *this = tfpi;
+    coftable_feature_prop_instructions const &tfpi)
+    : coftable_feature_prop(tfpi) {
+
+  ofh_tfpi = somem();
+
+  instructions_ids.clear();
+  for (std::vector<rofl::openflow::ofp_instruction>::const_iterator it =
+           tfpi.instructions_ids.begin();
+       it != tfpi.instructions_ids.end(); ++it) {
+    instructions_ids.push_back(*it);
+  }
 }
 
 coftable_feature_prop_instructions &coftable_feature_prop_instructions::
@@ -257,8 +267,9 @@ coftable_feature_prop_next_tables::coftable_feature_prop_next_tables(
 coftable_feature_prop_next_tables::~coftable_feature_prop_next_tables() {}
 
 coftable_feature_prop_next_tables::coftable_feature_prop_next_tables(
-    coftable_feature_prop_next_tables const &tfpnxt) {
-  *this = tfpnxt;
+    coftable_feature_prop_next_tables const &tfpnxt)
+    : coftable_feature_prop(tfpnxt), std::vector<uint8_t>(tfpnxt) {
+  ofh_tfpnxt = somem();
 }
 
 coftable_feature_prop_next_tables &coftable_feature_prop_next_tables::
@@ -389,8 +400,9 @@ coftable_feature_prop_actions::coftable_feature_prop_actions(
 coftable_feature_prop_actions::~coftable_feature_prop_actions() {}
 
 coftable_feature_prop_actions::coftable_feature_prop_actions(
-    coftable_feature_prop_actions const &tfpa) {
-  *this = tfpa;
+    coftable_feature_prop_actions const &tfpa)
+    : coftable_feature_prop(tfpa), actions(tfpa.actions) {
+  ofh_tfpa = somem();
 }
 
 coftable_feature_prop_actions &coftable_feature_prop_actions::
@@ -407,8 +419,6 @@ operator=(coftable_feature_prop_actions const &tfpa) {
        it != tfpa.actions.end(); ++it) {
     actions.push_back(*it);
   }
-  // std::copy(tfpa.begin(), tfpa.end(), std::vector<std::pair<uint16_t,
-  // uint16_t> >::begin());
 
   return *this;
 }
@@ -545,8 +555,10 @@ coftable_feature_prop_oxm::coftable_feature_prop_oxm(uint8_t ofp_version,
 coftable_feature_prop_oxm::~coftable_feature_prop_oxm() {}
 
 coftable_feature_prop_oxm::coftable_feature_prop_oxm(
-    coftable_feature_prop_oxm const &tfpoxm) {
-  *this = tfpoxm;
+    coftable_feature_prop_oxm const &tfpoxm)
+    : coftable_feature_prop(tfpoxm), oxm_ids(tfpoxm.oxm_ids),
+      oxm_ids_exp(tfpoxm.oxm_ids_exp) {
+  ofh_tfpoxm = somem();
 }
 
 coftable_feature_prop_oxm &coftable_feature_prop_oxm::

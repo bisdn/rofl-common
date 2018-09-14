@@ -44,7 +44,7 @@ cofmeter_bands &cofmeter_bands::operator=(cofmeter_bands const &mbs) {
   return *this;
 }
 
-const bool cofmeter_bands::operator==(const cofmeter_bands &mbands) {
+bool cofmeter_bands::operator==(const cofmeter_bands &mbands) {
   if ((mbs_drop.size() != mbands.mbs_drop.size()) ||
       (mbs_dscp_remark.size() != mbands.mbs_dscp_remark.size()) ||
       (mbs_experimenter.size() != mbands.mbs_experimenter.size())) {

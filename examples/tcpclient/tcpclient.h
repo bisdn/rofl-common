@@ -32,9 +32,7 @@ public:
    */
   tcpclient()
       : keep_on_running(true), ctlid(0), auxid(0), dpid(0x0102030405060708),
-        n_buffers(0xffff), n_tables(1), capabilities(0){
-
-                                        };
+        n_buffers(0xffff), n_tables(1), capabilities(0) {}
 
   /** @cond EXAMPLES */
 
@@ -42,7 +40,8 @@ public:
   /**
    *
    */
-  int run(int argc, char **argv) {
+  int run(__attribute__((unused)) int argc,
+          __attribute__((unused)) char **argv) {
     start();
 
     while (keep_on_running) {
@@ -127,10 +126,12 @@ private:
    * @param ctl controller instance
    * @param auxid connection identifier (main: 0)
    */
-  virtual void handle_conn_established(rofl::crofctl &ctl,
+  virtual void handle_conn_established(__attribute__((unused))
+                                       rofl::crofctl &ctl,
+                                       __attribute__((unused))
                                        const rofl::cauxid &auxid) {
     std::cerr << "channel established ctlid=" << ctlid << std::endl;
-  };
+  }
 
   /**
    * @brief 	Called when a control connection (main or auxiliary) has been
@@ -139,7 +140,9 @@ private:
    * @param ctl controller instance
    * @param auxid connection identifier (main: 0)
    */
-  virtual void handle_conn_terminated(rofl::crofctl &ctl,
+  virtual void handle_conn_terminated(__attribute__((unused))
+                                      rofl::crofctl &ctl,
+                                      __attribute__((unused))
                                       const rofl::cauxid &auxid) {
     std::cerr << "channel terminated ctlid=" << ctlid << std::endl;
   };
@@ -156,7 +159,8 @@ private:
    * @param ctl controller instance
    * @param auxid connection identifier (main: 0)
    */
-  virtual void handle_conn_refused(rofl::crofctl &ctl,
+  virtual void handle_conn_refused(__attribute__((unused)) rofl::crofctl &ctl,
+                                   __attribute__((unused))
                                    const rofl::cauxid &auxid) {
     std::cerr << "channel connect refused ctlid=" << ctlid << std::endl;
   };
@@ -175,7 +179,8 @@ private:
    * @param ctl controller instance
    * @param auxid connection identifier (main: 0)
    */
-  virtual void handle_conn_failed(rofl::crofctl &ctl,
+  virtual void handle_conn_failed(__attribute__((unused)) rofl::crofctl &ctl,
+                                  __attribute__((unused))
                                   const rofl::cauxid &auxid) {
     std::cerr << "channel connect failed ctlid=" << ctlid << std::endl;
   };
@@ -186,7 +191,9 @@ private:
    * @param ctl controller instance
    * @param auxid control connection identifier (main: 0)
    */
-  virtual void handle_conn_negotiation_failed(rofl::crofctl &ctl,
+  virtual void handle_conn_negotiation_failed(__attribute__((unused))
+                                              rofl::crofctl &ctl,
+                                              __attribute__((unused))
                                               const rofl::cauxid &auxid) {
     std::cerr << "channel failed ctlid=" << ctlid << std::endl;
   };
@@ -198,7 +205,9 @@ private:
    * @param ctl controller instance
    * @param auxid control connection identifier (main: 0)
    */
-  virtual void handle_conn_congestion_occurred(rofl::crofctl &ctl,
+  virtual void handle_conn_congestion_occurred(__attribute__((unused))
+                                               rofl::crofctl &ctl,
+                                               __attribute__((unused))
                                                const rofl::cauxid &auxid) {
     std::cerr << "channel congestion occurred, ctlid=" << ctlid << std::endl;
   };
@@ -210,7 +219,9 @@ private:
    * @param ctl controller instance
    * @param auxid control connection identifier (main: 0)
    */
-  virtual void handle_conn_congestion_solved(rofl::crofctl &ctl,
+  virtual void handle_conn_congestion_solved(__attribute__((unused))
+                                             rofl::crofctl &ctl,
+                                             __attribute__((unused))
                                              const rofl::cauxid &auxid) {
     std::cerr << "channel congestion solved, ctlid=" << ctlid << std::endl;
   };
@@ -305,7 +316,8 @@ private:
   /** @endcond */
 
 public:
-  friend std::ostream &operator<<(std::ostream &os, const tcpclient &client) {
+  friend std::ostream &operator<<(std::ostream &os, __attribute__((unused))
+                                                    const tcpclient &client) {
 
     return os;
   };
