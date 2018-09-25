@@ -585,7 +585,42 @@ public:
    *
    */
   std::string str() const { return addr2str(); };
+public:
+  /**
+   *
+   */
+  uint32_t get_addr_nbo() const {
+    uint8_t *ptr = somem();
+    return *((uint32_t *)ptr);
+  };
 
+  /**
+   *
+   */
+  void set_addr_nbo(uint32_t addr) {
+    uint8_t *ptr = somem();
+    *((uint32_t *)ptr) = addr;
+  };
+
+  /**
+   *
+   */
+  uint32_t get_addr_hbo() const {
+    uint8_t *ptr = somem();
+    return be32toh(*((uint32_t *)ptr));
+  };
+
+  /**
+   *
+   */
+  void set_addr_hbo(uint32_t addr) {
+    uint8_t *ptr = somem();
+    *((uint32_t *)ptr) = htobe32(addr);
+  };
+
+  /**
+   *
+   */
 private:
   /**
    *
