@@ -1,6 +1,6 @@
 MAINTAINERCLEANFILES = Makefile.in
 
-SUBDIRS = 
+SUBDIRS =
 
 noinst_PROGRAMS = controller
 
@@ -9,8 +9,7 @@ controller_SOURCES = \
 	controller.hpp \
 	controller.cpp
 
-controller_LDADD = ../../src/rofl/librofl_common.la 
-	-lpthread \
-	-lrt 
+controller_LDADD = ../../src/rofl/librofl_common.la
+	-lpthread
 
 AM_LDFLAGS = -static

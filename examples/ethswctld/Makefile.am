@@ -1,6 +1,6 @@
 MAINTAINERCLEANFILES = Makefile.in
 
-SUBDIRS = 
+SUBDIRS =
 
 noinst_PROGRAMS = ethswctld
 
@@ -21,8 +21,7 @@ ethswctld_SOURCES = \
 	cunixenv.cc \
 	cunixenv.h
 
-ethswctld_LDADD = ../../src/rofl/librofl_common.la 
-	-lpthread \
-	-lrt 
+ethswctld_LDADD = ../../src/rofl/librofl_common.la
+	-lpthread
 
 AM_LDFLAGS = -static
