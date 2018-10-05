@@ -7,5 +7,6 @@ Name: rofl-common
 Description: Revised OpenFlow Library (common part)
 Version: @ROFL_VERSION_NORMALIZED@
 Libs: -L${libdir} -lrofl_common
+Libs.private: -lpthread -lcrypto -lssl -lglog
 Cflags: -I${includedir}
 

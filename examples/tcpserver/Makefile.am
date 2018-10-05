@@ -1,6 +1,6 @@
 MAINTAINERCLEANFILES = Makefile.in
 
-SUBDIRS = 
+SUBDIRS =
 
 noinst_PROGRAMS = server
 
@@ -9,8 +9,7 @@ server_SOURCES = \
 	tcpserver.h \
 	tcpserver.cc
 
-server_LDADD = ../../src/rofl/librofl_common.la 
-	-lpthread \
-	-lrt 
+server_LDADD = ../../src/rofl/librofl_common.la
+	-lpthread
 
 AM_LDFLAGS = -static
