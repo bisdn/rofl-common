@@ -83,11 +83,11 @@ void cofdesc_stats_reply::unpack(uint8_t *buf, size_t buflen) {
     struct openflow12::ofp_desc_stats *desc =
         (struct openflow12::ofp_desc_stats *)buf;
 
-    mfr_desc.assign(desc->mfr_desc, DESC_STR_LEN);
-    hw_desc.assign(desc->hw_desc, DESC_STR_LEN);
-    sw_desc.assign(desc->sw_desc, DESC_STR_LEN);
-    serial_num.assign(desc->serial_num, SERIAL_NUM_LEN);
-    dp_desc.assign(desc->dp_desc, DESC_STR_LEN);
+    mfr_desc.assign(desc->mfr_desc, strnlen(desc->mfr_desc, DESC_STR_LEN));
+    hw_desc.assign(desc->hw_desc, strnlen(desc->hw_desc, DESC_STR_LEN));
+    sw_desc.assign(desc->sw_desc, strnlen(desc->sw_desc, DESC_STR_LEN));
+    serial_num.assign(desc->serial_num, strnlen(desc->serial_num, SERIAL_NUM_LEN));
+    dp_desc.assign(desc->dp_desc, strnlen(desc->dp_desc, DESC_STR_LEN));
 
   } break;
   default:
