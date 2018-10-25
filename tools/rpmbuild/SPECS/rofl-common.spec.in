@@ -70,6 +70,11 @@ make install DESTDIR=$RPM_BUILD_ROOT
 rm -rf $RPM_BUILD_ROOT
 
 %changelog
+* Thu Oct 25 2018 Tobias Jungel <tobias.jungel@bisdn.de> - v0.13.2
+- [B] fixing rofl-common.spec.in
+- [B] rpmbuild: add missing build requirement
+- [B] desc-stats: set correct length of strings
+
 * Wed Jul 04 2018 Andreas Koepsel <andreas.koepsel@bisdn.de> - v0.13.1
 - [+] added experimental matches from OFDPA-2:
       VRF, OVID, ALLOW_VLAN_TRANSLATION, ACTSET_OUTPUT
