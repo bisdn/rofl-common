@@ -6,8 +6,9 @@ Summary:	Revised OpenFlow Library
 Group:		System Environment/Libraries
 License:	MPLv2.0
 URL:		https://github.com/bisdn/rofl-common
-Source0:	https://github.com/bisdn/rofl-common/archive/v%{version}.tar.gz
+Source0:	https://github.com/bisdn/rofl-common/archive/v%{version}.tar.gz#/rofl-common-%{version}.tar.gz
 
+BuildRequires:	gcc-c++
 BuildRequires:	openssl-devel
 BuildRequires:	autoconf
 BuildRequires:	automake
@@ -19,7 +20,7 @@ Requires:	openssl
 Requires:	glog
 
 %description
-Revised OpenFlow Library (ROFL) version @ROFL_VERSION@
+Revised OpenFlow Library (ROFL) version %{version} - libraries
 
 %package        devel
 Summary:	Header files and libraries for revised openflow library
@@ -30,7 +31,7 @@ Requires:	glog-devel
 Requires:	gflags-devel
 
 %description    devel
-Revised OpenFlow Library (ROFL) version @ROFL_VERSION@ development files
+Revised OpenFlow Library (ROFL) version %{version} - development files
 
 %prep
 %setup -q
@@ -40,7 +41,7 @@ sh ./autogen.sh
 mkdir -p build
 cd build/
 ../configure --prefix=/usr --disable-silent-rules --libdir=%{_libdir}
-make %{?_smp_mflags} 
+make %{?_smp_mflags}
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -66,9 +67,14 @@ make install DESTDIR=$RPM_BUILD_ROOT
 %{_libdir}/pkgconfig/rofl_common.pc
 
 %clean
-rm -rf $RPM_BUILD_ROOT 
+rm -rf $RPM_BUILD_ROOT
 
 %changelog
+* Thu Oct 25 2018 Tobias Jungel <tobias.jungel@bisdn.de> - v0.13.2
+- [B] fixing rofl-common.spec.in
+- [B] rpmbuild: add missing build requirement
+- [B] desc-stats: set correct length of strings
+
 * Wed Jul 04 2018 Andreas Koepsel <andreas.koepsel@bisdn.de> - v0.13.1
 - [+] added experimental matches from OFDPA-2:
       VRF, OVID, ALLOW_VLAN_TRANSLATION, ACTSET_OUTPUT
@@ -85,7 +91,7 @@ rm -rf $RPM_BUILD_ROOT
 * Wed Sep 13 2017 Tobias Jungel <tobias.jungel@bisdn.de> - v0.12.1
 - [A] queue_type be public enum
 - [B] fix ctimespec operator
- 
+
 * Fri Jul 21 2017 Tobias Jungel <tobias.jungel@bisdn.de> - v0.12.0
 - [+] crofsock: revised tx-queueing strategy (default txqueue size limited
       to 128 messages), API changes to crofctl and crofdpt: all transmission

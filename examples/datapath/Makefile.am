@@ -1,6 +1,6 @@
 MAINTAINERCLEANFILES = Makefile.in
 
-SUBDIRS = 
+SUBDIRS =
 
 noinst_PROGRAMS = datapath
 
@@ -9,8 +9,7 @@ datapath_SOURCES = \
 	datapath.hpp \
 	datapath.cpp
 
-datapath_LDADD = ../../src/rofl/librofl_common.la 
-	-lpthread \
-	-lrt 
+datapath_LDADD = ../../src/rofl/librofl_common.la
+	-lpthread
 
 AM_LDFLAGS = -static
