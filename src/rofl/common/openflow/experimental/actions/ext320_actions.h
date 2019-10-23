@@ -43,12 +43,12 @@ struct onf_act_copy_field_hdr {
 OFP_ASSERT(sizeof(struct onf_act_copy_field_hdr) == 12);
 
 
-class cofaction_exp_body_copy_field : public rofl::cmemory {
+class cofaction_body_copy_field : public rofl::cmemory {
 public:
   /**
    *
    */
-  cofaction_exp_body_copy_field(
+  cofaction_body_copy_field(
 		  uint16_t n_bits = 0, 
 		  uint16_t src_offset = 0, 
 		  uint16_t dst_offset = 0, 
@@ -73,19 +73,19 @@ public:
   /**
    *
    */
-  ~cofaction_exp_body_copy_field(){};
+  ~cofaction_body_copy_field(){};
 
   /**
    *
    */
-  cofaction_exp_body_copy_field(const cofaction_exp_body_copy_field &body) {
+  cofaction_body_copy_field(const cofaction_body_copy_field &body) {
     *this = body;
   };
 
   /**
    *
    */
-  cofaction_exp_body_copy_field &operator=(const cofaction_exp_body_copy_field &body) {
+  cofaction_body_copy_field &operator=(const cofaction_body_copy_field &body) {
     if (this == &body)
       return *this;
     rofl::cmemory::operator=(body);
@@ -95,12 +95,12 @@ public:
   /**
    *
    */
-  cofaction_exp_body_copy_field(const rofl::cmemory &body) { *this = body; };
+  cofaction_body_copy_field(const rofl::cmemory &body) { *this = body; };
 
   /**
    *
    */
-  cofaction_exp_body_copy_field &operator=(const rofl::cmemory &body) {
+  cofaction_body_copy_field &operator=(const rofl::cmemory &body) {
     if (this == &body)
       return *this;
     rofl::cmemory::operator=(body);
@@ -113,7 +113,7 @@ public:
    */
   uint16_t get_exp_type() const {
     if (rofl::cmemory::memlen() < sizeof(struct onf_act_copy_field_hdr))
-      throw eInvalid("cofaction_exp_body_copy_field::get_exp_type()")
+      throw eInvalid("cofaction_body_copy_field::get_exp_type()")
           .set_func(__FUNCTION__)
           .set_line(__LINE__);
     return be16toh(
@@ -126,7 +126,7 @@ public:
    */
   void set_exp_type(uint16_t exp_type) {
     if (rofl::cmemory::memlen() < sizeof(struct onf_act_copy_field_hdr))
-      throw eInvalid("cofaction_exp_body_copy_field::set_exp_type()")
+      throw eInvalid("cofaction_body_copy_field::set_exp_type()")
           .set_func(__FUNCTION__)
           .set_line(__LINE__);
     ((struct onf_act_copy_field_hdr *)rofl::cmemory::somem())->exp_type =
@@ -138,7 +138,7 @@ public:
    */
   uint16_t get_n_bits() const {
     if (rofl::cmemory::memlen() < sizeof(struct onf_act_copy_field_hdr))
-      throw eInvalid("cofaction_exp_body_copy_field::get_n_bits()")
+      throw eInvalid("cofaction_body_copy_field::get_n_bits()")
           .set_func(__FUNCTION__)
           .set_line(__LINE__);
     return be16toh(
@@ -151,7 +151,7 @@ public:
    */
   void set_n_bits(uint16_t n_bits) {
     if (rofl::cmemory::memlen() < sizeof(struct onf_act_copy_field_hdr))
-      throw eInvalid("cofaction_exp_body_copy_field::set_n_bits()")
+      throw eInvalid("cofaction_body_copy_field::set_n_bits()")
           .set_func(__FUNCTION__)
           .set_line(__LINE__);
     ((struct onf_act_copy_field_hdr *)rofl::cmemory::somem())->n_bits =
@@ -163,7 +163,7 @@ public:
    */
   uint16_t get_src_offset() const {
     if (rofl::cmemory::memlen() < sizeof(struct onf_act_copy_field_hdr))
-      throw eInvalid("cofaction_exp_body_copy_field::get_src_offset()")
+      throw eInvalid("cofaction_body_copy_field::get_src_offset()")
           .set_func(__FUNCTION__)
           .set_line(__LINE__);
     return be16toh(
@@ -176,7 +176,7 @@ public:
    */
   void set_src_offset(uint16_t src_offset) {
     if (rofl::cmemory::memlen() < sizeof(struct onf_act_copy_field_hdr))
-      throw eInvalid("cofaction_exp_body_copy_field::set_src_offset()")
+      throw eInvalid("cofaction_body_copy_field::set_src_offset()")
           .set_func(__FUNCTION__)
           .set_line(__LINE__);
     ((struct onf_act_copy_field_hdr *)rofl::cmemory::somem())->src_offset =
@@ -188,7 +188,7 @@ public:
    */
   uint16_t get_dst_offset() const {
     if (rofl::cmemory::memlen() < sizeof(struct onf_act_copy_field_hdr))
-      throw eInvalid("cofaction_exp_body_copy_field::get_dst_offset()")
+      throw eInvalid("cofaction_body_copy_field::get_dst_offset()")
           .set_func(__FUNCTION__)
           .set_line(__LINE__);
     return be16toh(
@@ -201,7 +201,7 @@ public:
    */
   void set_dst_offset(uint16_t dst_offset) {
     if (rofl::cmemory::memlen() < sizeof(struct onf_act_copy_field_hdr))
-      throw eInvalid("cofaction_exp_body_copy_field::set_dst_offset()")
+      throw eInvalid("cofaction_body_copy_field::set_dst_offset()")
           .set_func(__FUNCTION__)
           .set_line(__LINE__);
     ((struct onf_act_copy_field_hdr *)rofl::cmemory::somem())->dst_offset =
@@ -213,7 +213,7 @@ public:
    */
   uint32_t get_src_oxm_id() const {
     if (rofl::cmemory::memlen() < sizeof(struct onf_act_copy_field_hdr))
-      throw eInvalid("cofaction_exp_body_copy_field::get_src_oxm_id() too short, no header found")
+      throw eInvalid("cofaction_body_copy_field::get_src_oxm_id() too short, no header found")
           .set_func(__FUNCTION__)
           .set_line(__LINE__);
 
@@ -221,7 +221,7 @@ public:
     size_t datalen = rofl::cmemory::memlen() - sizeof(struct onf_act_copy_field_hdr);
 
     if (datalen < sizeof(uint32_t))
-      throw eInvalid("cofaction_exp_body_copy_field::get_src_oxm_id() too short, no src_oxm_id found")
+      throw eInvalid("cofaction_body_copy_field::get_src_oxm_id() too short, no src_oxm_id found")
           .set_func(__FUNCTION__)
           .set_line(__LINE__);
 
@@ -232,13 +232,13 @@ public:
     case OFPXMC_OPENFLOW_BASIC:
     case 0x8001 /* TODO: to be replaced with constant once the latter is defined */: {
         if (datalen < sizeof(uint32_t))
-            throw eInvalid("cofaction_exp_body_copy_field::get_src_oxm_id()")
+            throw eInvalid("cofaction_body_copy_field::get_src_oxm_id()")
                 .set_func(__FUNCTION__)
                 .set_line(__LINE__);
 	return be32toh(*((uint32_t*)data));
     } break;
     default: {
-      throw eInvalid("cofaction_exp_body_copy_field::get_src_oxm_id() unsupported src-oxm-id class")
+      throw eInvalid("cofaction_body_copy_field::get_src_oxm_id() unsupported src-oxm-id class")
           .set_func(__FUNCTION__)
           .set_line(__LINE__);
     }
@@ -251,7 +251,7 @@ public:
    */
   uint32_t get_src_oxm_exp_id() const {
     if (rofl::cmemory::memlen() < sizeof(struct onf_act_copy_field_hdr))
-      throw eInvalid("cofaction_exp_body_copy_field::get_src_oxm_exp_id() too short")
+      throw eInvalid("cofaction_body_copy_field::get_src_oxm_exp_id() too short")
           .set_func(__FUNCTION__)
           .set_line(__LINE__);
 
@@ -259,7 +259,7 @@ public:
     size_t datalen = rofl::cmemory::memlen() - sizeof(struct onf_act_copy_field_hdr);
 
     if (datalen < sizeof(uint32_t))
-      throw eInvalid("cofaction_exp_body_copy_field::get_src_oxm_exp_id() too short, no src_oxm_id found")
+      throw eInvalid("cofaction_body_copy_field::get_src_oxm_exp_id() too short, no src_oxm_id found")
           .set_func(__FUNCTION__)
           .set_line(__LINE__);
 
@@ -268,7 +268,7 @@ public:
     switch (oxm_class) {
     case OFPXMC_EXPERIMENTER: {
         if (datalen < sizeof(uint64_t))
-            throw eInvalid("cofaction_exp_body_copy_field::get_src_oxm_exp_id() too short, no src_oxm_id experimenter id found")
+            throw eInvalid("cofaction_body_copy_field::get_src_oxm_exp_id() too short, no src_oxm_id experimenter id found")
                 .set_func(__FUNCTION__)
                 .set_line(__LINE__);
 	return be32toh(*((uint32_t*)(data + sizeof(uint32_t))));
@@ -285,7 +285,7 @@ public:
    */
   uint32_t get_dst_oxm_id() const {
     if (rofl::cmemory::memlen() < sizeof(struct onf_act_copy_field_hdr))
-      throw eInvalid("cofaction_exp_body_copy_field::get_dst_oxm_id() too short, no header found")
+      throw eInvalid("cofaction_body_copy_field::get_dst_oxm_id() too short, no header found")
           .set_func(__FUNCTION__)
           .set_line(__LINE__);
 
@@ -297,7 +297,7 @@ public:
     /* adjust offset */
     if (src_oxm_exp_id > 0) {
 	if (datalen < (2*sizeof(uint32_t) + sizeof(uint32_t)/* 3rd 32bits */)) {
-            throw eInvalid("cofaction_exp_body_copy_field::get_dst_oxm_id() too short, no dst_oxm_id found")
+            throw eInvalid("cofaction_body_copy_field::get_dst_oxm_id() too short, no dst_oxm_id found")
                 .set_func(__FUNCTION__)
                 .set_line(__LINE__);
 	}
@@ -306,7 +306,7 @@ public:
     } else
     if (src_oxm_exp_id == 0) {
 	if (datalen < (1*sizeof(uint32_t) + sizeof(uint32_t)/* 2nd 32bits */)) {
-            throw eInvalid("cofaction_exp_body_copy_field::get_dst_oxm_id() too short, no dst_oxm_id found")
+            throw eInvalid("cofaction_body_copy_field::get_dst_oxm_id() too short, no dst_oxm_id found")
                 .set_func(__FUNCTION__)
                 .set_line(__LINE__);
 	}
@@ -321,13 +321,13 @@ public:
     case OFPXMC_OPENFLOW_BASIC:
     case 0x8001 /* TODO: to be replaced with constant once the latter is defined */: {
         if (datalen < sizeof(uint32_t))
-            throw eInvalid("cofaction_exp_body_copy_field::get_dst_oxm_id()")
+            throw eInvalid("cofaction_body_copy_field::get_dst_oxm_id()")
                 .set_func(__FUNCTION__)
                 .set_line(__LINE__);
 	return be32toh(*((uint32_t*)data));
     } break;
     default: {
-      throw eInvalid("cofaction_exp_body_copy_field::get_dst_oxm_id() unsupported dst-oxm-id class")
+      throw eInvalid("cofaction_body_copy_field::get_dst_oxm_id() unsupported dst-oxm-id class")
           .set_func(__FUNCTION__)
           .set_line(__LINE__);
     }
@@ -340,7 +340,7 @@ public:
    */
   uint32_t get_dst_oxm_exp_id() const {
     if (rofl::cmemory::memlen() < sizeof(struct onf_act_copy_field_hdr))
-      throw eInvalid("cofaction_exp_body_copy_field::get_dst_oxm_exp_id() too short, no header found")
+      throw eInvalid("cofaction_body_copy_field::get_dst_oxm_exp_id() too short, no header found")
           .set_func(__FUNCTION__)
           .set_line(__LINE__);
 
@@ -352,7 +352,7 @@ public:
     /* adjust offset */
     if (src_oxm_exp_id > 0) {
 	if (datalen < (2*sizeof(uint32_t) + sizeof(uint32_t)/* 3rd 32bits */)) {
-            throw eInvalid("cofaction_exp_body_copy_field::get_dst_oxm_exp_id() too short, no dst_oxm_id found")
+            throw eInvalid("cofaction_body_copy_field::get_dst_oxm_exp_id() too short, no dst_oxm_id found")
                 .set_func(__FUNCTION__)
                 .set_line(__LINE__);
 	}
@@ -361,7 +361,7 @@ public:
     } else
     if (src_oxm_exp_id == 0) {
 	if (datalen < (1*sizeof(uint32_t) + sizeof(uint32_t)/* 2nd 32bits */)) {
-            throw eInvalid("cofaction_exp_body_copy_field::get_dst_oxm_exp_id() too short, no dst_oxm_id found")
+            throw eInvalid("cofaction_body_copy_field::get_dst_oxm_exp_id() too short, no dst_oxm_id found")
                 .set_func(__FUNCTION__)
                 .set_line(__LINE__);
 	}
@@ -374,7 +374,7 @@ public:
     switch (oxm_class) {
     case OFPXMC_EXPERIMENTER: {
         if (datalen < sizeof(uint64_t))
-            throw eInvalid("cofaction_exp_body_copy_field::get_src_oxm_exp_id() too short, no dst_oxm_id experimenter id found")
+            throw eInvalid("cofaction_body_copy_field::get_src_oxm_exp_id() too short, no dst_oxm_id experimenter id found")
                 .set_func(__FUNCTION__)
                 .set_line(__LINE__);
 	return be32toh(*((uint32_t*)(data + sizeof(uint32_t))));
@@ -395,7 +395,7 @@ public:
 	  uint32_t dst_oxm_id = 0,
 	  uint32_t dst_oxm_exp_id = 0/* should be 0 for non-experimental oxm_ids */) {
     if (rofl::cmemory::memlen() < sizeof(struct onf_act_copy_field_hdr))
-      throw eInvalid("cofaction_exp_body_copy_field::set_src_offset()")
+      throw eInvalid("cofaction_body_copy_field::set_src_offset()")
           .set_func(__FUNCTION__)
           .set_line(__LINE__);
 
@@ -407,7 +407,7 @@ public:
     /* src_oxm_id */
     if (src_oxm_exp_id > 0) {
         if (datalen < (offset + sizeof(uint64_t))) {
-            throw eInvalid("cofaction_exp_body_copy_field::set_oxm_id() too short, not enough space for storing 64bit src_oxm_id")
+            throw eInvalid("cofaction_body_copy_field::set_oxm_id() too short, not enough space for storing 64bit src_oxm_id")
                 .set_func(__FUNCTION__)
                 .set_line(__LINE__);
         }
@@ -419,7 +419,7 @@ public:
     } else
     if (src_oxm_exp_id == 0) {
         if (datalen < sizeof(uint64_t)) {
-            throw eInvalid("cofaction_exp_body_copy_field::set_oxm_id() too short, not enough space for storing 32bit src_oxm_id")
+            throw eInvalid("cofaction_body_copy_field::set_oxm_id() too short, not enough space for storing 32bit src_oxm_id")
                 .set_func(__FUNCTION__)
                 .set_line(__LINE__);
 	}
@@ -432,7 +432,7 @@ public:
     /* dst_oxm_id */
     if (dst_oxm_exp_id > 0) {
         if (datalen < (offset + sizeof(uint64_t))) {
-            throw eInvalid("cofaction_exp_body_copy_field::set_oxm_id() too short, not enough space for storing 64bit dst_oxm_id")
+            throw eInvalid("cofaction_body_copy_field::set_oxm_id() too short, not enough space for storing 64bit dst_oxm_id")
                 .set_func(__FUNCTION__)
                 .set_line(__LINE__);
 	}
@@ -444,7 +444,7 @@ public:
     } else
     if (dst_oxm_exp_id == 0) {
         if (datalen < sizeof(uint64_t)) {
-            throw eInvalid("cofaction_exp_body_copy_field::set_oxm_id() too short, not enough space for storing 32bit dst_oxm_id")
+            throw eInvalid("cofaction_body_copy_field::set_oxm_id() too short, not enough space for storing 32bit dst_oxm_id")
                 .set_func(__FUNCTION__)
                 .set_line(__LINE__);
 	}
@@ -460,13 +460,19 @@ public:
 
 public:
   friend std::ostream &operator<<(std::ostream &os,
-                                  const cofaction_exp_body_copy_field &body) {
-    os << "<cofaction_exp_body_copy_field exp-type: 0x" 
+                                  const cofaction_body_copy_field &body) {
+    os << "<cofaction_body_copy_field exp-type: 0x" 
 	    << std::hex
        	    << "exp-type: 0x" << (unsigned int)body.get_exp_type() << ", "
 	    << std::dec 
 	    << "src_offset: " << (unsigned int)body.get_src_offset() << ", "
 	    << "dst_offset: " << (unsigned int)body.get_dst_offset() << ", "
+	    << std::hex
+	    << "src_oxm_id: 0x" << (unsigned int)body.get_src_oxm_id() << ", "
+	    << "src_oxm_exp_id: 0x" << (unsigned int)body.get_src_oxm_exp_id() << ", "
+	    << "dst_oxm_exp_id: 0x" << (unsigned int)body.get_dst_oxm_id() << ", "
+	    << "dst_oxm_id: 0x" << (unsigned int)body.get_dst_oxm_exp_id() << " "
+	    << std::dec 
 	    << ">" << std::endl;
 
     os << dynamic_cast<const rofl::cmemory &>(body);
