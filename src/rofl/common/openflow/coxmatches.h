@@ -27,6 +27,7 @@
 
 #include "rofl/common/openflow/coxmatch.h"
 #include "rofl/common/openflow/coxmatch_output.h"
+#include "rofl/common/openflow/extensions/matches/ext244_matches.h"
 #include "rofl/common/openflow/experimental/matches/capwap_matches.h"
 #include "rofl/common/openflow/experimental/matches/gtp_matches.h"
 #include "rofl/common/openflow/experimental/matches/pppoe_matches.h"
@@ -3542,6 +3543,93 @@ public:
   /**
    *
    */
+  rofl::openflow::extensions::ext244::coxmatch_packet_register &add_packet_register(uint8_t pkt_reg_index, uint64_t value = 0) {
+    // dynamic oxm-id for packet register "pkt_reg_index"
+    uint32_t oxm_id = (OFPXMC_PACKET_REGS << 16) | (pkt_reg_index << 9) | sizeof(uint64_t);
+    AcquireReadWriteLock lock(rwlock);
+    if (matches.find(OXM_ROFL_OFB_TYPE(oxm_id)) != matches.end()) {
+      delete matches[OXM_ROFL_OFB_TYPE(oxm_id)];
+    }
+    matches[OXM_ROFL_OFB_TYPE(oxm_id)] =
+        new rofl::openflow::extensions::ext244::coxmatch_packet_register(pkt_reg_index, value);
+    return dynamic_cast<rofl::openflow::extensions::ext244::coxmatch_packet_register &>(
+        *matches[OXM_ROFL_OFB_TYPE(oxm_id)]);
+  };
+
+  /**
+   *
+   */
+  rofl::openflow::extensions::ext244::coxmatch_packet_register &add_packet_register(uint8_t pkt_reg_index, uint64_t value, uint64_t mask) {
+    // dynamic oxm-id for packet register "pkt_reg_index"
+    uint32_t oxm_id = (OFPXMC_PACKET_REGS << 16) | (pkt_reg_index << 9) | HAS_MASK_FLAG | 2*sizeof(uint64_t);
+    AcquireReadWriteLock lock(rwlock);
+    if (matches.find(OXM_ROFL_OFB_TYPE(pkt_reg_index)) != matches.end()) {
+      delete matches[OXM_ROFL_OFB_TYPE(oxm_id)];
+    }
+    matches[OXM_ROFL_OFB_TYPE(oxm_id)] =
+        new rofl::openflow::extensions::ext244::coxmatch_packet_register(pkt_reg_index, value, mask);
+    return dynamic_cast<rofl::openflow::extensions::ext244::coxmatch_packet_register &>(
+        *matches[OXM_ROFL_OFB_TYPE(oxm_id)]);
+  };
+
+  /**
+   *
+   */
+  rofl::openflow::extensions::ext244::coxmatch_packet_register &set_packet_register(uint8_t pkt_reg_index) {
+    // dynamic oxm-id for packet register "pkt_reg_index"
+    uint32_t oxm_id = (OFPXMC_PACKET_REGS << 16) | (pkt_reg_index << 9) | HAS_MASK_FLAG | 2*sizeof(uint64_t);
+    AcquireReadWriteLock lock(rwlock);
+    if (matches.find(OXM_ROFL_OFB_TYPE(oxm_id)) == matches.end()) {
+      matches[OXM_ROFL_OFB_TYPE(oxm_id)] =
+          new rofl::openflow::extensions::ext244::coxmatch_packet_register(pkt_reg_index);
+    }
+    return dynamic_cast<rofl::openflow::extensions::ext244::coxmatch_packet_register &>(
+        *matches[OXM_ROFL_OFB_TYPE(oxm_id)]);
+  };
+
+  /**
+   *
+   */
+  const rofl::openflow::extensions::ext244::coxmatch_packet_register &get_packet_register(uint8_t pkt_reg_index) const {
+    // dynamic oxm-id for packet register "pkt_reg_index"
+    uint32_t oxm_id = (OFPXMC_PACKET_REGS << 16) | (pkt_reg_index << 9) | HAS_MASK_FLAG | 2*sizeof(uint64_t);
+    AcquireReadLock lock(rwlock);
+    if (matches.find(OXM_ROFL_OFB_TYPE(oxm_id)) == matches.end()) {
+      throw eOxmInval("coxmatches::get_packet_register() not found");
+    }
+    return dynamic_cast<const rofl::openflow::extensions::ext244::coxmatch_packet_register &>(*matches.at(
+        OXM_ROFL_OFB_TYPE(oxm_id)));
+  };
+
+  /**
+   *
+   */
+  bool drop_packet_register(uint8_t pkt_reg_index) {
+    // dynamic oxm-id for packet register "pkt_reg_index"
+    uint32_t oxm_id = (OFPXMC_PACKET_REGS << 16) | (pkt_reg_index << 9) | HAS_MASK_FLAG | 2*sizeof(uint64_t);
+    AcquireReadWriteLock lock(rwlock);
+    if (matches.find(OXM_ROFL_OFB_TYPE(oxm_id)) == matches.end()) {
+      return false;
+    }
+    delete matches[OXM_ROFL_OFB_TYPE(oxm_id)];
+    matches.erase(OXM_ROFL_OFB_TYPE(oxm_id));
+    return true;
+  };
+
+  /**
+   *
+   */
+  bool has_packet_register(uint8_t pkt_reg_index) const {
+    // dynamic oxm-id for packet register "pkt_reg_index"
+    uint32_t oxm_id = (OFPXMC_PACKET_REGS << 16) | (pkt_reg_index << 9) | HAS_MASK_FLAG | 2*sizeof(uint64_t);
+    AcquireReadLock lock(rwlock);
+    return (not(matches.find(OXM_ROFL_OFB_TYPE(oxm_id)) == matches.end()));
+  };
+
+public:
+  /**
+   *
+   */
   coxmatch_exp &add_exp_match(uint32_t exp_id, uint32_t oxm_id) {
     AcquireReadWriteLock lock(rwlock);
     if (matches.find(OXM_EXPR_OFX_TYPE(exp_id, oxm_id)) != matches.end()) {
@@ -3757,7 +3845,16 @@ public:
         os << oxmatches.get_ofx_tp_dst();
       } break;
       default: {
-        if (OXM_ROFL_CLASS(*it) == 0xffff0000) {
+        // EXT-244: packet register
+        if (OXM_ROFL_CLASS(*it) == (uint32_t)(OFPXMC_PACKET_REGS << 16)) {
+		for (int i = 0; i < 128; i++) {
+			if (oxmatches.has_packet_register(i)) {
+				os << oxmatches.get_packet_register(i);
+			}
+		}
+
+	}
+        if (OXM_ROFL_CLASS(*it) == (uint32_t)(OFPXMC_EXPERIMENTER << 16)) {
           os << oxmatches.get_exp_match((*it & 0xffffffff00000000) >> 32,
                                         (*it & 0x00000000fffffe00) >> 0);
         }

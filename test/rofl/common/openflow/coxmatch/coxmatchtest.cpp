@@ -928,3 +928,59 @@ void coxmatchtest::testExp64() {
   CPPUNIT_ASSERT(clone.get_oxm_length() ==
                  sizeof(uint32_t) + 2 * sizeof(uint64_t));
 }
+
+void coxmatchtest::test_ext244_pkt_reg() {
+  uint8_t pkt_reg_index = 17;
+  uint64_t value = 0xa1a2a3a4a5a6a7a8;
+  rofl::openflow::extensions::ext244::coxmatch_packet_register oxmatch(pkt_reg_index, value);
+
+  rofl::cmemory mem(oxmatch.length());
+  oxmatch.pack(mem.somem(), mem.length());
+  rofl::openflow::extensions::ext244::coxmatch_packet_register oxm(pkt_reg_index);
+  oxm.unpack(mem.somem(), mem.length());
+
+  std::cerr << oxmatch << std::endl;
+  std::cerr << oxm << std::endl;
+  std::cerr << mem << std::endl;
+
+  CPPUNIT_ASSERT(oxm.length() ==
+                 sizeof(struct rofl::openflow::ofp_oxm_hdr) + 1*sizeof(uint64_t));
+  CPPUNIT_ASSERT(oxm.get_oxm_class() == rofl::openflow::OFPXMC_PACKET_REGS);
+  CPPUNIT_ASSERT(oxm.get_oxm_field() == pkt_reg_index);
+  CPPUNIT_ASSERT(oxm.get_oxm_hasmask() == false);
+  CPPUNIT_ASSERT(oxm.get_oxm_type() ==
+                 (uint32_t)((rofl::openflow::OFPXMC_PACKET_REGS << 16) |
+                            (pkt_reg_index << 9)));
+  CPPUNIT_ASSERT(oxm.get_u64value() == value);
+  CPPUNIT_ASSERT(oxm.get_u64masked_value() == value);
+}
+
+void coxmatchtest::test_ext244_pkt_reg_mask() {
+  uint8_t pkt_reg_index = 17;
+  uint64_t value = 0xa1a2a3a4a5a6a7a8;
+  uint64_t mask = 0xff00ff00f0f0f0f0;
+  rofl::openflow::extensions::ext244::coxmatch_packet_register oxmatch(pkt_reg_index, value, mask);
+
+  rofl::cmemory mem(oxmatch.length());
+  oxmatch.pack(mem.somem(), mem.length());
+  rofl::openflow::extensions::ext244::coxmatch_packet_register oxm(pkt_reg_index);
+  oxm.unpack(mem.somem(), mem.length());
+
+  std::cerr << ">>>oxmatch<<< " << std::endl << oxmatch << std::endl;
+  std::cerr << ">>>oxm<<< " << std::endl << oxm << std::endl;
+  std::cerr << ">>>mem<<< " << std::endl << mem << std::endl;
+
+  CPPUNIT_ASSERT(oxm.length() ==
+                 sizeof(struct rofl::openflow::ofp_oxm_hdr) + 2*sizeof(uint64_t));
+  CPPUNIT_ASSERT(oxm.get_oxm_class() == rofl::openflow::OFPXMC_PACKET_REGS);
+  CPPUNIT_ASSERT(oxm.get_oxm_field() == pkt_reg_index);
+  CPPUNIT_ASSERT(oxm.get_oxm_hasmask() == true);
+  CPPUNIT_ASSERT(oxm.get_oxm_type() ==
+                 (uint32_t)((rofl::openflow::OFPXMC_PACKET_REGS << 16) |
+                            (pkt_reg_index << 9)));
+  CPPUNIT_ASSERT(oxm.get_u64value() == value);
+  CPPUNIT_ASSERT(oxm.get_u64mask() == mask);
+  CPPUNIT_ASSERT(oxm.get_u64masked_value() == (value & mask));
+}
+
+

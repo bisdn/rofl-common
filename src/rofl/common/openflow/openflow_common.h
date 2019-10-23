@@ -394,6 +394,7 @@ enum ofp_oxm_class {
   OFPXMC_NXM_0 = 0x0000,          /* Backward compatibility with NXM */
   OFPXMC_NXM_1 = 0x0001,          /* Backward compatibility with NXM */
   OFPXMC_OPENFLOW_BASIC = 0x8000, /* Basic class for OpenFlow */
+  OFPXMC_PACKET_REGS = 0x8001,    /* EXT-244: packet register class id */
   OFPXMC_EXPERIMENTER = 0xFFFF,   /* Experimenter class */
 };
 
