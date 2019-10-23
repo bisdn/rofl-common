@@ -2,6 +2,8 @@ MAINTAINERCLEANFILES = Makefile.in
 
 noinst_LTLIBRARIES = libopenflow_experimental_actions.la
 libopenflow_experimental_actions_la_SOURCES = \
+	ext320_actions.h \
+	ext320_actions.cc \
 	gtp_actions.h \
 	gtp_actions.cc \
 	pppoe_actions.h \
@@ -15,6 +17,7 @@ libopenflow_experimental_actions_la_SOURCES = \
 
 library_includedir=$(includedir)/rofl/common/openflow/experimental/actions
 library_include_HEADERS = \
+	ext320_actions.h \
 	gtp_actions.h \
 	pppoe_actions.h \
 	capwap_actions.h \
