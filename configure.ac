@@ -69,6 +69,9 @@ AC_CONFIG_FILES([
 	src/rofl/common/Makefile
 	src/rofl/common/openflow/Makefile
 	src/rofl/common/openflow/messages/Makefile
+	src/rofl/common/openflow/extensions/Makefile
+	src/rofl/common/openflow/extensions/actions/Makefile
+	src/rofl/common/openflow/extensions/matches/Makefile
 	src/rofl/common/openflow/experimental/Makefile
 	src/rofl/common/openflow/experimental/actions/Makefile
 	src/rofl/common/openflow/experimental/matches/Makefile

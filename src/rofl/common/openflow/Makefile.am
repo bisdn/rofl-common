@@ -1,6 +1,6 @@
 MAINTAINERCLEANFILES = Makefile.in
 
-SUBDIRS = messages experimental
+SUBDIRS = messages experimental extensions
 
 noinst_LTLIBRARIES = libopenflow.la
 
@@ -128,7 +128,7 @@ libopenflow_la_SOURCES= \
 	cofmeterfeatures.h \
 	cofmeterfeatures.cc 
 
-libopenflow_la_LIBADD=messages/libopenflow_messages.la experimental/libopenflow_experimental.la
+libopenflow_la_LIBADD=messages/libopenflow_messages.la experimental/libopenflow_experimental.la extensions/libopenflow_extensions.la
 
 library_includedir=$(includedir)/rofl/common/openflow
 library_include_HEADERS = \

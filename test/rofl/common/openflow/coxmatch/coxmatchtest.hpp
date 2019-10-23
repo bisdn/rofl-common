@@ -13,6 +13,7 @@
 
 #include "rofl/common/cmemory.h"
 #include "rofl/common/openflow/coxmatch.h"
+#include "rofl/common/openflow/extensions/matches/ext244_matches.h"
 
 class coxmatchtest : public CppUnit::TestFixture {
   CPPUNIT_TEST_SUITE(coxmatchtest);
@@ -40,6 +41,8 @@ class coxmatchtest : public CppUnit::TestFixture {
   CPPUNIT_TEST(testExp32);
   CPPUNIT_TEST(testExp48);
   CPPUNIT_TEST(testExp64);
+  CPPUNIT_TEST(test_ext244_pkt_reg);
+  CPPUNIT_TEST(test_ext244_pkt_reg_mask);
   CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -74,6 +77,9 @@ public:
   void testExp32();
   void testExp48();
   void testExp64();
+
+  void test_ext244_pkt_reg();
+  void test_ext244_pkt_reg_mask();
 
 private:
   uint32_t oxm_id_exp;
