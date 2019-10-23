@@ -1,6 +1,6 @@
 MAINTAINERCLEANFILES = Makefile.in
 
-SUBDIRS = 
+SUBDIRS =
 
 noinst_PROGRAMS = client
 
@@ -9,8 +9,7 @@ client_SOURCES = \
 	tcpclient.h \
 	tcpclient.cc
 
-client_LDADD = ../../src/rofl/librofl_common.la 
-	-lpthread \
-	-lrt 
+client_LDADD = ../../src/rofl/librofl_common.la
+	-lpthread
 
 AM_LDFLAGS = -static

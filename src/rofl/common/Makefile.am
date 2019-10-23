@@ -1,6 +1,6 @@
 MAINTAINERCLEANFILES = Makefile.in
 
-SUBDIRS = openflow 
+SUBDIRS = openflow
 
 noinst_LTLIBRARIES = librofl_common_base.la
 
@@ -52,9 +52,9 @@ librofl_common_base_la_SOURCES = \
 		cbuffer.hpp \
 		cbuffer.cpp
 
-		
 
-librofl_common_base_la_LIBADD=openflow/libopenflow.la -lrt
+
+librofl_common_base_la_LIBADD=openflow/libopenflow.la
 
 library_includedir=$(includedir)/rofl/common
 library_include_HEADERS= \
