@@ -21,9 +21,9 @@ void coxmatchestest::setUp() {}
 void coxmatchestest::tearDown() {}
 
 void coxmatchestest::testPack() {
-  using rofl::openflow::coxmatch_8;
   using rofl::openflow::coxmatch_16;
   using rofl::openflow::coxmatch_48;
+  using rofl::openflow::coxmatch_8;
   rofl::openflow::coxmatches matches;
 
   matches.add_ofb_eth_dst(rofl::cmacaddr("b1:b2:b3:b4:b5:b6"),

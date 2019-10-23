@@ -190,7 +190,8 @@ void coxmatches::unpack(uint8_t *buf, size_t buflen) {
       case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_EXTHDR): {
         add_ofb_ipv6_exthdr().unpack(buf, buflen);
       } break;
-      default: {};
+      default: {
+      };
       }
 
     } break;
@@ -237,7 +238,9 @@ void coxmatches::unpack(uint8_t *buf, size_t buflen) {
           rofl::openflow::experimental::OXM_TLV_EXPR_TP_DST): {
         add_ofx_tp_dst().unpack(buf, buflen);
       } break;
-      default: { add_exp_match(exp_id, oxm_id).unpack(buf, buflen); };
+      default: {
+        add_exp_match(exp_id, oxm_id).unpack(buf, buflen);
+      };
       }
 
     } break;

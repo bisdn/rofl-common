@@ -432,7 +432,8 @@ void csegment::store_and_merge_msg(const rofl::openflow::cofmsg &msg_stats) {
       }
 
     } break;
-    default: {};
+    default: {
+    };
     }
 
   } // end else block

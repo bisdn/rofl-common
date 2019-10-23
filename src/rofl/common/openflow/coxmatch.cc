@@ -19,8 +19,8 @@ namespace rofl {
 namespace openflow {
 
 std::ostream &operator<<(std::ostream &os, const coxmatch_exp &oxm) {
-  using experimental::pppoe::coxmatch_ofx_pppoe_code;
   using experimental::pppoe::coxmatch_ofx_ppp_prot;
+  using experimental::pppoe::coxmatch_ofx_pppoe_code;
   using experimental::pppoe::coxmatch_ofx_pppoe_sid;
   using experimental::pppoe::coxmatch_ofx_pppoe_type;
 
@@ -59,5 +59,5 @@ std::ostream &operator<<(std::ostream &os, const coxmatch_exp &oxm) {
   }
   return os;
 };
-}
-}
+} // namespace openflow
+} // namespace rofl

@@ -32,7 +32,8 @@ void cofport::pack(uint8_t *buf, size_t buflen) {
 
     hdr->port_no = htobe16(portno & 0x0000ffff);
     memcpy(hdr->hw_addr, hwaddr.somem(), OFP_ETH_ALEN);
-    static_assert(sizeof(hdr->name) == OFP_MAX_PORT_NAME_LEN, "invalid length of hdr->name");
+    static_assert(sizeof(hdr->name) == OFP_MAX_PORT_NAME_LEN,
+                  "invalid length of hdr->name");
     // this is somewhat awkward
 #if __GNUC__ >= 8
 #pragma GCC diagnostic push

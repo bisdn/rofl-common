@@ -348,7 +348,8 @@ public:
       os << "<duration-nsec: " << (unsigned long long)r.get_duration_nsec()
          << " >" << std::endl;
     } break;
-    default: {};
+    default: {
+    };
     }
     return os;
   };
@@ -363,7 +364,7 @@ private:
   uint32_t duration_sec;
   uint32_t duration_nsec;
 };
-}
-}
+} // namespace openflow
+} // namespace rofl
 
 #endif /* ROFL_COMMON_OPENFLOW_COFQUEUESTATS_H */

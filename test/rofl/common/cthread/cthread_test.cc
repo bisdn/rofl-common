@@ -41,6 +41,7 @@ void cthread_test::cobject::handle_timeout(rofl::cthread &thread,
   case 1: {
     error = true;
   } break;
-  default: {};
+  default: {
+  };
   }
 };

@@ -91,7 +91,9 @@ std::ostream &cofaction::dump(std::ostream &os, const cofaction &action) {
     case rofl::openflow::OFPAT_EXPERIMENTER: {
       os << dynamic_cast<const cofaction_experimenter &>(action);
     } break;
-    default: { os << action; }
+    default: {
+      os << action;
+    }
     };
 
   } catch (...) {
@@ -1746,7 +1748,8 @@ size_t cofaction_set_field::length() const {
     case OXM_TYPE_EXP: {
       total_length += oxm_exp.length();
     } break;
-    default: {};
+    default: {
+    };
     }
 
     size_t pad = (0x7 & total_length);
@@ -1805,7 +1808,8 @@ void cofaction_set_field::pack(uint8_t *buf, size_t buflen) {
     case OXM_TYPE_EXP: {
       oxm_exp.pack(hdr->field, oxm_exp.length());
     } break;
-    default: {};
+    default: {
+    };
     }
 
   } break;
@@ -1874,7 +1878,8 @@ void cofaction_set_field::unpack(uint8_t *buf, size_t buflen) {
         case 32 /*bytes*/: {
           set_oxm_128().unpack(hdr->field, oxm_len);
         } break;
-        default: {};
+        default: {
+        };
         }
 
       } break;
@@ -1910,7 +1915,8 @@ void cofaction_set_field::unpack(uint8_t *buf, size_t buflen) {
         case 16 /*bytes*/: {
           set_oxm_128().unpack(hdr->field, oxm_len);
         } break;
-        default: {};
+        default: {
+        };
         }
 
       } break;

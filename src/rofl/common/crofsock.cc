@@ -154,7 +154,8 @@ void crofsock::close() {
     state = STATE_TCP_ESTABLISHED;
 
   } break;
-  default: {};
+  default: {
+  };
   }
 
   /* shutdown TCP */
@@ -239,7 +240,8 @@ void crofsock::close() {
     state = STATE_IDLE;
 
   } break;
-  default: {};
+  default: {
+  };
   }
 
   /* reset internal variables for next round */
@@ -257,7 +259,8 @@ void crofsock::close() {
     flag_set(FLAG_CLOSING, false);
   }
     return; // leave while loop
-  default: {};
+  default: {
+  };
   }
 }
 
@@ -775,9 +778,8 @@ void crofsock::tls_accept(int sockfd) {
         throw eLibCall("eLibCall", "SSL_new", __FILE__, __FUNCTION__, __LINE__);
       }
 
-      SSL_set_mode(ssl,
-                   SSL_MODE_ENABLE_PARTIAL_WRITE |
-                       SSL_MODE_ACCEPT_MOVING_WRITE_BUFFER);
+      SSL_set_mode(ssl, SSL_MODE_ENABLE_PARTIAL_WRITE |
+                            SSL_MODE_ACCEPT_MOVING_WRITE_BUFFER);
 
       if ((bio = BIO_new(BIO_s_socket())) == NULL) {
         throw eLibCall("eLibCall", "BIO_new", __FILE__, __FUNCTION__, __LINE__);
@@ -921,9 +923,8 @@ void crofsock::tls_connect(bool reconnect) {
       throw eLibCall("eLibCall", "SSL_new", __FILE__, __FUNCTION__, __LINE__);
     }
 
-    SSL_set_mode(ssl,
-                 SSL_MODE_ENABLE_PARTIAL_WRITE |
-                     SSL_MODE_ACCEPT_MOVING_WRITE_BUFFER);
+    SSL_set_mode(ssl, SSL_MODE_ENABLE_PARTIAL_WRITE |
+                          SSL_MODE_ACCEPT_MOVING_WRITE_BUFFER);
 
     if ((bio = BIO_new(BIO_s_socket())) == NULL) {
       throw eLibCall("eLibCall", "BIO_new", __FILE__, __FUNCTION__, __LINE__);
@@ -1350,7 +1351,8 @@ void crofsock::rx_disable() {
             << " sd=" << sd << " laddr=" << laddr.str()
             << " raddr=" << raddr.str();
   } break;
-  default: {};
+  default: {
+  };
   }
 }
 
@@ -1365,7 +1367,8 @@ void crofsock::rx_enable() {
             << " raddr=" << raddr.str();
     cthread::thread(rx_thread_num).wakeup(this);
   } break;
-  default: {};
+  default: {
+  };
   }
 }
 
@@ -1450,7 +1453,9 @@ crofsock::msg_result_t crofsock::send_message(rofl::openflow::cofmsg *msg,
       case rofl::openflow10::OFPT_ECHO_REPLY: {
         txqueues[QUEUE_OAM].store(msg, enforce_queueing);
       } break;
-      default: { txqueues[QUEUE_MGMT].store(msg, enforce_queueing); };
+      default: {
+        txqueues[QUEUE_MGMT].store(msg, enforce_queueing);
+      };
       }
     } break;
     case rofl::openflow12::OFP_VERSION: {
@@ -1472,7 +1477,9 @@ crofsock::msg_result_t crofsock::send_message(rofl::openflow::cofmsg *msg,
       case rofl::openflow12::OFPT_ECHO_REPLY: {
         txqueues[QUEUE_OAM].store(msg, enforce_queueing);
       } break;
-      default: { txqueues[QUEUE_MGMT].store(msg, enforce_queueing); };
+      default: {
+        txqueues[QUEUE_MGMT].store(msg, enforce_queueing);
+      };
       }
     } break;
     case rofl::openflow13::OFP_VERSION:
@@ -1495,7 +1502,9 @@ crofsock::msg_result_t crofsock::send_message(rofl::openflow::cofmsg *msg,
       case rofl::openflow13::OFPT_ECHO_REPLY: {
         txqueues[QUEUE_OAM].store(msg, enforce_queueing);
       } break;
-      default: { txqueues[QUEUE_MGMT].store(msg, enforce_queueing); };
+      default: {
+        txqueues[QUEUE_MGMT].store(msg, enforce_queueing);
+      };
       }
     };
     }
@@ -1724,7 +1733,7 @@ void crofsock::send_from_queue() {
             }
               return;
             case SSL_ERROR_WANT_CONNECT: { /* should never happen here, though
-                                              */
+                                            */
               VLOG(6) << __FUNCTION__
                       << " TLS: SSL_write WANT CONNECT on sd=" << sd;
               tx_is_running = false;
@@ -2144,7 +2153,9 @@ on_error:
     }
     // WARNING: handle_closed might delete this socket, don't call anything here
   } break;
-  default: { VLOG(6) << __FUNCTION__ << " error in state=" << str(); };
+  default: {
+    VLOG(6) << __FUNCTION__ << " error in state=" << str();
+  };
   }
 }
 

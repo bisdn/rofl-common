@@ -1268,13 +1268,8 @@ void cofaction_test::testActionCopyField1() {
   uint32_t dst_oxm_exp_id = 0xe5e6e7e8;
 
   rofl::openflow::experimental::ext320::cofaction_body_copy_field copy_field(
-		  n_bits, 
-		  src_offset, 
-		  dst_offset, 
-		  src_oxm_id, 
-		  src_oxm_exp_id, 
-		  dst_oxm_id, 
-		  dst_oxm_exp_id);
+      n_bits, src_offset, dst_offset, src_oxm_id, src_oxm_exp_id, dst_oxm_id,
+      dst_oxm_exp_id);
 
   std::cerr << ">>> copy_field body: <<<" << std::endl << copy_field;
 
@@ -1293,10 +1288,13 @@ void cofaction_test::testActionCopyField1() {
 
   std::cerr << ">>> copied: <<<" << std::endl << copied;
 
-  CPPUNIT_ASSERT(copied.get_exp_id() == rofl::openflow::experimental::ext320::EXT320_EXP_ID);
-  rofl::openflow::experimental::ext320::cofaction_body_copy_field copied_copy_field(copied.get_exp_body());
+  CPPUNIT_ASSERT(copied.get_exp_id() ==
+                 rofl::openflow::experimental::ext320::EXT320_EXP_ID);
+  rofl::openflow::experimental::ext320::cofaction_body_copy_field
+      copied_copy_field(copied.get_exp_body());
 
-  std::cerr << ">>> copied copy_field body: <<<" << std::endl << copied_copy_field;
+  std::cerr << ">>> copied copy_field body: <<<" << std::endl
+            << copied_copy_field;
 
   CPPUNIT_ASSERT(copy_field == copied_copy_field);
   CPPUNIT_ASSERT(copied_copy_field.get_n_bits() == n_bits);
@@ -1324,13 +1322,8 @@ void cofaction_test::testActionCopyField2() {
   uint32_t dst_oxm_exp_id = 0;
 
   rofl::openflow::experimental::ext320::cofaction_body_copy_field copy_field(
-		  n_bits, 
-		  src_offset, 
-		  dst_offset, 
-		  src_oxm_id, 
-		  src_oxm_exp_id, 
-		  dst_oxm_id, 
-		  dst_oxm_exp_id);
+      n_bits, src_offset, dst_offset, src_oxm_id, src_oxm_exp_id, dst_oxm_id,
+      dst_oxm_exp_id);
 
   std::cerr << ">>> copy_field body: <<<" << std::endl << copy_field;
 
@@ -1349,10 +1342,13 @@ void cofaction_test::testActionCopyField2() {
 
   std::cerr << ">>> copied: <<<" << std::endl << copied;
 
-  CPPUNIT_ASSERT(copied.get_exp_id() == rofl::openflow::experimental::ext320::EXT320_EXP_ID);
-  rofl::openflow::experimental::ext320::cofaction_body_copy_field copied_copy_field(copied.get_exp_body());
+  CPPUNIT_ASSERT(copied.get_exp_id() ==
+                 rofl::openflow::experimental::ext320::EXT320_EXP_ID);
+  rofl::openflow::experimental::ext320::cofaction_body_copy_field
+      copied_copy_field(copied.get_exp_body());
 
-  std::cerr << ">>> copied copy_field body: <<<" << std::endl << copied_copy_field;
+  std::cerr << ">>> copied copy_field body: <<<" << std::endl
+            << copied_copy_field;
 
   CPPUNIT_ASSERT(copy_field == copied_copy_field);
   CPPUNIT_ASSERT(copied_copy_field.get_n_bits() == n_bits);
@@ -1380,13 +1376,8 @@ void cofaction_test::testActionCopyField3() {
   uint32_t dst_oxm_exp_id = 0xe5e6e7e8;
 
   rofl::openflow::experimental::ext320::cofaction_body_copy_field copy_field(
-		  n_bits, 
-		  src_offset, 
-		  dst_offset, 
-		  src_oxm_id, 
-		  src_oxm_exp_id, 
-		  dst_oxm_id, 
-		  dst_oxm_exp_id);
+      n_bits, src_offset, dst_offset, src_oxm_id, src_oxm_exp_id, dst_oxm_id,
+      dst_oxm_exp_id);
 
   std::cerr << ">>> copy_field body: <<<" << std::endl << copy_field;
 
@@ -1405,10 +1396,13 @@ void cofaction_test::testActionCopyField3() {
 
   std::cerr << ">>> copied: <<<" << std::endl << copied;
 
-  CPPUNIT_ASSERT(copied.get_exp_id() == rofl::openflow::experimental::ext320::EXT320_EXP_ID);
-  rofl::openflow::experimental::ext320::cofaction_body_copy_field copied_copy_field(copied.get_exp_body());
+  CPPUNIT_ASSERT(copied.get_exp_id() ==
+                 rofl::openflow::experimental::ext320::EXT320_EXP_ID);
+  rofl::openflow::experimental::ext320::cofaction_body_copy_field
+      copied_copy_field(copied.get_exp_body());
 
-  std::cerr << ">>> copied copy_field body: <<<" << std::endl << copied_copy_field;
+  std::cerr << ">>> copied copy_field body: <<<" << std::endl
+            << copied_copy_field;
 
   CPPUNIT_ASSERT(copy_field == copied_copy_field);
   CPPUNIT_ASSERT(copied_copy_field.get_n_bits() == n_bits);
@@ -1436,13 +1430,8 @@ void cofaction_test::testActionCopyField4() {
   uint32_t dst_oxm_exp_id = 0;
 
   rofl::openflow::experimental::ext320::cofaction_body_copy_field copy_field(
-		  n_bits, 
-		  src_offset, 
-		  dst_offset, 
-		  src_oxm_id, 
-		  src_oxm_exp_id, 
-		  dst_oxm_id, 
-		  dst_oxm_exp_id);
+      n_bits, src_offset, dst_offset, src_oxm_id, src_oxm_exp_id, dst_oxm_id,
+      dst_oxm_exp_id);
 
   std::cerr << ">>> copy_field body: <<<" << std::endl << copy_field;
 
@@ -1461,10 +1450,13 @@ void cofaction_test::testActionCopyField4() {
 
   std::cerr << ">>> copied: <<<" << std::endl << copied;
 
-  CPPUNIT_ASSERT(copied.get_exp_id() == rofl::openflow::experimental::ext320::EXT320_EXP_ID);
-  rofl::openflow::experimental::ext320::cofaction_body_copy_field copied_copy_field(copied.get_exp_body());
+  CPPUNIT_ASSERT(copied.get_exp_id() ==
+                 rofl::openflow::experimental::ext320::EXT320_EXP_ID);
+  rofl::openflow::experimental::ext320::cofaction_body_copy_field
+      copied_copy_field(copied.get_exp_body());
 
-  std::cerr << ">>> copied copy_field body: <<<" << std::endl << copied_copy_field;
+  std::cerr << ">>> copied copy_field body: <<<" << std::endl
+            << copied_copy_field;
 
   CPPUNIT_ASSERT(copy_field == copied_copy_field);
   CPPUNIT_ASSERT(copied_copy_field.get_n_bits() == n_bits);

@@ -253,7 +253,7 @@ private:
   rofl::crwlock bcs_lock;
 };
 
-}; // end of namespace
-}; // end of namespace
+}; // namespace openflow
+}; // namespace rofl
 
 #endif /* ROFL_COMMON_OPENFLOW_COFBUCKETS_H */

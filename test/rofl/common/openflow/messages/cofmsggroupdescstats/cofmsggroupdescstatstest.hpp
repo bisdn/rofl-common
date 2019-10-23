@@ -48,4 +48,4 @@ private:
 };
 
 #endif /* TEST_SRC_ROFL_COMMON_OPENFLOW_MESSAGES_COFMSGGROUPDESCSTATS_TEST_HPP_ \
-          */
+        */

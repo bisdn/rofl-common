@@ -365,7 +365,7 @@ private:
   uint32_t exp_id;
   rofl::cmemory exp_body;
 };
-}
-}
+} // namespace openflow
+} // namespace rofl
 
 #endif /* COFMETERBAND_H_ */

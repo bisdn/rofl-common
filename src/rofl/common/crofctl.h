@@ -1364,6 +1364,6 @@ private:
   rofl::openflow::cofrole role;
 };
 
-}; // end of namespace
+}; // namespace rofl
 
 #endif

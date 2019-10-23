@@ -85,6 +85,6 @@ private:
   unsigned int seedp;
 };
 
-}; // end of namespace
+}; // namespace rofl
 
 #endif

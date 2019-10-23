@@ -34,7 +34,9 @@ public:
     case rofl::openflow10::OFP_VERSION: {
       set_type(rofl::openflow10::OFPT_BARRIER_REQUEST /* =18 */);
     } break;
-    default: { set_type(rofl::openflow12::OFPT_BARRIER_REQUEST /* =20 */); };
+    default: {
+      set_type(rofl::openflow12::OFPT_BARRIER_REQUEST /* =20 */);
+    };
     }
   };
 
@@ -121,7 +123,9 @@ public:
     case rofl::openflow10::OFP_VERSION: {
       set_type(rofl::openflow10::OFPT_BARRIER_REPLY /* =19 */);
     } break;
-    default: { set_type(rofl::openflow12::OFPT_BARRIER_REPLY /* =21 */); };
+    default: {
+      set_type(rofl::openflow12::OFPT_BARRIER_REPLY /* =21 */);
+    };
     }
   };
 

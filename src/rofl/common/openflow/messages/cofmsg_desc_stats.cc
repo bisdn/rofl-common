@@ -41,7 +41,9 @@ size_t cofmsg_desc_stats_request::length() const {
   case rofl::openflow10::OFP_VERSION: {
     return (sizeof(struct rofl::openflow10::ofp_stats_request));
   } break;
-  default: { return (sizeof(struct rofl::openflow13::ofp_multipart_request)); };
+  default: {
+    return (sizeof(struct rofl::openflow13::ofp_multipart_request));
+  };
   }
   return 0;
 }

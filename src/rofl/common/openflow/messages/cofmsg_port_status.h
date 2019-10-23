@@ -124,7 +124,9 @@ public:
     case openflow::OFPPR_MODIFY: {
       os << "<reason: -MODIFY- >" << std::endl;
     } break;
-    default: { os << "<reason: -UNKNOWN- >" << std::endl; } break;
+    default: {
+      os << "<reason: -UNKNOWN- >" << std::endl;
+    } break;
     }
 
     os << msg.port;

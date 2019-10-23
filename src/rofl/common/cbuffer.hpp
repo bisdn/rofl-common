@@ -132,7 +132,9 @@ public:
       }
       wbytes += offset;
     } break;
-    default: { throw eBufInval("invalid SEEK operation"); };
+    default: {
+      throw eBufInval("invalid SEEK operation");
+    };
     }
     return *this;
   };
@@ -158,7 +160,9 @@ public:
         rbytes = wbytes = 0; // FIXME: hmm ...
       }
     } break;
-    default: { throw eBufInval("invalid SEEK operation"); };
+    default: {
+      throw eBufInval("invalid SEEK operation");
+    };
     }
     return *this;
   };
@@ -204,6 +208,6 @@ private:
   unsigned int rbytes;
 };
 
-}; // end of namespace
+}; // namespace rofl
 
 #endif

@@ -12,7 +12,9 @@ size_t cofmsg_features_reply::length() const {
     return (sizeof(struct rofl::openflow12::ofp_switch_features) +
             ports.length());
   } break;
-  default: { return (sizeof(struct rofl::openflow13::ofp_switch_features)); };
+  default: {
+    return (sizeof(struct rofl::openflow13::ofp_switch_features));
+  };
   }
 }
 

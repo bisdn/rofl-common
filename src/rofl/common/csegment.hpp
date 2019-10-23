@@ -228,7 +228,9 @@ public:
               rofl::openflow::cofmsg_port_desc_stats_request const &>(
               *(msg.msg));
         } break;
-        default: { os << *(msg.msg); };
+        default: {
+          os << *(msg.msg);
+        };
         }
 
       } break;
@@ -283,7 +285,9 @@ public:
           os << dynamic_cast<
               rofl::openflow::cofmsg_port_desc_stats_reply const &>(*(msg.msg));
         } break;
-        default: { os << *(msg.msg); };
+        default: {
+          os << *(msg.msg);
+        };
         }
 
       } break;

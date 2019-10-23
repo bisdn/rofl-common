@@ -16,6 +16,6 @@ namespace rofl {
  */
 typedef unsigned int cdptid;
 
-}; // end of namespace
+}; // namespace rofl
 
 #endif /* CDPTID_H_ */

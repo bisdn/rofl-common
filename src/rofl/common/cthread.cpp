@@ -579,7 +579,8 @@ void cthread::start(const std::string &thread_name) {
     state = STATE_RUNNING;
 
   } break;
-  default: {};
+  default: {
+  };
   }
 }
 
@@ -604,7 +605,8 @@ void cthread::stop() {
     state = STATE_IDLE;
 
   } break;
-  default: {};
+  default: {
+  };
   }
 }
 
@@ -631,7 +633,8 @@ void cthread::wakeup(cthread_env *env) {
       }
     }
   } break;
-  default: {};
+  default: {
+  };
   }
 }
 

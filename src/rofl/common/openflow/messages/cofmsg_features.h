@@ -228,7 +228,9 @@ public:
          << std::hex << (int)msg.get_capabilities() << std::dec
          << " auxid:" << (int)msg.get_auxid() << " >" << std::endl;
     } break;
-    default: { } break; }
+    default: {
+    } break;
+    }
     return os;
   };
 

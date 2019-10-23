@@ -39,7 +39,8 @@ void caddrinfos::resolve() {
 
     } break;
     case EAI_SYSTEM:
-    default: {};
+    default: {
+    };
     }
     throw eSysCall("getaddrinfo() " + std::string(gai_strerror(rc)));
   }

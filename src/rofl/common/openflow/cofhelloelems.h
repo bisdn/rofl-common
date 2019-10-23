@@ -116,7 +116,9 @@ public:
       case openflow13::OFPHET_VERSIONBITMAP: {
         os << cofhello_elem_versionbitmap(elem);
       } break;
-      default: { os << *(it->second); } break;
+      default: {
+        os << *(it->second);
+      } break;
       }
     }
     return os;

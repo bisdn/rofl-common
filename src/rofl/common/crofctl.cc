@@ -150,7 +150,9 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
                   *msg));
 
         } break;
-        default: { } break; }
+        default: {
+        } break;
+        }
 
       } break;
       case rofl::openflow10::OFPT_BARRIER_REQUEST: {
@@ -168,7 +170,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
                 *msg));
 
       } break;
-      default: {};
+      default: {
+      };
       }
     } break;
     case rofl::openflow12::OFP_VERSION: {
@@ -332,7 +335,9 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
                   *msg));
 
         } break;
-        default: { } break; }
+        default: {
+        } break;
+        }
 
       } break;
       case rofl::openflow12::OFPT_BARRIER_REQUEST: {
@@ -367,7 +372,8 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
         send_role_reply(conn.get_auxid(), msg->get_xid(), role);
 
       } break;
-      default: {};
+      default: {
+      };
       }
     } break;
     case openflow13::OFP_VERSION: {
@@ -570,7 +576,9 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
                   *msg));
 
         } break;
-        default: { } break; }
+        default: {
+        } break;
+        }
 
       } break;
       case rofl::openflow13::OFPT_BARRIER_REQUEST: {
@@ -617,10 +625,12 @@ void crofctl::handle_recv(crofchan &chan, crofconn &conn,
             *this, conn.get_auxid(),
             dynamic_cast<rofl::openflow::cofmsg_meter_mod &>(*msg));
       } break;
-      default: {};
+      default: {
+      };
       }
     } break;
-    default: {};
+    default: {
+    };
     }
 
   } catch (eRofCtlNotFound &e) {
@@ -2147,7 +2157,8 @@ void crofctl::handle_transaction_timeout(crofchan &chan, crofconn &conn,
       case rofl::openflow10::OFPT_VENDOR: {
         crofctl_env::call_env(env).handle_experimenter_timeout(*this, xid);
       } break;
-      default: {};
+      default: {
+      };
       }
 
     } break;
@@ -2156,7 +2167,8 @@ void crofctl::handle_transaction_timeout(crofchan &chan, crofconn &conn,
       case rofl::openflow12::OFPT_EXPERIMENTER: {
         crofctl_env::call_env(env).handle_experimenter_timeout(*this, xid);
       } break;
-      default: {};
+      default: {
+      };
       }
 
     } break;
@@ -2165,11 +2177,13 @@ void crofctl::handle_transaction_timeout(crofchan &chan, crofconn &conn,
       case rofl::openflow13::OFPT_EXPERIMENTER: {
         crofctl_env::call_env(env).handle_experimenter_timeout(*this, xid);
       } break;
-      default: {};
+      default: {
+      };
       }
 
     } break;
-    default: {};
+    default: {
+    };
     }
 
   } catch (eRofCtlNotFound &e) {

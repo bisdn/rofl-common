@@ -2364,6 +2364,6 @@ private:
   std::string ciphers;
 };
 
-}; // end of namespace
+}; // namespace rofl
 
 #endif

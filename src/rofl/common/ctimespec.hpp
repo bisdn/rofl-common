@@ -124,7 +124,7 @@ public:
   };
   /**
    *
-  */
+   */
   ctimespec(const ctimespec &ts) { *this = ts; };
 
   /**

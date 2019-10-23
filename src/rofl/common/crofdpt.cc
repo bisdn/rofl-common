@@ -63,7 +63,8 @@ void crofdpt::handle_recv(rofl::crofchan &chan, rofl::crofconn &conn,
       case rofl::openflow10::OFPT_QUEUE_GET_CONFIG_REPLY: {
         queue_get_config_reply_rcvd(conn.get_auxid(), msg);
       } break;
-      default: {};
+      default: {
+      };
       }
 
     } break;
@@ -102,7 +103,8 @@ void crofdpt::handle_recv(rofl::crofchan &chan, rofl::crofconn &conn,
       case rofl::openflow12::OFPT_ROLE_REPLY: {
         role_reply_rcvd(conn.get_auxid(), msg);
       } break;
-      default: {};
+      default: {
+      };
       }
     } break;
     case rofl::openflow13::OFP_VERSION: {
@@ -143,10 +145,12 @@ void crofdpt::handle_recv(rofl::crofchan &chan, rofl::crofconn &conn,
       case rofl::openflow13::OFPT_GET_ASYNC_REPLY: {
         get_async_config_reply_rcvd(conn.get_auxid(), msg);
       } break;
-      default: {};
+      default: {
+      };
       }
     } break;
-    default: {};
+    default: {
+    };
     }
 
   } catch (rofl::exception &e) {
@@ -225,7 +229,8 @@ void crofdpt::handle_transaction_timeout(crofchan &chan, crofconn &conn,
       case rofl::openflow10::OFPT_VENDOR: {
         crofdpt_env::call_env(env).handle_experimenter_timeout(*this, xid);
       } break;
-      default: {};
+      default: {
+      };
       }
 
     } break;
@@ -303,7 +308,8 @@ void crofdpt::handle_transaction_timeout(crofchan &chan, crofconn &conn,
       case rofl::openflow12::OFPT_EXPERIMENTER: {
         crofdpt_env::call_env(env).handle_experimenter_timeout(*this, xid);
       } break;
-      default: {};
+      default: {
+      };
       }
 
     } break;
@@ -401,11 +407,13 @@ void crofdpt::handle_transaction_timeout(crofchan &chan, crofconn &conn,
       case rofl::openflow13::OFPT_EXPERIMENTER: {
         crofdpt_env::call_env(env).handle_experimenter_timeout(*this, xid);
       } break;
-      default: {};
+      default: {
+      };
       }
 
     } break;
-    default: {};
+    default: {
+    };
     }
 
   } catch (eRofDptNotFound &e) {
@@ -512,7 +520,8 @@ void crofdpt::multipart_reply_rcvd(const rofl::cauxid &auxid,
   case rofl::openflow13::OFPMP_EXPERIMENTER: {
     experimenter_stats_reply_rcvd(auxid, msg);
   } break;
-  default: {};
+  default: {
+  };
   }
 }
 
@@ -590,7 +599,9 @@ void crofdpt::group_features_stats_reply_rcvd(const rofl::cauxid &auxid,
     case rofl::openflow10::OFP_VERSION: {
       /* do nothing, no groups in OFP1.0 */
     } break;
-    default: { groups = reply.get_group_features_stats(); };
+    default: {
+      groups = reply.get_group_features_stats();
+    };
     }
   }
 
@@ -635,7 +646,9 @@ void crofdpt::table_features_stats_reply_rcvd(const rofl::cauxid &auxid,
     case rofl::openflow12::OFP_VERSION: {
       /* do nothing, not used in OFP1.0 and OFP1.2 */
     } break;
-    default: { tables = reply.get_tables(); };
+    default: {
+      tables = reply.get_tables();
+    };
     }
   }
 
@@ -654,7 +667,9 @@ void crofdpt::port_desc_stats_reply_rcvd(const rofl::cauxid &auxid,
     case rofl::openflow12::OFP_VERSION: {
       /* do nothing, handled in Features.Request */
     } break;
-    default: { ports = reply.get_ports(); };
+    default: {
+      ports = reply.get_ports();
+    };
     }
   }
 
@@ -713,7 +728,8 @@ void crofdpt::port_status_rcvd(const rofl::cauxid &auxid,
       ports.set_port(port_status.get_port().get_port_no()) =
           port_status.get_port();
     } break;
-    default: {};
+    default: {
+    };
     }
   }
 

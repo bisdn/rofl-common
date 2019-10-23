@@ -650,7 +650,8 @@ private:
     case TIMER_ID_ROFCONN_DESTROY: {
       __drop_conns_deletion();
     } break;
-    default: {};
+    default: {
+    };
     }
   };
 

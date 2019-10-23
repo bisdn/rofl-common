@@ -139,7 +139,9 @@ public:
     case rofl::openflow13::OFP_VERSION: {
       ss << "version: 1.3";
     } break;
-    default: { ss << "version: " << (int)get_version() << "(on wire)"; } break;
+    default: {
+      ss << "version: " << (int)get_version() << "(on wire)";
+    } break;
     }
     ss << ", type: " << (int)get_type() << ", len: " << (int)get_length()
        << ", xid: 0x" << std::hex << (unsigned int)get_xid() << std::dec

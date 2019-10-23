@@ -374,7 +374,9 @@ public:
         os << dynamic_cast<const cofportdesc_prop_experimenter &>(
             *(it->second));
       } break;
-      default: { os << (*(it->second)); }
+      default: {
+        os << (*(it->second));
+      }
       }
     }
     return os;

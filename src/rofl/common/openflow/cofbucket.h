@@ -268,7 +268,7 @@ private:
   cofactions actions; // list of OpenFlow actions
 };
 
-}; // end of namespace
-}; // end of namespace
+}; // namespace openflow
+}; // namespace rofl
 
 #endif /* ROFL_COMMON_OPENFLOW_COFBUCKET_H */

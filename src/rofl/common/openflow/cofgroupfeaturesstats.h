@@ -204,7 +204,7 @@ private:
   std::vector<uint32_t> actions;
 };
 
-} /* end of namespace */
-} /* end of namespace */
+} // namespace openflow
+} // namespace rofl
 
 #endif /* ROFL_COMMON_OPENFLOW_COFGROUPFEATURESSTATS_H */

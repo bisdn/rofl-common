@@ -406,7 +406,8 @@ void crofchantest::handle_timeout(rofl::cthread &thread, uint32_t timer_id) {
                      rofl::ctimespec().expire_in(4));
     }
   } break;
-  default: {};
+  default: {
+  };
   }
 }
 
@@ -443,7 +444,8 @@ void crofchantest::handle_recv(rofl::crofchan &chan, rofl::crofconn &conn,
   case rofl::openflow13::OFPT_PACKET_OUT: {
 
   } break;
-  default: {};
+  default: {
+  };
   }
 
   delete pmsg;

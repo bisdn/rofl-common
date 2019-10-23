@@ -20,8 +20,8 @@ int cetherswitch::run(int argc, char **argv) {
   signal(SIGINT, signal_handler);
 
   /*
-  * Parse parameters
-  */
+   * Parse parameters
+   */
   rofl::cunixenv env_parser(argc, argv);
 
   /* update defaults */
@@ -179,7 +179,9 @@ void cetherswitch::handle_dpt_open(rofl::crofdpt &dpt) {
         .add_action_output(rofl::cindex(0))
         .set_port_no(rofl::openflow13::OFPP_CONTROLLER);
   } break;
-  default: { throw rofl::eBadVersion(); };
+  default: {
+    throw rofl::eBadVersion();
+  };
   }
 
   dpt.send_flow_mod_message(rofl::cauxid(0), flow_table_entry);

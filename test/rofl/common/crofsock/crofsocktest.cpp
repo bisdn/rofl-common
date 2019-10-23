@@ -234,7 +234,8 @@ void crofsocktest::handle_listen(rofl::crofsock &socket) {
           .set_tls_keyfile(srvkey)
           .tls_accept(sd);
     } break;
-    default: {};
+    default: {
+    };
     }
   }
 }
@@ -264,7 +265,8 @@ void crofsocktest::handle_tcp_connected(rofl::crofsock &socket) {
     /* do nothing, wait for handle_tls_connected */
 
   } break;
-  default: {};
+  default: {
+  };
   }
 }
 
@@ -293,7 +295,8 @@ void crofsocktest::handle_tcp_accepted(rofl::crofsock &socket) {
     /* do nothing, wait for handle_tls_accepted */
 
   } break;
-  default: {};
+  default: {
+  };
   }
 }
 

@@ -9,6 +9,12 @@ Legend:
 Change log
 ==========
 
+v0.13.3
+[+] openflow extension EXT-244
+[+] openflow extension EXT-320
+
+v0.13.2
+
 v0.13.1
 [+] added experimental matches from OFDPA-2:
     VRF, OVID, ALLOW_VLAN_TRANSLATION, ACTSET_OUTPUT

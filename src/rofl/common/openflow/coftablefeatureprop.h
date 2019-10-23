@@ -231,7 +231,9 @@ public:
     case rofl::openflow13::OFPTFPT_INSTRUCTIONS_MISS: {
       os << "INSTRUCTIONS-MISS";
     } break;
-    default: { os << "type:" << (int)tfp.get_type(); };
+    default: {
+      os << "type:" << (int)tfp.get_type();
+    };
     }
     os << " >" << std::endl;
 
@@ -353,7 +355,9 @@ public:
     case rofl::openflow13::OFPTFPT_NEXT_TABLES_MISS: {
       os << "NEXT-TABLES-MISS";
     } break;
-    default: { os << "type:" << (int)tfp.get_type(); };
+    default: {
+      os << "type:" << (int)tfp.get_type();
+    };
     }
     os << " >" << std::endl;
 
@@ -464,7 +468,9 @@ public:
     case rofl::openflow13::OFPTFPT_APPLY_ACTIONS_MISS: {
       os << "APPLY-ACTIONS-MISS";
     } break;
-    default: { os << "type:" << (int)tfp.get_type(); };
+    default: {
+      os << "type:" << (int)tfp.get_type();
+    };
     }
     os << " >" << std::endl;
 
@@ -665,7 +671,9 @@ public:
     case rofl::openflow13::OFPTFPT_APPLY_SETFIELD_MISS: {
       os << "APPLY-SETFIELD-MISS";
     } break;
-    default: { os << "type:" << (int)tfp.get_type(); };
+    default: {
+      os << "type:" << (int)tfp.get_type();
+    };
     }
     os << " >" << std::endl;
 
@@ -907,7 +915,7 @@ public:
 /*
  * TODO: coftable_feature_prop_experimenter
  */
-};
-};
+}; // namespace openflow
+}; // namespace rofl
 
 #endif /* COFTABLEFEATUREPROP_H_ */

@@ -299,7 +299,8 @@ void crofbase::handle_timeout(cthread &thread, uint32_t timer_id) {
     }
     rofdpts_deletion.clear();
   } break;
-  default: {};
+  default: {
+  };
   }
 }
 
@@ -452,7 +453,9 @@ void crofbase::handle_established(crofconn &conn, uint8_t ofp_version) {
     handle_conn_established(set_ctl(ctlid), conn.get_auxid());
 
   } break;
-  default: { delete &conn; };
+  default: {
+    delete &conn;
+  };
   }
 }
 

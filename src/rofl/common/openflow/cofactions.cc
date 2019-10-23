@@ -263,7 +263,9 @@ void cofactions::unpack(uint8_t *buf, size_t buflen) {
       case rofl::openflow10::OFP_VERSION: {
         add_action_enqueue(index++).unpack(buf, len);
       } break;
-      default: { add_action_copy_ttl_out(index++).unpack(buf, len); }
+      default: {
+        add_action_copy_ttl_out(index++).unpack(buf, len);
+      }
       }
     } break;
     case rofl::openflow::OFPAT_COPY_TTL_IN: {
@@ -313,7 +315,9 @@ void cofactions::unpack(uint8_t *buf, size_t buflen) {
       case rofl::openflow10::OFP_VERSION: {
         add_action_vendor(index++).unpack(buf, len);
       } break;
-      default: { add_action_experimenter(index++).unpack(buf, len); }
+      default: {
+        add_action_experimenter(index++).unpack(buf, len);
+      }
       }
     } break;
     default: {

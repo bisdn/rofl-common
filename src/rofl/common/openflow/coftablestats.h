@@ -446,7 +446,9 @@ public:
          << " >" << std::endl;
       os << std::dec;
     } break;
-    default: { os << "<coftable_stats_reply >"; };
+    default: {
+      os << "<coftable_stats_reply >";
+    };
     }
     return os;
   };
@@ -470,7 +472,7 @@ private:
   uint64_t lookup_count;
   uint64_t matched_count;
 };
-}
-}
+} // namespace openflow
+} // namespace rofl
 
 #endif /* ROFL_COMMON_OPENFLOW_COFTABLESTATS_H */

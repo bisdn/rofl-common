@@ -181,7 +181,9 @@ void coftable_feature_props::unpack(uint8_t *buf, size_t buflen) {
            new coftable_feature_prop_oxm(ofp_version, be16toh(prop->type)))
           ->unpack(buf, total_length);
     } break;
-    default: { throw eTableFeaturesReqBadType(); } break;
+    default: {
+      throw eTableFeaturesReqBadType();
+    } break;
     }
 
     buf += total_length;

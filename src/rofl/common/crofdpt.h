@@ -1886,6 +1886,6 @@ private:
   rofl::openflow::cofgroup_features_stats_reply groups;
 };
 
-}; // end of namespace
+}; // namespace rofl
 
 #endif

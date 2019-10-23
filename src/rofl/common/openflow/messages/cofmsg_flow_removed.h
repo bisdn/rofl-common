@@ -226,7 +226,9 @@ public:
       case rofl::openflow10::OFPRR_DELETE: {
         os << "<reason: -DELETE- >" << std::endl;
       } break;
-      default: { os << "<reason: -UNKNOWN- >" << std::endl; };
+      default: {
+        os << "<reason: -UNKNOWN- >" << std::endl;
+      };
       }
       os << "<duration-sec:" << (int)msg.get_duration_sec() << " >"
          << std::endl;
@@ -263,7 +265,9 @@ public:
       case rofl::openflow12::OFPRR_GROUP_DELETE: {
         os << "<reason: -GROUP-DELETE- >" << std::endl;
       } break;
-      default: { os << "<reason: -UNKNOWN- >" << std::endl; };
+      default: {
+        os << "<reason: -UNKNOWN- >" << std::endl;
+      };
       }
       os << "<table-id:" << (int)msg.get_table_id() << " >" << std::endl;
       os << "<duration-sec:" << (int)msg.get_duration_sec() << " >"

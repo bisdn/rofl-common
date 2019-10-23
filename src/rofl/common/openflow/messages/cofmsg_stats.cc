@@ -42,7 +42,9 @@ size_t cofmsg_stats_request::length() const {
   case rofl::openflow10::OFP_VERSION: {
     return sizeof(struct rofl::openflow10::ofp_stats_request);
   } break;
-  default: { return sizeof(struct rofl::openflow13::ofp_multipart_request); };
+  default: {
+    return sizeof(struct rofl::openflow13::ofp_multipart_request);
+  };
   }
   return 0;
 }
@@ -146,7 +148,9 @@ size_t cofmsg_stats_reply::length() const {
   case rofl::openflow10::OFP_VERSION: {
     return sizeof(struct rofl::openflow10::ofp_stats_reply);
   } break;
-  default: { return sizeof(struct rofl::openflow13::ofp_multipart_reply); };
+  default: {
+    return sizeof(struct rofl::openflow13::ofp_multipart_reply);
+  };
   }
   return 0;
 }

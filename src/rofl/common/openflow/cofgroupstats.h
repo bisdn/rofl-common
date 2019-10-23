@@ -330,7 +330,8 @@ public:
          << std::endl;
       os << std::dec;
     } break;
-    default: {};
+    default: {
+    };
     }
 
     os << r.bucket_counters;

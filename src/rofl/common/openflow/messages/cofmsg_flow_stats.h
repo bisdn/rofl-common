@@ -174,7 +174,7 @@ private:
   rofl::openflow::cofflowstatsarray flowstatsarray;
 };
 
-} // end of namespace rofl
+} // namespace openflow
 } // end of namespace rofl
 
 #endif /* COFMSG_FLOW_STATS_H_ */

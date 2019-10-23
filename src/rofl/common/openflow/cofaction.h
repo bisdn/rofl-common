@@ -2042,7 +2042,9 @@ public:
     case OXM_TYPE_EXP: {
       return oxm_exp.get_oxm_class();
     } break;
-    default: { throw eActionInval(); };
+    default: {
+      throw eActionInval();
+    };
     }
   };
 
@@ -2075,7 +2077,9 @@ public:
     case OXM_TYPE_EXP: {
       return oxm_exp.get_oxm_field();
     } break;
-    default: { throw eActionInval(); };
+    default: {
+      throw eActionInval();
+    };
     }
   };
 
@@ -2108,7 +2112,9 @@ public:
     case OXM_TYPE_EXP: {
       return oxm_exp.get_oxm_type();
     } break;
-    default: { throw eActionInval(); };
+    default: {
+      throw eActionInval();
+    };
     }
   };
 
@@ -2141,7 +2147,9 @@ public:
     case OXM_TYPE_EXP: {
       return oxm_exp.get_oxm_id();
     } break;
-    default: { throw eActionInval(); };
+    default: {
+      throw eActionInval();
+    };
     }
   };
 
@@ -2153,7 +2161,9 @@ public:
     case OXM_TYPE_EXP: {
       return oxm_exp.get_oxm_exp_id();
     } break;
-    default: { return 0; };
+    default: {
+      return 0;
+    };
     }
   };
 
@@ -2388,7 +2398,8 @@ public:
     case OXM_TYPE_EXP: {
       os << action.get_oxm_exp();
     } break;
-    default: {};
+    default: {
+    };
     }
     return os;
   };

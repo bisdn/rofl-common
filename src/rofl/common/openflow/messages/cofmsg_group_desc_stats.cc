@@ -28,7 +28,9 @@ operator=(const cofmsg_group_desc_stats_request &msg) {
 
 size_t cofmsg_group_desc_stats_request::length() const {
   switch (get_version()) {
-  default: { return (sizeof(struct rofl::openflow13::ofp_multipart_request)); };
+  default: {
+    return (sizeof(struct rofl::openflow13::ofp_multipart_request));
+  };
   }
   return 0;
 }

@@ -28,7 +28,8 @@ cofhelloelems &cofhelloelems::operator=(const cofhelloelems &elems) {
     case rofl::openflow13::OFPHET_VERSIONBITMAP: {
       add_hello_elem_versionbitmap() = elems.get_hello_elem_versionbitmap();
     } break;
-    default: {};
+    default: {
+    };
     }
   }
 
@@ -79,7 +80,8 @@ void cofhelloelems::unpack(uint8_t *buf, size_t buflen) {
     case rofl::openflow13::OFPHET_VERSIONBITMAP: {
       add_hello_elem_versionbitmap().unpack(buf, be16toh(hello->length));
     } break;
-    default: {};
+    default: {
+    };
     }
 
     /* calculate padded length */

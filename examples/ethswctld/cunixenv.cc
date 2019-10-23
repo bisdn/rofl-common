@@ -38,10 +38,10 @@ std::string coption::parse_argument(char *optarg) {
 }
 
 /*
-*
-* cunixenv
-*
-*/
+ *
+ * cunixenv
+ *
+ */
 
 /* Constructor */
 cunixenv::cunixenv(int argc, char **argv) {
@@ -52,8 +52,8 @@ cunixenv::cunixenv(int argc, char **argv) {
   }
 
   /*
-  * Default arguments are debug and help ONLY
-  */
+   * Default arguments are debug and help ONLY
+   */
 
   // Prepare debug debug level
   // ss << rofl::logging::emerg_;

@@ -26,7 +26,9 @@ void cofmsg_flow_mod::check_prerequisites() const {
 
 size_t cofmsg_flow_mod::length() const {
   switch (get_version()) {
-  default: { return cofmsg::length() + flowmod.length(); };
+  default: {
+    return cofmsg::length() + flowmod.length();
+  };
   }
   return 0;
 }

@@ -18,7 +18,9 @@ cofmsg_experimenter_stats_request::cofmsg_experimenter_stats_request(
   case rofl::openflow10::OFP_VERSION: {
     set_stats_type(rofl::openflow10::OFPST_VENDOR);
   } break;
-  default: { set_stats_type(rofl::openflow13::OFPMP_EXPERIMENTER); };
+  default: {
+    set_stats_type(rofl::openflow13::OFPMP_EXPERIMENTER);
+  };
   }
 }
 
@@ -167,7 +169,9 @@ cofmsg_experimenter_stats_reply::cofmsg_experimenter_stats_reply(
   case rofl::openflow10::OFP_VERSION: {
     set_stats_type(rofl::openflow10::OFPST_VENDOR);
   } break;
-  default: { set_stats_type(rofl::openflow13::OFPMP_EXPERIMENTER); };
+  default: {
+    set_stats_type(rofl::openflow13::OFPMP_EXPERIMENTER);
+  };
   }
 }
 

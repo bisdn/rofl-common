@@ -13,7 +13,9 @@ size_t cofmsg_flow_removed::length() const {
   case rofl::openflow10::OFP_VERSION: {
     return (OFP10_FLOW_REMOVED_STATIC_HDR_LEN);
   } break;
-  default: { return (OFP13_FLOW_REMOVED_STATIC_HDR_LEN + match.length()); };
+  default: {
+    return (OFP13_FLOW_REMOVED_STATIC_HDR_LEN + match.length());
+  };
   }
   return 0;
 }

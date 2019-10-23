@@ -593,7 +593,9 @@ public:
     case STATE_TLS_ESTABLISHED: {
       ss << "state: -TLS-ESTABLISHED- ";
     } break;
-    default: { ss << "state: -unknown- "; };
+    default: {
+      ss << "state: -unknown- ";
+    };
     }
     return ss.str();
   };

@@ -133,7 +133,8 @@ void crofconntest::handle_listen(rofl::crofsock &socket) {
                           rofl::crofconn::MODE_CONTROLLER);
 
     } break;
-    default: {};
+    default: {
+    };
     }
   }
 }
@@ -242,7 +243,9 @@ void crofconntest::handle_recv(rofl::crofconn &conn,
     }
 
   } break;
-  default: { CPPUNIT_ASSERT(false); };
+  default: {
+    CPPUNIT_ASSERT(false);
+  };
   }
 
   delete pmsg;
