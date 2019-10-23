@@ -1,6 +1,7 @@
 #include "rofl/common/caddress.h"
 #include "rofl/common/cmemory.h"
 #include "rofl/common/openflow/cofaction.h"
+#include "rofl/common/openflow/experimental/actions/ext320_actions.h"
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 
@@ -38,6 +39,10 @@ class cofaction_test : public CppUnit::TestFixture {
   CPPUNIT_TEST(testActionExperimenter);
   CPPUNIT_TEST(testActionPushPbb);
   CPPUNIT_TEST(testActionPopPbb);
+  CPPUNIT_TEST(testActionCopyField1);
+  CPPUNIT_TEST(testActionCopyField2);
+  CPPUNIT_TEST(testActionCopyField3);
+  CPPUNIT_TEST(testActionCopyField4);
   CPPUNIT_TEST_SUITE_END();
 
 private:
@@ -76,4 +81,8 @@ public:
   void testActionExperimenter();
   void testActionPushPbb();
   void testActionPopPbb();
+  void testActionCopyField1();
+  void testActionCopyField2();
+  void testActionCopyField3();
+  void testActionCopyField4();
 };
