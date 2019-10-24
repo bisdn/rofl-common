@@ -486,17 +486,16 @@ public:
 public:
   friend std::ostream &operator<<(std::ostream &os,
                                   const cofaction_body_copy_field &body) {
-    os << "<cofaction_body_copy_field exp-type: 0x" << std::hex
-       << "exp-type: 0x" << (unsigned int)body.get_exp_type() << ", "
-       << std::dec << "src_offset: " << (unsigned int)body.get_src_offset()
-       << ", "
+    os << "<cofaction_body_copy_field " << std::hex << "exp-type: 0x"
+       << (unsigned int)body.get_exp_type() << ", " << std::dec
+       << "src_offset: " << (unsigned int)body.get_src_offset() << ", "
        << "dst_offset: " << (unsigned int)body.get_dst_offset() << ", "
        << std::hex << "src_oxm_id: 0x" << (unsigned int)body.get_src_oxm_id()
        << ", "
        << "src_oxm_exp_id: 0x" << (unsigned int)body.get_src_oxm_exp_id()
        << ", "
-       << "dst_oxm_exp_id: 0x" << (unsigned int)body.get_dst_oxm_id() << ", "
-       << "dst_oxm_id: 0x" << (unsigned int)body.get_dst_oxm_exp_id() << " "
+       << "dst_oxm_id: 0x" << (unsigned int)body.get_dst_oxm_id() << ", "
+       << "dst_oxm_exp_id: 0x" << (unsigned int)body.get_dst_oxm_exp_id() << " "
        << std::dec << ">" << std::endl;
 
     os << dynamic_cast<const rofl::cmemory &>(body);

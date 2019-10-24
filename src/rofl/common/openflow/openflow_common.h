@@ -692,8 +692,8 @@ enum ofp_port_no {
   OFPP_ANY = 0xffffffff         /* Wildcard port used only for flow mod
                                                                    (delete) and flow
                                    stats         requests. Selects         all flows
-                                   regardless of         output port         (including flows with         no
-                                   output port). */
+                                   regardless of         output port         (including
+                                   flows with         no         output port). */
 };
 
 /* Group numbering. Groups can use any number up to OFPG_MAX. */
