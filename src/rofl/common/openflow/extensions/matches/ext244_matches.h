@@ -8,6 +8,12 @@ namespace openflow {
 namespace extensions {
 namespace ext244 {
 
+#define OXM_TLV_PKTREG(n)                                                      \
+  ((uint32_t)(OFPXMC_PACKET_REGS << 16) | (n << 9) | sizeof(uint64_t))
+#define OXM_TLV_PKTREG_MASK(n)                                                 \
+  ((uint32_t)(OFPXMC_PACKET_REGS << 16) | (n << 9) | HAS_MASK_FLAG |           \
+   2 * sizeof(uint64_t))
+
 /**
  * @brief OXM_OF_EXT244
  *
@@ -15,16 +21,11 @@ namespace ext244 {
 class coxmatch_packet_register : public coxmatch_64 {
 public:
   coxmatch_packet_register(uint8_t pkt_reg)
-      : coxmatch_64((OFPXMC_PACKET_REGS << 16) | (pkt_reg << 9) |
-                    sizeof(uint64_t)){};
+      : coxmatch_64(OXM_TLV_PKTREG(pkt_reg)){};
   coxmatch_packet_register(uint8_t pkt_reg, uint64_t value)
-      : coxmatch_64((OFPXMC_PACKET_REGS << 16) | (pkt_reg << 9) |
-                        sizeof(uint64_t),
-                    value){};
+      : coxmatch_64(OXM_TLV_PKTREG(pkt_reg), value){};
   coxmatch_packet_register(uint8_t pkt_reg, uint64_t value, uint64_t mask)
-      : coxmatch_64((OFPXMC_PACKET_REGS << 16) | (pkt_reg << 9) |
-                        HAS_MASK_FLAG | 2 * sizeof(uint64_t),
-                    value, mask){};
+      : coxmatch_64(OXM_TLV_PKTREG_MASK(pkt_reg), value, mask){};
   coxmatch_packet_register(const coxmatch_64 &oxm) : coxmatch_64(oxm){};
   virtual ~coxmatch_packet_register(){};
 
