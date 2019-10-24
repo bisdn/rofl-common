@@ -1969,7 +1969,7 @@ public:
    */
   cofaction_set_field(uint8_t ofp_version = rofl::openflow::OFP_VERSION_UNKNOWN)
       : cofaction(ofp_version, rofl::openflow::OFPAT_SET_FIELD),
-        oxm_set_field_type(OXM_TYPE_UNKNOWN), oxm_8(0), oxm_16(0), oxm_24(0),
+        oxm_set_field_type(OXM_TYPE_UNKNOWN), oxm(0), oxm_8(0), oxm_16(0), oxm_24(0),
         oxm_32(0), oxm_48(0), oxm_64(0), oxm_128(0){};
 
   /**
@@ -1981,7 +1981,7 @@ public:
    *
    */
   cofaction_set_field(const cofaction_set_field &action)
-      : oxm_set_field_type(OXM_TYPE_UNKNOWN), oxm_8(0), oxm_16(0), oxm_24(0),
+      : oxm_set_field_type(OXM_TYPE_UNKNOWN), oxm(0), oxm_8(0), oxm_16(0), oxm_24(0),
         oxm_32(0), oxm_48(0), oxm_64(0), oxm_128(0) {
     *this = action;
   };
@@ -1994,6 +1994,7 @@ public:
       return *this;
     cofaction::operator=(action);
     oxm_set_field_type = action.oxm_set_field_type;
+    oxm = action.oxm;
     oxm_8 = action.oxm_8;
     oxm_16 = action.oxm_16;
     oxm_24 = action.oxm_24;
@@ -2018,6 +2019,9 @@ public:
    */
   uint16_t get_oxm_class() const {
     switch (oxm_set_field_type) {
+    case OXM_TYPE_UNKNOWN: {
+      return oxm.get_oxm_class();
+    } break;
     case OXM_TYPE_8: {
       return oxm_8.get_oxm_class();
     } break;
@@ -2053,6 +2057,9 @@ public:
    */
   uint8_t get_oxm_field() const {
     switch (oxm_set_field_type) {
+    case OXM_TYPE_UNKNOWN: {
+      return oxm.get_oxm_field();
+    } break;
     case OXM_TYPE_8: {
       return oxm_8.get_oxm_field();
     } break;
@@ -2088,6 +2095,9 @@ public:
    */
   uint32_t get_oxm_type() const {
     switch (oxm_set_field_type) {
+    case OXM_TYPE_UNKNOWN: {
+      return oxm.get_oxm_type();
+    } break;
     case OXM_TYPE_8: {
       return oxm_8.get_oxm_type();
     } break;
@@ -2123,6 +2133,9 @@ public:
    */
   uint32_t get_oxm_id() const {
     switch (oxm_set_field_type) {
+    case OXM_TYPE_UNKNOWN: {
+      return oxm.get_oxm_id();
+    } break;
     case OXM_TYPE_8: {
       return oxm_8.get_oxm_id();
     } break;
@@ -2165,6 +2178,29 @@ public:
       return 0;
     };
     }
+  };
+
+public:
+  /**
+   *
+   */
+  const rofl::openflow::coxmatch &get_oxm() const { return oxm; };
+
+  /**
+   *
+   */
+  rofl::openflow::coxmatch &set_oxm() {
+    oxm_set_field_type = OXM_TYPE_UNKNOWN;
+    return oxm;
+  };
+
+  /**
+   *
+   */
+  cofaction_set_field &set_oxm(const rofl::openflow::coxmatch &oxm) {
+    oxm_set_field_type = OXM_TYPE_UNKNOWN;
+    this->oxm = oxm;
+    return *this;
   };
 
 public:
@@ -2374,6 +2410,9 @@ public:
 
     os << dynamic_cast<const cofaction &>(action);
     switch (action.get_oxm_set_field_type()) {
+    case OXM_TYPE_UNKNOWN: {
+      os << action.get_oxm();
+    } break;
     case OXM_TYPE_8: {
       os << action.get_oxm_8();
     } break;
@@ -2407,6 +2446,7 @@ public:
 private:
   enum oxm_set_field_type_t oxm_set_field_type;
 
+  rofl::openflow::coxmatch oxm;
   rofl::openflow::coxmatch_8 oxm_8;
   rofl::openflow::coxmatch_16 oxm_16;
   rofl::openflow::coxmatch_24 oxm_24;

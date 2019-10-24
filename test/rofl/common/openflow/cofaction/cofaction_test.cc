@@ -1089,7 +1089,7 @@ void cofaction_test::testActionSetQueue() {
   CPPUNIT_ASSERT(clone.get_queue_id() == queue_id);
 }
 
-void cofaction_test::testActionSetField() {
+void cofaction_test::testActionSetField1() {
   rofl::openflow::coxmatch_ofb_eth_src oxm(
       rofl::caddress_ll("a1:a2:a3:a4:a5:a6"));
 
@@ -1129,6 +1129,47 @@ void cofaction_test::testActionSetField() {
   CPPUNIT_ASSERT(clone.get_length() == total_length);
   CPPUNIT_ASSERT(clone.length() == total_length);
   CPPUNIT_ASSERT(clone.get_oxm_48() == oxm);
+}
+
+void cofaction_test::testActionSetField2() {
+  rofl::openflow::coxmatch oxm(OXM_TLV_PKTREG_ID_ONLY(17));
+
+  size_t total_length = sizeof(struct rofl::openflow13::ofp_action_set_field) -
+                        4 * sizeof(uint8_t) + oxm.length();
+  size_t pad = (0x7 & total_length);
+  /* append padding if not a multiple of 8 */
+  if (pad) {
+    total_length += 8 - pad;
+  }
+
+  rofl::openflow::cofaction_set_field action;
+  CPPUNIT_ASSERT(rofl::openflow::OFP_VERSION_UNKNOWN == action.get_version());
+
+  action.set_version(rofl::openflow13::OFP_VERSION);
+  action.set_oxm(oxm);
+
+  rofl::cmemory packed(action.length());
+  action.pack(packed.somem(), packed.length());
+
+  std::cerr << "action:" << std::endl << action;
+
+  std::cerr << "packed:" << std::endl << packed;
+
+  CPPUNIT_ASSERT(action.get_type() == rofl::openflow::OFPAT_SET_FIELD);
+  CPPUNIT_ASSERT(action.get_length() == total_length);
+  CPPUNIT_ASSERT(action.length() == total_length);
+  CPPUNIT_ASSERT(action.get_oxm() == oxm);
+
+  rofl::openflow::cofaction_set_field clone(rofl::openflow13::OFP_VERSION);
+
+  clone.unpack(packed.somem(), packed.length());
+
+  std::cerr << "clone:" << std::endl << clone;
+
+  CPPUNIT_ASSERT(clone.get_type() == rofl::openflow::OFPAT_SET_FIELD);
+  CPPUNIT_ASSERT(clone.get_length() == total_length);
+  CPPUNIT_ASSERT(clone.length() == total_length);
+  CPPUNIT_ASSERT(clone.get_oxm() == oxm);
 }
 
 void cofaction_test::testActionExperimenter() {
@@ -1467,3 +1508,4 @@ void cofaction_test::testActionCopyField4() {
   CPPUNIT_ASSERT(copied_copy_field.get_dst_oxm_id() == dst_oxm_id);
   CPPUNIT_ASSERT(copied_copy_field.get_dst_oxm_exp_id() == dst_oxm_exp_id);
 }
+
