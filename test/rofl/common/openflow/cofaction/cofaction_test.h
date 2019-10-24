@@ -2,6 +2,7 @@
 #include "rofl/common/cmemory.h"
 #include "rofl/common/openflow/cofaction.h"
 #include "rofl/common/openflow/experimental/actions/ext320_actions.h"
+#include "rofl/common/openflow/extensions/matches/ext244_matches.h"
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 
@@ -35,7 +36,8 @@ class cofaction_test : public CppUnit::TestFixture {
   CPPUNIT_TEST(testActionSetNwTtl);
   CPPUNIT_TEST(testActionDecNwTtl);
   CPPUNIT_TEST(testActionSetQueue);
-  CPPUNIT_TEST(testActionSetField);
+  CPPUNIT_TEST(testActionSetField1);
+  CPPUNIT_TEST(testActionSetField2);
   CPPUNIT_TEST(testActionExperimenter);
   CPPUNIT_TEST(testActionPushPbb);
   CPPUNIT_TEST(testActionPopPbb);
@@ -77,7 +79,8 @@ public:
   void testActionSetNwTtl();
   void testActionDecNwTtl();
   void testActionSetQueue();
-  void testActionSetField();
+  void testActionSetField1();
+  void testActionSetField2();
   void testActionExperimenter();
   void testActionPushPbb();
   void testActionPopPbb();

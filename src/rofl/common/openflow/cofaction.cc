@@ -1784,6 +1784,9 @@ void cofaction_set_field::pack(uint8_t *buf, size_t buflen) {
         (struct rofl::openflow13::ofp_action_set_field *)buf;
 
     switch (oxm_set_field_type) {
+    case OXM_TYPE_UNKNOWN: {
+      oxm.pack(hdr->field, oxm.length());
+    } break;
     case OXM_TYPE_8: {
       oxm_8.pack(hdr->field, oxm_8.length());
     } break;
@@ -1855,8 +1858,12 @@ void cofaction_set_field::unpack(uint8_t *buf, size_t buflen) {
     if (oxm_hdr->oxm_field & 0x01 /*has_mask?*/) {
 
       switch (be16toh(oxm_hdr->oxm_class)) {
-      case rofl::openflow::OFPXMC_OPENFLOW_BASIC: {
+      case rofl::openflow::OFPXMC_OPENFLOW_BASIC:
+      case rofl::openflow::OFPXMC_PACKET_REGS: {
         switch (oxm_hdr->oxm_length) {
+        case 0 /*bytes*/: {
+          set_oxm().unpack(hdr->field, oxm_len);
+        } break;
         case 2 /*bytes*/: {
           set_oxm_8().unpack(hdr->field, oxm_len);
         } break;
@@ -1892,8 +1899,12 @@ void cofaction_set_field::unpack(uint8_t *buf, size_t buflen) {
     } else {
 
       switch (be16toh(oxm_hdr->oxm_class)) {
-      case rofl::openflow::OFPXMC_OPENFLOW_BASIC: {
+      case rofl::openflow::OFPXMC_OPENFLOW_BASIC:
+      case rofl::openflow::OFPXMC_PACKET_REGS: {
         switch (oxm_hdr->oxm_length) {
+        case 0 /*byte*/: {
+          set_oxm().unpack(hdr->field, oxm_len);
+        } break;
         case 1 /*byte*/: {
           set_oxm_8().unpack(hdr->field, oxm_len);
         } break;
