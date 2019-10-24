@@ -11,10 +11,11 @@ namespace ext244 {
 #define OXM_TLV_PKTREG_ID_ONLY(n)                                              \
   ((uint32_t)(rofl::openflow::OFPXMC_PACKET_REGS << 16) | (n << 9))
 #define OXM_TLV_PKTREG(n)                                                      \
-  ((uint32_t)(rofl::openflow::OFPXMC_PACKET_REGS << 16) | (n << 9) | sizeof(uint64_t))
+  ((uint32_t)(rofl::openflow::OFPXMC_PACKET_REGS << 16) | (n << 9) |           \
+   sizeof(uint64_t))
 #define OXM_TLV_PKTREG_MASK(n)                                                 \
-  ((uint32_t)(rofl::openflow::OFPXMC_PACKET_REGS << 16) | (n << 9) | HAS_MASK_FLAG |           \
-   2 * sizeof(uint64_t))
+  ((uint32_t)(rofl::openflow::OFPXMC_PACKET_REGS << 16) | (n << 9) |           \
+   HAS_MASK_FLAG | 2 * sizeof(uint64_t))
 
 /**
  * @brief OXM_OF_EXT244

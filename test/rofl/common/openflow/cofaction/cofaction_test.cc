@@ -1169,6 +1169,8 @@ void cofaction_test::testActionSetField2() {
   CPPUNIT_ASSERT(clone.get_type() == rofl::openflow::OFPAT_SET_FIELD);
   CPPUNIT_ASSERT(clone.get_length() == total_length);
   CPPUNIT_ASSERT(clone.length() == total_length);
+  std::cerr << ">>> oxm: <<<" << std::endl << oxm;
+  std::cerr << ">>> clone.oxm: <<<" << std::endl << clone.get_oxm();
   CPPUNIT_ASSERT(clone.get_oxm() == oxm);
 }
 
@@ -1508,4 +1510,3 @@ void cofaction_test::testActionCopyField4() {
   CPPUNIT_ASSERT(copied_copy_field.get_dst_oxm_id() == dst_oxm_id);
   CPPUNIT_ASSERT(copied_copy_field.get_dst_oxm_exp_id() == dst_oxm_exp_id);
 }
-

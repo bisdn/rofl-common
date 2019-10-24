@@ -1969,8 +1969,8 @@ public:
    */
   cofaction_set_field(uint8_t ofp_version = rofl::openflow::OFP_VERSION_UNKNOWN)
       : cofaction(ofp_version, rofl::openflow::OFPAT_SET_FIELD),
-        oxm_set_field_type(OXM_TYPE_UNKNOWN), oxm(0), oxm_8(0), oxm_16(0), oxm_24(0),
-        oxm_32(0), oxm_48(0), oxm_64(0), oxm_128(0){};
+        oxm_set_field_type(OXM_TYPE_UNKNOWN), oxm(0), oxm_8(0), oxm_16(0),
+        oxm_24(0), oxm_32(0), oxm_48(0), oxm_64(0), oxm_128(0){};
 
   /**
    *
@@ -1981,8 +1981,8 @@ public:
    *
    */
   cofaction_set_field(const cofaction_set_field &action)
-      : oxm_set_field_type(OXM_TYPE_UNKNOWN), oxm(0), oxm_8(0), oxm_16(0), oxm_24(0),
-        oxm_32(0), oxm_48(0), oxm_64(0), oxm_128(0) {
+      : oxm_set_field_type(OXM_TYPE_UNKNOWN), oxm(0), oxm_8(0), oxm_16(0),
+        oxm_24(0), oxm_32(0), oxm_48(0), oxm_64(0), oxm_128(0) {
     *this = action;
   };
 
