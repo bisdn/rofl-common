@@ -24,7 +24,7 @@ AC_ENABLE_STATIC
 
 # default flags
 CFLAGS="-std=gnu89 -Werror -Wall $CFLAGS"
-CXXFLAGS="-std=c++11 -Werror -Wall $CXXFLAGS"
+CXXFLAGS="-std=c++11 -Werror -Wall $CXXFLAGS -Wno-error=array-bounds -Wno-error=maybe-uninitialized"
 AC_DEFINE([__STDC_FORMAT_MACROS], [], [Description])
 
 
