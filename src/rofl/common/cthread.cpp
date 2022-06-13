@@ -34,8 +34,10 @@ using namespace rofl;
 /*static*/ void cthread::openssl_initialize() {
   SSL_library_init();
   SSL_load_error_strings();
+#if OPENSSL_VERSION_NUMBER < 0x30000000L
   ERR_load_ERR_strings();
   ERR_load_BIO_strings();
+#endif
   OpenSSL_add_all_algorithms();
   OpenSSL_add_all_ciphers();
   OpenSSL_add_all_digests();
@@ -57,7 +59,11 @@ using namespace rofl;
   OPENSSL_cleanup();
   ASN1_STRING_TABLE_cleanup();
 #endif
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+  EVP_default_properties_enable_fips(nullptr, 0);
+#else
   FIPS_mode_set(0);
+#endif
   ENGINE_cleanup();
   CONF_modules_unload(1);
   EVP_cleanup();
