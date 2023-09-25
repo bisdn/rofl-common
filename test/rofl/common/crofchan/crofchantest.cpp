@@ -391,7 +391,7 @@ void crofchantest::handle_timeout(rofl::cthread &thread, uint32_t timer_id) {
           return;
         }
 
-        pthread_yield();
+        sched_yield();
       }
 
     } catch (rofl::eRofQueueFull &e) {
