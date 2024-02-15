@@ -110,11 +110,11 @@ void crofsock::close() {
         switch (err_code = SSL_get_error(ssl, rc)) {
         case SSL_ERROR_WANT_READ: {
           VLOG(6) << __FUNCTION__ << " TLS: shutdown WANT READ sd=" << sd;
-          pthread_yield();
+          sched_yield();
         } break;
         case SSL_ERROR_WANT_WRITE: {
           VLOG(6) << __FUNCTION__ << " TLS: shutdown WANT WRITE sd=" << sd;
-          pthread_yield();
+          sched_yield();
         } break;
         case SSL_ERROR_NONE: {
           VLOG(6) << __FUNCTION__
