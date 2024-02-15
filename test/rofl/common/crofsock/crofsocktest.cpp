@@ -98,7 +98,7 @@ void crofsocktest::test() {
 
       sclient->set_raddr(baddr).tcp_connect(false);
 
-      pthread_yield();
+      sched_yield();
 
       while (keep_running && (--timeout > 0)) {
         struct timespec ts;

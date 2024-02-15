@@ -6,6 +6,7 @@
  */
 
 #include "cdaemon.h"
+#include <cstdint>
 #include <stdexcept>
 
 using namespace rofl;
