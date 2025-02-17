@@ -57,6 +57,11 @@ PKG_CHECK_MODULES([GLOG], libglog >= 0.3.3,
   [ CPPFLAGS="$CPPFLAGS $GLOG_CFLAGS"
         LIBS="$LIBS $GLOG_LIBS $GFLAGS_LIBS" ],
   [ AC_MSG_ERROR([minimum version of glog is 0.3.3]) ])
+# glog 0.7's libglog.pc is broken and does not set the correct cflags, so set
+# them ourself as needed
+PKG_CHECK_MODULES([GLOG], libglog >= 0.7.0,
+  [ CPPFLAGS="$CPPFLAGS -DGFLAGS_IS_A_DLL=0 -DGLOG_USE_GFLAGS -DGLOG_USE_GLOG_EXPORT" ],
+  [ ] ])
 
 AC_SEARCH_LIBS([pthread_rwlock_wrlock], [pthread], [], [AC_MSG_ERROR([lib pthread not found])])
 
