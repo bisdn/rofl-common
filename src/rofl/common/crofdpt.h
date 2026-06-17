@@ -1433,7 +1433,7 @@ public:
    */
   rofl::crofsock::msg_result_t
   send_barrier_request(const rofl::cauxid &auxid,
-                       int timeout_in_secs = DEFAULT_REQUEST_TIMEOUT,
+                       int timeout_in_secs = DEFAULT_BARRIER_REQUEST_TIMEOUT,
                        uint32_t *xid = nullptr);
 
   /**
@@ -1854,6 +1854,9 @@ private:
 
   // default request timeout
   static const time_t DEFAULT_REQUEST_TIMEOUT = 0; // seconds (0 : no timeout)
+
+  // default barrier request timeout
+  static const time_t DEFAULT_BARRIER_REQUEST_TIMEOUT = 3600; // one hour
 
   // datapath identifier
   rofl::cdpid dpid;
