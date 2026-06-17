@@ -672,10 +672,22 @@ void crofconn::features_request_expired() {
 }
 
 void crofconn::send_echo_request() {
+
   try {
     if (rofsock.is_congested()) {
       VLOG(5) << __FUNCTION__
               << " need life check while socket is congested, skipping check: "
+              << " laddr=" << rofsock.get_laddr().str()
+              << " raddr=" << rofsock.get_raddr().str();
+      cthread::thread(thread_num)
+          .add_timer(this, TIMER_ID_NEED_LIFE_CHECK,
+                     ctimespec().expire_in(timeout_lifecheck));
+      return;
+    }
+
+    if (has_pending_barrier_request()) {
+      VLOG(5) << __FUNCTION__
+              << " need life check while barrier request pending, skipping check: "
               << " laddr=" << rofsock.get_laddr().str()
               << " raddr=" << rofsock.get_raddr().str();
       cthread::thread(thread_num)
