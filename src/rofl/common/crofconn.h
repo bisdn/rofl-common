@@ -898,6 +898,16 @@ private:
         return (ta.get_xid() == xid);
       };
     };
+
+    class ctransaction_find_by_type {
+      uint8_t type;
+
+    public:
+      ctransaction_find_by_type(uint8_t type) : type(type){};
+      bool operator()(const ctransaction &ta) const {
+        return (ta.get_type() == type);
+      };
+    };
   };
 
   /**
@@ -952,6 +962,37 @@ private:
     std::set<ctransaction>::iterator it;
     if ((it = find_if(pending_requests.begin(), pending_requests.end(),
                       ctransaction::ctransaction_find_by_xid(xid))) !=
+        pending_requests.end()) {
+      return true;
+    }
+    return false;
+  };
+
+  /**
+   *
+   */
+  bool has_pending_barrier_request() const {
+    uint8_t type;
+    switch (ofp_version) {
+    default:
+    case rofl::openflow10::OFP_VERSION:
+        type = rofl::openflow10::OFPT_BARRIER_REQUEST;
+        break;
+    case rofl::openflow12::OFP_VERSION:
+        type = rofl::openflow12::OFPT_BARRIER_REQUEST;
+        break;
+    case rofl::openflow13::OFP_VERSION:
+        type = rofl::openflow13::OFPT_BARRIER_REQUEST;
+        break;
+    case rofl::openflow14::OFP_VERSION:
+        type = rofl::openflow14::OFPT_BARRIER_REQUEST;
+        break;
+    }
+
+    AcquireReadLock rlock(pending_requests_rwlock);
+    std::set<ctransaction>::iterator it;
+    if ((it = find_if(pending_requests.begin(), pending_requests.end(),
+                      ctransaction::ctransaction_find_by_type(type))) !=
         pending_requests.end()) {
       return true;
     }
