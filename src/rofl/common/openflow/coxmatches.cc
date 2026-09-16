@@ -185,7 +185,7 @@ void coxmatches::unpack(uint8_t *buf, size_t buflen) {
         add_ofb_pbb_isid().unpack(buf, buflen);
       } break;
       case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_TUNNEL_ID): {
-        add_ofb_mpls_bos().unpack(buf, buflen);
+        add_ofb_tunnel_id().unpack(buf, buflen);
       } break;
       case OXM_ROFL_OFB_TYPE(rofl::openflow::OXM_TLV_BASIC_IPV6_EXTHDR): {
         add_ofb_ipv6_exthdr().unpack(buf, buflen);
